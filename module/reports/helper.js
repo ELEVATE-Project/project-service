@@ -110,19 +110,6 @@ module.exports = class ReportsHelper {
 				})
 
 				if (!projectDetails.length > 0) {
-					//Initially not supporting pdf report, hence resolving response here. Remove resolve if pdf capability needs to be added
-					// return resolve({
-					//     message: CONSTANTS.apiResponses.REPORTS_DATA_NOT_FOUND,
-					//     data: {
-					//         dataAvailable: false,
-					//         data: {
-					//             categories: categories,
-					//             tasks: tasksReport,
-					//             projects: projectReport
-					//         }
-					//     }
-					// })
-
 					if (getPdf == true) {
 						let reportTaskData = {}
 						Object.keys(tasksReport).map((taskData) => {
@@ -260,21 +247,6 @@ module.exports = class ReportsHelper {
 				//     delete projectReport[CONSTANTS.common.SUBMITTED_STATUS];
 				//     delete projectReport[CONSTANTS.common.STARTED];
 				// }
-
-				//Initially not supporting pdf report, hence resolving response here. Remove resolve if pdf capability needs to be added
-				// let response = {
-				//     categories: categories,
-				//     tasks: tasksReport,
-				//     projects: projectReport
-				// }
-				// return resolve({
-				//     success: true,
-				//     message: CONSTANTS.apiResponses.REPORTS_GENERATED,
-				//     data: {
-				//         dataAvailable: true,
-				//         data: response,
-				//     }
-				// });
 
 				if (getPdf == true) {
 					let reportTaskData = {}

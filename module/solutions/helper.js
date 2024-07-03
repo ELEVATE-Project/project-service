@@ -20,6 +20,7 @@ const entitiesService = require(GENERICS_FILES_PATH + '/services/entity-manageme
 const projectTemplateQueries = require(DB_QUERY_BASE_PATH + '/projectTemplates')
 const projectTemplatesHelper = require(MODULES_BASE_PATH + '/project/templates/helper')
 const programUsersHelper = require(MODULES_BASE_PATH + '/programUsers/helper')
+const timeZoneDifference = process.env.TIMEZONE_DIFFRENECE_BETWEEN_LOCAL_TIME_AND_UTC
 
 /**
  * SolutionsHelper
@@ -704,10 +705,10 @@ module.exports = class SolutionsHelper {
 						//   currentDate.setDate(currentDate.getDate() - 15);
 						//   singleType["endDate"] = { $gte: currentDate };
 						// } else {
-						//   singleType = {
-						//     type: type,
-						//   };
-						//   singleType["endDate"] = { $gte: new Date() };
+						singleType = {
+							type: type,
+						}
+						singleType['endDate'] = { $gte: new Date() }
 						// }
 
 						if (type === CONSTANTS.common.IMPROVEMENT_PROJECT) {
@@ -719,13 +720,14 @@ module.exports = class SolutionsHelper {
 				} else {
 					if (type !== '') {
 						matchQuery['type'] = type
-						if (type === CONSTANTS.common.SURVEY) {
-							const currentDate = new Date()
-							currentDate.setDate(currentDate.getDate() - 15)
-							// matchQuery["endDate"] = { $gte: currentDate };
-						} else {
-							// matchQuery["endDate"] = { $gte: new Date() };
-						}
+						// if (type === CONSTANTS.common.SURVEY) {
+						// 	const currentDate = new Date()
+						// 	currentDate.setDate(currentDate.getDate() - 15)
+						// 	matchQuery["endDate"] = { $gte: currentDate };
+						// } else {
+						// 	matchQuery["endDate"] = { $gte: new Date() };
+						// }
+						matchQuery['endDate'] = { $gte: new Date() }
 					}
 
 					if (subType !== '') {

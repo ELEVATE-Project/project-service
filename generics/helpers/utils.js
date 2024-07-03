@@ -39,6 +39,41 @@ function camelCaseToTitleCase(in_camelCaseString) {
 }
 
 /**
+ * Returns date and time with offset
+ * @function
+ * @name addOffsetToDateTime
+ * @returns {date} returns date and time with offset
+ * example:
+ * input = Sun Jun 16 2024 23:59:59 GMT+0000 (Coordinated Universal Time), +05:30
+ * output = Sun Jun 16 2024 18:29:59 GMT+0000 (Coordinated Universal Time)
+ */
+
+function addOffsetToDateTime(time, timeZoneDifference) {
+	//get the offset time from env with respect UTC
+	let localTimeZone = timeZoneDifference
+	//convert offset time to minutes
+	let localTime = localTimeZone.split(':')
+	let localHourDifference = Number(localTime[0])
+	let getTimeDiffInMinutes =
+		localHourDifference * 60 + (localHourDifference / Math.abs(localHourDifference)) * Number(localTime[1])
+	//get server offset time w.r.t. UTC time
+	let timeDifference = new Date().getTimezoneOffset()
+	//get actual time difference in minutes
+	let differenceWithLocal = timeDifference + getTimeDiffInMinutes
+	// if its 0 then return same time
+	if (differenceWithLocal === 0) {
+		return time
+	} else {
+		// set time difference
+		let getMinutes = differenceWithLocal % 60
+		let getHours = (differenceWithLocal - getMinutes) / 60
+		time.setHours(time.getHours() - getHours)
+		time.setMinutes(time.getMinutes() - getMinutes)
+		return time
+	}
+}
+
+/**
  * Return druid query for the given query name
  * @function
  * @name getDruidQuery

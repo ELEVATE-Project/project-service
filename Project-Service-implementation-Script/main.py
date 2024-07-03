@@ -140,6 +140,8 @@ def programCreation(accessToken,parentFolder,externalId,pName,pDescription,roles
       "imageCompression" : {
           "quality" : 10
       },
+       "startDate": startDateOfProgram,
+        "endDate": endDateOfProgram,
       "components" : [
       ],
        "scope": {
@@ -216,7 +218,7 @@ def programmappingpdpmsheetcreation(MainFilePath,accessToken, program_file,progr
             userDetails = fetchUserDetails(environment, accessToken, programdesigner)
             creatorKeyCloakId = userDetails[0]
             creatorName = userDetails[1]
-            if "program_desiginer" in userDetails[4]:
+            if "program_designer" in userDetails[4]:
                 creatorKeyCloakId = userDetails[0]
                 creatorName = userDetails[1]
             else :
@@ -251,7 +253,7 @@ def programmappingpdpmsheetcreation(MainFilePath,accessToken, program_file,progr
                         userDetails = fetchUserDetails(environment, accessToken, programmanagername2)
                 creatorKeyCloakId = userDetails[0]
                 creatorName = userDetails[1]
-                if "program_desiginer" in userDetails[4]:
+                if "program_manager" in userDetails[4]:
                     creatorKeyCloakId = userDetails[0]
                     creatorName = userDetails[1]
                 else:

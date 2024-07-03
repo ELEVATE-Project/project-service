@@ -705,10 +705,10 @@ module.exports = class SolutionsHelper {
 						//   currentDate.setDate(currentDate.getDate() - 15);
 						//   singleType["endDate"] = { $gte: currentDate };
 						// } else {
-						//   singleType = {
-						//     type: type,
-						//   };
-						//   singleType["endDate"] = { $gte: new Date() };
+						singleType = {
+							type: type,
+						}
+						singleType['endDate'] = { $gte: new Date() }
 						// }
 
 						if (type === CONSTANTS.common.IMPROVEMENT_PROJECT) {
@@ -720,13 +720,14 @@ module.exports = class SolutionsHelper {
 				} else {
 					if (type !== '') {
 						matchQuery['type'] = type
-						if (type === CONSTANTS.common.SURVEY) {
-							const currentDate = new Date()
-							currentDate.setDate(currentDate.getDate() - 15)
-							// matchQuery["endDate"] = { $gte: currentDate };
-						} else {
-							// matchQuery["endDate"] = { $gte: new Date() };
-						}
+						// if (type === CONSTANTS.common.SURVEY) {
+						// 	const currentDate = new Date()
+						// 	currentDate.setDate(currentDate.getDate() - 15)
+						// 	matchQuery["endDate"] = { $gte: currentDate };
+						// } else {
+						// 	matchQuery["endDate"] = { $gte: new Date() };
+						// }
+						matchQuery['endDate'] = { $gte: new Date() }
 					}
 
 					if (subType !== '') {

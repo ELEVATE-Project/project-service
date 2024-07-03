@@ -556,7 +556,10 @@ const uploadPdfToCloud = async function (fileName, userId, folderPath) {
 				try {
 					// Set headers based on cloud storage type (e.g., Azure Blob Storage)
 					const headers = {
-						'Content-Type': 'application/pdf',
+						'Content-Type':
+							getSignedUrl.data.cloudStorage === CONSTANTS.common.GCP
+								? 'multipart/form-data'
+								: 'application/pdf',
 						'x-ms-blob-type':
 							getSignedUrl.data.cloudStorage === CONSTANTS.common.AZURE ? 'BlockBlob' : null,
 					}

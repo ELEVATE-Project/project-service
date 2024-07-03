@@ -112,6 +112,10 @@ let enviromentVariables = {
 		optional: false,
 		default: 'https://dev.elevate.org',
 	},
+	TIMEZONE_DIFFRENECE_BETWEEN_LOCAL_TIME_AND_UTC: {
+		message: 'Timezone diffrence required',
+		optional: false,
+	},
 }
 
 let success = true

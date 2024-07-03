@@ -768,7 +768,8 @@ module.exports = class Solutions extends Abstract {
             "5fd1b52ab53a6416aaeefc80",
             "5fd098e2e049735a86b748ac"
         ],
-        "roles" : "BEO"
+        "roles" : "BEO"'
+        "factors" : ["role","entities"] // optional if passed query will be generated based on passed keys (dynamic scoping)
     }
     * @apiParamExample {json} Response:
     {

@@ -20,6 +20,7 @@ const entitiesService = require(GENERICS_FILES_PATH + '/services/entity-manageme
 const projectTemplateQueries = require(DB_QUERY_BASE_PATH + '/projectTemplates')
 const projectTemplatesHelper = require(MODULES_BASE_PATH + '/project/templates/helper')
 const programUsersHelper = require(MODULES_BASE_PATH + '/programUsers/helper')
+const timeZoneDifference = process.env.TIMEZONE_DIFFRENECE_BETWEEN_LOCAL_TIME_AND_UTC
 
 /**
  * SolutionsHelper
@@ -704,10 +705,10 @@ module.exports = class SolutionsHelper {
 						//   currentDate.setDate(currentDate.getDate() - 15);
 						//   singleType["endDate"] = { $gte: currentDate };
 						// } else {
-						//   singleType = {
-						//     type: type,
-						//   };
-						//   singleType["endDate"] = { $gte: new Date() };
+						singleType = {
+							type: type,
+						}
+						singleType['endDate'] = { $gte: new Date() }
 						// }
 
 						if (type === CONSTANTS.common.IMPROVEMENT_PROJECT) {
@@ -719,13 +720,14 @@ module.exports = class SolutionsHelper {
 				} else {
 					if (type !== '') {
 						matchQuery['type'] = type
-						if (type === CONSTANTS.common.SURVEY) {
-							const currentDate = new Date()
-							currentDate.setDate(currentDate.getDate() - 15)
-							// matchQuery["endDate"] = { $gte: currentDate };
-						} else {
-							// matchQuery["endDate"] = { $gte: new Date() };
-						}
+						// if (type === CONSTANTS.common.SURVEY) {
+						// 	const currentDate = new Date()
+						// 	currentDate.setDate(currentDate.getDate() - 15)
+						// 	matchQuery["endDate"] = { $gte: currentDate };
+						// } else {
+						// 	matchQuery["endDate"] = { $gte: new Date() };
+						// }
+						matchQuery['endDate'] = { $gte: new Date() }
 					}
 
 					if (subType !== '') {
@@ -938,9 +940,9 @@ module.exports = class SolutionsHelper {
 					isReusable: false,
 					isDeleted: false,
 				}
-
+				// If validate entity set to ON . strict scoping should be applied
 				if (validateEntity !== CONSTANTS.common.OFF) {
-					Object.keys(_.omit(data, ['filter', 'role'])).forEach((requestedDataKey) => {
+					Object.keys(_.omit(data, ['filter', 'role', 'factors'])).forEach((requestedDataKey) => {
 						if (requestedDataKey == 'entities') entities.push(...data[requestedDataKey])
 						if (requestedDataKey == 'entityType') entityTypes.push(data[requestedDataKey])
 					})
@@ -962,11 +964,46 @@ module.exports = class SolutionsHelper {
 					filterQuery['scope.entities'] = { $in: entities }
 					filterQuery['scope.entityType'] = { $in: entityTypes }
 				} else {
-					let userRoleInfo = _.omit(data, ['filter'])
+					// Obtain userInfo
+					let userRoleInfo = _.omit(data, ['filter', 'factors', 'role'])
 					let userRoleKeys = Object.keys(userRoleInfo)
-					userRoleKeys.forEach((entities) => {
-						filterQuery['scope.' + entities] = { $in: userRoleInfo[entities].split(',') }
-					})
+					let queryFilter = []
+
+					// if factors are passed or query has to be build based on the keys passed
+					if (data.hasOwnProperty('factors') && data.factors.length > 0) {
+						let factors = data.factors
+						// Build query based on each key
+						factors.forEach((factor) => {
+							let scope = 'scope.' + factor
+							let values = userRoleInfo[factor]
+							if (factor === 'role') {
+								queryFilter.push({
+									['scope.roles']: { $in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')] },
+								})
+							} else if (!Array.isArray(values)) {
+								queryFilter.push({ [scope]: { $in: [values] } })
+							} else {
+								queryFilter.push({ [scope]: { $in: [...values] } })
+							}
+						})
+						// append query filter
+						filterQuery['$or'] = queryFilter
+					} else {
+						userRoleKeys.forEach((key) => {
+							let scope = 'scope.' + key
+							let values = userRoleInfo[key]
+							if (!Array.isArray(values)) {
+								queryFilter.push({ [scope]: { $in: [values] } })
+							} else {
+								queryFilter.push({ [scope]: { $in: [...values] } })
+							}
+						})
+						if (data.role) {
+							queryFilter.push({
+								['scope.roles']: { $in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')] },
+							})
+						}
+					}
 				}
 
 				// if (type === CONSTANTS.common.SURVEY) {

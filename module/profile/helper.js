@@ -20,7 +20,7 @@ module.exports = class ProfileHelper {
 				// Check if the user profile fetch was successful
 				if (!userResponse.success) {
 					throw {
-						message: CONSTANTS.common.STATUS_FAILURE,
+						message: CONSTANTS.apiResponses.USER_DATA_FETCH_UNSUCCESSFUL,
 						status: HTTP_STATUS_CODE.bad_request.status,
 					}
 				}

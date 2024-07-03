@@ -213,4 +213,5 @@ module.exports = {
 	PROJECT_TEMPLATE_ID_NOT_FOUND: 'Project tempalteId not found',
 	SOLUTION_TYPE_INVALID: 'Invalid solution type',
 	INPUT_IS_NOT_A_VALID_ARRAY: 'Input is not a valid array',
+	USER_DATA_FETCH_UNSUCCESSFUL: 'User data fetch unsuccessful',
 }

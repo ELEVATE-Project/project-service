@@ -1401,6 +1401,13 @@ module.exports = class UserProjectsHelper {
 						//     //Fetch user profile information by calling sunbird's user read api.
 
 						let userProfileData = await userService.profile(userId)
+						// Check if the user profile fetch was successful
+						if (!userProfileData.success) {
+							throw {
+								message: CONSTANTS.apiResponses.USER_DATA_FETCH_UNSUCCESSFUL,
+								status: HTTP_STATUS_CODE.bad_request.status,
+							}
+						}
 						if (userProfileData.success && userProfileData.data) {
 							projectCreation.data.userProfile = userProfileData.data
 							// addReportInfoToSolution = true;
@@ -1420,14 +1427,21 @@ module.exports = class UserProjectsHelper {
 							//     projectCreation.data.userProfile,
 							//     userRoleInformation
 							// );
-							let updatedUserProfile = userService.profile(userId)
+							let updatedUserProfile = await userService.profile(userId)
 
+							// Check if the user profile fetch was successful
+							if (!updatedUserProfile.success) {
+								throw {
+									message: CONSTANTS.apiResponses.USER_DATA_FETCH_UNSUCCESSFUL,
+									status: HTTP_STATUS_CODE.bad_request.status,
+								}
+							}
 							if (
 								updatedUserProfile &&
 								updatedUserProfile.success &&
-								updatedUserProfile.data.length > 0
+								Object.keys(updatedUserProfile.data).length > 0
 							) {
-								projectCreation.data.userProfile = updatedUserProfile.data[0]
+								projectCreation.data.userProfile = updatedUserProfile.data
 							}
 						}
 						let project = await projectQueries.createProject(projectCreation.data)
@@ -1602,6 +1616,13 @@ module.exports = class UserProjectsHelper {
 				//Fetch user profile information by calling sunbird's user read api.
 
 				let userProfile = await userService.profile(userId)
+				// Check if the user profile fetch was successful
+				if (!userProfile.success) {
+					throw {
+						message: CONSTANTS.apiResponses.USER_DATA_FETCH_UNSUCCESSFUL,
+						status: HTTP_STATUS_CODE.bad_request.status,
+					}
+				}
 				if (userProfile.success && userProfile.data) {
 					createProject.userProfile = userProfile.data
 				}
@@ -2242,12 +2263,15 @@ module.exports = class UserProjectsHelper {
 			try {
 				isATargetedSolution = UTILS.convertStringToBoolean(isATargetedSolution)
 
+				// Fetch project template details based on thr projectTemplate ID
+				// Will fetch matched projectTemplate if isDeleted = false && status = published
 				let libraryProjects = await libraryCategoriesHelper.projectDetails(
 					projectTemplateId,
 					'',
 					isATargetedSolution
 				)
 
+				// If template data is not found throw error
 				if (libraryProjects.data && !Object.keys(libraryProjects.data).length > 0) {
 					throw {
 						message: CONSTANTS.apiResponses.PROJECT_TEMPLATE_NOT_FOUND,
@@ -2257,6 +2281,7 @@ module.exports = class UserProjectsHelper {
 
 				let taskReport = {}
 
+				// If template contains project task process the task data
 				if (libraryProjects.data.tasks && libraryProjects.data.tasks.length > 0) {
 					libraryProjects.data.tasks = await _projectTask(
 						libraryProjects.data.tasks,
@@ -2281,6 +2306,9 @@ module.exports = class UserProjectsHelper {
 					libraryProjects.data['taskReport'] = taskReport
 				}
 
+				// If an entityId is passed in body data. we need to varify if it is a valid entity
+				// If not a valid entity throw error
+				// If it is valid make sure we add those data to newly creating projects
 				if (requestedData.entityId && requestedData.entityId !== '') {
 					let entityInformation = await entitiesService.entityDocuments(
 						{ _id: requestedData.entityId },
@@ -2358,12 +2386,20 @@ module.exports = class UserProjectsHelper {
 				//     delete  libraryProjects.data.certificateTemplateId;
 				// }
 
-				//Fetch user profile information by calling sunbird's user read api.
+				//Fetch user profile information.
 				let addReportInfoToSolution = false
 				let userProfile = await userService.profile(userId)
-				if (userProfile.success && userProfile.data && userProfile.data.response) {
-					libraryProjects.data.userProfile = userProfile.data.response
-					addReportInfoToSolution = true
+				// Check if the user profile fetch was successful
+				if (!userProfile.success) {
+					throw {
+						message: CONSTANTS.apiResponses.USER_DATA_FETCH_UNSUCCESSFUL,
+						status: HTTP_STATUS_CODE.bad_request.status,
+					}
+				}
+
+				if (userProfile.success && userProfile.data) {
+					libraryProjects.data.userProfile = userProfile.data
+					// addReportInfoToSolution = true
 				}
 
 				libraryProjects.data.userId = libraryProjects.data.updatedBy = libraryProjects.data.createdBy = userId
@@ -2387,12 +2423,12 @@ module.exports = class UserProjectsHelper {
 
 				let projectCreation = await projectQueries.createProject(_.omit(libraryProjects.data, ['_id']))
 
-				if (addReportInfoToSolution && projectCreation._doc.solutionId) {
-					let updateSolution = await solutionsHelper.addReportInformationInSolution(
-						projectCreation._doc.solutionId,
-						projectCreation._doc.userProfile
-					)
-				}
+				// if (addReportInfoToSolution && projectCreation._doc.solutionId) {
+				// 	let updateSolution = await solutionsHelper.addReportInformationInSolution(
+				// 		projectCreation._doc.solutionId,
+				// 		projectCreation._doc.userProfile
+				// 	)
+				// }
 
 				await kafkaProducersHelper.pushProjectToKafka(projectCreation)
 

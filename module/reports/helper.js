@@ -71,9 +71,9 @@ module.exports = class ReportsHelper {
 				const projectDetails = await projectQueries.projectDocument(
 					query,
 					[
-						//"programId",
-						// "programInformation.name",
-						// "entityInformation.name",
+						'programId',
+						'programInformation.name',
+						'entityInformation.name',
 						'taskReport',
 						'status',
 						'tasks',
@@ -108,70 +108,59 @@ module.exports = class ReportsHelper {
 						return type.label
 					}
 				})
-				// if (!projectDetails.length > 0) {
-				//Initially not supporting pdf report, hence resolving response here. Remove resolve if pdf capability needs to be added
-				// return resolve({
-				// 	message: CONSTANTS.apiResponses.REPORTS_DATA_NOT_FOUND,
-				// 	data: {
-				// 		dataAvailable: false,
-				// 		data: {
-				// 			categories: categories,
-				// 			tasks: tasksReport,
-				// 			projects: projectReport,
-				// 		},
-				// 	},
-				// })
 
-				if (getPdf == true) {
-					let reportTaskData = {}
-					Object.keys(tasksReport).map((taskData) => {
-						reportTaskData[UTILS.camelCaseToTitleCase(taskData)] = tasksReport[taskData]
-					})
-					let categoryData = {}
-					Object.keys(categories).map((category) => {
-						categoryData[UTILS.camelCaseToTitleCase(category)] = categories[category]
-					})
-					let pdfRequest = {
-						reportType: returnTypeInfo[0].label,
-						sharedBy: userName,
-						reportTitle: pdfReportString,
-						categories: categoryData,
-						tasks: reportTaskData,
-						projects: projectReport,
-					}
-					let response = await common_handler_v2.unnatiEntityReportPdfGeneration(pdfRequest, userId)
-					if (response && response.success) {
-						return resolve({
-							success: true,
-							message: CONSTANTS.apiResponses.REPORT_GENERATED,
-							data: {
-								data: {
-									downloadUrl: response.pdfUrl,
-								},
-							},
+				if (!projectDetails.length > 0) {
+					if (getPdf == true) {
+						let reportTaskData = {}
+						Object.keys(tasksReport).map((taskData) => {
+							reportTaskData[UTILS.camelCaseToTitleCase(taskData)] = tasksReport[taskData]
 						})
+
+						let categoryData = {}
+						Object.keys(categories).map((category) => {
+							categoryData[UTILS.camelCaseToTitleCase(category)] = categories[category]
+						})
+
+						let pdfRequest = {
+							reportType: returnTypeInfo[0].label,
+							sharedBy: userName,
+							reportTitle: pdfReportString,
+							categories: categoryData,
+							tasks: reportTaskData,
+							projects: projectReport,
+						}
+						let response = await common_handler_v2.unnatiEntityReportPdfGeneration(pdfRequest, userId)
+						if (response && response.success) {
+							return resolve({
+								success: true,
+								message: CONSTANTS.apiResponses.REPORT_GENERATED,
+								data: {
+									data: {
+										downloadUrl: response.data.pdfUrl,
+									},
+								},
+							})
+						} else {
+							return resolve({
+								message: CONSTANTS.apiResponses.REPORTS_DATA_NOT_FOUND,
+								data: [],
+								success: false,
+							})
+						}
 					} else {
 						return resolve({
 							message: CONSTANTS.apiResponses.REPORTS_DATA_NOT_FOUND,
-							data: [],
-							success: false,
+							data: {
+								dataAvailable: false,
+								data: {
+									categories: categories,
+									tasks: tasksReport,
+									projects: projectReport,
+								},
+							},
 						})
 					}
-				} else {
-					return resolve({
-						message: CONSTANTS.apiResponses.REPORTS_DATA_NOT_FOUND,
-						data: {
-							dataAvailable: false,
-							data: {
-								categories: categories,
-								tasks: tasksReport,
-								projects: projectReport,
-							},
-						},
-					})
 				}
-				// }
-
 				await Promise.all(
 					projectDetails.map(async function (project) {
 						if (project.categories) {
@@ -251,27 +240,13 @@ module.exports = class ReportsHelper {
 					})
 				)
 
-				// if (UTILS.revertStatusorNot(appVersion)) {
-				// 	projectReport[CONSTANTS.common.COMPLETED_STATUS] = projectReport[CONSTANTS.common.SUBMITTED_STATUS]
-				// 	projectReport[CONSTANTS.common.NOT_STARTED_STATUS] = projectReport[CONSTANTS.common.STARTED]
-				// 	delete projectReport[CONSTANTS.common.SUBMITTED_STATUS]
-				// 	delete projectReport[CONSTANTS.common.STARTED]
-				// }
+				// if ( UTILS.revertStatusorNot(appVersion) ) {
 
-				//Initially not supporting pdf report, hence resolving response here. Remove resolve if pdf capability needs to be added
-				let response = {
-					categories: categories,
-					tasks: tasksReport,
-					projects: projectReport,
-				}
-				return resolve({
-					success: true,
-					message: CONSTANTS.apiResponses.REPORTS_GENERATED,
-					data: {
-						dataAvailable: true,
-						data: response,
-					},
-				})
+				//     projectReport[CONSTANTS.common.COMPLETED_STATUS] = projectReport[CONSTANTS.common.SUBMITTED_STATUS];
+				//     projectReport[CONSTANTS.common.NOT_STARTED_STATUS] = projectReport[CONSTANTS.common.STARTED];
+				//     delete projectReport[CONSTANTS.common.SUBMITTED_STATUS];
+				//     delete projectReport[CONSTANTS.common.STARTED];
+				// }
 
 				if (getPdf == true) {
 					let reportTaskData = {}
@@ -307,14 +282,14 @@ module.exports = class ReportsHelper {
 					}
 
 					//send data to report service to generate PDF.
-					let response = await reportService.entityReport(userToken, pdfRequest)
-					if (response && response.success == true) {
+					let response = await common_handler_v2.unnatiEntityReportPdfGeneration(pdfRequest, userId)
+					if (response && response.success) {
 						return resolve({
 							success: true,
 							message: CONSTANTS.apiResponses.REPORT_GENERATED,
 							data: {
 								data: {
-									downloadUrl: response.data.pdfUrl,
+									downloadUrl: response.pdfUrl,
 								},
 							},
 						})

@@ -2,24 +2,17 @@ openapi: 3.0.0
 info:
   title: Elevate-Project
   version: 1.0.0
-  description: ''
+  description: >-
+    The Elevate Project API provides a suite of endpoints for managing various
+    aspects of the Elevate application
 servers:
-  - url: http://{{userbaseurl}}user
-  - url: http://{{interfacebaseurl}}interface
-  - url: http://{{interfacebaseurl}}user
   - url: http://{{baseurl}}project
-  - url: http://{{baseurl}}
-  - url: http://{{interfacebaseurl}}unnati
-  - url: http://{{baseurl}}unnati
 tags:
-  - name: User
   - name: projectTemplates
-    description: contain support team api for crating and updating project template
   - name: projectCategories
   - name: projectTemplateTasks
   - name: userProjects
   - name: reports
-  - name: files
   - name: programs
   - name: solutions
   - name: admin
@@ -27,396 +20,32 @@ tags:
   - name: Form Apis
   - name: certificateBaseTemplates
 paths:
-  /v1/account/registrationOtp:
-    post:
-      tags:
-        - User
-      summary: Registration OTP
-      requestBody:
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                  example: priyanka@tunerlabs.com
-                password:
-                  type: string
-                  example: password
-                name:
-                  type: string
-                  example: Priyanka
-              required:
-                - email
-                - password
-                - name
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              examples:
-                example1:
-                  value:
-                    responseCode: OK
-                    message: >-
-                      OTP has been sent to your registered email ID. Please
-                      enter the otp to complete the registration process.
-                    result: []
-                    meta:
-                      formsVersion: []
-                      correlation: cf10a8b0-7f68-4a79-b6e1-bc9fdfa897a8
-        '422':
-          description: Bad response
-          headers: {}
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  responseCode:
-                    type: string
-                  error:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        location:
-                          type: string
-                        param:
-                          type: string
-                        msg:
-                          type: string
-                      required:
-                        - location
-                        - param
-                        - msg
-                  meta:
-                    type: object
-                    properties:
-                      correlation:
-                        type: string
-                  message:
-                    type: string
-              examples:
-                example1:
-                  value:
-                    responseCode: CLIENT_ERROR
-                    error:
-                      - location: body
-                        param: email
-                        msg: email field is empty
-                      - location: body
-                        param: email
-                        msg: email is invalid
-                      - location: body
-                        param: name
-                        msg: name field is empty
-                    meta:
-                      correlation: a660b9b9-6839-4f7d-a23f-e07a0046250c
-                    message: Validation failed, Entered data is incorrect!
-      description: ''
-  /v1/account/create:
-    post:
-      tags:
-        - User
-      summary: Registration
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                email:
-                  type: string
-                password:
-                  type: string
-                otp:
-                  type: string
-                has_accepted_terms_and_conditions:
-                  type: boolean
-            examples:
-              example1:
-                value:
-                  name: user
-                  email: user@yahoo.com
-                  password: password
-                  otp: '871826'
-                  has_accepted_terms_and_conditions: true
-      parameters:
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              examples:
-                example1:
-                  value:
-                    responseCode: OK
-                    message: Sign-up successful, Please wait while logging in.
-                    result:
-                      access_token: >-
-                        eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjo0LCJuYW1lIjoiaGkiLCJzZXNzaW9uX2lkIjoyNTMsIm9yZ2FuaXphdGlvbl9pZCI6MSwicm9sZXMiOlt7ImlkIjo1LCJ0aXRsZSI6Im1lbnRlZSIsInVzZXJfdHlwZSI6MCwic3RhdHVzIjoiQUNUSVZFIiwib3JnYW5pemF0aW9uX2lkIjoxLCJ2aXNpYmlsaXR5IjoiUFVCTElDIn1dfSwiaWF0IjoxNzE5NTQ3MjQ1LCJleHAiOjE3MTk1NDkwNDV9.0JE2J1lEh_EsuPqkrNHXPJIL9cdgTy1Cj9Os_e0BKrU
-                      refresh_token: >-
-                        eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjo0LCJuYW1lIjoiaGkiLCJzZXNzaW9uX2lkIjoyNTMsIm9yZ2FuaXphdGlvbl9pZCI6MSwicm9sZXMiOlt7ImlkIjo1LCJ0aXRsZSI6Im1lbnRlZSIsInVzZXJfdHlwZSI6MCwic3RhdHVzIjoiQUNUSVZFIiwib3JnYW5pemF0aW9uX2lkIjoxLCJ2aXNpYmlsaXR5IjoiUFVCTElDIn1dfSwiaWF0IjoxNzE5NTQ3MjQ1LCJleHAiOjE3MzUzNTg0NDV9.5XNhrv61L-4W-b510wMKQ6hP3wv3mqsqY280m3cfD5E
-                      user:
-                        id: 4
-                        email: dd@yahoo.com
-                        email_verified: 'false'
-                        name: hi
-                        gender: null
-                        location: null
-                        about: null
-                        share_link: null
-                        status: ACTIVE
-                        image: null
-                        has_accepted_terms_and_conditions: true
-                        languages: null
-                        preferred_language:
-                          value: en
-                          label: English
-                        organization_id: 1
-                        roles:
-                          - 5
-                        meta: null
-                        location_ids: null
-                        created_at: '2024-06-28T04:00:45.293Z'
-                        updated_at: '2024-06-28T04:00:45.293Z'
-                        deleted_at: null
-                        organization:
-                          id: 1
-                          name: Default Organization
-                          code: default_code
-                        user_roles:
-                          - id: 5
-                            title: mentee
-                            user_type: 0
-                            status: ACTIVE
-                            organization_id: 1
-                            visibility: PUBLIC
-                    meta:
-                      formsVersion: []
-                      correlation: f6cd0424-58bb-4191-a1b6-c5f84599e14d
-        '406':
-          description: Bad response
-          headers: {}
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  responseCode:
-                    type: string
-                  error:
-                    type: array
-                    items:
-                      type: string
-                  meta:
-                    type: object
-                    properties:
-                      correlation:
-                        type: string
-                  message:
-                    type: string
-              examples:
-                example1:
-                  value:
-                    responseCode: CLIENT_ERROR
-                    error: []
-                    meta:
-                      correlation: 9356c4d9-74a9-47d4-9f13-3aea30c90b90
-                    message: User already exists.
-      description: ''
-  /v1/account/login:
-    post:
-      tags:
-        - User
-      summary: Login
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              example:
-                email: prajwal@tunerlabs.com
-                password: password
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              examples:
-                example1:
-                  value:
-                    responseCode: OK
-                    message: User logged in successfully.
-                    result:
-                      access_token: >-
-                        eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoxLCJuYW1lIjoiUHJpeWFua2EiLCJzZXNzaW9uX2lkIjoyNTIsIm9yZ2FuaXphdGlvbl9pZCI6MSwicm9sZXMiOlt7ImlkIjo3LCJ0aXRsZSI6Im9yZ19hZG1pbiIsInVzZXJfdHlwZSI6MSwic3RhdHVzIjoiQUNUSVZFIiwib3JnYW5pemF0aW9uX2lkIjoxLCJ2aXNpYmlsaXR5IjoiUFVCTElDIn0seyJpZCI6NSwidGl0bGUiOiJtZW50ZWUiLCJ1c2VyX3R5cGUiOjAsInN0YXR1cyI6IkFDVElWRSIsIm9yZ2FuaXphdGlvbl9pZCI6MSwidmlzaWJpbGl0eSI6IlBVQkxJQyJ9LHsiaWQiOjgsInRpdGxlIjoicHJvZ3JhbV9kZXNpZ2luZXIiLCJ1c2VyX3R5cGUiOjAsInN0YXR1cyI6IkFDVElWRSIsIm9yZ2FuaXphdGlvbl9pZCI6MSwidmlzaWJpbGl0eSI6IlBVQkxJQyJ9LHsiaWQiOjksInRpdGxlIjoicHJvZ3JhbV9jcmVhdG9yIiwidXNlcl90eXBlIjowLCJzdGF0dXMiOiJBQ1RJVkUiLCJvcmdhbml6YXRpb25faWQiOjEsInZpc2liaWxpdHkiOiJQVUJMSUMifV19LCJpYXQiOjE3MTk1NDY0MTYsImV4cCI6MTcxOTU0ODIxNn0.FAg4n2nlg3NydH6K6rozZ588Z_CQSE9WklZfy6G8Msc
-                      refresh_token: >-
-                        eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoxLCJuYW1lIjoiUHJpeWFua2EiLCJzZXNzaW9uX2lkIjoyNTIsIm9yZ2FuaXphdGlvbl9pZCI6MSwicm9sZXMiOlt7ImlkIjo3LCJ0aXRsZSI6Im9yZ19hZG1pbiIsInVzZXJfdHlwZSI6MSwic3RhdHVzIjoiQUNUSVZFIiwib3JnYW5pemF0aW9uX2lkIjoxLCJ2aXNpYmlsaXR5IjoiUFVCTElDIn0seyJpZCI6NSwidGl0bGUiOiJtZW50ZWUiLCJ1c2VyX3R5cGUiOjAsInN0YXR1cyI6IkFDVElWRSIsIm9yZ2FuaXphdGlvbl9pZCI6MSwidmlzaWJpbGl0eSI6IlBVQkxJQyJ9LHsiaWQiOjgsInRpdGxlIjoicHJvZ3JhbV9kZXNpZ2luZXIiLCJ1c2VyX3R5cGUiOjAsInN0YXR1cyI6IkFDVElWRSIsIm9yZ2FuaXphdGlvbl9pZCI6MSwidmlzaWJpbGl0eSI6IlBVQkxJQyJ9LHsiaWQiOjksInRpdGxlIjoicHJvZ3JhbV9jcmVhdG9yIiwidXNlcl90eXBlIjowLCJzdGF0dXMiOiJBQ1RJVkUiLCJvcmdhbml6YXRpb25faWQiOjEsInZpc2liaWxpdHkiOiJQVUJMSUMifV19LCJpYXQiOjE3MTk1NDY0MTYsImV4cCI6MTczNTM1NzYxNn0.iY99cjRQHCz-GdvmG3rp8VUC6kKN6FZmJcu8WindMw4
-                      user:
-                        id: 1
-                        email: rahul@yahoo.com
-                        email_verified: 'false'
-                        name: Priyanka
-                        gender: null
-                        location:
-                          value: ap
-                          label: Andhra Pradesh
-                        about: This is teswtg
-                        share_link: null
-                        status: ACTIVE
-                        image: null
-                        has_accepted_terms_and_conditions: true
-                        languages:
-                          - value: en_in
-                            label: English
-                        preferred_language:
-                          value: en
-                          label: English
-                        organization_id: 1
-                        roles:
-                          - 5
-                          - 7
-                          - 9
-                          - 8
-                        meta:
-                          hub:
-                            - 5fd1b52ab53a6416aaeefb26
-                          block:
-                            - 5fd1b52ab53a6416aaeefb1f
-                            - 5fd1b52ab53a6416aaeefb24
-                          state: 663364443c990eaa179e289e
-                          school:
-                            - 5fd1b52ab53a6416aaeefb26
-                          district: 5fd098e2e049735a86b748ae
-                        location_ids: null
-                        created_at: '2024-06-11T06:52:31.427Z'
-                        updated_at: '2024-06-25T04:44:52.020Z'
-                        deleted_at: null
-                        organization:
-                          id: 1
-                          name: Default Organization
-                          code: default_code
-                        user_roles:
-                          - id: 7
-                            title: org_admin
-                            user_type: 1
-                            status: ACTIVE
-                            organization_id: 1
-                            visibility: PUBLIC
-                          - id: 5
-                            title: mentee
-                            user_type: 0
-                            status: ACTIVE
-                            organization_id: 1
-                            visibility: PUBLIC
-                          - id: 8
-                            title: program_desiginer
-                            user_type: 0
-                            status: ACTIVE
-                            organization_id: 1
-                            visibility: PUBLIC
-                          - id: 9
-                            title: program_creator
-                            user_type: 0
-                            status: ACTIVE
-                            organization_id: 1
-                            visibility: PUBLIC
-                    meta:
-                      formsVersion: []
-                      correlation: 3d8e16f0-c7cf-496b-bb3c-dd0ab94a3285
-        '422':
-          description: ''
-          headers: {}
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  responseCode:
-                    type: string
-                  error:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        location:
-                          type: string
-                        param:
-                          type: string
-                        msg:
-                          type: string
-                      required:
-                        - location
-                        - param
-                        - msg
-                  meta:
-                    type: object
-                    properties:
-                      correlation:
-                        type: string
-                  message:
-                    type: string
-              examples:
-                example1:
-                  value:
-                    responseCode: CLIENT_ERROR
-                    error:
-                      - location: body
-                        param: email
-                        msg: email field is empty
-                      - location: body
-                        param: email
-                        msg: email is invalid
-                      - location: body
-                        param: password
-                        msg: password field is empty
-                    meta:
-                      correlation: 31b55aad-51f7-4d4d-8358-3ab24f559821
-                    message: Validation failed, Entered data is incorrect!
-      description: ''
   /v1/project/templates/bulkCreate:
     post:
       tags:
         - projectTemplates
-      summary: bulkCreate
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                projectTemplates:
-                  type: string
-                  format: binary
+      summary: Bulk create project templates
+      requestBody: {}
       parameters:
         - name: X-auth-token
           in: header
           schema:
             type: string
           example: '{{userToken}}'
+          required: true
         - name: internal-access-token
           in: header
           schema:
             type: string
           example: '{{internal_access_token}}'
+          required: true
       responses:
         '200':
           description: Successful response
           content:
-            application/json:
+            text:
               examples:
-                example1:
+                SuccessResponse:
                   value: >-
                     "title",
 
@@ -667,6 +296,7 @@ paths:
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   message:
@@ -674,52 +304,57 @@ paths:
                   status:
                     type: number
               examples:
-                example1:
+                FailureResponse:
                   value:
                     message: Missing file of type projectTemplates
                     status: 400
-      description: ''
+      description: >-
+        This endpoint allows for the bulk creation of project templates by
+        uploading a file containing multiple templates.
   /v1/project/templates/bulkUpdate:
     post:
       tags:
         - projectTemplates
-      summary: bulkUpdate
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                projectTemplates:
-                  type: string
-                  format: binary
+      summary: Bulk update project templates
+      requestBody: {}
       parameters:
-        - name: Authorization
-          in: header
-          schema:
-            type: string
-          example: '{{authorization}}'
         - name: X-auth-token
           in: header
           schema:
             type: string
           example: '{{userToken}}'
+          required: true
         - name: internal-access-token
           in: header
           schema:
             type: string
           example: '{{internal_access_token}}'
+          required: true
       responses:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            text:
+              examples:
+                SuccessResponse:
+                  value: >-
+                    "title","externalId","categories","recommendedFor","description","entityType","goal","learningResources1-name","learningResources1-link","learningResources1-app","learningResources1-id","learningResources2-name","learningResources2-link","learningResources2-app","learningResources2-id","learningResources3-name","learningResources3-link","learningResources3-app","learningResources3-id","rationale","primaryAudience","taskCreationForm","duration","concepts","keywords","successIndicators","risks","approaches","_arrayFields","_SYSTEM_ID","UPDATE_STATUS"
+
+                    "Infrastructure-Management","Infrastructure-Management-1","educationLeader","Head
+                    Master/Mistress (HM),Principal,Head Teacher,Elementary
+                    School Head Master (ESHM)","Encourage school leaders to
+                    maintain proper Infrastructure.","","TEMP","View the
+                    learning resources to understand about library books
+                    management.","https://diksha.gov.in/resources/play/content/do_31400164030265753613820","Diksha","do_31400164030265753613820","","","","","","","","","","","","1
+                    month","","Smart Learn,
+                    Assembly","","","","categories,recommendedFor,primaryAudience,successIndicators,risks,approaches","667e776867803932055a0ec1","SUCCESS"
         '400':
           description: 'Bad response '
           headers: {}
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   message:
@@ -727,53 +362,53 @@ paths:
                   status:
                     type: number
               examples:
-                example1:
+                FailureResponse:
                   value:
                     message: Missing file of type projectTemplates
                     status: 400
-      description: ''
-  /v1/project/templates/update/64b534d32bf17aea84b3862f:
+      description: >-
+        This endpoint allows for the bulk updating of project templates by
+        uploading a file containing multiple templates.
+  /v1/project/templates/update/{_id}:
     post:
       tags:
         - projectTemplates
-      summary: update
+      summary: Update project template
       requestBody:
         content:
           '*/*':
             schema:
+              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 description:
                   type: string
             examples:
-              example1:
+              sampleBodyData:
                 value:
                   description: >-
                     शिक्षकों को कक्षा में मापन - लंबाई , भार एवं धारिता के
                     शिक्षण कौशलों का संवर्धन करना । updated
       parameters:
-        - name: Authorization
-          in: header
-          schema:
-            type: string
-          example: '{{authorization}}'
         - name: X-auth-token
           in: header
           schema:
             type: string
           example: '{{userToken}}'
+          required: true
         - name: Content-Type
           in: header
           schema:
             type: string
           example: application/json
+          required: true
       responses:
         '200':
           description: Successful response
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     status: 200
                     message: template updated successfully
@@ -783,6 +418,7 @@ paths:
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -790,20 +426,23 @@ paths:
                   message:
                     type: string
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message: Project template not found
-      description: ''
+      description: >-
+        This endpoint allows for updating a specific project template by
+        providing the necessary data.
   /v1/project/templates/listByIds:
     post:
       tags:
         - projectTemplates
-      summary: listByIds
+      summary: ' List project templates by IDs'
       requestBody:
         content:
           '*/*':
             schema:
+              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 externalIds:
@@ -811,33 +450,30 @@ paths:
                   items:
                     type: string
             examples:
-              example1:
+              sampleBodyData:
                 value:
                   externalIds:
                     - MIPMLC23-1688974067915
       parameters:
-        - name: Authorization
-          in: header
-          schema:
-            type: string
-          example: Bearer {{token}}
         - name: X-auth-token
           in: header
           schema:
             type: string
           example: Bearer {{token}}
+          required: true
         - name: Content-Type
           in: header
           schema:
             type: string
           example: application/json
+          required: true
       responses:
         '200':
           description: Successful response
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: List of project templates fetched successfully
                     status: 200
@@ -855,6 +491,7 @@ paths:
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -862,44 +499,44 @@ paths:
                   message:
                     type: string
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message: Project template not found
-      description: ''
-  /v1/project/templates/importProjectTemplate/TSCSLHAR02-1710148664591:
+      description: >-
+        This endpoint retrieves a list of project templates based on the
+        provided external IDs.
+  /v1/project/templates/importProjectTemplate/{_id}:
     post:
       tags:
         - projectTemplates
-      summary: importProjectTemplate
-      requestBody:
-        content:
-          '*/*':
-            schema:
-              type: string
-              example: '""'
+      summary: Imports a project template.
+      requestBody: {}
       parameters:
         - name: X-auth-token
           in: header
           schema:
             type: string
           example: '{{userToken}}'
+          required: true
         - name: Content-Type
           in: header
           schema:
             type: string
           example: application/json
+          required: false
         - name: solutionId
           in: query
           schema:
             type: string
+          required: true
       responses:
         '200':
           description: Successful response
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: Successfully created duplicate project templates
                     status: 200
@@ -911,6 +548,7 @@ paths:
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -927,32 +565,40 @@ paths:
                         msg:
                           type: string
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message:
                       - location: params
                         param: _id
                         msg: required project template id
-      description: ''
-  /v1/project/templates/details/:templateId:
+      description: >-
+        This endpoint allows you to import a project template using a solution
+        ID provided in the query parameter.
+  /v1/project/templates/details/{templateId}:
     get:
       tags:
         - projectTemplates
-      summary: details
+      summary: Fetches details of a specific project template
       parameters:
         - name: Content-Type
           in: header
           schema:
             type: string
           example: application/json
+        - in: header
+          name: X-auth-token
+          description: ''
+          schema: &ref_0
+            type: string
+          required: true
       responses:
         '200':
           description: Successful response
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: Successfully fetched project template details
                     status: 200
@@ -1312,6 +958,7 @@ paths:
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -1328,23 +975,26 @@ paths:
                         msg:
                           type: string
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message:
                       - location: params
                         param: _id
                         msg: required project template id or externalId
-      description: ''
+      description: >-
+        This endpoint retrieves detailed information about a specified project
+        template using the template ID provided in the params.
   /v1/library/categories/create:
     post:
       tags:
         - projectCategories
-      summary: create
+      summary: Creates a new project category in the library.
       requestBody:
         content:
           '*/*':
             schema:
+              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 name:
@@ -1354,27 +1004,24 @@ paths:
                 icon:
                   type: string
             examples:
-              example1:
+              sampleBodyData:
                 value:
                   name: Teachers
                   externalId: teachers
                   icon: static/projectCategories/teacher.png
       parameters:
-        - name: Authorization
-          in: header
-          schema:
-            type: string
-          example: '{{authorization}}'
         - name: X-auth-token
           in: header
           schema:
             type: string
           example: '{{userToken}}'
+          required: true
         - name: internal-access-token
           in: header
           schema:
             type: string
           example: '{{internal-access-token}}'
+          required: true
         - name: Content-Type
           in: header
           schema:
@@ -1386,7 +1033,7 @@ paths:
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: Successfully created project categories
                     status: 200
@@ -1397,6 +1044,7 @@ paths:
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -1417,7 +1065,7 @@ paths:
                         - param
                         - msg
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message:
@@ -1427,16 +1075,19 @@ paths:
                       - location: body
                         param: name
                         msg: name is required
-      description: ''
-  /v1/library/categories/update/project category _id:
+      description: >-
+        This endpoint allows the creation of a new project category in the
+        library.
+  /v1/library/categories/update/{project_category_id}:
     post:
       tags:
         - projectCategories
-      summary: update
+      summary: Update an existing project category.
       requestBody:
         content:
           '*/*':
             schema:
+              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 name:
@@ -1446,7 +1097,7 @@ paths:
                 icon:
                   type: string
             examples:
-              example1:
+              sampleBodyData:
                 value:
                   name: Teachers
                   externalId: teachers
@@ -1457,11 +1108,13 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          required: true
         - name: internal-access-token
           in: header
           schema:
             type: string
           example: '{{internal-access-token}}'
+          required: true
         - name: Content-Type
           in: header
           schema:
@@ -1473,7 +1126,7 @@ paths:
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: Successfully updated project categories
                     status: 200
@@ -1487,6 +1140,7 @@ paths:
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -1503,23 +1157,27 @@ paths:
                         msg:
                           type: string
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message:
                       - location: params
                         param: _id
                         msg: required category id
-      description: ''
+      description: >-
+        This endpoint allows the user to update the details of an existing
+        project category. The user must provide the project category ID in the
+        params and the updated details in the request body.
   /v1/library/categories/list:
     post:
       tags:
         - projectCategories
-      summary: list
+      summary: Retrieve a list of project categories.
       requestBody:
         content:
           '*/*':
             schema:
+              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 name:
@@ -1529,7 +1187,7 @@ paths:
                 icon:
                   type: string
             examples:
-              example1:
+              sampleBodyData:
                 value:
                   name: Teachers
                   externalId: teachers
@@ -1540,23 +1198,26 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          required: true
         - name: internal-access-token
           in: header
           schema:
             type: string
           example: '{{internal-access-token}}'
+          required: false
         - name: Content-Type
           in: header
           schema:
             type: string
           example: application/json
+          required: true
       responses:
         '200':
           description: Successful response
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: Project categories fetched successfully
                     status: 200
@@ -1579,6 +1240,7 @@ paths:
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -1586,36 +1248,30 @@ paths:
                   message:
                     type: string
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message: Bad request
-      description: ''
+      description: This endpoint allows the user to fetch a list of all project categories.
   /v1/project/templateTasks/bulkCreate/{_id}:
     post:
       tags:
         - projectTemplateTasks
-      summary: bulkCreate
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                projectTemplateTasks:
-                  type: string
-                  format: binary
+      summary: Bulk create project template tasks.
+      requestBody: {}
       parameters:
         - name: X-auth-token
           in: header
           schema:
             type: string
           example: '{{userToken}}'
+          required: true
         - name: internal-access-token
           in: header
           schema:
             type: string
           example: '{{internal_access_token}}'
+          required: true
         - name: _id
           in: path
           schema:
@@ -1626,13 +1282,22 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            text:
+              examples:
+                SuccessResponse:
+                  value: >-
+                    "name","externalId","description","type","hasAParentTask","parentTaskOperator","parentTaskValue","parentTaskId","solutionType","solutionSubType","solutionId","isDeletable","learningResources1-name","learningResources1-link","learningResources1-app","learningResources1-id","learningResources2-name","learningResources2-link","learningResources2-app","learningResources2-id","minNoOfSubmissionsRequired","sequenceNumber","_SYSTEM_ID","STATUS"
+
+                    "Online training to bring awareness amongst school leaders
+                    to maintain proper
+                    infrastructure","Infrastructure-Management-Task1","","simple","NO","","","","","","","FALSE","","","","","","","","","","1","667e79b467803932055a0ecb","Success"
         '400':
           description: 'Bad response '
           headers: {}
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -1649,39 +1314,36 @@ paths:
                         msg:
                           type: string
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message:
                       - location: params
                         param: _id
                         msg: required project template id
-      description: ''
+      description: >-
+        This endpoint allows the user to bulk create tasks for a specified
+        project template by uploading a csv file. The user must provide the
+        project template ID in the params.
   /v1/project/templateTasks/bulkUpdate/{projectTemplateId}:
     post:
       tags:
         - projectTemplateTasks
-      summary: bulkUpdate
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                projectTemplateTasks:
-                  type: string
-                  format: binary
+      summary: Bulk update project template tasks.
+      requestBody: {}
       parameters:
         - name: X-auth-token
           in: header
           schema:
             type: string
           example: '{{userToken}}'
+          required: true
         - name: internal-access-token
           in: header
           schema:
             type: string
           example: '{{internal-access-token}}'
+          required: true
         - name: projectTemplateId
           in: path
           schema:
@@ -1692,13 +1354,22 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            text:
+              examples:
+                SuccessResponse:
+                  value: >-
+                    "name","externalId","description","type","hasAParentTask","parentTaskOperator","parentTaskValue","parentTaskId","solutionType","solutionSubType","solutionId","isDeletable","learningResources1-name","learningResources1-link","learningResources1-app","learningResources1-id","learningResources2-name","learningResources2-link","learningResources2-app","learningResources2-id","minNoOfSubmissionsRequired","sequenceNumber","_SYSTEM_ID","STATUS"
+
+                    "Online training to bring awareness amongst school leaders
+                    to maintain proper
+                    infrastructure","Infrastructure-Management-Task1","","simple","NO","","","","","","","FALSE","","","","","","","","","","1","667e79b467803932055a0ecb","Success"
         '400':
           description: 'Bad response '
           headers: {}
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   message:
@@ -1706,26 +1377,30 @@ paths:
                   status:
                     type: number
               examples:
-                example1:
+                FailureResponse:
                   value:
                     message: Project template not found
                     status: 400
-      description: ''
-  /v1/userProjects/importFromLibrary/5fcf9954546a92494f2e587c:
+      description: |2-
+         This endpoint allows the user to bulk update tasks for a specified
+         project template by uploading a csv file. The user must provide the
+         project template ID in the params.
+  /v1/userProjects/importFromLibrary/{_id}:
     post:
       tags:
         - userProjects
-      summary: importFromLibrary
+      summary: Import user projects from library.
       requestBody:
         content:
           '*/*':
             schema:
+              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 hasAcceptedTAndC:
                   type: boolean
             examples:
-              example1:
+              sampleBodyData:
                 value:
                   hasAcceptedTAndC: true
       parameters:
@@ -1750,13 +1425,19 @@ paths:
           schema:
             type: boolean
           example: 'false'
+          required: true
+        - in: query
+          name: Id
+          description: ''
+          schema: *ref_0
+          required: true
       responses:
         '200':
           description: Successful response
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: Successfully fetched projects
                     status: 200
@@ -1865,6 +1546,7 @@ paths:
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   message:
@@ -1875,17 +1557,20 @@ paths:
                     type: object
                     properties: {}
               examples:
-                example1:
+                FailureResponse:
                   value:
                     message: Project template not found
                     status: 200
                     result: {}
-      description: ''
+      description: >-
+        This endpoint allows the user to import projects from a specified
+        project library. The user must provide the project library ID in the
+        params
   /v1/userProjects/importedProjects/{programId}:
     get:
       tags:
         - userProjects
-      summary: importedProjects
+      summary: Fetch Imported Projects for a Specific Program
       parameters:
         - name: X-auth-token
           in: header
@@ -1915,7 +1600,7 @@ paths:
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: List of imported projects fetched
                     status: 200
@@ -1940,6 +1625,7 @@ paths:
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -1947,24 +1633,22 @@ paths:
                   message:
                     type: string
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message: Bad request
-      description: ''
+      description: >-
+        This endpoint retrieves a list of imported projects associated with a
+        given program ID.
   /v1/userProjects/list:
-    post:
-      tags:
+    get:
+      tags: &ref_14
         - userProjects
-      summary: list
-      requestBody:
-        content:
-          '*/*':
-            schema:
-              type: string
-              example: '""'
+      summary: List User Projects
+      requestBody: &ref_15 {}
       parameters:
-        - name: X-auth-token
+        - &ref_16
+          name: X-auth-token
           in: header
           schema:
             type: string
@@ -1972,10 +1656,11 @@ paths:
           required: true
         - name: internal-access-token
           in: header
-          schema:
+          schema: &ref_17
             type: string
           example: '{{internal_access_token}}'
-        - name: Content-Type
+        - &ref_18
+          name: Content-Type
           in: header
           schema:
             type: string
@@ -1985,26 +1670,30 @@ paths:
           schema:
             type: integer
           example: '1'
+          required: false
         - name: limit
           in: query
           schema:
             type: integer
           example: '3'
+          required: false
         - name: search
           in: query
           schema:
             type: string
+          required: false
         - name: filter
           in: query
-          schema:
+          schema: &ref_19
             type: string
+          required: false
       responses:
         '200':
           description: Successful response
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: Successfully fetched projects
                     status: 200
@@ -2048,10 +1737,11 @@ paths:
                               solutionType: ''
         '400':
           description: 'Bad response '
-          headers: {}
+          headers: &ref_20 {}
           content:
             application/json:
-              schema:
+              schema: &ref_21
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -2059,20 +1749,21 @@ paths:
                   message:
                     type: string
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message: Bad request
-      description: ''
-  /v1/userProjects/sync/6624ff5124fc48e1fcdbec29:
+      description: This endpoint lists user projects based on provided query parameters.
+  /v1/userProjects/sync/{_id}:
     post:
       tags:
         - userProjects
-      summary: sync
+      summary: Sync User Project
       requestBody:
         content:
           '*/*':
             schema:
+              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 _id:
@@ -2161,23 +1852,23 @@ paths:
                     name:
                       type: string
                     gender:
-                      type: string
+                      type: 'null'
                     location:
-                      type: string
+                      type: 'null'
                     about:
-                      type: string
+                      type: 'null'
                     share_link:
-                      type: string
+                      type: 'null'
                     status:
                       type: string
                     image:
-                      type: string
+                      type: 'null'
                     last_logged_in_at:
                       type: string
                     has_accepted_terms_and_conditions:
                       type: boolean
                     languages:
-                      type: string
+                      type: 'null'
                     preferred_language:
                       type: string
                     organization_id:
@@ -2187,13 +1878,13 @@ paths:
                       items:
                         type: number
                     meta:
-                      type: string
+                      type: 'null'
                     created_at:
                       type: string
                     updated_at:
                       type: string
                     deleted_at:
-                      type: string
+                      type: 'null'
                     organization:
                       type: object
                       properties:
@@ -2334,7 +2025,7 @@ paths:
                 __v:
                   type: number
             examples:
-              example1:
+              sampleBodyData:
                 value:
                   _id: 6624ff5124fc48e1fcdbec29
                   userId: '2'
@@ -2481,13 +2172,19 @@ paths:
           schema:
             type: string
           example: '2024-04-21T11:58:09.204Z'
+          required: true
+        - in: query
+          name: Id
+          description: ''
+          schema: *ref_0
+          required: true
       responses:
         '200':
           description: Successful response
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: Project updated successfully
                     status: 200
@@ -2499,6 +2196,7 @@ paths:
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -2519,7 +2217,7 @@ paths:
                         - param
                         - msg
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message:
@@ -2529,16 +2227,19 @@ paths:
                       - location: query
                         param: lastDownloadedAt
                         msg: required last downloaded at
-      description: ''
+      description: >-
+        This endpoint synchronizes the details of a specific user project based
+        on the provided project ID.
   /v1/userProjects/details:
     post:
       tags:
         - userProjects
-      summary: details
+      summary: Fetch details of a specific user project.
       requestBody:
         content:
           '*/*':
             schema:
+              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 userRole:
@@ -2583,7 +2284,7 @@ paths:
                 entityId:
                   type: string
             examples:
-              example1:
+              sampleBodyData:
                 value:
                   userRole: DEO
                   externalId: TSCSLHAR02-1710148664591
@@ -2619,32 +2320,34 @@ paths:
           schema:
             type: string
           example: '{{internal_access_token}}'
-          required: true
+          required: false
         - name: Content-Type
           in: header
           schema:
             type: string
           example: application/json
-        - name: programId
-          in: query
-          schema:
-            type: string
         - name: solutionId
           in: query
           schema:
             type: string
+          required: true
         - name: templateId
           in: query
           schema:
             type: string
           example: TSCSLHAR02-1710148664591
+          required: true
+        - in: query
+          name: programId
+          description: ''
+          schema: *ref_0
       responses:
         '200':
           description: Successful response
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: Successfully fetched project details
                     status: 200
@@ -2853,6 +2556,7 @@ paths:
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   message:
@@ -2860,22 +2564,25 @@ paths:
                   status:
                     type: number
               examples:
-                example1:
+                FailureResponse:
                   value:
                     message: >-
                       Cannot read properties of undefined (reading
                       'isATargetedSolution')
                     status: 500
-      description: ''
-  /v1/userProjects/add/:
+      description: >-
+        This endpoint allows the retrieval of detailed information about a user
+        project, including project metadata, tasks, and user profile information
+  /v1/userProjects/add:
     post:
       tags:
         - userProjects
-      summary: add
+      summary: Add a new user project.
       requestBody:
         content:
           application/json:
             schema:
+              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 userRole:
@@ -2933,7 +2640,7 @@ paths:
                       type:
                         type: string
             examples:
-              example1:
+              sampleBodyData:
                 value:
                   userRole: BEO
                   createdFor:
@@ -2974,13 +2681,14 @@ paths:
           schema:
             type: string
           example: '{{internal_access_token}}'
+          required: false
       responses:
         '200':
           description: Successful response
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: Project created successfully
                     status: 200
@@ -2995,6 +2703,7 @@ paths:
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -3011,23 +2720,26 @@ paths:
                         msg:
                           type: string
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message:
                       - location: body
                         param: title
                         msg: required project title
-      description: ''
-  /v1/userProjects/tasksStatus/6018e75f14969a4cfd76f52c:
+      description: >-
+        This endpoint allows for the creation of a new user project, including
+        setting project metadata, tasks, and categories.
+  /v1/userProjects/tasksStatus/{_id}:
     post:
       tags:
         - userProjects
-      summary: taskStatus
+      summary: Retrieve the status of specific tasks for a user project.
       requestBody:
         content:
           application/json:
             schema:
+              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 taskIds:
@@ -3035,7 +2747,7 @@ paths:
                   items:
                     type: string
             examples:
-              example1:
+              sampleBodyData:
                 value:
                   taskIds: []
       parameters:
@@ -3044,18 +2756,24 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          required: true
         - name: internal-access-token
           in: header
           schema:
             type: string
           example: '{{internal_access_token}}'
+        - in: query
+          name: Id
+          description: ''
+          schema: *ref_0
+          required: true
       responses:
         '200':
           description: Successful response
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: Tasks status fetched successfully
                     status: 200
@@ -3073,6 +2791,7 @@ paths:
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -3089,55 +2808,56 @@ paths:
                         msg:
                           type: string
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message:
                       - location: params
                         param: _id
                         msg: required project id
-      description: ''
-  /v1/reports/entity/:
+      description: >-
+        This endpoint fetches the status of tasks identified by their IDs within
+        a user project. The request requires authentication tokens in the
+        headers and the project ID in the query parameters.
+
+
+        #### 
+  /v1/reports/entity?entity?requestPdf=true&reportType={type}&programId={_id}:
     get:
-      tags: &ref_0
+      tags: &ref_2
         - reports
       summary: entity report
       parameters:
-        - name: Authorization
-          in: header
-          schema:
-            type: string
-          example: '{{authorization}}'
         - name: X-auth-token
           in: header
-          schema: &ref_1
+          schema: &ref_3
             type: string
           example: '{{userToken}}'
-        - &ref_2
-          name: x-app-ver
+          required: true
+        - name: x-app-ver
           in: header
-          schema:
+          schema: &ref_4
             type: number
           example: '1.0'
-        - &ref_3
-          name: requestPdf
+        - name: requestPdf
           in: query
-          schema:
+          schema: &ref_5
             type: boolean
           example: 'false'
-        - &ref_4
-          name: reportType
+          required: true
+        - name: reportType
           in: query
-          schema:
+          schema: &ref_6
             type: integer
           example: '1'
+          required: true
       responses:
         '200':
           description: Successful response
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: Chart report data generated succesfully.
                     status: 200
@@ -3145,12 +2865,13 @@ paths:
                       data:
                         downloadUrl: >-
                           https://ax2cel5zyviy.compat.objectstorage.ap-hyderabad-1.oraclecloud.com/samiksha/project/4eb90608-11f7-4b1d-8738-c14dbd08ed86/1/336b101d-75e2-47de-860f-1fe59e8f976e/303ff5d3-9419-4e7f-9da8-0ecf4360183a.pdf
-        '400': &ref_5
+        '400': &ref_7
           description: 'Bad response '
           headers: {}
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -3167,196 +2888,26 @@ paths:
                         msg:
                           type: string
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message:
                       - location: query
                         param: reportType
                         msg: required report type
-      description: ''
-  /v1/files/preSignedUrls:
-    post:
-      tags:
-        - files
-      summary: presignedUrl
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                files:
-                  type: array
-                  items:
-                    type: string
-            examples:
-              example1:
-                value:
-                  files:
-                    - Screenshot from 2024-03-19 15-50-35.png
-      parameters:
-        - name: X-auth-token
-          in: header
-          schema:
-            type: string
-          example: '{{userToken}}'
-        - name: x-app-ver
-          in: header
-          schema:
-            type: number
-          example: '1.0'
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
-        - name: internal-access-token
-          in: header
-          schema:
-            type: string
-          example: '{{internal_access_token}}'
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              examples:
-                example1:
-                  value:
-                    message: Url generated successfully
-                    status: 200
-        '400':
-          description: 'Bad response '
-          headers: {}
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: number
-                  message:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        location:
-                          type: string
-                        param:
-                          type: string
-                        msg:
-                          type: string
-              examples:
-                example1:
-                  value:
-                    status: 400
-                    message:
-                      - location: body
-                        param: files
-                        msg: files data is required
-      description: ''
-  /v1/files/getDownloadableUrl:
-    get:
-      tags:
-        - files
-      summary: downloadableUrl
-      parameters:
-        - name: X-auth-token
-          in: header
-          schema:
-            type: string
-          example: '{{userToken}}'
-        - name: x-app-ver
-          in: header
-          schema:
-            type: number
-          example: '1.0'
-        - name: Content-Type
-          in: header
-          schema:
-            type: string
-          example: application/json
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              examples:
-                example1:
-                  value:
-                    message: Url generated successfully
-                    status: 200
-                    result:
-                      - filePath: >-
-                          project/64b12ef31073b0dd429e19b4/d9f5b0c1-2f12-41ed-8406-ee67a42de611/test.jpeg
-                        url: >-
-                          https://ax2cel5zyviy.compat.objectstorage.ap-hyderabad-1.oraclecloud.com/undefined/project/64b12ef31073b0dd429e19b4/d9f5b0c1-2f12-41ed-8406-ee67a42de611/test.jpeg
-        '400':
-          description: 'Bad response '
-          headers: {}
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: number
-                  message:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        location:
-                          type: string
-                        param:
-                          type: string
-                        msg:
-                          type: string
-                      required:
-                        - location
-                        - param
-                        - msg
-              examples:
-                example1:
-                  value:
-                    status: 400
-                    message:
-                      - location: body
-                        param: filePaths
-                        msg: files data is required
-                      - location: body
-                        param: filePaths
-                        msg: files should be an array
-                      - location: body
-                        param: filePaths
-                        msg: files array should not be empty
-        description: ''
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                filePaths:
-                  type: array
-                  items:
-                    type: string
-            examples:
-              example1:
-                value:
-                  filePaths:
-                    - >-
-                      project/64b12ef31073b0dd429e19b4/d9f5b0c1-2f12-41ed-8406-ee67a42de611/test.jpeg
-      description: ''
+      description: >-
+        This endpoint generates report data for a specified entity based on the
+        query parameters provided.
   /v1/programs/create:
     post:
       tags:
         - programs
-      summary: create
+      summary: Create a new program.
       requestBody:
         content:
           application/json:
             schema:
+              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 externalId:
@@ -3410,7 +2961,7 @@ paths:
                 requestForPIIConsent:
                   type: boolean
             examples:
-              example1:
+              sampleBodyData:
                 value:
                   externalId: PROGID01
                   name: DCPCR School Development Index 2018-19
@@ -3441,6 +2992,7 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          required: true
         - name: internal-access-token
           in: header
           schema:
@@ -3452,7 +3004,7 @@ paths:
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: Programs created successfully
                     status: 200
@@ -3464,6 +3016,7 @@ paths:
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -3484,7 +3037,7 @@ paths:
                         - param
                         - msg
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message:
@@ -3497,16 +3050,19 @@ paths:
                       - location: body
                         param: requestForPIIConsent
                         msg: required requestForPIIConsent value of program
-      description: ''
+      description: >-
+        This endpoint allows the creation of a new program with various
+        attributes such as external ID and name.
   /v1/programs/update/{programId}:
     post:
       tags:
         - programs
-      summary: update
+      summary: Update an existing program.
       requestBody:
         content:
           application/json:
             schema:
+              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 externalId:
@@ -3560,7 +3116,7 @@ paths:
                 requestForPIIConsent:
                   type: boolean
             examples:
-              example1:
+              sampleBodyData:
                 value:
                   externalId: PROGID01
                   name: DCPCR School Development Index 2018-19
@@ -3595,6 +3151,7 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          required: true
         - name: internal-access-token
           in: header
           schema:
@@ -3612,7 +3169,7 @@ paths:
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: Programs updated successfully
                     status: 200
@@ -3624,6 +3181,7 @@ paths:
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -3644,7 +3202,7 @@ paths:
                         - param
                         - msg
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message:
@@ -3654,18 +3212,19 @@ paths:
                       - location: params
                         param: _id
                         msg: Invalid program ID
-      description: ''
+      description: This endpoint allows updating an existing program identified by its ID
   /v1/programs/details/{programId}:
     get:
       tags:
         - programs
-      summary: details
+      summary: Fetch program details by program ID.
       parameters:
         - name: X-auth-token
           in: header
           schema:
             type: string
           example: '{{userToken}}'
+          required: true
         - name: internal-access-token
           in: header
           schema:
@@ -3683,7 +3242,7 @@ paths:
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: Programs fetched successfully
                     status: 200
@@ -3731,6 +3290,7 @@ paths:
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -3751,7 +3311,7 @@ paths:
                         - param
                         - msg
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message:
@@ -3761,16 +3321,19 @@ paths:
                       - location: params
                         param: _id
                         msg: Invalid program ID
-      description: ''
+      description: >-
+        Retrieves detailed information about a specific program identified by
+        its unique program ID.
   /v1/programs/addRolesInScope/{programId}:
     post:
       tags:
         - programs
-      summary: addRoles
+      summary: Add roles to program scope.
       requestBody:
         content:
           application/json:
             schema:
+              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 roles:
@@ -3778,7 +3341,7 @@ paths:
                   items:
                     type: string
             examples:
-              example1:
+              sampleBodyData:
                 value:
                   roles:
                     - UUU
@@ -3788,6 +3351,7 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          required: true
         - name: internal-access-token
           in: header
           schema:
@@ -3805,7 +3369,7 @@ paths:
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: Successfully added roles in program scope
                     status: 200
@@ -3815,6 +3379,7 @@ paths:
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -3835,7 +3400,7 @@ paths:
                         - param
                         - msg
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message:
@@ -3848,16 +3413,19 @@ paths:
                       - location: body
                         param: roles
                         msg: required program roles to be added
-      description: ''
+      description: >-
+        Adds specified roles to the scope of a program identified by its unique
+        program ID.
   /v1/programs/addEntitiesInScope/{programId}:
     post:
       tags:
         - programs
-      summary: addEntities
+      summary: Add entities to program scope.
       requestBody:
         content:
           application/json:
             schema:
+              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 entities:
@@ -3865,7 +3433,7 @@ paths:
                   items:
                     type: string
             examples:
-              example1:
+              sampleBodyData:
                 value:
                   entities:
                     - 5f33c3d85f637784791cd830
@@ -3875,6 +3443,7 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          required: true
         - name: internal-access-token
           in: header
           schema:
@@ -3892,7 +3461,7 @@ paths:
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: Successfully added entities in program scope
                     status: 200
@@ -3902,6 +3471,7 @@ paths:
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -3922,7 +3492,7 @@ paths:
                         - param
                         - msg
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message:
@@ -3935,24 +3505,33 @@ paths:
                       - location: body
                         param: entities
                         msg: required entities to be added
-      description: ''
+      description: >-
+        Adds specified entities to the scope of a program identified by its
+        unique program ID.
   /v1/programs/removeRolesInScope/{programId}:
     post:
       tags:
         - programs
-      summary: removeRoles
+      summary: Remove roles from program scope.
       requestBody:
         content:
           application/json:
             schema:
               type: object
               example: {}
+            examples:
+              sampleBodyData:
+                value:
+                  roles:
+                    - HM
+                    - BEO
       parameters:
         - name: X-auth-token
           in: header
           schema:
             type: string
           example: '{{userToken}}'
+          required: true
         - name: internal-access-token
           in: header
           schema:
@@ -3970,7 +3549,7 @@ paths:
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: Successfully removed roles in program scope
                     status: 200
@@ -3980,6 +3559,7 @@ paths:
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -4000,7 +3580,7 @@ paths:
                         - param
                         - msg
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message:
@@ -4013,16 +3593,19 @@ paths:
                       - location: body
                         param: roles
                         msg: required program roles to be added
-      description: ''
+      description: >-
+        Removes specified roles from the scope of a program identified by its
+        unique program ID.
   /v1/programs/removeEntitiesInScope/{programId}:
     post:
       tags:
         - programs
-      summary: removeEntities
+      summary: Remove entities from program scope
       requestBody:
         content:
           application/json:
             schema:
+              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 entities:
@@ -4030,7 +3613,7 @@ paths:
                   items:
                     type: string
             examples:
-              example1:
+              sampleBodyData:
                 value:
                   entities:
                     - 5f33c3d85f637784791cd830
@@ -4040,6 +3623,7 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          required: true
         - name: internal-access-token
           in: header
           schema:
@@ -4057,7 +3641,7 @@ paths:
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: Successfully removed entities in program scope
                     status: 200
@@ -4067,6 +3651,7 @@ paths:
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -4087,7 +3672,7 @@ paths:
                         - param
                         - msg
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message:
@@ -4100,18 +3685,21 @@ paths:
                       - location: body
                         param: entities
                         msg: required entities to be added
-      description: ''
+      description: >-
+        Removes specified entities from the scope of a program identified by its
+        unique program ID.
   /v1/programs/list:
     get:
       tags:
         - programs
-      summary: list
+      summary: List programs.
       parameters:
         - name: X-auth-token
           in: header
           schema:
             type: string
           example: '{{userToken}}'
+          required: true
         - name: internal-access-token
           in: header
           schema:
@@ -4137,7 +3725,7 @@ paths:
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: Program lists fetched successfully
                     status: 200
@@ -4170,6 +3758,7 @@ paths:
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -4177,22 +3766,25 @@ paths:
                   message:
                     type: string
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message: Bad request
-      description: ''
+      description: >-
+        Retrieves a list of programs based on optional pagination and search
+        criteria.
   /v1/programs/join/{programId}:
     get:
       tags:
         - programs
-      summary: join
+      summary: Join program.
       parameters:
         - name: X-auth-token
           in: header
           schema:
             type: string
           example: '{{userToken}}'
+          required: true
         - name: internal-access-token
           in: header
           schema:
@@ -4209,7 +3801,7 @@ paths:
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: You have joined this program successfully
                     status: 200
@@ -4221,6 +3813,7 @@ paths:
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -4241,7 +3834,7 @@ paths:
                         - param
                         - msg
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message:
@@ -4251,10 +3844,12 @@ paths:
                       - location: params
                         param: _id
                         msg: Invalid program ID
+      requestBody:
         description: ''
         content:
           application/json:
             schema:
+              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 externalId:
@@ -4308,7 +3903,7 @@ paths:
                 requestForPIIConsent:
                   type: boolean
             examples:
-              example1:
+              sampleBodyData:
                 value:
                   externalId: PROGID01
                   name: DCPCR School Development Index 2018-19
@@ -4333,16 +3928,17 @@ paths:
                     roles:
                       - HM
                   requestForPIIConsent: true
-      description: ''
+      description: Allows a user to join a specific program identified by its program ID.
   /v1/solutions/create:
     post:
       tags:
         - solutions
-      summary: create
+      summary: Create solution.
       requestBody:
         content:
           application/json:
             schema:
+              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 name:
@@ -4415,7 +4011,7 @@ paths:
                     roles:
                       type: string
             examples:
-              example1:
+              sampleBodyData:
                 value:
                   name: create solution
                   programExternalId: MAHARASTHA-AUTO-TARGETING
@@ -4454,6 +4050,7 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          required: true
         - name: inernal-access-token
           in: header
           schema:
@@ -4465,7 +4062,7 @@ paths:
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: Solution created successfully
                     status: 200
@@ -4477,6 +4074,7 @@ paths:
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -4497,7 +4095,7 @@ paths:
                         - param
                         - msg
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message:
@@ -4513,16 +4111,17 @@ paths:
                       - location: body
                         param: name
                         msg: required solution name
-      description: ''
+      description: Creates a new solution with specified attributes and scope.
   /v1/solutions/update/{solutionId}:
     post:
       tags:
         - solutions
-      summary: update
+      summary: ' Update solution.'
       requestBody:
         content:
           application/json:
             schema:
+              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 name:
@@ -4597,7 +4196,7 @@ paths:
                       items:
                         type: string
             examples:
-              example1:
+              sampleBodyData:
                 value:
                   name: create solution
                   programExternalId: MAHARASTHA-AUTO-TARGETING
@@ -4638,6 +4237,7 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          required: true
         - name: internal-access-token
           in: header
           schema:
@@ -4655,7 +4255,7 @@ paths:
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: Solution updated successfully
                     status: 200
@@ -4667,6 +4267,7 @@ paths:
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -4687,7 +4288,7 @@ paths:
                         - param
                         - msg
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message:
@@ -4697,16 +4298,19 @@ paths:
                       - location: params
                         param: _id
                         msg: Invalid solution ID
-      description: ''
+      description: >-
+        Updates the attributes and scope of an existing solution identified by
+        its solution ID.
   /v1/solutions/addRolesInScope/{solutionId}:
     post:
       tags:
         - solutions
-      summary: addRoles
+      summary: ' Add roles to solution scope.'
       requestBody:
         content:
           application/json:
             schema:
+              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 roles:
@@ -4714,7 +4318,7 @@ paths:
                   items:
                     type: string
             examples:
-              example1:
+              sampleBodyData:
                 value:
                   roles:
                     - aaa
@@ -4724,6 +4328,7 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          required: true
         - name: internal-access-token
           in: header
           schema:
@@ -4741,7 +4346,7 @@ paths:
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: Successfully added roles in solutions scope
                     status: 200
@@ -4751,6 +4356,7 @@ paths:
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -4771,7 +4377,7 @@ paths:
                         - param
                         - msg
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message:
@@ -4784,16 +4390,19 @@ paths:
                       - location: body
                         param: roles
                         msg: required solution roles to be added
-      description: ''
+      description: >-
+        Adds specified roles to the scope of a solution identified by its
+        solution ID.
   /v1/solutions/detailsBasedOnRoleAndLocation/{solutionId}:
     post:
       tags:
         - solutions
-      summary: detailsBasedOnRoleAndLocation
+      summary: Get solution details by role and location.
       requestBody:
         content:
           application/json:
             schema:
+              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 entityType:
@@ -4812,7 +4421,7 @@ paths:
                       items:
                         type: string
             examples:
-              example1:
+              sampleBodyData:
                 value:
                   entityType: block
                   entities:
@@ -4828,6 +4437,7 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          required: true
         - name: internal-access-token
           in: header
           schema:
@@ -4838,6 +4448,7 @@ paths:
           schema:
             type: string
           example: improvementProject
+          required: false
         - name: solutionId
           in: path
           schema:
@@ -4850,7 +4461,7 @@ paths:
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: Successfully targeted solutions fetched
                     status: 200
@@ -4871,6 +4482,7 @@ paths:
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -4891,7 +4503,7 @@ paths:
                         - param
                         - msg
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message:
@@ -4905,16 +4517,19 @@ paths:
                   value:
                     message: No solution found
                     status: 400
-      description: ''
+      description: >-
+        Fetches the details of a solution based on specified roles and
+        locations, identified by its solution ID.
   /v1/solutions/removeRolesInScope/{solutionId}:
     post:
       tags:
         - solutions
-      summary: removeRoles
+      summary: Remove roles from solution scope.
       requestBody:
         content:
           application/json:
             schema:
+              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 roles:
@@ -4922,7 +4537,7 @@ paths:
                   items:
                     type: string
             examples:
-              example1:
+              sampleBodyData:
                 value:
                   roles:
                     - ak
@@ -4932,6 +4547,7 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          required: true
         - name: internal-access-token
           in: header
           schema:
@@ -4949,7 +4565,7 @@ paths:
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: Successfully removed roles in solution scope
                     status: 200
@@ -4960,6 +4576,7 @@ paths:
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -4980,7 +4597,7 @@ paths:
                         - param
                         - msg
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message:
@@ -4997,18 +4614,21 @@ paths:
                   value:
                     message: No solution found
                     status: 400
-      description: ''
+      description: >-
+        Removes specified roles from the scope of a solution identified by its
+        solution ID.
   /v1/solutions/fetchLink/{solutionId}:
     get:
       tags:
         - solutions
-      summary: fetchLink
+      summary: Fetch solution link.
       parameters:
         - name: X-auth-token
           in: header
           schema:
             type: string
           example: '{{userToken}}'
+          required: true
         - name: internal-access-token
           in: header
           schema:
@@ -5026,7 +4646,7 @@ paths:
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: Solution Link generated successfully
                     status: 200
@@ -5038,6 +4658,7 @@ paths:
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -5054,23 +4675,24 @@ paths:
                         msg:
                           type: string
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message:
                       - location: body
                         param: entities
                         msg: required entities to add
-      description: ''
+      description: Retrieves the link to access a solution identified by its solution ID.
   /v1/solutions/addEntitiesInScope/{solutionId}:
     post:
       tags:
         - solutions
-      summary: addEntities
+      summary: Add entities to solution scope.
       requestBody:
         content:
           application/json:
             schema:
+              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 entities:
@@ -5078,7 +4700,7 @@ paths:
                   items:
                     type: string
             examples:
-              example1:
+              sampleBodyData:
                 value:
                   entities:
                     - 5fd1b52ab53a6416aaeefb12
@@ -5088,6 +4710,7 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          required: true
         - name: internal-access-token
           in: header
           schema:
@@ -5105,7 +4728,7 @@ paths:
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: Successfully added entities in solution scope
                     status: 200
@@ -5115,6 +4738,7 @@ paths:
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -5131,23 +4755,26 @@ paths:
                         msg:
                           type: string
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message:
                       - location: body
                         param: entities
                         msg: required entities to add
-      description: ''
+      description: >-
+        Adds specified entities to the scope of a solution identified by its
+        solution ID.
   /v1/solutions/removeEntitiesInScope/{solutionId}:
     post:
       tags:
         - solutions
-      summary: removeEntities
+      summary: Remove entities from solution scope
       requestBody:
         content:
           application/json:
             schema:
+              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 entities:
@@ -5155,7 +4782,7 @@ paths:
                   items:
                     type: string
             examples:
-              example1:
+              sampleBodyData:
                 value:
                   entities:
                     - 5fd098e2e049735a86b748ac
@@ -5166,6 +4793,7 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          required: true
         - name: internal-access-token
           in: header
           schema:
@@ -5183,7 +4811,7 @@ paths:
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: Successfully removed entities in solution scope
                     status: 200
@@ -5193,6 +4821,7 @@ paths:
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -5213,7 +4842,7 @@ paths:
                         - param
                         - msg
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message:
@@ -5226,16 +4855,22 @@ paths:
                       - location: body
                         param: entities
                         msg: required entities to remove
-      description: ''
-    /v1/solutions/forUserRoleAndLocation?programId=programId&type=type&subType=subType&page=page&limit=::
+      description: >-
+        Removes specified entities from the scope of a solution identified by
+        its solution ID.
+
+
+        ### 
+  /v1/solutions/forUserRoleAndLocation?programId={programId}&type={type}&subType={subType}&page={page}&limit=:
     post:
       tags:
         - solutions
-      summary: forUserRoleAndLocation
+      summary: Fetch solutions for user role and location.
       requestBody:
         content:
           application/json:
             schema:
+              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 role:
@@ -5247,7 +4882,7 @@ paths:
                 entityType:
                   type: string
             examples:
-              example1:
+              sampleBodyData:
                 value:
                   role: BEO
                   entities:
@@ -5260,6 +4895,7 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          required: true
         - name: internal-access-token
           in: header
           schema:
@@ -5270,6 +4906,7 @@ paths:
           schema:
             type: string
           example: 5ff840ce383ae437eb02b96c
+          required: true
         - name: type
           in: query
           schema:
@@ -5301,7 +4938,7 @@ paths:
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: Successfully targeted solutions fetched
                     status: 200
@@ -5317,6 +4954,7 @@ paths:
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -5337,7 +4975,7 @@ paths:
                         - param
                         - msg
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message:
@@ -5350,16 +4988,20 @@ paths:
                       - location: body
                         param: entityType
                         msg: entityType required
-      description: ''
-  /v1/solutions/targetedSolutions?type=:solutionType&page=:page&limit=:limit&search=:search&filter=:filter:
+      description: >-
+        Retrieves solutions based on user role, entity type, and entities within
+        a specified program. This endpoint supports pagination and search
+        functionality.
+  /v1/solutions/targetedSolutions?type={solutionType}&page={page_no}&limit={limit}&search={search}&filter={filter}:
     post:
       tags:
         - solutions
-      summary: targetedSolutions
+      summary: Fetch targeted solutions.
       requestBody:
         content:
           application/json:
             schema:
+              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 entityType:
@@ -5371,7 +5013,7 @@ paths:
                 role:
                   type: string
             examples:
-              example1:
+              sampleBodyData:
                 value:
                   entityType: block
                   entities:
@@ -5386,6 +5028,7 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          required: true
         - name: internal-access-token
           in: header
           schema:
@@ -5420,7 +5063,7 @@ paths:
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: Solutions fetched successfully
                     status: 200
@@ -5443,6 +5086,7 @@ paths:
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -5463,7 +5107,7 @@ paths:
                         - param
                         - msg
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message:
@@ -5476,16 +5120,19 @@ paths:
                       - location: body
                         param: entityType
                         msg: entityType required
-      description: ''
+      description: >-
+        Retrieves a list of targeted solutions based on specified criteria,
+        including solution type, pagination, search, and filters.
   /v1/solutions/verifyLink/{link}:
     post:
       tags:
         - solutions
-      summary: verifyLink
+      summary: ' Verify solution link.'
       requestBody:
         content:
           application/json:
             schema:
+              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 entityType:
@@ -5497,7 +5144,7 @@ paths:
                 role:
                   type: string
             examples:
-              example1:
+              sampleBodyData:
                 value:
                   entityType: block
                   entities:
@@ -5528,7 +5175,7 @@ paths:
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: Solution Link verified successfully
                     status: 200
@@ -5545,6 +5192,7 @@ paths:
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -5561,23 +5209,29 @@ paths:
                         msg:
                           type: string
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message:
                       - location: params
                         param: _id
                         msg: required solution link
-      description: ''
+      description: >-
+        * Verifies the validity of a solution link and returns details about the
+        targeted solution.
+
+
+        ### 
   /v1/solutions/verifySolution/{solutionId}:
     post:
       tags:
         - solutions
-      summary: verifySolution
+      summary: Verify solution by ID.
       requestBody:
         content:
           application/json:
             schema:
+              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 entityType:
@@ -5589,7 +5243,7 @@ paths:
                 role:
                   type: string
             examples:
-              example1:
+              sampleBodyData:
                 value:
                   entityType: block
                   entities:
@@ -5602,6 +5256,7 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          required: true
         - name: internal-access-token
           in: header
           schema:
@@ -5619,7 +5274,7 @@ paths:
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: Solution verified successfully
                     status: 200
@@ -5653,7 +5308,7 @@ paths:
                         - param
                         - msg
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message:
@@ -5672,12 +5327,14 @@ paths:
                       - location: body
                         param: entityType
                         msg: entityType required
-      description: ''
+      description: >-
+        Verifies if a solution identified by its solution ID is targeted and
+        returns details about the solution.
   /v1/solutions/list:
     post:
       tags:
         - solutions
-      summary: list
+      summary: List solutions
       requestBody:
         content:
           application/json:
@@ -5688,7 +5345,7 @@ paths:
                 isReusable:
                   type: boolean
             examples:
-              example1:
+              sampleBodyData:
                 value:
                   isReusable: false
       parameters:
@@ -5697,6 +5354,7 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          required: true
         - name: internal-access-token
           in: header
           schema:
@@ -5731,7 +5389,7 @@ paths:
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: Solutions lists fetched successfully
                     status: 200
@@ -5774,22 +5432,25 @@ paths:
                   message:
                     type: string
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message: Bad request
-      description: ''
+      description: >-
+        Retrieves a list of solutions with optional filters for reusability,
+        type, and search criteria, along with pagination support.
   /v1/solutions/getDetails/{solutionId}:
     get:
       tags:
         - solutions
-      summary: getDetails
+      summary: Fetch Solution Details
       parameters:
         - name: X-auth-token
           in: header
           schema:
             type: string
           example: '{{userToken}}'
+          required: true
         - name: internal-access-token
           in: header
           schema:
@@ -5807,7 +5468,7 @@ paths:
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: Solutions details fetched successfully
                     status: 200
@@ -5866,6 +5527,7 @@ paths:
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -5886,7 +5548,7 @@ paths:
                         - param
                         - msg
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message:
@@ -5896,16 +5558,19 @@ paths:
                       - location: params
                         param: _id
                         msg: Invalid solution ID
-      description: ''
-  /v1/admin/createIndex/{_collectionName}:
+      description: >-
+        This endpoint retrieves detailed information about a specific solution
+        using its solution ID.
+  /v1/admin/createIndex/{collectionName}:
     post:
-      tags: &ref_6
+      tags: &ref_8
         - admin
-      summary: createIndex
-      requestBody: &ref_7
+      summary: Create Index
+      requestBody: &ref_9
         content:
           application/json:
             schema:
+              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 keys:
@@ -5913,22 +5578,23 @@ paths:
                   items:
                     type: string
             examples:
-              example1:
+              sampleBodyData:
                 value:
                   keys:
                     - aaa
       parameters:
         - name: X-auth-token
           in: header
-          schema: &ref_8
+          schema: &ref_10
             type: string
           example: '{{userToken}}'
+          required: true
         - name: internal-access-token
           in: header
-          schema: &ref_9
+          schema: &ref_11
             type: string
           example: '{{internal_access_token}}'
-        - &ref_10
+        - &ref_12
           name: _collectionName
           in: path
           schema:
@@ -5941,11 +5607,11 @@ paths:
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: Keys indexed successfully
                     status: 200
-        '400': &ref_11
+        '400': &ref_13
           description: Bad response
           headers: {}
           content:
@@ -5968,23 +5634,26 @@ paths:
                         msg:
                           type: string
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message:
                       - location: body
                         param: keys
                         msg: keys required
-      description: ''
+      description: >-
+        This endpoint allows an admin to create an index for a specified
+        collection. The request body should include the keys to be indexed.
   /v1/cloud-services/files/preSignedUrls:
     post:
       tags:
         - cloud-services
-      summary: preSignedUrls
+      summary: Generate Pre-Signed URLs
       requestBody:
         content:
           application/json:
             schema:
+              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 request:
@@ -5998,7 +5667,7 @@ paths:
                           items:
                             type: string
             examples:
-              example1:
+              sampleBodyData:
                 value:
                   request:
                     5f72f9998925ec7c60f79a91:
@@ -6011,6 +5680,7 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          required: true
         - name: internal-access-token
           in: header
           schema:
@@ -6022,7 +5692,7 @@ paths:
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: Url generated successfully
                     status: 200
@@ -6048,6 +5718,7 @@ paths:
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -6064,19 +5735,21 @@ paths:
                         msg:
                           type: string
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message:
                       - location: body
                         param: request
                         msg: request data is required
-      description: ''
+      description: >-
+        This endpoint generates pre-signed URLs for uploading files to cloud
+        storage.
   /v1/cloud-services/files/getDownloadableUrl:
     post:
       tags:
         - cloud-services
-      summary: getDownloadableUrl
+      summary: Generate Downloadable URLs
       requestBody:
         content:
           application/json:
@@ -6089,7 +5762,7 @@ paths:
                   items:
                     type: string
             examples:
-              example1:
+              sampleBodyData:
                 value:
                   filePaths:
                     - >-
@@ -6100,6 +5773,7 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          required: true
         - name: internal-access-token
           in: header
           schema:
@@ -6111,7 +5785,7 @@ paths:
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     status: 200
                     message: Url's generated successfully
@@ -6126,6 +5800,7 @@ paths:
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -6133,34 +5808,41 @@ paths:
                   message:
                     type: string
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message: Input is not a valid array
-      description: ''
-  /v1/forms/read:
+      description: This endpoint generates downloadable URLs for files stored in the cloud.
+  /v1/forms/read/{_Id}:
     get:
       tags:
         - Form Apis
-      summary: read
+      summary: Fetches a form by its ID.
       parameters:
         - name: X-auth-token
           in: header
           schema:
             type: string
           example: '{{userToken}}'
+          required: true
         - name: internal-access-token
           in: header
           schema:
             type: string
           example: '{{internal_access_token}}'
+        - in: query
+          name: Id
+          description: ''
+          schema: &ref_1
+            type: string
+          required: true
       responses:
         '200':
           description: Successful response
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: Form fetched successfully
                     status: 200
@@ -6187,6 +5869,7 @@ paths:
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -6194,20 +5877,21 @@ paths:
                   message:
                     type: string
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message: Bad request
-      description: ''
+      description: This API retrieves a form based on the provided ID.
   /v1/forms/create:
     post:
       tags:
         - Form Apis
-      summary: create
+      summary: Creates a new form.
       requestBody:
         content:
           application/json:
             schema:
+              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 type:
@@ -6224,7 +5908,7 @@ paths:
                       items:
                         type: number
             examples:
-              example1:
+              sampleBodyData:
                 value:
                   type: aaa
                   subType: bbb
@@ -6241,6 +5925,7 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          required: true
         - name: internal-access-token
           in: header
           schema:
@@ -6252,7 +5937,7 @@ paths:
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: Form created successfully
                     status: 200
@@ -6279,6 +5964,7 @@ paths:
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -6299,7 +5985,7 @@ paths:
                         - param
                         - msg
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message:
@@ -6318,12 +6004,12 @@ paths:
                       - location: body
                         param: data
                         msg: data field is empty
-      description: ''
-  /v1/forms/update/:
+      description: This API creates a new form with the specified type, subType, and data.
+  /v1/forms/update/{_Id}:
     post:
       tags:
         - Form Apis
-      summary: update
+      summary: Updates an existing form by its ID.
       requestBody:
         content:
           application/json:
@@ -6343,7 +6029,7 @@ paths:
                       items:
                         type: number
             examples:
-              example1:
+              sampleBodyData:
                 value:
                   type: school
                   subType: dicchi
@@ -6359,18 +6045,24 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          required: true
         - name: internal-access-token
           in: header
           schema:
             type: string
           example: '{{internal_access_token}}'
+        - in: query
+          name: Id
+          description: ''
+          schema: *ref_1
+          required: true
       responses:
         '200':
           description: Successful response
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: Form updated successfully
                     status: 200
@@ -6413,7 +6105,7 @@ paths:
                         - param
                         - msg
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message:
@@ -6432,33 +6124,20 @@ paths:
                       - location: body
                         param: data
                         msg: data field is empty
-      description: ''
+      description: This API updates a form based on the provided ID with new data.
   /v1/certificateBaseTemplates/createOrUpdate:
     post:
       tags:
         - certificateBaseTemplates
-      summary: create
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                file:
-                  type: string
-                  format: binary
-                code:
-                  type: string
-                  example: SingleLogoSingleSign
-                name:
-                  type: string
-                  example: 'base '
+      summary: Creates or updates a certificate base template.
+      requestBody: {}
       parameters:
         - name: X-auth-token
           in: header
           schema:
             type: string
           example: '{{userToken}}'
+          required: true
         - name: internal-access-token
           in: header
           schema:
@@ -6475,6 +6154,7 @@ paths:
           content:
             application/json:
               schema:
+                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -6482,30 +6162,19 @@ paths:
                   message:
                     type: string
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message: Bad request
-  /v1/certificateBaseTemplates/createOrUpdate/6646e0a7b5226e19a19edf37:
+      description: >-
+        This API creates or updates a certificate base template using a
+        multipart form data.
+  /v1/certificateBaseTemplates/createOrUpdate/{_id}:
     patch:
       tags:
         - certificateBaseTemplates
-      summary: update
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                file:
-                  type: string
-                  format: binary
-                code:
-                  type: string
-                  example: abcd
-                name:
-                  type: string
-                  example: efgh
+      summary: Updates an existing certificate base template.
+      requestBody: {}
       parameters:
         - name: X-auth-token
           in: header
@@ -6536,29 +6205,43 @@ paths:
                   message:
                     type: string
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
                     message: Bad request
-  /v1/detailView/c4c7a517-019e-40e8-af2c-d8b967b92401/?requestPdf=true&reportType=1:
+      description: This API updates a specific certificate base template using its ID.
+  /v1/detailView/{_id}/?requestPdf=true&reportType={type}:
     get:
-      tags: *ref_0
-      summary: entity report
+      tags: *ref_2
+      summary: Generates an entity report.
       parameters:
         - name: X-auth-token
           in: header
-          schema: *ref_1
+          schema: *ref_3
           example: '{{userToken}}'
-        - *ref_2
-        - *ref_3
-        - *ref_4
+          required: true
+        - name: x-app-ver
+          in: header
+          schema: *ref_4
+          example: '1.0'
+          required: true
+        - name: requestPdf
+          in: query
+          schema: *ref_5
+          example: 'false'
+          required: false
+        - name: reportType
+          in: query
+          schema: *ref_6
+          example: '1'
+          required: true
       responses:
         '200':
           description: Successful response
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: Chart report data generated succesfully.
                     status: 200
@@ -6566,32 +6249,32 @@ paths:
                       data:
                         downloadUrl: >-
                           https://ax2cel5zyviy.compat.objectstorage.ap-hyderabad-1.oraclecloud.com/samiksha/project/cc5efab3-248e-4a65-8f57-e990bb3f6ef8/1/364b4b0b-bfa3-4f22-a144-14f42d5ab9c9/73964bc4-4bfc-411b-8e45-1cb53c8b6059.pdf
-        '400': *ref_5
-      description: ''
-  /v1/admin/dbFind/:collectionName:
+        '400': *ref_7
+      description: This API generates a detailed entity report.
+  /v1/admin/dbFind/{collectionName}:
     get:
-      tags: *ref_6
-      summary: createIndex
-      requestBody: *ref_7
+      tags: *ref_8
+      summary: Provide information based on query
+      requestBody: *ref_9
       parameters:
         - name: X-auth-token
           in: header
-          schema: *ref_8
+          schema: *ref_10
           example: '{{userToken}}'
           required: true
         - name: internal-access-token
           in: header
-          schema: *ref_9
+          schema: *ref_11
           example: '{{internal_access_token}}'
           required: true
-        - *ref_10
+        - *ref_12
       responses:
         '200':
           description: Successful response
           content:
             application/json:
               examples:
-                example1:
+                SuccessResponse:
                   value:
                     message: Data Fetched Or Updated Successfully
                     status: 200
@@ -6604,5 +6287,52 @@ paths:
                         title: >-
                           Please edit this project for submitting your Prerak
                           Head Teacher of the Block-19-20 project
-        '400': *ref_11
-      description: ''
+        '400': *ref_13
+      description: >-
+        This api will help to get information based on Id by passing the
+        collection name in params.
+  /v1/userProjects/share/{_id}:
+    get:
+      tags: *ref_14
+      summary: List User Projects
+      requestBody: *ref_15
+      parameters:
+        - *ref_16
+        - name: x-app-ver
+          in: header
+          schema: *ref_17
+          example: '{{internal_access_token}}'
+        - *ref_18
+        - name: _id
+          in: query
+          schema: *ref_19
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              examples:
+                SuccessResponse:
+                  value:
+                    message: Report generated succesfully
+                    status: 200
+                    result:
+                      data:
+                        downloadUrl: >-
+                          https://storage.googleapis.com/mentoring-dev-storage-private/project/c25cd97e-a9f3-4344-be12-90d7783f2b23/162/41fda8c7-71f2-4592-b46e-b25b9bf1c9dc/fe9d5833-5a27-4489-badd-d5c5abbaa015.pdf?GoogleAccessId=sl-mentoring-dev-storage%40sl-dev-project.iam.gserviceaccount.com&Expires=1720196779&Signature=kaDHMeTKhOPNNe%2BQHGgCu0NgkBGeLn3bIe4PlwS8s0NhnhFp132kKWwtwtqy%2F1ojEgHqpKP0yNx8WirQW%2Fyf7Ww9fb24O4gfETGUfaSqFvkrfw2Mf6%2FUSj6m9PUP5%2BZmk%2FKwIOQqigDBMzn1Or%2FJPhC5G2HjXOyWv%2Br90Jf1AaAqrPTlGvlto8ihC2I9GpdU5J%2FP96OcQkpRHsudGdiMrnkz6Cc35aNdyz0TBU79c3UsoIwKDZ%2B8gk%2BMQ4SsPuLn644jvBwuubhugcSgo9culEhGXOprRsXvoUHGlTewzrC3RfpAzpWvVxr9otzUu8O%2BVDLFUthkkeN0jknWNI5niw%3D%3D
+        '400':
+          description: 'Bad response '
+          headers: *ref_20
+          content:
+            application/json:
+              schema: *ref_21
+              examples:
+                FailureResponse:
+                  value:
+                    status: 400
+                    message:
+                      - location: params
+                        param: _id
+                        msg: required project id
+      description: This endpoint lists user projects based on provided query parameters.

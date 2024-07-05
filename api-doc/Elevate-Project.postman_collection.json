@@ -7,136 +7,6 @@
 	},
 	"item": [
 		{
-			"name": "User",
-			"item": [
-				{
-					"name": "Registration OTP",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": [
-								{
-									"key": "email",
-									"value": "priyanka@tunerlabs.com",
-									"type": "text"
-								},
-								{
-									"key": "password",
-									"value": "password",
-									"type": "text"
-								},
-								{
-									"key": "name",
-									"value": "Priyanka",
-									"type": "text"
-								}
-							]
-						},
-						"url": {
-							"raw": "{{UserBaseURL}}user/v1/account/registrationOtp",
-							"host": [
-								"{{UserBaseURL}}user"
-							],
-							"path": [
-								"v1",
-								"account",
-								"registrationOtp"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Registration",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"var jsonBody = JSON.parse(responseBody);",
-									"pm.environment.set(\"userToken\", jsonBody.result.access_token);",
-									"pm.environment.set(\"token\", jsonBody.result.access_token);",
-									"pm.environment.set(\"authorization\", 'Bearer '+ jsonBody.result.access_token);",
-									"pm.environment.set(\"refresh_token\", jsonBody.result.refresh_token);"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"priyanka\",\n    \"email\": \"priyanka@tunerlabs.com\",\n    \"password\": \"password\",\n    \"otp\": \"876543\",\n    \"has_accepted_terms_and_conditions\": true\n}"
-						},
-						"url": {
-							"raw": "{{InterfaceBaseUrl}}interface/v1/account/create",
-							"host": [
-								"{{InterfaceBaseUrl}}interface"
-							],
-							"path": [
-								"v1",
-								"account",
-								"create"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Login",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"var jsonBody = JSON.parse(responseBody);",
-									"pm.environment.set(\"userToken\", jsonBody.result.access_token);",
-									"pm.environment.set(\"token\", jsonBody.result.access_token);",
-									"pm.environment.set(\"authorization\", 'Bearer '+ jsonBody.result.access_token);",
-									"pm.environment.set(\"refresh_token\", jsonBody.result.refresh_token);"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"email\": \"prajwal@tunerlabs.com\",\n    \"password\":\"password\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{InterfaceBaseUrl}}user/v1/account/login",
-							"host": [
-								"{{InterfaceBaseUrl}}user"
-							],
-							"path": [
-								"v1",
-								"account",
-								"login"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
 			"name": "projectTemplates",
 			"item": [
 				{
@@ -1150,6 +1020,47 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "share",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-authenticated-user-token",
+								"value": "{{token}}",
+								"type": "text"
+							},
+							{
+								"key": "x-app-ver",
+								"value": "",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "http://localhost:5000/project/v1/userProjects/share/6018e75f14969a4cfd76f52c",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"project",
+								"v1",
+								"userProjects",
+								"share",
+								"6018e75f14969a4cfd76f52c"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -1197,123 +1108,6 @@
 									"key": "reportType",
 									"value": "1"
 								}
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "files",
-			"item": [
-				{
-					"name": "presignedUrl",
-					"protocolProfileBehavior": {
-						"disabledSystemHeaders": {
-							"content-type": true
-						}
-					},
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "{{authorization}}",
-								"type": "text",
-								"disabled": true
-							},
-							{
-								"key": "X-authenticated-user-token",
-								"value": "{{userToken}}",
-								"type": "text"
-							},
-							{
-								"key": "x-app-ver",
-								"value": "1.0",
-								"type": "text"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							},
-							{
-								"key": "internal-access-token",
-								"value": "{{internal_access_token}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"files\" : [\"Screenshot from 2024-03-19 15-50-35.png\"]\n}\n",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{baseUrl}}/project/v1/files/preSignedUrls",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"project",
-								"v1",
-								"files",
-								"preSignedUrls"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "downloadableUrl",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true,
-						"disabledSystemHeaders": {
-							"content-type": true
-						}
-					},
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "{{authorization}}",
-								"type": "text"
-							},
-							{
-								"key": "X-authenticated-user-token",
-								"value": "{{userToken}}",
-								"type": "text"
-							},
-							{
-								"key": "x-app-ver",
-								"value": "1.0",
-								"type": "text"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"filePaths\" : [\"project/64b12ef31073b0dd429e19b4/d9f5b0c1-2f12-41ed-8406-ee67a42de611/test.jpeg\"]\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/project/v1/files/getDownloadableUrl",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"project",
-								"v1",
-								"files",
-								"getDownloadableUrl"
 							]
 						}
 					},
@@ -1443,7 +1237,7 @@
 					"response": []
 				},
 				{
-					"name": "addRoles",
+					"name": "addRolesInScope",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -1484,7 +1278,7 @@
 					"response": []
 				},
 				{
-					"name": "addEntities",
+					"name": "addEntitiesInScopes",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -1525,7 +1319,7 @@
 					"response": []
 				},
 				{
-					"name": "removeRoles",
+					"name": "removeRolesInScope",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -1651,6 +1445,46 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "removeEntitiesInScope",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoxLCJuYW1lIjoiUHJpeWFua2EiLCJzZXNzaW9uX2lkIjoyNjQsIm9yZ2FuaXphdGlvbl9pZCI6MSwicm9sZXMiOlt7ImlkIjo3LCJ0aXRsZSI6Im9yZ19hZG1pbiIsInVzZXJfdHlwZSI6MSwic3RhdHVzIjoiQUNUSVZFIiwib3JnYW5pemF0aW9uX2lkIjoxLCJ2aXNpYmlsaXR5IjoiUFVCTElDIn0seyJpZCI6NSwidGl0bGUiOiJtZW50ZWUiLCJ1c2VyX3R5cGUiOjAsInN0YXR1cyI6IkFDVElWRSIsIm9yZ2FuaXphdGlvbl9pZCI6MSwidmlzaWJpbGl0eSI6IlBVQkxJQyJ9LHsiaWQiOjgsInRpdGxlIjoicHJvZ3JhbV9kZXNpZ2luZXIiLCJ1c2VyX3R5cGUiOjAsInN0YXR1cyI6IkFDVElWRSIsIm9yZ2FuaXphdGlvbl9pZCI6MSwidmlzaWJpbGl0eSI6IlBVQkxJQyJ9LHsiaWQiOjksInRpdGxlIjoicHJvZ3JhbV9jcmVhdG9yIiwidXNlcl90eXBlIjowLCJzdGF0dXMiOiJBQ1RJVkUiLCJvcmdhbml6YXRpb25faWQiOjEsInZpc2liaWxpdHkiOiJQVUJMSUMifV19LCJpYXQiOjE3MTk5OTY4ODYsImV4cCI6MTcxOTk5ODY4Nn0.MXgAlooVZv--RaVUoInyCqSueab-E2IH9UBYXQQ2EnY"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "internal_access_token"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"roles\": [\n                \"HM\",\n                \"BEO\"\n            ]\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/project/v1/programs/removeEntitiesInScope/665eb764cbf5d12ba882722f",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"project",
+								"v1",
+								"programs",
+								"removeEntitiesInScope",
+								"665eb764cbf5d12ba882722f"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -1739,7 +1573,7 @@
 					"response": []
 				},
 				{
-					"name": "addRoles",
+					"name": "addRolesInScope",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -1820,7 +1654,7 @@
 					"response": []
 				},
 				{
-					"name": "removeRoles",
+					"name": "removeRolesInScope",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -1911,7 +1745,7 @@
 					"response": []
 				},
 				{
-					"name": "addEntities",
+					"name": "addEntitiesInScope",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -1952,7 +1786,7 @@
 					"response": []
 				},
 				{
-					"name": "removeEntities",
+					"name": "removeEntitiesInScope",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -2309,7 +2143,7 @@
 				{
 					"name": "createIndex",
 					"request": {
-						"method": "GET",
+						"method": "POST",
 						"header": [
 							{
 								"key": "X-auth-token",
@@ -2332,6 +2166,55 @@
 								"v1",
 								"admin",
 								"dbFind"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "dbFind",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-authenticated-user-token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoxLCJuYW1lIjoiUHJpeWFua2EiLCJzZXNzaW9uX2lkIjoyNjQsIm9yZ2FuaXphdGlvbl9pZCI6MSwicm9sZXMiOlt7ImlkIjo3LCJ0aXRsZSI6Im9yZ19hZG1pbiIsInVzZXJfdHlwZSI6MSwic3RhdHVzIjoiQUNUSVZFIiwib3JnYW5pemF0aW9uX2lkIjoxLCJ2aXNpYmlsaXR5IjoiUFVCTElDIn0seyJpZCI6NSwidGl0bGUiOiJtZW50ZWUiLCJ1c2VyX3R5cGUiOjAsInN0YXR1cyI6IkFDVElWRSIsIm9yZ2FuaXphdGlvbl9pZCI6MSwidmlzaWJpbGl0eSI6IlBVQkxJQyJ9LHsiaWQiOjgsInRpdGxlIjoicHJvZ3JhbV9kZXNpZ2luZXIiLCJ1c2VyX3R5cGUiOjAsInN0YXR1cyI6IkFDVElWRSIsIm9yZ2FuaXphdGlvbl9pZCI6MSwidmlzaWJpbGl0eSI6IlBVQkxJQyJ9LHsiaWQiOjksInRpdGxlIjoicHJvZ3JhbV9jcmVhdG9yIiwidXNlcl90eXBlIjowLCJzdGF0dXMiOiJBQ1RJVkUiLCJvcmdhbml6YXRpb25faWQiOjEsInZpc2liaWxpdHkiOiJQVUJMSUMifV19LCJpYXQiOjE3MTk5OTY4ODYsImV4cCI6MTcxOTk5ODY4Nn0.MXgAlooVZv--RaVUoInyCqSueab-E2IH9UBYXQQ2EnY"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "internal-access-token"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"keys\": [\n    \"aaa\"\n  ]\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/project/v1/admin/dbFind/:collectionName",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"project",
+								"v1",
+								"admin",
+								"dbFind",
+								":collectionName"
+							],
+							"variable": [
+								{
+									"key": "collectionName",
+									"value": ""
+								}
 							]
 						}
 					},
@@ -2423,10 +2306,6 @@
 					"response": []
 				}
 			]
-		},
-		{
-			"name": "libraryCategories",
-			"item": []
 		},
 		{
 			"name": "Form Apis",
@@ -2647,46 +2526,6 @@
 					"response": []
 				}
 			]
-		},
-		{
-			"name": "createIndex",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "X-authenticated-user-token",
-						"value": "{{token}}"
-					},
-					{
-						"key": "internal-access-token",
-						"value": "internal-access-token"
-					},
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"keys\": [\n        \"scope.entities\",\n        \"scope.entityTypeId\",\n        \"scope.entityType\",\n        \"scope.roles\"\n    ]\n}"
-				},
-				"url": {
-					"raw": "http://localhost:5000/project/v1/admin/createIndex/solutions",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "5000",
-					"path": [
-						"project",
-						"v1",
-						"admin",
-						"createIndex",
-						"solutions"
-					]
-				}
-			},
-			"response": []
 		}
 	]
 }

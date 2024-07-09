@@ -4029,6 +4029,8 @@ def solutionCreationAndMapping(projectName_for_folder_path, entityToUpload, list
             "name": project_name,
             "description": project_description,
             "isReusable" : False,
+            "startDate": startDateOfProgram,
+            "endDate": endDateOfProgram,
         }
         responseCreateSolutionApi = requests.post(url=urlCreateProjectSolutionApi,headers=headerCreateSolutionApi, data=json.dumps(sol_payload))
         messageArr = ["Project Solution Created.","URL : " + str(urlCreateProjectSolutionApi),"Status Code : " + str(responseCreateSolutionApi.status_code),"Response : " + str(responseCreateSolutionApi.text)]
@@ -4075,6 +4077,7 @@ def solutionCreationAndMapping(projectName_for_folder_path, entityToUpload, list
                                                                        solutionId, accessToken)
                 scopeEntities = entitiesPGMID
                 scopeRoles = solutionDetails[0]
+  
                 bodySolutionUpdate = {
                     "scope": {"entityType": scopeEntityType, "entities": scopeEntities, "roles": scopeRoles}}
                 solutionUpdate(projectName_for_folder_path, accessToken, solutionId, bodySolutionUpdate)

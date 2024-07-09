@@ -24,8 +24,18 @@ In Windows
 - If there are any errors in the install, try to install the same version of the libraries seperatly.
 - Download the user given template and save it in the same file where the code is hosted.
 - There are TWO Command to run the script.
-i. For projectTemplate : 
-```  python3 main.py --env pre-prod --programFile input.xlsx ```
+i. For programTemplate : 
+- for QA
+```  python3 main.py --env QA --programFile input.xlsx ```
+-for DEV
+```  python3 main.py --env dev --programFile input.xlsx ```
+-for LOCAL
+```  python3 main.py --env local --programFile input.xlsx ```
 ii. For projectTemplate :
-```  python3 main.py --env pre-prod --project input.xlsx ```
+-for QA
+```  python3 main.py --QA --project input.xlsx ```
+-for DEV
+```  python3 main.py --dev --project input.xlsx ```
+-for LOCAL
+```  python3 main.py --local --project input.xlsx ```
 We have ``` dev ``` and ``` local ``` as environment.

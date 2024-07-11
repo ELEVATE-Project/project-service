@@ -3270,29 +3270,42 @@ def prepareProjectAndTasksSheets(project_inputFile, projectName_for_folder_path,
         taskName = str(dictTasksDetails["TaskTitle"]).encode('utf-8').decode('utf-8').strip()
         # subtaskname = str(dictTasksDetails["Subtask"]).encode('utf-8').decode('utf-8').strip()
 
-        if dictTasksDetails['TaskId'] :
-           taskId = str(dictTasksDetails["TaskId"]).encode('utf-8').decode('utf-8').strip()  + "-" + str(millisecond)
-           taskminNoOfSubmissionsRequired = str(dictTasksDetails["Number of submissions for observation"]).strip()
-           sequenceNumber = sequenceNumber + 1
-           taskSolutionType = ""
-           try:
-               taskDescription = str(dictTasksDetails["description"]).strip()
-           except:
-               taskDescription = ""
-           if dictTasksDetails["observation Name"] != "":
-               taskType = "observation"
-           elif dictTasksDetails["learningResources1-name"] != "" and dictTasksDetails["learningResources1-link"] != "":
-               taskType = "content"
-           else:
-               taskType = "simple"
+   
+        taskId = str(dictTasksDetails["TaskId"]).encode('utf-8').decode('utf-8').strip() + "-" + str(millisecond)
+        taskminNoOfSubmissionsRequired = str(dictTasksDetails["Number of submissions for observation"]).strip()
+        sequenceNumber = sequenceNumber + 1
+        taskSolutionType = ""
+        
+        try:
+            taskDescription = str(dictTasksDetails["description"]).strip()
+        except:
+            taskDescription = ""
+    
+        if dictTasksDetails["observation Name"] != "":
+            taskType = "observation"
+        elif dictTasksDetails["learningResources1-name"] != "" and dictTasksDetails["learningResources1-link"] != "":
+            taskType = "content"
+        else:
+            taskType = "simple"
+    
+        hasAParentTask = "NO"
+        parentTaskOperator = ""
+        parentTaskValue = ""
+        parentTaskId = ""
+    
+        if dictTasksDetails["parentTaskId"] != "":
+            hasAParentTask = "YES"
+            parentTaskOperator = "EQUALS"
+            parentTaskValue = "started"
+            parentTaskId = str(dictTasksDetails["parentTaskId"]).strip() + "-" + str(millisecond)
+        else:
+            hasAParentTask = "NO"
+            parentTaskOperator = ""
+            parentTaskValue = ""
+            parentTaskId = ""
 
-           hasAParentTask = "NO"
-           parentTaskOperator = ""
-           parentTaskValue = ""
-           parentTaskId = ""
-
-           if dictTasksDetails["observation Name"] != "":
-                pass
+        if dictTasksDetails["observation Name"] != "":
+            pass
             #    solutionNameOrId = dictTasksDetails["observation Name"].encode('utf-8').decode('utf-8')
             #    taskSolutionType = "observation"
             #    solutionDetailsInTask = checkEntityOfSolution(projectName_for_folder_path, solutionNameOrId, accessToken)
@@ -3306,41 +3319,40 @@ def prepareProjectAndTasksSheets(project_inputFile, projectName_for_folder_path,
 
             #    # writing into the file
             #    projectUpload.to_csv(projectFilePath + "projectUpload.csv", index=False)
-           else:
-               solutionId = ""
-               taskSolutionType = ""
-               solutionSubType = ""
+        else:
+            solutionId = ""
+            taskSolutionType = ""
+            solutionSubType = ""
 
-           if str(dictTasksDetails["Mandatory task(Yes or No)"]).strip().strip().lower() == "no":
-               isDeletable = "TRUE"
-           else:
-               isDeletable = "FALSE"
-           task_values = [taskName, taskId, taskDescription, taskType, hasAParentTask, parentTaskOperator, parentTaskValue,
+        if str(dictTasksDetails["Mandatory task(Yes or No)"]).strip().strip().lower() == "no":
+            isDeletable = "TRUE"
+        else:
+            isDeletable = "FALSE"
+        task_values = [taskName, taskId, taskDescription, taskType, hasAParentTask, parentTaskOperator, parentTaskValue,
                           parentTaskId, taskSolutionType, solutionSubType, solutionId, isDeletable]
-           task_lr_value_count = 1
-           for task_lr in range(0, int(taskLearningResource_count)):
-               task_lr_name = str(dictTasksDetails["learningResources" + str(task_lr_value_count) + "-name"]).strip()
-               task_lr_link = str(dictTasksDetails["learningResources" + str(task_lr_value_count) + "-link"]).strip()
-               if task_lr_name == "" and task_lr_link == "":
-                   task_values.append("")
-                   task_values.append("")
-                   task_values.append("")
-                   task_values.append("")
-                   task_lr_value_count += 1
-               else:
-                   task_values.append(task_lr_name)
-                   task_lr_link_id = task_lr_link.split("/")[-1]
-                   task_values.append(task_lr_link)
-                   task_values.append("projectService")
-                   task_values.append(task_lr_link_id)
-                   task_lr_value_count += 1
-           task_values.append(taskminNoOfSubmissionsRequired)
-           task_values.append(sequenceNumber)
-
-           with open(taskFilePath + 'taskUpload.csv','a',encoding='utf-8') as file:
-               writer = csv.writer(file, quoting=csv.QUOTE_NONNUMERIC, delimiter=',',lineterminator='\n')
-               writer.writerows([task_values])
-        #    subtaskname2 = str(dictTasksDetails["Subtask"]).encode('utf-8').decode('utf-8').strip()
+        task_lr_value_count = 1
+        for task_lr in range(0, int(taskLearningResource_count)):
+            task_lr_name = str(dictTasksDetails["learningResources" + str(task_lr_value_count) + "-name"]).strip()
+            task_lr_link = str(dictTasksDetails["learningResources" + str(task_lr_value_count) + "-link"]).strip()
+            if task_lr_name == "" and task_lr_link == "":
+                task_values.append("")
+                task_values.append("")
+                task_values.append("")
+                task_values.append("")
+                task_lr_value_count += 1
+            else:
+                task_values.append(task_lr_name)
+                task_lr_link_id = task_lr_link.split("/")[-1]
+                task_values.append(task_lr_link)
+                task_values.append("projectService")
+                task_values.append(task_lr_link_id)
+                task_lr_value_count += 1
+        task_values.append(taskminNoOfSubmissionsRequired)
+        task_values.append(sequenceNumber)
+        with open(taskFilePath + 'taskUpload.csv','a',encoding='utf-8') as file:
+            writer = csv.writer(file, quoting=csv.QUOTE_NONNUMERIC, delimiter=',',lineterminator='\n')
+            writer.writerows([task_values])
+        #   subtaskname2 = str(dictTasksDetails["Subtask"]).encode('utf-8').decode('utf-8').strip()
 
     
 # Function to upload sheet
@@ -4077,7 +4089,6 @@ def solutionCreationAndMapping(projectName_for_folder_path, entityToUpload, list
                                                                        solutionId, accessToken)
                 scopeEntities = entitiesPGMID
                 scopeRoles = solutionDetails[0]
-  
                 bodySolutionUpdate = {
                     "scope": {"entityType": scopeEntityType, "entities": scopeEntities, "roles": scopeRoles}}
                 solutionUpdate(projectName_for_folder_path, accessToken, solutionId, bodySolutionUpdate)

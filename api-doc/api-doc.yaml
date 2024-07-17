@@ -3,8 +3,8 @@ info:
   title: Elevate-Project
   version: 1.0.0
   description: >-
-    The Elevate Project API provides a suite of endpoints for managing various
-    aspects of the Elevate application
+    The Elevate Project service provides a suite of endpoints for managing various
+    aspects of the ELEVATE-Project application.
 servers:
   - url: http://{{baseurl}}project
 tags:
@@ -25,13 +25,26 @@ paths:
       tags:
         - projectTemplates
       summary: Bulk create project templates
-      requestBody: {}
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The CSV file to upload
       parameters:
         - name: X-auth-token
           in: header
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
@@ -310,19 +323,32 @@ paths:
                     status: 400
       description: >-
         This endpoint allows for the bulk creation of project templates by
-        uploading a file containing multiple templates.
+        uploading a csv file containing multiple templates.
   /v1/project/templates/bulkUpdate:
     post:
       tags:
         - projectTemplates
       summary: Bulk update project templates
-      requestBody: {}
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The CSV file to upload
       parameters:
         - name: X-auth-token
           in: header
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
@@ -368,7 +394,7 @@ paths:
                     status: 400
       description: >-
         This endpoint allows for the bulk updating of project templates by
-        uploading a file containing multiple templates.
+        uploading a csv file containing multiple templates.
   /v1/project/templates/update/{_id}:
     post:
       tags:
@@ -395,12 +421,22 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: Content-Type
           in: header
           schema:
             type: string
           example: application/json
+          required: true
+        - name: _id
+          in: header
+          schema:
+            type: string
+          example: '123'
+          description: 'To update the data we need to match its id'
           required: true
       responses:
         '200':
@@ -432,12 +468,12 @@ paths:
                     message: Project template not found
       description: >-
         This endpoint allows for updating a specific project template by
-        providing the necessary data.
+        providing template Id in params.
   /v1/project/templates/listByIds:
     post:
       tags:
         - projectTemplates
-      summary: ' List project templates by IDs'
+      summary: ' List project templates by id'
       requestBody:
         content:
           '*/*':
@@ -460,6 +496,9 @@ paths:
           schema:
             type: string
           example: Bearer {{token}}
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: Content-Type
           in: header
@@ -505,30 +544,39 @@ paths:
                     message: Project template not found
       description: >-
         This endpoint retrieves a list of project templates based on the
-        provided external IDs.
-  /v1/project/templates/importProjectTemplate/{_id}:
+        provided external id.
+  /v1/project/templates/importProjectTemplate/{_id}?solutionId={solution_id}:
     post:
       tags:
         - projectTemplates
       summary: Imports a project template.
-      requestBody: {}
       parameters:
         - name: X-auth-token
           in: header
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: Content-Type
           in: header
           schema:
             type: string
           example: application/json
-          required: false
+          required: true
+        - name: _id
+          in: query
+          schema:
+            type: string
+          description: 'We need to pass the external id of the parent project template.'
+          required: true
         - name: solutionId
           in: query
           schema:
             type: string
+          description: 'We need to pass the solution id required to create the project template.'
           required: true
       responses:
         '200':
@@ -573,8 +621,8 @@ paths:
                         param: _id
                         msg: required project template id
       description: >-
-        This endpoint allows you to import a project template using a solution
-        ID provided in the query parameter.
+        This endpoint will help you to create a duplicate projectTemplate
+        in the query you should pass parent projectTemplate externalId and solutionId.
   /v1/project/templates/details/{templateId}:
     get:
       tags:
@@ -588,9 +636,17 @@ paths:
           example: application/json
         - in: header
           name: X-auth-token
-          description: ''
           schema: &ref_0
             type: string
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
+          required: true
+        - name: _id
+          in: query
+          schema:
+            type: string
+          description: 'We need to pass the correct id to fetch template details.'
           required: true
       responses:
         '200':
@@ -984,7 +1040,7 @@ paths:
                         msg: required project template id or externalId
       description: >-
         This endpoint retrieves detailed information about a specified project
-        template using the template ID provided in the params.
+        template using the template id provided in the params.
   /v1/library/categories/create:
     post:
       tags:
@@ -1015,6 +1071,9 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
@@ -1108,6 +1167,9 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
@@ -1120,6 +1182,13 @@ paths:
           schema:
             type: string
           example: application/json
+        - name: _id
+          in: header
+          schema:
+            type: string
+          example: '1234'
+          description: 'To update the data we need to match its id'
+          required: true
       responses:
         '200':
           description: Successful response
@@ -1166,7 +1235,7 @@ paths:
                         msg: required category id
       description: >-
         This endpoint allows the user to update the details of an existing
-        project category. The user must provide the project category ID in the
+        project category. The user must provide the project category id in the
         params and the updated details in the request body.
   /v1/library/categories/list:
     post:
@@ -1198,6 +1267,9 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
@@ -1258,13 +1330,26 @@ paths:
       tags:
         - projectTemplateTasks
       summary: Bulk create project template tasks.
-      requestBody: {}
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The CSV file to upload
       parameters:
         - name: X-auth-token
           in: header
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
@@ -1277,6 +1362,7 @@ paths:
           schema:
             type: string
           required: true
+          description: 'The user must provide the project template id in the params.'
           example: 6624c4638932662ff66ae700
       responses:
         '200':
@@ -1324,19 +1410,32 @@ paths:
       description: >-
         This endpoint allows the user to bulk create tasks for a specified
         project template by uploading a csv file. The user must provide the
-        project template ID in the params.
+        project template id in the params.
   /v1/project/templateTasks/bulkUpdate/{projectTemplateId}:
     post:
       tags:
         - projectTemplateTasks
       summary: Bulk update project template tasks.
-      requestBody: {}
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The CSV file to upload
       parameters:
         - name: X-auth-token
           in: header
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
@@ -1381,10 +1480,11 @@ paths:
                   value:
                     message: Project template not found
                     status: 400
-      description: |2-
-         This endpoint allows the user to bulk update tasks for a specified
-         project template by uploading a csv file. The user must provide the
-         project template ID in the params.
+      description: >-
+        This endpoint allows the user to bulk update tasks for a specified
+        project template by uploading a csv file. The user must provide the
+        project template id in the path and the csv file containing the updated
+        tasks in the request body.
   /v1/userProjects/importFromLibrary/{_id}:
     post:
       tags:
@@ -1409,6 +1509,9 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
@@ -1428,7 +1531,7 @@ paths:
           required: true
         - in: query
           name: Id
-          description: ''
+          description: 'The user must provide the project template id in the path'
           schema: *ref_0
           required: true
       responses:
@@ -1564,8 +1667,8 @@ paths:
                     result: {}
       description: >-
         This endpoint allows the user to import projects from a specified
-        project library. The user must provide the project library ID in the
-        params
+        project library. The user must provide the project template id in the
+        path
   /v1/userProjects/importedProjects/{programId}:
     get:
       tags:
@@ -1577,6 +1680,9 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
@@ -1593,6 +1699,7 @@ paths:
           schema:
             type: string
           required: true
+          description: 'The user must provide the program id in the path'
           example: 66254d3dd07c5713b46d17c1
       responses:
         '200':
@@ -1639,28 +1746,35 @@ paths:
                     message: Bad request
       description: >-
         This endpoint retrieves a list of imported projects associated with a
-        given program ID.
-  /v1/userProjects/list:
-    get:
-      tags: &ref_14
+        given program id
+  /v1/userProjects/list?page={page_no}&limit={limit}&search=&filter=:
+    post:
+      tags:
         - userProjects
       summary: List User Projects
-      requestBody: &ref_15 {}
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+              example: '""'
       parameters:
-        - &ref_16
-          name: X-auth-token
+        - name: X-auth-token
           in: header
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
-          schema: &ref_17
+          schema:
             type: string
+          required: true
           example: '{{internal_access_token}}'
-        - &ref_18
-          name: Content-Type
+        - name: Content-Type
           in: header
           schema:
             type: string
@@ -1684,7 +1798,7 @@ paths:
           required: false
         - name: filter
           in: query
-          schema: &ref_19
+          schema:
             type: string
           required: false
       responses:
@@ -1737,10 +1851,10 @@ paths:
                               solutionType: ''
         '400':
           description: 'Bad response '
-          headers: &ref_20 {}
+          headers: {}
           content:
             application/json:
-              schema: &ref_21
+              schema:
                 $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
@@ -1753,7 +1867,7 @@ paths:
                   value:
                     status: 400
                     message: Bad request
-      description: This endpoint lists user projects based on provided query parameters.
+      description: This endpoint lists projects based on provided query parameters.
   /v1/userProjects/sync/{_id}:
     post:
       tags:
@@ -2156,6 +2270,9 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
@@ -2175,7 +2292,7 @@ paths:
           required: true
         - in: query
           name: Id
-          description: ''
+          description: 'The user need to provided project id.'
           schema: *ref_0
           required: true
       responses:
@@ -2229,8 +2346,8 @@ paths:
                         msg: required last downloaded at
       description: >-
         This endpoint synchronizes the details of a specific user project based
-        on the provided project ID.
-  /v1/userProjects/details:
+        on the provided project id.
+  /v1/userProjects/details?solutionId={solution_id}&templateId={template_id}:
     post:
       tags:
         - userProjects
@@ -2314,6 +2431,9 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
@@ -2331,15 +2451,17 @@ paths:
           schema:
             type: string
           required: true
+          description: 'The user need to provide solution id.'
         - name: templateId
           in: query
           schema:
             type: string
           example: TSCSLHAR02-1710148664591
+          description: 'We need to pass the external id of the parent project template.'
           required: true
         - in: query
           name: programId
-          description: ''
+          description: 'We need to pass valid program id.'
           schema: *ref_0
       responses:
         '200':
@@ -2675,6 +2797,9 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
@@ -2730,6 +2855,79 @@ paths:
       description: >-
         This endpoint allows for the creation of a new user project, including
         setting project metadata, tasks, and categories.
+  /v1/userProjects/share/{project_id}:
+    get:
+      tags:
+        - userProjects
+      summary: Add a new user project.
+      parameters:
+        - name: X-auth-token
+          in: header
+          schema:
+            type: string
+          example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
+          required: true
+        - name: internal-access-token
+          in: header
+          schema:
+            type: string
+          example: '{{internal_access_token}}'
+          required: false
+        - name: projectId
+          in: header
+          schema:
+            type: string
+          description: 'We need to pass valid project id.'
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              examples:
+                SuccessResponse:
+                  value:
+                    message: Report generated succesfully.
+                    status: 200
+                    result:
+                      data:
+                        downloadUrl: >-
+                          https://storage.googleapis.com/mentoring-dev-storage-private/project/910a3f0e-cc28-4698-9237-32cc6453fbd9/162/f569b643-0b1e-45a1-a9fd-e06e10b68c77/28c0c2d7-5236-4d68-93cd-bac8731b89f8.pdf?GoogleAccessId=sl-mentoring-dev-storage%40sl-dev-project.iam.gserviceaccount.com&Expires=1721129143&Signature=DlmEM8UV9xy9Bowggok5984eKdFJafktWFvCVDKsDsRrwz83N4PKdEeYr4U9U%2BUfd%2FNVyJvlenR1GzXzQmVXMXN%2B5pUNBPbrLL%2FkTqHp%2BcXn98MjXXNU5sg3ZIYKALanJIgZLMaEk3Y%2BFslABtKw02PuvQjwt8ex%2FR64Eu2DbxI48JHrjKJ9KaRLMWtxmhs7HkWBMKV8eE9Lkm%2BQlKV0SdIR22fFE3qs%2B%2BQieB2J4KHn9fynuzOWGybjhAb2YvtChkMgiDjhFnCsz3WTR0GJQjG5Z56oWDIDvMC0uFeVuhZkEKBKwoaljox1Fhp6obKnXaN4wHRDEH9Yzw%2FeoImBQA%3D%3D
+        '400':
+          description: Bad response
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $schema: http://json-schema.org/draft-04/schema#
+                type: object
+                properties:
+                  status:
+                    type: number
+                  message:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        location:
+                          type: string
+                        param:
+                          type: string
+                        msg:
+                          type: string
+              examples:
+                FailureResponse:
+                  value:
+                    status: 400
+                    message:
+                      - location: params
+                        param: _id
+                        msg: required project id
+      description: >-
+        This endpoint generates project data based on project id.
   /v1/userProjects/tasksStatus/{_id}:
     post:
       tags:
@@ -2756,6 +2954,9 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
@@ -2764,7 +2965,7 @@ paths:
           example: '{{internal_access_token}}'
         - in: query
           name: Id
-          description: ''
+          description: 'We need to pass valid id within a user project. '
           schema: *ref_0
           required: true
       responses:
@@ -2816,23 +3017,23 @@ paths:
                         param: _id
                         msg: required project id
       description: >-
-        This endpoint fetches the status of tasks identified by their IDs within
+        This endpoint fetches the status of tasks identified by their id within
         a user project. The request requires authentication tokens in the
-        headers and the project ID in the query parameters.
-
-
-        #### 
-  /v1/reports/entity?entity?requestPdf=true&reportType={type}&programId={_id}:
+        headers and the project id in the query parameters.
+  /v1/reports/entity?requestPdf=true&reportType={type}&programId={_id}:
     get:
       tags: &ref_2
         - reports
-      summary: entity report
+      summary: Generate entity report
       parameters:
         - name: X-auth-token
           in: header
           schema: &ref_3
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: x-app-ver
           in: header
@@ -2843,13 +3044,22 @@ paths:
           in: query
           schema: &ref_5
             type: boolean
-          example: 'false'
+          example: 'true'
           required: true
+          description: 'If we require PDF link then we need to pass it as true else false.'
         - name: reportType
           in: query
           schema: &ref_6
             type: integer
           example: '1'
+          required: true
+          description: 'ReportType indicates whether the report is generated weekly, quarterly, or yearly.'
+        - name: programId
+          in: query
+          schema: &ref_6
+            type: integer
+          example: '1'
+          description: 'We need to pass program id.'
           required: true
       responses:
         '200':
@@ -2992,6 +3202,9 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
@@ -3052,7 +3265,7 @@ paths:
                         msg: required requestForPIIConsent value of program
       description: >-
         This endpoint allows the creation of a new program with various
-        attributes such as external ID and name.
+        attributes such as external id and name.
   /v1/programs/update/{programId}:
     post:
       tags:
@@ -3151,6 +3364,9 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
@@ -3162,6 +3378,7 @@ paths:
           schema:
             type: string
           required: true
+          description: 'To update the data we need to match its id'
           example: 66254d3dd07c5713b46d17c1
       responses:
         '200':
@@ -3211,19 +3428,22 @@ paths:
                         msg: required program id
                       - location: params
                         param: _id
-                        msg: Invalid program ID
-      description: This endpoint allows updating an existing program identified by its ID
+                        msg: Invalid program id
+      description: This endpoint allows updating an existing program identified by its id
   /v1/programs/details/{programId}:
     get:
       tags:
         - programs
-      summary: Fetch program details by program ID.
+      summary: Fetch program details by program id.
       parameters:
         - name: X-auth-token
           in: header
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
@@ -3236,6 +3456,7 @@ paths:
             type: string
           required: true
           example: 66254d3dd07c5713b46d17c1
+          description: 'We need to pass valid programId to fetch details.'
       responses:
         '200':
           description: Successful response
@@ -3320,10 +3541,10 @@ paths:
                         msg: required program id
                       - location: params
                         param: _id
-                        msg: Invalid program ID
+                        msg: Invalid program id
       description: >-
         Retrieves detailed information about a specific program identified by
-        its unique program ID.
+        its unique program id.
   /v1/programs/addRolesInScope/{programId}:
     post:
       tags:
@@ -3351,6 +3572,9 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
@@ -3362,6 +3586,7 @@ paths:
           schema:
             type: string
           required: true
+          description: 'We need to pass valid programId to add roles in scope.'
           example: 662373e8e45b22cb080f9ac1
       responses:
         '200':
@@ -3409,13 +3634,13 @@ paths:
                         msg: required program id
                       - location: params
                         param: _id
-                        msg: Invalid program ID
+                        msg: Invalid program id
                       - location: body
                         param: roles
                         msg: required program roles to be added
       description: >-
         Adds specified roles to the scope of a program identified by its unique
-        program ID.
+        program id.
   /v1/programs/addEntitiesInScope/{programId}:
     post:
       tags:
@@ -3443,6 +3668,9 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
@@ -3454,6 +3682,7 @@ paths:
           schema:
             type: string
           required: true
+          description: 'We need to pass valid programId to add entities in scope.'
           example: 66254d3dd07c5713b46d17c1
       responses:
         '200':
@@ -3501,13 +3730,13 @@ paths:
                         msg: required program id
                       - location: params
                         param: _id
-                        msg: Invalid program ID
+                        msg: Invalid program id
                       - location: body
                         param: entities
                         msg: required entities to be added
       description: >-
         Adds specified entities to the scope of a program identified by its
-        unique program ID.
+        unique program id.
   /v1/programs/removeRolesInScope/{programId}:
     post:
       tags:
@@ -3519,18 +3748,15 @@ paths:
             schema:
               type: object
               example: {}
-            examples:
-              sampleBodyData:
-                value:
-                  roles:
-                    - HM
-                    - BEO
       parameters:
         - name: X-auth-token
           in: header
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
@@ -3542,6 +3768,7 @@ paths:
           schema:
             type: string
           required: true
+          description: 'We need to pass valid programId to remove roles in scope.'
           example: 662373e8e45b22cb080f9ac1
       responses:
         '200':
@@ -3589,13 +3816,13 @@ paths:
                         msg: required program id
                       - location: params
                         param: _id
-                        msg: Invalid program ID
+                        msg: Invalid program id
                       - location: body
                         param: roles
                         msg: required program roles to be added
       description: >-
         Removes specified roles from the scope of a program identified by its
-        unique program ID.
+        unique program id.
   /v1/programs/removeEntitiesInScope/{programId}:
     post:
       tags:
@@ -3623,6 +3850,9 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
@@ -3634,6 +3864,7 @@ paths:
           schema:
             type: string
           required: true
+          description: 'We need to pass valid programId to remove entities in scope.'
           example: 662373e8e45b22cb080f9ac1
       responses:
         '200':
@@ -3681,14 +3912,14 @@ paths:
                         msg: required program id
                       - location: params
                         param: _id
-                        msg: Invalid program ID
+                        msg: Invalid program id
                       - location: body
                         param: entities
                         msg: required entities to be added
       description: >-
         Removes specified entities from the scope of a program identified by its
-        unique program ID.
-  /v1/programs/list:
+        unique program id.
+  /v1/programs/list?page={page_no}&limit={limit}&search=:
     get:
       tags:
         - programs
@@ -3699,6 +3930,9 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
@@ -3784,6 +4018,9 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
@@ -3794,6 +4031,7 @@ paths:
           in: path
           schema:
             type: string
+          description: 'We need to pass valid programId to join a specific program identified by its program id.'
           required: true
       responses:
         '200':
@@ -3843,7 +4081,7 @@ paths:
                         msg: required program id
                       - location: params
                         param: _id
-                        msg: Invalid program ID
+                        msg: Invalid program id
       requestBody:
         description: ''
         content:
@@ -3928,7 +4166,7 @@ paths:
                     roles:
                       - HM
                   requestForPIIConsent: true
-      description: Allows a user to join a specific program identified by its program ID.
+      description: Allows a user to join a specific program identified by its program id.
   /v1/solutions/create:
     post:
       tags:
@@ -4050,6 +4288,9 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: inernal-access-token
           in: header
@@ -4237,6 +4478,9 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
@@ -4248,6 +4492,7 @@ paths:
           schema:
             type: string
           required: true
+          description: 'To update the data we need to match its id'
           example: 66254691a9fe19f3514de013
       responses:
         '200':
@@ -4297,10 +4542,10 @@ paths:
                         msg: required solution id
                       - location: params
                         param: _id
-                        msg: Invalid solution ID
+                        msg: Invalid solution id
       description: >-
         Updates the attributes and scope of an existing solution identified by
-        its solution ID.
+        its solution id.
   /v1/solutions/addRolesInScope/{solutionId}:
     post:
       tags:
@@ -4328,6 +4573,9 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
@@ -4339,6 +4587,7 @@ paths:
           schema:
             type: string
           required: true
+          description: 'We need to pass valid solution id to add roles in scope.'
           example: 66238002c174351b59145572
       responses:
         '200':
@@ -4386,13 +4635,13 @@ paths:
                         msg: required solution id
                       - location: params
                         param: _id
-                        msg: Invalid solution ID
+                        msg: Invalid solution id
                       - location: body
                         param: roles
                         msg: required solution roles to be added
       description: >-
         Adds specified roles to the scope of a solution identified by its
-        solution ID.
+        solution id.
   /v1/solutions/detailsBasedOnRoleAndLocation/{solutionId}:
     post:
       tags:
@@ -4437,6 +4686,9 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
@@ -4454,6 +4706,7 @@ paths:
           schema:
             type: string
           required: true
+          description: 'We need to pass valid solution id to fetches the details of a solution based on specified roles and locations, identified by its solution id.'
           example: 660f9383f65100c296372c77
       responses:
         '200':
@@ -4512,14 +4765,14 @@ paths:
                         msg: required solution id
                       - location: params
                         param: _id
-                        msg: Invalid solution ID
+                        msg: Invalid solution id
                 example2:
                   value:
                     message: No solution found
                     status: 400
       description: >-
         Fetches the details of a solution based on specified roles and
-        locations, identified by its solution ID.
+        locations, identified by its solution id.
   /v1/solutions/removeRolesInScope/{solutionId}:
     post:
       tags:
@@ -4547,6 +4800,9 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
@@ -4558,6 +4814,7 @@ paths:
           schema:
             type: string
           required: true
+          description: 'We need to pass valid solution id to remove roles in scope.'
           example: 66238002c174351b59145572
       responses:
         '200':
@@ -4606,7 +4863,7 @@ paths:
                         msg: required solution id
                       - location: params
                         param: _id
-                        msg: Invalid solution ID
+                        msg: Invalid solution id
                       - location: body
                         param: roles
                         msg: required solution roles to remove
@@ -4616,7 +4873,7 @@ paths:
                     status: 400
       description: >-
         Removes specified roles from the scope of a solution identified by its
-        solution ID.
+        solution id.
   /v1/solutions/fetchLink/{solutionId}:
     get:
       tags:
@@ -4628,6 +4885,9 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
@@ -4639,6 +4899,7 @@ paths:
           schema:
             type: string
           required: true
+          description: 'We need to pass solution id that return deep link for specified solution.'
           example: 66254691a9fe19f3514de013
       responses:
         '200':
@@ -4682,7 +4943,7 @@ paths:
                       - location: body
                         param: entities
                         msg: required entities to add
-      description: Retrieves the link to access a solution identified by its solution ID.
+      description: create and return deep link for specified solution.
   /v1/solutions/addEntitiesInScope/{solutionId}:
     post:
       tags:
@@ -4710,6 +4971,9 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
@@ -4721,6 +4985,7 @@ paths:
           schema:
             type: string
           required: true
+          description: 'We need to pass valid solution id to add entities in scope.'
           example: 66238002c174351b59145572
       responses:
         '200':
@@ -4764,7 +5029,7 @@ paths:
                         msg: required entities to add
       description: >-
         Adds specified entities to the scope of a solution identified by its
-        solution ID.
+        solution id.
   /v1/solutions/removeEntitiesInScope/{solutionId}:
     post:
       tags:
@@ -4793,6 +5058,9 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
@@ -4804,6 +5072,7 @@ paths:
           schema:
             type: string
           required: true
+          description: 'We need to pass valid solution id to remove entities in scope.'
           example: 66238002c174351b59145572
       responses:
         '200':
@@ -4851,13 +5120,13 @@ paths:
                         msg: required solution id
                       - location: params
                         param: _id
-                        msg: Invalid solution ID
+                        msg: Invalid solution id
                       - location: body
                         param: entities
                         msg: required entities to remove
       description: >-
         Removes specified entities from the scope of a solution identified by
-        its solution ID.
+        its solution id.
 
 
         ### 
@@ -4895,6 +5164,9 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
@@ -4906,6 +5178,7 @@ paths:
           schema:
             type: string
           example: 5ff840ce383ae437eb02b96c
+          description: 'We need to pass valid program id to retrieves solutions .'
           required: true
         - name: type
           in: query
@@ -5028,6 +5301,9 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
@@ -5157,6 +5433,9 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
@@ -5168,6 +5447,7 @@ paths:
           schema:
             type: string
           required: true
+          description: 'We need to pass valid link that returns details about the targeted solution. '
           example: 2dbfc345a4fee8fa89e8ce0ea492badb
       responses:
         '200':
@@ -5219,14 +5499,11 @@ paths:
       description: >-
         * Verifies the validity of a solution link and returns details about the
         targeted solution.
-
-
-        ### 
   /v1/solutions/verifySolution/{solutionId}:
     post:
       tags:
         - solutions
-      summary: Verify solution by ID.
+      summary: Verify solution by id.
       requestBody:
         content:
           application/json:
@@ -5256,6 +5533,9 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
@@ -5267,6 +5547,7 @@ paths:
           schema:
             type: string
           required: true
+          description: 'We need to pass valid solution id that returns details about the solution.'
           example: 66238002c174351b59145572
       responses:
         '200':
@@ -5317,7 +5598,7 @@ paths:
                         msg: required solution id
                       - location: params
                         param: _id
-                        msg: Invalid solution ID
+                        msg: Invalid solution id
                       - location: body
                         param: entities
                         msg: required entities to remove
@@ -5328,7 +5609,7 @@ paths:
                         param: entityType
                         msg: entityType required
       description: >-
-        Verifies if a solution identified by its solution ID is targeted and
+        Verifies if a solution identified by its solution id is targeted and
         returns details about the solution.
   /v1/solutions/list:
     post:
@@ -5354,6 +5635,9 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
@@ -5450,6 +5734,9 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
@@ -5461,6 +5748,7 @@ paths:
           schema:
             type: string
           required: true
+          description: 'We need to pass valid solution id that returns details about the solution.'
           example: 66254691a9fe19f3514de013
       responses:
         '200':
@@ -5557,11 +5845,11 @@ paths:
                         msg: required solution id
                       - location: params
                         param: _id
-                        msg: Invalid solution ID
+                        msg: Invalid solution id
       description: >-
         This endpoint retrieves detailed information about a specific solution
-        using its solution ID.
-  /v1/admin/createIndex/{collectionName}:
+        using its solution id.
+  /v1/admin/createIndex/{_collectionName}:
     post:
       tags: &ref_8
         - admin
@@ -5588,6 +5876,9 @@ paths:
           schema: &ref_10
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
@@ -5600,6 +5891,7 @@ paths:
           schema:
             type: string
           required: true
+          description: 'We need to pass valid collectionName to create an index for a specified collection.'
           example: solutions
       responses:
         '200':
@@ -5680,6 +5972,9 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
@@ -5773,6 +6068,9 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
@@ -5813,17 +6111,20 @@ paths:
                     status: 400
                     message: Input is not a valid array
       description: This endpoint generates downloadable URLs for files stored in the cloud.
-  /v1/forms/read/{_Id}:
-    get:
+  /v1/forms/read/Id:
+    post:
       tags:
         - Form Apis
-      summary: Fetches a form by its ID.
+      summary: Fetches a form by its id.
       parameters:
         - name: X-auth-token
           in: header
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
@@ -5881,7 +6182,7 @@ paths:
                   value:
                     status: 400
                     message: Bad request
-      description: This API retrieves a form based on the provided ID.
+      description: This API retrieves a form based on the provided id.
   /v1/forms/create:
     post:
       tags:
@@ -5925,6 +6226,9 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
@@ -6005,11 +6309,11 @@ paths:
                         param: data
                         msg: data field is empty
       description: This API creates a new form with the specified type, subType, and data.
-  /v1/forms/update/{_Id}:
+  /v1/forms/update/{Id}:
     post:
       tags:
         - Form Apis
-      summary: Updates an existing form by its ID.
+      summary: Updates an existing form by its id.
       requestBody:
         content:
           application/json:
@@ -6045,6 +6349,9 @@ paths:
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
@@ -6053,7 +6360,7 @@ paths:
           example: '{{internal_access_token}}'
         - in: query
           name: Id
-          description: ''
+          description: 'To update the data we need to match its id'
           schema: *ref_1
           required: true
       responses:
@@ -6124,19 +6431,36 @@ paths:
                       - location: body
                         param: data
                         msg: data field is empty
-      description: This API updates a form based on the provided ID with new data.
+      description: This API updates a form based on the provided id with new data.
   /v1/certificateBaseTemplates/createOrUpdate:
     post:
       tags:
         - certificateBaseTemplates
       summary: Creates or updates a certificate base template.
-      requestBody: {}
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                code:
+                  type: string
+                  example: SingleLogoSingleSign
+                name:
+                  type: string
+                  example: 'base '
       parameters:
         - name: X-auth-token
           in: header
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
@@ -6174,18 +6498,40 @@ paths:
       tags:
         - certificateBaseTemplates
       summary: Updates an existing certificate base template.
-      requestBody: {}
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                code:
+                  type: string
+                  example: abcd
+                name:
+                  type: string
+                  example: efgh
       parameters:
         - name: X-auth-token
           in: header
           schema:
             type: string
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
+          required: true
         - name: internal-access-token
           in: header
           schema:
             type: string
           example: '{{internal_access_token}}'
+        - name: _id
+          description: 'To update the data we need to match its id'
+          schema: *ref_1
+          required: true
       responses:
         '200':
           description: Successful response
@@ -6209,8 +6555,8 @@ paths:
                   value:
                     status: 400
                     message: Bad request
-      description: This API updates a specific certificate base template using its ID.
-  /v1/detailView/{_id}/?requestPdf=true&reportType={type}:
+      description: This API updates a specific certificate base template using its id.
+  /v1/detailView/{_id}/?requestPdf=true&reportType={type}&programId={program_id}:
     get:
       tags: *ref_2
       summary: Generates an entity report.
@@ -6219,6 +6565,9 @@ paths:
           in: header
           schema: *ref_3
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: x-app-ver
           in: header
@@ -6230,11 +6579,13 @@ paths:
           schema: *ref_5
           example: 'false'
           required: false
+          description: 'If we require PDF link then we need to pass it as true else false.'
         - name: reportType
           in: query
           schema: *ref_6
           example: '1'
           required: true
+          description: 'ReportType indicates whether the report is generated weekly, quarterly, or yearly.'
       responses:
         '200':
           description: Successful response
@@ -6261,13 +6612,23 @@ paths:
           in: header
           schema: *ref_10
           example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
           required: true
         - name: internal-access-token
           in: header
           schema: *ref_11
           example: '{{internal_access_token}}'
           required: true
-        - *ref_12
+        - name: _collectionName
+          in: path
+          schema:
+            type: string
+          required: true
+          description: 'We need to pass valid collectionName for which we need to search for.'
+          example: solutions
+        
       responses:
         '200':
           description: Successful response
@@ -6291,48 +6652,3 @@ paths:
       description: >-
         This api will help to get information based on Id by passing the
         collection name in params.
-  /v1/userProjects/share/{_id}:
-    get:
-      tags: *ref_14
-      summary: List User Projects
-      requestBody: *ref_15
-      parameters:
-        - *ref_16
-        - name: x-app-ver
-          in: header
-          schema: *ref_17
-          example: '{{internal_access_token}}'
-        - *ref_18
-        - name: _id
-          in: query
-          schema: *ref_19
-          required: true
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              examples:
-                SuccessResponse:
-                  value:
-                    message: Report generated succesfully
-                    status: 200
-                    result:
-                      data:
-                        downloadUrl: >-
-                          https://storage.googleapis.com/mentoring-dev-storage-private/project/c25cd97e-a9f3-4344-be12-90d7783f2b23/162/41fda8c7-71f2-4592-b46e-b25b9bf1c9dc/fe9d5833-5a27-4489-badd-d5c5abbaa015.pdf?GoogleAccessId=sl-mentoring-dev-storage%40sl-dev-project.iam.gserviceaccount.com&Expires=1720196779&Signature=kaDHMeTKhOPNNe%2BQHGgCu0NgkBGeLn3bIe4PlwS8s0NhnhFp132kKWwtwtqy%2F1ojEgHqpKP0yNx8WirQW%2Fyf7Ww9fb24O4gfETGUfaSqFvkrfw2Mf6%2FUSj6m9PUP5%2BZmk%2FKwIOQqigDBMzn1Or%2FJPhC5G2HjXOyWv%2Br90Jf1AaAqrPTlGvlto8ihC2I9GpdU5J%2FP96OcQkpRHsudGdiMrnkz6Cc35aNdyz0TBU79c3UsoIwKDZ%2B8gk%2BMQ4SsPuLn644jvBwuubhugcSgo9culEhGXOprRsXvoUHGlTewzrC3RfpAzpWvVxr9otzUu8O%2BVDLFUthkkeN0jknWNI5niw%3D%3D
-        '400':
-          description: 'Bad response '
-          headers: *ref_20
-          content:
-            application/json:
-              schema: *ref_21
-              examples:
-                FailureResponse:
-                  value:
-                    status: 400
-                    message:
-                      - location: params
-                        param: _id
-                        msg: required project id
-      description: This endpoint lists user projects based on provided query parameters.

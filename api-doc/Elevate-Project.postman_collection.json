@@ -15,10 +15,6 @@
 						"method": "POST",
 						"header": [
 							{
-								"key": "Authorization",
-								"value": "{{authorization}}"
-							},
-							{
 								"key": "X-authenticated-user-token",
 								"value": "{{token}}"
 							},
@@ -59,10 +55,6 @@
 					"request": {
 						"method": "POST",
 						"header": [
-							{
-								"key": "Authorization",
-								"value": "{{authorization}}"
-							},
 							{
 								"key": "X-authenticated-user-token",
 								"value": "{{userToken}}"
@@ -108,10 +100,6 @@
 					"request": {
 						"method": "POST",
 						"header": [
-							{
-								"key": "Authorization",
-								"value": "{{authorization}}"
-							},
 							{
 								"key": "X-authenticated-user-token",
 								"value": "{{userToken}}"
@@ -159,10 +147,6 @@
 						"method": "POST",
 						"header": [
 							{
-								"key": "Authorization",
-								"value": "{{authorization}}"
-							},
-							{
 								"key": "X-auth-token",
 								"value": "{{token}}"
 							},
@@ -208,10 +192,6 @@
 						"method": "POST",
 						"header": [
 							{
-								"key": "Authorization",
-								"value": "{{authorization}}"
-							},
-							{
 								"key": "X-authenticated-user-token",
 								"value": "{{userToken}}"
 							},
@@ -256,11 +236,6 @@
 					"request": {
 						"method": "GET",
 						"header": [
-							{
-								"key": "Authorization",
-								"value": "{{authorization}}",
-								"disabled": true
-							},
 							{
 								"key": "X-authenticated-user-token",
 								"value": "{{userToken}}"
@@ -313,10 +288,6 @@
 						"method": "POST",
 						"header": [
 							{
-								"key": "Authorization",
-								"value": "{{authorization}}"
-							},
-							{
 								"key": "X-authenticated-user-token",
 								"value": "{{userToken}}"
 							},
@@ -360,10 +331,6 @@
 					"request": {
 						"method": "POST",
 						"header": [
-							{
-								"key": "Authorization",
-								"value": "{{authorization}}"
-							},
 							{
 								"key": "X-authenticated-user-token",
 								"value": "{{userToken}}"
@@ -410,10 +377,6 @@
 						"method": "POST",
 						"header": [
 							{
-								"key": "Authorization",
-								"value": "{{authorization}}"
-							},
-							{
 								"key": "X-authenticated-user-token",
 								"value": "{{userToken}}"
 							},
@@ -458,10 +421,6 @@
 						"method": "POST",
 						"header": [
 							{
-								"key": "Authorization",
-								"value": "{{authorization}}"
-							},
-							{
 								"key": "X-authenticated-user-token",
 								"value": "{{userToken}}"
 							},
@@ -502,10 +461,6 @@
 					"request": {
 						"method": "POST",
 						"header": [
-							{
-								"key": "Authorization",
-								"value": "{{authorization}}"
-							},
 							{
 								"key": "X-authenticated-user-token",
 								"value": "{{userToken}}"
@@ -563,10 +518,6 @@
 						"method": "POST",
 						"header": [
 							{
-								"key": "Authorization",
-								"value": "{{authorization}}"
-							},
-							{
 								"key": "X-authenticated-user-token",
 								"value": "{{userToken}}"
 							},
@@ -618,10 +569,6 @@
 						"method": "GET",
 						"header": [
 							{
-								"key": "Authorization",
-								"value": "{{authorization}}"
-							},
-							{
 								"key": "X-auth-token",
 								"value": "{{userToken}}"
 							},
@@ -665,11 +612,6 @@
 					"request": {
 						"method": "GET",
 						"header": [
-							{
-								"key": "Authorization",
-								"value": "{{authorization}}",
-								"disabled": true
-							},
 							{
 								"key": "X-authenticated-user-token",
 								"value": "{{userToken}}"
@@ -724,11 +666,6 @@
 							"originalRequest": {
 								"method": "GET",
 								"header": [
-									{
-										"key": "Authorization",
-										"value": "{{authorization}}",
-										"disabled": true
-									},
 									{
 										"key": "X-authenticated-user-token",
 										"value": "{{userToken}}"
@@ -830,10 +767,6 @@
 						"method": "POST",
 						"header": [
 							{
-								"key": "Authorization",
-								"value": "{{authorization}}"
-							},
-							{
 								"key": "X-authenticated-user-token",
 								"value": "{{userToken}}"
 							},
@@ -882,11 +815,6 @@
 					"request": {
 						"method": "POST",
 						"header": [
-							{
-								"key": "Authorization",
-								"value": "{{authorization}}",
-								"disabled": true
-							},
 							{
 								"key": "X-authenticated-user-token",
 								"value": "{{userToken}}"
@@ -939,10 +867,6 @@
 						"method": "POST",
 						"header": [
 							{
-								"key": "Authorization",
-								"value": "{{authorization}}"
-							},
-							{
 								"key": "X-authenticated-user-token",
 								"value": "{{userToken}}"
 							},
@@ -980,12 +904,6 @@
 					"request": {
 						"method": "POST",
 						"header": [
-							{
-								"key": "Authorization",
-								"value": "{{authorization}}",
-								"type": "text",
-								"disabled": true
-							},
 							{
 								"key": "X-authenticated-user-token",
 								"value": "{{userToken}}",
@@ -1068,15 +986,10 @@
 			"name": "reports",
 			"item": [
 				{
-					"name": "entity report",
+					"name": "entity",
 					"request": {
 						"method": "GET",
 						"header": [
-							{
-								"key": "Authorization",
-								"value": "{{authorization}}",
-								"type": "text"
-							},
 							{
 								"key": "X-authenticated-user-token",
 								"value": "{{userToken}}",
@@ -1123,11 +1036,6 @@
 					"request": {
 						"method": "POST",
 						"header": [
-							{
-								"key": "Authorization",
-								"value": "{{authorization}}",
-								"type": "text"
-							},
 							{
 								"key": "X-auth-token",
 								"value": "{{userToken}}",
@@ -2308,7 +2216,7 @@
 			]
 		},
 		{
-			"name": "Form Apis",
+			"name": "forms",
 			"item": [
 				{
 					"name": "read",

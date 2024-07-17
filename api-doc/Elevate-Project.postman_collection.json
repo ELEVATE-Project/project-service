@@ -1,0 +1,2531 @@
+{
+	"info": {
+		"_postman_id": "c9964b04-92c9-4e57-8613-3bd331773fca",
+		"name": "Elevate-Project",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "33513401"
+	},
+	"item": [
+		{
+			"name": "projectTemplates",
+			"item": [
+				{
+					"name": "bulkCreate",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authorization}}"
+							},
+							{
+								"key": "X-authenticated-user-token",
+								"value": "{{token}}"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "8c3a94f0931e01a4940a"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "projectTemplates",
+									"type": "file",
+									"src": "/home/user3/Videos/project and task upload - projectUpload.csv"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/project/templates/bulkUpdate/bulkCreate",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"project",
+								"templates",
+								"bulkUpdate",
+								"bulkCreate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "bulkUpdate",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authorization}}"
+							},
+							{
+								"key": "X-authenticated-user-token",
+								"value": "{{userToken}}"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "projectTemplates",
+									"type": "file",
+									"src": "/home/dell/Documents/project-templates-updation_2024_04_21_13_20.csv"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/project/templates/bulkUpdate",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"project",
+								"templates",
+								"bulkUpdate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"content-type": true
+						}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authorization}}"
+							},
+							{
+								"key": "X-authenticated-user-token",
+								"value": "{{userToken}}"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal-access-token}}",
+								"disabled": true
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"description\" : \"शिक्षकों को कक्षा में मापन - लंबाई , भार एवं धारिता के शिक्षण कौशलों का संवर्धन करना । updated\"\n\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/project/templates/update/64b534d32bf17aea84b3862f",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"project",
+								"templates",
+								"update",
+								"64b534d32bf17aea84b3862f"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "listByIds",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"content-type": true
+						}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authorization}}"
+							},
+							{
+								"key": "X-auth-token",
+								"value": "{{token}}"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal-access-token}}",
+								"disabled": true
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"externalIds\" : [\"TSCSLHAR02-1710148664591\"]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/project/templates/listByIds",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"project",
+								"templates",
+								"listByIds"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "importProjectTemplate",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"content-type": true
+						}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authorization}}"
+							},
+							{
+								"key": "X-authenticated-user-token",
+								"value": "{{userToken}}"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal-access-token}}",
+								"disabled": true
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:5000/project/v1/project/templates/importProjectTemplate/TSCSLHAR02-1710148664591=",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"project",
+								"v1",
+								"project",
+								"templates",
+								"importProjectTemplate",
+								"TSCSLHAR02-1710148664591="
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "details",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true,
+						"disabledSystemHeaders": {
+							"content-type": true
+						}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authorization}}",
+								"disabled": true
+							},
+							{
+								"key": "X-authenticated-user-token",
+								"value": "{{userToken}}"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal-access-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/project/templates/details/TSCSLHAR02-1710148664591",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"project",
+								"templates",
+								"details",
+								"TSCSLHAR02-1710148664591"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "contain support team api for crating and updating project template"
+		},
+		{
+			"name": "projectCategories",
+			"item": [
+				{
+					"name": "create",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"content-type": true
+						}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authorization}}"
+							},
+							{
+								"key": "X-authenticated-user-token",
+								"value": "{{userToken}}"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal-access-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\" : \"educationLeader\",\n    \"externalId\" : \"educationLeader\",\n    \"icon\" : \"static/projectCategories/teacher.png\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/library/categories/create",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"library",
+								"categories",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"content-type": true
+						}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authorization}}"
+							},
+							{
+								"key": "X-authenticated-user-token",
+								"value": "{{userToken}}"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal-access-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\" : \"Teachers\",\n    \"externalId\" : \"teachers\",\n    \"icon\" : \"static/projectCategories/teacher.png\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/library/categories/update/665ea7cccbf5d12ba8827223",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"library",
+								"categories",
+								"update",
+								"665ea7cccbf5d12ba8827223"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "list",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"content-type": true
+						}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authorization}}"
+							},
+							{
+								"key": "X-authenticated-user-token",
+								"value": "{{userToken}}"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal-access-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    // \"name\" : \"Teachers\",\n    // \"externalId\" : \"teachers\",\n    // \"icon\" : \"static/projectCategories/teacher.png\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/library/categories/list",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"library",
+								"categories",
+								"list"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "projectTemplateTasks",
+			"item": [
+				{
+					"name": "bulkCreate",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authorization}}"
+							},
+							{
+								"key": "X-authenticated-user-token",
+								"value": "{{userToken}}"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "projectTemplateTasks",
+									"type": "file",
+									"src": "/home/user3/workspace/sl-sunbird-implementation-utils/sunbird/programFiles/ProgramTemplate-1716794188_5101194/SolutionFiles/NEW (1)-1716794189_7917657/taskUpload/taskUpload.csv"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/project/templateTasks/bulkCreate/665430eb8f2943842b2ae46b",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"project",
+								"templateTasks",
+								"bulkCreate",
+								"665430eb8f2943842b2ae46b"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "bulkUpdate",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authorization}}"
+							},
+							{
+								"key": "X-authenticated-user-token",
+								"value": "{{userToken}}"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal-access-token}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "projectTemplateTasks",
+									"type": "file",
+									"src": "/home/dell/Downloads/project and task upload - taskUpload.csv"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}project/v1/project/templateTasks/bulkUpdate/:projectTemplateId",
+							"host": [
+								"{{baseUrl}}project"
+							],
+							"path": [
+								"v1",
+								"project",
+								"templateTasks",
+								"bulkUpdate",
+								":projectTemplateId"
+							],
+							"variable": [
+								{
+									"key": "projectTemplateId",
+									"value": "66154798c5572e588f0fff99"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "userProjects",
+			"item": [
+				{
+					"name": "importFromLibrary",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"content-type": true
+						}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authorization}}"
+							},
+							{
+								"key": "X-authenticated-user-token",
+								"value": "{{userToken}}"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"hasAcceptedTAndC\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/userProjects/importFromLibrary/5fcf9954546a92494f2e587c?isATargetedSolution=false",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"userProjects",
+								"importFromLibrary",
+								"5fcf9954546a92494f2e587c"
+							],
+							"query": [
+								{
+									"key": "isATargetedSolution",
+									"value": "false"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "importedProjects",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true,
+						"disabledSystemHeaders": {
+							"content-type": true
+						}
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authorization}}"
+							},
+							{
+								"key": "X-auth-token",
+								"value": "{{userToken}}"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/userProjects/importedProjects",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"userProjects",
+								"importedProjects"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "list",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"content-type": true
+						},
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authorization}}",
+								"disabled": true
+							},
+							{
+								"key": "X-authenticated-user-token",
+								"value": "{{userToken}}"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/userProjects/list?page=1&limit=2&search=&filter=",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"userProjects",
+								"list"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "2"
+								},
+								{
+									"key": "search",
+									"value": ""
+								},
+								{
+									"key": "filter",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "list",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{authorization}}",
+										"disabled": true
+									},
+									{
+										"key": "X-authenticated-user-token",
+										"value": "{{userToken}}"
+									},
+									{
+										"key": "internal-access-token",
+										"value": "{{internal_access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{baseUrl}}/project/v1/userProjects/list?page=1&limit=2&search=&filter=",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"project",
+										"v1",
+										"userProjects",
+										"list"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "limit",
+											"value": "2"
+										},
+										{
+											"key": "search",
+											"value": ""
+										},
+										{
+											"key": "filter",
+											"value": ""
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "53737385"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"333f7a9-dbb+8A8BO9GXm1JTSSehAbVIqdk\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 18 Jun 2024 07:21:25 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": null
+						}
+					]
+				},
+				{
+					"name": "sync",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"content-type": true
+						}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authorization}}"
+							},
+							{
+								"key": "X-authenticated-user-token",
+								"value": "{{userToken}}"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal-access-token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"_id\" : \"6624ff5124fc48e1fcdbec29\",\n    \"userId\" : \"2\",\n    \"userRole\" : \"BEO\",\n    \"status\" : \"started\",\n    \"isDeleted\" : false,\n    \"categories\" : [\n        {\n            \"externalId\" : \"\",\n            \"_id\" : \"\"\n        }\n    ],\n    \"createdBy\" : \"2\",\n    \"tasks\" : [\n        {\n            \"externalId\" : \"Task1-1710148664591\",\n            \"name\" : \"Address the assembly and share ideas about Smart Learn\",\n            \"_id\" : \"1234\",\n            \"type\" : \"observation\",\n            \"status\" : \"notStarted\",\n            \"isDeleted\" : false,\n            \"isDeletable\" : true,\n            \"createdAt\" : \"2024-04-21T11:58:09.204+0000\",\n            \"updatedAt\" : \"2024-04-21T11:58:09.204+0000\",\n            \"isImportedFromLibrary\" : false,\n            \"syncedAt\" : \"2024-04-21T11:58:09.204+0000\",\n            \"children\" : [\n\n            ]\n        }\n    ],\n    \"updatedBy\" : \"2\",\n    \"learningResources\" : [\n\n    ],\n    \"hasAcceptedTAndC\" : false,\n    \"taskSequence\" : [\n\n    ],\n    \"recommendedFor\" : [\n\n    ],\n    \"attachments\" : [\n\n    ],\n    \"deleted\" : false,\n    \"userProfile\" : {\n        \"id\" : 2,\n        \"email\" : \"prajwal@tunerlabs.com\",\n        \"email_verified\" : \"false\",\n        \"name\" : \"prajwal\",\n        \"gender\" : null,\n        \"location\" : null,\n        \"about\" : null,\n        \"share_link\" : null,\n        \"status\" : \"ACTIVE\",\n        \"image\" : null,\n        \"last_logged_in_at\" : \"2024-04-21T07:44:54.239Z\",\n        \"has_accepted_terms_and_conditions\" : true,\n        \"languages\" : null,\n        \"preferred_language\" : \"en\",\n        \"organization_id\" : 1,\n        \"roles\" : [\n            3\n        ],\n        \"meta\" : null,\n        \"created_at\" : \"2024-03-22T07:11:10.925Z\",\n        \"updated_at\" : \"2024-04-21T07:44:54.240Z\",\n        \"deleted_at\" : null,\n        \"organization\" : {\n            \"id\" : 1,\n            \"name\" : \"Default Organization\",\n            \"code\" : \"default_code\"\n        },\n        \"user_roles\" : [\n            {\n                \"id\" : 3,\n                \"title\" : \"mentee\",\n                \"user_type\" : 0,\n                \"status\" : \"ACTIVE\"\n            }\n        ]\n    },\n    \"syncedAt\" : \"2024-04-21T11:58:09.183+0000\",\n    \"entityInformation\" : {\n        \"_id\" : \"5f33c3d85f637784791cd830\",\n        \"childHierarchyPath\" : [\n            \"district\",\n            \"beat\",\n            \"cluster\",\n            \"school\"\n        ],\n        \"deleted\" : false,\n        \"entityTypeId\" : \"5f32d8228e0dc8312404056e\",\n        \"entityType\" : \"state\",\n        \"metaInformation\" : {\n            \"externalId\" : \"MH\",\n            \"name\" : \"Maharashtra\",\n            \"region\" : \"West\",\n            \"capital\" : \"Mumbai\"\n        },\n        \"updatedBy\" : \"124fdade-aaa2-4587-9dcd-3c7cf15c7147\",\n        \"createdBy\" : \"2b655fd1-201d-4d2a-a1b7-9048a25c0afa\",\n        \"updatedAt\" : \"2021-01-18T06:51:31.086Z\",\n        \"createdAt\" : \"2020-08-12T10:26:32.038Z\",\n        \"__v\" : 0,\n        \"groups\" : {\n            \"district\" : [\n                \"5f33c56fb451f58478b36996\"\n            ],\n            \"beat\" : [\n                \"5f33cb24c1352f84a29f547c\",\n                \"5f33cb24c1352f84a29f547d\"\n            ],\n            \"cluster\" : [\n                \"5f33cb07ce438a849b4a17f6\",\n                \"5f33cb07ce438a849b4a17f7\"\n            ],\n            \"school\" : [\n                \"5f33caebb451f58478b36998\",\n                \"5f33caebb451f58478b36999\"\n            ]\n        },\n        \"registryDetails\" : {\n            \"locationId\" : \"db331a8c-b9e2-45f8-b3c0-7ec1e826b6df\",\n            \"code\" : \"db331a8c-b9e2-45f8-b3c0-7ec1e826b6df\"\n        }\n    },\n    \"entityId\" : \"5f33c3d85f637784791cd830\",\n    \"programInformation\" : {\n        \"_id\" : \"5f5f6f66f69c8a0fd28a8aba\",\n        \"name\" : \"My Program\",\n        \"description\" : \"Unnati-Default-Program\",\n        \"isAPrivateProgram\" : true\n    },\n    \"taskReport\" : {\n        \"total\" : 1,\n        \"notStarted\" : 1\n    },\n    \"description\" : \"Come See Our School!- Parent Mela vishwa\",\n    \"title\" : \"Come See Our School!- Parent Mela\",\n    \"metaInformation\" : {\n        \"rationale\" : \"\",\n        \"primaryAudience\" : [\n            \"Community\"\n        ],\n        \"goal\" : \"Organizing the Parent Mela in the school in order to make better community reach\",\n        \"duration\" : \"At the end of every quarter\",\n        \"successIndicators\" : \"\",\n        \"risks\" : \"\",\n        \"approaches\" : \"\"\n    },\n    \"programId\" : \"5f5f6f66f69c8a0fd28a8aba\",\n    \"lastDownloadedAt\" : \"2024-04-21T11:58:09.204+0000\",\n    \"updatedAt\" : \"2024-04-21T11:58:09.213+0000\",\n    \"createdAt\" : \"2024-04-21T11:58:09.213+0000\",\n    \"__v\" : 0\n}\n"
+						},
+						"url": {
+							"raw": "{{baseUrl}}project/v1/userProjects/sync/6624ff5124fc48e1fcdbec29?lastDownloadedAt=2024-04-21T11:58:09.204Z",
+							"host": [
+								"{{baseUrl}}project"
+							],
+							"path": [
+								"v1",
+								"userProjects",
+								"sync",
+								"6624ff5124fc48e1fcdbec29"
+							],
+							"query": [
+								{
+									"key": "lastDownloadedAt",
+									"value": "2024-04-21T11:58:09.204Z"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "details",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"content-type": true
+						}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authorization}}",
+								"disabled": true
+							},
+							{
+								"key": "X-authenticated-user-token",
+								"value": "{{userToken}}"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}",
+								"disabled": true
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n   \"role\": \"HM\",\n  \"entities\": [\"66506485e59a5ccb82b9eff6\"],\n  \"entityType\":\"block\",\n  \"type\": \"improvementProject\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:3567/project/v1/userProjects/details?solutionId=66727b63cf0222d7ec1fa7e0&templateId=IMP-3147f",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3567",
+							"path": [
+								"project",
+								"v1",
+								"userProjects",
+								"details"
+							],
+							"query": [
+								{
+									"key": "solutionId",
+									"value": "66727b63cf0222d7ec1fa7e0"
+								},
+								{
+									"key": "templateId",
+									"value": "IMP-3147f"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authorization}}"
+							},
+							{
+								"key": "X-authenticated-user-token",
+								"value": "{{userToken}}"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"userRole\": \"BEO\",\n\t\"createdFor\": [\n\t\t\"0126796199493140480\"\n\t],\n\t\"status\": \"completed\",\n\n\t\"description\": \"Come See Our School!- Parent Mela vishwa\",\n\t\"title\": \"Come See Our School!- Parent Mela\",\n\t\"metaInformation\": {\n\t\t\"rationale\": \"\",\n\t\t\"primaryAudience\": [\n\t\t\t\"Community\"\n\t\t],\n\t\t\"goal\": \"Organizing the Parent Mela in the school in order to make better community reach\",\n\t\t\"duration\": \"At the end of every quarter\",\n\t\t\"successIndicators\": \"\",\n\t\t\"risks\": \"\",\n\t\t\"approaches\": \"\"\n\t},\n\t\"hasAcceptedTAndC\": false,\n    // \"entityId\":\"db331a8c-b9e2-45f8-b3c0-7ec1e826b6df\",\n    \"categories\" : [\"educationLeader\"],\n    \"programId\" : \"5f3ff17c19377eecddb06975\",\n    \"solutionId\" : \"5f3ff17c19377eecddb06975\",\n    \"tasks\" : [\n        {\n        \"externalId\" : \"Task1-1710148664591\",\n        \"name\" : \"Address the assembly and share ideas about Smart Learn\",\n        \"_id\" : \"1234\",\n        \"type\" : \"observation\"\n        }\n    ]\n    \n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/userProjects/add",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"userProjects",
+								"add"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "taskStatus",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authorization}}",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "X-authenticated-user-token",
+								"value": "{{userToken}}",
+								"type": "text"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    // \"taskIds\" : [\n    // ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/userProjects/tasksStatus",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"userProjects",
+								"tasksStatus"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "share",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-authenticated-user-token",
+								"value": "{{token}}",
+								"type": "text"
+							},
+							{
+								"key": "x-app-ver",
+								"value": "",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "http://localhost:5000/project/v1/userProjects/share/6018e75f14969a4cfd76f52c",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"project",
+								"v1",
+								"userProjects",
+								"share",
+								"6018e75f14969a4cfd76f52c"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "reports",
+			"item": [
+				{
+					"name": "entity report",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authorization}}",
+								"type": "text"
+							},
+							{
+								"key": "X-authenticated-user-token",
+								"value": "{{userToken}}",
+								"type": "text"
+							},
+							{
+								"key": "x-app-ver",
+								"value": "1.0",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/v1/reports/entity/?requestPdf=false&reportType=1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"reports",
+								"entity",
+								""
+							],
+							"query": [
+								{
+									"key": "requestPdf",
+									"value": "false"
+								},
+								{
+									"key": "reportType",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "programs",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{authorization}}",
+								"type": "text"
+							},
+							{
+								"key": "X-auth-token",
+								"value": "{{userToken}}",
+								"type": "text"
+							},
+							{
+								"key": "internal_access_token",
+								"value": "8c3a94f0931e01a4940a",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n      \"externalId\" : \"test_5\",\n      \"name\" : \"school\",\n      \"description\" : \"DCPCR School Development Index 2018-19\",\n      \"isDeleted\" : false,\n    \"isAPrivateProgram\": true,\n      \"resourceType\" : [ \n          \"program\"\n      ],\n      \"language\" : [ \n          \"English\"\n      ],\n      \"keywords\" : [],\n      \"concepts\" : [],\n      \"imageCompression\" : {\n          \"quality\" : 10\n      },\n      \"components\" : [ \n          \n      ],\n      \"scope\" : {\n          \"entityType\" : \"block\",\n          \"entities\" : [\"66506485e59a5ccb82b9eff6\"],\n          \"roles\" : \"HM\"\n      },\n      \"requestForPIIConsent\" : true\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/programs/create",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"programs",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-authenticated-user-token",
+								"value": "{{userToken}}",
+								"type": "text"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n      \"externalId\" : \"PROGID01\",\n      \"name\" : \"DCPCR School Development Index 2018-19\",\n      \"description\" : \"DCPCR School Development Index 2018-19\",\n      \"isDeleted\" : false,\n      \"resourceType\" : [ \n          \"program\"\n      ],\n      \"language\" : [ \n          \"English\", \"Kannada\",\"telugu\"\n      ],\n      \"keywords\" : [],\n      \"concepts\" : [],\n      \"userId\":\"a082787f-8f8f-42f2-a706-35457ca6f1fd\",\n      \"imageCompression\" : {\n          \"quality\" : 10\n      },\n      \"components\" : [ \n          \"5b98fa069f664f7e1ae7498c\"\n      ],\n      \"scope\" : {\n          \"entityType\" : \"state\",\n          \"entities\" : [\"bc75cc99-9205-463e-a722-5326857838f8\",\"8ac1efe9-0415-4313-89ef-884e1c8eee34\",\"5f33c3d85f637784791cd830\"],\n          \"roles\" : [\"HM\",\"BEO\"]\n      },\n      \"requestForPIIConsent\" : true\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/programs/update/667953639a5223446315e011",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"programs",
+								"update",
+								"667953639a5223446315e011"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-authenticated-user-token",
+								"value": "{{userToken}}",
+								"type": "text"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/programs/details/667954289a5223446315e01c",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"programs",
+								"details",
+								"667954289a5223446315e01c"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "addRolesInScope",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-authenticated-user-token",
+								"value": "{{userToken}}",
+								"type": "text"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"roles\" : [\"UUU\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/programs/addRolesInScope/667954289a5223446315e01c",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"programs",
+								"addRolesInScope",
+								"667954289a5223446315e01c"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "addEntitiesInScopes",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-authenticated-user-token",
+								"value": "{{userToken}}",
+								"type": "text"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "    {\n      \"entities\" : [\"6645b7c7d162b402bae6161e\"]\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/programs/addEntitiesInScope/667954289a5223446315e01c",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"programs",
+								"addEntitiesInScope",
+								"667954289a5223446315e01c"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "removeRolesInScope",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{userToken}}",
+								"type": "text"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"roles\": [\n                \"HM\",\n                \"BEO\"\n            ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/programs/removeRolesInScope/665eb764cbf5d12ba882722f",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"programs",
+								"removeRolesInScope",
+								"665eb764cbf5d12ba882722f"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "list",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{userToken}}",
+								"type": "text"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/programs/list?page=1&limit=5&search=",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"programs",
+								"list"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "5"
+								},
+								{
+									"key": "search",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "join",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{userToken}}"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n      \"externalId\" : \"PROGID01\",\n      \"name\" : \"DCPCR School Development Index 2018-19\",\n      \"description\" : \"DCPCR School Development Index 2018-19\",\n      \"isDeleted\" : false,\n      \"resourceType\" : [ \n          \"program\"\n      ],\n      \"language\" : [ \n          \"English\"\n      ],\n      \"keywords\" : [],\n      \"concepts\" : [],\n      \"userId\":\"a082787f-8f8f-42f2-a706-35457ca6f1fd\",\n      \"imageCompression\" : {\n          \"quality\" : 10\n      },\n      \"components\" : [ \n          \"5b98fa069f664f7e1ae7498c\"\n      ],\n      \"scope\" : {\n          \"entityType\" : \"state\",\n          \"entities\" : [\"bc75cc99-9205-463e-a722-5326857838f8\",\"8ac1efe9-0415-4313-89ef-884e1c8eee34\"],\n          \"roles\" : [\"HM\"]\n      },\n      \"requestForPIIConsent\" : true\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/programs/join/665eb764cbf5d12ba882722f",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"programs",
+								"join",
+								"665eb764cbf5d12ba882722f"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "removeEntitiesInScope",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoxLCJuYW1lIjoiUHJpeWFua2EiLCJzZXNzaW9uX2lkIjoyNjQsIm9yZ2FuaXphdGlvbl9pZCI6MSwicm9sZXMiOlt7ImlkIjo3LCJ0aXRsZSI6Im9yZ19hZG1pbiIsInVzZXJfdHlwZSI6MSwic3RhdHVzIjoiQUNUSVZFIiwib3JnYW5pemF0aW9uX2lkIjoxLCJ2aXNpYmlsaXR5IjoiUFVCTElDIn0seyJpZCI6NSwidGl0bGUiOiJtZW50ZWUiLCJ1c2VyX3R5cGUiOjAsInN0YXR1cyI6IkFDVElWRSIsIm9yZ2FuaXphdGlvbl9pZCI6MSwidmlzaWJpbGl0eSI6IlBVQkxJQyJ9LHsiaWQiOjgsInRpdGxlIjoicHJvZ3JhbV9kZXNpZ2luZXIiLCJ1c2VyX3R5cGUiOjAsInN0YXR1cyI6IkFDVElWRSIsIm9yZ2FuaXphdGlvbl9pZCI6MSwidmlzaWJpbGl0eSI6IlBVQkxJQyJ9LHsiaWQiOjksInRpdGxlIjoicHJvZ3JhbV9jcmVhdG9yIiwidXNlcl90eXBlIjowLCJzdGF0dXMiOiJBQ1RJVkUiLCJvcmdhbml6YXRpb25faWQiOjEsInZpc2liaWxpdHkiOiJQVUJMSUMifV19LCJpYXQiOjE3MTk5OTY4ODYsImV4cCI6MTcxOTk5ODY4Nn0.MXgAlooVZv--RaVUoInyCqSueab-E2IH9UBYXQQ2EnY"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "internal_access_token"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"roles\": [\n                \"HM\",\n                \"BEO\"\n            ]\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/project/v1/programs/removeEntitiesInScope/665eb764cbf5d12ba882722f",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"project",
+								"v1",
+								"programs",
+								"removeEntitiesInScope",
+								"665eb764cbf5d12ba882722f"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "solutions",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{userToken}}",
+								"type": "text"
+							},
+							{
+								"key": "inernal-access-token",
+								"value": "{{internal_access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"create solution\",\n    \"programExternalId\": \"test_2\",\n    \"link\":\"\",\n    \"resourceType\": [],\n    \"language\": [],\n    \"keywords\": [],\n    \"concepts\": [],\n    \"themes\": [],\n    \"flattenedThemes\": [],\n    \"entities\": [\n        \"66506485e59a5ccb82b9eff6\"\n        \n    ],\n    \"registry\": [],\n    \"isRubricDriven\": false,\n    \"enableQuestionReadOut\": false,\n    \"allowMultipleAssessemts\": false,\n    \"isDeleted\": false,\n    \"entityType\": \"school\",\n    \"type\": \"improvementProject\",\n    \"subType\": \"improvementProject\",\n    \"isReusable\": false,\n    \"externalId\": \"01c04166f-a65eh-4e92-a87b-a9e4194e771ll9\",\n    \"minNoOfSubmissionsRequired\": 2,\n    \"scope\": {\n        \"entityType\": \"block\",\n        \"entityTypeId\": \"66506485e59a5ccb82b9eff6\",\n        \"entities\": [\n          \n            \"66506485e59a5ccb82b9eff6\"\n        ],\n        \"roles\": [\"BEO\",\"HM\"]\n    }\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/solutions/create",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"solutions",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{userToken}}",
+								"type": "text"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"entityType\":\"66506485e59a5ccb82b9eff6\",\n      \"scope\": {\"entityType\": \"state\", \"entities\": [\"666031b6f10e2087c1846d05\"], \"roles\": [\"HM\",\"kkk\"]}\n      }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/solutions/update/667957bbc9d3d7c5740dafb7",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"solutions",
+								"update",
+								"667957bbc9d3d7c5740dafb7"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "addRolesInScope",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{userToken}}",
+								"type": "text"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"roles\" : [\"aaa\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/solutions/addRolesInScope/665ec2f8cbf5d12ba8827253",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"solutions",
+								"addRolesInScope",
+								"665ec2f8cbf5d12ba8827253"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "detailsBasedOnRoleAndLocation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{userToken}}",
+								"type": "text"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \n    \"entityType\" : \"block\",\n    \"entities\" : [\n            \"5fd1b52ab53a6416aaeefc80\",\n            \"5fd098e2e049735a86b748ac\"\n        ],\n    \"role\" : \"BEO,SEO\",\n    \"filter\" : {\n        \"skipSolutions\" : [\"660f9383f65100c296372c79\"]\n    }\n}\n    \n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/solutions/detailsBasedOnRoleAndLocation",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"solutions",
+								"detailsBasedOnRoleAndLocation"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "removeRolesInScope",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{userToken}}",
+								"type": "text"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"roles\" : [\"ak\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/solutions/removeRolesInScope/665ec2f8cbf5d12ba8827253",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"solutions",
+								"removeRolesInScope",
+								"665ec2f8cbf5d12ba8827253"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "fetchLink",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-authenticated-user-token",
+								"value": "{{userToken}}",
+								"type": "text"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/solutions/fetchLink/:solutionId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"solutions",
+								"fetchLink",
+								":solutionId"
+							],
+							"variable": [
+								{
+									"key": "solutionId",
+									"value": "665ec2f8cbf5d12ba8827253"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "addEntitiesInScope",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{userToken}}",
+								"type": "text"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n      \"entities\" : [\"5fd1b52ab53a6416aaeefb12\"]\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/solutions/addEntitiesInScope/665ec2f8cbf5d12ba8827253",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"solutions",
+								"addEntitiesInScope",
+								"665ec2f8cbf5d12ba8827253"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "removeEntitiesInScope",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{userToken}}",
+								"type": "text"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"entities\" : [\n            \"5fd098e2e049735a86b748ac\",\n            \"5fd1b52ab53a6416aaeefb12\"\n        ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/solutions/removeEntitiesInScope/665ec2f8cbf5d12ba8827253",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"solutions",
+								"removeEntitiesInScope",
+								"665ec2f8cbf5d12ba8827253"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "forUserRoleAndLocation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{userToken}}",
+								"type": "text"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"role\" : \"BEO\",\n   \t\"entities\" : [\n            \"5fd1b52ab53a6416aaeefc80\",\n            \"5fd098e2e049735a86b748ac\"\n        ],\n    \"entityType\" : \"block\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/solutions/forUserRoleAndLocation?programId=5ff840ce383ae437eb02b96c&type=improvementProject&subType=improvementProject&page=1&limit=100&search=create solutio",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"solutions",
+								"forUserRoleAndLocation"
+							],
+							"query": [
+								{
+									"key": "programId",
+									"value": "5ff840ce383ae437eb02b96c"
+								},
+								{
+									"key": "type",
+									"value": "improvementProject"
+								},
+								{
+									"key": "subType",
+									"value": "improvementProject"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "100"
+								},
+								{
+									"key": "search",
+									"value": "create solutio"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "targetedSolutions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{userToken}}",
+								"type": "text"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"entityType\" : \"block\",\n    \"entities\" : [\n        \"5fd1b52ab53a6416aaeefc80\",\n        \"5fd098e2e049735a86b748ac\",\n        \"5fd1b52ab53a6416aaeefc83\",\n        \"5fd1b52ab53a6416aaeefb20\"\n    ],\n    \"role\" :\"HM,BEO\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/solutions/targetedSolutions?type=improvementProject&page=1&limit=10&search=&filter=",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"solutions",
+								"targetedSolutions"
+							],
+							"query": [
+								{
+									"key": "type",
+									"value": "improvementProject"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "search",
+									"value": ""
+								},
+								{
+									"key": "filter",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "verifyLink",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{userToken}}",
+								"type": "text"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n        \"entityType\" : \"block\",\n        \"entities\" : [\n            \"5fd1b52ab53a6416aaeefc80\",\n            \"5fd098e2e049735a86b748ac\"\n        ],\n        \"role\" : \"BEO\"\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/solutions/verifyLink",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"solutions",
+								"verifyLink"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "verifySolution",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{userToken}}",
+								"type": "text"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"entityType\" : \"block\",\n    \"entities\" : [\n        \"5fd1b52ab53a6416aaeefc80\",\n        \"5fd098e2e049735a86b748ac\"\n    ],\n    \"role\" : \"BEO\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/solutions/verifySolution/:solutionId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"solutions",
+								"verifySolution",
+								":solutionId"
+							],
+							"variable": [
+								{
+									"key": "solutionId",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "list",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{userToken}}",
+								"type": "text"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"isReusable\" : false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/solutions/list?page=1&limit=100&search=&type=improvementProject&subType",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"solutions",
+								"list"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "100"
+								},
+								{
+									"key": "search",
+									"value": ""
+								},
+								{
+									"key": "type",
+									"value": "improvementProject"
+								},
+								{
+									"key": "subType",
+									"value": null
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getDetails",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-authenticated-user-token",
+								"value": "{{userToken}}",
+								"type": "text"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/solutions/getDetails/66727b63cf0222d7ec1fa7e0",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"solutions",
+								"getDetails",
+								"66727b63cf0222d7ec1fa7e0"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "admin",
+			"item": [
+				{
+					"name": "createIndex",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{userToken}}",
+								"type": "text"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "internal_access_token",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/admin/dbFind",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"admin",
+								"dbFind"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "dbFind",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-authenticated-user-token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoxLCJuYW1lIjoiUHJpeWFua2EiLCJzZXNzaW9uX2lkIjoyNjQsIm9yZ2FuaXphdGlvbl9pZCI6MSwicm9sZXMiOlt7ImlkIjo3LCJ0aXRsZSI6Im9yZ19hZG1pbiIsInVzZXJfdHlwZSI6MSwic3RhdHVzIjoiQUNUSVZFIiwib3JnYW5pemF0aW9uX2lkIjoxLCJ2aXNpYmlsaXR5IjoiUFVCTElDIn0seyJpZCI6NSwidGl0bGUiOiJtZW50ZWUiLCJ1c2VyX3R5cGUiOjAsInN0YXR1cyI6IkFDVElWRSIsIm9yZ2FuaXphdGlvbl9pZCI6MSwidmlzaWJpbGl0eSI6IlBVQkxJQyJ9LHsiaWQiOjgsInRpdGxlIjoicHJvZ3JhbV9kZXNpZ2luZXIiLCJ1c2VyX3R5cGUiOjAsInN0YXR1cyI6IkFDVElWRSIsIm9yZ2FuaXphdGlvbl9pZCI6MSwidmlzaWJpbGl0eSI6IlBVQkxJQyJ9LHsiaWQiOjksInRpdGxlIjoicHJvZ3JhbV9jcmVhdG9yIiwidXNlcl90eXBlIjowLCJzdGF0dXMiOiJBQ1RJVkUiLCJvcmdhbml6YXRpb25faWQiOjEsInZpc2liaWxpdHkiOiJQVUJMSUMifV19LCJpYXQiOjE3MTk5OTY4ODYsImV4cCI6MTcxOTk5ODY4Nn0.MXgAlooVZv--RaVUoInyCqSueab-E2IH9UBYXQQ2EnY"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "internal-access-token"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"keys\": [\n    \"aaa\"\n  ]\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5000/project/v1/admin/dbFind/:collectionName",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"project",
+								"v1",
+								"admin",
+								"dbFind",
+								":collectionName"
+							],
+							"variable": [
+								{
+									"key": "collectionName",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "cloud-services",
+			"item": [
+				{
+					"name": "preSignedUrls",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{userToken}}",
+								"type": "text"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"request\": {\n    \"5f72f9998925ec7c60f79a91\": {\n      \"files\": [\n        \"i1.png\",\n        \"i2.png\"\n      ]\n    }\n  }  \n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/cloud-services/files/preSignedUrls",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"cloud-services",
+								"files",
+								"preSignedUrls"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getDownloadableUrl",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{userToken}}"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"filePaths\" : [\n        \"project/e20d2c8f-d1fc-4fd0-9eb7-b6386920d71c/2/ecf941ec-7c64-439d-8557-90b4eaba3243/2_17-4-2024-1715921062776.svg\"\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/cloud-services/files/getDownloadableUrl",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"cloud-services",
+								"files",
+								"getDownloadableUrl"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Form Apis",
+			"item": [
+				{
+					"name": "read",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{userToken}}"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/forms/read/:_id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"forms",
+								"read",
+								":_id"
+							],
+							"variable": [
+								{
+									"key": "_id",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{userToken}}"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"type\" : \"aaa\",\n    \"subType\" : \"bbb\",\n    \"data\" : {\n        \"name\" : \"xyz\",\n        \"values\" : [1,2,3,4]\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/forms/create",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"forms",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{userToken}}"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"type\" : \"prajwal\",\n    \"subType\" : \"dicchi\",\n    \"data\" : {\n        \"values\" : [1,2,3,4]\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/forms/update/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"forms",
+								"update",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "certificateBaseTemplates",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-authenticated-user-token",
+								"value": "{{userToken}}"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/home/dell/Downloads/8138.svg"
+								},
+								{
+									"key": "code",
+									"value": "SingleLogoSingleSign",
+									"type": "text"
+								},
+								{
+									"key": "name",
+									"value": "base ",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}project/v1/certificateBaseTemplates/createOrUpdate",
+							"host": [
+								"{{baseUrl}}project"
+							],
+							"path": [
+								"v1",
+								"certificateBaseTemplates",
+								"createOrUpdate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "X-authenticated-user-token",
+								"value": "{{userToken}}"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/home/dell/Downloads/3562.svg"
+								},
+								{
+									"key": "code",
+									"value": "abcd",
+									"type": "text"
+								},
+								{
+									"key": "name",
+									"value": "efgh",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}project/v1/certificateBaseTemplates/createOrUpdate/6646e0a7b5226e19a19edf37",
+							"host": [
+								"{{baseUrl}}project"
+							],
+							"path": [
+								"v1",
+								"certificateBaseTemplates",
+								"createOrUpdate",
+								"6646e0a7b5226e19a19edf37"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

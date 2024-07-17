@@ -364,7 +364,7 @@ module.exports = class UserProjectsHelper {
 						status: HTTP_STATUS_CODE.bad_request.status,
 					}
 				}
-
+				
 				//  push project details to kafka
 				await kafkaProducersHelper.pushProjectToKafka(projectUpdated)
 
@@ -2429,7 +2429,7 @@ module.exports = class UserProjectsHelper {
 				// 		projectCreation._doc.userProfile
 				// 	)
 				// }
-
+				console.log("message pushing to Kafka : ",JSON.stringify(message))
 				await kafkaProducersHelper.pushProjectToKafka(projectCreation)
 
 				if (requestedData.rating && requestedData.rating > 0) {

@@ -2429,7 +2429,7 @@ module.exports = class UserProjectsHelper {
 				// 		projectCreation._doc.userProfile
 				// 	)
 				// }
-				console.log("message pushing to Kafka : ",JSON.stringify(message))
+				console.log("message pushing to Kafka ++++++ : ",JSON.stringify(projectCreation))
 				await kafkaProducersHelper.pushProjectToKafka(projectCreation)
 
 				if (requestedData.rating && requestedData.rating > 0) {

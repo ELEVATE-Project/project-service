@@ -364,8 +364,7 @@ module.exports = class UserProjectsHelper {
 						status: HTTP_STATUS_CODE.bad_request.status,
 					}
 				}
-				console.log("check data : ", projectUpdated)
-				console.log("Console for event log ++++++ : ", JSON.stringify(projectUpdated))
+				console.log("<---------data sending to kafka -----------> : ", JSON.stringify(projectUpdated))
 				//  push project details to kafka
 				await kafkaProducersHelper.pushProjectToKafka(projectUpdated)
 

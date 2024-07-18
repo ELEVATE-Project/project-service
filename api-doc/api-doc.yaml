@@ -324,6 +324,13 @@ paths:
       description: >-
         This endpoint allows for the bulk creation of project templates by
         uploading a csv file containing multiple templates.
+        
+        * The API Endpoint for the bulk creation of project templates is `/v1/project/templates/bulkCreate`
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/project/templates/bulkUpdate:
     post:
       tags:
@@ -395,6 +402,13 @@ paths:
       description: >-
         This endpoint allows for the bulk updating of project templates by
         uploading a csv file containing multiple templates.
+        
+        * The API Endpoint for the bulk updating of project templates is `/v1/project/templates/bulkUpdate`
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/project/templates/update/{_id}:
     post:
       tags:
@@ -469,6 +483,13 @@ paths:
       description: >-
         This endpoint allows for updating a specific project template by
         providing template Id in params.
+        
+        * The API Endpoint for updating a specific project template is `/v1/project/templates/update`
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/project/templates/listByIds:
     post:
       tags:
@@ -545,6 +566,13 @@ paths:
       description: >-
         This endpoint retrieves a list of project templates based on the
         provided external id.
+        
+        * The API Endpoint to retrieves a list of project templates is `/v1/project/templates/listByIds`
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/project/templates/importProjectTemplate/{_id}?solutionId={solution_id}:
     post:
       tags:
@@ -623,6 +651,13 @@ paths:
       description: >-
         This endpoint will help you to create a duplicate projectTemplate
         in the query you should pass parent projectTemplate externalId and solutionId.
+        
+        * The API Endpoint will help you to create a duplicate projectTemplate is `/v1/project/templates/importProjectTemplate`
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/project/templates/details/{templateId}:
     get:
       tags:
@@ -1041,6 +1076,14 @@ paths:
       description: >-
         This endpoint retrieves detailed information about a specified project
         template using the template id provided in the params.
+        
+        * The API to retrieves detailed information about a specified project
+        template `/v1/project/templates/details`
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/library/categories/create:
     post:
       tags:
@@ -1137,6 +1180,14 @@ paths:
       description: >-
         This endpoint allows the creation of a new project category in the
         library.
+        
+        * The API allows the creation of a new project category in the
+        library is `/v1/project/categories/create`
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/library/categories/update/{project_category_id}:
     post:
       tags:
@@ -1237,6 +1288,14 @@ paths:
         This endpoint allows the user to update the details of an existing
         project category. The user must provide the project category id in the
         params and the updated details in the request body.
+        
+        * The API allows the user to update the details of an existing
+        project category is `/v1/project/categories/update`
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/library/categories/list:
     post:
       tags:
@@ -1324,7 +1383,16 @@ paths:
                   value:
                     status: 400
                     message: Bad request
-      description: This endpoint allows the user to fetch a list of all project categories.
+      description: >-
+        This endpoint allows the user to fetch a list of all project categories.
+        
+        * The API allows the user to fetch a list of all project categories is `/v1/project/categories/list`
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
+     
   /v1/project/templateTasks/bulkCreate/{_id}:
     post:
       tags:
@@ -1411,6 +1479,14 @@ paths:
         This endpoint allows the user to bulk create tasks for a specified
         project template by uploading a csv file. The user must provide the
         project template id in the params.
+        
+        * The API allows the user to bulk create tasks for a specified
+        project template is `/v1/project/templateTasks/bulkCreate`
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/project/templateTasks/bulkUpdate/{projectTemplateId}:
     post:
       tags:
@@ -1485,6 +1561,14 @@ paths:
         project template by uploading a csv file. The user must provide the
         project template id in the path and the csv file containing the updated
         tasks in the request body.
+        
+        * The API allows the user to bulk update tasks for a specified
+        project template is `/v1/project/templateTasks/bulkUpdate`
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/userProjects/importFromLibrary/{_id}:
     post:
       tags:
@@ -1668,7 +1752,15 @@ paths:
       description: >-
         This endpoint allows the user to import projects from a specified
         project library. The user must provide the project template id in the
-        path
+        path.
+        
+        * The API allows the user to import projects from a specified
+        project library is `/v1/userProjects/importFromLibrary`
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/userProjects/importedProjects/{programId}:
     get:
       tags:
@@ -1746,7 +1838,15 @@ paths:
                     message: Bad request
       description: >-
         This endpoint retrieves a list of imported projects associated with a
-        given program id
+        given program id.
+        
+        * The API retrieves a list of imported projects associated with a
+        given program id is `/v1/userProjects/importedProjects`
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/userProjects/list?page={page_no}&limit={limit}&search=&filter=:
     post:
       tags:
@@ -1867,7 +1967,15 @@ paths:
                   value:
                     status: 400
                     message: Bad request
-      description: This endpoint lists projects based on provided query parameters.
+      description: >-
+        This endpoint lists projects based on provided query parameters.
+        
+        * The API retrieves a lists projects based on provided query parameters is `/v1/userProjects/list`
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/userProjects/sync/{_id}:
     post:
       tags:
@@ -2347,6 +2455,14 @@ paths:
       description: >-
         This endpoint synchronizes the details of a specific user project based
         on the provided project id.
+        
+        * The API retrieves the details of a specific user project based
+        on the provided project id is `/v1/userProjects/sync`.
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/userProjects/details?solutionId={solution_id}&templateId={template_id}:
     post:
       tags:
@@ -2694,7 +2810,15 @@ paths:
                     status: 500
       description: >-
         This endpoint allows the retrieval of detailed information about a user
-        project, including project metadata, tasks, and user profile information
+        project, including project metadata, tasks, and user profile information.
+        
+        * The API retrieves the detailed information about a user
+        project, including project metadata, tasks, and user profile information is `/v1/userProjects/details`.
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/userProjects/add:
     post:
       tags:
@@ -2855,6 +2979,13 @@ paths:
       description: >-
         This endpoint allows for the creation of a new user project, including
         setting project metadata, tasks, and categories.
+        
+        * The API allows for the creation of a new user project is `/v1/userProjects/add`.
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/userProjects/share/{project_id}:
     get:
       tags:
@@ -2928,6 +3059,13 @@ paths:
                         msg: required project id
       description: >-
         This endpoint generates project data based on project id.
+        
+        * The API allows to generates project data based on project id is `/v1/userProjects/share`.
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/userProjects/tasksStatus/{_id}:
     post:
       tags:
@@ -3020,11 +3158,19 @@ paths:
         This endpoint fetches the status of tasks identified by their id within
         a user project. The request requires authentication tokens in the
         headers and the project id in the query parameters.
+        
+        * The API allows to fetches the status of tasks identified by their id within
+        a user project is `/v1/userProjects/tasksStatus`.
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/reports/entity?requestPdf=true&reportType={type}&programId={_id}:
     get:
       tags: &ref_2
         - reports
-      summary: Generate entity report
+      summary: entity report
       parameters:
         - name: X-auth-token
           in: header
@@ -3108,6 +3254,14 @@ paths:
       description: >-
         This endpoint generates report data for a specified entity based on the
         query parameters provided.
+        
+        * The API allows to generates report data for a specified entity based on the
+        query parameters provided is `/v1/reports/entity`.
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/programs/create:
     post:
       tags:
@@ -3266,6 +3420,13 @@ paths:
       description: >-
         This endpoint allows the creation of a new program with various
         attributes such as external id and name.
+        
+        * The API allows the creation of a new program is `/v1/programs/create`.
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/programs/update/{programId}:
     post:
       tags:
@@ -3429,7 +3590,15 @@ paths:
                       - location: params
                         param: _id
                         msg: Invalid program id
-      description: This endpoint allows updating an existing program identified by its id
+      description: >-
+        This endpoint allows updating an existing program identified by its id.
+        
+        * The endpoint allows updating an existing program identified by its id is `/v1/programs/update`.
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/programs/details/{programId}:
     get:
       tags:
@@ -3545,6 +3714,13 @@ paths:
       description: >-
         Retrieves detailed information about a specific program identified by
         its unique program id.
+        
+        * The endpoint retrieves detailed information about a specific program is `/v1/programs/details`.
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/programs/addRolesInScope/{programId}:
     post:
       tags:
@@ -3641,6 +3817,14 @@ paths:
       description: >-
         Adds specified roles to the scope of a program identified by its unique
         program id.
+        
+        * The endpoint to add specified roles to the scope of a program identified by its unique
+        program id is `/v1/programs/addRolesInScope`.
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/programs/addEntitiesInScope/{programId}:
     post:
       tags:
@@ -3737,6 +3921,14 @@ paths:
       description: >-
         Adds specified entities to the scope of a program identified by its
         unique program id.
+        
+        * The endpoint to add specified entities to the scope of a program identified by its unique
+        program id is `/v1/programs/addEntitiesInScope`.
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/programs/removeRolesInScope/{programId}:
     post:
       tags:
@@ -3823,6 +4015,14 @@ paths:
       description: >-
         Removes specified roles from the scope of a program identified by its
         unique program id.
+        
+        * The endpoint to remove specified roles from the scope of a program identified by its unique
+        program id is `/v1/programs/removeRolesInScope`.
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/programs/removeEntitiesInScope/{programId}:
     post:
       tags:
@@ -3919,6 +4119,14 @@ paths:
       description: >-
         Removes specified entities from the scope of a program identified by its
         unique program id.
+        
+        * The endpoint to remove specified entities from the scope of a program identified by its unique
+        program id is `/v1/programs/removeEntitiesInScope`.
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/programs/list?page={page_no}&limit={limit}&search=:
     get:
       tags:
@@ -4007,6 +4215,14 @@ paths:
       description: >-
         Retrieves a list of programs based on optional pagination and search
         criteria.
+        
+        * The endpoint to retrieves a list of programs based on optional pagination and search
+        criteria is `/v1/programs/list`.
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/programs/join/{programId}:
     get:
       tags:
@@ -4166,7 +4382,15 @@ paths:
                     roles:
                       - HM
                   requestForPIIConsent: true
-      description: Allows a user to join a specific program identified by its program id.
+      description: >-
+        Allows a user to join a specific program identified by its program id.
+        
+        * The endpoint allows a user to join a specific program identified by its program id is `/v1/programs/join`.
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/solutions/create:
     post:
       tags:
@@ -4352,7 +4576,15 @@ paths:
                       - location: body
                         param: name
                         msg: required solution name
-      description: Creates a new solution with specified attributes and scope.
+      description: >-
+        Creates a new solution with specified attributes and scope
+        
+        * The endpoint allows a user to create a new solution with specified attributes and scope is `/v1/solutions/create`.
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/solutions/update/{solutionId}:
     post:
       tags:
@@ -4546,6 +4778,14 @@ paths:
       description: >-
         Updates the attributes and scope of an existing solution identified by
         its solution id.
+        
+        * The endpoint allows a user to update  the attributes and scope of an existing solution identified by
+        its solution id is `/v1/solutions/update`.
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/solutions/addRolesInScope/{solutionId}:
     post:
       tags:
@@ -4642,6 +4882,14 @@ paths:
       description: >-
         Adds specified roles to the scope of a solution identified by its
         solution id.
+        
+        * The endpoint allows a user to add specified roles to the scope of a solution identified by its
+        solution id is `/v1/project/solutions/addRolesInScope`.
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/solutions/detailsBasedOnRoleAndLocation/{solutionId}:
     post:
       tags:
@@ -4773,6 +5021,14 @@ paths:
       description: >-
         Fetches the details of a solution based on specified roles and
         locations, identified by its solution id.
+        
+         * The endpoint allows a user to fetche the details of a solution based on specified roles and
+        locations is `/v1/solutions/detailsBasedOnRoleAndLocation`.
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/solutions/removeRolesInScope/{solutionId}:
     post:
       tags:
@@ -4874,6 +5130,14 @@ paths:
       description: >-
         Removes specified roles from the scope of a solution identified by its
         solution id.
+        
+        * The endpoint allows a user to remove specified roles to the scope of a solution identified by its
+        solution id is `/v1/solutions/removeRolesInScope`.
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/solutions/fetchLink/{solutionId}:
     get:
       tags:
@@ -4943,7 +5207,15 @@ paths:
                       - location: body
                         param: entities
                         msg: required entities to add
-      description: create and return deep link for specified solution.
+      description: >-
+        Create and return deep link for specified solution.
+        
+        * The endpoint allows a user to create and return deep link for specified solution is `/v1/solutions/fetchLink`.
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/solutions/addEntitiesInScope/{solutionId}:
     post:
       tags:
@@ -5030,6 +5302,14 @@ paths:
       description: >-
         Adds specified entities to the scope of a solution identified by its
         solution id.
+        
+        * The endpoint allows a user to add specified entities to the scope of a solution identified by its
+        solution id is `/v1/solutions/addEntitiesInScope`.
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/solutions/removeEntitiesInScope/{solutionId}:
     post:
       tags:
@@ -5128,8 +5408,13 @@ paths:
         Removes specified entities from the scope of a solution identified by
         its solution id.
 
+        * The endpoint allows a user to remove specified entities to the scope of a solution identified by its
+        solution id is `/v1/solutions/removeEntitiesInScope`.
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
 
-        ### 
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/solutions/forUserRoleAndLocation?programId={programId}&type={type}&subType={subType}&page={page}&limit=:
     post:
       tags:
@@ -5265,6 +5550,14 @@ paths:
         Retrieves solutions based on user role, entity type, and entities within
         a specified program. This endpoint supports pagination and search
         functionality.
+        
+        * The endpoint allows a user to retrieves solutions based on user role, entity type, and entities within
+        a specified program is `/v1/solutions/forUserRoleAndLocation`.
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/solutions/targetedSolutions?type={solutionType}&page={page_no}&limit={limit}&search={search}&filter={filter}:
     post:
       tags:
@@ -5399,6 +5692,14 @@ paths:
       description: >-
         Retrieves a list of targeted solutions based on specified criteria,
         including solution type, pagination, search, and filters.
+        
+        * The endpoint allows a user to retrieves  a list of targeted solutions based on specified criteria,
+        including solution type, pagination, search, and filters is `/v1/solutions/targetdSolutions`.
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/solutions/verifyLink/{link}:
     post:
       tags:
@@ -5497,8 +5798,16 @@ paths:
                         param: _id
                         msg: required solution link
       description: >-
-        * Verifies the validity of a solution link and returns details about the
+        Verifies the validity of a solution link and returns details about the
         targeted solution.
+        
+         * The endpoint allows a user to verifies the validity of a solution link and returns details about the
+        targeted solution is `/v1/solutions/verifyLink`.
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/solutions/verifySolution/{solutionId}:
     post:
       tags:
@@ -5611,6 +5920,14 @@ paths:
       description: >-
         Verifies if a solution identified by its solution id is targeted and
         returns details about the solution.
+        
+        * The endpoint allows a user to verifies if a solution identified by its solution id is targeted and
+        returns details about the solution is `/v1/solutions/verifySolution`.
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/solutions/list:
     post:
       tags:
@@ -5723,6 +6040,14 @@ paths:
       description: >-
         Retrieves a list of solutions with optional filters for reusability,
         type, and search criteria, along with pagination support.
+        
+        * The endpoint allows a user to retrieves a list of solutions with optional filters for reusability,
+        type, and search criteria, along with pagination support is `/v1/solutions/list`.
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/solutions/getDetails/{solutionId}:
     get:
       tags:
@@ -5849,6 +6174,14 @@ paths:
       description: >-
         This endpoint retrieves detailed information about a specific solution
         using its solution id.
+        
+        * The endpoint allows a user to retrieves detailed information about a specific solution
+        using its solution id is `/v1/solutions/getDetails`.
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/admin/createIndex/{_collectionName}:
     post:
       tags: &ref_8
@@ -5936,6 +6269,14 @@ paths:
       description: >-
         This endpoint allows an admin to create an index for a specified
         collection. The request body should include the keys to be indexed.
+        
+        * The endpoint allows a user to create an index for a specified
+        collection. The request body should include the keys to be indexed is `/v1/admin/createIndex`.
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/cloud-services/files/preSignedUrls:
     post:
       tags:
@@ -6040,6 +6381,14 @@ paths:
       description: >-
         This endpoint generates pre-signed URLs for uploading files to cloud
         storage.
+        
+        * The endpoint allows a user to generates pre-signed URLs for uploading files to cloud
+        storage is `/v1/cloud-service/files/preSignedUrls`.
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/cloud-services/files/getDownloadableUrl:
     post:
       tags:
@@ -6110,8 +6459,16 @@ paths:
                   value:
                     status: 400
                     message: Input is not a valid array
-      description: This endpoint generates downloadable URLs for files stored in the cloud.
-  /v1/forms/read/Id:
+      description: >-
+        This endpoint generates downloadable URLs for files stored in the cloud.
+        
+        * The endpoint allows a user to downloadable URLs for files stored in the cloud is `/v1/cloud-service/files/getDownloadableUrl`.
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
+  /v1/forms/read/{Id}:
     post:
       tags:
         - Form Apis
@@ -6133,7 +6490,7 @@ paths:
           example: '{{internal_access_token}}'
         - in: query
           name: Id
-          description: ''
+          description: 'To read the data we need to match its id'
           schema: &ref_1
             type: string
           required: true
@@ -6182,7 +6539,15 @@ paths:
                   value:
                     status: 400
                     message: Bad request
-      description: This API retrieves a form based on the provided id.
+      description: >-
+        This API retrieves a form based on the provided id.
+        
+        * The endpoint allows a user to creates a new form with the specified type, subType, and data is `/v1/forms/read`.
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/forms/create:
     post:
       tags:
@@ -6308,7 +6673,15 @@ paths:
                       - location: body
                         param: data
                         msg: data field is empty
-      description: This API creates a new form with the specified type, subType, and data.
+      description: >-
+        This API creates a new form with the specified type, subType, and data.
+        
+        * The endpoint allows a user to creates a new form with the specified type, subType, and data is `/v1/forms/create`.
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/forms/update/{Id}:
     post:
       tags:
@@ -6431,7 +6804,15 @@ paths:
                       - location: body
                         param: data
                         msg: data field is empty
-      description: This API updates a form based on the provided id with new data.
+      description: >-
+        This API updates a form based on the provided id with new data.
+        
+        * The endpoint allows a user to updates a form based on the provided id with new data is `/v1/forms/update`.
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/certificateBaseTemplates/createOrUpdate:
     post:
       tags:
@@ -6493,6 +6874,14 @@ paths:
       description: >-
         This API creates or updates a certificate base template using a
         multipart form data.
+        
+        * The endpoint allows a user to creates or updates a certificate base template using a
+        multipart form data is `/v1/certificateBaseTemplates/createOrUpdate`.
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/certificateBaseTemplates/createOrUpdate/{_id}:
     patch:
       tags:
@@ -6555,8 +6944,16 @@ paths:
                   value:
                     status: 400
                     message: Bad request
-      description: This API updates a specific certificate base template using its id.
-  /v1/detailView/{_id}/?requestPdf=true&reportType={type}&programId={program_id}:
+      description: >-
+        This API updates a specific certificate base template using its id.
+        
+        * The endpoint allows a user to updates a specific certificate base template using its id is `/v1/certificateBaseTemplates/createOrUpdate`.
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
+  /v1/reports/detailView/{_id}/?requestPdf=true&reportType={type}&programId={program_id}:
     get:
       tags: *ref_2
       summary: Generates an entity report.
@@ -6601,7 +6998,15 @@ paths:
                         downloadUrl: >-
                           https://ax2cel5zyviy.compat.objectstorage.ap-hyderabad-1.oraclecloud.com/samiksha/project/cc5efab3-248e-4a65-8f57-e990bb3f6ef8/1/364b4b0b-bfa3-4f22-a144-14f42d5ab9c9/73964bc4-4bfc-411b-8e45-1cb53c8b6059.pdf
         '400': *ref_7
-      description: This API generates a detailed entity report.
+      description: >-
+        This endpoint will generates a detailed entity report.
+        
+        * The API allows to generates a detailed entity report is `/v1/reports/detailView`.
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
   /v1/admin/dbFind/{collectionName}:
     get:
       tags: *ref_8
@@ -6650,5 +7055,13 @@ paths:
                           Head Teacher of the Block-19-20 project
         '400': *ref_13
       description: >-
-        This api will help to get information based on Id by passing the
+        This api will help to get information based on id by passing the
         collection name in params.
+        
+         * The endpoint allows a user to get information based on id by passing the
+        collection name in params is `/v1/admin/dbfind`.
+        
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.

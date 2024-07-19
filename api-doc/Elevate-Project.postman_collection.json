@@ -15,12 +15,12 @@
 						"method": "POST",
 						"header": [
 							{
-								"key": "X-authenticated-user-token",
-								"value": "{{token}}"
+								"key": "X-auth-token",
+								"value": "{{userToken}}"
 							},
 							{
 								"key": "internal-access-token",
-								"value": "8c3a94f0931e01a4940a"
+								"value": "{{internal_access_token}}"
 							}
 						],
 						"body": {
@@ -56,7 +56,7 @@
 						"method": "POST",
 						"header": [
 							{
-								"key": "X-authenticated-user-token",
+								"key": "X-auth-token",
 								"value": "{{userToken}}"
 							},
 							{
@@ -101,12 +101,12 @@
 						"method": "POST",
 						"header": [
 							{
-								"key": "X-authenticated-user-token",
+								"key": "X-auth-token",
 								"value": "{{userToken}}"
 							},
 							{
 								"key": "internal-access-token",
-								"value": "{{internal-access-token}}",
+								"value": "{{internal_access_token}}",
 								"disabled": true
 							},
 							{
@@ -148,11 +148,11 @@
 						"header": [
 							{
 								"key": "X-auth-token",
-								"value": "{{token}}"
+								"value": "{{userToken}}"
 							},
 							{
 								"key": "internal-access-token",
-								"value": "{{internal-access-token}}",
+								"value": "{{internal_access_token}}",
 								"disabled": true
 							},
 							{
@@ -192,12 +192,12 @@
 						"method": "POST",
 						"header": [
 							{
-								"key": "X-authenticated-user-token",
+								"key": "X-auth-token",
 								"value": "{{userToken}}"
 							},
 							{
 								"key": "internal-access-token",
-								"value": "{{internal-access-token}}",
+								"value": "{{internal_access_token}}",
 								"disabled": true
 							},
 							{
@@ -237,12 +237,12 @@
 						"method": "GET",
 						"header": [
 							{
-								"key": "X-authenticated-user-token",
+								"key": "X-auth-token",
 								"value": "{{userToken}}"
 							},
 							{
 								"key": "internal-access-token",
-								"value": "{{internal-access-token}}"
+								"value": "{{internal_access_token}}"
 							},
 							{
 								"key": "Content-Type",
@@ -288,12 +288,12 @@
 						"method": "POST",
 						"header": [
 							{
-								"key": "X-authenticated-user-token",
+								"key": "X-auth-token",
 								"value": "{{userToken}}"
 							},
 							{
 								"key": "internal-access-token",
-								"value": "{{internal-access-token}}"
+								"value": "{{internal_access_token}}"
 							},
 							{
 								"key": "Content-Type",
@@ -332,12 +332,12 @@
 						"method": "POST",
 						"header": [
 							{
-								"key": "X-authenticated-user-token",
+								"key": "X-auth-token",
 								"value": "{{userToken}}"
 							},
 							{
 								"key": "internal-access-token",
-								"value": "{{internal-access-token}}"
+								"value": "{{internal_access_token}}"
 							},
 							{
 								"key": "Content-Type",
@@ -377,12 +377,12 @@
 						"method": "POST",
 						"header": [
 							{
-								"key": "X-authenticated-user-token",
+								"key": "X-auth-token",
 								"value": "{{userToken}}"
 							},
 							{
 								"key": "internal-access-token",
-								"value": "{{internal-access-token}}"
+								"value": "{{internal_access_token}}"
 							},
 							{
 								"key": "Content-Type",
@@ -421,7 +421,7 @@
 						"method": "POST",
 						"header": [
 							{
-								"key": "X-authenticated-user-token",
+								"key": "X-auth-token",
 								"value": "{{userToken}}"
 							},
 							{
@@ -462,12 +462,12 @@
 						"method": "POST",
 						"header": [
 							{
-								"key": "X-authenticated-user-token",
+								"key": "X-auth-token",
 								"value": "{{userToken}}"
 							},
 							{
 								"key": "internal-access-token",
-								"value": "{{internal-access-token}}"
+								"value": "{{internal_access_token}}"
 							}
 						],
 						"body": {
@@ -518,7 +518,7 @@
 						"method": "POST",
 						"header": [
 							{
-								"key": "X-authenticated-user-token",
+								"key": "X-auth-token",
 								"value": "{{userToken}}"
 							},
 							{
@@ -613,7 +613,7 @@
 						"method": "GET",
 						"header": [
 							{
-								"key": "X-authenticated-user-token",
+								"key": "X-auth-token",
 								"value": "{{userToken}}"
 							},
 							{
@@ -667,7 +667,7 @@
 								"method": "GET",
 								"header": [
 									{
-										"key": "X-authenticated-user-token",
+										"key": "X-auth-token",
 										"value": "{{userToken}}"
 									},
 									{
@@ -767,12 +767,12 @@
 						"method": "POST",
 						"header": [
 							{
-								"key": "X-authenticated-user-token",
+								"key": "X-auth-token",
 								"value": "{{userToken}}"
 							},
 							{
 								"key": "internal-access-token",
-								"value": "{{internal-access-token}}"
+								"value": "{{internal_access_token}}"
 							},
 							{
 								"key": "Content-Type",
@@ -816,7 +816,7 @@
 						"method": "POST",
 						"header": [
 							{
-								"key": "X-authenticated-user-token",
+								"key": "X-auth-token",
 								"value": "{{userToken}}"
 							},
 							{
@@ -867,7 +867,7 @@
 						"method": "POST",
 						"header": [
 							{
-								"key": "X-authenticated-user-token",
+								"key": "X-auth-token",
 								"value": "{{userToken}}"
 							},
 							{
@@ -905,7 +905,7 @@
 						"method": "POST",
 						"header": [
 							{
-								"key": "X-authenticated-user-token",
+								"key": "X-auth-token",
 								"value": "{{userToken}}",
 								"type": "text"
 							},
@@ -948,8 +948,8 @@
 						"method": "GET",
 						"header": [
 							{
-								"key": "x-authenticated-user-token",
-								"value": "{{token}}",
+								"key": "X-auth-token",
+								"value": "{{userToken}}",
 								"type": "text"
 							},
 							{
@@ -991,7 +991,7 @@
 						"method": "GET",
 						"header": [
 							{
-								"key": "X-authenticated-user-token",
+								"key": "X-auth-token",
 								"value": "{{userToken}}",
 								"type": "text"
 							},
@@ -1042,8 +1042,8 @@
 								"type": "text"
 							},
 							{
-								"key": "internal_access_token",
-								"value": "8c3a94f0931e01a4940a",
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}",
 								"type": "text"
 							}
 						],
@@ -1077,7 +1077,7 @@
 						"method": "POST",
 						"header": [
 							{
-								"key": "X-authenticated-user-token",
+								"key": "X-auth-token",
 								"value": "{{userToken}}",
 								"type": "text"
 							},
@@ -1118,7 +1118,7 @@
 						"method": "GET",
 						"header": [
 							{
-								"key": "X-authenticated-user-token",
+								"key": "X-auth-token",
 								"value": "{{userToken}}",
 								"type": "text"
 							},
@@ -1150,7 +1150,7 @@
 						"method": "POST",
 						"header": [
 							{
-								"key": "X-authenticated-user-token",
+								"key": "X-auth-token",
 								"value": "{{userToken}}",
 								"type": "text"
 							},
@@ -1191,7 +1191,7 @@
 						"method": "POST",
 						"header": [
 							{
-								"key": "X-authenticated-user-token",
+								"key": "X-auth-token",
 								"value": "{{userToken}}",
 								"type": "text"
 							},
@@ -1361,11 +1361,11 @@
 						"header": [
 							{
 								"key": "X-auth-token",
-								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoxLCJuYW1lIjoiUHJpeWFua2EiLCJzZXNzaW9uX2lkIjoyNjQsIm9yZ2FuaXphdGlvbl9pZCI6MSwicm9sZXMiOlt7ImlkIjo3LCJ0aXRsZSI6Im9yZ19hZG1pbiIsInVzZXJfdHlwZSI6MSwic3RhdHVzIjoiQUNUSVZFIiwib3JnYW5pemF0aW9uX2lkIjoxLCJ2aXNpYmlsaXR5IjoiUFVCTElDIn0seyJpZCI6NSwidGl0bGUiOiJtZW50ZWUiLCJ1c2VyX3R5cGUiOjAsInN0YXR1cyI6IkFDVElWRSIsIm9yZ2FuaXphdGlvbl9pZCI6MSwidmlzaWJpbGl0eSI6IlBVQkxJQyJ9LHsiaWQiOjgsInRpdGxlIjoicHJvZ3JhbV9kZXNpZ2luZXIiLCJ1c2VyX3R5cGUiOjAsInN0YXR1cyI6IkFDVElWRSIsIm9yZ2FuaXphdGlvbl9pZCI6MSwidmlzaWJpbGl0eSI6IlBVQkxJQyJ9LHsiaWQiOjksInRpdGxlIjoicHJvZ3JhbV9jcmVhdG9yIiwidXNlcl90eXBlIjowLCJzdGF0dXMiOiJBQ1RJVkUiLCJvcmdhbml6YXRpb25faWQiOjEsInZpc2liaWxpdHkiOiJQVUJMSUMifV19LCJpYXQiOjE3MTk5OTY4ODYsImV4cCI6MTcxOTk5ODY4Nn0.MXgAlooVZv--RaVUoInyCqSueab-E2IH9UBYXQQ2EnY"
+								"value": "{{userToken}}"
 							},
 							{
 								"key": "internal-access-token",
-								"value": "internal_access_token"
+								"value": "{{internal_access_token}}"
 							},
 							{
 								"key": "Content-Type",
@@ -1410,7 +1410,7 @@
 								"type": "text"
 							},
 							{
-								"key": "inernal-access-token",
+								"key": "internal-access-token",
 								"value": "{{internal_access_token}}",
 								"type": "text"
 							}
@@ -1611,7 +1611,7 @@
 						"method": "GET",
 						"header": [
 							{
-								"key": "X-authenticated-user-token",
+								"key": "X-auth-token",
 								"value": "{{userToken}}",
 								"type": "text"
 							},
@@ -2017,7 +2017,7 @@
 						"method": "GET",
 						"header": [
 							{
-								"key": "X-authenticated-user-token",
+								"key": "X-auth-token",
 								"value": "{{userToken}}",
 								"type": "text"
 							},
@@ -2060,7 +2060,7 @@
 							},
 							{
 								"key": "internal-access-token",
-								"value": "internal_access_token",
+								"value": "{{internal_access_token}}",
 								"type": "text"
 							}
 						],
@@ -2085,15 +2085,15 @@
 						"disableBodyPruning": true
 					},
 					"request": {
-						"method": "GET",
+						"method": "POST",
 						"header": [
 							{
-								"key": "X-authenticated-user-token",
-								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoxLCJuYW1lIjoiUHJpeWFua2EiLCJzZXNzaW9uX2lkIjoyNjQsIm9yZ2FuaXphdGlvbl9pZCI6MSwicm9sZXMiOlt7ImlkIjo3LCJ0aXRsZSI6Im9yZ19hZG1pbiIsInVzZXJfdHlwZSI6MSwic3RhdHVzIjoiQUNUSVZFIiwib3JnYW5pemF0aW9uX2lkIjoxLCJ2aXNpYmlsaXR5IjoiUFVCTElDIn0seyJpZCI6NSwidGl0bGUiOiJtZW50ZWUiLCJ1c2VyX3R5cGUiOjAsInN0YXR1cyI6IkFDVElWRSIsIm9yZ2FuaXphdGlvbl9pZCI6MSwidmlzaWJpbGl0eSI6IlBVQkxJQyJ9LHsiaWQiOjgsInRpdGxlIjoicHJvZ3JhbV9kZXNpZ2luZXIiLCJ1c2VyX3R5cGUiOjAsInN0YXR1cyI6IkFDVElWRSIsIm9yZ2FuaXphdGlvbl9pZCI6MSwidmlzaWJpbGl0eSI6IlBVQkxJQyJ9LHsiaWQiOjksInRpdGxlIjoicHJvZ3JhbV9jcmVhdG9yIiwidXNlcl90eXBlIjowLCJzdGF0dXMiOiJBQ1RJVkUiLCJvcmdhbml6YXRpb25faWQiOjEsInZpc2liaWxpdHkiOiJQVUJMSUMifV19LCJpYXQiOjE3MTk5OTY4ODYsImV4cCI6MTcxOTk5ODY4Nn0.MXgAlooVZv--RaVUoInyCqSueab-E2IH9UBYXQQ2EnY"
+								"key": "X-auth-token",
+								"value": "{{userToken}}"
 							},
 							{
 								"key": "internal-access-token",
-								"value": "internal-access-token"
+								"value": "{{internal_access_token}}"
 							},
 							{
 								"key": "Content-Type",
@@ -2102,7 +2102,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"keys\": [\n    \"aaa\"\n  ]\n}"
+							"raw": "{\n    \"query\": {\n       \"_id\":\"66975a4a4999c205ea017da9\"\n    },\n    \"mongoIdKeys\": [\n        \"_id\"\n    ],\n    \"limit\":2000\n}"
 						},
 						"url": {
 							"raw": "http://localhost:5000/project/v1/admin/dbFind/:collectionName",
@@ -2342,7 +2342,7 @@
 						"method": "POST",
 						"header": [
 							{
-								"key": "X-authenticated-user-token",
+								"key": "X-auth-token",
 								"value": "{{userToken}}"
 							},
 							{
@@ -2390,7 +2390,7 @@
 						"method": "PATCH",
 						"header": [
 							{
-								"key": "X-authenticated-user-token",
+								"key": "X-auth-token",
 								"value": "{{userToken}}"
 							},
 							{

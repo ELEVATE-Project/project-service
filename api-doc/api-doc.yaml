@@ -6201,8 +6201,11 @@ paths:
             examples:
               sampleBodyData:
                 value:
-                  keys:
-                    - aaa
+                  query:
+                    _id: 66975a4a4999c205ea017da9
+                  mongoIdKeys:
+                    - _id
+                  limit: 2000
       parameters:
         - name: X-auth-token
           in: header
@@ -7042,17 +7045,75 @@ paths:
               examples:
                 SuccessResponse:
                   value:
-                    message: Data Fetched Or Updated Successfully
+                    message: Data fetched successfully
                     status: 200
                     result:
-                      - _id: 601921e86ffa9c5e9d0b53e7
-                        title: >-
-                          Please edit this project for submitting your Prerak
-                          Head Teacher of the Block-19-20 project
-                      - _id: 60193ce26ffa9c5e9d0b53fe
-                        title: >-
-                          Please edit this project for submitting your Prerak
-                          Head Teacher of the Block-19-20 project
+                      - _id: 66975a4a4999c205ea017da9
+                        description: >-
+                          Send an invitation to parents with the PTM date and
+                          time, and prepare the agenda with teachers. During the
+                          meeting, welcome parents, conduct an ice breaker,
+                          discuss the 'Parents as Partners' initiative, and have
+                          one-on-one conversations. Collect feedback and
+                          encourage sharing photos of learning spaces.
+                        concepts:
+                          - ''
+                        keywords:
+                          - ''
+                        isDeleted: false
+                        recommendedFor: []
+                        tasks:
+                          - 66975a4a4999c205ea017dac
+                          - 66975a4a4999c205ea017daf
+                          - 66975a4a4999c205ea017db2
+                          - 66975a4a4999c205ea017db5
+                          - 66975a4a4999c205ea017db8
+                          - 66975a4a4999c205ea017dbb
+                        createdBy: '1'
+                        updatedBy: '162'
+                        learningResources:
+                          - link: https://youtu.be/libKVRa01L8?feature=shared
+                            app: projectService
+                            id: libKVRa01L8?feature=shared
+                        isReusable: false
+                        taskSequence:
+                          - 1.0-1721195081571
+                          - 2.0-1721195081571
+                        averageRating: 0
+                        noOfRatings: 0
+                        ratings:
+                          '1': 0
+                          '2': 0
+                          '3': 0
+                          '4': 0
+                          '5': 0
+                        deleted: false
+                        title: PTM AGENDA for 20th July
+                        externalId: IDE-1721195081571_IMPORTED
+                        categories:
+                          - _id: 667beaa1a33f2c0410bc2514
+                            externalId: educationLeader
+                            name: Education Leader
+                        entityType: ''
+                        taskCreationForm: ''
+                        metaInformation:
+                          goal: TEMP
+                          rationale: ''
+                          primaryAudience: ''
+                          duration: 2 months
+                          successIndicators: ''
+                          risks: ''
+                          approaches: ''
+                        status: published
+                        updatedAt: '2024-07-17T06:47:39.223Z'
+                        createdAt: '2024-07-17T05:44:41.814Z'
+                        __v: 0
+                        solutionId: 66975a4a39646b05e05a398c
+                        solutionExternalId: IDE-1721195081571-PROJECT-SOLUTION
+                        programId: 668faa414999c205ea017968
+                        programExternalId: SubTask1234
+                        parentTemplateId: 66975a4939646b05e05a3988
+                    count: 1
         '400': *ref_13
       description: >-
         This api will help to get information based on id by passing the

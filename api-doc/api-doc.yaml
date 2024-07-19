@@ -3,8 +3,7 @@ info:
   title: Elevate-Project
   version: 1.0.0
   description: >-
-    The Elevate Project service provides a suite of endpoints for managing various
-    aspects of the ELEVATE-Project application.
+   The Elevate Project service offers a comprehensive suite of endpoints designed to facilitate the creation of projects, both with and without associated programs and solutions. Additionally, it provides the capability to consume project data and generate various reports based on project consumption.
 servers:
   - url: http://{{baseurl}}project
 tags:

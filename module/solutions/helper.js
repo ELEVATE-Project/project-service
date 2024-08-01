@@ -2658,7 +2658,13 @@ module.exports = class SolutionsHelper {
 
 				surveyReportPage = UTILS.convertStringToBoolean(surveyReportPage)
 
-				if (!surveyReportPage) {
+				let getTargetedSolution = true
+
+				if (filter === CONSTANTS.common.DISCOVERED_BY_ME) {
+					getTargetedSolution = false
+				}
+
+				if (getTargetedSolution) {
 					targetedSolutions = await this.forUserRoleAndLocation(
 						requestedData,
 						solutionType,

@@ -20,7 +20,6 @@ module.exports = (req) => {
 		},
 		add: function () {
 			req.checkBody('title').exists().withMessage('required project title')
-			req.checkBody('categories[0].value').exists().withMessage('required categories[0].value')
 		},
 		share: function () {
 			req.checkParams('_id').exists().withMessage('required project id')

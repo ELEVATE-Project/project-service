@@ -2917,7 +2917,7 @@ module.exports = class SolutionsHelper {
 							checkTargetedProjectExist.length > 0 &&
 							checkTargetedProjectExist[0]._id != ''
 						) {
-							checkForTargetedSolution.result['projectId'] = checkTargetedProjectExist.data[0]._id
+							checkForTargetedSolution.result['projectId'] = checkTargetedProjectExist[0]._id
 						} else if (!isSolutionActive) {
 							throw new Error(CONSTANTS.apiResponses.LINK_IS_EXPIRED)
 						}

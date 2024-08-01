@@ -364,7 +364,7 @@ module.exports = class UserProjectsHelper {
 						status: HTTP_STATUS_CODE.bad_request.status,
 					}
 				}
-				console.log("<---------data sending to kafka -----------> : ", JSON.stringify(projectUpdated))
+				console.log('<---------data sending to kafka -----------> : ', JSON.stringify(projectUpdated))
 				//  push project details to kafka
 				await kafkaProducersHelper.pushProjectToKafka(projectUpdated)
 
@@ -1630,6 +1630,8 @@ module.exports = class UserProjectsHelper {
 				let projectData = await _projectData(data)
 				if (projectData && projectData.success == true) {
 					createProject = _.merge(createProject, projectData.data)
+				} else {
+					return reject(projectData)
 				}
 
 				// let createNewProgramAndSolution = false;
@@ -2358,7 +2360,7 @@ module.exports = class UserProjectsHelper {
 					if (
 						libraryProjects.data['entityInformation'] &&
 						libraryProjects.data['entityInformation'].entityType !==
-						programAndSolutionInformation.data.solutionInformation.entityType
+							programAndSolutionInformation.data.solutionInformation.entityType
 					) {
 						throw {
 							message: CONSTANTS.apiResponses.ENTITY_TYPE_MIS_MATCHED,
@@ -2429,7 +2431,7 @@ module.exports = class UserProjectsHelper {
 				// 		projectCreation._doc.userProfile
 				// 	)
 				// }
-				
+
 				await kafkaProducersHelper.pushProjectToKafka(projectCreation)
 
 				if (requestedData.rating && requestedData.rating > 0) {

@@ -1070,16 +1070,27 @@ module.exports = class UserProjects extends Abstract {
 	async certificateCallback(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				//console request body to check if callback is coming or not and to check any structural change is there or not
-				console.log('-------------callback request body------------', JSON.stringify(req.body))
-				let certificateDetails = await userProjectsHelper.certificateCallback(
-					req.body.data.transactionId,
-					req.body.data.osid
+				let certificateCallback = await userProjectsHelper.certificateCallback(
+					req,
+					req.params._id,
+					req.query.userId
 				)
-				return resolve({
-					message: certificateDetails.message,
-					result: certificateDetails.data,
+				return resolve(certificateCallback)
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
 				})
+			}
+		})
+	}
+
+	async certificateCallbackError(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				const certificateCallbackError = await userProjectsHelper.certificateCallbackError(req)
+				return resolve(certificateCallbackError)
 			} catch (error) {
 				return reject({
 					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
@@ -1182,7 +1193,7 @@ module.exports = class UserProjects extends Abstract {
 			try {
 				// ReIssue certificate of given project : projectId is passed as param
 				// This console has to be removed- adding to check the Issuer kid value in case rancher doesn't display console while deployment
-				console.log('+++++CERTIFICATE_ISSUER_KID+++++ : ', CERTIFICATE_ISSUER_KID)
+				// console.log('+++++CERTIFICATE_ISSUER_KID+++++ : ', CERTIFICATE_ISSUER_KID)
 				let projectDetails = await userProjectsHelper.certificateReIssue(req.params._id)
 				return resolve({
 					message: projectDetails.message,

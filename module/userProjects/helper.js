@@ -29,6 +29,11 @@ const programQueries = require(DB_QUERY_BASE_PATH + '/programs')
 const entitiesService = require(GENERICS_FILES_PATH + '/services/entity-management')
 const common_handler = require(GENERICS_FILES_PATH + '/helpers/common_handler')
 const cloudServicesHelper = require(MODULES_BASE_PATH + '/cloud-services/files/helper')
+const axios = require('axios')
+const fs = require('fs')
+const request = require('request-promise')
+const QRCode = require('qrcode')
+const path = require('path')
 /**
  * UserProjectsHelper
  * @class
@@ -1288,18 +1293,24 @@ module.exports = class UserProjectsHelper {
 							projectCreation.data['appInformation']['appVersion'] = appVersion
 						}
 
-						// if ( solutionDetails.certificateTemplateId && solutionDetails.certificateTemplateId !== "" ) {
-						//     // <- Add certificate template details to projectCreation data if present ->
-						//     const certificateTemplateDetails = await certificateTemplateQueries.certificateTemplateDocument({
-						//         _id : solutionDetails.certificateTemplateId
-						//     });
+						if (solutionDetails.certificateTemplateId && solutionDetails.certificateTemplateId !== '') {
+							// <- Add certificate template details to projectCreation data if present ->
+							const certificateTemplateDetails =
+								await certificateTemplateQueries.certificateTemplateDocument({
+									_id: solutionDetails.certificateTemplateId,
+								})
 
-						//     // create certificate object and add data if certificate template is present.
-						//     if ( certificateTemplateDetails.length > 0 ) {
-						//         projectCreation.data["certificate"] = _.pick(certificateTemplateDetails[0], ['templateUrl', 'status', 'criteria']);
-						//         projectCreation.data["certificate"]["templateId"] = solutionDetails.certificateTemplateId;
-						//     }
-						// }
+							// create certificate object and add data if certificate template is present.
+							if (certificateTemplateDetails.length > 0) {
+								projectCreation.data['certificate'] = _.pick(certificateTemplateDetails[0], [
+									'templateUrl',
+									'status',
+									'criteria',
+								])
+								projectCreation.data['certificate']['templateId'] =
+									solutionDetails.certificateTemplateId
+							}
+						}
 
 						let getUserProfileFromObservation = false
 
@@ -2517,7 +2528,7 @@ module.exports = class UserProjectsHelper {
 				// create payload for certificate generation
 				const certificateData = await this.createCertificatePayload(data)
 
-				// call sunbird-RC to create certificate for project
+				// call certificateService to create certificate for project
 				const certificate = await this.createCertificate(certificateData, data._id)
 
 				return resolve(certificate)
@@ -2583,21 +2594,23 @@ module.exports = class UserProjectsHelper {
 	static createCertificatePayload(data) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				console.log('Certificate issuer Kid: ', CERTIFICATE_ISSUER_KID)
-
 				if (data.title.length > 75) {
 					data.title = data.title.substring(0, 75) + '...'
 				}
 
 				// get downloadable url for certificate template
 				if (data.certificate.templateUrl && data.certificate.templateUrl !== '') {
-					let certificateTemplateDownloadableUrl = await coreService.getDownloadableUrl({
-						filePaths: [data.certificate.templateUrl],
-					})
-					if (certificateTemplateDownloadableUrl.success) {
-						data.certificate.templateUrl = certificateTemplateDownloadableUrl.data[0].url
+					let certificateTemplateDownloadableUrl = await cloudServicesHelper.getDownloadableUrl([
+						data.certificate.templateUrl,
+					])
+					if (
+						certificateTemplateDownloadableUrl.result &&
+						certificateTemplateDownloadableUrl.result.length > 0
+					) {
+						data.certificate.templateUrl = certificateTemplateDownloadableUrl.result[0].url
 					} else {
 						throw {
+							status: HTTP_STATUS_CODE.bad_request.status,
 							message: CONSTANTS.apiResponses.DOWNLOADABLE_URL_NOT_FOUND,
 						}
 					}
@@ -2615,19 +2628,16 @@ module.exports = class UserProjectsHelper {
 					//certificate template data do not exists.
 					if (!certificateTemplateDetails.length > 0) {
 						throw {
+							status: HTTP_STATUS_CODE.bad_request.status,
 							message: CONSTANTS.apiResponses.CERTIFICATE_TEMPLATE_NOT_FOUND,
 						}
 					}
-					certificateTemplateDetails[0].issuer.kid = CERTIFICATE_ISSUER_KID
 				}
 
 				//create certificate request body
 				let certificateData = {
-					recipient: {
-						id: data.userId,
-						name: `${data.userProfile.firstName} ${data.userProfile.lastName}`,
-						type: data.userProfile.profileUserType.type,
-					},
+					userId: data.userId,
+					name: data.userProfile.name,
 					templateUrl: data.certificate.templateUrl,
 					issuer: certificateTemplateDetails[0].issuer,
 					status: data.certificate.status.toUpperCase(),
@@ -2639,7 +2649,7 @@ module.exports = class UserProjectsHelper {
 					solutionId: certificateTemplateDetails[0].solutionId.toString(),
 					solutionName:
 						data.solutionInformation && data.solutionInformation.name ? data.solutionInformation.name : '',
-					completedDate: data.completedDate,
+					completedDate: UTILS.formatISODateToReadableDate(data.completedDate),
 				}
 				return resolve(certificateData)
 			} catch (error) {
@@ -2660,16 +2670,11 @@ module.exports = class UserProjectsHelper {
 	 * @returns {Boolean} certificate creation status.
 	 */
 
-	static createCertificate(certificateData, projectId) {
+	static createCertificate(certificateData, projectId, asyncMode = true) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				const certificateDetails = await certificateService.createCertificate(certificateData)
-
-				if (
-					!certificateDetails.success ||
-					!certificateDetails.data ||
-					!certificateDetails.data.ProjectCertificate
-				) {
+				const certificateDetails = await certificateService.createCertificate(certificateData, asyncMode)
+				if (!certificateDetails.success || !certificateDetails.data || !certificateDetails.data.transactionId) {
 					throw {
 						message: CONSTANTS.apiResponses.CERTIFICATE_GENERATION_FAILED,
 					}
@@ -2680,31 +2685,13 @@ module.exports = class UserProjectsHelper {
 				}
 
 				//  if transaction id is present.
-				if (
-					certificateDetails.data.ProjectCertificate.transactionId &&
-					certificateDetails.data.ProjectCertificate.transactionId !== ''
-				) {
-					let transactionIdvalue = certificateDetails.data.ProjectCertificate.transactionId
-					const first2 = transactionIdvalue.slice(0, 2)
-
-					if (first2 === '1-') {
-						transactionIdvalue = transactionIdvalue.split(/1-(.*)/s)
-						updateObject['$set']['certificate.transactionId'] = transactionIdvalue[1]
-					} else {
-						updateObject['$set']['certificate.transactionId'] = transactionIdvalue
-					}
+				if (certificateDetails.data.transactionId && certificateDetails.data.transactionId !== '') {
+					let transactionIdvalue = certificateDetails.data.transactionId
+					updateObject['$set']['certificate.transactionId'] = transactionIdvalue
+					updateObject['$set']['certificate.transactionIdCreatedAt'] = new Date()
 				}
 
 				// update project details certificate details
-				if (
-					certificateDetails.data.ProjectCertificate.osid &&
-					certificateDetails.data.ProjectCertificate.osid !== ''
-				) {
-					updateObject['$set']['certificate.osid'] = certificateDetails.data.ProjectCertificate.osid
-					updateObject['$set']['certificate.issuedOn'] = new Date()
-				}
-				updateObject['$set']['certificate.transactionIdCreatedAt'] = new Date()
-
 				if (Object.keys(updateObject['$set']).length > 0) {
 					let updatedProject = await projectQueries.findOneAndUpdate(
 						{
@@ -2715,6 +2702,7 @@ module.exports = class UserProjectsHelper {
 				}
 				return resolve({
 					success: true,
+					transactionId: certificateDetails.data.transactionId,
 				})
 			} catch (error) {
 				return resolve({
@@ -2734,52 +2722,88 @@ module.exports = class UserProjectsHelper {
 	 * @returns {JSON} certificate data updation details.
 	 */
 
-	static certificateCallback(transactionId, osid) {
+	static certificateCallback(requestObject, projectId, userId) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				// adding comments to check call back is called properly or not
-				console.log('<==================callback called====================>', transactionId, osid)
-				console.log('transactionId :', transactionId)
-				console.log('osid :', osid)
-				console.log('<==================callback called====================>')
-				// callback request structure nested so validating transactionId and osid here instead in validator.
-				if (transactionId == '' || osid == '') {
-					throw {
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: CONSTANTS.apiResponses.TRANSACTION_ID_AND_OSID_REQUIRED,
+				const contentDisposition = requestObject.headers['content-disposition']
+				const transaction = requestObject.headers['gotenberg-trace']
+				const match = contentDisposition && contentDisposition.match(/filename="(.+)"/)
+				let filename = match && match[1] ? match[1] : 'output.pdf'
+				const certificateTempFolderPath = path.resolve(__dirname + '/../../certificateTempFolder')
+				const filePath = certificateTempFolderPath + '/' + filename
+				const fileStream = fs.createWriteStream(filePath)
+
+				// Pipe the request stream to the file stream
+				requestObject.pipe(fileStream)
+
+				requestObject.on('end', async () => {
+					console.log(`PDF downloaded and saved successfully as ${filename}`)
+					const pdfPreSignedUrl = await common_handler.uploadPdfToCloud(
+						filename,
+						userId,
+						certificateTempFolderPath
+					)
+					const svgPreSignedUrl = await common_handler.uploadPdfToCloud(
+						'template.svg',
+						userId,
+						certificateTempFolderPath
+					)
+					let updateObject = {
+						$set: {},
 					}
-				}
-				let updateObject = {
-					$set: {},
-				}
-
-				// update osid and eligibility based on transactionId
-				updateObject['$set']['certificate.osid'] = osid
-				updateObject['$set']['certificate.message'] =
-					CONSTANTS.common.PROJECT_CERTIFICATE_GENERATED_SUCCESSFULLY
-				updateObject['$set']['certificate.issuedOn'] = new Date()
-
-				let projectDetails = await projectQueries.findOneAndUpdate(
-					{
-						'certificate.transactionId': transactionId,
-					},
-					updateObject
-				)
-
-				if (projectDetails == null || !Object.keys(projectDetails).length > 0) {
-					throw {
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: CONSTANTS.apiResponses.PROJECT_NOT_FOUND,
+					if (pdfPreSignedUrl.success && pdfPreSignedUrl.data != '') {
+						console.log(pdfPreSignedUrl)
+						updateObject['$set']['certificate.pdfPath'] = pdfPreSignedUrl.data
+						updateObject['$set']['certificate.svgPath'] = svgPreSignedUrl.data
+						updateObject['$set']['certificate.issuedOn'] = new Date()
+						let updatedProject = await projectQueries.findOneAndUpdate(
+							{
+								_id: projectId,
+							},
+							updateObject
+						)
+						await kafkaProducersHelper.pushProjectToKafka(updatedProject)
 					}
-				}
-				await kafkaProducersHelper.pushProjectToKafka(projectDetails)
-				return resolve({
-					success: true,
-					message: CONSTANTS.apiResponses.PROJECT_CERTIFICATE_GENERATED,
-					data: {
-						_id: ObjectId(projectDetails._id),
-					},
+					if (fs.existsSync(certificateTempFolderPath)) {
+						fs.rmSync(certificateTempFolderPath, { recursive: true, force: true })
+					}
+					return resolve({
+						success: true,
+						message: CONSTANTS.apiResponses.PROJECT_CERTIFICATE_GENERATED,
+					})
 				})
+
+				requestObject.on('error', async () => {
+					console.log('Error generating PDF', error)
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.CERTIFICATE_GENERATION_FAILED,
+					}
+				})
+			} catch (error) {
+				return resolve({
+					success: false,
+					message: error.message,
+					data: {},
+				})
+			}
+		})
+	}
+
+	/**
+	 * certificate callback error
+	 * @method
+	 * @name certificateCallbackError
+	 * @returns {JSON} certificate data updation details.
+	 */
+
+	static certificateCallbackError() {
+		return new Promise(async (resolve, reject) => {
+			try {
+				throw {
+					status: HTTP_STATUS_CODE.bad_request.status,
+					message: CONSTANTS.apiResponses.CERTIFICATE_GENERATION_FAILED,
+				}
 			} catch (error) {
 				return resolve({
 					success: false,
@@ -2917,16 +2941,14 @@ module.exports = class UserProjectsHelper {
 				}
 
 				//  fetch user data using userId of project and calling the profile API
-				let userProfileData = await userService.profileReadPrivate(userProject[0].userId)
+				let userProfileData = await userService.profile(userProject[0].userId)
 				if (
 					userProfileData.success &&
 					userProfileData.data &&
-					userProfileData.data.response &&
-					userProfileData.data.response.firstName &&
-					userProfileData.data.response.firstName !== ''
+					userProfileData.data.name &&
+					userProfileData.data.name !== ''
 				) {
-					userProject[0].userProfile.firstName = userProfileData.data.response.firstName
-					userProject[0].userProfile.lastName = userProfileData.data.response.lastName
+					userProject[0].userProfile.name = userProfileData.data.name
 				} else {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
@@ -2937,8 +2959,8 @@ module.exports = class UserProjectsHelper {
 				// create payload for certificate generation
 				const certificateData = await this.createCertificatePayload(userProject[0])
 
-				// call sunbird-RC to create certificate for project
-				const certificate = await this.createCertificate(certificateData, userProject[0]._id)
+				// call certificateService to create certificate for project
+				const certificate = await this.createCertificate(certificateData, userProject[0]._id, false)
 
 				if (!certificate.success) {
 					throw {
@@ -2950,17 +2972,17 @@ module.exports = class UserProjectsHelper {
 					updateObject['$set']['certificate.originalTransactionInformation.transactionId'] =
 						userProject[0].certificate.transactionId
 				}
-				if (userProject[0].certificate.osid) {
-					updateObject['$set']['certificate.originalTransactionInformation.osid'] =
-						userProject[0].certificate.osid
+				if (userProject[0].certificate.pdfPath) {
+					updateObject['$set']['certificate.originalTransactionInformation.pdfPath'] =
+						userProject[0].certificate.pdfPath
+				}
+				if (userProject[0].certificate.svgPath) {
+					updateObject['$set']['certificate.originalTransactionInformation.svgPath'] =
+						userProject[0].certificate.svgPath
 				}
 
-				if (userProject[0].userProfile.firstName) {
-					updateObject['$set']['userProfile.firstName'] = userProject[0].userProfile.firstName
-				}
-
-				if (userProject[0].userProfile.lastName) {
-					updateObject['$set']['userProfile.lastName'] = userProject[0].userProfile.lastName
+				if (userProject[0].userProfile.name) {
+					updateObject['$set']['userProfile.name'] = userProject[0].userProfile.name
 				}
 
 				updateObject['$set']['certificate.reIssuedAt'] = new Date()

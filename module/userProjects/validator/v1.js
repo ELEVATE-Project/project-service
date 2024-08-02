@@ -28,9 +28,8 @@ module.exports = (req) => {
 			req.checkParams('_id').exists().withMessage('required project id')
 		},
 		certificateCallback: function () {
-			req.checkBody('data').exists().withMessage('data is required')
-			req.checkBody('data.transactionId').exists().withMessage('transactionId is required')
-			req.checkBody('data.osid').exists().withMessage('osid is required')
+			req.checkParams('_id').exists().withMessage('required project id')
+			req.checkQuery('userId').exists().withMessage('required user id')
 		},
 	}
 

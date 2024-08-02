@@ -29,7 +29,7 @@ module.exports = class FilesHelper {
 	 * @returns {Array}                 - consists of all signed urls & filePaths.
 	 */
 
-	static preSignedUrls(payloadData, userId = '') {
+	static preSignedUrls(payloadData, userId = '', isCertificateFile = false) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let payloadIds = Object.keys(payloadData)
@@ -42,7 +42,12 @@ module.exports = class FilesHelper {
 				for (let pointerToPayload = 0; pointerToPayload < payloadIds.length; pointerToPayload++) {
 					let payloadId = payloadIds[pointerToPayload]
 					// Generate unique folderPath to all the file names in payloadData
-					let folderPath = 'project/' + payloadId + '/' + userId + '/' + UTILS.generateUniqueId() + '/'
+					let folderPath
+					if (isCertificateFile) {
+						folderPath = 'certificate/' + payloadId + '/' + userId + '/' + UTILS.generateUniqueId() + '/'
+					} else {
+						folderPath = 'project/' + payloadId + '/' + userId + '/' + UTILS.generateUniqueId() + '/'
+					}
 					// Call preSignedUrls helper file to get the signedUrl
 					let imagePayload = await filesHelpers.preSignedUrls(
 						payloadData[payloadId].files,
@@ -100,18 +105,12 @@ module.exports = class FilesHelper {
 						CONSTANTS.common.READ_PERMISSION, //permission PARAMS
 						true //true if filePath is passed
 					)
-					console.log('downloadableUrl : ', downloadableUrl)
+
 					if (!downloadableUrl.success) {
 						return resolve({
 							status: HTTP_STATUS_CODE.bad_request.status,
 							message: CONSTANTS.apiResponses.FAILED_TO_CREATE_DOWNLOADABLEURL,
 							result: {},
-						})
-					}
-					if (Array.isArray(downloadableUrl.result) && downloadableUrl.result.length > 0) {
-						downloadableUrl.result.forEach((currentResoponse) => {
-							currentResoponse['filePath'] = currentResoponse.payload.sourcePath
-							delete currentResoponse.payload
 						})
 					}
 					return resolve({

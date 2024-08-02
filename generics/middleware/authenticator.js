@@ -47,7 +47,12 @@ module.exports = async function (req, res, next, token = '') {
 
 	// Allow search endpoints for non-logged in users.
 	let guestAccess = false
-	let guestAccessPaths = ['/dataPipeline/', '/templates/details', 'userProjects/certificateCallback']
+	let guestAccessPaths = [
+		'/dataPipeline/',
+		'/templates/details',
+		'userProjects/certificateCallback',
+		'userProjects/certificateCallbackError',
+	]
 	await Promise.all(
 		guestAccessPaths.map(async function (path) {
 			if (req.path.includes(path)) {

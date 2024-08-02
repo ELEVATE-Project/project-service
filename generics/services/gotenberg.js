@@ -30,12 +30,14 @@ function gotenbergConnectionForCertificate(projectId, userId, asyncMode = true) 
 	const callbackUrl =
 		'http://localhost:' +
 		process.env.APPLICATION_PORT +
+		'/' +
 		process.env.SERVICE_NAME +
 		CONSTANTS.endpoints.PROJECT_CERTIFICATE_API_CALLBACK +
 		`/${projectId}?userId=${userId}`
 	const errorCallBackUrl =
 		'http://localhost:' +
 		process.env.APPLICATION_PORT +
+		'/' +
 		process.env.SERVICE_NAME +
 		CONSTANTS.endpoints.PROJECT_CERTIFICATE_API_CALLBACK_ERROR
 

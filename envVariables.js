@@ -50,8 +50,8 @@ let enviromentVariables = {
 	},
 	SERVICE_NAME: {
 		message: 'current service name',
-		optional: false,
-		default: '/project',
+		optional: true,
+		default: 'project',
 	},
 	CERTIFICATE_SERVICE_URL: {
 		message: 'certificate service base url',

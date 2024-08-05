@@ -666,8 +666,6 @@ module.exports = class ProjectTemplates extends Abstract {
 					req.query.isAPrivateProgram ? req.query.isAPrivateProgram : ''
 				)
 
-				projectTemplatesDetails.result = projectTemplatesDetails.data
-
 				return resolve(projectTemplatesDetails)
 			} catch (error) {
 				return reject({

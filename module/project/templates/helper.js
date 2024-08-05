@@ -1000,7 +1000,7 @@ module.exports = class ProjectTemplatesHelper {
 					link: solutionsResult.link,
 				}
 				return resolve({
-					success: false,
+					success: true,
 					data: result.data,
 					result: result.data,
 					message: CONSTANTS.apiResponses.PROJECT_TEMPLATE_DETAILS_FETCHED,

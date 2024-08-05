@@ -882,52 +882,49 @@ module.exports = class ProjectTemplatesHelper {
 				let solutionsResult = {}
 				let findQuery = {}
 				//get data when link is given
-				// not considering link is pased
-				// if( link ){
+				if (link) {
+					let queryData = {}
+					queryData['link'] = link
 
-				//     let queryData = {};
-				//     queryData["link"] =link;
+					//   fetch solutions data based on the link provided
+					let solutionDocument = await solutionsQueries.solutionsDocument(queryData, [
+						'_id',
+						'name',
+						'programId',
+						'programName',
+						'projectTemplateId',
+						'link',
+					])
 
-				//     let solutionDocument = await solutionsQueries.solutionsDocument(queryData,
-				//         [
-				//             "_id",
-				//             "name",
-				//             "programId",
-				//             "programName",
-				//             "projectTemplateId",
-				//             "link"
-				//         ]
-				//     );
-
-				//     if( !solutionDocument.length > 0 ) {
-				//         throw {
-				//             message : CONSTANTS.apiResponses.SOLUTION_NOT_FOUND,
-				//             status : HTTP_STATUS_CODE.bad_request.status
-				//         }
-				//     }
-				//     let solutiondata = solutionDocument;
-				//     templateId = solutiondata[0].projectTemplateId;
-				//     if( !templateId ){
-				//         return resolve({
-				//             success : false,
-				//             data : solutiondata,
-				//             message : CONSTANTS.apiResponses.TEMPLATE_ID_NOT_FOUND_IN_SOLUTION
-				//         });
-				//     }
-				//     solutionsResult = solutiondata;
-				//     templateId=templateId.toString();
-				// }
+					if (!(solutionDocument.length > 0)) {
+						throw {
+							message: CONSTANTS.apiResponses.SOLUTION_NOT_FOUND,
+							status: HTTP_STATUS_CODE.bad_request.status,
+						}
+					}
+					let solutiondata = solutionDocument
+					templateId = solutiondata[0].projectTemplateId
+					if (!templateId) {
+						return resolve({
+							success: false,
+							data: solutiondata,
+							message: CONSTANTS.apiResponses.TEMPLATE_ID_NOT_FOUND_IN_SOLUTION,
+						})
+					}
+					solutionsResult = solutiondata
+					templateId = templateId.toString()
+				}
 
 				if (templateId) {
-					let validateTemplateId = UTILS.isValidMongoId(templateId.toString())
+					let validateTemplateId = UTILS.isValidMongoId(templateId)
 					if (validateTemplateId) {
 						findQuery['_id'] = templateId
 					} else {
 						findQuery['externalId'] = templateId
 					}
 				}
-				//getting template data using templateId
 
+				//getting template data using templateId
 				let templateData = await projectTemplateQueries.templateDocument(findQuery, 'all', [
 					'ratings',
 					'noOfRatings',
@@ -940,26 +937,29 @@ module.exports = class ProjectTemplatesHelper {
 					'updatedAt',
 					'__v',
 				])
-
-				if (!templateData.length > 0) {
+				if (!(templateData.length > 0)) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.PROJECT_TEMPLATE_NOT_FOUND,
 					}
 				}
-				// if ( templateData[0].certificateTemplateId && templateData[0].certificateTemplateId !== "" ){
-				//     let certificateTemplateDetails = await certificateTemplateQueries.certificateTemplateDocument({
-				//         _id : templateData[0].certificateTemplateId
-				//     },["criteria"]);
 
-				//     //certificate template data do not exists.
-				//     if ( !certificateTemplateDetails.length > 0 ) {
-				//         throw {
-				//             message:  CONSTANTS.apiResponses.CERTIFICATE_TEMPLATE_NOT_FOUND
-				//         };
-				//     }
-				//     templateData[0].criteria = certificateTemplateDetails[0].criteria
-				// }
+				// fetch certficateTemplate details using certificateTemplateId fetched from projectTemplate
+				if (templateData[0].certificateTemplateId && templateData[0].certificateTemplateId !== '') {
+					let certificateTemplateDetails = await certificateTemplateQueries.certificateTemplateDocument(
+						{
+							_id: templateData[0].certificateTemplateId,
+						},
+						['criteria']
+					)
+					//certificate template data do not exists.
+					if (!(certificateTemplateDetails.length > 0)) {
+						throw {
+							message: CONSTANTS.apiResponses.CERTIFICATE_TEMPLATE_NOT_FOUND,
+						}
+					}
+					templateData[0].criteria = certificateTemplateDetails[0].criteria
+				}
 
 				if (templateData[0].tasks && templateData[0].tasks.length > 0) {
 					templateData[0].tasks = await this.tasksAndSubTasks(templateData[0]._id)
@@ -980,26 +980,28 @@ module.exports = class ProjectTemplatesHelper {
 					if (isAPrivateProgram !== '') {
 						projectIdQuery.isAPrivateProgram = isAPrivateProgram
 					}
-					let project = await projectQueries.projectDocument(projectIdQuery, ['_id'])
+					let project = await projectQueries.projectDocument(projectIdQuery, ['_id', 'hasAcceptedTAndC'])
 
 					if (project && project.length > 0) {
 						templateData[0].projectId = project[0]._id
+						templateData[0].hasAcceptedTAndC = project[0].hasAcceptedTAndC
 					}
 				}
-				// if( !result.data.programInformation ){
-				//     result.data.programInformation = {
-				//         programId : solutionsResult.programId,
-				//         programName : solutionsResult.programName
-				//     }
-				// }
-				// result.data.solutionInformation = {
-				//     _id : solutionsResult._id,
-				//     name : solutionsResult.name,
-				//     link : solutionsResult.link
-				// }
+				if (!result.data.programInformation) {
+					result.data.programInformation = {
+						programId: solutionsResult.programId,
+						programName: solutionsResult.programName,
+					}
+				}
+				result.data.solutionInformation = {
+					_id: solutionsResult._id,
+					name: solutionsResult.name,
+					link: solutionsResult.link,
+				}
 				return resolve({
-					success: true,
+					success: false,
 					data: result.data,
+					result: result.data,
 					message: CONSTANTS.apiResponses.PROJECT_TEMPLATE_DETAILS_FETCHED,
 				})
 			} catch (error) {

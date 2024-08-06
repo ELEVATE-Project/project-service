@@ -9,8 +9,6 @@
 
 const libraryCategoriesHelper = require(MODULES_BASE_PATH + '/library/categories/helper')
 const projectTemplatesHelper = require(MODULES_BASE_PATH + '/project/templates/helper')
-const { result } = require('lodash')
-const { resolve } = require('path')
 const { v4: uuidv4 } = require('uuid')
 const projectQueries = require(DB_QUERY_BASE_PATH + '/projects')
 const projectCategoriesQueries = require(DB_QUERY_BASE_PATH + '/projectCategories')
@@ -1482,20 +1480,26 @@ module.exports = class UserProjectsHelper {
 				//     projectDetails.data.status = UTILS.convertProjectStatus(projectDetails.data.status);
 				// }
 				// make templateUrl downloadable befor passing to front-end
-				// if ( projectDetails.data.certificate &&
-				//      projectDetails.data.certificate.templateUrl &&
-				//      projectDetails.data.certificate.templateUrl !== ""
-				// ) {
-				//     let certificateTemplateDownloadableUrl =
-				//         await coreService.getDownloadableUrl(
-				//             {
-				//                 filePaths: [projectDetails.data.certificate.templateUrl]
-				//             }
-				//         );
-				//         if ( certificateTemplateDownloadableUrl.success ) {
-				//             projectDetails.data.certificate.templateUrl = certificateTemplateDownloadableUrl.data[0].url;
-				//         }
-				// }
+				if (
+					projectDetails.data.certificate &&
+					projectDetails.data.certificate.pdfPath &&
+					projectDetails.data.certificate.pdfPath !== '' &&
+					projectDetails.data.certificate.svgPath &&
+					projectDetails.data.certificate.svgPath !== ''
+				) {
+					let certificateTemplateDownloadableUrl = await cloudServicesHelper.getDownloadableUrl([
+						projectDetails.data.certificate.pdfPath,
+						projectDetails.data.certificate.svgPath,
+					])
+					if (
+						certificateTemplateDownloadableUrl &&
+						certificateTemplateDownloadableUrl.result &&
+						certificateTemplateDownloadableUrl.result.length > 0
+					) {
+						projectDetails.data.certificate['pdfUrl'] = certificateTemplateDownloadableUrl.result[0].url
+						projectDetails.data.certificate['svgUrl'] = certificateTemplateDownloadableUrl.result[1].url
+					}
+				}
 				return resolve({
 					success: true,
 					message: CONSTANTS.apiResponses.PROJECT_DETAILS_FETCHED,

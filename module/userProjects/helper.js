@@ -2908,7 +2908,7 @@ module.exports = class UserProjectsHelper {
 	static certificates(userId) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				//  get project details of user which have certificate.
+				// Get project details for the user that have certificates
 				const userProject = await projectQueries.projectDocument(
 					{
 						userId: userId,
@@ -2919,62 +2919,103 @@ module.exports = class UserProjectsHelper {
 						'_id',
 						'title',
 						'status',
-						'certificate.osid',
-						'certificate.transactioId',
-						'certificate.templateUrl',
+						'programId',
+						'solutionId',
+						'programInformation.name',
+						'solutionInformation.name',
+						'certificate.pdfPath',
+						'certificate.transactionId',
+						'certificate.svgPath',
 						'certificate.status',
 						'certificate.eligible',
 						'certificate.message',
 						'certificate.issuedOn',
 						'completedDate',
+						'userProfile.name',
 					]
 				)
 
+				// Throw an error if no projects with certificates are found
 				if (!userProject.length > 0) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.PROJECT_WITH_CERTIFICATE_NOT_FOUND,
 					}
 				}
-				let templateFilePath = []
-				//loop through user projects and get downloadable url for templateUrl if osid is present.
+				let certificateFilePath = []
+				// Loop through user projects and collect file paths for certificates
 				for (let userProjectPointer = 0; userProjectPointer < userProject.length; userProjectPointer++) {
 					if (
-						userProject[userProjectPointer].certificate.osid &&
-						userProject[userProjectPointer].certificate.osid !== '' &&
-						userProject[userProjectPointer].certificate.templateUrl &&
-						userProject[userProjectPointer].certificate.templateUrl !== ''
+						userProject[userProjectPointer].certificate.svgPath &&
+						userProject[userProjectPointer].certificate.svgPath !== '' &&
+						userProject[userProjectPointer].certificate.pdfPath &&
+						userProject[userProjectPointer].certificate.pdfPath !== ''
 					) {
-						templateFilePath.push(userProject[userProjectPointer].certificate.templateUrl)
+						// Add SVG and PDF paths to the list
+						certificateFilePath.push(userProject[userProjectPointer].certificate.svgPath)
+						certificateFilePath.push(userProject[userProjectPointer].certificate.pdfPath)
 					}
+					// Restructure the response data
+					userProject[userProjectPointer].programName =
+						userProject[userProjectPointer].programInformation &&
+						userProject[userProjectPointer].programInformation.name
+							? userProject[userProjectPointer].programInformation.name
+							: ''
+					userProject[userProjectPointer].solutionName =
+						userProject[userProjectPointer].solutionInformation &&
+						userProject[userProjectPointer].solutionInformation.name
+							? userProject[userProjectPointer].solutionInformation.name
+							: ''
+					userProject[userProjectPointer].userName =
+						userProject[userProjectPointer].userProfile && userProject[userProjectPointer].userProfile.name
+							? userProject[userProjectPointer].userProfile.name
+							: ''
+					// Remove unnecessary fields
+					delete userProject[userProjectPointer].programInformation
+					delete userProject[userProjectPointer].solutionInformation
+					delete userProject[userProjectPointer].userProfile
 				}
 
-				if (templateFilePath.length > 0) {
-					let certificateTemplateDownloadableUrl = await coreService.getDownloadableUrl({
-						filePaths: templateFilePath,
-					})
-					if (!certificateTemplateDownloadableUrl.success) {
+				// Update project data with downloadable URLs for certificates
+				if (certificateFilePath.length > 0) {
+					let certificateFileDownloadableUrl = await cloudServicesHelper.getDownloadableUrl(
+						certificateFilePath
+					)
+
+					// Throw an error if no downloadable URLs are found
+					if (!certificateFileDownloadableUrl.result || !certificateFileDownloadableUrl.result.length > 0) {
 						throw {
 							message: CONSTANTS.apiResponses.DOWNLOADABLE_URL_NOT_FOUND,
 						}
 					}
-					// map downloadable templateUrl to corresponding project data
+					certificateFileDownloadableUrl = certificateFileDownloadableUrl.result
+					// Map downloadable URLs to the corresponding project data
 					userProject.forEach((projectData) => {
-						var itemFromUrlArray = certificateTemplateDownloadableUrl.data.find(
-							(item) => item.filePath == projectData.certificate.templateUrl
+						// Set SVG path
+						var svgLinkFromUrlArray = certificateFileDownloadableUrl.find(
+							(item) => item.payload.sourcePath == projectData.certificate.svgPath
 						)
-						if (itemFromUrlArray) {
-							projectData.certificate.templateUrl = itemFromUrlArray.url
+						if (svgLinkFromUrlArray) {
+							projectData.certificate.svgPath = svgLinkFromUrlArray.url
+						}
+						// Set PDF path in the response
+						var pdfLinkFromArray = certificateFileDownloadableUrl.find(
+							(item) => item.payload.sourcePath == projectData.certificate.pdfPath
+						)
+						if (pdfLinkFromArray) {
+							projectData.certificate.pdfPath = pdfLinkFromArray.url
 						}
 					})
 				}
 
+				// Count the number of projects with generated certificates
 				let count = _.countBy(userProject, (rec) => {
-					return rec.certificate && rec.certificate.osid && rec.certificate.osid !== ''
+					return rec.certificate && rec.certificate.pdfPath && rec.certificate.pdfPath !== ''
 						? 'generated'
 						: 'notGenerated'
 				})
 
+				// Resolve the promise with the project data and counts
 				return resolve({
 					success: true,
 					message: CONSTANTS.apiResponses.PROJECTS_FETCHED,
@@ -2985,6 +3026,7 @@ module.exports = class UserProjectsHelper {
 					},
 				})
 			} catch (error) {
+				// Resolve the promise with an error message
 				return resolve({
 					success: false,
 					message: error.message,

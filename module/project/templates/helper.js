@@ -914,9 +914,9 @@ module.exports = class ProjectTemplatesHelper {
 					solutionsResult = solutiondata
 					templateId = templateId.toString()
 				}
-
+				// fetch project template details using project template id
 				if (templateId) {
-					let validateTemplateId = UTILS.isValidMongoId(templateId)
+					let validateTemplateId = UTILS.isValidMongoId(templateId.toString())
 					if (validateTemplateId) {
 						findQuery['_id'] = templateId
 					} else {

@@ -9,6 +9,8 @@
 
 const libraryCategoriesHelper = require(MODULES_BASE_PATH + '/library/categories/helper')
 const projectTemplatesHelper = require(MODULES_BASE_PATH + '/project/templates/helper')
+const { result } = require('lodash')
+const { resolve } = require('path')
 const { v4: uuidv4 } = require('uuid')
 const projectQueries = require(DB_QUERY_BASE_PATH + '/projects')
 const projectCategoriesQueries = require(DB_QUERY_BASE_PATH + '/projectCategories')
@@ -3137,6 +3139,119 @@ module.exports = class UserProjectsHelper {
 					success: false,
 					message: error.message,
 					data: {},
+				})
+			}
+		})
+	}
+
+	/**
+	 * Verify project certificate
+	 * @method
+	 * @name verifyCertificate
+	 * @param {String} projectId - projectId.
+	 * @returns {JSON} certificate details.
+	 */
+
+	static verifyCertificate(projectId) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				// Fetch project details based on projectId
+				let projectDetails = await projectQueries.projectDocument({
+					_id: projectId,
+				})
+
+				// Check if project details are not found
+				if (!projectDetails || !projectDetails.length > 0) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.USER_PROJECT_NOT_FOUND,
+					}
+				}
+
+				// Get the first element of project details array
+				projectDetails = projectDetails[0]
+
+				// Check if the project is not submitted or certificate is not eligible
+				if (
+					projectDetails.status !== CONSTANTS.common.SUBMITTED_STATUS ||
+					!projectDetails.certificate ||
+					!projectDetails.certificate.eligible
+				) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.PROJECT_NOT_ELIGIBLE_FOR_CERTIFICATE,
+					}
+				}
+
+				// Check if transaction ID is missing or empty
+				if (!projectDetails.certificate.transactionId || projectDetails.certificate.transactionId === '') {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.CERTIFICATE_NOT_AVAILABLE_FOR_THE_PROJECT,
+					}
+				}
+				// Check if both PDF path and SVG path are missing or empty
+				else if (
+					!(projectDetails.certificate.pdfPath && projectDetails.certificate.pdfPath != '') &&
+					!(projectDetails.certificate.svgPath && projectDetails.certificate.svgPath != '')
+				) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.CERTIFICATE_NOT_AVAILABLE_FOR_THE_PROJECT,
+					}
+				}
+
+				let pdfCertificateUrl, svgCertificateUrl
+				const certificateUrls = await cloudServicesHelper.getDownloadableUrl([
+					projectDetails.certificate.pdfPath ? projectDetails.certificate.pdfPath : '',
+					projectDetails.certificate.svgPath ? projectDetails.certificate.svgPath : '',
+				])
+				if (certificateUrls && certificateUrls.result && certificateUrls.result.length > 0) {
+					for (const certificateUrlsIndex of certificateUrls.result) {
+						if (
+							projectDetails.certificate.pdfPath != '' &&
+							certificateUrlsIndex.payload['sourcePath'] != '' &&
+							certificateUrlsIndex.payload['sourcePath'] == projectDetails.certificate.pdfPath
+						) {
+							pdfCertificateUrl = certificateUrlsIndex.url
+						} else if (
+							projectDetails.certificate.svgPath != '' &&
+							certificateUrlsIndex.payload['sourcePath'] != '' &&
+							certificateUrlsIndex.payload['sourcePath'] == projectDetails.certificate.svgPath
+						) {
+							svgCertificateUrl = certificateUrlsIndex.url
+						}
+					}
+				}
+
+				// Prepare certificate verification information
+				const certificateVerificationInfo = {
+					projectId,
+					projectName: projectDetails.title,
+					programId: projectDetails.programId,
+					solutionId: projectDetails.solutionId,
+					userId: projectDetails.userId,
+					isCertificateVerified: true,
+					completedDate: projectDetails.completedDate,
+					issuedOn: projectDetails.issuedOn,
+					eligible: projectDetails.certificate.eligible,
+					pdfCertificateUrl: pdfCertificateUrl ? pdfCertificateUrl : '',
+					svgCertificateUrl: svgCertificateUrl ? svgCertificateUrl : '',
+				}
+
+				// Resolve the promise with success response
+				return resolve({
+					success: true,
+					message: CONSTANTS.apiResponses.CERTIFICATE_VERIFIED_SUCCESSFULLY,
+					data: certificateVerificationInfo,
+					result: certificateVerificationInfo,
+				})
+			} catch (error) {
+				// Resolve the promise with error response
+				return resolve({
+					success: false,
+					status: error.status,
+					message: error.message,
 				})
 			}
 		})

@@ -171,6 +171,10 @@ module.exports = {
 				pdfPath: String,
 				svgPath: String,
 			},
+			callbackErrorEvent: {
+				type: Boolean,
+				default: false,
+			},
 		},
 	},
 	compoundIndex: [

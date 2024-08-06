@@ -27,10 +27,6 @@ module.exports = (req) => {
 		certificateReIssue: function () {
 			req.checkParams('_id').exists().withMessage('required project id')
 		},
-		certificateCallback: function () {
-			req.checkParams('_id').exists().withMessage('required project id')
-			req.checkQuery('userId').exists().withMessage('required user id')
-		},
 	}
 
 	if (projectsValidator[req.params.method]) {

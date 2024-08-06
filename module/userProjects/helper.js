@@ -34,6 +34,8 @@ const fs = require('fs')
 const request = require('request-promise')
 const QRCode = require('qrcode')
 const path = require('path')
+const { update } = require('lodash')
+const gotenbergService = require(SERVICES_BASE_PATH + '/gotenberg')
 /**
  * UserProjectsHelper
  * @class
@@ -2594,21 +2596,24 @@ module.exports = class UserProjectsHelper {
 	static createCertificatePayload(data) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				// Truncate the title if it exceeds 75 characters
 				if (data.title.length > 75) {
 					data.title = data.title.substring(0, 75) + '...'
 				}
 
-				// get downloadable url for certificate template
+				// Get downloadable URL for the certificate template
 				if (data.certificate.templateUrl && data.certificate.templateUrl !== '') {
 					let certificateTemplateDownloadableUrl = await cloudServicesHelper.getDownloadableUrl([
 						data.certificate.templateUrl,
 					])
+					// If a downloadable URL is found, update the template URL
 					if (
 						certificateTemplateDownloadableUrl.result &&
 						certificateTemplateDownloadableUrl.result.length > 0
 					) {
 						data.certificate.templateUrl = certificateTemplateDownloadableUrl.result[0].url
 					} else {
+						// Throw an error if the downloadable URL is not found
 						throw {
 							status: HTTP_STATUS_CODE.bad_request.status,
 							message: CONSTANTS.apiResponses.DOWNLOADABLE_URL_NOT_FOUND,
@@ -2617,6 +2622,7 @@ module.exports = class UserProjectsHelper {
 				}
 
 				let certificateTemplateDetails = []
+				// Fetch certificate template details if the template ID is provided
 				if (data.certificate.templateId && data.certificate.templateId !== '') {
 					certificateTemplateDetails = await certificateTemplateQueries.certificateTemplateDocument(
 						{
@@ -2625,7 +2631,7 @@ module.exports = class UserProjectsHelper {
 						['issuer', 'solutionId', 'programId']
 					)
 
-					//certificate template data do not exists.
+					// Throw an error if certificate template data does not exist
 					if (!certificateTemplateDetails.length > 0) {
 						throw {
 							status: HTTP_STATUS_CODE.bad_request.status,
@@ -2634,7 +2640,7 @@ module.exports = class UserProjectsHelper {
 					}
 				}
 
-				//create certificate request body
+				// Create the certificate request body
 				let certificateData = {
 					userId: data.userId,
 					name: data.userProfile.name,
@@ -2651,8 +2657,27 @@ module.exports = class UserProjectsHelper {
 						data.solutionInformation && data.solutionInformation.name ? data.solutionInformation.name : '',
 					completedDate: UTILS.formatISODateToReadableDate(data.completedDate),
 				}
+
+				// Populate the SVG template if the template URL is provided
+				if (certificateData.templateUrl && certificateData.templateUrl != '') {
+					let svgTemplate = await axios.get(certificateData.templateUrl)
+					svgTemplate = svgTemplate.data
+
+					const qrCodeData = await QRCode.toDataURL(
+						`/v1/userProjects/verifyCertificate/${certificateData.projectId}`
+					)
+
+					const populatedSVGTemplate = svgTemplate
+						.replace('{{credentialSubject.recipientName}}', certificateData.name)
+						.replace('{{credentialSubject.projectName}}', certificateData.projectName)
+						.replace('{{dateFormat issuanceDate "DD MMMM  YYYY"}}', certificateData.completedDate)
+						.replace('{{qrCode}}', qrCodeData)
+
+					certificateData['populatedSVGTemplate'] = populatedSVGTemplate
+				}
 				return resolve(certificateData)
 			} catch (error) {
+				// Resolve the promise with an error message
 				return resolve({
 					success: false,
 					message: error.message,
@@ -2667,13 +2692,16 @@ module.exports = class UserProjectsHelper {
 	 * @name createCertificate
 	 * @param {Object} certificateData - payload for certificate creation data.
 	 * @param {string} projectId - project Id.
-	 * @returns {Boolean} certificate creation status.
+	 * @param {Boolean} asyncMode - Defines if the certificate callback is async or sync.
+	 * @returns {Object} certificate creation status.
 	 */
 
 	static createCertificate(certificateData, projectId, asyncMode = true) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				const certificateDetails = await certificateService.createCertificate(certificateData, asyncMode)
+				// Call the service to create the certificate and get the details
+				const certificateDetails = await gotenbergService.createCertificate(certificateData, asyncMode)
+				// Check if the certificate creation was successful
 				if (!certificateDetails.success || !certificateDetails.data || !certificateDetails.data.transactionId) {
 					throw {
 						message: CONSTANTS.apiResponses.CERTIFICATE_GENERATION_FAILED,
@@ -2684,14 +2712,14 @@ module.exports = class UserProjectsHelper {
 					$set: {},
 				}
 
-				//  if transaction id is present.
+				// If a transaction ID is present, update the certificate details
 				if (certificateDetails.data.transactionId && certificateDetails.data.transactionId !== '') {
 					let transactionIdvalue = certificateDetails.data.transactionId
 					updateObject['$set']['certificate.transactionId'] = transactionIdvalue
 					updateObject['$set']['certificate.transactionIdCreatedAt'] = new Date()
 				}
 
-				// update project details certificate details
+				// If there are fields to update, update the project details with the certificate information
 				if (Object.keys(updateObject['$set']).length > 0) {
 					let updatedProject = await projectQueries.findOneAndUpdate(
 						{
@@ -2700,11 +2728,13 @@ module.exports = class UserProjectsHelper {
 						updateObject
 					)
 				}
+				// Resolve the promise with success and the transaction ID
 				return resolve({
 					success: true,
 					transactionId: certificateDetails.data.transactionId,
 				})
 			} catch (error) {
+				// Resolve the promise with an error message
 				return resolve({
 					success: false,
 					message: error.message,
@@ -2717,62 +2747,86 @@ module.exports = class UserProjectsHelper {
 	 * certificate callback
 	 * @method
 	 * @name certificateCallback
-	 * @param {String} transactionId - transactionId for create certificate.
-	 * @param {String} osid - osid for created certificate.
+	 * @param {Stream} requestObject - Request object from Gotenberg.
 	 * @returns {JSON} certificate data updation details.
 	 */
 
-	static certificateCallback(requestObject, projectId, userId) {
+	static certificateCallback(requestObject) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				// Extract the content-disposition header to get the filename
 				const contentDisposition = requestObject.headers['content-disposition']
-				const transaction = requestObject.headers['gotenberg-trace']
+				// Extract the Gotenberg trace header to get the transaction ID
+				const transactionId = requestObject.headers['gotenberg-trace']
+				// Match the filename from the content-disposition header
 				const match = contentDisposition && contentDisposition.match(/filename="(.+)"/)
+				// Set the filename or default to 'output.pdf' if not found
 				let filename = match && match[1] ? match[1] : 'output.pdf'
+				// Define the temporary folder path for the certificate
 				const certificateTempFolderPath = path.resolve(__dirname + '/../../certificateTempFolder')
+				// Define the file path to save the PDF
 				const filePath = certificateTempFolderPath + '/' + filename
+				// Create a writable stream to the file
 				const fileStream = fs.createWriteStream(filePath)
+
+				// Fetch project details based on the transaction ID
+				let projectDetails = await projectQueries.projectDocument({
+					'certificate.transactionId': transactionId,
+				})
+
+				// If no project details are found, throw an error
+				if (!projectDetails || !projectDetails.length > 0) {
+					throw {
+						message: CONSTANTS.apiResponses.PROJECT_NOT_FOUND,
+					}
+				}
 
 				// Pipe the request stream to the file stream
 				requestObject.pipe(fileStream)
 
+				// Handle the end of the request stream
 				requestObject.on('end', async () => {
-					console.log(`PDF downloaded and saved successfully as ${filename}`)
+					// Upload the PDF to the cloud and get the pre-signed URL
 					const pdfPreSignedUrl = await common_handler.uploadPdfToCloud(
 						filename,
-						userId,
+						projectDetails[0].userId,
 						certificateTempFolderPath
 					)
+					// Upload the SVG template to the cloud and get the pre-signed URL
 					const svgPreSignedUrl = await common_handler.uploadPdfToCloud(
 						'template.svg',
-						userId,
+						projectDetails[0].userId,
 						certificateTempFolderPath
 					)
 					let updateObject = {
 						$set: {},
 					}
+					// If the PDF upload was successful, update the project details
 					if (pdfPreSignedUrl.success && pdfPreSignedUrl.data != '') {
-						console.log(pdfPreSignedUrl)
 						updateObject['$set']['certificate.pdfPath'] = pdfPreSignedUrl.data
 						updateObject['$set']['certificate.svgPath'] = svgPreSignedUrl.data
 						updateObject['$set']['certificate.issuedOn'] = new Date()
 						let updatedProject = await projectQueries.findOneAndUpdate(
 							{
-								_id: projectId,
+								'certificate.transactionId': transactionId,
 							},
 							updateObject
 						)
+						// Push the updated project details to Kafka
 						await kafkaProducersHelper.pushProjectToKafka(updatedProject)
 					}
+					// Clean up the temporary folder
 					if (fs.existsSync(certificateTempFolderPath)) {
 						fs.rmSync(certificateTempFolderPath, { recursive: true, force: true })
 					}
+					// Resolve the promise with success
 					return resolve({
 						success: true,
 						message: CONSTANTS.apiResponses.PROJECT_CERTIFICATE_GENERATED,
 					})
 				})
 
+				// Handle errors during the request stream
 				requestObject.on('error', async () => {
 					console.log('Error generating PDF', error)
 					throw {
@@ -2781,6 +2835,7 @@ module.exports = class UserProjectsHelper {
 					}
 				})
 			} catch (error) {
+				// Resolve the promise with an error message
 				return resolve({
 					success: false,
 					message: error.message,
@@ -2794,17 +2849,45 @@ module.exports = class UserProjectsHelper {
 	 * certificate callback error
 	 * @method
 	 * @name certificateCallbackError
+	 * @param {Stream} requestObject - Request object
 	 * @returns {JSON} certificate data updation details.
 	 */
 
-	static certificateCallbackError() {
+	static certificateCallbackError(requestObject) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				// Extract the Gotenberg trace header to get the transaction ID
+				const transactionId = requestObject.headers['gotenberg-trace']
+
+				// Fetch project details based on the transaction ID
+				const projectDetails = await projectQueries.projectDocument({
+					'certificate.transactionId': transactionId,
+				})
+
+				// Prepare the update object to set the callback error event and message
+				let updateObject = {
+					$set: {},
+				}
+				updateObject['$set']['certificate.callbackErrorEvent'] = true
+				updateObject['$set']['certificate.message'] = requestObject.body['message']
+
+				// If project details are found, update the project with the error information
+				if (projectDetails && projectDetails.length > 0) {
+					await projectQueries.findOneAndUpdate(
+						{
+							'certificate.transactionId': transactionId,
+						},
+						updateObject
+					)
+				}
+
+				// Throw an error to indicate certificate generation failure
 				throw {
 					status: HTTP_STATUS_CODE.bad_request.status,
 					message: CONSTANTS.apiResponses.CERTIFICATE_GENERATION_FAILED,
 				}
 			} catch (error) {
+				// Resolve the promise with the error message
 				return resolve({
 					success: false,
 					message: error.message,
@@ -2922,14 +3005,14 @@ module.exports = class UserProjectsHelper {
 	static certificateReIssue(projectId) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				//  get project details project for which certificate re-issue required .
+				// Get project details for the project that requires certificate re-issue
 				const userProject = await projectQueries.projectDocument({
 					_id: projectId,
 					status: CONSTANTS.common.SUBMITTED_STATUS,
 					certificate: { $exists: true },
 				})
 
-				//  if project details not found.
+				// Throw an error if project details are not found
 				if (!userProject.length > 0) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
@@ -2940,7 +3023,7 @@ module.exports = class UserProjectsHelper {
 					$set: {},
 				}
 
-				//  fetch user data using userId of project and calling the profile API
+				// Fetch user data using userId from the project and call the profile API
 				let userProfileData = await userService.profile(userProject[0].userId)
 				if (
 					userProfileData.success &&
@@ -2950,24 +3033,27 @@ module.exports = class UserProjectsHelper {
 				) {
 					userProject[0].userProfile.name = userProfileData.data.name
 				} else {
+					// Throw an error if user profile data is not found
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.USER_PROFILE_NOT_FOUND,
 					}
 				}
 
-				// create payload for certificate generation
+				// Create payload for certificate generation
 				const certificateData = await this.createCertificatePayload(userProject[0])
 
-				// call certificateService to create certificate for project
+				// Call the certificateService to create a new certificate for the project
 				const certificate = await this.createCertificate(certificateData, userProject[0]._id, false)
 
+				// Throw an error if certificate generation failed
 				if (!certificate.success) {
 					throw {
 						message: CONSTANTS.apiResponses.CERTIFICATE_GENERATION_FAILED,
 					}
 				}
 
+				// Update the project with original transaction information if available
 				if (userProject[0].certificate.transactionId) {
 					updateObject['$set']['certificate.originalTransactionInformation.transactionId'] =
 						userProject[0].certificate.transactionId
@@ -2981,10 +3067,12 @@ module.exports = class UserProjectsHelper {
 						userProject[0].certificate.svgPath
 				}
 
+				// Update the project with the user's name if available
 				if (userProject[0].userProfile.name) {
 					updateObject['$set']['userProfile.name'] = userProject[0].userProfile.name
 				}
 
+				// Set the re-issue date and update the project details
 				updateObject['$set']['certificate.reIssuedAt'] = new Date()
 				await projectQueries.findOneAndUpdate(
 					{
@@ -2993,6 +3081,7 @@ module.exports = class UserProjectsHelper {
 					updateObject
 				)
 
+				// Resolve the promise with success message and project ID
 				return resolve({
 					success: true,
 					message: CONSTANTS.apiResponses.PROJECT_SUBMITTED_FOR_REISSUE,
@@ -3001,6 +3090,7 @@ module.exports = class UserProjectsHelper {
 					},
 				})
 			} catch (error) {
+				// Resolve the promise with an error message
 				return resolve({
 					success: false,
 					message: error.message,

@@ -1070,11 +1070,7 @@ module.exports = class UserProjects extends Abstract {
 	async certificateCallback(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let certificateCallback = await userProjectsHelper.certificateCallback(
-					req,
-					req.params._id,
-					req.query.userId
-				)
+				let certificateCallback = await userProjectsHelper.certificateCallback(req)
 				return resolve(certificateCallback)
 			} catch (error) {
 				return reject({
@@ -1086,6 +1082,13 @@ module.exports = class UserProjects extends Abstract {
 		})
 	}
 
+	/**
+	 * Project certificate error callback.
+	 * @method
+	 * @name certificateCallbackError
+	 * @param {Object} req - request data.
+	 * @returns {JSON} certificate error details.
+	 */
 	async certificateCallbackError(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
@@ -1192,8 +1195,6 @@ module.exports = class UserProjects extends Abstract {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// ReIssue certificate of given project : projectId is passed as param
-				// This console has to be removed- adding to check the Issuer kid value in case rancher doesn't display console while deployment
-				// console.log('+++++CERTIFICATE_ISSUER_KID+++++ : ', CERTIFICATE_ISSUER_KID)
 				let projectDetails = await userProjectsHelper.certificateReIssue(req.params._id)
 				return resolve({
 					message: projectDetails.message,

@@ -115,6 +115,10 @@ let enviromentVariables = {
 		message: 'Timezone diffrence required',
 		optional: false,
 	},
+	ELEVATE_PROJECT_SERVICE_URL: {
+		message: 'Elevate project service url',
+		optional: false,
+	},
 }
 
 let success = true

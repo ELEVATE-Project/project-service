@@ -114,14 +114,20 @@ module.exports = class CertificateTemplates extends Abstract {
 	async createOrUpdate(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				// Check if the request method is POST
 				if (req.method === 'POST') {
+					// Call the create method of certificateTemplateHelper with the provided data
 					let certificateTemplateData = await certificateTemplateHelper.create(req.body)
+					// Resolve the promise with the created certificate template data
 					return resolve(certificateTemplateData)
 				} else if (req.method === 'PATCH') {
+					// Call the update method of certificateTemplateHelper with the provided data
 					let certificateTemplateData = await certificateTemplateHelper.update(req.params._id, req.body)
+					// Resolve the promise with the updated certificate template data
 					return resolve(certificateTemplateData)
 				}
 			} catch (error) {
+				// Reject the promise with an error object containing status and message
 				return reject({
 					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
 					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
@@ -165,24 +171,29 @@ module.exports = class CertificateTemplates extends Abstract {
 	async uploadTemplate(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				// Check if files are provided in the request
 				if (req.files && req.files.file) {
+					// Call the uploadToCloud method of certificateTemplateHelper with the provided data
 					let uploadedTemplateDetails = await certificateTemplateHelper.uploadToCloud(
 						req.files,
 						req.params._id,
 						req.userDetails ? req.userDetails.userInformation.userId : '',
 						req.query.updateTemplate ? req.query.updateTemplate : true
 					)
+					// Resolve the promise with the uploaded template details
 					return resolve({
 						message: CONSTANTS.apiResponses.FILE_UPLOADED,
 						result: uploadedTemplateDetails,
 					})
 				} else {
+					// Reject the promise if files are not provided in the request
 					return reject({
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: HTTP_STATUS_CODE.bad_request.message,
 					})
 				}
 			} catch (error) {
+				// Reject the promise with an error object containing status and message
 				return reject({
 					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
 					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
@@ -191,6 +202,7 @@ module.exports = class CertificateTemplates extends Abstract {
 			}
 		})
 	}
+
 	/**
     * @api {post} /project/v1/certificateTemplates/createSvg
     * @apiVersion 1.0.0

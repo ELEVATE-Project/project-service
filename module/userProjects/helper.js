@@ -2134,8 +2134,8 @@ module.exports = class UserProjectsHelper {
 
 							if (
 								projectData.certificate &&
-								projectData.certificate.osid &&
-								projectData.certificate.osid !== '' &&
+								projectData.certificate.transactionId &&
+								projectData.certificate.transactionId !== '' &&
 								projectData.certificate.templateUrl &&
 								projectData.certificate.templateUrl !== ''
 							) {
@@ -2144,10 +2144,14 @@ module.exports = class UserProjectsHelper {
 						})
 
 						if (templateFilePath.length > 0) {
-							let certificateTemplateDownloadableUrl = await coreService.getDownloadableUrl({
-								filePaths: templateFilePath,
-							})
-							if (!certificateTemplateDownloadableUrl.success) {
+							let certificateTemplateDownloadableUrl = await cloudServicesHelper.getDownloadableUrl(
+								templateFilePath
+							)
+							if (
+								!certificateTemplateDownloadableUrl ||
+								!certificateTemplateDownloadableUrl.result ||
+								!certificateTemplateDownloadableUrl.result.length > 0
+							) {
 								throw {
 									message: CONSTANTS.apiResponses.DOWNLOADABLE_URL_NOT_FOUND,
 								}
@@ -2155,8 +2159,8 @@ module.exports = class UserProjectsHelper {
 							// map downloadable templateUrl to corresponding project data
 							data.forEach((projectData) => {
 								if (projectData.certificate) {
-									var itemFromUrlArray = certificateTemplateDownloadableUrl.data.find(
-										(item) => item.filePath == projectData.certificate.templateUrl
+									var itemFromUrlArray = certificateTemplateDownloadableUrl.result.find(
+										(item) => item.payload['sourcePath'] == projectData.certificate.templateUrl
 									)
 									if (itemFromUrlArray) {
 										projectData.certificate.templateUrl = itemFromUrlArray.url
@@ -2390,22 +2394,23 @@ module.exports = class UserProjectsHelper {
 					libraryProjects.data = _.merge(libraryProjects.data, programAndSolutionInformation.data)
 				}
 				//  <- Add certificate template data
-				// if (
-				//     libraryProjects.data.certificateTemplateId &&
-				//     libraryProjects.data.certificateTemplateId !== ""
-				// ){
-				//     // <- Add certificate template details to projectCreation data if present ->
-				//     const certificateTemplateDetails = await certificateTemplateQueries.certificateTemplateDocument({
-				//         _id : libraryProjects.data.certificateTemplateId
-				//     });
+				if (libraryProjects.data.certificateTemplateId && libraryProjects.data.certificateTemplateId !== '') {
+					// <- Add certificate template details to projectCreation data if present ->
+					const certificateTemplateDetails = await certificateTemplateQueries.certificateTemplateDocument({
+						_id: libraryProjects.data.certificateTemplateId,
+					})
 
-				//     // create certificate object and add data if certificate template is present.
-				//     if ( certificateTemplateDetails.length > 0 ) {
-				//         libraryProjects.data["certificate"] = _.pick(certificateTemplateDetails[0], ['templateUrl', 'status', 'criteria']);
-				//     }
-				//     libraryProjects.data["certificate"]["templateId"] = libraryProjects.data.certificateTemplateId;
-				//     delete  libraryProjects.data.certificateTemplateId;
-				// }
+					// create certificate object and add data if certificate template is present.
+					if (certificateTemplateDetails.length > 0) {
+						libraryProjects.data['certificate'] = _.pick(certificateTemplateDetails[0], [
+							'templateUrl',
+							'status',
+							'criteria',
+						])
+					}
+					libraryProjects.data['certificate']['templateId'] = libraryProjects.data.certificateTemplateId
+					delete libraryProjects.data.certificateTemplateId
+				}
 
 				//Fetch user profile information.
 				let addReportInfoToSolution = false
@@ -2670,7 +2675,7 @@ module.exports = class UserProjectsHelper {
 					svgTemplate = svgTemplate.data
 
 					const qrCodeData = await QRCode.toDataURL(
-						`/v1/userProjects/verifyCertificate/${certificateData.projectId}`
+						`${process.env.ELEVATE_PROJECT_SERVICE_URL}/${process.env.SERVICE_NAME}/v1/userProjects/verifyCertificate/${certificateData.projectId}`
 					)
 
 					const populatedSVGTemplate = svgTemplate
@@ -2693,7 +2698,7 @@ module.exports = class UserProjectsHelper {
 	}
 
 	/**
-	 * call sunbird-RC for certificate creation.
+	 * call gotenberg for certificate creation.
 	 * @method
 	 * @name createCertificate
 	 * @param {Object} certificateData - payload for certificate creation data.

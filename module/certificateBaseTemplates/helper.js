@@ -27,14 +27,19 @@ module.exports = class CertificateBaseTemplatesHelper {
 	static create(data, file, userId) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				// Call the uploadToCloud method of certificateTemplatesHelper with the provided file data
 				let uploadFile = await certificateTemplatesHelper.uploadToCloud(file, '', userId, false)
+				// Throw an error if the file upload was not successful
 				if (!uploadFile.success) {
 					throw {
 						message: CONSTANTS.apiResponses.COULD_NOT_UPLOAD_CONTENT,
 					}
 				}
+				// Add the uploaded file URL to the data object
 				data.url = uploadFile.data.templateUrl
+				// Call the create method of certificateBaseTemplateQueries to create a new certificate base template
 				let certificateBaseTemplateCreated = await certificateBaseTemplateQueries.create(data)
+				// Resolve the promise with the created certificate base template details
 				return resolve({
 					message: CONSTANTS.apiResponses.CERTIFICATE_BASE_TEMPLATE_ADDED,
 					data: {
@@ -45,6 +50,7 @@ module.exports = class CertificateBaseTemplatesHelper {
 					},
 				})
 			} catch (error) {
+				// Reject the promise with the error object
 				return reject(error)
 			}
 		})
@@ -64,28 +70,36 @@ module.exports = class CertificateBaseTemplatesHelper {
 	static update(baseTemplateId, data, file = {}, userId) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				// Check if a file is provided in the request
 				if (Object.keys(file).length > 0) {
+					// Call the uploadToCloud method of certificateTemplatesHelper with the provided file data
 					let uploadFile = await certificateTemplatesHelper.uploadToCloud(file, '', userId, true)
+					// Throw an error if the file upload was not successful
 					if (!uploadFile.success) {
 						throw {
 							message: CONSTANTS.apiResponses.COULD_NOT_UPLOAD_CONTENT,
 						}
 					}
+					// Add the uploaded file URL to the data object
 					data.url = uploadFile.data.templateUrl
 				}
 
+				// Create an update object with the new data
 				let updateObject = {
 					$set: data,
 				}
+				// Call the update method of certificateBaseTemplateQueries to update the database
 				let certificateBaseTemplateUpdated = await certificateBaseTemplateQueries.update(
 					{ _id: baseTemplateId },
 					updateObject
 				)
+				// Throw an error if the update was not successful
 				if (certificateBaseTemplateUpdated == null) {
 					throw {
 						message: CONSTANTS.apiResponses.CERTIFICATE_BASE_TEMPLATE_NOT_UPDATED,
 					}
 				}
+				// Resolve the promise with the updated certificate base template details
 				return resolve({
 					message: CONSTANTS.apiResponses.CERTIFICATE_BASE_TEMPLATE_UPDATED,
 					data: {
@@ -96,6 +110,7 @@ module.exports = class CertificateBaseTemplatesHelper {
 					},
 				})
 			} catch (error) {
+				// Reject the promise with the error object
 				return reject(error)
 			}
 		})

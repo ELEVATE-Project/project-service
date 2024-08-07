@@ -15,7 +15,7 @@ const programQueries = require(DB_QUERY_BASE_PATH + '/programs')
 const validateEntity = process.env.VALIDATE_ENTITIES
 const appsPortalBaseUrl = process.env.APP_PORTAL_BASE_URL + '/'
 const projectQueries = require(DB_QUERY_BASE_PATH + '/projects')
-const filesHelpers = require(MODULES_BASE_PATH + '/files/helper')
+const filesHelpers = require(MODULES_BASE_PATH + '/cloud-services/files/helper')
 const entitiesService = require(GENERICS_FILES_PATH + '/services/entity-management')
 const projectTemplateQueries = require(DB_QUERY_BASE_PATH + '/projectTemplates')
 const projectTemplatesHelper = require(MODULES_BASE_PATH + '/project/templates/helper')
@@ -2357,7 +2357,7 @@ module.exports = class SolutionsHelper {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let downloadableUrl = await filesHelpers.getDownloadableUrl(payloadData)
-				if (!downloadableUrl.success) {
+				if (!downloadableUrl || !downloadableUrl.result || !downloadableUrl.result.length > 0) {
 					return resolve({
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.FAILED_TO_CREATE_DOWNLOADABLEURL,
@@ -2474,40 +2474,37 @@ module.exports = class SolutionsHelper {
 
 							if (
 								projectData.certificate &&
-								projectData.certificate.osid &&
-								projectData.certificate.osid !== '' &&
+								projectData.certificate.transactionId &&
+								projectData.certificate.transactionId !== '' &&
 								projectData.certificate.templateUrl &&
 								projectData.certificate.templateUrl !== ''
 							) {
 								templateFilePath.push(projectData.certificate.templateUrl)
 							}
 						})
-
-						// if( templateFilePath.length > 0 ) {
-
-						//     let certificateTemplateDownloadableUrl =
-						//         await this.getDownloadableUrl(
-						//             {
-						//                 filePaths: templateFilePath
-						//             }
-						//     );
-						//     if ( !certificateTemplateDownloadableUrl.success ) {
-						//         throw {
-						//             message:  CONSTANTS.apiResponses.DOWNLOADABLE_URL_NOT_FOUND
-						//         };
-						//     }
-						//     // map downloadable templateUrl to corresponding project data
-						//     data.forEach(projectData => {
-						//         if (projectData.certificate) {
-						//             var itemFromUrlArray = certificateTemplateDownloadableUrl.data.find(item=> item.filePath == projectData.certificate.templateUrl);
-						//                 if (itemFromUrlArray) {
-						//                     projectData.certificate.templateUrl = itemFromUrlArray.url;
-						//                 }
-						//             }
-						//         }
-
-						//     )
-						// }
+						if (templateFilePath.length > 0) {
+							let certificateTemplateDownloadableUrl = await this.getDownloadableUrl(templateFilePath)
+							if (
+								!certificateTemplateDownloadableUrl ||
+								!certificateTemplateDownloadableUrl.result ||
+								!certificateTemplateDownloadableUrl.result.length > 0
+							) {
+								throw {
+									message: CONSTANTS.apiResponses.DOWNLOADABLE_URL_NOT_FOUND,
+								}
+							}
+							// map downloadable templateUrl to corresponding project data
+							data.forEach((projectData) => {
+								if (projectData.certificate) {
+									var itemFromUrlArray = certificateTemplateDownloadableUrl.result.find(
+										(item) => item.payload['sourcePath'] == projectData.certificate.templateUrl
+									)
+									if (itemFromUrlArray) {
+										projectData.certificate.templateUrl = itemFromUrlArray.url
+									}
+								}
+							})
+						}
 					}
 				}
 

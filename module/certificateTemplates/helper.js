@@ -57,31 +57,35 @@ module.exports = class CertificateTemplatesHelper {
 	static update(templateId, data) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				// in case support team pass below values as empty string (not valid) we cant check it with validator. So adding it here
-				//  If templateUrl value passed as empty string.
+				// If templateUrl value is passed as an empty string, remove it from the data object
 				if (!data.templateUrl) {
 					delete data.templateUrl
 				}
-				//  If solutionId value passed as empty string.
+				// If solutionId value is passed as an empty string, remove it from the data object
 				if (!data.solutionId) {
 					delete data.solutionId
 				}
-				//  If programId value passed as empty string.
+				// If programId value is passed as an empty string, remove it from the data object
 				if (!data.programId) {
 					delete data.programId
 				}
+
+				// Create an update object with the new data
 				let updateObject = {
 					$set: data,
 				}
+				// Call the updateCertificateTemplate method of certificateTemplateQueries to update the database
 				let certificateTemplateUpdated = await certificateTemplateQueries.updateCertificateTemplate(
 					{ _id: templateId },
 					updateObject
 				)
+				// Throw an error if the update was not successful
 				if (certificateTemplateUpdated == null) {
 					throw {
 						message: CONSTANTS.apiResponses.CERTIFICATE_TEMPLATE_NOT_UPDATED,
 					}
 				}
+				// Resolve the promise with the updated certificate template details
 				return resolve({
 					message: CONSTANTS.apiResponses.CERTIFICATE_TEMPLATE_UPDATED,
 					data: {
@@ -92,6 +96,7 @@ module.exports = class CertificateTemplatesHelper {
 					},
 				})
 			} catch (error) {
+				// Reject the promise with the error object
 				return reject(error)
 			}
 		})
@@ -104,28 +109,35 @@ module.exports = class CertificateTemplatesHelper {
 	 * @param {Object} fileData - file to upload.
 	 * @param {String} templateId - templateId.
 	 * @param {String} userId - user Id.
+	 * @param {Boolean}updateTemplate - true/false to update template data.
 	 * @returns {JSON} Uploaded certificate template details.
 	 */
 
 	static uploadToCloud(fileData, templateId, userId = '', updateTemplate = false) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				// Normalize the updateTemplate flag
 				if (updateTemplate == 'true' || updateTemplate == true) {
 					updateTemplate = true
 				} else {
 					updateTemplate == false
 				}
+
 				let fileName
 				const now = new Date()
 				const date = now.getDate() + '-' + now.getMonth() + '-' + now.getFullYear() + '-' + now.getTime()
+
+				// Determine the file name based on the updateTemplate flag
 				if (updateTemplate == false) {
 					fileName = `${date}_${fileData.file.name}`
 				} else {
 					fileName = `${templateId}/${date}_${fileData.file.name}`
 				}
 
+				// Generate a unique ID for the file upload
 				let uniqueId = await UTILS.generateUniqueId()
 
+				// Prepare the request data for the file upload
 				let requestData = {
 					[uniqueId]: {
 						files: [fileName],
@@ -133,20 +145,22 @@ module.exports = class CertificateTemplatesHelper {
 				}
 
 				let referenceType
+				// Set the reference type based on the updateTemplate flag
 				if (updateTemplate == false) {
 					referenceType = 'baseTemplates'
 				} else {
 					referenceType = CONSTANTS.common.CERTIFICATE
 				}
 
+				// Get the pre-signed URL for the file upload
 				let signedUrl = await filesHelpers.preSignedUrls(
 					requestData, // data to upload
 					userId,
-					true, // isCertificateFilewill be set true for certificate generation
+					true, // isCertificateFile will be set true for certificate generation
 					referenceType // referenceType
 				)
 
-				//  upload file using signed Url
+				// Check if the signed URL is valid and upload the file using the signed URL
 				if (
 					signedUrl.data &&
 					Object.keys(signedUrl.data).length > 0 &&
@@ -158,6 +172,7 @@ module.exports = class CertificateTemplatesHelper {
 					let file = fileData.file.data
 
 					try {
+						// Upload the file to the cloud storage
 						const uploadData = await axios.put(fileUploadUrl, file, {
 							headers: {
 								'x-ms-blob-type': process.env.CLOUD_STORAGE_PROVIDER === 'azure' ? 'BlockBlob' : null,
@@ -166,9 +181,8 @@ module.exports = class CertificateTemplatesHelper {
 						})
 						let updateCertificateTemplate = {}
 						if (updateTemplate == true) {
-							//  Update certificate template url in certificateTemplates collection
+							// Update the certificate template URL in the certificateTemplates collection
 							updateCertificateTemplate = await this.update(templateId, {
-								// certificateTemplates/6343bd978f9d8980b7841e85/ba9aa220-ff1b-4717-b6ea-ace55f04fc16_2022-9-10-1665383945769.svg
 								templateUrl: signedUrl.data[uniqueId].files[0].payload.sourcePath,
 							})
 							return resolve({
@@ -189,6 +203,7 @@ module.exports = class CertificateTemplatesHelper {
 						return reject(error)
 					}
 				} else {
+					// Resolve with success false if the signed URL is not valid
 					return resolve({
 						success: false,
 					})

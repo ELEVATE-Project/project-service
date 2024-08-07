@@ -27,6 +27,9 @@ module.exports = (req) => {
 		certificateReIssue: function () {
 			req.checkParams('_id').exists().withMessage('required project id')
 		},
+		verifyCertificate: function () {
+			req.checkParams('_id').exists().withMessage('required project id')
+		},
 	}
 
 	if (projectsValidator[req.params.method]) {

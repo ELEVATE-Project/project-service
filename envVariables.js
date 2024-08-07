@@ -116,7 +116,7 @@ let enviromentVariables = {
 		optional: false,
 	},
 	ELEVATE_PROJECT_SERVICE_URL: {
-		message: 'Elevate project service url',
+		message: 'Elevate project service url required',
 		optional: false,
 	},
 }

@@ -33,28 +33,23 @@ function getGotenbergConnection() {
  */
 
 function gotenbergConnectionForCertificate(asyncMode = true) {
+	// Define the options object for the Gotenberg connection
 	let options = {
-		uri: process.env.GOTENBERG_URL + '/forms/libreoffice/convert',
+		uri: process.env.GOTENBERG_URL + '/forms/libreoffice/convert', // Gotenberg URI for converting LibreOffice documents
 		headers: {
-			'Content-Type': 'multipart/form-data',
+			'Content-Type': 'multipart/form-data', // Set the Content-Type header for multipart/form-data
 		},
-		responseType: 'arraybuffer',
+		responseType: 'arraybuffer', // Set the response type to arraybuffer
 	}
 
+	// If asyncMode is true, configure the callback URLs for Gotenberg webhooks
 	if (asyncMode) {
-		const callbackUrl =
-			'http://localhost:' +
-			process.env.APPLICATION_PORT +
-			'/' +
-			process.env.SERVICE_NAME +
-			CONSTANTS.endpoints.PROJECT_CERTIFICATE_API_CALLBACK
+		// Construct the base URL for the callback
+		const callbackBaseUrl = `${process.env.ELEVATE_PROJECT_SERVICE_URL}/${process.env.SERVICE_NAME}`
 
-		const errorCallBackUrl =
-			'http://localhost:' +
-			process.env.APPLICATION_PORT +
-			'/' +
-			process.env.SERVICE_NAME +
-			CONSTANTS.endpoints.PROJECT_CERTIFICATE_API_CALLBACK_ERROR
+		const callbackUrl = callbackBaseUrl + CONSTANTS.endpoints.PROJECT_CERTIFICATE_API_CALLBACK
+
+		const errorCallBackUrl = callbackBaseUrl + CONSTANTS.endpoints.PROJECT_CERTIFICATE_API_CALLBACK_ERROR
 
 		options.headers['Gotenberg-Webhook-Url'] = callbackUrl
 		options.headers['Gotenberg-Webhook-Error-Url'] = errorCallBackUrl
@@ -87,8 +82,11 @@ const createCertificate = function (bodyData, asyncMode = true) {
 			// Create the temporary folder
 			fs.mkdirSync(certificateTempFolderPath)
 
+			// Generate UUID for svg file
+			const dynamicUUIDForSvgFile = UTILS.generateUniqueId()
+
 			// Define the path for the SVG template
-			const svgTemplatePath = certificateTempFolderPath + '/template.svg'
+			const svgTemplatePath = certificateTempFolderPath + `/${dynamicUUIDForSvgFile}_template.svg`
 
 			// Write the populated SVG template to the file
 			fs.writeFileSync(svgTemplatePath, bodyData.populatedSVGTemplate)
@@ -126,6 +124,30 @@ const createCertificate = function (bodyData, asyncMode = true) {
 				success: true,
 			}
 
+			const svgUploadDetails = await common_handler.uploadPdfToCloud(
+				`${dynamicUUIDForSvgFile}_template.svg`,
+				bodyData.userId,
+				certificateTempFolderPath
+			)
+
+			if (!svgUploadDetails || svgUploadDetails.data == '') {
+				result['success'] = false
+				result['message'] = CONSTANTS.apiResponses.FAILED_TO_CREATE_DOWNLOADABLEURL
+				return resolve(result)
+			}
+
+			// Update the project in the database
+			await projectQueries.findOneAndUpdate(
+				{
+					_id: bodyData.projectId,
+				},
+				{
+					$set: {
+						'certificate.svgPath': svgUploadDetails.data,
+					},
+				}
+			)
+
 			// Prepare the form data with the SVG template
 			const formData = new FormData()
 			formData.append('files', fs.createReadStream(svgTemplatePath))
@@ -142,22 +164,36 @@ const createCertificate = function (bodyData, asyncMode = true) {
 				responseType: gotenbergOptionsForCertificate.responseType,
 			})
 
+			if (!asyncMode && (!response || !response.data)) {
+				result['success'] = false
+				result['message'] = CONSTANTS.apiResponses.CERTIFICATE_GENERATION_FAILED
+				await projectQueries.findOneAndUpdate(
+					{
+						_id: bodyData.projectId,
+					},
+					{
+						$set: {
+							'certificate.transactionId': response.headers['gotenberg-trace'],
+							['certificate.transactionIdCreatedAt']: new Date(),
+						},
+					}
+				)
+				return resolve(result)
+			}
 			// If not in async mode, handle the response data
 			if (!asyncMode) {
+				// Generate UUID for pdf file
+				const dynamicUUIDForPdfFile = UTILS.generateUniqueId()
+
 				// Define the path for the output PDF
-				const certificatePdfPath = certificateTempFolderPath + '/output.pdf'
+				const certificatePdfPath = certificateTempFolderPath + `/${dynamicUUIDForPdfFile}_output.pdf`
 
 				// Write the response data (PDF) to the file
 				fs.writeFileSync(certificatePdfPath, response.data)
 
 				// Upload the PDF and SVG template to the cloud
-				const pdfPreSignedUrl = await common_handler.uploadPdfToCloud(
-					'output.pdf',
-					bodyData.userId,
-					certificateTempFolderPath
-				)
-				const svgPreSignedUrl = await common_handler.uploadPdfToCloud(
-					'template.svg',
+				const pdfUploadDetails = await common_handler.uploadPdfToCloud(
+					`${dynamicUUIDForPdfFile}_output.pdf`,
 					bodyData.userId,
 					certificateTempFolderPath
 				)
@@ -167,9 +203,8 @@ const createCertificate = function (bodyData, asyncMode = true) {
 				}
 
 				// If the PDF upload was successful, update the project details
-				if (pdfPreSignedUrl.success && pdfPreSignedUrl.data != '') {
-					updateObject['$set']['certificate.pdfPath'] = pdfPreSignedUrl.data
-					updateObject['$set']['certificate.svgPath'] = svgPreSignedUrl.data
+				if (pdfUploadDetails.success && pdfUploadDetails.data != '') {
+					updateObject['$set']['certificate.pdfPath'] = pdfUploadDetails.data
 					updateObject['$set']['certificate.issuedOn'] = new Date()
 
 					// Update the project in the database

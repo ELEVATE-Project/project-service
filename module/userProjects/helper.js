@@ -21,7 +21,6 @@ const userService = require(GENERICS_FILES_PATH + '/services/users')
 const solutionsHelper = require(MODULES_BASE_PATH + '/solutions/helper')
 const programsHelper = require(MODULES_BASE_PATH + '/programs/helper')
 const certificateTemplateQueries = require(DB_QUERY_BASE_PATH + '/certificateTemplates')
-const certificateService = require(GENERICS_FILES_PATH + '/services/certificate')
 const certificateValidationsHelper = require(MODULES_BASE_PATH + '/certificateValidations/helper')
 const programUsersQueries = require(DB_QUERY_BASE_PATH + '/programUsers')
 const solutionsQueries = require(DB_QUERY_BASE_PATH + '/solutions')
@@ -31,10 +30,8 @@ const common_handler = require(GENERICS_FILES_PATH + '/helpers/common_handler')
 const cloudServicesHelper = require(MODULES_BASE_PATH + '/cloud-services/files/helper')
 const axios = require('axios')
 const fs = require('fs')
-const request = require('request-promise')
 const QRCode = require('qrcode')
 const path = require('path')
-const { update } = require('lodash')
 const gotenbergService = require(SERVICES_BASE_PATH + '/gotenberg')
 /**
  * UserProjectsHelper
@@ -2136,10 +2133,12 @@ module.exports = class UserProjectsHelper {
 								projectData.certificate &&
 								projectData.certificate.transactionId &&
 								projectData.certificate.transactionId !== '' &&
-								projectData.certificate.templateUrl &&
-								projectData.certificate.templateUrl !== ''
+								projectData.certificate.pdfPath &&
+								projectData.certificate.pdfPath !== '' &&
+								projectData.certificate.svgPath &&
+								projectData.certificate.svgPath !== ''
 							) {
-								templateFilePath.push(projectData.certificate.templateUrl)
+								templateFilePath.push(projectData.certificate.pdfPath, projectData.certificate.svgPath)
 							}
 						})
 
@@ -2159,11 +2158,18 @@ module.exports = class UserProjectsHelper {
 							// map downloadable templateUrl to corresponding project data
 							data.forEach((projectData) => {
 								if (projectData.certificate) {
-									var itemFromUrlArray = certificateTemplateDownloadableUrl.result.find(
-										(item) => item.payload['sourcePath'] == projectData.certificate.templateUrl
+									var pdfItemFromUrlArray = certificateTemplateDownloadableUrl.result.find(
+										(item) => item.payload['sourcePath'] == projectData.certificate.pdfPath
 									)
-									if (itemFromUrlArray) {
-										projectData.certificate.templateUrl = itemFromUrlArray.url
+									if (pdfItemFromUrlArray) {
+										projectData.certificate.certificatePdfUrl = pdfItemFromUrlArray.url
+									}
+
+									var svgItemFromUrlArray = certificateTemplateDownloadableUrl.result.find(
+										(item) => item.payload['sourcePath'] == projectData.certificate.svgPath
+									)
+									if (svgItemFromUrlArray) {
+										projectData.certificate.certificateSvgUrl = svgItemFromUrlArray.url
 									}
 								}
 							})
@@ -2769,16 +2775,6 @@ module.exports = class UserProjectsHelper {
 				const contentDisposition = requestObject.headers['content-disposition']
 				// Extract the Gotenberg trace header to get the transaction ID
 				const transactionId = requestObject.headers['gotenberg-trace']
-				// Match the filename from the content-disposition header
-				const match = contentDisposition && contentDisposition.match(/filename="(.+)"/)
-				// Set the filename or default to 'output.pdf' if not found
-				let filename = match && match[1] ? match[1] : 'output.pdf'
-				// Define the temporary folder path for the certificate
-				const certificateTempFolderPath = path.resolve(__dirname + '/../../certificateTempFolder')
-				// Define the file path to save the PDF
-				const filePath = certificateTempFolderPath + '/' + filename
-				// Create a writable stream to the file
-				const fileStream = fs.createWriteStream(filePath)
 
 				// Fetch project details based on the transaction ID
 				let projectDetails = await projectQueries.projectDocument({
@@ -2792,20 +2788,25 @@ module.exports = class UserProjectsHelper {
 					}
 				}
 
+				// Match the filename from the content-disposition header
+				const match = contentDisposition && contentDisposition.match(/filename="(.+)"/)
+				// Set the filename or default to 'output.pdf' if not found
+				let filename = match && match[1] ? match[1] : 'output.pdf'
+				// Define the temporary folder path for the certificate
+				const certificateTempFolderPath = path.resolve(__dirname + '/../../certificateTempFolder')
+				// Define the file path to save the PDF
+				const filePath = certificateTempFolderPath + '/' + filename
+				// Create a writable stream to the file
+				const fileStream = fs.createWriteStream(filePath)
+
 				// Pipe the request stream to the file stream
 				requestObject.pipe(fileStream)
 
 				// Handle the end of the request stream
 				requestObject.on('end', async () => {
 					// Upload the PDF to the cloud and get the pre-signed URL
-					const pdfPreSignedUrl = await common_handler.uploadPdfToCloud(
+					const certificatePdfUrl = await common_handler.uploadPdfToCloud(
 						filename,
-						projectDetails[0].userId,
-						certificateTempFolderPath
-					)
-					// Upload the SVG template to the cloud and get the pre-signed URL
-					const svgPreSignedUrl = await common_handler.uploadPdfToCloud(
-						'template.svg',
 						projectDetails[0].userId,
 						certificateTempFolderPath
 					)
@@ -2813,9 +2814,8 @@ module.exports = class UserProjectsHelper {
 						$set: {},
 					}
 					// If the PDF upload was successful, update the project details
-					if (pdfPreSignedUrl.success && pdfPreSignedUrl.data != '') {
-						updateObject['$set']['certificate.pdfPath'] = pdfPreSignedUrl.data
-						updateObject['$set']['certificate.svgPath'] = svgPreSignedUrl.data
+					if (certificatePdfUrl.success && certificatePdfUrl.data != '') {
+						updateObject['$set']['certificate.pdfPath'] = certificatePdfUrl.data
 						updateObject['$set']['certificate.issuedOn'] = new Date()
 						let updatedProject = await projectQueries.findOneAndUpdate(
 							{
@@ -3210,7 +3210,7 @@ module.exports = class UserProjectsHelper {
 					}
 				}
 
-				let pdfCertificateUrl, svgCertificateUrl
+				let certificatePdfUrl, certificateSvgUrl
 				const certificateUrls = await cloudServicesHelper.getDownloadableUrl([
 					projectDetails.certificate.pdfPath ? projectDetails.certificate.pdfPath : '',
 					projectDetails.certificate.svgPath ? projectDetails.certificate.svgPath : '',
@@ -3222,13 +3222,13 @@ module.exports = class UserProjectsHelper {
 							certificateUrlsIndex.payload['sourcePath'] != '' &&
 							certificateUrlsIndex.payload['sourcePath'] == projectDetails.certificate.pdfPath
 						) {
-							pdfCertificateUrl = certificateUrlsIndex.url
+							certificatePdfUrl = certificateUrlsIndex.url
 						} else if (
 							projectDetails.certificate.svgPath != '' &&
 							certificateUrlsIndex.payload['sourcePath'] != '' &&
 							certificateUrlsIndex.payload['sourcePath'] == projectDetails.certificate.svgPath
 						) {
-							svgCertificateUrl = certificateUrlsIndex.url
+							certificateSvgUrl = certificateUrlsIndex.url
 						}
 					}
 				}
@@ -3244,8 +3244,8 @@ module.exports = class UserProjectsHelper {
 					completedDate: projectDetails.completedDate,
 					issuedOn: projectDetails.issuedOn,
 					eligible: projectDetails.certificate.eligible,
-					pdfCertificateUrl: pdfCertificateUrl ? pdfCertificateUrl : '',
-					svgCertificateUrl: svgCertificateUrl ? svgCertificateUrl : '',
+					certificatePdfUrl: certificatePdfUrl ? certificatePdfUrl : '',
+					certificateSvgUrl: certificateSvgUrl ? certificateSvgUrl : '',
 				}
 
 				// Resolve the promise with success response

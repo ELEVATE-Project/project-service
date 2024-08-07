@@ -174,7 +174,7 @@ const createCertificate = function (bodyData, asyncMode = true) {
 					{
 						$set: {
 							'certificate.transactionId': response.headers['gotenberg-trace'],
-							['certificate.transactionIdCreatedAt']: new Date(),
+							'certificate.transactionIdCreatedAt': new Date(),
 						},
 					}
 				)

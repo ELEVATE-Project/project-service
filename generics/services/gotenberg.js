@@ -89,6 +89,11 @@ const createCertificate = function (bodyData, asyncMode = true) {
 				},
 				responseType: gotenbergOptionsForCertificate.responseType,
 			})
+			console.log('\n<==============================GOTENBERG SERVICE TRIGGERED==============================>\n')
+			console.log(
+				'\n<==============================GOTENBERG SERVICE RESPONSE==============================>\n',
+				response
+			)
 
 			if (!asyncMode && (!response || !response.data)) {
 				result['success'] = false

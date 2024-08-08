@@ -368,9 +368,10 @@ module.exports = class UserProjectsHelper {
 						status: HTTP_STATUS_CODE.bad_request.status,
 					}
 				}
-				console.log('<---------data sending to kafka -----------> : ', JSON.stringify(projectUpdated))
 				//  push project details to kafka
-				await kafkaProducersHelper.pushProjectToKafka(projectUpdated)
+				const kafkaPushedProject = await kafkaProducersHelper.pushProjectToKafka(projectUpdated)
+
+				console.log('<---------data sending to kafka -----------> : ', kafkaPushedProject)
 
 				return resolve({
 					success: true,

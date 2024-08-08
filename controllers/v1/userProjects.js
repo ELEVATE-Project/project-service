@@ -1070,6 +1070,9 @@ module.exports = class UserProjects extends Abstract {
 	async certificateCallback(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				console.log(
+					'\n<==============================CERTIFICATE CALLBACK TRIGGERED==============================>\n'
+				)
 				let certificateCallback = await userProjectsHelper.certificateCallback(req)
 				return resolve(certificateCallback)
 			} catch (error) {
@@ -1092,6 +1095,9 @@ module.exports = class UserProjects extends Abstract {
 	async certificateCallbackError(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				console.log(
+					'\n<==============================CERTIFICATE CALLBACK ERROR TRIGGERED==============================>\n'
+				)
 				const certificateCallbackError = await userProjectsHelper.certificateCallbackError(req)
 				return resolve(certificateCallbackError)
 			} catch (error) {

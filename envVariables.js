@@ -8,7 +8,6 @@
 const Log = require('log')
 let log = new Log('debug')
 let table = require('cli-table')
-const certificateService = require(GENERICS_FILES_PATH + '/services/certificate')
 
 let tableData = new table()
 
@@ -52,7 +51,7 @@ let enviromentVariables = {
 	SERVICE_NAME: {
 		message: 'current service name',
 		optional: true,
-		default: 'ml-projects-service',
+		default: 'project',
 	},
 	CERTIFICATE_SERVICE_URL: {
 		message: 'certificate service base url',
@@ -114,6 +113,10 @@ let enviromentVariables = {
 	},
 	TIMEZONE_DIFFRENECE_BETWEEN_LOCAL_TIME_AND_UTC: {
 		message: 'Timezone diffrence required',
+		optional: false,
+	},
+	ELEVATE_PROJECT_SERVICE_URL: {
+		message: 'Elevate project service url required',
 		optional: false,
 	},
 }
@@ -203,28 +206,7 @@ module.exports = function () {
 	})
 
 	log.info(tableData.toString())
-	// getKid();
 	return {
 		success: success,
-	}
-}
-
-async function getKid() {
-	if (process.env.PROJECT_CERTIFICATE_ON_OFF === 'ON') {
-		// get certificate issuer kid from sunbird-RC
-		let kidData = await certificateService.getCertificateIssuerKid()
-		if (!kidData.success) {
-			console.log('failed to get kid value from registry service : ', kidData)
-			if (process.env.CERTIFICATE_ISSUER_KID && process.env.CERTIFICATE_ISSUER_KID != '') {
-				global.CERTIFICATE_ISSUER_KID = process.env.CERTIFICATE_ISSUER_KID
-			}
-			// console.log("Server stoped . Failed to set certificate issuer Kid value")
-			// process.exit();
-		} else {
-			console.log('Kid data fetched successfully : ', kidData.data)
-			global.CERTIFICATE_ISSUER_KID = kidData.data
-		}
-		console.log(JSON.stringify(kidData))
-		// global.CERTIFICATE_ISSUER_KID = kidData.data
 	}
 }

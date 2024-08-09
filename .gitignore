@@ -85,3 +85,6 @@ keycloak-public-keys/
 
 .dcignore
 
+#ignore unnecessary file creation
+Project-Service-implementation-Script/programFiles
+Project-Service-implementation-Script/InputFiles

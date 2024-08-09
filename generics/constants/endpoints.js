@@ -50,6 +50,7 @@ module.exports = {
 	GET_LOCATION_DATA: '/v1/location/search',
 	CERTIFICATE_CREATE: '/api/v1/ProjectCertificate',
 	PROJECT_CERTIFICATE_API_CALLBACK: '/v1/userProjects/certificateCallback',
+	PROJECT_CERTIFICATE_API_CALLBACK_ERROR: '/v1/userProjects/certificateCallbackError',
 	USER_READ_PRIVATE: '/private/user/v1/read', // !Caution: End point for reading user details without token. Do not use for public work flow
 	GET_CERTIFICATE_KID: '/api/v1/PublicKey/search',
 	PROGRAM_JOIN: '/v1/programs/join',

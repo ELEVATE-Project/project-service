@@ -1070,16 +1070,36 @@ module.exports = class UserProjects extends Abstract {
 	async certificateCallback(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				//console request body to check if callback is coming or not and to check any structural change is there or not
-				console.log('-------------callback request body------------', JSON.stringify(req.body))
-				let certificateDetails = await userProjectsHelper.certificateCallback(
-					req.body.data.transactionId,
-					req.body.data.osid
+				console.log(
+					'\n<==============================CERTIFICATE CALLBACK TRIGGERED==============================>\n'
 				)
-				return resolve({
-					message: certificateDetails.message,
-					result: certificateDetails.data,
+				let certificateCallback = await userProjectsHelper.certificateCallback(req)
+				return resolve(certificateCallback)
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
 				})
+			}
+		})
+	}
+
+	/**
+	 * Project certificate error callback.
+	 * @method
+	 * @name certificateCallbackError
+	 * @param {Object} req - request data.
+	 * @returns {JSON} certificate error details.
+	 */
+	async certificateCallbackError(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				console.log(
+					'\n<==============================CERTIFICATE CALLBACK ERROR TRIGGERED==============================>\n'
+				)
+				const certificateCallbackError = await userProjectsHelper.certificateCallbackError(req)
+				return resolve(certificateCallbackError)
 			} catch (error) {
 				return reject({
 					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
@@ -1098,33 +1118,31 @@ module.exports = class UserProjects extends Abstract {
     * @apiSampleRequest /project/v1/userProjects/certificates
     * @apiParamExample {json} Response:
     *   {
-            "message": "User project fetched successfully",
+            "message": "Successfully fetched projects",
             "status": 200,
             "result": {
-                "data": [{
-                        "_id": "60793b80bd49095a19ddeae1",
-                        "title": "Project with learning resources",
-                        "certificate": {
-                            "osid": "1-21c8ecab-7b8d-40f1-9961-cae7fcb6a5f9",
-                            "status": "active",
-                            "templateId": "600acc42c7de076e6f995147",
-                            "templateUrl": "certificateTemplates/6343bd978f9d8980b7841e85/ba9aa220-ff1b-4717-b6ea-ace55f04fc16_2022-9-10-1665383945769.svg",
-                            "issuedOn": "2020-12-03 13:22:31.988Z"
-                        },
-                        "status": "submitted"
-                    },
+                "data": [
                     {
-                        "_id": "6011136a2d25b926974d9ec9",
-                        "title": "Keep Our Schools Alive! (Petition)",
-                        "status": "submitted",
+                        "_id": "66ac9949227504a96d8dce1c",
                         "certificate": {
-                            "eligible": false,
-                            "templateId": "600acc42c7de076e6f995147",
-                            "message": "Not submitted the project the project within program end date"
-                        }
+                            "status": "active",
+                            "eligible": true,
+                            "transactionId": "a0d7ce6e-7c9f-4da8-8188-40e8a6f82541",
+                            "issuedOn": "2024-08-06T09:11:06.329Z",
+                            "pdfPath": "https://storage.googleapis.com/mentoring-dev-storage-private/project/dff195ca-0641-4a18-bbcb-246961d34250/1/a61c8091-e70e-4083-99b8-844e5884c708/output.pdf?GoogleAccessId=sl-mentoring-dev-storage%40sl-dev-project.iam.gserviceaccount.com&Expires=1723014659&Signature=pnLcUtS6wFO3Zw4C7IuiOHTdEsWdkNoj35hE8cpM27wJX5uxEdI7ytsJNmYZugJMcZpDeHtajkOU1CH9L8m84v6cA2ZB6WgxaOPssvb11k%2Bbzix%2FvWKnlMIAVNNcVjwkez%2BQXLgokxCoDgTEK3poeN3uPBqbP6xa8G7mq8ltrH5z1OuZZtMVO5zmh7r6%2BdDjnk%2BkqkxTiNQSTRwrVYwD6H6CdI7xgd9Y2z%2BER5m%2FjDCZeHbDMGGsqohWn37zI0sj%2FPNeK04iaLwyL%2B7%2FynAMFmk5AJ0GmCC3H%2FexbmfSGVAhSOCkhVl5VmcvOD8nx%2FNiuMymZaQqM3m%2FQEhZl7UUDw%3D%3D",
+                            "svgPath": "https://storage.googleapis.com/mentoring-dev-storage-private/project/25291645-6583-46ac-becb-35ce2ac1064c/1/d664feff-1d12-4877-be46-6fac41172852/template.svg?GoogleAccessId=sl-mentoring-dev-storage%40sl-dev-project.iam.gserviceaccount.com&Expires=1723014659&Signature=vxdkUbfVn4BNDJxjLukkcBK0ddOMa6NGPikyJIL397mKujfwqrTpX1IDcAZwVhy4MJK9NVRCP85BBhLZQvoTU5SkzapqgRN7xL1bQDUsxuyK7NVlRyKuVgEZ5BEJ3YmNFZesli470tUSz36CA2vcz9gfegHPujybhT5%2BxyBZ1bymA98Fy7cEUJDSalG3RL78WWz8jUkHiY%2FBMcA2QIN727zvUk8oAk4ZvZSSS8bp5EEC5Xavu6vNttcbbEUDpbzlGSemCc%2BqBGlmA2fhte3YtM%2Bb2XeHTzW4fqUlotcbATEZmpCJ37w1gco62lqOyPWn4x8Xyp3ApTJFhz3UVC2VYg%3D%3D"
+                        },
+                        "status": "submitted",
+                        "title": "Tech Skill Club- Smart Learn",
+                        "solutionId": "66a2ba2b379d453de63b9248",
+                        "programId": "66a2ba1f379d453de63b9242",
+                        "completedDate": "2024-08-06T09:06:07.067Z",
+                        "programName": "DCPCR School Development Index 2018-19",
+                        "solutionName": "Tech Skill Club- Smart Learn",
+                        "userName": "priyanka"
                     }
                 ],
-                "count": 2,
+                "count": 1,
                 "certificateCount": 1
             }
         }
@@ -1164,10 +1182,10 @@ module.exports = class UserProjects extends Abstract {
     * @apiSampleRequest /project/v1/userProjects/certificateReIssue
     * @apiParamExample {json} Response:
     /**{
-            "message": "Successfully generated project certificate",
+            "message": "Submitted for project certificate reIssue",
             "status": 200,
             "result": {
-                "_id": "63446059eeffea2b819f036e"
+                "_id": "66ac9949227504a96d8dce1c"
             }
         }
     /**
@@ -1181,13 +1199,57 @@ module.exports = class UserProjects extends Abstract {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// ReIssue certificate of given project : projectId is passed as param
-				// This console has to be removed- adding to check the Issuer kid value in case rancher doesn't display console while deployment
-				console.log('+++++CERTIFICATE_ISSUER_KID+++++ : ', CERTIFICATE_ISSUER_KID)
 				let projectDetails = await userProjectsHelper.certificateReIssue(req.params._id)
 				return resolve({
 					message: projectDetails.message,
 					result: projectDetails.data,
 				})
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
+				})
+			}
+		})
+	}
+
+	/**
+    * @api {post} /project/v1/verifyCertificate/:_id
+    * ReIssue project certificate
+    * @apiVersion 1.0.0
+    * @apiGroup User Projects
+    * @apiSampleRequest /project/v1/userProjects/verifyCertificate/66ac9949227504a96d8dce1c
+    * @apiParamExample {json} Response:
+    /**{
+            "message": "Certificate verified successfully",
+            "status": 200,
+            "result": {
+                "projectId": "66ac9949227504a96d8dce1c",
+                "projectName": "Tech Skill Club- Smart Learn",
+                "programId": "66a2ba1f379d453de63b9242",
+                "solutionId": "66a2ba2b379d453de63b9248",
+                "userId": "1",
+                "isCertificateVerified": true,
+                "completedDate": "2024-08-06T09:06:07.067Z",
+                "eligible": true,
+                "certificatePdfUrl": "https://storage.googleapis.com/mentoring-dev-storage-private/project/dff195ca-0641-4a18-bbcb-246961d34250/1/a61c8091-e70e-4083-99b8-844e5884c708/output.pdf?GoogleAccessId=sl-mentoring-dev-storage%40sl-dev-project.iam.gserviceaccount.com&Expires=1722956711&Signature=XGKVOQdH0hqjlMUr3%2FwJVOeGLXS4d62TS8Y1CAOUJ1ntHxxC7FCZanukYqi%2FPpYLjPPxTMihYLrM5L1xkcpDwimRBUaDXSITTtkPVS6o9tOi7OZxFGEENY%2FYDMQsNEjPwE0C4mIN2dCjF2t9u0DupDay0cg8Byyep0mPa6UamCsPdsnvysZfNyCG4Z%2F98e4n7a7QXFhm2vt1Z1k8KCQXIMGdVtyJyNXCLrUyq5VZESkT5TUfAtup8QnNqK1hkFOKBl7H0st%2BOb2HzoICqLXgS8%2BWxFj3j8R%2F5PHfY4WM1Xc49mwp6dfJDO7skPvBLIIQ6v3WYOTm3QBjk8B7tBq%2B%2BA%3D%3D",
+                "certificateSvgUrl": "https://storage.googleapis.com/mentoring-dev-storage-private/project/25291645-6583-46ac-becb-35ce2ac1064c/1/d664feff-1d12-4877-be46-6fac41172852/template.svg?GoogleAccessId=sl-mentoring-dev-storage%40sl-dev-project.iam.gserviceaccount.com&Expires=1722956711&Signature=gUGRNgykUz3Jp%2FiNC82UkSkJhOXR3E8qY58UhkvCSGmJ%2FD34AdkR8HYropHfNeX191CwV%2F7%2FNR0bvgHubCg3a2v9qDelYK5tvAwZ%2FC9pUoaIyYTdmq6yqq9m%2FbdjC%2BmBERpLT8IDVfHl7nttw%2FiIhP%2BVj8NnejVbS%2FgFa7jOe7iFwNVjxXiBspfjnq1Dh9v%2FN9d6NibyTljQx%2FLDUpJ6DfwoAwmnytZUg94%2FwuwGpgCK0FbR78UlJGSanDtJvyZ%2FGh3pkV4ulr%2BLqLfSIMjLI3yjxBVNmkLv0f%2FXP3cH8ULvRT%2BzYtWXU0yRUK%2ByJaCgF%2BIzTCXtzXLZuCLhxxnOeA%3D%3D"
+            }
+        }
+    /**
+	 * Verify project certificate
+	 * @method
+	 * @name verifyCertificate
+	 * @param {String} projectId - projectId.
+	 * @returns {JSON} certificate details.
+	 */
+	async verifyCertificate(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				const projectId = req.params._id
+				const verifyCertificateData = await userProjectsHelper.verifyCertificate(projectId)
+				return resolve(verifyCertificateData)
 			} catch (error) {
 				return reject({
 					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,

@@ -603,6 +603,28 @@ function arrayIdsTobjectIds(ids) {
 	return ids.map((id) => ObjectId(id))
 }
 
+/**
+ * Convert ISO 8601 date string to readable format
+ * @method
+ * @name formatISODate
+ * @param {String} isoDate - ISO 8601 date string.
+ * @returns {String} - Formatted date string to human readable date.
+ */
+function formatISODateToReadableDate(isoDate) {
+	// Convert the ISO 8601 date string to a Date object
+	const date = new Date(isoDate)
+
+	// Define options for the desired date format
+	const options = {
+		day: '2-digit', // e.g., 16
+		month: 'long', // e.g., July
+		year: 'numeric', // e.g., 2024
+	}
+
+	const readableDate = date.toLocaleDateString('en-GB', options)
+	return readableDate
+}
+
 module.exports = {
 	camelCaseToTitleCase: camelCaseToTitleCase,
 	lowerCase: lowerCase,
@@ -632,4 +654,5 @@ module.exports = {
 	md5Hash: md5Hash,
 	dateDiffInDays: dateDiffInDays,
 	arrayIdsTobjectIds: arrayIdsTobjectIds,
+	formatISODateToReadableDate: formatISODateToReadableDate,
 }

@@ -214,4 +214,7 @@ module.exports = {
 	SOLUTION_TYPE_INVALID: 'Invalid solution type',
 	INPUT_IS_NOT_A_VALID_ARRAY: 'Input is not a valid array',
 	USER_DATA_FETCH_UNSUCCESSFUL: 'User data fetch unsuccessful',
+	PROJECT_NOT_ELIGIBLE_FOR_CERTIFICATE: 'Project not eligible for certificate',
+	CERTIFICATE_NOT_AVAILABLE_FOR_THE_PROJECT: 'Certificate not available for the project',
+	CERTIFICATE_VERIFIED_SUCCESSFULLY: 'Certificate verified successfully',
 }

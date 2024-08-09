@@ -705,7 +705,7 @@ const createChart = async function (chartData, imgPath) {
  * @param {string} userId - The ID of the user initiating the upload.
  * @param {string} folderPath - The path to the folder where the PDF file is located.
  */
-const uploadPdfToCloud = async function (fileName, userId, folderPath) {
+exports.uploadPdfToCloud = async function (fileName, userId, folderPath) {
 	return new Promise(async function (resolve, reject) {
 		try {
 			// Generate a unique identifier

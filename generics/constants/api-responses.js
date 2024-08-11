@@ -217,4 +217,5 @@ module.exports = {
 	PROJECT_NOT_ELIGIBLE_FOR_CERTIFICATE: 'Project not eligible for certificate',
 	CERTIFICATE_NOT_AVAILABLE_FOR_THE_PROJECT: 'Certificate not available for the project',
 	CERTIFICATE_VERIFIED_SUCCESSFULLY: 'Certificate verified successfully',
+	CONFIGURATION_FETCHED_SUCCESSFULLY: 'Configuration fetched successfully',
 }

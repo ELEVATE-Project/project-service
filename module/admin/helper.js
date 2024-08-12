@@ -11,6 +11,7 @@
  * @class
  */
 const adminQueries = require(DB_QUERY_BASE_PATH + '/admin')
+const configurationQueries = require(DB_QUERY_BASE_PATH + '/configurations')
 module.exports = class AdminHelper {
 	/**
 	 * create index in the model.
@@ -32,6 +33,16 @@ module.exports = class AdminHelper {
 					indexNotPresent.forEach(async (key) => {
 						await adminQueries.createIndex(collection, key)
 					})
+					//If indexing is happening in solutions collection update the configuration table
+					if (collection === CONSTANTS.common.SOLUTION_MODEL_NAME) {
+						// Filter keys that start with "scope." and extract the part after "scope."
+						const scopeKeys = keys
+							.filter((key) => key.startsWith('scope.')) // Filter out keys that start with "scope."
+							.map((key) => key.split('scope.')[1]) // Extract the part after "scope."
+						if (scopeKeys.length > 0) {
+							await configurationQueries.createOrUpdate('keysAllowedForTargeting', scopeKeys)
+						}
+					}
 					return resolve({
 						message: CONSTANTS.apiResponses.KEYS_INDEXED_SUCCESSFULL,
 						success: true,

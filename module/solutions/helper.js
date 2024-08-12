@@ -2418,9 +2418,21 @@ module.exports = class SolutionsHelper {
 					} else if (filter == CONSTANTS.common.ASSIGN_TO_ME) {
 						query['isAPrivateProgram'] = false
 					} else {
-						query['referenceFrom'] = CONSTANTS.common.LINK
+						query['$or'] = [
+							{
+								$and: [{ programId: { $exists: false } }, { projectTemplateId: { $exists: true } }],
+							},
+							{
+								$and: [
+									{ programId: { $exists: true } },
+									{ isAPrivateProgram: true },
+									{ projectTemplateId: { $exists: true } },
+								],
+							},
+						]
 					}
 				}
+
 				let projects = await this.projects(
 					query,
 					searchQuery,

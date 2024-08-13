@@ -1082,14 +1082,14 @@ module.exports = class UserProjectsHelper {
 			try {
 				let solutionExternalId = ''
 				let templateDocuments
-				console.log('templateId : ', templateId)
+
 				if (templateId !== '') {
 					templateDocuments = await projectTemplateQueries.templateDocument({
 						externalId: templateId,
 						isReusable: false,
 						// solutionId: { $exists: true },
 					})
-					console.log('templateDocuments :', templateDocuments)
+
 					if (!templateDocuments.length > 0) {
 						throw {
 							message: CONSTANTS.apiResponses.PROJECT_TEMPLATE_NOT_FOUND,
@@ -1100,7 +1100,7 @@ module.exports = class UserProjectsHelper {
 					solutionId = templateDocuments[0].solutionId ? templateDocuments[0].solutionId : solutionId
 					solutionExternalId = templateDocuments[0].solutionExternalId
 				}
-				console.log('solutionId : ', solutionId)
+
 				let userRoleInformation = _.omit(bodyData, ['referenceFrom', 'submissions', 'hasAcceptedTAndC', 'link'])
 
 				if (projectId === '') {
@@ -1123,11 +1123,10 @@ module.exports = class UserProjectsHelper {
 					} else {
 						let isAPrivateSolution = targetedSolutionId.result.isATargetedSolution === false ? true : false
 						let solutionDetails = {}
-						console.log('isAPrivateSolution : ', isAPrivateSolution)
+
 						if (templateId === '') {
 							// If solution Id of a private program is passed, fetch solution details
 							if (isAPrivateSolution && solutionId != '') {
-								console.log('coming here')
 								solutionDetails = await solutionsQueries.solutionsDocument(
 									{
 										_id: solutionId,
@@ -1156,16 +1155,14 @@ module.exports = class UserProjectsHelper {
 									}
 								}
 								solutionDetails = solutionDetails[0]
-								console.log('IIIIII', solutionDetails)
 							} else {
-								console.log('reached hert+++')
 								solutionDetails = await solutionsHelper.detailsBasedOnRoleAndLocation(
 									solutionId,
 									bodyData,
 									'',
 									isAPrivateSolution
 								)
-								console.log('g+++ : ', solutionDetails)
+
 								// await coreService.solutionDetailsBasedOnRoleAndLocation(
 								//     userToken,
 								//     bodyData,
@@ -1192,7 +1189,6 @@ module.exports = class UserProjectsHelper {
 								}
 							}
 						} else {
-							console.log('reaaaaaa')
 							solutionDetails = await solutionsQueries.solutionsDocument(solutionId)
 							solutionDetails = solutionDetails[0]
 							// if( !solutionDetails.success ) {
@@ -1257,7 +1253,6 @@ module.exports = class UserProjectsHelper {
 						}
 
 						let projectCreation = await this.userAssignedProjectCreation(projectTemplateId, userId)
-						console.log('gfdakdgfkl', projectCreation, solutionDetails.isAPrivateProgram)
 						if (!projectCreation.success) {
 							return resolve(projectCreation)
 						}

@@ -944,7 +944,7 @@ module.exports = class SolutionsHelper {
 				console.log('validate Entity : ', validateEntity)
 				// If validate entity set to ON . strict scoping should be applied
 				if (validateEntity !== CONSTANTS.common.OFF) {
-					Object.keys(_.omit(data, ['filter', 'role', 'factors'])).forEach((requestedDataKey) => {
+					Object.keys(_.omit(data, ['filter', 'role', 'factors', 'type'])).forEach((requestedDataKey) => {
 						if (requestedDataKey == 'entities') entities.push(...data[requestedDataKey])
 						if (requestedDataKey == 'entityType') entityTypes.push(data[requestedDataKey])
 					})
@@ -967,7 +967,7 @@ module.exports = class SolutionsHelper {
 					filterQuery['scope.entityType'] = { $in: entityTypes }
 				} else {
 					// Obtain userInfo
-					let userRoleInfo = _.omit(data, ['filter', 'factors', 'role'])
+					let userRoleInfo = _.omit(data, ['filter', 'factors', 'role', 'type'])
 					let userRoleKeys = Object.keys(userRoleInfo)
 					let queryFilter = []
 

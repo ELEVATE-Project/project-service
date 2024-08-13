@@ -1103,7 +1103,10 @@ module.exports = class UserProjectsHelper {
 
 				if (projectId === '') {
 					// This will check wether the user user is targeted to solution or not based on his userRoleInformation
-					const targetedSolutionId = await solutionsHelper.isTargetedBasedOnUserProfile(solutionId, bodyData)
+					const targetedSolutionId = await solutionsHelper.isTargetedBasedOnUserProfile(
+						solutionId,
+						userRoleInformation
+					)
 					//based on above api will check for projects wether its is private project or public project
 					const projectDetails = await projectQueries.projectDocument(
 						{

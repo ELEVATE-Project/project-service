@@ -941,6 +941,7 @@ module.exports = class SolutionsHelper {
 					isReusable: false,
 					isDeleted: false,
 				}
+				console.log('validate Entity : ', validateEntity)
 				// If validate entity set to ON . strict scoping should be applied
 				if (validateEntity !== CONSTANTS.common.OFF) {
 					Object.keys(_.omit(data, ['filter', 'role', 'factors'])).forEach((requestedDataKey) => {
@@ -1024,7 +1025,6 @@ module.exports = class SolutionsHelper {
 				// } else {
 				//   filterQuery.status = CONSTANTS.common.ACTIVE_STATUS;
 				// }
-				console.log()
 
 				filterQuery.status = CONSTANTS.common.ACTIVE_STATUS
 				if (type != '') {

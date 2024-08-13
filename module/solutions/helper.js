@@ -291,7 +291,7 @@ module.exports = class SolutionsHelper {
 	 * @returns {JSON} solution creation data.
 	 */
 
-	static createSolution(userToken, solutionData, checkDate = false) {
+	static createSolution(solutionData, checkDate = false) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				solutionData.type = solutionData.subType = CONSTANTS.common.IMPROVEMENT_PROJECT
@@ -684,7 +684,6 @@ module.exports = class SolutionsHelper {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let queryData = await this.queryBasedOnRoleAndLocation(bodyData, type)
-
 				if (!queryData.success) {
 					return resolve(queryData)
 				}
@@ -935,20 +934,23 @@ module.exports = class SolutionsHelper {
 	static queryBasedOnRoleAndLocation(data, type = '') {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let entities = []
+				let registryIds = []
 				let entityTypes = []
 				let filterQuery = {
 					isReusable: false,
 					isDeleted: false,
 				}
+				Object.keys(_.omit(data, ['role', 'filter', 'factor'])).forEach((key) => {
+					data[key] = data[key].split(',')
+				})
 
 				// If validate entity set to ON . strict scoping should be applied
 				if (validateEntity !== CONSTANTS.common.OFF) {
-					Object.keys(_.omit(data, ['filter', 'role', 'factors', 'type'])).forEach((requestedDataKey) => {
-						if (requestedDataKey == 'entities') entities.push(...data[requestedDataKey])
-						if (requestedDataKey == 'entityType') entityTypes.push(data[requestedDataKey])
+					Object.keys(_.omit(data, ['filter', 'role', 'factors'])).forEach((requestedDataKey) => {
+						registryIds.push(...data[requestedDataKey])
+						entityTypes.push(requestedDataKey)
 					})
-					if (!entities.length > 0) {
+					if (!registryIds.length > 0) {
 						throw {
 							message: CONSTANTS.apiResponses.NO_LOCATION_ID_FOUND_IN_DATA,
 						}
@@ -963,7 +965,13 @@ module.exports = class SolutionsHelper {
 					filterQuery['scope.roles'] = {
 						$in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')],
 					}
-					filterQuery['scope.entities'] = { $in: entities }
+					// filterQuery['scope.entities'] = { $in: entities }
+					filterQuery.$or = []
+					Object.keys(_.omit(data, ['filter', 'role', 'factors'])).forEach((key) => {
+						filterQuery.$or.push({
+							[`scope.${key}`]: { $in: data[key] },
+						})
+					})
 					filterQuery['scope.entityType'] = { $in: entityTypes }
 				} else {
 					// Obtain userInfo
@@ -1712,7 +1720,7 @@ module.exports = class SolutionsHelper {
 	 * @returns {JSON} - Added entities data.
 	 */
 
-	static addEntitiesInScope(solutionId, entities, usertoken) {
+	static addEntitiesInScope(solutionId, entities) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let solutionData = await solutionsQueries.solutionsDocument(
@@ -1933,6 +1941,7 @@ module.exports = class SolutionsHelper {
 					'name',
 					'projectTemplateId',
 				])
+				console.log(solutionData, '\n')
 
 				if (!Array.isArray(solutionData) || solutionData.length < 1) {
 					response.solutionId = solutionDetails[0]._id
@@ -2678,7 +2687,6 @@ module.exports = class SolutionsHelper {
 				if (filter === CONSTANTS.common.DISCOVERED_BY_ME) {
 					getTargetedSolution = false
 				}
-
 				if (getTargetedSolution) {
 					targetedSolutions = await this.forUserRoleAndLocation(
 						requestedData,
@@ -2826,7 +2834,7 @@ module.exports = class SolutionsHelper {
 			try {
 				let verifySolution = await this.verifySolutionDetails(link, userId, userToken)
 				let checkForTargetedSolution = await this.checkForTargetedSolution(link, bodyData, userId, userToken)
-
+				console.log('checkForTargetedSolution\n', checkForTargetedSolution, '\n')
 				if (!checkForTargetedSolution || Object.keys(checkForTargetedSolution.result).length <= 0) {
 					return resolve(checkForTargetedSolution)
 				}
@@ -2943,6 +2951,7 @@ module.exports = class SolutionsHelper {
 							throw new Error(CONSTANTS.apiResponses.LINK_IS_EXPIRED)
 						}
 					} else {
+						console.log('-------------------not targeted------------------')
 						if (!isSolutionActive) {
 							throw new Error(CONSTANTS.apiResponses.LINK_IS_EXPIRED)
 						}

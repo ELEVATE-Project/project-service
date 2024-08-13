@@ -93,7 +93,6 @@ module.exports = class Solutions extends Abstract {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let solutionData = await solutionsHelper.createSolution(
-					req.userDetails.userToken,
 					req.body,
 					true //this is true for when its called via API calls
 				)
@@ -573,11 +572,7 @@ module.exports = class Solutions extends Abstract {
 	async addEntitiesInScope(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let solutionUpdated = await solutionsHelper.addEntitiesInScope(
-					req.params._id,
-					req.body.entities,
-					req.userDetails.userToken
-				)
+				let solutionUpdated = await solutionsHelper.addEntitiesInScope(req.params._id, req.body.entities)
 
 				return resolve(solutionUpdated)
 			} catch (error) {

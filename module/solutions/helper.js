@@ -990,6 +990,7 @@ module.exports = class SolutionsHelper {
 						// append query filter
 						filterQuery['$or'] = queryFilter
 					} else {
+						console.log('inside else condition')
 						userRoleKeys.forEach((key) => {
 							let scope = 'scope.' + key
 							let values = userRoleInfo[key]
@@ -1004,6 +1005,10 @@ module.exports = class SolutionsHelper {
 								['scope.roles']: { $in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')] },
 							})
 						}
+
+						// append query filter
+						filterQuery['$and'] = queryFilter
+						console.log('queryFilter : ', JSON.stringify(filterQuery))
 					}
 				}
 
@@ -1019,6 +1024,7 @@ module.exports = class SolutionsHelper {
 				// } else {
 				//   filterQuery.status = CONSTANTS.common.ACTIVE_STATUS;
 				// }
+				console.log()
 
 				filterQuery.status = CONSTANTS.common.ACTIVE_STATUS
 				if (type != '') {

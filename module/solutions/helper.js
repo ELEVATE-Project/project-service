@@ -738,6 +738,7 @@ module.exports = class SolutionsHelper {
 				if (programId !== '') {
 					matchQuery['programId'] = ObjectId(programId)
 				}
+				console.log('queryData : ', queryData)
 				// matchQuery["startDate"] = { $lte: new Date() };
 				// for survey type solutions even after expiry it should be visible to user for 15 days
 				let targetedSolutions = await this.list(type, subType, matchQuery, pageNo, pageSize, searchText, [
@@ -1040,7 +1041,7 @@ module.exports = class SolutionsHelper {
 
 					filterQuery = _.merge(filterQuery, data.filter)
 				}
-
+				console.log('filterQuery : ', filterQuery)
 				return resolve({
 					success: true,
 					data: filterQuery,

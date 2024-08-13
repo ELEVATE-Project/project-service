@@ -5,7 +5,6 @@
  * Description : Certificate Template related helper functionality.
  */
 // dependencies
-const request = require('request')
 const axios = require('axios')
 let fs = require('fs')
 const cheerio = require('cheerio')
@@ -251,13 +250,7 @@ module.exports = class CertificateTemplatesHelper {
 				const $ = cheerio.load(baseTemplate.result)
 				let htmltags = ['<html>', '</html>', '<head>', '</head>', '<body>', '</body>']
 				let imageNames = ['stateLogo1', 'stateLogo2', 'signatureImg1', 'signatureImg2']
-				let textKeys = [
-					'stateTitle',
-					'signatureTitleName1',
-					'signatureTitleDesignation1',
-					'signatureTitleName2',
-					'signatureTitleDesignation2',
-				]
+				let textKeys = ['stateTitle', 'signatureTitle1a', 'signatureTitle2a']
 
 				// edit image elements
 				for (let imageNamesIndex = 0; imageNamesIndex < imageNames.length; imageNamesIndex++) {
@@ -321,25 +314,16 @@ module.exports = class CertificateTemplatesHelper {
 const getBaseTemplate = function (templateUrl) {
 	return new Promise(async (resolve, reject) => {
 		try {
-			axios
-				.get(templateUrl)
-				.then((response) => {
-					if (response.status === 200) {
-						return {
-							success: true,
-							result: response.data,
-						}
-					} else {
-						throw {
-							success: false,
-						}
-					}
+			const response = await axios.get(templateUrl)
+			if (response.status == 200) {
+				return resolve({
+					success: true,
+					result: response.data,
 				})
-				.catch((error) => {
-					throw {
-						success: false,
-					}
-				})
+			}
+			return resolve({
+				success: false,
+			})
 		} catch (error) {
 			return reject(error)
 		}

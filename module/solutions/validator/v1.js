@@ -9,7 +9,7 @@ module.exports = (req) => {
 	let solutionsValidator = {
 		create: function () {
 			req.checkBody('programExternalId').exists().withMessage('required program externalId')
-			req.checkBody('entityType').exists().withMessage('required entity type')
+			// req.checkBody('entityType').exists().withMessage('required entity type')
 			req.checkBody('externalId').exists().withMessage('required solution externalId')
 			req.checkBody('name').exists().withMessage('required solution name')
 		},
@@ -75,9 +75,9 @@ module.exports = (req) => {
 				.withMessage('required solution id')
 				.isMongoId()
 				.withMessage('Invalid solution ID')
-			req.checkBody('entities').exists().withMessage('required entities to remove')
-			req.checkBody('role').exists().withMessage('roles required')
-			req.checkBody('entityType').exists().withMessage('entityType required')
+			// req.checkBody('entities').exists().withMessage('required entities to remove')
+			// req.checkBody('role').exists().withMessage('roles required')
+			// req.checkBody('entityType').exists().withMessage('entityType required')
 		},
 		forUserRoleAndLocation: function () {
 			req.checkBody('entities').exists().withMessage('required entities to remove')
@@ -85,9 +85,9 @@ module.exports = (req) => {
 			req.checkBody('entityType').exists().withMessage('entityType required')
 		},
 		targetedSolutions: function () {
-			req.checkBody('entities').exists().withMessage('required entities to remove')
-			req.checkBody('role').exists().withMessage('roles required')
-			req.checkBody('entityType').exists().withMessage('entityType required')
+			// req.checkBody('entities').exists().withMessage('required entities to remove')
+			// req.checkBody('role').exists().withMessage('roles required')
+			// req.checkBody('entityType').exists().withMessage('entityType required')
 		},
 		isTargetedBasedOnUserProfile: function () {
 			req.checkParams('_id')
@@ -97,7 +97,7 @@ module.exports = (req) => {
 				.withMessage('Invalid solution ID')
 			req.checkBody('entities').exists().withMessage('required entities to remove')
 			req.checkBody('role').exists().withMessage('roles required')
-			req.checkBody('entityType').exists().withMessage('entityType required')
+			// req.checkBody('entityType').exists().withMessage('entityType required')
 		},
 		getDetails: function () {
 			req.checkParams('_id')
@@ -107,16 +107,15 @@ module.exports = (req) => {
 				.withMessage('Invalid solution ID')
 		},
 		details: function () {
-			req
-				.checkParams('_id')
+			req.checkParams('_id')
 				.exists()
 				.withMessage('required solution id')
 				.isMongoId()
-				.withMessage('Invalid solution ID'),
-				req.checkBody('entities').exists().withMessage('required entities')
-			req.checkBody('role').exists().withMessage('roles required')
-			req.checkBody('entityType').exists().withMessage('entityType required')
-			req.checkBody('entityTypeId').exists().withMessage('entityTypeId required')
+				.withMessage('Invalid solution ID')
+			// 	req.checkBody('entities').exists().withMessage('required entities')
+			// req.checkBody('role').exists().withMessage('roles required')
+			// req.checkBody('entityType').exists().withMessage('entityType required')
+			// req.checkBody('entityTypeId').exists().withMessage('entityTypeId required')
 		},
 	}
 

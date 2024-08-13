@@ -226,14 +226,12 @@ module.exports = class CertificateTemplatesHelper {
 	static createSvg(files, textData, baseTemplateId) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let baseTemplateData = await certificateBaseTemplateQueries
-					.findDocument(
-						{
-							_id: baseTemplateId,
-						},
-						['url']
-					)
-					.lean()
+				let baseTemplateData = await certificateBaseTemplateQueries.findDocument(
+					{
+						_id: baseTemplateId,
+					},
+					['url']
+				)
 
 				if (!(baseTemplateData.length > 0) || !baseTemplateData[0].url || baseTemplateData[0].url == '') {
 					throw {

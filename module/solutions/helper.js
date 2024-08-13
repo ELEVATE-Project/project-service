@@ -738,6 +738,7 @@ module.exports = class SolutionsHelper {
 				if (programId !== '') {
 					matchQuery['programId'] = ObjectId(programId)
 				}
+
 				// matchQuery["startDate"] = { $lte: new Date() };
 				// for survey type solutions even after expiry it should be visible to user for 15 days
 				let targetedSolutions = await this.list(type, subType, matchQuery, pageNo, pageSize, searchText, [
@@ -940,9 +941,10 @@ module.exports = class SolutionsHelper {
 					isReusable: false,
 					isDeleted: false,
 				}
+
 				// If validate entity set to ON . strict scoping should be applied
 				if (validateEntity !== CONSTANTS.common.OFF) {
-					Object.keys(_.omit(data, ['filter', 'role', 'factors'])).forEach((requestedDataKey) => {
+					Object.keys(_.omit(data, ['filter', 'role', 'factors', 'type'])).forEach((requestedDataKey) => {
 						if (requestedDataKey == 'entities') entities.push(...data[requestedDataKey])
 						if (requestedDataKey == 'entityType') entityTypes.push(data[requestedDataKey])
 					})
@@ -965,7 +967,7 @@ module.exports = class SolutionsHelper {
 					filterQuery['scope.entityType'] = { $in: entityTypes }
 				} else {
 					// Obtain userInfo
-					let userRoleInfo = _.omit(data, ['filter', 'factors', 'role'])
+					let userRoleInfo = _.omit(data, ['filter', 'factors', 'role', 'type'])
 					let userRoleKeys = Object.keys(userRoleInfo)
 					let queryFilter = []
 
@@ -981,7 +983,7 @@ module.exports = class SolutionsHelper {
 									['scope.roles']: { $in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')] },
 								})
 							} else if (!Array.isArray(values)) {
-								queryFilter.push({ [scope]: { $in: [values] } })
+								queryFilter.push({ [scope]: { $in: values.split(',') } })
 							} else {
 								queryFilter.push({ [scope]: { $in: [...values] } })
 							}
@@ -993,16 +995,20 @@ module.exports = class SolutionsHelper {
 							let scope = 'scope.' + key
 							let values = userRoleInfo[key]
 							if (!Array.isArray(values)) {
-								queryFilter.push({ [scope]: { $in: [values] } })
+								queryFilter.push({ [scope]: { $in: values.split(',') } })
 							} else {
 								queryFilter.push({ [scope]: { $in: [...values] } })
 							}
 						})
+
 						if (data.role) {
 							queryFilter.push({
 								['scope.roles']: { $in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')] },
 							})
 						}
+
+						// append query filter
+						filterQuery['$and'] = queryFilter
 					}
 				}
 
@@ -2418,9 +2424,21 @@ module.exports = class SolutionsHelper {
 					} else if (filter == CONSTANTS.common.ASSIGN_TO_ME) {
 						query['isAPrivateProgram'] = false
 					} else {
-						query['referenceFrom'] = CONSTANTS.common.LINK
+						query['$or'] = [
+							{
+								$and: [{ programId: { $exists: false } }, { projectTemplateId: { $exists: true } }],
+							},
+							{
+								$and: [
+									{ programId: { $exists: true } },
+									{ isAPrivateProgram: true },
+									{ projectTemplateId: { $exists: true } },
+								],
+							},
+						]
 					}
 				}
+
 				let projects = await this.projects(
 					query,
 					searchQuery,

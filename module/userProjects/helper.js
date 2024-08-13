@@ -1089,6 +1089,7 @@ module.exports = class UserProjectsHelper {
 						isReusable: false,
 						// solutionId: { $exists: true },
 					})
+
 					if (!templateDocuments.length > 0) {
 						throw {
 							message: CONSTANTS.apiResponses.PROJECT_TEMPLATE_NOT_FOUND,
@@ -1099,11 +1100,15 @@ module.exports = class UserProjectsHelper {
 					solutionId = templateDocuments[0].solutionId ? templateDocuments[0].solutionId : solutionId
 					solutionExternalId = templateDocuments[0].solutionExternalId
 				}
-				let userRoleInformation = _.omit(bodyData, ['referenceFrom', 'submissions', 'hasAcceptedTAndC'])
+
+				let userRoleInformation = _.omit(bodyData, ['referenceFrom', 'submissions', 'hasAcceptedTAndC', 'link'])
 
 				if (projectId === '') {
 					// This will check wether the user user is targeted to solution or not based on his userRoleInformation
-					const targetedSolutionId = await solutionsHelper.isTargetedBasedOnUserProfile(solutionId, bodyData)
+					const targetedSolutionId = await solutionsHelper.isTargetedBasedOnUserProfile(
+						solutionId,
+						userRoleInformation
+					)
 					//based on above api will check for projects wether its is private project or public project
 					const projectDetails = await projectQueries.projectDocument(
 						{
@@ -1157,6 +1162,7 @@ module.exports = class UserProjectsHelper {
 									'',
 									isAPrivateSolution
 								)
+
 								// await coreService.solutionDetailsBasedOnRoleAndLocation(
 								//     userToken,
 								//     bodyData,
@@ -1247,7 +1253,6 @@ module.exports = class UserProjectsHelper {
 						}
 
 						let projectCreation = await this.userAssignedProjectCreation(projectTemplateId, userId)
-
 						if (!projectCreation.success) {
 							return resolve(projectCreation)
 						}

@@ -983,7 +983,7 @@ module.exports = class SolutionsHelper {
 							} else if (!Array.isArray(values)) {
 								queryFilter.push({ [scope]: { $in: [values] } })
 							} else {
-								queryFilter.push({ [scope]: { $in: [...values] } })
+								queryFilter.push({ [scope]: { $in: [...values.split(',')] } })
 							}
 						})
 						// append query filter
@@ -995,7 +995,7 @@ module.exports = class SolutionsHelper {
 							if (!Array.isArray(values)) {
 								queryFilter.push({ [scope]: { $in: [values] } })
 							} else {
-								queryFilter.push({ [scope]: { $in: [...values] } })
+								queryFilter.push({ [scope]: { $in: [...values.split(',')] } })
 							}
 						})
 						if (data.role) {

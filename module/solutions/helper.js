@@ -983,24 +983,24 @@ module.exports = class SolutionsHelper {
 									['scope.roles']: { $in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')] },
 								})
 							} else if (!Array.isArray(values)) {
-								queryFilter.push({ [scope]: { $in: [values] } })
+								queryFilter.push({ [scope]: { $in: values.split(',') } })
 							} else {
-								queryFilter.push({ [scope]: { $in: [...values.split(',')] } })
+								queryFilter.push({ [scope]: { $in: [...values] } })
 							}
 						})
 						// append query filter
 						filterQuery['$or'] = queryFilter
 					} else {
-						console.log('inside else condition')
 						userRoleKeys.forEach((key) => {
 							let scope = 'scope.' + key
 							let values = userRoleInfo[key]
 							if (!Array.isArray(values)) {
-								queryFilter.push({ [scope]: { $in: [values] } })
+								queryFilter.push({ [scope]: { $in: values.split(',') } })
 							} else {
-								queryFilter.push({ [scope]: { $in: [...values.split(',')] } })
+								queryFilter.push({ [scope]: { $in: [...values] } })
 							}
 						})
+
 						if (data.role) {
 							queryFilter.push({
 								['scope.roles']: { $in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')] },

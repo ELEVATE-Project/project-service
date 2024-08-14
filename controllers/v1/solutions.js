@@ -618,11 +618,7 @@ module.exports = class Solutions extends Abstract {
 	async removeEntitiesInScope(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let solutionUpdated = await solutionsHelper.removeEntitiesInScope(
-					req.params._id,
-					req.body.entities,
-					req.userDetails.userToken
-				)
+				let solutionUpdated = await solutionsHelper.removeEntitiesInScope(req.params._id, req.body.entities)
 
 				return resolve(solutionUpdated)
 			} catch (error) {

@@ -149,16 +149,15 @@ module.exports = class SolutionsHelper {
 				}
 
 				// let currentSolutionScope = {};
-				let scopeDatas = Object.keys(scopeData)
-				let scopeDataIndex = scopeDatas.map((index) => {
-					return `scope.${index}`
+				let scopeKeys = Object.keys(scopeData).map((key) => {
+					return `scope.${key}`
 				})
 
-				let solutionIndex = await solutionsQueries.listIndexesFunc()
-				let indexes = solutionIndex.map((indexedKeys) => {
+				let solutionIndexedKeys = await solutionsQueries.listIndexes()
+				let indexes = solutionIndexedKeys.map((indexedKeys) => {
 					return Object.keys(indexedKeys.key)[0]
 				})
-				let keysNotIndexed = _.differenceWith(scopeDataIndex, indexes)
+				let keysNotIndexed = _.differenceWith(scopeKeys, indexes)
 				// if (Object.keys(scopeData).length > 0) {
 				//   if (scopeData.entityType) {
 				//     let bodyData = { name: scopeData.entityType };
@@ -253,12 +252,22 @@ module.exports = class SolutionsHelper {
 					})
 					scopeData = _.omit(scopeData, keysCannotBeAdded)
 				}
+				const updateObject = {
+					$set: {},
+				}
+				updateObject['$set']['scope'] = scopeData
+				const entities = Object.keys(scopeData)
+					.filter((key) => key !== 'roles')
+					.reduce((acc, key) => acc.concat(scopeData[key]), [])
+				updateObject.$set.entities = entities
+				scopeData['entityType'] = Object.keys(_.omit(scopeData, ['roles'])).join(',')
+				updateObject['$set']['entityType'] = scopeData.entityType
 
 				let updateSolution = await solutionsQueries.updateSolutionDocument(
 					{
 						_id: solutionId,
 					},
-					{ $set: { scope: scopeData } },
+					updateObject,
 					{ new: true }
 				)
 
@@ -294,6 +303,11 @@ module.exports = class SolutionsHelper {
 	static createSolution(solutionData, checkDate = false) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				if (!solutionData.scope || !Object.keys(solutionData.scope).length > 0) {
+					throw {
+						message: CONSTANTS.apiResponses.SCOPE_DATA_MISSING,
+					}
+				}
 				solutionData.type = solutionData.subType = CONSTANTS.common.IMPROVEMENT_PROJECT
 				solutionData.resourceType = [CONSTANTS.common.RESOURCE_TYPE]
 				solutionData.language = [CONSTANTS.common.ENGLISH_LANGUAGE]
@@ -325,44 +339,44 @@ module.exports = class SolutionsHelper {
 					})
 				}
 
-				if (solutionData.entities && solutionData.entities.length > 0) {
-					let entityIds = []
-					let locationData = UTILS.filterLocationIdandCode(solutionData.entities)
+				// if (solutionData.entities && solutionData.entities.length > 0) {
+				// 	let entityIds = []
+				// 	let locationData = UTILS.filterLocationIdandCode(solutionData.entities)
 
-					if (locationData.ids.length > 0) {
-						let bodyData = {
-							id: locationData.ids,
-						}
-						let entityData = await entitiesService.entityDocuments(bodyData, 'all')
-						if (entityData.success) {
-							entityData.data.forEach((entity) => {
-								entityIds.push(entity._id)
-							})
-						}
-					}
+				// 	if (locationData.ids.length > 0) {
+				// 		let bodyData = {
+				// 			id: locationData.ids,
+				// 		}
+				// 		let entityData = await entitiesService.entityDocuments(bodyData, 'all')
+				// 		if (entityData.success) {
+				// 			entityData.data.forEach((entity) => {
+				// 				entityIds.push(entity._id)
+				// 			})
+				// 		}
+				// 	}
 
-					//   if (locationData.codes.length > 0) {
-					//     let filterData = {
-					//       externalId: locationData.codes,
-					//     };
-					//     let schoolDetails = await userService.orgSchoolSearch(filterData);
+				// 	  if (locationData.codes.length > 0) {
+				// 	    let filterData = {
+				// 	      externalId: locationData.codes,
+				// 	    };
+				// 	    let schoolDetails = await userService.orgSchoolSearch(filterData);
 
-					//     if (schoolDetails.success) {
-					//       let schoolData = schoolDetails.data;
-					//       schoolData.forEach((entity) => {
-					//         entityIds.push(entity.externalId);
-					//       });
-					//     }
-					//   }
+				// 	    if (schoolDetails.success) {
+				// 	      let schoolData = schoolDetails.data;
+				// 	      schoolData.forEach((entity) => {
+				// 	        entityIds.push(entity.externalId);
+				// 	      });
+				// 	    }
+				// 	  }
 
-					//   if (!entityIds.length > 0) {
-					//     throw {
-					//       message: CONSTANTS.apiResponses.ENTITIES_NOT_FOUND,
-					//     };
-					//   }
+				// 	  if (!entityIds.length > 0) {
+				// 	    throw {
+				// 	      message: CONSTANTS.apiResponses.ENTITIES_NOT_FOUND,
+				// 	    };
+				// 	  }
 
-					solutionData.entities = entityIds
-				}
+				// 	solutionData.entities = entityIds
+				// }
 
 				if (
 					solutionData.minNoOfSubmissionsRequired &&
@@ -408,10 +422,7 @@ module.exports = class SolutionsHelper {
 				)
 
 				if (!solutionData.excludeScope && programData[0].scope) {
-					let solutionScope = await this.setScope(
-						solutionCreation._id,
-						solutionData.scope ? solutionData.scope : {}
-					)
+					await this.setScope(solutionCreation._id, solutionData.scope ? solutionData.scope : {})
 				}
 
 				return resolve({
@@ -965,7 +976,7 @@ module.exports = class SolutionsHelper {
 					filterQuery['scope.roles'] = {
 						$in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')],
 					}
-					// filterQuery['scope.entities'] = { $in: entities }
+
 					filterQuery.$or = []
 					Object.keys(_.omit(data, ['filter', 'role', 'factors'])).forEach((key) => {
 						filterQuery.$or.push({
@@ -1098,7 +1109,7 @@ module.exports = class SolutionsHelper {
 					isATargetedSolution: false,
 					_id: solutionId,
 				}
-				let queryData = await this.queryBasedOnRoleAndLocation(bodyData, bodyData.type)
+				let queryData = await this.queryBasedOnRoleAndLocation(bodyData)
 				if (!queryData.success) {
 					return resolve(queryData)
 				}
@@ -1145,7 +1156,7 @@ module.exports = class SolutionsHelper {
 	 * @returns {JSON} - Details of solution based on role and location.
 	 */
 
-	static detailsBasedOnRoleAndLocation(solutionId, bodyData, type = '', isAPrivateSolution = '') {
+	static detailsBasedOnRoleAndLocation(solutionId, bodyData, type = '') {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let queryData = await this.queryBasedOnRoleAndLocation(bodyData, type)
@@ -1829,7 +1840,7 @@ module.exports = class SolutionsHelper {
 	 * @returns {JSON} - Removed entities from solution scope.
 	 */
 
-	static removeEntitiesInScope(solutionId, entities, userToken) {
+	static removeEntitiesInScope(solutionId, entities) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let solutionData = await solutionsQueries.solutionsDocument(
@@ -1868,14 +1879,15 @@ module.exports = class SolutionsHelper {
 				entitiesData.forEach((entity) => {
 					entityIds.push(entity._id)
 				})
-
+				let updateObject = {
+					$pull: {},
+				}
+				updateObject['$pull'][`scope.${solutionData[0].scope.entityType}`] = { $in: entityIds }
 				let updateSolution = await solutionsQueries.updateSolutionDocument(
 					{
 						_id: solutionId,
 					},
-					{
-						$pull: { 'scope.entities': { $in: entityIds } },
-					},
+					updateObject,
 					{ new: true }
 				)
 
@@ -1907,7 +1919,7 @@ module.exports = class SolutionsHelper {
 	 * @returns {Object} - Details of the solution.
 	 */
 
-	static checkForTargetedSolution(link = '', bodyData = {}, userId = '', userToken = '') {
+	static checkForTargetedSolution(link = '', bodyData = {}) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let response = {
@@ -1941,7 +1953,6 @@ module.exports = class SolutionsHelper {
 					'name',
 					'projectTemplateId',
 				])
-				console.log(solutionData, '\n')
 
 				if (!Array.isArray(solutionData) || solutionData.length < 1) {
 					response.solutionId = solutionDetails[0]._id
@@ -2833,8 +2844,7 @@ module.exports = class SolutionsHelper {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let verifySolution = await this.verifySolutionDetails(link, userId, userToken)
-				let checkForTargetedSolution = await this.checkForTargetedSolution(link, bodyData, userId, userToken)
-				console.log('checkForTargetedSolution\n', checkForTargetedSolution, '\n')
+				let checkForTargetedSolution = await this.checkForTargetedSolution(link, bodyData)
 				if (!checkForTargetedSolution || Object.keys(checkForTargetedSolution.result).length <= 0) {
 					return resolve(checkForTargetedSolution)
 				}
@@ -2951,7 +2961,6 @@ module.exports = class SolutionsHelper {
 							throw new Error(CONSTANTS.apiResponses.LINK_IS_EXPIRED)
 						}
 					} else {
-						console.log('-------------------not targeted------------------')
 						if (!isSolutionActive) {
 							throw new Error(CONSTANTS.apiResponses.LINK_IS_EXPIRED)
 						}

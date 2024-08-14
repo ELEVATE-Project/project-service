@@ -125,7 +125,7 @@ module.exports = class Solutions {
 	 * @returns {Array} list of indexes.
 	 */
 
-	static listIndexesFunc() {
+	static listIndexes() {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let indexData = await database.models.solutions.listIndexes()

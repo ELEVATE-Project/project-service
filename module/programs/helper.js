@@ -40,16 +40,15 @@ module.exports = class ProgramsHelper {
 					})
 				}
 
-				let scopeDatas = Object.keys(scopeData)
-				let scopeDataIndex = scopeDatas.map((index) => {
-					return `scope.${index}`
+				let scopeKeys = Object.keys(scopeData).map((key) => {
+					return `scope.${key}`
 				})
 
-				let programIndex = await programsQueries.listIndexesFunc()
-				let indexes = programIndex.map((indexedKeys) => {
+				let programIndexedKeys = await programsQueries.listIndexes()
+				let indexes = programIndexedKeys.map((indexedKeys) => {
 					return Object.keys(indexedKeys.key)[0]
 				})
-				let keysNotIndexed = _.differenceWith(scopeDataIndex, indexes)
+				let keysNotIndexed = _.differenceWith(scopeKeys, indexes)
 				// if (Object.keys(scopeData).length > 0) {
 				//   if (scopeData.entityType) {
 				//     let bodyData = { name: scopeData.entityType };
@@ -145,12 +144,21 @@ module.exports = class ProgramsHelper {
 					})
 					scopeData = _.omit(scopeData, keysCannotBeAdded)
 				}
-
+				const updateObject = {
+					$set: {},
+				}
+				updateObject['$set']['scope'] = scopeData
+				const entities = Object.keys(scopeData)
+					.filter((key) => key !== 'roles')
+					.reduce((acc, key) => acc.concat(scopeData[key]), [])
+				updateObject.$set.entities = entities
+				scopeData['entityType'] = Object.keys(_.omit(scopeData, ['roles'])).join(',')
+				updateObject['$set']['entityType'] = scopeData.entityType
 				let updateProgram = await programsQueries.findAndUpdate(
 					{
 						_id: programId,
 					},
-					{ $set: { scope: scopeData } },
+					updateObject,
 					{ new: true }
 				)
 
@@ -197,6 +205,11 @@ module.exports = class ProgramsHelper {
 					updatedBy: userId == '' ? data.userId : userId,
 				}
 
+				if (!data.scope || !Object.keys(data.scope).length > 0) {
+					throw {
+						message: CONSTANTS.apiResponses.SCOPE_DATA_MISSING,
+					}
+				}
 				if (checkDate) {
 					if (data.hasOwnProperty(CONSTANTS.common.END_DATE)) {
 						data.endDate = UTILS.getEndDate(data.endDate, timeZoneDifference)
@@ -441,7 +454,7 @@ module.exports = class ProgramsHelper {
 	 * @returns {JSON} - Added entities data.
 	 */
 
-	static addEntitiesInScope(programId, entities, userToken) {
+	static addEntitiesInScope(programId, entities) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let programData = await programsQueries.programsDocument(
@@ -478,14 +491,16 @@ module.exports = class ProgramsHelper {
 				entitiesData.forEach((entity) => {
 					entityIds.push(entity._id)
 				})
+				let updateObject = {
+					$addToSet: {},
+				}
+				updateObject['$addToSet'][`scope.${programData[0].scope.entityType}`] = { $each: entityIds }
 
 				let updateProgram = await programsQueries.findAndUpdate(
 					{
 						_id: programId,
 					},
-					{
-						$addToSet: { 'scope.entities': { $each: entityIds } },
-					},
+					updateObject,
 					{ new: true }
 				)
 
@@ -592,7 +607,7 @@ module.exports = class ProgramsHelper {
 						scope: { $exists: true },
 						isAPrivateProgram: false,
 					},
-					['_id', 'scope.entities']
+					['_id', 'scope.entityType']
 				)
 
 				if (!programData.length > 0) {
@@ -600,22 +615,34 @@ module.exports = class ProgramsHelper {
 						message: CONSTANTS.apiResponses.PROGRAM_NOT_FOUND,
 					}
 				}
-				let entitiesData = []
-				entitiesData = programData[0].scope.entities
+				let entitiesData = await entitiesService.entityDocuments(
+					{
+						_id: { $in: entities },
+						entityType: programData[0].scope.entityType,
+					},
+					['_id']
+				)
 
-				if (!entitiesData.length > 0) {
+				if (!entitiesData.success || !entitiesData.data.length > 0) {
 					throw {
 						message: CONSTANTS.apiResponses.ENTITIES_NOT_FOUND,
 					}
 				}
+				entitiesData = entitiesData.data
+				let entityIds = []
 
+				entitiesData.forEach((entity) => {
+					entityIds.push(entity._id)
+				})
+				let updateObject = {
+					$pull: {},
+				}
+				updateObject['$pull'][`scope.${programData[0].scope.entityType}`] = { $in: entityIds }
 				let updateProgram = await programsQueries.findAndUpdate(
 					{
 						_id: programId,
 					},
-					{
-						$pull: { 'scope.entities': { $in: entities } },
-					},
+					updateObject,
 					{ new: true }
 				)
 

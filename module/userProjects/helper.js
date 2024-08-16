@@ -1324,6 +1324,10 @@ module.exports = class UserProjectsHelper {
 								projectCreation.data.hasAcceptedTAndC = bodyData.hasAcceptedTAndC
 							}
 
+							if (bodyData.link) {
+								projectCreation.data.link = bodyData.link
+							}
+
 							if (bodyData.referenceFrom) {
 								projectCreation.data.referenceFrom = bodyData.referenceFrom
 

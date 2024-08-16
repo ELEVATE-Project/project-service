@@ -1146,6 +1146,7 @@ module.exports = class UserProjectsHelper {
 										'entityTypeId',
 										'language',
 										'creator',
+										'certificateTemplateId',
 									]
 								)
 								if (!solutionDetails.length > 0) {

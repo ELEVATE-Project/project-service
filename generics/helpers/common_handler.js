@@ -21,7 +21,7 @@ const GotenbergConnection = require(SERVICES_BASE_PATH + '/gotenberg')
  * @returns {String} 				- returns pdf uploaded link.
  */
 
-exports.improvementProjectPdfGeneration = async function (responseData, userId) {
+const improvementProjectPdfGeneration = async function (responseData, userId) {
 	return new Promise(async function (resolve, reject) {
 		try {
 			// construct a temp folder path
@@ -201,7 +201,7 @@ exports.improvementProjectPdfGeneration = async function (responseData, userId) 
  * @returns {String} 				- returns pdf uploaded link.
  */
 
-exports.improvementProjectTaskPdfGeneration = async function (responseData, userId) {
+const improvementProjectTaskPdfGeneration = async function (responseData, userId) {
 	return new Promise(async function (resolve, reject) {
 		let currentTempFolder = 'tmp/' + uuidv4() + '--' + Math.floor(Math.random() * (10000 - 10 + 1) + 10)
 
@@ -369,7 +369,7 @@ exports.improvementProjectTaskPdfGeneration = async function (responseData, user
  * @param {string} userId - User ID for identifying the uploader.
  * @returns {Promise<Object>} A promise that resolves to an object representing the result of PDF generation and upload.
  */
-exports.unnatiViewFullReportPdfGeneration = async function (responseData, userId) {
+const unnatiViewFullReportPdfGeneration = async function (responseData, userId) {
 	return new Promise(async function (resolve, reject) {
 		// Generate a unique temporary folder path
 		var currentTempFolder = 'tmp/' + uuidv4() + '--' + Math.floor(Math.random() * (10000 - 10 + 1) + 10)
@@ -705,7 +705,7 @@ const createChart = async function (chartData, imgPath) {
  * @param {string} userId - The ID of the user initiating the upload.
  * @param {string} folderPath - The path to the folder where the PDF file is located.
  */
-exports.uploadPdfToCloud = async function (fileName, userId, folderPath) {
+const uploadPdfToCloud = async function (fileName, userId, folderPath) {
 	return new Promise(async function (resolve, reject) {
 		try {
 			// Generate a unique identifier
@@ -775,4 +775,11 @@ async function copyBootStrapFile(from, to) {
 			return resolve(err)
 		})
 	})
+}
+
+module.exports = {
+	improvementProjectPdfGeneration: improvementProjectPdfGeneration,
+	improvementProjectTaskPdfGeneration: improvementProjectTaskPdfGeneration,
+	uploadPdfToCloud: uploadPdfToCloud,
+	unnatiViewFullReportPdfGeneration: unnatiViewFullReportPdfGeneration,
 }

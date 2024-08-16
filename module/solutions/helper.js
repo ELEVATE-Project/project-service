@@ -1773,7 +1773,6 @@ module.exports = class SolutionsHelper {
 						},
 						['_id']
 					)
-
 					if (!checkEntityInParent.success) {
 						throw {
 							message: CONSTANTS.apiResponses.ENTITY_NOT_EXISTS_IN_PARENT,
@@ -1800,14 +1799,16 @@ module.exports = class SolutionsHelper {
 				entitiesData.forEach((entity) => {
 					entityIds.push(entity._id)
 				})
+				let updateObject = {
+					$addToSet: {},
+				}
+				updateObject['$addToSet'][`scope.${solutionData[0].scope.entityType}`] = { $each: entityIds }
 
 				let updateSolution = await solutionsQueries.updateSolutionDocument(
 					{
 						_id: solutionId,
 					},
-					{
-						$addToSet: { 'scope.entities': { $each: entityIds } },
-					},
+					updateObject,
 					{ new: true }
 				)
 

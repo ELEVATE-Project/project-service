@@ -964,7 +964,7 @@ module.exports = class SolutionsHelper {
 					isReusable: false,
 					isDeleted: false,
 				}
-				Object.keys(_.omit(data, ['role', 'filter', 'factor', 'type'])).forEach((key) => {
+				Object.keys(_.omit(data, ['role', 'filter', 'factors', 'type'])).forEach((key) => {
 					data[key] = data[key].split(',')
 				})
 
@@ -1078,7 +1078,6 @@ module.exports = class SolutionsHelper {
 
 					filterQuery = _.merge(filterQuery, data.filter)
 				}
-
 				return resolve({
 					success: true,
 					data: filterQuery,

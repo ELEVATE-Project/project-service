@@ -4,6 +4,11 @@ module.exports = (req) => {
 			req.checkBody('externalId').exists().withMessage('required program externalId')
 			req.checkBody('name').exists().withMessage('required program name')
 			req.checkBody('requestForPIIConsent').exists().withMessage('required requestForPIIConsent value of program')
+			req.checkBody('scope')
+				.exists()
+				.withMessage('required solution scope')
+				.notEmpty()
+				.withMessage('solution scope cannot be empty')
 		},
 		update: function () {
 			req.checkParams('_id')

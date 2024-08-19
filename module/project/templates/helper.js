@@ -882,7 +882,7 @@ module.exports = class ProjectTemplatesHelper {
 				let solutionsResult = {}
 				let findQuery = {}
 				//get data when link is given
-				if (link) {
+				if (link != '') {
 					let queryData = {}
 					queryData['link'] = link
 

@@ -28,15 +28,8 @@ module.exports = {
 			type: Boolean,
 		},
 		scope: {
-			entityType: String,
-			entities: {
-				type: Array,
-				index: true,
-			},
-			roles: {
-				type: Array,
-				index: true,
-			},
+			type: Object,
+			default: {},
 		},
 		isDeleted: {
 			default: false,

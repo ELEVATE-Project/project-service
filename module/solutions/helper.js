@@ -3133,6 +3133,13 @@ module.exports = class SolutionsHelper {
 						result: {},
 					}
 				}
+
+				// remove certificate related details if solution not targeted to user
+				if (isSolutionTargeted.result.isATargetedSolution === false) {
+					delete templateOrQuestionDetails.data.criteria
+					delete templateOrQuestionDetails.data.certificateTemplateId
+				}
+
 				// commented for drop 1 of elevate-project
 				// if (solutionData.programId) {
 				// 	// add ["rootOrganisations","requestForPIIConsent","programJoined"] values to response. Based on these values front end calls PII consent

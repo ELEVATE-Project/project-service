@@ -173,7 +173,6 @@ module.exports = {
 			},
 			callbackErrorEvent: {
 				type: Boolean,
-				default: false,
 			},
 		},
 	},

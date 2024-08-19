@@ -1109,6 +1109,7 @@ module.exports = class UserProjectsHelper {
 						solutionId,
 						userRoleInformation
 					)
+
 					//based on above api will check for projects wether its is private project or public project
 					const projectDetails = await projectQueries.projectDocument(
 						{
@@ -1320,8 +1321,9 @@ module.exports = class UserProjectsHelper {
 						}
 
 						// remove certificate object if project is of type private
-						if (projectCreation.data.isAPrivateProgram && projectCreation.data.certificate) {
+						if (projectCreation.data.isAPrivateProgram) {
 							delete projectCreation.data.certificate
+							delete projectCreation.data.certificateTemplateId
 						}
 
 						let getUserProfileFromObservation = false

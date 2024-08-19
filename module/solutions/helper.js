@@ -247,22 +247,35 @@ module.exports = class SolutionsHelper {
 				//   // }
 				// }
 				if (keysNotIndexed.length > 0) {
+					// Map the keysNotIndexed array to get the second part after splitting by '.'
 					let keysCannotBeAdded = keysNotIndexed.map((keys) => {
 						return keys.split('.')[1]
 					})
 					scopeData = _.omit(scopeData, keysCannotBeAdded)
 				}
+
 				const updateObject = {
 					$set: {},
 				}
+
+				// Assign the scopeData to the scope field in updateObject
 				updateObject['$set']['scope'] = scopeData
+
+				// Extract all keys from scopeData except 'roles', and merge their values into a single array
 				const entities = Object.keys(scopeData)
 					.filter((key) => key !== 'roles')
 					.reduce((acc, key) => acc.concat(scopeData[key]), [])
+
+				// Assign the entities array to the entities field in updateObject
 				updateObject.$set.entities = entities
+
+				// Create a comma-separated string of all keys in scopeData except 'roles'
 				scopeData['entityType'] = Object.keys(_.omit(scopeData, ['roles'])).join(',')
+
+				// Assign the entityType string to the entityType field in updateObject
 				updateObject['$set']['entityType'] = scopeData.entityType
 
+				// Update the solution document with the updateObject
 				let updateSolution = await solutionsQueries.updateSolutionDocument(
 					{
 						_id: solutionId,
@@ -271,13 +284,18 @@ module.exports = class SolutionsHelper {
 					{ new: true }
 				)
 
+				// If the update was unsuccessful, throw an error
 				if (!updateSolution._id) {
 					throw {
 						status: CONSTANTS.apiResponses.SOLUTION_SCOPE_NOT_ADDED,
 					}
 				}
 				solutionData = updateSolution
+
+				// Create the result object with the updated solution ID and scope
 				let result = { _id: solutionId, scope: updateSolution.scope }
+
+				// Resolve the promise with a success message and the result object
 				return resolve({
 					success: true,
 					message: CONSTANTS.apiResponses.SOLUTION_UPDATED,
@@ -303,11 +321,6 @@ module.exports = class SolutionsHelper {
 	static createSolution(solutionData, checkDate = false) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				if (!solutionData.scope || !Object.keys(solutionData.scope).length > 0) {
-					throw {
-						message: CONSTANTS.apiResponses.SCOPE_DATA_MISSING,
-					}
-				}
 				solutionData.type = solutionData.subType = CONSTANTS.common.IMPROVEMENT_PROJECT
 				solutionData.resourceType = [CONSTANTS.common.RESOURCE_TYPE]
 				solutionData.language = [CONSTANTS.common.ENGLISH_LANGUAGE]
@@ -951,13 +964,13 @@ module.exports = class SolutionsHelper {
 					isReusable: false,
 					isDeleted: false,
 				}
-				Object.keys(_.omit(data, ['role', 'filter', 'factor'])).forEach((key) => {
+				Object.keys(_.omit(data, ['role', 'filter', 'factor', 'type'])).forEach((key) => {
 					data[key] = data[key].split(',')
 				})
 
 				// If validate entity set to ON . strict scoping should be applied
 				if (validateEntity !== CONSTANTS.common.OFF) {
-					Object.keys(_.omit(data, ['filter', 'role', 'factors'])).forEach((requestedDataKey) => {
+					Object.keys(_.omit(data, ['filter', 'role', 'factors', 'type'])).forEach((requestedDataKey) => {
 						registryIds.push(...data[requestedDataKey])
 						entityTypes.push(requestedDataKey)
 					})
@@ -978,7 +991,7 @@ module.exports = class SolutionsHelper {
 					}
 
 					filterQuery.$or = []
-					Object.keys(_.omit(data, ['filter', 'role', 'factors'])).forEach((key) => {
+					Object.keys(_.omit(data, ['filter', 'role', 'factors', 'type'])).forEach((key) => {
 						filterQuery.$or.push({
 							[`scope.${key}`]: { $in: data[key] },
 						})
@@ -1109,7 +1122,7 @@ module.exports = class SolutionsHelper {
 					isATargetedSolution: false,
 					_id: solutionId,
 				}
-				let queryData = await this.queryBasedOnRoleAndLocation(bodyData)
+				let queryData = await this.queryBasedOnRoleAndLocation(bodyData, bodyData.type)
 				if (!queryData.success) {
 					return resolve(queryData)
 				}
@@ -1788,7 +1801,7 @@ module.exports = class SolutionsHelper {
 					['_id']
 				)
 
-				if (!entitiesData.success) {
+				if (!entitiesData.success || !entitiesData.data.length > 0) {
 					throw {
 						message: CONSTANTS.apiResponses.ENTITIES_NOT_FOUND,
 					}

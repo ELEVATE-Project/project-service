@@ -139,21 +139,35 @@ module.exports = class ProgramsHelper {
 				// }
 
 				if (keysNotIndexed.length > 0) {
+					// Map over keysNotIndexed to extract the part after the first dot
 					let keysCannotBeAdded = keysNotIndexed.map((keys) => {
 						return keys.split('.')[1]
 					})
 					scopeData = _.omit(scopeData, keysCannotBeAdded)
 				}
+
 				const updateObject = {
 					$set: {},
 				}
+
+				// Set the scope in updateObject to the updated scopeData
 				updateObject['$set']['scope'] = scopeData
+
+				// Extract entities from scopeData excluding the 'roles' key
 				const entities = Object.keys(scopeData)
 					.filter((key) => key !== 'roles')
 					.reduce((acc, key) => acc.concat(scopeData[key]), [])
+
+				// Add the entities array to updateObject
 				updateObject.$set.entities = entities
+
+				// Join all keys except 'roles' into a comma-separated string and set it as entityType
 				scopeData['entityType'] = Object.keys(_.omit(scopeData, ['roles'])).join(',')
+
+				// Add the entityType to updateObject
 				updateObject['$set']['entityType'] = scopeData.entityType
+
+				// Find and update the program with the specified programId
 				let updateProgram = await programsQueries.findAndUpdate(
 					{
 						_id: programId,
@@ -162,13 +176,19 @@ module.exports = class ProgramsHelper {
 					{ new: true }
 				)
 
+				// Check if the update was successful by verifying the presence of an _id
 				if (!updateProgram._id) {
+					// If the update was not successful, throw an error with the appropriate status
 					throw {
 						status: CONSTANTS.apiResponses.PROGRAM_SCOPE_NOT_ADDED,
 					}
 				}
 				programData = updateProgram
+
+				// Prepare the result object with the updated scope and programId
 				let result = { _id: programId, scope: updateProgram.scope }
+
+				// Resolve the promise with a success message and the result
 				return resolve({
 					success: true,
 					message: CONSTANTS.apiResponses.PROGRAM_UPDATED,
@@ -205,11 +225,6 @@ module.exports = class ProgramsHelper {
 					updatedBy: userId == '' ? data.userId : userId,
 				}
 
-				if (!data.scope || !Object.keys(data.scope).length > 0) {
-					throw {
-						message: CONSTANTS.apiResponses.SCOPE_DATA_MISSING,
-					}
-				}
 				if (checkDate) {
 					if (data.hasOwnProperty(CONSTANTS.common.END_DATE)) {
 						data.endDate = UTILS.getEndDate(data.endDate, timeZoneDifference)
@@ -480,7 +495,7 @@ module.exports = class ProgramsHelper {
 					['_id']
 				)
 
-				if (!entitiesData.success) {
+				if (!entitiesData.success || !entitiesData.data.length > 0) {
 					throw {
 						message: CONSTANTS.apiResponses.ENTITIES_NOT_FOUND,
 					}

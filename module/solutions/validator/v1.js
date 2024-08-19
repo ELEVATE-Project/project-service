@@ -9,7 +9,11 @@ module.exports = (req) => {
 	let solutionsValidator = {
 		create: function () {
 			req.checkBody('programExternalId').exists().withMessage('required program externalId')
-			req.checkBody('scope').exists().withMessage('required solution scope')
+			req.checkBody('scope')
+				.exists()
+				.withMessage('required solution scope')
+				.notEmpty()
+				.withMessage('solution scope cannot be empty')
 			req.checkBody('externalId').exists().withMessage('required solution externalId')
 			req.checkBody('name').exists().withMessage('required solution name')
 		},

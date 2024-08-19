@@ -48,9 +48,8 @@ module.exports = class Programs extends Abstract {
           "5b98fa069f664f7e1ae7498c"
       ],
       "scope" : {
-          "entityType" : "state",
-          "entities" : ["bc75cc99-9205-463e-a722-5326857838f8","8ac1efe9-0415-4313-89ef-884e1c8eee34","5f33c3d85f637784791cd830"],
-          "roles" : ["HM"]
+          "state" : ["e3a58f2b3c4d719a6821b590"],
+          "roles" : [ "head_master","distrct_education_officer"]
       },
       "requestForPIIConsent" : true
     }
@@ -117,9 +116,8 @@ module.exports = class Programs extends Abstract {
           "5b98fa069f664f7e1ae7498c"
       ],
       "scope" : {
-          "entityType" : "state",
-          "entities" : ["bc75cc99-9205-463e-a722-5326857838f8","8ac1efe9-0415-4313-89ef-884e1c8eee34","5f33c3d85f637784791cd830"],
-          "roles" : ["HM","BEO"]
+          "state" : ["e3a58f2b3c4d719a6821b590"],
+          "roles" : [ "head_master","distrct_education_officer"]
       },
       "requestForPIIConsent" : true
     }
@@ -175,17 +173,9 @@ module.exports = class Programs extends Abstract {
         "status": 200,
         "result": {
             "_id": "66254d3dd07c5713b46d17c1",
-            "scope": {
-                "entityType": "state",
-                "entities": [
-                    "bc75cc99-9205-463e-a722-5326857838f8",
-                    "8ac1efe9-0415-4313-89ef-884e1c8eee34",
-                    "5f33c3d85f637784791cd830"
-                ],
-                "roles": [
-                    "HM",
-                    "BEO"
-                ]
+            "scope" : {
+                "state" : ["e3a58f2b3c4d719a6821b590"],
+                "roles" : [ "head_master","distrct_education_officer"]
             },
             "resourceType": [
                 "program"
@@ -255,7 +245,7 @@ module.exports = class Programs extends Abstract {
     * @apiGroup Programs
     * @apiParamExample {json} Request-Body:
     * {
-    * "roles" : ["DEO","SPD"]
+    * "roles" : ["head_master","distrct_education_officer"]
     }
     * @apiHeader {String} X-authenticated-user-token Authenticity token
     * @apiSampleRequest /project/v1/programs/addRolesInScope/5ffbf8909259097d48017bbf
@@ -346,7 +336,7 @@ module.exports = class Programs extends Abstract {
     * @apiGroup Programs
     * @apiParamExample {json} Request-Body:
     * {
-    * "roles" : ["DEO","SPD"]
+    * "roles" : ["head_master","distrct_education_officer"]
     }
     * @apiHeader {String} X-authenticated-user-token Authenticity token
     * @apiSampleRequest /project/v1/programs/removeRolesInScope/5ffbf8909259097d48017bbf
@@ -514,10 +504,11 @@ module.exports = class Programs extends Abstract {
         "components" : [ 
             "5b98fa069f664f7e1ae7498c"
         ],
-        "scope" : {
-            "entityType" : "state",
-            "entities" : ["bc75cc99-9205-463e-a722-5326857838f8","8ac1efe9-0415-4313-89ef-884e1c8eee34"],
-            "roles" : ["HM"]
+        "scope": {
+            "roles": [
+                "head_master","distrct_education_officer"
+            ],
+            "state" : ["e3a58f2b3c4d719a6821b590"]
         },
         "requestForPIIConsent" : true
       }

@@ -73,15 +73,11 @@ module.exports = class Solutions extends Abstract {
     "externalId": "01c04166-a65e-4e92-a87b-a9e4194e771lll",
     "minNoOfSubmissionsRequired": 2,
     "scope": {
-        "entityType": "block",
-        "entityTypeId": "5f32d8228e0dc8312404056e",
-        "entities": [
-            "5fd1b52ab53a6416aaeefc80",
-            "5fd098e2e049735a86b748ac",
-            "5fd1b52ab53a6416aaeefc83",
-            "5fd1b52ab53a6416aaeefb20"
+        "roles": [
+            "head_master","district_education_officer"
         ],
-        "roles": "BEO"
+        "state" : ["e3a58f2b3c4d719a6821b590"]
+    }
     }
   }
 
@@ -168,13 +164,10 @@ module.exports = class Solutions extends Abstract {
     "externalId": "01c04166-a65e-4e92-a87b-a9e4194e771lll",
     "minNoOfSubmissionsRequired": 2,
     "scope": {
-        "entityType": "block",
-        "entityTypeId": "5f32d8228e0dc8312404056e",
-        "entities": [
-            "5fd1b52ab53a6416aaeefc80",
-            "5fd098e2e049735a86b748ac"
+        "roles": [
+            "head_master","district_education_officer"
         ],
-        "roles": "BEO"
+        "state" : ["e3a58f2b3c4d719a6821b590"]
     }
 }
 
@@ -274,7 +267,7 @@ module.exports = class Solutions extends Abstract {
     * @apiGroup Solutions
     * @apiParamExample {json} Request-Body:
     * {
-        "roles" : ["DEO","SPD"]
+        "roles" : ["head_master"]
       }
     * @apiHeader {String} X-authenticated-user-token Authenticity token
     * @apiSampleRequest /project/v1/solutions/addRolesInScope/5ffbf8909259097d48017bbf
@@ -320,13 +313,8 @@ module.exports = class Solutions extends Abstract {
     * @apiGroup Solutions
     * @apiParamExample {json} Request-Body:
       {
-        
-        "entityType" : "block",
-        "entities" : [
-                "5fd1b52ab53a6416aaeefc80",
-                "5fd098e2e049735a86b748ac"
-            ],
-        "role" : "BEO,SEO",
+        "roles": ["head_master","district_education_officer"],
+        "state" : ["e3a58f2b3c4d719a6821b590"]
         "filter" : {
             "skipSolutions" : ["660f9383f65100c296372c77"]
         }
@@ -390,7 +378,7 @@ module.exports = class Solutions extends Abstract {
     * @apiGroup Solutions
     * @apiParamExample {json} Request-Body:
     * {
-    * "roles" : ["DEO","SPD"]
+    * "roles" : ["head_master"]
     }
     * @apiHeader {String} X-authenticated-user-token Authenticity token
     * @apiSampleRequest /project/v1/solutions/removeRolesInScope/5ffbf8909259097d48017bbf
@@ -485,12 +473,8 @@ module.exports = class Solutions extends Abstract {
   * @apiUse errorBody
   * @apiParamExample {json} Request:
   * {
-        "entityType" : "block",
-        "entities" : [
-            "5fd1b52ab53a6416aaeefc80",
-            "5fd098e2e049735a86b748ac"
-        ],
-        "role" : "BEO"
+        "roles": "head_master,district_education_officer",
+        "state" : ["e3a58f2b3c4d719a6821b590"]
     }
   * @apiParamExample {json} Response:
   * {
@@ -642,9 +626,8 @@ module.exports = class Solutions extends Abstract {
   * @apiUse errorBody
   * @apiParamExample {json} Request:
   * {
-  *   "role" : "HM,DEO",
-      "entities" : "[236f5cff-c9af-4366-b0b6-253a1789766a"],
-      "entityType" : "block",
+        "roles": "head_master,district_education_officer",
+        "state" : ["e3a58f2b3c4d719a6821b590"]
     }
   * @apiParamExample {json} Response:
   * {
@@ -689,9 +672,8 @@ module.exports = class Solutions extends Abstract {
     * @apiGroup Solutions
     * @apiParamExample {json} Request-Body:
     * {
-        "role" : "HM,DEO",
-   		  "entities" : "[236f5cff-c9af-4366-b0b6-253a1789766a]",
-        "entityType" : "block",
+        "roles": "head_master,district_education_officer",
+        "state" : ["e3a58f2b3c4d719a6821b590"]
       }
     * @apiHeader {String} X-authenticated-user-token Authenticity token
     * @apiSampleRequest /project/v1/solutions/forUserRoleAndLocation?type=assessment&page=1&limit=5
@@ -754,12 +736,8 @@ module.exports = class Solutions extends Abstract {
     * @apiSampleRequest /project/v1/solutions/targetedSolutions?type=observation&page=1&limit=10&search=a&filter=assignedToMe
     * @apiParamExample {json} Request:
     * {
-    *   "entityType" : "block",
-        "entities" : [
-            "5fd1b52ab53a6416aaeefc80",
-            "5fd098e2e049735a86b748ac"
-        ],
-        "roles" : "BEO"'
+        "roles": "head_master,district_education_officer",
+        "state" : ["e3a58f2b3c4d719a6821b590"]
         "factors" : ["role","entities"] // optional if passed query will be generated based on passed keys (dynamic scoping)
     }
     * @apiParamExample {json} Response:
@@ -833,12 +811,8 @@ module.exports = class Solutions extends Abstract {
   * @apiUse errorBody
   * @apiParamExample {json} Request:
   * {
-       "entityType" : "block",
-        "entities" : [
-            "5fd1b52ab53a6416aaeefc80",
-            "5fd098e2e049735a86b748ac"
-        ],
-        "roles" : "BEO"
+        "roles": "head_master,district_education_officer",
+        "state" : ["e3a58f2b3c4d719a6821b590"]
     }
   * @apiParamExample {json} Response:
   * {
@@ -1015,15 +989,8 @@ module.exports = class Solutions extends Abstract {
      * @apiUse errorBody
      * @apiParamExample {json} Request:
         {
-            "entityType" : "block",
-            "entityTypeId" : "5f32d8228e0dc8312404056e",
-            "entities" : [
-                "5fd1b52ab53a6416aaeefc80",
-                "5fd098e2e049735a86b748ac",
-                "5fd1b52ab53a6416aaeefc83",
-                "5fd1b52ab53a6416aaeefb20"
-            ],
-            "role" : "BEO,HM"
+        "roles": "head_master,district_education_officer",
+        "state" : ["e3a58f2b3c4d719a6821b590"]
         }
     * @apiParamExample {json} Response:
     * {

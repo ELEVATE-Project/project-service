@@ -9,7 +9,11 @@ module.exports = (req) => {
 	let solutionsValidator = {
 		create: function () {
 			req.checkBody('programExternalId').exists().withMessage('required program externalId')
-			// req.checkBody('entityType').exists().withMessage('required entity type')
+			req.checkBody('scope')
+				.exists()
+				.withMessage('required solution scope')
+				.notEmpty()
+				.withMessage('solution scope cannot be empty')
 			req.checkBody('externalId').exists().withMessage('required solution externalId')
 			req.checkBody('name').exists().withMessage('required solution name')
 		},
@@ -80,9 +84,7 @@ module.exports = (req) => {
 			// req.checkBody('entityType').exists().withMessage('entityType required')
 		},
 		forUserRoleAndLocation: function () {
-			req.checkBody('entities').exists().withMessage('required entities to remove')
 			req.checkBody('role').exists().withMessage('roles required')
-			req.checkBody('entityType').exists().withMessage('entityType required')
 		},
 		targetedSolutions: function () {
 			// req.checkBody('entities').exists().withMessage('required entities to remove')

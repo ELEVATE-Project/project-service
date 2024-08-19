@@ -149,16 +149,15 @@ module.exports = class SolutionsHelper {
 				}
 
 				// let currentSolutionScope = {};
-				let scopeDatas = Object.keys(scopeData)
-				let scopeDataIndex = scopeDatas.map((index) => {
-					return `scope.${index}`
+				let scopeKeys = Object.keys(scopeData).map((key) => {
+					return `scope.${key}`
 				})
 
-				let solutionIndex = await solutionsQueries.listIndexesFunc()
-				let indexes = solutionIndex.map((indexedKeys) => {
+				let solutionIndexedKeys = await solutionsQueries.listIndexes()
+				let indexes = solutionIndexedKeys.map((indexedKeys) => {
 					return Object.keys(indexedKeys.key)[0]
 				})
-				let keysNotIndexed = _.differenceWith(scopeDataIndex, indexes)
+				let keysNotIndexed = _.differenceWith(scopeKeys, indexes)
 				// if (Object.keys(scopeData).length > 0) {
 				//   if (scopeData.entityType) {
 				//     let bodyData = { name: scopeData.entityType };
@@ -248,27 +247,55 @@ module.exports = class SolutionsHelper {
 				//   // }
 				// }
 				if (keysNotIndexed.length > 0) {
+					// Map the keysNotIndexed array to get the second part after splitting by '.'
 					let keysCannotBeAdded = keysNotIndexed.map((keys) => {
 						return keys.split('.')[1]
 					})
 					scopeData = _.omit(scopeData, keysCannotBeAdded)
 				}
 
+				const updateObject = {
+					$set: {},
+				}
+
+				// Assign the scopeData to the scope field in updateObject
+				updateObject['$set']['scope'] = scopeData
+
+				// Extract all keys from scopeData except 'roles', and merge their values into a single array
+				const entities = Object.keys(scopeData)
+					.filter((key) => key !== 'roles')
+					.reduce((acc, key) => acc.concat(scopeData[key]), [])
+
+				// Assign the entities array to the entities field in updateObject
+				updateObject.$set.entities = entities
+
+				// Create a comma-separated string of all keys in scopeData except 'roles'
+				scopeData['entityType'] = Object.keys(_.omit(scopeData, ['roles'])).join(',')
+
+				// Assign the entityType string to the entityType field in updateObject
+				updateObject['$set']['entityType'] = scopeData.entityType
+
+				// Update the solution document with the updateObject
 				let updateSolution = await solutionsQueries.updateSolutionDocument(
 					{
 						_id: solutionId,
 					},
-					{ $set: { scope: scopeData } },
+					updateObject,
 					{ new: true }
 				)
 
+				// If the update was unsuccessful, throw an error
 				if (!updateSolution._id) {
 					throw {
 						status: CONSTANTS.apiResponses.SOLUTION_SCOPE_NOT_ADDED,
 					}
 				}
 				solutionData = updateSolution
+
+				// Create the result object with the updated solution ID and scope
 				let result = { _id: solutionId, scope: updateSolution.scope }
+
+				// Resolve the promise with a success message and the result object
 				return resolve({
 					success: true,
 					message: CONSTANTS.apiResponses.SOLUTION_UPDATED,
@@ -291,7 +318,7 @@ module.exports = class SolutionsHelper {
 	 * @returns {JSON} solution creation data.
 	 */
 
-	static createSolution(userToken, solutionData, checkDate = false) {
+	static createSolution(solutionData, checkDate = false) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				solutionData.type = solutionData.subType = CONSTANTS.common.IMPROVEMENT_PROJECT
@@ -325,44 +352,44 @@ module.exports = class SolutionsHelper {
 					})
 				}
 
-				if (solutionData.entities && solutionData.entities.length > 0) {
-					let entityIds = []
-					let locationData = UTILS.filterLocationIdandCode(solutionData.entities)
+				// if (solutionData.entities && solutionData.entities.length > 0) {
+				// 	let entityIds = []
+				// 	let locationData = UTILS.filterLocationIdandCode(solutionData.entities)
 
-					if (locationData.ids.length > 0) {
-						let bodyData = {
-							id: locationData.ids,
-						}
-						let entityData = await entitiesService.entityDocuments(bodyData, 'all')
-						if (entityData.success) {
-							entityData.data.forEach((entity) => {
-								entityIds.push(entity._id)
-							})
-						}
-					}
+				// 	if (locationData.ids.length > 0) {
+				// 		let bodyData = {
+				// 			id: locationData.ids,
+				// 		}
+				// 		let entityData = await entitiesService.entityDocuments(bodyData, 'all')
+				// 		if (entityData.success) {
+				// 			entityData.data.forEach((entity) => {
+				// 				entityIds.push(entity._id)
+				// 			})
+				// 		}
+				// 	}
 
-					//   if (locationData.codes.length > 0) {
-					//     let filterData = {
-					//       externalId: locationData.codes,
-					//     };
-					//     let schoolDetails = await userService.orgSchoolSearch(filterData);
+				// 	  if (locationData.codes.length > 0) {
+				// 	    let filterData = {
+				// 	      externalId: locationData.codes,
+				// 	    };
+				// 	    let schoolDetails = await userService.orgSchoolSearch(filterData);
 
-					//     if (schoolDetails.success) {
-					//       let schoolData = schoolDetails.data;
-					//       schoolData.forEach((entity) => {
-					//         entityIds.push(entity.externalId);
-					//       });
-					//     }
-					//   }
+				// 	    if (schoolDetails.success) {
+				// 	      let schoolData = schoolDetails.data;
+				// 	      schoolData.forEach((entity) => {
+				// 	        entityIds.push(entity.externalId);
+				// 	      });
+				// 	    }
+				// 	  }
 
-					//   if (!entityIds.length > 0) {
-					//     throw {
-					//       message: CONSTANTS.apiResponses.ENTITIES_NOT_FOUND,
-					//     };
-					//   }
+				// 	  if (!entityIds.length > 0) {
+				// 	    throw {
+				// 	      message: CONSTANTS.apiResponses.ENTITIES_NOT_FOUND,
+				// 	    };
+				// 	  }
 
-					solutionData.entities = entityIds
-				}
+				// 	solutionData.entities = entityIds
+				// }
 
 				if (
 					solutionData.minNoOfSubmissionsRequired &&
@@ -408,10 +435,7 @@ module.exports = class SolutionsHelper {
 				)
 
 				if (!solutionData.excludeScope && programData[0].scope) {
-					let solutionScope = await this.setScope(
-						solutionCreation._id,
-						solutionData.scope ? solutionData.scope : {}
-					)
+					await this.setScope(solutionCreation._id, solutionData.scope ? solutionData.scope : {})
 				}
 
 				return resolve({
@@ -684,7 +708,6 @@ module.exports = class SolutionsHelper {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let queryData = await this.queryBasedOnRoleAndLocation(bodyData, type)
-
 				if (!queryData.success) {
 					return resolve(queryData)
 				}
@@ -935,20 +958,23 @@ module.exports = class SolutionsHelper {
 	static queryBasedOnRoleAndLocation(data, type = '') {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let entities = []
+				let registryIds = []
 				let entityTypes = []
 				let filterQuery = {
 					isReusable: false,
 					isDeleted: false,
 				}
+				Object.keys(_.omit(data, ['role', 'filter', 'factors', 'type'])).forEach((key) => {
+					data[key] = data[key].split(',')
+				})
 
 				// If validate entity set to ON . strict scoping should be applied
 				if (validateEntity !== CONSTANTS.common.OFF) {
 					Object.keys(_.omit(data, ['filter', 'role', 'factors', 'type'])).forEach((requestedDataKey) => {
-						if (requestedDataKey == 'entities') entities.push(...data[requestedDataKey])
-						if (requestedDataKey == 'entityType') entityTypes.push(data[requestedDataKey])
+						registryIds.push(...data[requestedDataKey])
+						entityTypes.push(requestedDataKey)
 					})
-					if (!entities.length > 0) {
+					if (!registryIds.length > 0) {
 						throw {
 							message: CONSTANTS.apiResponses.NO_LOCATION_ID_FOUND_IN_DATA,
 						}
@@ -963,7 +989,13 @@ module.exports = class SolutionsHelper {
 					filterQuery['scope.roles'] = {
 						$in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')],
 					}
-					filterQuery['scope.entities'] = { $in: entities }
+
+					filterQuery.$or = []
+					Object.keys(_.omit(data, ['filter', 'role', 'factors', 'type'])).forEach((key) => {
+						filterQuery.$or.push({
+							[`scope.${key}`]: { $in: data[key] },
+						})
+					})
 					filterQuery['scope.entityType'] = { $in: entityTypes }
 				} else {
 					// Obtain userInfo
@@ -1046,7 +1078,6 @@ module.exports = class SolutionsHelper {
 
 					filterQuery = _.merge(filterQuery, data.filter)
 				}
-
 				return resolve({
 					success: true,
 					data: filterQuery,
@@ -1137,7 +1168,7 @@ module.exports = class SolutionsHelper {
 	 * @returns {JSON} - Details of solution based on role and location.
 	 */
 
-	static detailsBasedOnRoleAndLocation(solutionId, bodyData, type = '', isAPrivateSolution = '') {
+	static detailsBasedOnRoleAndLocation(solutionId, bodyData, type = '') {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let queryData = await this.queryBasedOnRoleAndLocation(bodyData, type)
@@ -1712,7 +1743,7 @@ module.exports = class SolutionsHelper {
 	 * @returns {JSON} - Added entities data.
 	 */
 
-	static addEntitiesInScope(solutionId, entities, usertoken) {
+	static addEntitiesInScope(solutionId, entities) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let solutionData = await solutionsQueries.solutionsDocument(
@@ -1754,7 +1785,6 @@ module.exports = class SolutionsHelper {
 						},
 						['_id']
 					)
-
 					if (!checkEntityInParent.success) {
 						throw {
 							message: CONSTANTS.apiResponses.ENTITY_NOT_EXISTS_IN_PARENT,
@@ -1770,7 +1800,7 @@ module.exports = class SolutionsHelper {
 					['_id']
 				)
 
-				if (!entitiesData.success) {
+				if (!entitiesData.success || !entitiesData.data.length > 0) {
 					throw {
 						message: CONSTANTS.apiResponses.ENTITIES_NOT_FOUND,
 					}
@@ -1781,14 +1811,16 @@ module.exports = class SolutionsHelper {
 				entitiesData.forEach((entity) => {
 					entityIds.push(entity._id)
 				})
+				let updateObject = {
+					$addToSet: {},
+				}
+				updateObject['$addToSet'][`scope.${solutionData[0].scope.entityType}`] = { $each: entityIds }
 
 				let updateSolution = await solutionsQueries.updateSolutionDocument(
 					{
 						_id: solutionId,
 					},
-					{
-						$addToSet: { 'scope.entities': { $each: entityIds } },
-					},
+					updateObject,
 					{ new: true }
 				)
 
@@ -1821,7 +1853,7 @@ module.exports = class SolutionsHelper {
 	 * @returns {JSON} - Removed entities from solution scope.
 	 */
 
-	static removeEntitiesInScope(solutionId, entities, userToken) {
+	static removeEntitiesInScope(solutionId, entities) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let solutionData = await solutionsQueries.solutionsDocument(
@@ -1860,14 +1892,15 @@ module.exports = class SolutionsHelper {
 				entitiesData.forEach((entity) => {
 					entityIds.push(entity._id)
 				})
-
+				let updateObject = {
+					$pull: {},
+				}
+				updateObject['$pull'][`scope.${solutionData[0].scope.entityType}`] = { $in: entityIds }
 				let updateSolution = await solutionsQueries.updateSolutionDocument(
 					{
 						_id: solutionId,
 					},
-					{
-						$pull: { 'scope.entities': { $in: entityIds } },
-					},
+					updateObject,
 					{ new: true }
 				)
 
@@ -1899,7 +1932,7 @@ module.exports = class SolutionsHelper {
 	 * @returns {Object} - Details of the solution.
 	 */
 
-	static checkForTargetedSolution(link = '', bodyData = {}, userId = '', userToken = '') {
+	static checkForTargetedSolution(link = '', bodyData = {}) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let response = {
@@ -2678,7 +2711,6 @@ module.exports = class SolutionsHelper {
 				if (filter === CONSTANTS.common.DISCOVERED_BY_ME) {
 					getTargetedSolution = false
 				}
-
 				if (getTargetedSolution) {
 					targetedSolutions = await this.forUserRoleAndLocation(
 						requestedData,
@@ -2825,8 +2857,7 @@ module.exports = class SolutionsHelper {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let verifySolution = await this.verifySolutionDetails(link, userId, userToken)
-				let checkForTargetedSolution = await this.checkForTargetedSolution(link, bodyData, userId, userToken)
-
+				let checkForTargetedSolution = await this.checkForTargetedSolution(link, bodyData)
 				if (!checkForTargetedSolution || Object.keys(checkForTargetedSolution.result).length <= 0) {
 					return resolve(checkForTargetedSolution)
 				}

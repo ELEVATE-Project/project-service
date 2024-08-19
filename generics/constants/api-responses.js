@@ -219,4 +219,5 @@ module.exports = {
 	CERTIFICATE_VERIFIED_SUCCESSFULLY: 'Certificate verified successfully',
 	CONFIGURATION_FETCHED_SUCCESSFULLY: 'Configuration fetched successfully',
 	CONFIGURATION_NOT_AVAILABLE: 'Configuration is not available',
+	SCOPE_DATA_MISSING: 'Scope data missing',
 }

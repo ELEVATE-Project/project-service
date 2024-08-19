@@ -1118,6 +1118,7 @@ module.exports = class UserProjectsHelper {
 						},
 						['_id']
 					)
+
 					if (projectDetails.length > 0) {
 						projectId = projectDetails[0]._id
 					} else {
@@ -1146,7 +1147,6 @@ module.exports = class UserProjectsHelper {
 										'entityTypeId',
 										'language',
 										'creator',
-										'certificateTemplateId',
 									]
 								)
 								if (!solutionDetails.length > 0) {
@@ -1257,6 +1257,7 @@ module.exports = class UserProjectsHelper {
 						if (!projectCreation.success) {
 							return resolve(projectCreation)
 						}
+
 						projectCreation.data['isAPrivateProgram'] = solutionDetails.isAPrivateProgram
 
 						if (Object.keys(solutionDetails).length > 0) {
@@ -1316,6 +1317,11 @@ module.exports = class UserProjectsHelper {
 								projectCreation.data['certificate']['templateId'] =
 									solutionDetails.certificateTemplateId
 							}
+						}
+
+						// remove certificate object if project is of type private
+						if (projectCreation.data.isAPrivateProgram && projectCreation.data.certificate) {
+							delete projectCreation.data.certificate
 						}
 
 						let getUserProfileFromObservation = false
@@ -1465,6 +1471,7 @@ module.exports = class UserProjectsHelper {
 								projectCreation.data.userProfile = updatedUserProfile.data
 							}
 						}
+
 						let project = await projectQueries.createProject(projectCreation.data)
 
 						// if ( addReportInfoToSolution && project.solutionId ) {

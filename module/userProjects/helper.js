@@ -1109,6 +1109,7 @@ module.exports = class UserProjectsHelper {
 						solutionId,
 						userRoleInformation
 					)
+
 					//based on above api will check for projects wether its is private project or public project
 					const projectDetails = await projectQueries.projectDocument(
 						{
@@ -1118,6 +1119,7 @@ module.exports = class UserProjectsHelper {
 						},
 						['_id']
 					)
+
 					if (projectDetails.length > 0) {
 						projectId = projectDetails[0]._id
 					} else {
@@ -1146,7 +1148,6 @@ module.exports = class UserProjectsHelper {
 										'entityTypeId',
 										'language',
 										'creator',
-										'certificateTemplateId',
 									]
 								)
 								if (!solutionDetails.length > 0) {
@@ -1257,6 +1258,7 @@ module.exports = class UserProjectsHelper {
 						if (!projectCreation.success) {
 							return resolve(projectCreation)
 						}
+
 						projectCreation.data['isAPrivateProgram'] = solutionDetails.isAPrivateProgram
 
 						if (Object.keys(solutionDetails).length > 0) {
@@ -1316,6 +1318,12 @@ module.exports = class UserProjectsHelper {
 								projectCreation.data['certificate']['templateId'] =
 									solutionDetails.certificateTemplateId
 							}
+						}
+
+						// remove certificate object if project is of type private
+						if (projectCreation.data.isAPrivateProgram) {
+							delete projectCreation.data.certificate
+							delete projectCreation.data.certificateTemplateId
 						}
 
 						let getUserProfileFromObservation = false
@@ -1465,6 +1473,7 @@ module.exports = class UserProjectsHelper {
 								projectCreation.data.userProfile = updatedUserProfile.data
 							}
 						}
+
 						let project = await projectQueries.createProject(projectCreation.data)
 
 						// if ( addReportInfoToSolution && project.solutionId ) {
@@ -2022,19 +2031,16 @@ module.exports = class UserProjectsHelper {
 					response = await common_handler.improvementProjectTaskPdfGeneration(projectDocument, userId)
 				}
 
-				if (response && response.success) {
+				if (response && response.success && response.folderPath != '') {
+					const downloadUrl = `${process.env.ELEVATE_PROJECT_SERVICE_URL}/${process.env.SERVICE_NAME}${CONSTANTS.endpoints.AUTO_DOWNLOAD}?file=${response.folderPath}`
 					return resolve({
 						success: true,
 						message: CONSTANTS.apiResponses.REPORT_GENERATED_SUCCESSFULLY,
 						data: {
-							data: {
-								downloadUrl: response.pdfUrl ? response.pdfUrl : '',
-							},
+							downloadUrl,
 						},
 						result: {
-							data: {
-								downloadUrl: response.pdfUrl ? response.pdfUrl : '',
-							},
+							downloadUrl,
 						},
 					})
 				} else {

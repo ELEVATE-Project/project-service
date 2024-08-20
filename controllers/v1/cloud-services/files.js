@@ -156,4 +156,45 @@ module.exports = class Files {
 			}
 		})
 	}
+
+	/**
+	 * @api {get} /project/v1/cloud-services/files/download
+	 * @apiVersion 1.0.0
+	 * @apiHeader {String} X-auth-token Authenticity token
+	 * @apiSampleRequest /project/v1/cloud-services/files/download?file=project/77d9b0a7-f962-4f24-9fbd-cb027ada5eee/1/187aa81b-3007-4122-b5f0-ea0cc70af2fd/c56938e3-26aa-4a69-a8ef-9eaceeb0ca1b.pdf
+	 * @apiUse successBody
+	 * @apiUse errorBody
+	 * @apiParamExample {json} Response:
+	 * directly serves the file as the api response
+	 */
+
+	/**
+	 * Get Downloadable URL from cloud service.
+	 * @method
+	 * @name download
+	 * @param  {Request}  req  request body.
+	 * @returns {JSON} Response with status and message.
+	 */
+	async download(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let file = req.query.file
+				let fileURL = await filesHelpers.getDownloadableUrl([file])
+				fileURL = fileURL.result[0].url
+				return resolve({
+					isResponseAStream: true,
+					fileURL,
+					file,
+				})
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+
+					errorObject: error,
+				})
+			}
+		})
+	}
 }

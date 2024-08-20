@@ -10,6 +10,8 @@ const authenticator = require(PROJECT_ROOT_DIRECTORY + '/generics/middleware/aut
 const pagination = require(PROJECT_ROOT_DIRECTORY + '/generics/middleware/pagination')
 const fs = require('fs')
 const inputValidator = require(PROJECT_ROOT_DIRECTORY + '/generics/middleware/validator')
+const path = require('path')
+const https = require('https')
 
 module.exports = function (app) {
 	const applicationBaseUrl = process.env.APPLICATION_BASE_URL || '/project/'
@@ -54,21 +56,41 @@ module.exports = function (app) {
 				}
 
 				if (result.isResponseAStream == true) {
-					fs.exists(result.fileNameWithPath, function (exists) {
-						if (exists) {
-							res.setHeader(
-								'Content-disposition',
-								'attachment; filename=' + result.fileNameWithPath.split('/').pop()
-							)
-							res.set('Content-Type', 'application/octet-stream')
-							fs.createReadStream(result.fileNameWithPath).pipe(res)
-						} else {
-							throw {
-								status: HTTP_STATUS_CODE.internal_server_error.status,
-								message: HTTP_STATUS_CODE.internal_server_error.message,
+					if (result.fileNameWithPath) {
+						fs.exists(result.fileNameWithPath, function (exists) {
+							if (exists) {
+								res.setHeader(
+									'Content-disposition',
+									'attachment; filename=' + result.fileNameWithPath.split('/').pop()
+								)
+								res.set('Content-Type', 'application/octet-stream')
+								fs.createReadStream(result.fileNameWithPath).pipe(res)
+							} else {
+								throw {
+									status: 500,
+									message: 'Oops! Something went wrong!',
+								}
 							}
+						})
+					} else if (result.fileURL) {
+						let extName = path.extname(result.file)
+						let uniqueFileName = 'File_' + UTILS.generateUniqueId() + extName
+						https
+							.get(result.fileURL, (fileStream) => {
+								res.setHeader('Content-Disposition', `attachment; filename="${uniqueFileName}"`)
+								res.setHeader('Content-Type', fileStream.headers['content-type'])
+								fileStream.pipe(res)
+							})
+							.on('error', (err) => {
+								console.error('Error downloading the file:', err)
+								throw err
+							})
+					} else {
+						throw {
+							status: 500,
+							message: 'Oops! Something went wrong!',
 						}
-					})
+					}
 				} else {
 					res.status(result.status ? result.status : HTTP_STATUS_CODE['ok'].status).json({
 						message: result.message,

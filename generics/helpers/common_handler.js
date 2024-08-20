@@ -134,7 +134,6 @@ const improvementProjectPdfGeneration = async function (responseData, userId) {
 										return resolve({
 											status: false,
 											message: CONSTANTS.common.COULD_NOT_GENERATE_PDF,
-											pdfUrl: '',
 										})
 									}
 								}
@@ -264,7 +263,6 @@ const improvementProjectTaskPdfGeneration = async function (responseData, userId
 												return resolve({
 													status: false,
 													message: CONSTANTS.common.COULD_NOT_GENERATE_PDF,
-													pdfUrl: '',
 												})
 											}
 										}

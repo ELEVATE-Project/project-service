@@ -165,7 +165,7 @@ module.exports = class Files {
 	 * @apiUse successBody
 	 * @apiUse errorBody
 	 * @apiParamExample {json} Response:
-	 * Automaticaly downloads the file.
+	 * directly serves the file as the api response
 	 */
 
 	/**

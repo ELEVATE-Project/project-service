@@ -2037,14 +2037,10 @@ module.exports = class UserProjectsHelper {
 						success: true,
 						message: CONSTANTS.apiResponses.REPORT_GENERATED_SUCCESSFULLY,
 						data: {
-							data: {
-								downloadUrl,
-							},
+							downloadUrl,
 						},
 						result: {
-							data: {
-								downloadUrl,
-							},
+							downloadUrl,
 						},
 					})
 				} else {

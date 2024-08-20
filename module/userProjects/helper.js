@@ -2031,18 +2031,19 @@ module.exports = class UserProjectsHelper {
 					response = await common_handler.improvementProjectTaskPdfGeneration(projectDocument, userId)
 				}
 
-				if (response && response.success) {
+				if (response && response.success && response.folderPath != '') {
+					const downloadUrl = `${process.env.ELEVATE_PROJECT_SERVICE_URL}/${process.env.SERVICE_NAME}${CONSTANTS.endpoints.AUTO_DOWNLOAD}?file=${response.folderPath}`
 					return resolve({
 						success: true,
 						message: CONSTANTS.apiResponses.REPORT_GENERATED_SUCCESSFULLY,
 						data: {
 							data: {
-								downloadUrl: response.pdfUrl ? response.pdfUrl : '',
+								downloadUrl,
 							},
 						},
 						result: {
 							data: {
-								downloadUrl: response.pdfUrl ? response.pdfUrl : '',
+								downloadUrl,
 							},
 						},
 					})

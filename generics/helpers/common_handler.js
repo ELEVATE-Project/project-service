@@ -117,63 +117,23 @@ const improvementProjectPdfGeneration = async function (responseData, userId) {
 									//dir : local file path to fetch the file
 									let uploadFileResponse = await uploadPdfToCloud(pdfFile, userId, dir)
 
-									if (uploadFileResponse.success) {
-										// Get downloadable URL for the uploaded PDF
-										let pdfDownloadableUrl = await filesHelper.getDownloadableUrl([
-											uploadFileResponse.data,
-										])
+									if (
+										uploadFileResponse.success &&
+										uploadFileResponse.data &&
+										uploadFileResponse.data.length > 0
+									) {
+										rimraf(imgPath, function () {
+											console.log('done')
+										})
 
-										if (
-											pdfDownloadableUrl.result[0] &&
-											Object.keys(pdfDownloadableUrl.result[0]).length > 0
-										) {
-											fs.readdir(imgPath, (err, files) => {
-												if (err) reject(err)
-												let i = 0
-												// Delete all files in the temporary directory
-												for (const file of files) {
-													fs.unlink(path.join(imgPath, file), (err) => {
-														if (err) reject(err)
-													})
-
-													if (i == files.length) {
-														fs.unlink('../../' + currentTempFolder, (err) => {
-															if (err) reject(err)
-														})
-														console.log(
-															'path.dirname(filename).split(path.sep).pop()',
-															path.dirname(file).split(path.sep).pop()
-														)
-													}
-
-													i = i + 1
-												}
-											})
-											rimraf(imgPath, function () {
-												console.log('done')
-											})
-
-											return resolve({
-												success: CONSTANTS.common.SUCCESS,
-												message: pdfDownloadableUrl.message,
-												pdfUrl: pdfDownloadableUrl.result[0].url,
-											})
-										} else {
-											console.log('error')
-											return resolve({
-												status: CONSTANTS.common.STATUS_FAILURE,
-												message: pdfDownloadableUrl.message
-													? pdfDownloadableUrl.message
-													: CONSTANTS.common.COULD_NOT_GENERATE_PDF,
-												pdfUrl: '',
-											})
-										}
+										return resolve({
+											success: true,
+											folderPath: uploadFileResponse.data,
+										})
 									} else {
 										return resolve({
-											status: CONSTANTS.common.STATUS_FAILURE,
-											message: pdfDownloadableUrl.message
-												? pdfDownloadableUrl.message
-												: CONSTANTS.common.COULD_NOT_GENERATE_PDF,
+											status: false,
+											message: CONSTANTS.common.COULD_NOT_GENERATE_PDF,
 											pdfUrl: '',
 										})
 									}
@@ -287,62 +247,23 @@ const improvementProjectTaskPdfGeneration = async function (responseData, userId
 											let uploadFileResponse = await uploadPdfToCloud(pdfFile, userId, dir)
 											console.log({ uploadFileResponse })
 
-											if (uploadFileResponse.success) {
-												// create downloadable URL
-												let pdfDownloadableUrl = await filesHelper.getDownloadableUrl([
-													uploadFileResponse.data,
-												])
+											if (
+												uploadFileResponse.success &&
+												uploadFileResponse.data &&
+												uploadFileResponse.data.length > 0
+											) {
+												rimraf(imgPath, function () {
+													console.log('done')
+												})
 
-												if (
-													pdfDownloadableUrl.result[0] &&
-													Object.keys(pdfDownloadableUrl.result[0]).length > 0
-												) {
-													fs.readdir(imgPath, (err, files) => {
-														if (err) throw err
-
-														let i = 0
-														for (const file of files) {
-															fs.unlink(path.join(imgPath, file), (err) => {
-																if (err) throw err
-															})
-
-															if (i == files.length) {
-																fs.unlink('../../' + currentTempFolder, (err) => {
-																	if (err) throw err
-																})
-																console.log(
-																	'path.dirname(filename).split(path.sep).pop()',
-																	path.dirname(file).split(path.sep).pop()
-																)
-															}
-
-															i = i + 1
-														}
-													})
-													rimraf(imgPath, function () {
-														console.log('done')
-													})
-
-													return resolve({
-														success: CONSTANTS.common.SUCCESS,
-														message: pdfDownloadableUrl.message,
-														pdfUrl: pdfDownloadableUrl.result[0].url,
-													})
-												} else {
-													return resolve({
-														status: CONSTANTS.common.STATUS_FAILURE,
-														message: pdfDownloadableUrl.message
-															? pdfDownloadableUrl.message
-															: CONSTANTS.common.COULD_NOT_GENERATE_PDF,
-														pdfUrl: '',
-													})
-												}
+												return resolve({
+													success: true,
+													folderPath: uploadFileResponse.data,
+												})
 											} else {
 												return resolve({
-													status: CONSTANTS.common.STATUS_FAILURE,
-													message: pdfDownloadableUrl.message
-														? pdfDownloadableUrl.message
-														: CONSTANTS.common.COULD_NOT_GENERATE_PDF,
+													status: false,
+													message: CONSTANTS.common.COULD_NOT_GENERATE_PDF,
 													pdfUrl: '',
 												})
 											}

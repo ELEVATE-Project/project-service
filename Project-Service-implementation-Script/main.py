@@ -1288,8 +1288,8 @@ def validateSheets(filePathAddObs, accessToken, parentFolder):
         # taskUploadCols.append("Task Level Evidence")
         # taskUploadCols.append("Minimum No. of Evidence")
 
-        certificateCols = ["Certificate issuer","Type of certificate","Logo - 1","Logo - 2","Authorised Signature Image - 1","Authorised Signature Name - 1",
-                           "Authorised Designation - 1","Authorised Signature Image - 2","Authorised Signature Name - 2","Authorised Designation - 2"]
+        certificateCols = ["Certificate issuer","Type of certificate","Logo - 1","Logo - 2","Authorised Signature Image - 1",
+                           "Authorised Signatory - 1","Authorised Signature Image - 2","Authorised Signatory - 2"]
         for sheetColCheck in sheetNames1:
             if sheetColCheck.strip().lower() == 'Project upload'.lower():
                 print("--->Checking Project Upload sheet...")
@@ -1387,8 +1387,7 @@ def validateSheets(filePathAddObs, accessToken, parentFolder):
                         "\"Logo - 1\" must not be Empty in \"Certificate details\" sheet")
 
                         Authorisedsignlogo1 = dictDetailsEnv['Authorised Signature Image - 1'] if dictDetailsEnv['Authorised Signature Image - 1'] else terminatingMessage("\"Authorised Signature Image - 1\" must not be Empty in \"Certificate details\" sheet")
-                        Authorisedsignname1 = dictDetailsEnv['Authorised Signature Name - 1'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Authorised Signature Name - 1'] else terminatingMessage("\"Authorised Signature Name - 1\" must not be Empty in \"Certificate details\" sheet")
-                        Authoriseddesifnation1 = dictDetailsEnv['Authorised Designation - 1'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Authorised Designation - 1'] else terminatingMessage("\"Authorised Designation - 1\" must not be Empty in \"Certificate details\" sheet")
+                        Authoriseddesifnation1 = dictDetailsEnv['Authorised Signatory - 1'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Authorised Signatory - 1'] else terminatingMessage("\"Authorised Signatory - 1\" must not be Empty in \"Certificate details\" sheet")
 
     return typeofSolutin
 
@@ -3908,11 +3907,9 @@ def editsvg(accessToken,filePathAddProject,projectName_for_folder_path,baseTempl
                 Certificateisuuer = dictDetailsEnv['Certificate issuer'].encode('utf-8').decode('utf-8')
                 Logo1 = dictDetailsEnv['Logo - 1']
                 authsignaturelogo1 = dictDetailsEnv['Authorised Signature Image - 1']
-                authrigedsignaturename1 = dictDetailsEnv['Authorised Signature Name - 1'].encode('utf-8').decode('utf-8')
-                authrigeddesignation1 = dictDetailsEnv['Authorised Designation - 1'].encode('utf-8').decode('utf-8')
+                authrigeddesignation1 = dictDetailsEnv['Authorised Signatory - 1'].encode('utf-8').decode('utf-8')
                 authrigedlogo2 = dictDetailsEnv['Authorised Signature Image - 2']
-                authrigedsignaturename2 = dictDetailsEnv['Authorised Signature Name - 2'].encode('utf-8').decode('utf-8')
-                authrigeddesignation2 = dictDetailsEnv['Authorised Designation - 2'].encode('utf-8').decode('utf-8')
+                authrigeddesignation2 = dictDetailsEnv['Authorised Signatory - 2'].encode('utf-8').decode('utf-8')
 
                 payload = {}
                 downloadedfiles = []

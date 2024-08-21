@@ -117,67 +117,23 @@ exports.unnatiEntityReportPdfGeneration = async function (entityReportData, user
 										} else {
 											// Upload the PDF file to cloud storage
 											let uploadFileResponse = await uploadPdfToCloud(pdfFile, userId, dir)
-											let payload = {
-												filePaths: [uploadFileResponse.data],
-											}
-											if (uploadFileResponse.success) {
-												// Get the downloadable URL for the uploaded PDF
-												let pdfDownloadableUrl = await filesHelper.getDownloadableUrl(
-													payload.filePaths
-												)
-												if (
-													pdfDownloadableUrl.result[0] &&
-													Object.keys(pdfDownloadableUrl.result[0]).length > 0
-												) {
-													// Remove temporary files and resolve with success message and PDF URL
-													fs.readdir(imgPath, (err, files) => {
-														if (err) throw err
+											if (
+												uploadFileResponse.success &&
+												uploadFileResponse.data &&
+												uploadFileResponse.data.length > 0
+											) {
+												rimraf(imgPath, function () {
+													console.log('done')
+												})
 
-														let i = 0
-														// Delete all files in the temporary folder
-														for (const file of files) {
-															fs.unlink(path.join(imgPath, file), (err) => {
-																if (err) throw err
-															})
-
-															if (i == files.length) {
-																fs.unlink('../../' + currentTempFolder, (err) => {
-																	if (err) throw err
-																})
-																console.log(
-																	'path.dirname(filename).split(path.sep).pop()',
-																	path.dirname(file).split(path.sep).pop()
-																)
-															}
-
-															i = i + 1
-														}
-													})
-													rimraf(imgPath, function () {
-														console.log('done')
-													})
-
-													return resolve({
-														success: CONSTANTS.common.SUCCESS,
-														message: pdfDownloadableUrl.message,
-														pdfUrl: pdfDownloadableUrl.result[0].url,
-													})
-												} else {
-													return resolve({
-														status: CONSTANTS.common.STATUS_FAILURE,
-														message: pdfDownloadableUrl.message
-															? pdfDownloadableUrl.message
-															: CONSTANTS.common.COULD_NOT_GENERATE_PDF,
-														pdfUrl: '',
-													})
-												}
+												return resolve({
+													success: true,
+													folderPath: uploadFileResponse.data,
+												})
 											} else {
 												return resolve({
-													status: CONSTANTS.common.STATUS_FAILURE,
-													message: uploadFileResponse.message
-														? uploadFileResponse.message
-														: CONSTANTS.common.COULD_NOT_GENERATE_PDF,
-													pdfUrl: '',
+													status: false,
+													message: CONSTANTS.common.COULD_NOT_GENERATE_PDF,
 												})
 											}
 										}

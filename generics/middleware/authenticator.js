@@ -52,6 +52,7 @@ module.exports = async function (req, res, next, token = '') {
 		'/templates/details',
 		'userProjects/certificateCallback',
 		'userProjects/certificateCallbackError',
+		'cloud-services/files/download',
 	]
 	await Promise.all(
 		guestAccessPaths.map(async function (path) {

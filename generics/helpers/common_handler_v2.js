@@ -122,9 +122,7 @@ exports.unnatiEntityReportPdfGeneration = async function (entityReportData, user
 												uploadFileResponse.data &&
 												uploadFileResponse.data.length > 0
 											) {
-												rimraf(imgPath, function () {
-													console.log('done')
-												})
+												rimraf(imgPath, () => {})
 
 												return resolve({
 													success: true,

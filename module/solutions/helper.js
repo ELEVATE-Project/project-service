@@ -2314,7 +2314,12 @@ module.exports = class SolutionsHelper {
 				}
 
 				if (searchQuery && searchQuery.length > 0) {
-					matchQuery['$match']['$or'] = searchQuery
+					matchQuery['$match'] = {
+						$and: [
+							matchQuery['$match'], // Ensure the filter is respected
+							{ $or: searchQuery }, // Then apply the search conditions
+						],
+					}
 				}
 
 				let projection = {}

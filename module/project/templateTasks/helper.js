@@ -245,6 +245,7 @@ module.exports = class ProjectTemplateTasksHelper {
 
 				let templateTasksData = Object.keys(templateTaskSchema)
 				let booleanData = UTILS.getAllBooleanDataFromModels(templateTaskSchema)
+				let metaInformation = {}
 
 				Object.keys(parsedData).forEach((eachParsedData) => {
 					if (templateTasksData.includes(eachParsedData) && !allValues[eachParsedData]) {
@@ -255,8 +256,20 @@ module.exports = class ProjectTemplateTasksHelper {
 						} else {
 							allValues[eachParsedData] = parsedData[eachParsedData]
 						}
+					} else if (
+						!templateTasksData.includes(eachParsedData) &&
+						!eachParsedData.startsWith('learningResources') &&
+						!eachParsedData.startsWith('solution')
+					) {
+						// If the key is not in the model, add it to metaInformation
+						metaInformation[eachParsedData] = parsedData[eachParsedData]
 					}
 				})
+
+				// Add metaInformation to allValues if it's not empty
+				if (Object.keys(metaInformation).length > 0) {
+					allValues.metaInformation = metaInformation
+				}
 
 				let solutionDetails = {
 					solutionId: parsedData.solutionId,

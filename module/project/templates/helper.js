@@ -936,6 +936,7 @@ module.exports = class ProjectTemplatesHelper {
 					'createdAt',
 					'updatedAt',
 					'__v',
+					'metaInformation',
 				])
 
 				if (!(templateData.length > 0)) {
@@ -981,11 +982,15 @@ module.exports = class ProjectTemplatesHelper {
 					if (isAPrivateProgram !== '') {
 						projectIdQuery.isAPrivateProgram = isAPrivateProgram
 					}
-					let project = await projectQueries.projectDocument(projectIdQuery, ['_id', 'hasAcceptedTAndC'])
-
+					let project = await projectQueries.projectDocument(projectIdQuery, [
+						'_id',
+						'hasAcceptedTAndC',
+						'metaInformation',
+					])
 					if (project && project.length > 0) {
 						templateData[0].projectId = project[0]._id
 						templateData[0].hasAcceptedTAndC = project[0].hasAcceptedTAndC
+						result.data['projectMetaInformation'] = project[0].metaInformation
 					}
 				}
 				if (!result.data.programInformation) {

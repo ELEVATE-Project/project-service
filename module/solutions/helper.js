@@ -779,6 +779,7 @@ module.exports = class SolutionsHelper {
 					'referenceFrom',
 					'entityType',
 					'certificateTemplateId',
+					'metaInformation',
 				])
 				return resolve({
 					success: true,
@@ -2738,7 +2739,9 @@ module.exports = class SolutionsHelper {
 							targetedSolution.solutionId = targetedSolution._id
 							targetedSolution._id = ''
 							targetedSolution['creator'] = targetedSolution.creator ? targetedSolution.creator : ''
-
+							targetedSolution['solutionMetaInformation'] = targetedSolution.metaInformation
+								? targetedSolution.metaInformation
+								: {}
 							mergedData.push(targetedSolution)
 							delete targetedSolution.type
 							delete targetedSolution.externalId

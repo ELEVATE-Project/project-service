@@ -58,4 +58,5 @@ module.exports = {
 	FIND_ENTITY_DOCUMENTS: '/v1/entities/find',
 	FIND_ENTITY_TYPE_DOCUMENTS: '/v1/entityTypes/find',
 	ORGANIZATION_READ: '/v1/organization/read',
+	AUTO_DOWNLOAD: '/v1/cloud-services/files/download',
 }

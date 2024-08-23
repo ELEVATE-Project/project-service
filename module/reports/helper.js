@@ -130,14 +130,16 @@ module.exports = class ReportsHelper {
 							projects: projectReport,
 						}
 						let response = await common_handler_v2.unnatiEntityReportPdfGeneration(pdfRequest, userId)
-						if (response && response.success) {
+						if (response && response.success && response.folderPath != '') {
+							const downloadUrl = `${process.env.ELEVATE_PROJECT_SERVICE_URL}/${process.env.SERVICE_NAME}${CONSTANTS.endpoints.AUTO_DOWNLOAD}?file=${response.folderPath}`
 							return resolve({
 								success: true,
 								message: CONSTANTS.apiResponses.REPORT_GENERATED,
 								data: {
-									data: {
-										downloadUrl: response.data.pdfUrl,
-									},
+									downloadUrl,
+								},
+								result: {
+									downloadUrl,
 								},
 							})
 						} else {
@@ -283,14 +285,16 @@ module.exports = class ReportsHelper {
 
 					//send data to report service to generate PDF.
 					let response = await common_handler_v2.unnatiEntityReportPdfGeneration(pdfRequest, userId)
-					if (response && response.success) {
+					if (response && response.success && response.folderPath != '') {
+						const downloadUrl = `${process.env.ELEVATE_PROJECT_SERVICE_URL}/${process.env.SERVICE_NAME}${CONSTANTS.endpoints.AUTO_DOWNLOAD}?file=${response.folderPath}`
 						return resolve({
 							success: true,
 							message: CONSTANTS.apiResponses.REPORT_GENERATED,
 							data: {
-								data: {
-									downloadUrl: response.pdfUrl,
-								},
+								downloadUrl,
+							},
+							result: {
+								downloadUrl,
 							},
 						})
 					}

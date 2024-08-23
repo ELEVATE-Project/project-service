@@ -779,6 +779,7 @@ module.exports = class SolutionsHelper {
 					'referenceFrom',
 					'entityType',
 					'certificateTemplateId',
+					'metaInformation',
 				])
 				return resolve({
 					success: true,
@@ -2314,7 +2315,12 @@ module.exports = class SolutionsHelper {
 				}
 
 				if (searchQuery && searchQuery.length > 0) {
-					matchQuery['$match']['$or'] = searchQuery
+					matchQuery['$match'] = {
+						$and: [
+							matchQuery['$match'], // Ensure the filter is respected
+							{ $or: searchQuery }, // Then apply the search conditions
+						],
+					}
 				}
 
 				let projection = {}
@@ -2733,7 +2739,9 @@ module.exports = class SolutionsHelper {
 							targetedSolution.solutionId = targetedSolution._id
 							targetedSolution._id = ''
 							targetedSolution['creator'] = targetedSolution.creator ? targetedSolution.creator : ''
-
+							targetedSolution['solutionMetaInformation'] = targetedSolution.metaInformation
+								? targetedSolution.metaInformation
+								: {}
 							mergedData.push(targetedSolution)
 							delete targetedSolution.type
 							delete targetedSolution.externalId

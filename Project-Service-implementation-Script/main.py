@@ -452,6 +452,8 @@ def programsFileCheck(filePathAddPgm, accessToken, parentFolder, MainFilePath):
                     resourceTypePGM = dictDetailsEnv['Type of resources'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Type of resources'] else terminatingMessage("\"Type of resources\" must not be Empty in \"Resource Details\" sheet")
                     resourceLinkOrExtPGM = dictDetailsEnv['Resource Link']
                     resourceStatusOrExtPGM = dictDetailsEnv['Resource Status'] if dictDetailsEnv['Resource Status'] else terminatingMessage("\"Resource Status\" must not be Empty in \"Resource Details\" sheet")
+                    # global rolesPGM
+                    rolesPGM = dictDetailsEnv['Targeted subrole at resource level'] if dictDetailsEnv['Targeted subrole at resource level'] else terminatingMessage("\"Targeted subrole at resource level\" must not be Empty in \"Program details\" sheet")
                     # setting start and end dates globally. 
                     global startDateOfResource, endDateOfResource
                     startDateOfResource = dictDetailsEnv['Start date of resource']
@@ -840,7 +842,7 @@ def validateSheets(filePathAddObs, accessToken, parentFolder):
     rubrics_sheet_IMP_names = ['Instructions', 'details', 'framework', 'ECMs or Domains', 'questions','Criteria_Rubric-Scoring', 'Domain(theme)_rubric_scoring', 'Imp mapping']
     observation_sheet_names = ['Instructions', 'details', 'criteria', 'questions']
     survey_sheet_names = ['Instructions', 'details', 'questions']
-    project_sheet_names = [ 'Instructions','Project upload', 'Tasks upload']
+    project_sheet_names = [ 'Instructions','Project upload', 'Tasks upload','Certificate details']
 
     # 1-with rubrics , 2 - with out rubrics , 3 - survey , 4 - Project 5 - With rubric and IMP
     typeofSolutin = 0
@@ -1269,7 +1271,7 @@ def validateSheets(filePathAddObs, accessToken, parentFolder):
         for i in range(lentasks):
             projectDetailsCols.append(f"learningResources{i+1}-name")
             projectDetailsCols.append(f"learningResources{i+1}-link")
-        # projectDetailsCols.append("has certificate")
+        projectDetailsCols.append("has certificate")
         # projectDetailsCols.append("Project Level Evidence")
         # projectDetailsCols.append("Minimum No. of Evidence")
         # sys.exit()
@@ -1286,8 +1288,8 @@ def validateSheets(filePathAddObs, accessToken, parentFolder):
         # taskUploadCols.append("Task Level Evidence")
         # taskUploadCols.append("Minimum No. of Evidence")
 
-        certificateCols = ["Certificate issuer","Type of certificate","Logo - 1","Logo - 2","Authorised Signature Image - 1","Authorised Signature Name - 1",
-                           "Authorised Designation - 1","Authorised Signature Image - 2","Authorised Signature Name - 2","Authorised Designation - 2"]
+        certificateCols = ["Certificate issuer","Type of certificate","Logo - 1","Logo - 2","Authorised Signature Image - 1",
+                           "Authorised Signatory - 1","Authorised Signature Image - 2","Authorised Signatory - 2"]
         for sheetColCheck in sheetNames1:
             if sheetColCheck.strip().lower() == 'Project upload'.lower():
                 print("--->Checking Project Upload sheet...")
@@ -1324,8 +1326,8 @@ def validateSheets(filePathAddObs, accessToken, parentFolder):
                     projectDuration = dictDetailsEnv["duration"].encode('utf-8').decode('utf-8') if dictDetailsEnv[
                         "duration"] else terminatingMessage(
                         "\"duration\" must not be Empty in \"Project Upload\" sheet")
-                    # projectcertificate = dictDetailsEnv["has certificate"] if dictDetailsEnv["has certificate"] else terminatingMessage(
-                        # "\"has certificate\" must not be Empty in \"Project Upload\" sheet")
+                    projectcertificate = dictDetailsEnv["has certificate"] if dictDetailsEnv["has certificate"] else terminatingMessage(
+                        "\"has certificate\" must not be Empty in \"Project Upload\" sheet")
                     # projectlevelEvidence = dictDetailsEnv["Project Level Evidence"] if dictDetailsEnv[
                     #     "Project Level Evidence"] else terminatingMessage(
                     #     "\"Project Level Evidence\" must not be Empty in \"Project Upload\" sheet")
@@ -1385,8 +1387,7 @@ def validateSheets(filePathAddObs, accessToken, parentFolder):
                         "\"Logo - 1\" must not be Empty in \"Certificate details\" sheet")
 
                         Authorisedsignlogo1 = dictDetailsEnv['Authorised Signature Image - 1'] if dictDetailsEnv['Authorised Signature Image - 1'] else terminatingMessage("\"Authorised Signature Image - 1\" must not be Empty in \"Certificate details\" sheet")
-                        Authorisedsignname1 = dictDetailsEnv['Authorised Signature Name - 1'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Authorised Signature Name - 1'] else terminatingMessage("\"Authorised Signature Name - 1\" must not be Empty in \"Certificate details\" sheet")
-                        Authoriseddesifnation1 = dictDetailsEnv['Authorised Designation - 1'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Authorised Designation - 1'] else terminatingMessage("\"Authorised Designation - 1\" must not be Empty in \"Certificate details\" sheet")
+                        Authoriseddesifnation1 = dictDetailsEnv['Authorised Signatory - 1'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Authorised Signatory - 1'] else terminatingMessage("\"Authorised Signatory - 1\" must not be Empty in \"Certificate details\" sheet")
 
     return typeofSolutin
 
@@ -3472,7 +3473,7 @@ def fetchCertificateBaseTemplate(filePathAddProject,accessToken,projectName_for_
 
                 typeOfCertificate = dictDetailsEnv["Type of certificate"]
                 
-    urldbFind = config.get(environment, 'INTERNAL_KONG_IP') + config.get(environment, 'dbfindapi')
+    urldbFind = config.get(environment, 'elevateprojecthost') + config.get(environment, 'dbfindapi')
     headerdbFindApi = {
         'Authorization': config.get(environment, 'Authorization'),
         'X-auth-token': accessToken,
@@ -3629,7 +3630,7 @@ def prepareaddingcertificatetemp(filePathAddProject, projectName_for_folder_path
     if not os.path.exists(addcetificateFilePath):
         os.mkdir(addcetificateFilePath)
 
-    urladdcertificate = config.get(environment, 'INTERNAL_KONG_IP') + config.get(environment, 'Addcertificatetemplate')
+    urladdcertificate = config.get(environment, 'elevateprojecthost') + config.get(environment, 'Addcertificatetemplate')
     headeraddcertificateApi = {
         'Authorization': config.get(environment, 'Authorization'),
         'X-auth-token': accessToken,
@@ -3780,9 +3781,9 @@ def prepareaddingcertificatetemp(filePathAddProject, projectName_for_folder_path
 
     print(json.dumps(payload, indent=1))
     # sys.exit()
-
-    responseaddcertificateUploadApi = requests.request("POST",url=urladdcertificate, headers=headeraddcertificateApi,
-                                           data=json.dumps(payload))
+    # responseaddcertificateUploadApi = requests.request("POST",url=urladdcertificate, headers=headeraddcertificateApi,
+    #                                        data=json.dumps(payload))
+    responseaddcertificateUploadApi = requests.post(url=urladdcertificate, headers=headeraddcertificateApi, data=json.dumps(payload))
     messageArr = ["Add certificate json is prepared",
                   "File path : " + projectName_for_folder_path + '/addCertificate/Addcertificate.text']
     messageArr.append("URL : " + str(responseaddcertificateUploadApi))
@@ -3794,7 +3795,7 @@ def prepareaddingcertificatetemp(filePathAddProject, projectName_for_folder_path
 
     if responseaddcertificateUploadApi.status_code == 200:
         responseaddcetificate = responseaddcertificateUploadApi.json()
-        certificatetemplateid = responseaddcetificate['result']['id']
+        certificatetemplateid = responseaddcetificate['result']['_id']
         print("-->Certificate template id generated <--", certificatetemplateid)
 
 
@@ -3808,7 +3809,7 @@ def prepareaddingcertificatetemp(filePathAddProject, projectName_for_folder_path
         createAPILog(projectName_for_folder_path, messageArr)
         sys.exit()
 
-    urluploadcertificatepi = config.get(environment, 'INTERNAL_KONG_IP')+config.get(environment, 'uploadcertificatetosvg') + certificatetemplateid
+    urluploadcertificatepi = config.get(environment, 'elevateprojecthost')+config.get(environment, 'uploadcertificatetosvg') + certificatetemplateid
 
     headeruploadcertificateApi = {
         'Authorization': config.get(environment, 'Authorization'),
@@ -3829,7 +3830,7 @@ def prepareaddingcertificatetemp(filePathAddProject, projectName_for_folder_path
         responseeditsvg = responseDownloadsvgApi.json()
         svgid = responseeditsvg['result']['data']['templateId']
 
-        urlsolutionupdateapi = config.get(environment, 'INTERNAL_KONG_IP')+config.get(environment, 'updatecertificatesolu') + solutionId
+        urlsolutionupdateapi = config.get(environment, 'elevateprojecthost')+config.get(environment, 'solutionupdateapi') + solutionId
 
         headersolutionupdateApi = {
             'Authorization': config.get(environment, 'Authorization'),
@@ -3854,7 +3855,7 @@ def prepareaddingcertificatetemp(filePathAddProject, projectName_for_folder_path
             print("error in updating solution")
             sys.exit()
 
-        urlprojecttemplateapi = config.get(environment, 'INTERNAL_KONG_IP')+config.get(environment, 'updateprojecttemplate') + projectTemplateId
+        urlprojecttemplateapi = config.get(environment, 'elevateprojecthost')+config.get(environment, 'updateprojecttemplate') + projectTemplateId
         headerprojectrtemplateupdateApi = {
             'Authorization': config.get(environment, 'Authorization'),
             'X-auth-token': accessToken,
@@ -3906,59 +3907,50 @@ def editsvg(accessToken,filePathAddProject,projectName_for_folder_path,baseTempl
                 Certificateisuuer = dictDetailsEnv['Certificate issuer'].encode('utf-8').decode('utf-8')
                 Logo1 = dictDetailsEnv['Logo - 1']
                 authsignaturelogo1 = dictDetailsEnv['Authorised Signature Image - 1']
-                authrigedsignaturename1 = dictDetailsEnv['Authorised Signature Name - 1'].encode('utf-8').decode('utf-8')
-                authrigeddesignation1 = dictDetailsEnv['Authorised Designation - 1'].encode('utf-8').decode('utf-8')
+                authrigeddesignation1 = dictDetailsEnv['Authorised Signatory - 1'].encode('utf-8').decode('utf-8')
                 authrigedlogo2 = dictDetailsEnv['Authorised Signature Image - 2']
-                authrigedsignaturename2 = dictDetailsEnv['Authorised Signature Name - 2'].encode('utf-8').decode('utf-8')
-                authrigeddesignation2 = dictDetailsEnv['Authorised Designation - 2'].encode('utf-8').decode('utf-8')
+                authrigeddesignation2 = dictDetailsEnv['Authorised Signatory - 2'].encode('utf-8').decode('utf-8')
 
                 payload = {}
                 downloadedfiles = []
                 baseTemplateId = ''
                 if Typeofcertificate == 'One Logo - One Signature':
                     print("-->This is One Logo - One Signature<--")
-
-                    stateLogo1 = ('stateLogo1',('logo1.jpg',open(projectName_for_folder_path +'/Logofile/logo1.jpg' ,'rb'),'image/jpeg'))
+                    stateLogo1 = ('stateLogo1', ('logo1.jpg', open(projectName_for_folder_path + '/Logofile/logo1.jpg', 'rb'), 'image/jpeg'))
                     downloadedfiles.append(stateLogo1)
                     payload['stateTitle'] = Certificateisuuer
-                    signatureImg1 = ('signatureImg1',('signature1.jpg',open(projectName_for_folder_path +'/Logofile/signature1.jpg','rb'),'image/jpeg'))
+                    signatureImg1 = ('signatureImg1',('signatureImg1',open(projectName_for_folder_path +'/Logofile/signature1.jpg','rb'),'image/jpeg'))
                     downloadedfiles.append(signatureImg1)
-                    payload['signatureTitleName1'] = authrigedsignaturename1
-                    payload['signatureTitleDesignation1'] = authrigeddesignation1
+                    payload['signatureTitle1a'] = authrigeddesignation1
                     baseTemplateId=baseTemplate_id
                     
 
                 elif Typeofcertificate == 'One Logo - Two Signature':
                     print("-->This is One Logo - Two Signature<--")
 
-                    stateLogo1 = ('stateLogo1', (
-                    'logo1.jpg', open(projectName_for_folder_path + '/Logofile/logo1.jpg', 'rb'), 'image/jpeg'))
+                    stateLogo1 = ('stateLogo1', ('logo1.jpg', open(projectName_for_folder_path + '/Logofile/logo1.jpg', 'rb'), 'image/jpeg'))
                     downloadedfiles.append(stateLogo1)
                     payload['stateTitle'] = Certificateisuuer
                     signatureImg1 = ('signatureImg1', (
-                    'signature1.jpg', open(projectName_for_folder_path + '/Logofile/signature1.jpg', 'rb'),
+                    'signatureImg1', open(projectName_for_folder_path + '/Logofile/signature1.jpg', 'rb'),
                     'image/jpeg'))
                     downloadedfiles.append(signatureImg1)
                     signatureImg2 = ('signatureImg2', ('signature2.jpg', open(projectName_for_folder_path + '/Logofile/signature2.jpg', 'rb'),'image/jpeg'))
                     downloadedfiles.append(signatureImg2)
-                    payload['signatureTitleName1'] = authrigedsignaturename1
-                    payload['signatureTitleDesignation1'] = authrigeddesignation1
-                    payload['signatureTitleName2'] = authrigedsignaturename2
-                    payload['signatureTitleDesignation2'] = authrigeddesignation2
+                    payload['signatureTitle1a'] = authrigeddesignation1
+                    payload['signatureTitle2a'] = authrigeddesignation2
                     baseTemplateId=baseTemplate_id
                    
                 elif Typeofcertificate == 'Two Logo - One Signature':
                     print("-->This is Two Logo - One Signature<--")
-                    stateLogo1 = ('stateLogo1', (
-                        'logo1.jpg', open(projectName_for_folder_path + '/Logofile/logo1.jpg', 'rb'), 'image/jpeg'))
+                    stateLogo1 = ('stateLogo1', ('logo1.jpg', open(projectName_for_folder_path + '/Logofile/logo1.jpg', 'rb'), 'image/jpeg'))
                     downloadedfiles.append(stateLogo1)
-                    payload['stateTitle'] = Certificateisuuer
-                    signatureImg1 = ('signatureImg1', ('signature1.jpg', open(projectName_for_folder_path + '/Logofile/signature1.jpg', 'rb'),'image/jpeg'))
-                    downloadedfiles.append(signatureImg1)
                     stateLogo2 = ('stateLogo2', ('logo2.jpg', open(projectName_for_folder_path + '/Logofile/logo2.jpg', 'rb'), 'image/jpeg'))
                     downloadedfiles.append(stateLogo2)
-                    payload['signatureTitleName1'] = authrigedsignaturename1
-                    payload['signatureTitleDesignation1'] = authrigeddesignation1
+                    payload['stateTitle'] = Certificateisuuer
+                    signatureImg1 = ('signatureImg1', ('signatureImg1', open(projectName_for_folder_path + '/Logofile/signature1.jpg', 'rb'),'image/jpeg'))
+                    downloadedfiles.append(signatureImg1)
+                    payload['signatureTitle1a'] = authrigeddesignation1
                     baseTemplateId=baseTemplate_id
 
                 elif Typeofcertificate == 'Two Logo - Two Signature':
@@ -3972,13 +3964,11 @@ def editsvg(accessToken,filePathAddProject,projectName_for_folder_path,baseTempl
                     downloadedfiles.append(stateLogo2)
                     signatureImg2 = ('signatureImg2', ('signature2.jpg', open(projectName_for_folder_path + '/Logofile/signature2.jpg', 'rb'),'image/jpeg'))
                     downloadedfiles.append(signatureImg2)
-                    payload['signatureTitleName1'] = authrigedsignaturename1
-                    payload['signatureTitleDesignation1'] = authrigeddesignation1
-                    payload['signatureTitleName2'] = authrigedsignaturename2
-                    payload['signatureTitleDesignation2'] = authrigeddesignation2
+                    payload['signatureTitle1a'] = authrigeddesignation1
+                    payload['signatureTitle2a'] = authrigeddesignation2
                     baseTemplateId=baseTemplate_id
 
-                urleditnigsvgApi = config.get(environment, 'INTERNAL_KONG_IP') + config.get(environment, 'editsvgtemp') + baseTemplateId
+                urleditnigsvgApi = config.get(environment, 'elevateprojecthost') + config.get(environment, 'editsvgtemp') + baseTemplateId
                 headereditingsvgApi = {
                     'Authorization': config.get(environment, 'Authorization'),
                     'X-auth-token': accessToken,
@@ -4039,6 +4029,9 @@ def solutionCreationAndMapping(projectName_for_folder_path, entityToUpload, list
             "entityType": projectEntityType,
             "externalId": solutionExternalId,
             "name": project_name,
+            "scope": {
+                  "roles": [rolesPGM],
+                },
             "description": project_description,
             "isReusable" : False,
             "startDate": startDateOfProgram,
@@ -4090,7 +4083,7 @@ def solutionCreationAndMapping(projectName_for_folder_path, entityToUpload, list
                 scopeEntities = entitiesPGMID
                 scopeRoles = solutionDetails[0]
                 bodySolutionUpdate = {
-                    "scope": {"entityType": scopeEntityType, "entities": scopeEntities, "roles": scopeRoles}}
+                    "scope": { "state": scopeEntities, "roles": [rolesPGM]}}
                 solutionUpdate(projectName_for_folder_path, accessToken, solutionId, bodySolutionUpdate)
                 userDetails = fetchUserDetails(environment, accessToken, projectAuthor)
                 matchedShikshalokamLoginId = userDetails[0]
@@ -4429,7 +4422,7 @@ def mainFunc(MainFilePath, programFile, addObservationSolution, millisecond, isP
                     scopeEntities = entitiesPGMID
                     scopeRoles = solutionDetails[0]
                     bodySolutionUpdate = {
-                        "scope": {"entityType": scopeEntityType, "entities": scopeEntities, "roles": scopeRoles}}
+                        "scope": {"state": scopeEntities, "roles": scopeRoles}}
                     solutionUpdate(parentFolder, accessToken, childId[0], bodySolutionUpdate)
                     if solutionDetails[1]:
                         startDateArr = str(solutionDetails[1]).split("-")
@@ -4551,17 +4544,17 @@ def mainFunc(MainFilePath, programFile, addObservationSolution, millisecond, isP
                                 #                                ProjectSolutionId, accessToken)
                                 # elif str(dictDetailsEnv['has certificate']).lower()== 'Yes'.lower():
                                 #     print("---->this is certificate with project<---")
-                                #     baseTemplate_id=fetchCertificateBaseTemplate(filePathAddProject,accessToken,projectName_for_folder_path)
-                                #     # sys.exit()
-                                #     downloadlogosign(filePathAddProject,projectName_for_folder_path)
-                                #     editsvg(accessToken,filePathAddProject,projectName_for_folder_path,baseTemplate_id)
+                                baseTemplate_id=fetchCertificateBaseTemplate(filePathAddProject,accessToken,projectName_for_folder_path)
+                                # sys.exit()
+                                downloadlogosign(filePathAddProject,projectName_for_folder_path)
+                                editsvg(accessToken,filePathAddProject,projectName_for_folder_path,baseTemplate_id)
                                 #     prepareProjectAndTasksSheets(addObservationSolution, projectName_for_folder_path,accessToken)
                                 #     projectUpload(addObservationSolution, projectName_for_folder_path, accessToken)
                                 #     taskUpload(addObservationSolution, projectName_for_folder_path, accessToken)
                                 # ProjectSolutionResp = solutionCreationAndMapping(projectName_for_folder_path,entityToUpload,listOfFoundRoles, accessToken)
-                                # ProjectSolutionExternalId = ProjectSolutionResp[0]
-                                # ProjectSolutionId = ProjectSolutionResp[1]
-                            # certificatetemplateid= prepareaddingcertificatetemp(filePathAddProject,projectName_for_folder_path, accessToken,ProjectSolutionId,programID,baseTemplate_id)
+                                ProjectSolutionExternalId = ProjectSolutionResp[0]
+                                ProjectSolutionId = ProjectSolutionResp[1]
+                            certificatetemplateid= prepareaddingcertificatetemp(filePathAddProject,projectName_for_folder_path, accessToken,ProjectSolutionId,programID,baseTemplate_id)
 
                             prepareProgramSuccessSheet(MainFilePath, projectName_for_folder_path, programFile,
                                                                ProjectSolutionExternalId,
@@ -4585,8 +4578,8 @@ def mainFunc(MainFilePath, programFile, addObservationSolution, millisecond, isP
         # ProjectSolutionExternalId = ProjectSolutionResp[0]  
         # ProjectSolutionResp = solutionCreationAndMapping(parentFolder,entityToUpload,listOfFoundRoles, accessToken)
         # ProjectSolutionExternalId = ProjectSolutionResp[0]
-        # ProjectSolutionId = ProjectSolutionResp[1]
-                                        # certificatetemplateid= prepareaddingcertificatetemp(filePathAddProject,projectName_for_folder_path, accessToken,ProjectSolutionId,programID,baseTemplate_id)
+        ProjectSolutionId = ProjectSolutionResp[1]
+        certificatetemplateid= prepareaddingcertificatetemp(filePathAddProject,projectName_for_folder_path, accessToken,ProjectSolutionId,programID,baseTemplate_id)
         prepareProgramSuccessProjectSheet(MainFilePath, parentFolder, programFile ,accessToken)                                                                           
                                                                                            
                                                                                       

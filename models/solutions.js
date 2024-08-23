@@ -94,5 +94,6 @@ module.exports = {
 			type: 'ObjectId',
 			index: true,
 		},
+		metaInformation: Object,
 	},
 }

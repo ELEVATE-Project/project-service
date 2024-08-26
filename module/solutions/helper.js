@@ -2730,7 +2730,6 @@ module.exports = class SolutionsHelper {
 						search
 					)
 				}
-
 				if (targetedSolutions.success) {
 					if (targetedSolutions.data.data && targetedSolutions.data.data.length > 0) {
 						let filteredTargetedSolutions = []
@@ -2748,6 +2747,8 @@ module.exports = class SolutionsHelper {
 							newEntry['certificateTemplateId'] = solution.certificateTemplateId
 							newEntry['programId'] = solution.programId
 							newEntry['programName'] = solution.programName
+							newEntry['name'] = solution.name
+							newEntry['description'] = solution.description
 							filteredTargetedSolutions.push(newEntry)
 						})
 						if (currentScopeOnly) {
@@ -2780,7 +2781,6 @@ module.exports = class SolutionsHelper {
 						}
 					}
 				}
-
 				if (mergedData.length > 0) {
 					let startIndex = pageSize * (pageNo - 1)
 					let endIndex = startIndex + pageSize

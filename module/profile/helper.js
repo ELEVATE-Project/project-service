@@ -44,7 +44,7 @@ module.exports = class ProfileHelper {
 						},
 					}
 					// Define the fields to be projected in the entity documents
-					const projection = ['_id', 'metaInformation.name']
+					const projection = ['_id', 'metaInformation.name', 'metaInformation.externalId']
 					// Use the entityDocuments function to fetch entity details
 					const response = await entityManagementService.entityDocuments(filterData, projection)
 
@@ -116,16 +116,24 @@ module.exports = class ProfileHelper {
 					const entity = entityDetails.find((entity) => entity._id === id)
 					// Return the formatted entity details or a placeholder if not found
 					return entity
-						? { value: entity._id, label: entity.metaInformation.name }
-						: { value: id, label: 'Unknown' }
+						? {
+								value: entity._id,
+								label: entity.metaInformation.name,
+								externalId: entity.metaInformation.externalId,
+						  }
+						: { value: id, label: 'Unknown', externalId: 'Unknown' }
 				})
 			} else if (typeof ids === 'string') {
 				// If the meta value is a string, replace it with entity details
 				const entity = entityDetails.find((entity) => entity._id === ids)
 				// Update the userDetails with the formatted entity details or a placeholder if not found
 				userDetails[key] = entity
-					? { value: entity._id, label: entity.metaInformation.name }
-					: { value: ids, label: 'Unknown' }
+					? {
+							value: entity._id,
+							label: entity.metaInformation.name,
+							externalId: entity.metaInformation.externalId,
+					  }
+					: { value: ids, label: 'Unknown', externalId: 'Unknown' }
 			}
 		}
 		// Clear meta information and remove location field

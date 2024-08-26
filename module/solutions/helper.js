@@ -2748,6 +2748,8 @@ module.exports = class SolutionsHelper {
 							newEntry['certificateTemplateId'] = solution.certificateTemplateId
 							newEntry['programId'] = solution.programId
 							newEntry['programName'] = solution.programName
+							newEntry['name'] = solution.name
+							newEntry['description'] = solution.description
 							filteredTargetedSolutions.push(newEntry)
 						})
 						if (currentScopeOnly) {

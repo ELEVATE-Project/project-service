@@ -2735,21 +2735,27 @@ module.exports = class SolutionsHelper {
 					if (targetedSolutions.data.data && targetedSolutions.data.data.length > 0) {
 						let filteredTargetedSolutions = []
 						targetedSolutions.data.data.forEach((solution) => {
-							let newEntry = {}
-							newEntry['_id'] = ''
-							newEntry['solutionId'] = solution._id
-							newEntry['creator'] = solution.creator ? solution.creator : ''
-							newEntry['solutionMetaInformation'] = solution.metaInformation
-								? solution.metaInformation
-								: {}
-							newEntry['type'] = solution.type
-							newEntry['externalId'] = solution.externalId
-							newEntry['projectTemplateId'] = solution.projectTemplateId
-							newEntry['certificateTemplateId'] = solution.certificateTemplateId
-							newEntry['programId'] = solution.programId
-							newEntry['programName'] = solution.programName
+							let newEntry = Object.assign(
+								{
+									_id: '',
+									solutionId: solution._id,
+									creator: solution.creator || '',
+									solutionMetaInformation: solution.metaInformation || {},
+								},
+								_.pick(solution, [
+									'type',
+									'externalId',
+									'projectTemplateId',
+									'certificateTemplateId',
+									'programId',
+									'programName',
+									'name',
+									'description',
+								])
+							)
 							filteredTargetedSolutions.push(newEntry)
 						})
+
 						if (currentScopeOnly) {
 							filteredTargetedSolutions.forEach((solution) => {
 								// Find the corresponding project in mergedData where solutionId matches _id

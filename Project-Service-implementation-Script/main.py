@@ -3665,7 +3665,6 @@ def prepareaddingcertificatetemp(filePathAddProject, projectName_for_folder_path
         payload['criteria']['conditions']['C2']['conditions']['C1']['filter'] = {}
         payload['criteria']['conditions']['C2']['conditions']['C1']['filter']['key'] = "type"
         payload['criteria']['conditions']['C2']['conditions']['C1']['filter']['value'] = "all"
-        # payload['criteria']['conditions']['C2']['conditions']['C1']['function'] = {}
         payload['criteria']['conditions']['C2']['conditions']['C1']['operator'] = ">="
         payload['criteria']['conditions']['C2']['conditions']['C1']['value'] = int(projectMinNooEvide)
         payload['issuer'] ={}

@@ -2636,10 +2636,12 @@ module.exports = class SolutionsHelper {
 		pageNo,
 		search,
 		filter,
-		surveyReportPage = ''
+		surveyReportPage = '',
+		currentScopeOnly = false
 	) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				currentScopeOnly = UTILS.convertStringToBoolean(currentScopeOnly)
 				let assignedSolutions = await this.assignedUserSolutions(solutionType, userId, search, filter, '', '')
 				if (!assignedSolutions.success) {
 					throw {
@@ -2692,9 +2694,9 @@ module.exports = class SolutionsHelper {
 				}
 
 				requestedData['filter'] = {}
-				if (solutionIds.length > 0) {
-					requestedData['filter']['skipSolutions'] = solutionIds
-				}
+				// if (solutionIds.length > 0) {
+				// 	requestedData['filter']['skipSolutions'] = solutionIds
+				// }
 
 				if (filter && filter !== '') {
 					if (filter === CONSTANTS.common.CREATED_BY_ME) {
@@ -2731,24 +2733,60 @@ module.exports = class SolutionsHelper {
 
 				if (targetedSolutions.success) {
 					if (targetedSolutions.data.data && targetedSolutions.data.data.length > 0) {
-						totalCount += targetedSolutions.data.count
-
-						// removing if condition check here because if mergedData.length == pageSize, solutions wont get added to mergedData though we have data in targetedSoltions,
-						// if (mergedData.length !== pageSize) {
-						targetedSolutions.data.data.forEach((targetedSolution) => {
-							targetedSolution.solutionId = targetedSolution._id
-							targetedSolution._id = ''
-							targetedSolution['creator'] = targetedSolution.creator ? targetedSolution.creator : ''
-							targetedSolution['solutionMetaInformation'] = targetedSolution.metaInformation
-								? targetedSolution.metaInformation
-								: {}
-							mergedData.push(targetedSolution)
-							delete targetedSolution.type
-							delete targetedSolution.externalId
+						let filteredTargetedSolutions = []
+						targetedSolutions.data.data.forEach((solution) => {
+							let newEntry = Object.assign(
+								{
+									_id: '',
+									solutionId: solution._id,
+									creator: solution.creator || '',
+									solutionMetaInformation: solution.metaInformation || {},
+								},
+								_.pick(solution, [
+									'type',
+									'externalId',
+									'projectTemplateId',
+									'certificateTemplateId',
+									'programId',
+									'programName',
+									'name',
+									'description',
+								])
+							)
+							filteredTargetedSolutions.push(newEntry)
 						})
-						// }
+
+						if (currentScopeOnly) {
+							filteredTargetedSolutions.forEach((solution) => {
+								// Find the corresponding project in mergedData where solutionId matches _id
+								const matchingProject = _.find(mergedData, (project) => {
+									return String(project.solutionId) === String(solution.solutionId)
+								})
+
+								if (matchingProject) {
+									// Add all keys from the matching project to the solution object
+									Object.assign(solution, matchingProject)
+								}
+							})
+							mergedData = filteredTargetedSolutions
+							totalCount = mergedData.length
+						} else {
+							filteredTargetedSolutions.forEach((solution) => {
+								// Check if the solution _id exists in mergedData solutionId
+								const existsInMergedData = _.some(mergedData, (project) => {
+									return String(project.solutionId) === String(solution.solutionId)
+								})
+
+								if (!existsInMergedData) {
+									mergedData.push(solution)
+								}
+							})
+
+							totalCount = mergedData.length
+						}
 					}
 				}
+
 				if (mergedData.length > 0) {
 					let startIndex = pageSize * (pageNo - 1)
 					let endIndex = startIndex + pageSize

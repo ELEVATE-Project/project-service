@@ -3234,6 +3234,8 @@ module.exports = class UserProjectsHelper {
 				if (userProject[0].certificate.pdfPath) {
 					updateObject['$set']['certificate.originalTransactionInformation.pdfPath'] =
 						userProject[0].certificate.pdfPath
+					updateObject['$set']['certificate.eligible'] = true
+					updateObject['$set']['certificate.callbackErrorEvent'] = false
 				}
 				if (userProject[0].certificate.svgPath) {
 					updateObject['$set']['certificate.originalTransactionInformation.svgPath'] =

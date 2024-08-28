@@ -113,6 +113,12 @@ module.exports = class FilesHelper {
 							result: {},
 						})
 					}
+					if (Array.isArray(downloadableUrl.result) && downloadableUrl.result.length > 0) {
+						downloadableUrl.result.forEach((currentResponse) => {
+							currentResponse['filePath'] = currentResponse.payload.sourcePath
+							delete currentResponse.payload
+						})
+					}
 					return resolve({
 						message: CONSTANTS.apiResponses.CLOUD_SERVICE_SUCCESS_MESSAGE,
 						result: downloadableUrl.result,
@@ -130,12 +136,6 @@ module.exports = class FilesHelper {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.FAILED_TO_CREATE_DOWNLOADABLEURL,
 						result: {},
-					})
-				}
-				if (Array.isArray(downloadableUrl.result) && downloadableUrl.result.length > 0) {
-					downloadableUrl.result.forEach((currentResponse) => {
-						currentResponse['filePath'] = currentResponse.payload.sourcePath
-						delete currentResponse.payload
 					})
 				}
 				return resolve({

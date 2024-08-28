@@ -8,6 +8,14 @@
 const { validate: uuidValidate, v4: uuidV4 } = require('uuid')
 const packageData = require(PROJECT_ROOT_DIRECTORY + '/package.json')
 const md5 = require('md5')
+const { ChartJSNodeCanvas } = require('chartjs-node-canvas')
+const ChartDataLabels = require('chartjs-plugin-datalabels')
+
+// Create a ChartJSNodeCanvas instance
+const width = 800 // width of the chart
+const height = 500 // height of the chart
+const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height })
+
 // const druidQueries = require('./druid_queries.json');
 /**
  * convert camel case to title case.
@@ -71,6 +79,27 @@ function addOffsetToDateTime(time, timeZoneDifference) {
 		time.setMinutes(time.getMinutes() - getMinutes)
 		return time
 	}
+}
+
+/**
+ * Generates a chart image buffer using ChartJSNodeCanvas.
+ *
+ * @param {Object} data - The chart configuration object that contains data, type, options, etc.
+ * @returns {Promise<Buffer>} - A Promise that resolves to a Buffer containing the chart image.
+ * @throws {Error} - Throws an error if the chart generation fails.
+ */
+async function generateChart(data) {
+	return new Promise(async (resolve, reject) => {
+		// Render the chart to a buffer
+		chartJSNodeCanvas
+			.renderToBuffer(data)
+			.then((buffer) => {
+				resolve(buffer)
+			})
+			.catch((err) => {
+				reject(err)
+			})
+	})
 }
 
 /**
@@ -655,4 +684,5 @@ module.exports = {
 	dateDiffInDays: dateDiffInDays,
 	arrayIdsTobjectIds: arrayIdsTobjectIds,
 	formatISODateToReadableDate: formatISODateToReadableDate,
+	generateChart: generateChart,
 }

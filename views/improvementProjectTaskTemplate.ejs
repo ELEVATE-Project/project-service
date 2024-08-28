@@ -509,7 +509,7 @@
                     <%let evidenceLink = [] %>
                     <%if ( data.tasksArray[i].attachments && data.tasksArray[i].attachments.length > 0 ) { %>
                         <%data.tasksArray[i].attachments.forEach( attachment => { %>
-                            <%if ( attachment.type == "image/jpeg"  && attachment.url !== "" ) { %>
+                            <%if ( attachment.type.includes('image/')  && attachment.url !== "" ) { %>
                                 <%evidenceImage.push(attachment.url) %>
                             <%} else if ( attachment.type == "link" && attachment.name && attachment.name !== "" ) { %>
                                 <% 

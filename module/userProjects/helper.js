@@ -1952,11 +1952,7 @@ module.exports = class UserProjectsHelper {
 				let evidenceLink = []
 				if (projectDocument.attachments && projectDocument.attachments.length > 0) {
 					projectDocument.attachments.forEach((attachment) => {
-						if (
-							attachment.type == CONSTANTS.common.IMAGE_DATA_TYPE &&
-							attachment.url &&
-							attachment.url !== ''
-						) {
+						if (attachment.type.includes('image/') && attachment.url && attachment.url !== '') {
 							imageLink.push(attachment.url)
 						} else if (
 							attachment.type == CONSTANTS.common.ATTACHMENT_TYPE_LINK &&
@@ -1977,6 +1973,7 @@ module.exports = class UserProjectsHelper {
 						}
 					})
 				}
+				console.log(imageLink)
 				projectDocument.evidenceLink = evidenceLink
 				projectDocument.imageLink = imageLink
 

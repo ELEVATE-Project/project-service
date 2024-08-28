@@ -12,7 +12,6 @@ const rp = require('request-promise')
 const filesHelper = require(MODULES_BASE_PATH + '/cloud-services/files/helper')
 const axios = require('axios')
 const GotenbergConnection = require(SERVICES_BASE_PATH + '/gotenberg')
-const utilsConnection = require(GENERICS_FILES_PATH + '/helpers/utils')
 const ChartDataLabels = require('chartjs-plugin-datalabels')
 
 /**
@@ -465,8 +464,7 @@ const createChart = async function (chartData, imgPath) {
 					let chartImage = 'chartPngImage_' + uuidv4() + '_.png'
 					let imgFilePath = imgPath + '/' + chartImage
 					// Render the chart to a buffer using Chart.js Node Canvas
-					const imageBuffer = await utilsConnection.generateChart(data.options)
-					// require('fs').writeFileSync('chart-with-percentages.png', buffer);
+					const imageBuffer = await UTILS.generateChart(data.options)
 					fs.writeFileSync(imgFilePath, imageBuffer)
 					// Prepare form data entry for the chart image
 					formData.push({

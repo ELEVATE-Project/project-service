@@ -12,6 +12,8 @@ const rp = require('request-promise')
 const filesHelper = require(MODULES_BASE_PATH + '/cloud-services/files/helper')
 const axios = require('axios')
 const GotenbergConnection = require(SERVICES_BASE_PATH + '/gotenberg')
+const utilsConnection = require(GENERICS_FILES_PATH + '/helpers/utils')
+const ChartDataLabels = require('chartjs-plugin-datalabels')
 
 /**
  * Generates a PDF report based on entity report data.
@@ -463,10 +465,9 @@ const createChart = async function (chartData, imgPath) {
 					let chartImage = 'chartPngImage_' + uuidv4() + '_.png'
 					let imgFilePath = imgPath + '/' + chartImage
 					// Render the chart to a buffer using Chart.js Node Canvas
-					let imageBuffer = await chartJSNodeCanvas.renderToBuffer(data.options)
-					// Write the image buffer to a file in the specified image path
+					const imageBuffer = await utilsConnection.generateChart(data.options)
+					// require('fs').writeFileSync('chart-with-percentages.png', buffer);
 					fs.writeFileSync(imgFilePath, imageBuffer)
-
 					// Prepare form data entry for the chart image
 					formData.push({
 						order: data.order,
@@ -645,28 +646,31 @@ async function getCategoryWiseChart(categories) {
 				legend: {
 					position: 'bottom',
 					labels: {
+						top: 15,
 						padding: 30,
 					},
 				},
 				layout: {
 					padding: {
-						top: 15,
-						bottom: 25,
+						top: 25,
 					},
 				},
 				plugins: {
 					datalabels: {
+						font: {
+							size: 20,
+						},
 						anchor: 'end',
 						align: 'end',
-						font: {
-							size: 18,
-						},
+						offset: -5,
 						formatter: (value) => {
 							return value + '%'
 						},
+						color: 'black', // Text color
 					},
 				},
 			},
+			plugins: [ChartDataLabels],
 		}
 
 		// Create the chart object with defined order and options
@@ -760,6 +764,7 @@ async function getTaskOverviewChart(tasks) {
 				legend: {
 					position: 'bottom',
 					labels: {
+						top: 15,
 						padding: 30,
 					},
 				},
@@ -772,15 +777,19 @@ async function getTaskOverviewChart(tasks) {
 					datalabels: {
 						anchor: 'end',
 						align: 'end',
+						offset: -5,
 						font: {
-							size: 18,
+							size: 20,
 						},
 						formatter: (value) => {
 							return value + '%'
 						},
+						color: 'black',
+						borderRadius: 4,
 					},
 				},
 			},
+			plugins: [ChartDataLabels],
 		}
 
 		// Create the chart object with defined order and options

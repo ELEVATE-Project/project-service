@@ -2554,7 +2554,7 @@ module.exports = class SolutionsHelper {
 							data.forEach((projectData) => {
 								if (projectData.certificate) {
 									var itemFromUrlArray = certificateTemplateDownloadableUrl.result.find(
-										(item) => item.payload['sourcePath'] == projectData.certificate.templateUrl
+										(item) => item['filePath'] == projectData.certificate.templateUrl
 									)
 									if (itemFromUrlArray) {
 										projectData.certificate.templateUrl = itemFromUrlArray.url

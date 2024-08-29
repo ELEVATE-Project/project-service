@@ -2413,6 +2413,10 @@ module.exports = class UserProjectsHelper {
 
 					libraryProjects.data = _.merge(libraryProjects.data, programAndSolutionInformation.data)
 				}
+
+				if (requestedData.referenceFrom && requestedData.referenceFrom !== '') {
+					libraryProjects.data.referenceFrom = requestedData.referenceFrom
+				}
 				//  <- Add certificate template data
 				// if (libraryProjects.data.certificateTemplateId && libraryProjects.data.certificateTemplateId !== '') {
 				// 	// <- Add certificate template details to projectCreation data if present ->

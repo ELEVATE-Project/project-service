@@ -3244,7 +3244,7 @@ def prepareProjectAndTasksSheets(project_inputFile, projectName_for_folder_path,
                  range(tasksDetailsSheet.ncols)]
     taskColumns1 = ["name", "externalId", "description", "type", "hasAParentTask", "parentTaskOperator",
                     "parentTaskValue",
-                    "parentTaskId", "solutionType", "solutionSubType", "solutionId", "isDeletable"]
+                    "parentTaskId", "solutionType", "solutionSubType", "solutionId", "isDeletable","startDate","endDate"]
     taskLearningResource_count = 0
 
     for tasksHeader in keysTasks:
@@ -3270,8 +3270,15 @@ def prepareProjectAndTasksSheets(project_inputFile, projectName_for_folder_path,
                             for col_index_env in range(tasksDetailsSheet.ncols)}
         taskName = str(dictTasksDetails["TaskTitle"]).encode('utf-8').decode('utf-8').strip()
         # subtaskname = str(dictTasksDetails["Subtask"]).encode('utf-8').decode('utf-8').strip()
+        startDate = dictTasksDetails["startDate"]
+        endDate = dictTasksDetails["endDate"]
+        if startDate:
+            startDateArr = str(startDate).split("-")
+            bodyStartDate = startDateArr[0] + "/" + startDateArr[1] + "/" + startDateArr[2]
+            if endDate:
+                endDateArr = str(endDate).split("-")
+                bodyEndDate = endDateArr[0] + "/" + endDateArr[1] + "/" + endDateArr[2]                     
 
-   
         taskId = str(dictTasksDetails["TaskId"]).encode('utf-8').decode('utf-8').strip() + "-" + str(millisecond)
         taskminNoOfSubmissionsRequired = str(dictTasksDetails["Number of submissions for observation"]).strip()
         sequenceNumber = sequenceNumber + 1
@@ -3330,7 +3337,7 @@ def prepareProjectAndTasksSheets(project_inputFile, projectName_for_folder_path,
         else:
             isDeletable = "FALSE"
         task_values = [taskName, taskId, taskDescription, taskType, hasAParentTask, parentTaskOperator, parentTaskValue,
-                          parentTaskId, taskSolutionType, solutionSubType, solutionId, isDeletable]
+                          parentTaskId, taskSolutionType, solutionSubType, solutionId, isDeletable,bodyStartDate,bodyEndDate]
         task_lr_value_count = 1
         for task_lr in range(0, int(taskLearningResource_count)):
             task_lr_name = str(dictTasksDetails["learningResources" + str(task_lr_value_count) + "-name"]).strip()

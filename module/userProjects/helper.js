@@ -2414,23 +2414,23 @@ module.exports = class UserProjectsHelper {
 					libraryProjects.data = _.merge(libraryProjects.data, programAndSolutionInformation.data)
 				}
 				//  <- Add certificate template data
-				if (libraryProjects.data.certificateTemplateId && libraryProjects.data.certificateTemplateId !== '') {
-					// <- Add certificate template details to projectCreation data if present ->
-					const certificateTemplateDetails = await certificateTemplateQueries.certificateTemplateDocument({
-						_id: libraryProjects.data.certificateTemplateId,
-					})
+				// if (libraryProjects.data.certificateTemplateId && libraryProjects.data.certificateTemplateId !== '') {
+				// 	// <- Add certificate template details to projectCreation data if present ->
+				// 	const certificateTemplateDetails = await certificateTemplateQueries.certificateTemplateDocument({
+				// 		_id: libraryProjects.data.certificateTemplateId,
+				// 	})
 
-					// create certificate object and add data if certificate template is present.
-					if (certificateTemplateDetails.length > 0) {
-						libraryProjects.data['certificate'] = _.pick(certificateTemplateDetails[0], [
-							'templateUrl',
-							'status',
-							'criteria',
-						])
-					}
-					libraryProjects.data['certificate']['templateId'] = libraryProjects.data.certificateTemplateId
-					delete libraryProjects.data.certificateTemplateId
-				}
+				// 	// create certificate object and add data if certificate template is present.
+				// 	if (certificateTemplateDetails.length > 0) {
+				// 		libraryProjects.data['certificate'] = _.pick(certificateTemplateDetails[0], [
+				// 			'templateUrl',
+				// 			'status',
+				// 			'criteria',
+				// 		])
+				// 	}
+				// 	libraryProjects.data['certificate']['templateId'] = libraryProjects.data.certificateTemplateId
+				// 	delete libraryProjects.data.certificateTemplateId
+				// }
 
 				//Fetch user profile information.
 				let addReportInfoToSolution = false
@@ -2466,9 +2466,7 @@ module.exports = class UserProjectsHelper {
 
 				libraryProjects.data.projectTemplateId = libraryProjects.data._id
 				libraryProjects.data.projectTemplateExternalId = libraryProjects.data.externalId
-
 				let projectCreation = await projectQueries.createProject(_.omit(libraryProjects.data, ['_id']))
-
 				// if (addReportInfoToSolution && projectCreation._doc.solutionId) {
 				// 	let updateSolution = await solutionsHelper.addReportInformationInSolution(
 				// 		projectCreation._doc.solutionId,
@@ -2482,8 +2480,7 @@ module.exports = class UserProjectsHelper {
 					await projectTemplatesHelper.ratings(projectTemplateId, requestedData.rating, userToken)
 				}
 
-				projectCreation = await _projectInformation(projectCreation._doc)
-
+				projectCreation = await _projectInformation(_.omit(projectCreation._doc, ['certificate']))
 				return resolve({
 					success: true,
 					message: CONSTANTS.apiResponses.PROJECTS_FETCHED,
@@ -3437,7 +3434,6 @@ function _projectInformation(project) {
 					project.attachments = projectAttachmentsUrl.data
 				}
 			}
-
 			//task attachments
 			if (project.tasks && project.tasks.length > 0) {
 				//order task based on task sequence
@@ -3491,7 +3487,6 @@ function _projectInformation(project) {
 					project.tasks = taskAttachmentsUrl.data
 				}
 			}
-
 			project.status = project.status ? project.status : CONSTANTS.common.NOT_STARTED_STATUS
 
 			if (project.metaInformation) {

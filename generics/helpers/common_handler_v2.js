@@ -699,7 +699,6 @@ async function getTaskOverviewChart(tasks) {
 		if (tasks['Completed']) {
 			labels.push('Completed')
 			data.push(((tasks['Completed'] / total) * 100).toFixed(1))
-			backgroundColor.push('#295e28')
 			delete tasks['Completed']
 		}
 
@@ -707,23 +706,25 @@ async function getTaskOverviewChart(tasks) {
 		if (tasks['Not Started']) {
 			labels.push('Not Started')
 			data.push(((tasks['Not Started'] / total) * 100).toFixed(1))
-			backgroundColor.push('#db0b0b')
 			delete tasks['Not Started']
 		}
 
 		// Process remaining task statuses
 
 		Object.keys(tasks).forEach((eachTask) => {
-			let percetage = ((tasks[eachTask] / total) * 100).toFixed(1)
-			labels.push(eachTask)
-			data.push(percetage)
+			if (tasks[eachTask] > 0) {
+				let percentage = ((tasks[eachTask] / total) * 100).toFixed(1)
+				labels.push(eachTask)
+				data.push(percentage)
+			}
 		})
+
 		// Add additional background colors for doughnut segments
 		backgroundColor = [
 			...backgroundColor,
 			...[
-				'rgb(255, 99, 132)',
 				'rgb(54, 162, 235)',
+				'rgb(255, 99, 132)',
 				'rgb(255, 206, 86)',
 				'rgb(231, 233, 237)',
 				'rgb(75, 192, 192)',

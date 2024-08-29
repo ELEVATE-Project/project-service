@@ -2413,24 +2413,28 @@ module.exports = class UserProjectsHelper {
 
 					libraryProjects.data = _.merge(libraryProjects.data, programAndSolutionInformation.data)
 				}
-				//  <- Add certificate template data
-				if (libraryProjects.data.certificateTemplateId && libraryProjects.data.certificateTemplateId !== '') {
-					// <- Add certificate template details to projectCreation data if present ->
-					const certificateTemplateDetails = await certificateTemplateQueries.certificateTemplateDocument({
-						_id: libraryProjects.data.certificateTemplateId,
-					})
 
-					// create certificate object and add data if certificate template is present.
-					if (certificateTemplateDetails.length > 0) {
-						libraryProjects.data['certificate'] = _.pick(certificateTemplateDetails[0], [
-							'templateUrl',
-							'status',
-							'criteria',
-						])
-					}
-					libraryProjects.data['certificate']['templateId'] = libraryProjects.data.certificateTemplateId
-					delete libraryProjects.data.certificateTemplateId
+				if (requestedData.referenceFrom && requestedData.referenceFrom !== '') {
+					libraryProjects.data.referenceFrom = requestedData.referenceFrom
 				}
+				//  <- Add certificate template data
+				// if (libraryProjects.data.certificateTemplateId && libraryProjects.data.certificateTemplateId !== '') {
+				// 	// <- Add certificate template details to projectCreation data if present ->
+				// 	const certificateTemplateDetails = await certificateTemplateQueries.certificateTemplateDocument({
+				// 		_id: libraryProjects.data.certificateTemplateId,
+				// 	})
+
+				// 	// create certificate object and add data if certificate template is present.
+				// 	if (certificateTemplateDetails.length > 0) {
+				// 		libraryProjects.data['certificate'] = _.pick(certificateTemplateDetails[0], [
+				// 			'templateUrl',
+				// 			'status',
+				// 			'criteria',
+				// 		])
+				// 	}
+				// 	libraryProjects.data['certificate']['templateId'] = libraryProjects.data.certificateTemplateId
+				// 	delete libraryProjects.data.certificateTemplateId
+				// }
 
 				//Fetch user profile information.
 				let addReportInfoToSolution = false
@@ -2482,7 +2486,7 @@ module.exports = class UserProjectsHelper {
 					await projectTemplatesHelper.ratings(projectTemplateId, requestedData.rating, userToken)
 				}
 
-				projectCreation = await _projectInformation(projectCreation._doc)
+				projectCreation = await _projectInformation(_.omit(projectCreation._doc, ['certificate']))
 
 				return resolve({
 					success: true,

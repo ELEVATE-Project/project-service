@@ -3690,8 +3690,8 @@ function _projectCategories(categories) {
 			let categoryIds = []
 
 			categories.forEach((category) => {
-				if (category.value && category.value !== '') {
-					categoryIds.push(category.value)
+				if (category._id && category._id !== '') {
+					categoryIds.push(category._id)
 				}
 			})
 
@@ -3724,8 +3724,8 @@ function _projectCategories(categories) {
 			const categoriesData = categories.map((category) => {
 				let categoryData = {}
 
-				if (category.value && category.value !== '' && categoryInternalIdToData[category.value]) {
-					categoryData = categoryInternalIdToData[category.value]
+				if (category._id && category._id !== '' && categoryInternalIdToData[category._id]) {
+					categoryData = categoryInternalIdToData[category._id]
 				} else {
 					categoryData = {
 						name: category.label,

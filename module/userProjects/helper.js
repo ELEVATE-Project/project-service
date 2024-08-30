@@ -3110,11 +3110,9 @@ module.exports = class UserProjectsHelper {
 
 				// Update project data with downloadable URLs for certificates
 				if (certificateFilePath.length > 0) {
-					console.log('Reached here +++++++ : ')
 					let certificateFileDownloadableUrl = await cloudServicesHelper.getDownloadableUrl(
 						certificateFilePath
 					)
-					console.log(certificateFileDownloadableUrl, 'certificateFileDownloadableUrl')
 					// Throw an error if no downloadable URLs are found
 					if (!certificateFileDownloadableUrl.result || !certificateFileDownloadableUrl.result.length > 0) {
 						throw {

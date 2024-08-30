@@ -3113,7 +3113,6 @@ module.exports = class UserProjectsHelper {
 					let certificateFileDownloadableUrl = await cloudServicesHelper.getDownloadableUrl(
 						certificateFilePath
 					)
-
 					// Throw an error if no downloadable URLs are found
 					if (!certificateFileDownloadableUrl.result || !certificateFileDownloadableUrl.result.length > 0) {
 						throw {
@@ -3125,14 +3124,14 @@ module.exports = class UserProjectsHelper {
 					userProject.forEach((projectData) => {
 						// Set SVG path
 						var svgLinkFromUrlArray = certificateFileDownloadableUrl.find(
-							(item) => item.payload.sourcePath == projectData.certificate.svgPath
+							(item) => item.filePath == projectData.certificate.svgPath
 						)
 						if (svgLinkFromUrlArray) {
 							projectData.certificate.svgPath = svgLinkFromUrlArray.url
 						}
 						// Set PDF path in the response
 						var pdfLinkFromArray = certificateFileDownloadableUrl.find(
-							(item) => item.payload.sourcePath == projectData.certificate.pdfPath
+							(item) => item.filePath == projectData.certificate.pdfPath
 						)
 						if (pdfLinkFromArray) {
 							projectData.certificate.pdfPath = pdfLinkFromArray.url

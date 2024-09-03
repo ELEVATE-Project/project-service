@@ -2732,6 +2732,7 @@ module.exports = class SolutionsHelper {
 				}
 
 				if (targetedSolutions.success) {
+					// When targetedSolutions is empty and currentScopeOnly is set to true send empty response
 					if (!(targetedSolutions.data.data.length > 0) && currentScopeOnly) {
 						return resolve({
 							success: true,
@@ -2746,6 +2747,7 @@ module.exports = class SolutionsHelper {
 							},
 						})
 					}
+					// When targetedSolutions is not empty alter the response based on the value of currentScopeOnly
 					if (targetedSolutions.data.data && targetedSolutions.data.data.length > 0) {
 						let filteredTargetedSolutions = []
 						targetedSolutions.data.data.forEach((solution) => {

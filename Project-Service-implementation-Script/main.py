@@ -728,7 +728,7 @@ def fetchEntityId(solutionName_for_folder_path, accessToken, entitiesNameList, s
     payload = {
 
     "query" : {
-        "entityType" : "state"
+        "entityType" : scopeEntityType
     },
 
     "projection": [
@@ -4533,36 +4533,36 @@ def mainFunc(MainFilePath, programFile, addObservationSolution, millisecond, isP
                                     keysEnv[col_index_env]: detailsEnvSheet.cell(row_index_env, col_index_env).value
                                     for
                                     col_index_env in range(detailsEnvSheet.ncols)}
-                                # if str(dictDetailsEnv['has certificate']).lower() == 'No'.lower():
-                                prepareProjectAndTasksSheets(addObservationSolution, projectName_for_folder_path,
+                                if str(dictDetailsEnv['has certificate']).lower() == 'No'.lower():
+                                    prepareProjectAndTasksSheets(addObservationSolution, projectName_for_folder_path,
                                                                  accessToken)
                                 #     # sys.exit()
-                                projectUpload(addObservationSolution, projectName_for_folder_path, accessToken)
-                                taskUpload(addObservationSolution, projectName_for_folder_path, accessToken)
-                                ProjectSolutionResp = solutionCreationAndMapping(projectName_for_folder_path,
+                                    projectUpload(addObservationSolution, projectName_for_folder_path, accessToken)
+                                    taskUpload(addObservationSolution, projectName_for_folder_path, accessToken)
+                                    ProjectSolutionResp = solutionCreationAndMapping(projectName_for_folder_path,
                                                                                      entityToUpload,
                                                                                      listOfFoundRoles, accessToken)
-                                ProjectSolutionExternalId = ProjectSolutionResp[0]
-                                ProjectSolutionId = ProjectSolutionResp[1]
+                                    ProjectSolutionExternalId = ProjectSolutionResp[0]
+                                    ProjectSolutionId = ProjectSolutionResp[1]
                                 #     ProjectSolutionId = ProjectSolutionResp[1]
-                                #     prepareProgramSuccessSheet(MainFilePath, projectName_for_folder_path, programFile,
-                                #                                ProjectSolutionExternalId,
-                                #                                ProjectSolutionId, accessToken)
-                                # elif str(dictDetailsEnv['has certificate']).lower()== 'Yes'.lower():
-                                #     print("---->this is certificate with project<---")
-                                baseTemplate_id=fetchCertificateBaseTemplate(filePathAddProject,accessToken,projectName_for_folder_path)
+                                    prepareProgramSuccessSheet(MainFilePath, projectName_for_folder_path, programFile,
+                                                               ProjectSolutionExternalId,
+                                                               ProjectSolutionId, accessToken)
+                                elif str(dictDetailsEnv['has certificate']).lower()== 'Yes'.lower():
+                                    print("---->this is certificate with project<---")
+                                    baseTemplate_id=fetchCertificateBaseTemplate(filePathAddProject,accessToken,projectName_for_folder_path)
                                 # sys.exit()
-                                downloadlogosign(filePathAddProject,projectName_for_folder_path)
-                                editsvg(accessToken,filePathAddProject,projectName_for_folder_path,baseTemplate_id)
-                                #     prepareProjectAndTasksSheets(addObservationSolution, projectName_for_folder_path,accessToken)
-                                #     projectUpload(addObservationSolution, projectName_for_folder_path, accessToken)
-                                #     taskUpload(addObservationSolution, projectName_for_folder_path, accessToken)
-                                # ProjectSolutionResp = solutionCreationAndMapping(projectName_for_folder_path,entityToUpload,listOfFoundRoles, accessToken)
-                                ProjectSolutionExternalId = ProjectSolutionResp[0]
-                                ProjectSolutionId = ProjectSolutionResp[1]
-                            certificatetemplateid= prepareaddingcertificatetemp(filePathAddProject,projectName_for_folder_path, accessToken,ProjectSolutionId,programID,baseTemplate_id)
+                                    downloadlogosign(filePathAddProject,projectName_for_folder_path)
+                                    editsvg(accessToken,filePathAddProject,projectName_for_folder_path,baseTemplate_id)
+                                    prepareProjectAndTasksSheets(addObservationSolution, projectName_for_folder_path,accessToken)
+                                    projectUpload(addObservationSolution, projectName_for_folder_path, accessToken)
+                                    taskUpload(addObservationSolution, projectName_for_folder_path, accessToken)
+                                    ProjectSolutionResp = solutionCreationAndMapping(projectName_for_folder_path,entityToUpload,listOfFoundRoles, accessToken)
+                                    ProjectSolutionExternalId = ProjectSolutionResp[0]
+                                    ProjectSolutionId = ProjectSolutionResp[1]
+                                    certificatetemplateid= prepareaddingcertificatetemp(filePathAddProject,projectName_for_folder_path, accessToken,ProjectSolutionId,programID,baseTemplate_id)
 
-                            prepareProgramSuccessSheet(MainFilePath, projectName_for_folder_path, programFile,
+                                    prepareProgramSuccessSheet(MainFilePath, projectName_for_folder_path, programFile,
                                                                ProjectSolutionExternalId,
                                                                ProjectSolutionId, accessToken)
 

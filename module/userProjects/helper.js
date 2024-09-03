@@ -3341,14 +3341,14 @@ module.exports = class UserProjectsHelper {
 					for (const certificateUrlsIndex of certificateUrls.result) {
 						if (
 							projectDetails.certificate.pdfPath != '' &&
-							certificateUrlsIndex.payload['sourcePath'] != '' &&
-							certificateUrlsIndex.payload['sourcePath'] == projectDetails.certificate.pdfPath
+							certificateUrlsIndex.filePath != '' &&
+							certificateUrlsIndex.filePath == projectDetails.certificate.pdfPath
 						) {
 							certificatePdfUrl = certificateUrlsIndex.url
 						} else if (
 							projectDetails.certificate.svgPath != '' &&
-							certificateUrlsIndex.payload['sourcePath'] != '' &&
-							certificateUrlsIndex.payload['sourcePath'] == projectDetails.certificate.svgPath
+							certificateUrlsIndex.filePath != '' &&
+							certificateUrlsIndex.filePath == projectDetails.certificate.svgPath
 						) {
 							certificateSvgUrl = certificateUrlsIndex.url
 						}

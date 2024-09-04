@@ -118,7 +118,7 @@ module.exports = class Files {
      * @apiHeader {String} 			- X-authenticated-user-token Authenticity token
      * @apiParamExample {json} 		- Request:
      * {
-     *     "filePaths": []
+     *     "filePaths": ["project/64b12ef31073b0dd429e19b4/d9f5b0c1-2f12-41ed-8406-ee67a42de611/test.jpeg"]
      * }
      * @apiSampleRequest 			-	/kendra/api/v1/cloud-services/files/getDownloadableUrl
      * @apiUse 						- successBody

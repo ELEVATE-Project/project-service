@@ -6,19 +6,19 @@
  */
 
 module.exports = (req) => {
+	let reportsValidator = {
+		entity: function () {
+			req.checkQuery('reportType').exists().withMessage('required report type')
+		},
+		detailView: function () {
+			req.checkQuery('reportType').exists().withMessage('required report type')
+		},
+		getProgramsByEntity: function () {
+			req.checkParams('_id').exists().withMessage('required program id')
+		},
+	}
 
-    let reportsValidator = {
-        entity : function () {
-            req.checkQuery("reportType").exists().withMessage("required report type");
-        },
-        detailView : function () {
-            req.checkQuery("reportType").exists().withMessage("required report type");
-        }
-
-    }
-
-    if (reportsValidator[req.params.method]) {
-        reportsValidator[req.params.method]();
-    }
-
-};
+	if (reportsValidator[req.params.method]) {
+		reportsValidator[req.params.method]()
+	}
+}

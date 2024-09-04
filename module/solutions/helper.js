@@ -2732,6 +2732,22 @@ module.exports = class SolutionsHelper {
 				}
 
 				if (targetedSolutions.success) {
+					// When targetedSolutions is empty and currentScopeOnly is set to true send empty response
+					if (!(targetedSolutions.data.data.length > 0) && currentScopeOnly) {
+						return resolve({
+							success: true,
+							message: CONSTANTS.apiResponses.TARGETED_SOLUTIONS_FETCHED,
+							data: {
+								data: targetedSolutions.data.data,
+								count: targetedSolutions.data.data.length,
+							},
+							result: {
+								data: targetedSolutions.data.data,
+								count: targetedSolutions.data.data.length,
+							},
+						})
+					}
+					// When targetedSolutions is not empty alter the response based on the value of currentScopeOnly
 					if (targetedSolutions.data.data && targetedSolutions.data.data.length > 0) {
 						let filteredTargetedSolutions = []
 						targetedSolutions.data.data.forEach((solution) => {
@@ -2755,7 +2771,6 @@ module.exports = class SolutionsHelper {
 							)
 							filteredTargetedSolutions.push(newEntry)
 						})
-
 						if (currentScopeOnly) {
 							filteredTargetedSolutions.forEach((solution) => {
 								// Find the corresponding project in mergedData where solutionId matches _id

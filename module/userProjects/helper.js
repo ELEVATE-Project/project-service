@@ -3632,7 +3632,7 @@ function _projectTask(tasks, isImportedFromLibrary = false, parentTaskId = '') {
 		singleTask.type = singleTask.type ? singleTask.type : CONSTANTS.common.SIMPLE_TASK_TYPE
 		singleTask.status = singleTask.status ? singleTask.status : CONSTANTS.common.NOT_STARTED_STATUS
 		singleTask.isDeleted = singleTask.isDeleted ? singleTask.isDeleted : false
-
+		singleTask.attachments = singleTask.attachments ? singleTask.attachments : []
 		if (!singleTask.hasOwnProperty('isDeletable')) {
 			singleTask.isDeletable = true
 		}

@@ -1428,8 +1428,8 @@ module.exports = class UserProjectsHelper {
 
 						// } else {
 						//     //Fetch user profile information by calling sunbird's user read api.
-
-						let userProfileData = await userService.profile(userId)
+						/* Commented Code to test start User Project
+						let userProfileData = await userService.profile(userId);
 						// Check if the user profile fetch was successful
 						if (!userProfileData.success) {
 							throw {
@@ -1442,6 +1442,7 @@ module.exports = class UserProjectsHelper {
 							// addReportInfoToSolution = true;
 						}
 						// }
+						*/
 
 						projectCreation.data.userRoleInformation = userRoleInformation
 

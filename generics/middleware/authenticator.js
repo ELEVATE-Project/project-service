@@ -114,11 +114,11 @@ module.exports = async function (req, res, next, token = '') {
 	req.userDetails = {
 		userToken: token,
 		userInformation: {
-			userId: decodedToken.data.id.toString(),
-			userName: decodedToken.data.name,
-			organizationId: decodedToken.data.organization_id,
+			userId: decodedToken.sub.toString(),
+			userName: decodedToken.preferred_username,
+			// organizationId: decodedToken.data.organization_id,
 			// email : decodedToken.data.email, //email is removed from token
-			firstName: decodedToken.data.name,
+			firstName: decodedToken.name,
 		},
 	}
 

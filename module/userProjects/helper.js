@@ -33,6 +33,7 @@ const fs = require('fs')
 const QRCode = require('qrcode')
 const path = require('path')
 const gotenbergService = require(SERVICES_BASE_PATH + '/gotenberg')
+const projectService = require(SERVICES_BASE_PATH + '/projects')
 /**
  * UserProjectsHelper
  * @class
@@ -1416,7 +1417,7 @@ module.exports = class UserProjectsHelper {
 						//     } else {
 						//         //Fetch user profile information by calling sunbird's user read api.
 
-						//         let userProfile = await userService.profile( userId);
+						//         let userProfile = await projectService.profileRead(userToken, userId)
 						//         if ( userProfile.success &&
 						//              userProfile.data &&
 						//              userProfile.data.response
@@ -1429,7 +1430,7 @@ module.exports = class UserProjectsHelper {
 						// } else {
 						//     //Fetch user profile information by calling sunbird's user read api.
 
-						let userProfileData = await userService.profile(userId)
+						let userProfileData = await projectService.profileRead(userToken, userId)
 						// Check if the user profile fetch was successful
 						if (!userProfileData.success) {
 							throw {
@@ -1456,7 +1457,7 @@ module.exports = class UserProjectsHelper {
 							//     projectCreation.data.userProfile,
 							//     userRoleInformation
 							// );
-							let updatedUserProfile = await userService.profile(userId)
+							let updatedUserProfile = await projectService.profileRead(userToken, userId)
 
 							// Check if the user profile fetch was successful
 							if (!updatedUserProfile.success) {
@@ -1651,7 +1652,7 @@ module.exports = class UserProjectsHelper {
 
 				//Fetch user profile information by calling sunbird's user read api.
 
-				let userProfile = await userService.profile(userId)
+				let userProfile = await projectService.profileRead(userToken, userId)
 				// Check if the user profile fetch was successful
 				if (!userProfile.success) {
 					throw {
@@ -2438,7 +2439,7 @@ module.exports = class UserProjectsHelper {
 
 				//Fetch user profile information.
 				let addReportInfoToSolution = false
-				let userProfile = await userService.profile(userId)
+				let userProfile = await projectService.profileRead(userToken, userId)
 				// Check if the user profile fetch was successful
 				if (!userProfile.success) {
 					throw {
@@ -3175,7 +3176,7 @@ module.exports = class UserProjectsHelper {
 	 * @returns {JSON} certificate re-issued details.
 	 */
 
-	static certificateReIssue(projectId) {
+	static certificateReIssue(userToken, projectId) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Get project details for the project that requires certificate re-issue
@@ -3197,7 +3198,7 @@ module.exports = class UserProjectsHelper {
 				}
 
 				// Fetch user data using userId from the project and call the profile API
-				let userProfileData = await userService.profile(userProject[0].userId)
+				let userProfileData = await projectService.profileRead(userToken, userProject[0].userId)
 				if (
 					userProfileData.success &&
 					userProfileData.data &&

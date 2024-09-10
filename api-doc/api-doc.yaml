@@ -17,7 +17,22 @@ tags:
   - name: admin
   - name: cloud-services
   - name: Form Apis
+  - name: certificateTemplates
+  - name: configurations
+    description: ''
+    externalDocs:
+      description: ''
+      url: ''
+  - name: profile
+    description: ''
+    externalDocs:
+      description: ''
+      url: ''
   - name: certificateBaseTemplates
+    description: ''
+    externalDocs:
+      description: ''
+      url: ''
 paths:
   /v1/project/templates/bulkCreate:
     post:
@@ -663,12 +678,14 @@ paths:
         - projectTemplates
       summary: Fetches details of a specific project template
       parameters:
-        - name: Content-Type
+        - &ref_21
+          name: Content-Type
           in: header
           schema:
             type: string
           example: application/json
-        - in: header
+        - &ref_22
+          in: header
           name: X-auth-token
           schema: &ref_0
             type: string
@@ -1044,7 +1061,7 @@ paths:
                       projectId: ''
         '400':
           description: 'Bad response '
-          headers: {}
+          headers: &ref_23 {}
           content:
             application/json:
               schema:
@@ -1085,7 +1102,7 @@ paths:
         * This is a mandatory parameter and cannot be empty or null.
   /v1/library/categories/create:
     post:
-      tags:
+      tags: &ref_17
         - projectCategories
       summary: Creates a new project category in the library.
       requestBody:
@@ -1108,7 +1125,8 @@ paths:
                   externalId: teachers
                   icon: static/projectCategories/teacher.png
       parameters:
-        - name: X-auth-token
+        - &ref_18
+          name: X-auth-token
           in: header
           schema:
             type: string
@@ -1123,7 +1141,8 @@ paths:
             type: string
           example: '{{internal-access-token}}'
           required: true
-        - name: Content-Type
+        - &ref_19
+          name: Content-Type
           in: header
           schema:
             type: string
@@ -1141,7 +1160,7 @@ paths:
                     result: 667d3e25c611d3428a855c25
         '400':
           description: 'Bad response '
-          headers: {}
+          headers: &ref_20 {}
           content:
             application/json:
               schema:
@@ -1503,7 +1522,8 @@ paths:
                   format: binary
                   description: The CSV file to upload
       parameters:
-        - name: X-auth-token
+        - &ref_24
+          name: X-auth-token
           in: header
           schema:
             type: string
@@ -1512,7 +1532,8 @@ paths:
             To use this API, you require an X-auth-token. This token is
             available in the login API Response.
           required: true
-        - name: internal-access-token
+        - &ref_25
+          name: internal-access-token
           in: header
           schema:
             type: string
@@ -1539,7 +1560,7 @@ paths:
                     infrastructure","Infrastructure-Management-Task1","","simple","NO","","","","","","","FALSE","","","","","","","","","","1","667e79b467803932055a0ecb","Success"
         '400':
           description: 'Bad response '
-          headers: {}
+          headers: &ref_26 {}
           content:
             application/json:
               schema:
@@ -3067,7 +3088,7 @@ paths:
         * This is a mandatory parameter and cannot be empty or null.
   /v1/userProjects/tasksStatus/{_id}:
     post:
-      tags:
+      tags: &ref_37
         - userProjects
       summary: Retrieve the status of specific tasks for a user project.
       requestBody:
@@ -3086,7 +3107,8 @@ paths:
                 value:
                   taskIds: []
       parameters:
-        - name: X-auth-token
+        - &ref_38
+          name: X-auth-token
           in: header
           schema:
             type: string
@@ -3095,7 +3117,8 @@ paths:
             To use this API, you require an X-auth-token. This token is
             available in the login API Response.
           required: true
-        - name: internal-access-token
+        - &ref_39
+          name: internal-access-token
           in: header
           schema:
             type: string
@@ -3125,7 +3148,7 @@ paths:
                         submissionId: 5fbaa71d97ccef111cbb4ee0
         '400':
           description: 'Bad response '
-          headers: {}
+          headers: &ref_40 {}
           content:
             application/json:
               schema:
@@ -3194,7 +3217,7 @@ paths:
           description: 'If we require PDF link then we need to pass it as true else false.'
         - name: reportType
           in: query
-          schema: &ref_6
+          schema:
             type: integer
           example: '1'
           required: true
@@ -5809,7 +5832,7 @@ paths:
         * This is a mandatory parameter and cannot be empty or null.
   /v1/solutions/verifySolution/{solutionId}:
     post:
-      tags:
+      tags: &ref_34
         - solutions
       summary: Verify solution by id.
       requestBody:
@@ -5835,7 +5858,7 @@ paths:
                     - 5fd1b52ab53a6416aaeefc80
                     - 5fd098e2e049735a86b748ac
                   role: BEO
-      parameters:
+      parameters: &ref_35
         - name: X-auth-token
           in: header
           schema:
@@ -5872,7 +5895,7 @@ paths:
                       _id: 5f6853f293734140ccce90cf
         '400':
           description: Bad response
-          headers: {}
+          headers: &ref_36 {}
           content:
             application/json:
               schema:
@@ -6053,7 +6076,8 @@ paths:
         - solutions
       summary: Fetch Solution Details
       parameters:
-        - name: X-auth-token
+        - &ref_31
+          name: X-auth-token
           in: header
           schema:
             type: string
@@ -6062,7 +6086,8 @@ paths:
             To use this API, you require an X-auth-token. This token is
             available in the login API Response.
           required: true
-        - name: internal-access-token
+        - &ref_32
+          name: internal-access-token
           in: header
           schema:
             type: string
@@ -6135,7 +6160,7 @@ paths:
                           - BEO
         '400':
           description: Bad response
-          headers: {}
+          headers: &ref_33 {}
           content:
             application/json:
               schema:
@@ -6220,8 +6245,7 @@ paths:
           schema: &ref_11
             type: string
           example: '{{internal_access_token}}'
-        - &ref_12
-          name: _collectionName
+        - name: _collectionName
           in: path
           schema:
             type: string
@@ -6238,7 +6262,7 @@ paths:
                   value:
                     message: Keys indexed successfully
                     status: 200
-        '400': &ref_13
+        '400': &ref_12
           description: Bad response
           headers: {}
           content:
@@ -6281,7 +6305,7 @@ paths:
         * This is a mandatory parameter and cannot be empty or null.
   /v1/cloud-services/files/preSignedUrls:
     post:
-      tags:
+      tags: &ref_13
         - cloud-services
       summary: Generate Pre-Signed URLs
       requestBody:
@@ -6310,7 +6334,8 @@ paths:
                         - i1.png
                         - i2.png
       parameters:
-        - name: X-auth-token
+        - &ref_14
+          name: X-auth-token
           in: header
           schema:
             type: string
@@ -6319,7 +6344,8 @@ paths:
             To use this API, you require an X-auth-token. This token is
             available in the login API Response.
           required: true
-        - name: internal-access-token
+        - &ref_15
+          name: internal-access-token
           in: header
           schema:
             type: string
@@ -6352,7 +6378,7 @@ paths:
                               https://ax2cel5zyviy.compat.objectstorage.ap-hyderabad-1.oraclecloud.com/samiksha/project/5f72f9998925ec7c60f79a91/1/acee9b95-3c5e-4a09-bfb0-993647ab66f0/i2.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=3737771d26e1d8f211a04ec59cfd3037c8d1c6ff%2F20240628%2Fap-hyderabad-1%2Fs3%2Faws4_request&X-Amz-Date=20240628T031041Z&X-Amz-Expires=300&X-Amz-Signature=920e8dc3753d16c9932b3b347bc41161fa6d9f4932723a00d6319e4e67a9a682&X-Amz-SignedHeaders=host&x-id=PutObject
         '400':
           description: Bad response
-          headers: {}
+          headers: &ref_16 {}
           content:
             application/json:
               schema:
@@ -6819,7 +6845,7 @@ paths:
     post:
       tags:
         - certificateBaseTemplates
-      summary: Creates or updates a certificate base template.
+      summary: Creates certificate base template
       requestBody:
         content:
           multipart/form-data:
@@ -6827,14 +6853,17 @@ paths:
               type: object
               properties:
                 file:
-                  type: string
+                  type: file
                   format: binary
+                  description: svg file to upload
                 code:
                   type: string
-                  example: SingleLogoSingleSign
+                  format: text
+                  description: SingleLogoSingleSign
                 name:
                   type: string
-                  example: 'base '
+                  format: text
+                  description: SingleLogoSingleSign
       parameters:
         - name: X-auth-token
           in: header
@@ -6854,32 +6883,59 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              examples:
+                SuccessResponse:
+                  value:
+                    status: 200
+                    message: Base template added successfully
+                    result:
+                      id": 6011136a2d25b926974d9ec9
         '400':
           description: Bad response
           headers: {}
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
                     type: number
                   message:
-                    type: string
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        location:
+                          type: string
+                        param:
+                          type: string
+                        msg:
+                          type: string
+                      required:
+                        - location
+                        - param
+                        - msg
               examples:
                 FailureResponse:
                   value:
                     status: 400
-                    message: Bad request
+                    message:
+                      - location: body
+                        param: code
+                        msg: Base template code required
+                      - location: body
+                        param: name
+                        msg: Base template name required
       description: >-
         This API creates or updates a certificate base template using a
-        multipart form data.
-        
-        * The endpoint allows a user to creates or updates a certificate base template using a
-        multipart form data is `/v1/certificateBaseTemplates/createOrUpdate`.
-        
+        multipart form data.The request requires authentication tokens in the
+        headers.
+
+
+        * The endpoint allows a user to creates certificate base
+        template`/v1/certificateBaseTemplates/createOrUpdate`.
+
         * It is mandatory to provide values for parameters which are marked as
         `required`
 
@@ -6896,14 +6952,17 @@ paths:
               type: object
               properties:
                 file:
-                  type: string
+                  type: file
                   format: binary
+                  description: svg file to upload
                 code:
                   type: string
-                  example: abcd
+                  format: text
+                  description: SingleLogoSingleSign
                 name:
                   type: string
-                  example: efgh
+                  format: text
+                  description: SingleLogoSingleSign
       parameters:
         - name: X-auth-token
           in: header
@@ -6923,34 +6982,69 @@ paths:
           description: 'To update the data we need to match its id'
           schema: *ref_1
           required: true
+        - in: path
+          name: _id
+          description: To update the data we need to match its id
+          schema: &ref_43
+            type: string
+          required: true
       responses:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              examples:
+                SuccessResponse:
+                  value:
+                    status: 200
+                    message: Base template updated successfully
+                    result:
+                      id": 6011136a2d25b926974d9ec9
         '400':
           description: Bad response
           headers: {}
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
                     type: number
                   message:
-                    type: string
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        location:
+                          type: string
+                        param:
+                          type: string
+                        msg:
+                          type: string
+                      required:
+                        - location
+                        - param
+                        - msg
               examples:
                 FailureResponse:
                   value:
                     status: 400
-                    message: Bad request
+                    message:
+                      - location: params
+                        param: _id
+                        msg: Base template Id required
+                      - location: params
+                        param: _id
+                        msg: Base template Id is not valid
       description: >-
-        This API updates a specific certificate base template using its id.
-        
-        * The endpoint allows a user to updates a specific certificate base template using its id is `/v1/certificateBaseTemplates/createOrUpdate`.
-        
+        This API updates a specific certificate base template using its id.The
+        request requires authentication tokens in the headers and the id in the
+        query parameters.
+
+
+        * The endpoint allows a user to updates certificate base
+        template`/v1/certificateBaseTemplates/createOrUpdate/{_id}`.
+
         * It is mandatory to provide values for parameters which are marked as
         `required`
 
@@ -7113,7 +7207,7 @@ paths:
                         programExternalId: SubTask1234
                         parentTemplateId: 66975a4939646b05e05a3988
                     count: 1
-        '400': *ref_13
+        '400': *ref_12
       description: >-
         This api will help to get information based on id by passing the
         collection name in params.
@@ -7125,3 +7219,2471 @@ paths:
         `required`
 
         * This is a mandatory parameter and cannot be empty or null.
+  /v1/cloud-services/files/download:
+    get:
+      tags: *ref_13
+      summary: Auto serves the file stored in cloud
+      parameters:
+        - *ref_14
+        - *ref_15
+        - in: query
+          name: file
+          description: ''
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              examples:
+                SuccessResponse: {}
+        '400':
+          description: Bad response
+          headers: *ref_16
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  message:
+                    type: string
+              examples:
+                FailureResponse:
+                  value:
+                    status: 400
+                    message: >-
+                      The "path" argument must be of type string. Received
+                      undefined
+      description: >-
+        This endpoint auto serves the file stored in cloud.
+
+
+        * The endpoint allows a user to Auto serves the file stored in cloud
+        `/v1/cloud-service/files/download`.
+
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
+  /v1/library/categories/projects/:{categoryExternalId}:
+    get:
+      tags: *ref_17
+      summary: Lists the library projects
+      parameters:
+        - *ref_18
+        - *ref_19
+        - in: path
+          name: categoryExternalId
+          description: To list the data we need to match its id
+          schema: &ref_42
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              examples:
+                SuccessResponse:
+                  value:
+                    message: Successfully fetched projects
+                    status: 200
+                    result:
+                      data:
+                        - _id: 5f4c91b0acae343a15c39357
+                          averageRating: 2.5
+                          noOfRatings: 4
+                          name: Test-template
+                          externalId: Test-template1
+                          description: Test template description
+                          createdAt: '2020-08-31T05:59:12.230Z'
+                      count: 7
+        '400':
+          description: 'Bad response '
+          headers: *ref_20
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  message:
+                    type: string
+              examples:
+                FailureResponse:
+                  value:
+                    status: 400
+                    message: Bad request
+      description: >-
+        This endpoint allows to lists the library projects.The request requires
+        authentication tokens in the headers and the categoryExternalId in the
+        query parameters.
+
+
+        * The API allows to lists the library projects```
+        /v1/project/categories/projects/:{categoryExternalId} ```
+
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
+  /v1/project/templates/list:
+    get:
+      tags:
+        - projectTemplates
+      summary: Lists all the project template
+      parameters: &ref_29
+        - *ref_21
+        - *ref_22
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              examples:
+                SuccessResponse:
+                  value:
+                    message: List of project templates fetched successfully
+                    status: 200
+                    result:
+                      - _id: 5fcf9954546a92494f2e587c
+                        title: test
+                        externalId: TEST-HOME
+                        categories: []
+                        duration:
+                          value: 1W
+                          label: 1 Week
+                        difficultyLevel:
+                          value: B
+                          label: Basic
+                        description: test
+                        concepts:
+                          - ''
+                        keywords:
+                          - ''
+                        status: published
+                        isDeleted: false
+                        recommendedFor: []
+                        tasks: []
+                        createdAt: '2020-12-08T15:18:44+00:00'
+                        updatedAt: '2020-12-08T15:18:44+00:00'
+                        createdBy: SYSTEM
+                        updatedBy: SYSTEM
+                        learningResources: []
+                        isReusable: true
+                        entityType: []
+                        taskSequence: []
+                        metaInformation:
+                          supportingDocuments:
+                            - ''
+                          primaryAudience:
+                            - ''
+                      - _id: 5fcf9954546a92494f2e587f
+                        title: Vidyagama facilitation project
+                        externalId: da9f31a1-dc9d-4665-9af4-d023258dc558
+                        categories: []
+                        duration:
+                          value: 1W
+                          label: 1 Week
+                        difficultyLevel:
+                          value: B
+                          label: Basic
+                        description: >-
+                          Support HMs and teachers by identifying common good
+                          practices and challenges with respect to Vidyagama
+                        concepts: []
+                        keywords:
+                          - ''
+                        status: published
+                        isDeleted: false
+                        recommendedFor: []
+                        tasks:
+                          - 5fcf9954546a92494f2e587d
+                          - 5fcf9954546a92494f2e587e
+                        createdAt: '2020-12-08T15:18:44+00:00'
+                        updatedAt: '2020-12-08T15:18:44+00:00'
+                        createdBy: SYSTEM
+                        updatedBy: SYSTEM
+                        learningResources: []
+                        isReusable: true
+                        entityType: []
+                        taskSequence:
+                          - 5fcf9954546a92494f2e587d
+                          - 5fcf9954546a92494f2e587e
+                        metaInformation: {}
+                      - _id: 5fcf9954546a92494f2e588b
+                        title: Effective Online Instructions (English Medium)
+                        externalId: 6df4ab7c-f92e-4109-a810-ccb6f82b4b5e
+                        categories: []
+                        duration:
+                          value: 1W
+                          label: 1 Week
+                        difficultyLevel:
+                          value: B
+                          label: Basic
+                        description: >-
+                          By the end of this project, the teacher will be able
+                          to give clear instructions to students during the
+                          online classes.
+                        concepts: []
+                        keywords:
+                          - Teaching learning
+                          - instructions
+                          - english
+                          - online class
+                        status: published
+                        isDeleted: false
+                        recommendedFor: []
+                        tasks:
+                          - 5fcf9954546a92494f2e5882
+                          - 5fcf9954546a92494f2e5880
+                          - 5fcf9954546a92494f2e5881
+                          - 5fcf9954546a92494f2e5883
+                          - 5fcf9954546a92494f2e5884
+                          - 5fcf9954546a92494f2e5885
+                          - 5fcf9954546a92494f2e5886
+                          - 5fcf9954546a92494f2e5889
+                          - 5fcf9954546a92494f2e588a
+                        createdAt: '2020-12-08T15:18:44+00:00'
+                        updatedAt: '2020-12-08T15:18:44+00:00'
+                        createdBy: SYSTEM
+                        updatedBy: SYSTEM
+                        learningResources: []
+                        isReusable: true
+                        entityType: []
+                        taskSequence:
+                          - 5fcf9954546a92494f2e5882
+                          - 5fcf9954546a92494f2e5880
+                          - 5fcf9954546a92494f2e5881
+                          - 5fcf9954546a92494f2e5883
+                          - 5fcf9954546a92494f2e5884
+                          - 5fcf9954546a92494f2e5885
+                          - 5fcf9954546a92494f2e5886
+                          - 5fcf9954546a92494f2e5889
+                          - 5fcf9954546a92494f2e588a
+                        metaInformation: {}
+                      - _id: 5fcf9954546a92494f2e5896
+                        title: Effective Online Instructions (English Medium)
+                        externalId: 29b4e13d-0317-48b0-9429-9db9e15536b9
+                        categories: []
+                        duration:
+                          value: 1W
+                          label: 1 Week
+                        difficultyLevel:
+                          value: B
+                          label: Basic
+                        description: >-
+                          By the end of this project, the HM will be able to
+                          guide teachers to give clear instructions during
+                          online teaching.
+                        concepts: []
+                        keywords:
+                          - Teaching learning
+                          - instructions
+                          - english
+                          - online class
+                        status: published
+                        isDeleted: false
+                        recommendedFor: []
+                        tasks:
+                          - 5fcf9954546a92494f2e588c
+                          - 5fcf9954546a92494f2e588d
+                          - 5fcf9954546a92494f2e588e
+                          - 5fcf9954546a92494f2e588f
+                          - 5fcf9954546a92494f2e5890
+                          - 5fcf9954546a92494f2e5891
+                          - 5fcf9954546a92494f2e5892
+                          - 5fcf9954546a92494f2e5893
+                          - 5fcf9954546a92494f2e5894
+                          - 5fcf9954546a92494f2e5895
+                        createdAt: '2020-12-08T15:18:44+00:00'
+                        updatedAt: '2020-12-08T15:18:44+00:00'
+                        createdBy: SYSTEM
+                        updatedBy: SYSTEM
+                        learningResources: []
+                        isReusable: true
+                        entityType: []
+                        taskSequence:
+                          - 5fcf9954546a92494f2e588c
+                          - 5fcf9954546a92494f2e588d
+                          - 5fcf9954546a92494f2e588e
+                          - 5fcf9954546a92494f2e588f
+                          - 5fcf9954546a92494f2e5890
+                          - 5fcf9954546a92494f2e5891
+                          - 5fcf9954546a92494f2e5892
+                          - 5fcf9954546a92494f2e5893
+                          - 5fcf9954546a92494f2e5894
+                          - 5fcf9954546a92494f2e5895
+                        metaInformation: {}
+                      - _id: 5fcf9954546a92494f2e58a2
+                        title: Reach the 'Unreached'
+                        externalId: 13d6252c-b582-4704-9710-302f86844dae
+                        categories: []
+                        duration:
+                          value: 1W
+                          label: 1 Week
+                        difficultyLevel:
+                          value: B
+                          label: Basic
+                        description: >-
+                          Teachers will be able to map available devices in the
+                          community. Devices and learning resources are
+                          mobilised for children through community
+                        concepts: []
+                        keywords:
+                          - Learning
+                          - Mapping
+                          - Devices
+                          - Community
+                          - Mobilisation
+                          - Teachers
+                        status: published
+                        isDeleted: false
+                        recommendedFor: []
+                        tasks:
+                          - 5fcf9954546a92494f2e5897
+                          - 5fcf9954546a92494f2e5898
+                          - 5fcf9954546a92494f2e589a
+                          - 5fcf9954546a92494f2e589d
+                          - 5fcf9954546a92494f2e589c
+                          - 5fcf9954546a92494f2e589f
+                          - 5fcf9954546a92494f2e58a0
+                          - 5fcf9954546a92494f2e58a1
+                        createdAt: '2020-12-08T15:18:44+00:00'
+                        updatedAt: '2020-12-08T15:18:44+00:00'
+                        createdBy: SYSTEM
+                        updatedBy: SYSTEM
+                        learningResources: []
+                        isReusable: true
+                        entityType: []
+                        taskSequence:
+                          - 5fcf9954546a92494f2e5897
+                          - 5fcf9954546a92494f2e5898
+                          - 5fcf9954546a92494f2e589a
+                          - 5fcf9954546a92494f2e589d
+                          - 5fcf9954546a92494f2e589c
+                          - 5fcf9954546a92494f2e589f
+                          - 5fcf9954546a92494f2e58a0
+                          - 5fcf9954546a92494f2e58a1
+                        metaInformation: {}
+                      - _id: 5fcf9954546a92494f2e58ae
+                        title: Implementing Digital mode of Education
+                        externalId: e2b24a6c-3872-4cc4-baa3-37b5c0fbc1b6
+                        categories: []
+                        duration:
+                          value: 1W
+                          label: 1 Week
+                        difficultyLevel:
+                          value: B
+                          label: Basic
+                        description: >-
+                          HMs will be able to plan for implementing the various
+                          digital mode of education for thier schools with
+                          teachers as per the PRAGYATA guideline document.
+                        concepts: []
+                        keywords:
+                          - Digital learning
+                          - PRAGYATA guideline
+                          - Digital Education
+                          - Community
+                        status: published
+                        isDeleted: false
+                        recommendedFor: []
+                        tasks:
+                          - 5fcf9954546a92494f2e58a3
+                          - 5fcf9954546a92494f2e58a4
+                          - 5fcf9954546a92494f2e58a5
+                          - 5fcf9954546a92494f2e58a6
+                          - 5fcf9954546a92494f2e58a7
+                          - 5fcf9954546a92494f2e58a9
+                          - 5fcf9954546a92494f2e58aa
+                          - 5fcf9954546a92494f2e58ab
+                          - 5fcf9954546a92494f2e58ac
+                          - 5fcf9954546a92494f2e58ad
+                        createdAt: '2020-12-08T15:18:44+00:00'
+                        updatedAt: '2020-12-08T15:18:44+00:00'
+                        createdBy: SYSTEM
+                        updatedBy: SYSTEM
+                        learningResources: []
+                        isReusable: true
+                        entityType: []
+                        taskSequence:
+                          - 5fcf9954546a92494f2e58a3
+                          - 5fcf9954546a92494f2e58a4
+                          - 5fcf9954546a92494f2e58a5
+                          - 5fcf9954546a92494f2e58a6
+                          - 5fcf9954546a92494f2e58a7
+                          - 5fcf9954546a92494f2e58a9
+                          - 5fcf9954546a92494f2e58aa
+                          - 5fcf9954546a92494f2e58ab
+                          - 5fcf9954546a92494f2e58ac
+                          - 5fcf9954546a92494f2e58ad
+                        metaInformation: {}
+                      - _id: 5fcf9954546a92494f2e58bc
+                        title: Improved Preparedness of district for VPTM
+                        externalId: b5c49977-0a5b-4164-981d-c6576c3a6d8c
+                        categories: []
+                        duration:
+                          value: 1W
+                          label: 1 Week
+                        difficultyLevel:
+                          value: B
+                          label: Basic
+                        description: >-
+                          DEOs will be able to conduct the PTM in their
+                          districts effectively
+                        concepts: []
+                        keywords:
+                          - PTM
+                          - Parent
+                          - Teachers Meeting
+                          - Virtual
+                          - District Level
+                          - DEO
+                          - Punjab
+                        status: published
+                        isDeleted: false
+                        recommendedFor: []
+                        tasks:
+                          - 5fcf9954546a92494f2e58af
+                          - 5fcf9954546a92494f2e58b0
+                          - 5fcf9954546a92494f2e58b1
+                          - 5fcf9954546a92494f2e58b5
+                          - 5fcf9954546a92494f2e58b6
+                          - 5fcf9954546a92494f2e58b7
+                          - 5fcf9954546a92494f2e58b8
+                          - 5fcf9954546a92494f2e58b9
+                          - 5fcf9954546a92494f2e58ba
+                          - 5fcf9954546a92494f2e58bb
+                        createdAt: '2020-12-08T15:18:44+00:00'
+                        updatedAt: '2020-12-08T15:18:44+00:00'
+                        createdBy: SYSTEM
+                        updatedBy: SYSTEM
+                        learningResources: []
+                        isReusable: true
+                        entityType: []
+                        taskSequence:
+                          - 5fcf9954546a92494f2e58af
+                          - 5fcf9954546a92494f2e58b0
+                          - 5fcf9954546a92494f2e58b1
+                          - 5fcf9954546a92494f2e58b5
+                          - 5fcf9954546a92494f2e58b6
+                          - 5fcf9954546a92494f2e58b7
+                          - 5fcf9954546a92494f2e58b8
+                          - 5fcf9954546a92494f2e58b9
+                          - 5fcf9954546a92494f2e58ba
+                          - 5fcf9954546a92494f2e58bb
+                        metaInformation: {}
+                      - _id: 5fcf9954546a92494f2e58c4
+                        title: Class Teacher -- Monitoring Student Progress
+                        externalId: c65318e5-ff9a-4a67-b85e-cff40164a2fa
+                        categories: []
+                        duration:
+                          value: 1W
+                          label: 1 Week
+                        difficultyLevel:
+                          value: B
+                          label: Basic
+                        description: >-
+                          Students are regular in their work and are conscious
+                          of completing their tasks/quality of the work they do
+                          . They are able to share their challenges with
+                          teachers and seek support.
+                        concepts: []
+                        keywords:
+                          - class teacher
+                          - covid
+                          - student learning
+                          - student progress
+                        status: published
+                        isDeleted: false
+                        recommendedFor: []
+                        tasks:
+                          - 5fcf9954546a92494f2e58bd
+                          - 5fcf9954546a92494f2e58be
+                          - 5fcf9954546a92494f2e58bf
+                          - 5fcf9954546a92494f2e58c0
+                          - 5fcf9954546a92494f2e58c1
+                          - 5fcf9954546a92494f2e58c3
+                          - 5fcf9954546a92494f2e58c2
+                        createdAt: '2020-12-08T15:18:44+00:00'
+                        updatedAt: '2020-12-08T15:18:44+00:00'
+                        createdBy: SYSTEM
+                        updatedBy: SYSTEM
+                        learningResources: []
+                        isReusable: true
+                        entityType: []
+                        taskSequence:
+                          - 5fcf9954546a92494f2e58bd
+                          - 5fcf9954546a92494f2e58be
+                          - 5fcf9954546a92494f2e58bf
+                          - 5fcf9954546a92494f2e58c0
+                          - 5fcf9954546a92494f2e58c1
+                          - 5fcf9954546a92494f2e58c3
+                          - 5fcf9954546a92494f2e58c2
+                        metaInformation: {}
+                      - _id: 5fcf9954546a92494f2e58cd
+                        title: Virtual Parents' Teachers' Meeting
+                        externalId: 0a761376-f908-4577-870b-80a8abb7a266
+                        categories: []
+                        duration:
+                          value: 1W
+                          label: 1 Week
+                        difficultyLevel:
+                          value: B
+                          label: Basic
+                        description: >-
+                          Teachers will be able to hold effective conversations
+                          with parents through PTMs held virtually
+                        concepts: []
+                        keywords:
+                          - PTM
+                          - Parents
+                          - Teachers Meeting
+                          - Virtual
+                        status: published
+                        isDeleted: false
+                        recommendedFor: []
+                        tasks:
+                          - 5fcf9954546a92494f2e58c6
+                          - 5fcf9954546a92494f2e58c5
+                          - 5fcf9954546a92494f2e58c7
+                          - 5fcf9954546a92494f2e58c8
+                          - 5fcf9954546a92494f2e58c9
+                          - 5fcf9954546a92494f2e58ca
+                          - 5fcf9954546a92494f2e58cb
+                          - 5fcf9954546a92494f2e58cc
+                        createdAt: '2020-12-08T15:18:44+00:00'
+                        updatedAt: '2020-12-08T15:18:44+00:00'
+                        createdBy: SYSTEM
+                        updatedBy: SYSTEM
+                        learningResources: []
+                        isReusable: true
+                        entityType: []
+                        taskSequence:
+                          - 5fcf9954546a92494f2e58c6
+                          - 5fcf9954546a92494f2e58c5
+                          - 5fcf9954546a92494f2e58c7
+                          - 5fcf9954546a92494f2e58c8
+                          - 5fcf9954546a92494f2e58c9
+                          - 5fcf9954546a92494f2e58ca
+                          - 5fcf9954546a92494f2e58cb
+                          - 5fcf9954546a92494f2e58cc
+                        metaInformation: {}
+                      - _id: 5fcf9954546a92494f2e58d6
+                        title: Virtual Staff Meetings
+                        externalId: 8aa32dca-4f58-4650-9dae-828605ccaf3c
+                        categories: []
+                        duration:
+                          value: 1W
+                          label: 1 Week
+                        difficultyLevel:
+                          value: B
+                          label: Basic
+                        description: >-
+                          To stay connected with teachers and take updates on
+                          their challenges, tasks and support required by them
+                        concepts: []
+                        keywords:
+                          - Staff meeting
+                          - Teachers
+                          - School leaders
+                          - virtual meeting
+                        status: published
+                        isDeleted: false
+                        recommendedFor: []
+                        tasks:
+                          - 5fcf9954546a92494f2e58ce
+                          - 5fcf9954546a92494f2e58cf
+                          - 5fcf9954546a92494f2e58d0
+                          - 5fcf9954546a92494f2e58d1
+                          - 5fcf9954546a92494f2e58d2
+                          - 5fcf9954546a92494f2e58d3
+                          - 5fcf9954546a92494f2e58d4
+                          - 5fcf9954546a92494f2e58d5
+                        createdAt: '2020-12-08T15:18:44+00:00'
+                        updatedAt: '2020-12-08T15:18:44+00:00'
+                        createdBy: SYSTEM
+                        updatedBy: SYSTEM
+                        learningResources: []
+                        isReusable: true
+                        entityType: []
+                        taskSequence:
+                          - 5fcf9954546a92494f2e58ce
+                          - 5fcf9954546a92494f2e58cf
+                          - 5fcf9954546a92494f2e58d0
+                          - 5fcf9954546a92494f2e58d1
+                          - 5fcf9954546a92494f2e58d2
+                          - 5fcf9954546a92494f2e58d3
+                          - 5fcf9954546a92494f2e58d4
+                          - 5fcf9954546a92494f2e58d5
+                        metaInformation: {}
+                      - _id: 5fcf9954546a92494f2e58f3
+                        title: Teacher's motivation matters
+                        externalId: 151cb9c5-bddd-4758-a5fc-8234816c4eed
+                        categories: []
+                        duration:
+                          value: 1W
+                          label: 1 Week
+                        difficultyLevel:
+                          value: B
+                          label: Basic
+                        description: >-
+                          HM will be able to assess the motivation level of his
+                          teachers and take necessary steps to keep teachers
+                          motivated
+                        concepts: []
+                        keywords:
+                          - ''
+                        status: published
+                        isDeleted: false
+                        recommendedFor: []
+                        tasks:
+                          - 5fcf9954546a92494f2e58d7
+                          - 5fcf9954546a92494f2e58ec
+                          - 5fcf9954546a92494f2e58ed
+                          - 5fcf9954546a92494f2e58ef
+                          - 5fcf9954546a92494f2e58ee
+                          - 5fcf9954546a92494f2e58f0
+                          - 5fcf9954546a92494f2e58f1
+                          - 5fcf9954546a92494f2e58f2
+                        createdAt: '2020-12-08T15:18:44+00:00'
+                        updatedAt: '2020-12-08T15:18:44+00:00'
+                        createdBy: SYSTEM
+                        updatedBy: SYSTEM
+                        learningResources: []
+                        isReusable: true
+                        entityType: []
+                        taskSequence:
+                          - 5fcf9954546a92494f2e58d7
+                          - 5fcf9954546a92494f2e58ec
+                          - 5fcf9954546a92494f2e58ed
+                          - 5fcf9954546a92494f2e58ef
+                          - 5fcf9954546a92494f2e58ee
+                          - 5fcf9954546a92494f2e58f0
+                          - 5fcf9954546a92494f2e58f1
+                          - 5fcf9954546a92494f2e58f2
+                        metaInformation: {}
+                      - _id: 5fcf9954546a92494f2e58f9
+                        title: COVID Safety habits
+                        externalId: f0dcb02f-0f6b-4a69-81cc-5d5751c0d5cd
+                        categories: []
+                        duration:
+                          value: 1W
+                          label: 1 Week
+                        difficultyLevel:
+                          value: B
+                          label: Basic
+                        description: >-
+                          Ensuring that children are aware of norms to follow in
+                          the school is as important as making sure that there
+                          are necessary resources. The aim of this project is to
+                          make sure children are aware of, and practice safety
+                          habits
+                        concepts: []
+                        keywords:
+                          - ''
+                        status: published
+                        isDeleted: false
+                        recommendedFor: []
+                        tasks:
+                          - 5fcf9954546a92494f2e58f4
+                          - 5fcf9954546a92494f2e58f7
+                          - 5fcf9954546a92494f2e58f5
+                          - 5fcf9954546a92494f2e58f6
+                          - 5fcf9954546a92494f2e58f8
+                        createdAt: '2020-12-08T15:18:44+00:00'
+                        updatedAt: '2020-12-08T15:18:44+00:00'
+                        createdBy: SYSTEM
+                        updatedBy: SYSTEM
+                        learningResources: []
+                        isReusable: true
+                        entityType: []
+                        taskSequence:
+                          - 5fcf9954546a92494f2e58f4
+                          - 5fcf9954546a92494f2e58f7
+                          - 5fcf9954546a92494f2e58f5
+                          - 5fcf9954546a92494f2e58f6
+                          - 5fcf9954546a92494f2e58f8
+                        metaInformation: {}
+                      - _id: 5fcf9954546a92494f2e58ff
+                        title: विद्यालय को सैनेटाइज करना
+                        externalId: c2140097-ed18-49ec-b6fe-0b089744ddfb
+                        categories: []
+                        duration:
+                          value: 1W
+                          label: 1 Week
+                        difficultyLevel:
+                          value: B
+                          label: Basic
+                        description: >-
+                          Having one-on-one discussions with teachers helps give
+                          personalized support to teachers, as well as address
+                          challenges or concerns that teachers may not be
+                          comfortable discussing in large groups!
+                        concepts: []
+                        keywords:
+                          - 0ne on one interaction,CRPinteraction,FLN
+                        status: published
+                        isDeleted: false
+                        recommendedFor: []
+                        tasks:
+                          - 5fcf9954546a92494f2e58fa
+                          - 5fcf9954546a92494f2e58fb
+                          - 5fcf9954546a92494f2e58fe
+                          - 5fcf9954546a92494f2e58fc
+                          - 5fcf9954546a92494f2e58fd
+                        createdAt: '2020-12-08T15:18:44+00:00'
+                        updatedAt: '2020-12-08T15:18:44+00:00'
+                        createdBy: SYSTEM
+                        updatedBy: SYSTEM
+                        learningResources: []
+                        isReusable: true
+                        entityType: []
+                        taskSequence:
+                          - 5fcf9954546a92494f2e58fa
+                          - 5fcf9954546a92494f2e58fb
+                          - 5fcf9954546a92494f2e58fe
+                          - 5fcf9954546a92494f2e58fc
+                          - 5fcf9954546a92494f2e58fd
+                        metaInformation: {}
+                      - _id: 5fd1b2a3e4d17b4af8aa6f4d
+                        categories:
+                          - _id: 5fcfa9a2457d6055e33843ef
+                            externalId: teachers
+                            name: Teachers
+                        description: ''
+                        concepts:
+                          - Unit plan
+                          - ' long term plan'
+                          - ' short term plan'
+                        keywords:
+                          - >-
+                            long term planning, short term planning, program of
+                            work
+                        isDeleted: false
+                        recommendedFor: []
+                        tasks:
+                          - 5fd1b4a6e4d17b4af8aa6f4e
+                          - 5fd1b4a6e4d17b4af8aa6f4f
+                          - 5fd1b4a6e4d17b4af8aa6f50
+                          - 5fd1b4a6e4d17b4af8aa6f51
+                          - 5fd1b4a6e4d17b4af8aa6f52
+                          - 5fd1b4a6e4d17b4af8aa6f53
+                          - 5fd1b4a6e4d17b4af8aa6f54
+                          - 5fd1b4a6e4d17b4af8aa6f55
+                          - 5fd1b4a6e4d17b4af8aa6f56
+                          - 5fd1b4a6e4d17b4af8aa6f57
+                          - 5fd1b4a6e4d17b4af8aa6f58
+                          - 5fd1b4a6e4d17b4af8aa6f59
+                          - 5fd1b4a6e4d17b4af8aa6f5a
+                          - 5fd1b4a6e4d17b4af8aa6f5b
+                          - 5fd1b4a6e4d17b4af8aa6f5c
+                          - 5fd1b4a6e4d17b4af8aa6f5d
+                        createdBy: 140558b9-7df4-4993-be3c-31eb8b9ca368
+                        updatedBy: 140558b9-7df4-4993-be3c-31eb8b9ca368
+                        learningResources: []
+                        isReusable: true
+                        taskSequence: []
+                        averageRating: 0
+                        noOfRatings: 0
+                        ratings:
+                          '1': 0
+                          '2': 0
+                          '3': 0
+                          '4': 0
+                          '5': 0
+                        deleted: false
+                        title: Way forward
+                        externalId: IMP-3147a
+                        entityType: ''
+                        taskCreationForm: ''
+                        metaInformation:
+                          rationale: ''
+                          primaryAudience:
+                            - Teachers
+                          goal: >-
+                            To understand the importance of having long term and
+                            short term planning
+                          duration: 3 weeks
+                          successIndicators: ''
+                          risks: ''
+                          approaches: ''
+                        status: published
+                        updatedAt: '2020-12-10T05:31:15.956Z'
+                        createdAt: '2020-12-10T05:31:15.956Z'
+                        __v: 0
+                      - _id: 5fd1de09e4d17b4af8aa6f5e
+                        categories: []
+                        description: improving community library
+                        concepts: []
+                        keywords: []
+                        isDeleted: false
+                        recommendedFor:
+                          - roleId: 5f32d8238e0dc831240405a3
+                            code: DEO
+                        tasks:
+                          - 5fd1e06a1233354b094f1518
+                        createdBy: 4255a82b-7d58-4ed9-a297-c888f0faafbe
+                        updatedBy: 4255a82b-7d58-4ed9-a297-c888f0faafbe
+                        learningResources: []
+                        isReusable: true
+                        taskSequence: []
+                        averageRating: 5
+                        noOfRatings: 1
+                        ratings:
+                          '1': 0
+                          '2': 0
+                          '3': 0
+                          '4': 0
+                          '5': 1
+                        deleted: false
+                        title: TEST OBSERVATION
+                        externalId: TEST-OBSERVATION
+                        entityType: state
+                        taskCreationForm: ''
+                        entityTypeId: 5f32d8228e0dc8312404056e
+                        metaInformation:
+                          rationale: ''
+                          primaryAudience:
+                            - teachers
+                            - head master
+                        status: published
+                        updatedAt: '2020-12-10T09:52:48.035Z'
+                        createdAt: '2020-12-10T08:36:25.752Z'
+                        __v: 0
+                      - _id: 5fd20c94e4d17b4af8aa6f61
+                        categories:
+                          - _id: 5fcfa9a2457d6055e33843f2
+                            externalId: community
+                            name: Community
+                        description: improving community library
+                        concepts: []
+                        keywords: []
+                        isDeleted: false
+                        recommendedFor:
+                          - roleId: 5f32d8238e0dc831240405a3
+                            code: DEO
+                        tasks:
+                          - 5fd20d44e4d17b4af8aa6f62
+                        createdBy: 4255a82b-7d58-4ed9-a297-c888f0faafbe
+                        updatedBy: 4255a82b-7d58-4ed9-a297-c888f0faafbe
+                        learningResources: []
+                        isReusable: true
+                        taskSequence: []
+                        averageRating: 5
+                        noOfRatings: 1
+                        ratings:
+                          '1': 0
+                          '2': 0
+                          '3': 0
+                          '4': 0
+                          '5': 1
+                        deleted: false
+                        title: TEST OBSERVATION
+                        externalId: OBSERVATION TEST
+                        entityType: school
+                        taskCreationForm: ''
+                        entityTypeId: 5f32d8228e0dc83124040567
+                        metaInformation:
+                          rationale: ''
+                          primaryAudience:
+                            - teachers
+                            - head master
+                        status: published
+                        updatedAt: '2020-12-10T11:59:02.909Z'
+                        createdAt: '2020-12-10T11:55:00.806Z'
+                        __v: 0
+                      - _id: 5fd21654e4d17b4af8aa6f64
+                        categories:
+                          - _id: 5fcfa9a2457d6055e33843f3
+                            externalId: educationLeader
+                            name: Education Leader
+                        description: ''
+                        concepts:
+                          - ''
+                        keywords:
+                          - >-
+                            school leadership,leader, strengths, competency,
+                            teacher
+                        isDeleted: false
+                        recommendedFor: []
+                        tasks:
+                          - 5fd242f21233354b094f151b
+                          - 5fd242f21233354b094f151c
+                          - 5fd242f21233354b094f151d
+                          - 5fd242f21233354b094f151e
+                          - 5fd242f21233354b094f151f
+                          - 5fd242f21233354b094f1520
+                          - 5fd242f21233354b094f1521
+                          - 5fd242f21233354b094f1522
+                          - 5fd242f21233354b094f1523
+                          - 5fd242f21233354b094f1524
+                          - 5fd242f21233354b094f1525
+                          - 5fd242f21233354b094f1526
+                          - 5fd242f21233354b094f1527
+                          - 5fd242f21233354b094f1528
+                          - 5fd242f21233354b094f1529
+                          - 5fd242f21233354b094f152a
+                        createdBy: 140558b9-7df4-4993-be3c-31eb8b9ca368
+                        updatedBy: 140558b9-7df4-4993-be3c-31eb8b9ca368
+                        learningResources: []
+                        isReusable: true
+                        taskSequence: []
+                        averageRating: 0
+                        noOfRatings: 0
+                        ratings:
+                          '1': 0
+                          '2': 0
+                          '3': 0
+                          '4': 0
+                          '5': 0
+                        deleted: false
+                        title: Tag the leader
+                        externalId: IMP-3147c
+                        entityType: ''
+                        taskCreationForm: ''
+                        metaInformation:
+                          rationale: ''
+                          primaryAudience:
+                            - Teachers
+                          goal: >-
+                            To identify leadership positions in the school and
+                            to map teachers to them based on their strengths.
+                          duration: 3 weeks
+                          successIndicators: ''
+                          risks: ''
+                          approaches: ''
+                        status: published
+                        updatedAt: '2020-12-10T12:36:36.429Z'
+                        createdAt: '2020-12-10T12:36:36.429Z'
+                        __v: 0
+                      - _id: 5fd21654e4d17b4af8aa6f65
+                        categories:
+                          - _id: 5fcfa9a2457d6055e33843ef
+                            externalId: teachers
+                            name: Teachers
+                        description: ''
+                        concepts:
+                          - restorative consequences
+                          - ' punitive consequences'
+                        keywords:
+                          - attendance, teacher
+                        isDeleted: false
+                        recommendedFor: []
+                        tasks:
+                          - 5fd242f3e4d17b4af8aa6fac
+                          - 5fd242f3e4d17b4af8aa6fad
+                          - 5fd242f3e4d17b4af8aa6fae
+                          - 5fd242f3e4d17b4af8aa6faf
+                          - 5fd242f3e4d17b4af8aa6fb0
+                          - 5fd242f3e4d17b4af8aa6fb1
+                          - 5fd242f3e4d17b4af8aa6fb2
+                          - 5fd242f3e4d17b4af8aa6fb3
+                          - 5fd242f3e4d17b4af8aa6fb4
+                          - 5fd242f3e4d17b4af8aa6fb5
+                          - 5fd242f3e4d17b4af8aa6fb6
+                          - 5fd242f3e4d17b4af8aa6fb7
+                          - 5fd242f3e4d17b4af8aa6fb8
+                          - 5fd242f3e4d17b4af8aa6fb9
+                          - 5fd242f3e4d17b4af8aa6fba
+                          - 5fd242f3e4d17b4af8aa6fbb
+                          - 5fd242f3e4d17b4af8aa6fbc
+                          - 5fd242f3e4d17b4af8aa6fbd
+                        createdBy: 140558b9-7df4-4993-be3c-31eb8b9ca368
+                        updatedBy: 140558b9-7df4-4993-be3c-31eb8b9ca368
+                        learningResources: []
+                        isReusable: true
+                        taskSequence: []
+                        averageRating: 0
+                        noOfRatings: 0
+                        ratings:
+                          '1': 0
+                          '2': 0
+                          '3': 0
+                          '4': 0
+                          '5': 0
+                        deleted: false
+                        title: Teacher Forum for attendance
+                        externalId: IMP-3147d
+                        entityType: ''
+                        taskCreationForm: ''
+                        metaInformation:
+                          rationale: ''
+                          primaryAudience:
+                            - Teachers
+                          goal: >-
+                            To create an effective mechanism to minimize teacher
+                            absenteeism
+                          duration: 2 weeks
+                          successIndicators: ''
+                          risks: ''
+                          approaches: ''
+                        status: published
+                        updatedAt: '2020-12-10T12:36:36.441Z'
+                        createdAt: '2020-12-10T12:36:36.441Z'
+                        __v: 0
+                      - _id: 5fd21654e4d17b4af8aa6f66
+                        categories:
+                          - _id: 5fcfa9a2457d6055e33843ef
+                            externalId: teachers
+                            name: Teachers
+                        description: ''
+                        concepts:
+                          - classroom observation
+                        keywords:
+                          - >-
+                            classroom observation,teacher, best practices,
+                            appreciation
+                        isDeleted: false
+                        recommendedFor: []
+                        tasks:
+                          - 5fd2446d1233354b094f152b
+                          - 5fd2446d1233354b094f152c
+                          - 5fd2446d1233354b094f152d
+                          - 5fd2446d1233354b094f152e
+                          - 5fd2446d1233354b094f152f
+                          - 5fd2446d1233354b094f1530
+                          - 5fd2446d1233354b094f1531
+                          - 5fd2446d1233354b094f1532
+                          - 5fd2446d1233354b094f1533
+                          - 5fd2446d1233354b094f1534
+                          - 5fd2446d1233354b094f1535
+                        createdBy: 140558b9-7df4-4993-be3c-31eb8b9ca368
+                        updatedBy: 140558b9-7df4-4993-be3c-31eb8b9ca368
+                        learningResources: []
+                        isReusable: true
+                        taskSequence: []
+                        averageRating: 0
+                        noOfRatings: 0
+                        ratings:
+                          '1': 0
+                          '2': 0
+                          '3': 0
+                          '4': 0
+                          '5': 0
+                        deleted: false
+                        title: Super teachers project
+                        externalId: IMP-3147e
+                        entityType: ''
+                        taskCreationForm: ''
+                        metaInformation:
+                          rationale: ''
+                          primaryAudience:
+                            - Teachers
+                          goal: >-
+                            To observe teachers classes and to create avenues
+                            for teachers to share their best classroom practices
+                          duration: 3 weeks
+                          successIndicators: ''
+                          risks: ''
+                          approaches: ''
+                        status: published
+                        updatedAt: '2020-12-10T12:36:36.451Z'
+                        createdAt: '2020-12-10T12:36:36.451Z'
+                        __v: 0
+                      - _id: 5fd21654e4d17b4af8aa6f68
+                        categories:
+                          - _id: 5fcfa9a2457d6055e33843ef
+                            externalId: teachers
+                            name: Teachers
+                        description: ''
+                        concepts:
+                          - Bloom's taxonomy
+                          - ' lesson planning'
+                        keywords:
+                          - lesson planning, teacher
+                        isDeleted: false
+                        recommendedFor: []
+                        tasks:
+                          - 5fd2446e1233354b094f1536
+                          - 5fd2446e1233354b094f1537
+                          - 5fd2446e1233354b094f1538
+                          - 5fd2446e1233354b094f1539
+                          - 5fd2446e1233354b094f153a
+                          - 5fd2446e1233354b094f153b
+                          - 5fd2446e1233354b094f153c
+                          - 5fd2446e1233354b094f153d
+                          - 5fd2446e1233354b094f153e
+                          - 5fd2446e1233354b094f153f
+                          - 5fd2446e1233354b094f1540
+                          - 5fd2446e1233354b094f1541
+                          - 5fd2446e1233354b094f1542
+                          - 5fd2446e1233354b094f1543
+                          - 5fd2446e1233354b094f1544
+                          - 5fd2446e1233354b094f1545
+                          - 5fd2446e1233354b094f1546
+                          - 5fd2446e1233354b094f1547
+                        createdBy: 140558b9-7df4-4993-be3c-31eb8b9ca368
+                        updatedBy: 140558b9-7df4-4993-be3c-31eb8b9ca368
+                        learningResources: []
+                        isReusable: true
+                        taskSequence: []
+                        averageRating: 0
+                        noOfRatings: 0
+                        ratings:
+                          '1': 0
+                          '2': 0
+                          '3': 0
+                          '4': 0
+                          '5': 0
+                        deleted: false
+                        title: Let's plan together
+                        externalId: IMP-3147g
+                        entityType: ''
+                        taskCreationForm: ''
+                        metaInformation:
+                          rationale: ''
+                          primaryAudience:
+                            - Teachers
+                          goal: >-
+                            This project will focus on improving lesson planning
+                            skills of teachers.
+                          duration: 3 weeks
+                          successIndicators: ''
+                          risks: ''
+                          approaches: ''
+                        status: published
+                        updatedAt: '2020-12-10T12:36:36.467Z'
+                        createdAt: '2020-12-10T12:36:36.467Z'
+                        __v: 0
+                      - _id: 5fd21654e4d17b4af8aa6f69
+                        categories:
+                          - _id: 5fcfa9a2457d6055e33843f3
+                            externalId: educationLeader
+                            name: Education Leader
+                        description: ''
+                        concepts:
+                          - ''
+                        keywords:
+                          - strength, motivation, teacher, leader, job
+                        isDeleted: false
+                        recommendedFor: []
+                        tasks:
+                          - 5fd2446fe4d17b4af8aa6fd2
+                          - 5fd2446fe4d17b4af8aa6fd3
+                          - 5fd2446fe4d17b4af8aa6fd4
+                          - 5fd2446fe4d17b4af8aa6fd5
+                          - 5fd2446fe4d17b4af8aa6fd6
+                          - 5fd2446fe4d17b4af8aa6fd7
+                          - 5fd2446fe4d17b4af8aa6fd8
+                          - 5fd2446fe4d17b4af8aa6fd9
+                          - 5fd2446fe4d17b4af8aa6fda
+                          - 5fd2446fe4d17b4af8aa6fdb
+                          - 5fd2446fe4d17b4af8aa6fdc
+                          - 5fd2446fe4d17b4af8aa6fdd
+                          - 5fd2446fe4d17b4af8aa6fde
+                          - 5fd2446fe4d17b4af8aa6fdf
+                          - 5fd2446fe4d17b4af8aa6fe0
+                          - 5fd2446fe4d17b4af8aa6fe1
+                          - 5fd2446fe4d17b4af8aa6fe2
+                          - 5fd2446fe4d17b4af8aa6fe3
+                          - 5fd2446fe4d17b4af8aa6fe4
+                          - 5fd2446fe4d17b4af8aa6fe5
+                        createdBy: 140558b9-7df4-4993-be3c-31eb8b9ca368
+                        updatedBy: 140558b9-7df4-4993-be3c-31eb8b9ca368
+                        learningResources: []
+                        isReusable: true
+                        taskSequence: []
+                        averageRating: 0
+                        noOfRatings: 0
+                        ratings:
+                          '1': 0
+                          '2': 0
+                          '3': 0
+                          '4': 0
+                          '5': 0
+                        deleted: false
+                        title: Leading the way
+                        externalId: IMP-3147h
+                        entityType: ''
+                        taskCreationForm: ''
+                        metaInformation:
+                          rationale: ''
+                          primaryAudience:
+                            - School leader
+                          goal: >-
+                            To identify the strength of different teachers to
+                            help the school in leading the way into the future
+                          duration: 1 month
+                          successIndicators: ''
+                          risks: ''
+                          approaches: ''
+                        status: published
+                        updatedAt: '2020-12-10T12:36:36.474Z'
+                        createdAt: '2020-12-10T12:36:36.474Z'
+                        __v: 0
+                      - _id: 5fd21654e4d17b4af8aa6f6a
+                        categories:
+                          - _id: 5fcfa9a2457d6055e33843f3
+                            externalId: educationLeader
+                            name: Education Leader
+                        description: ''
+                        concepts:
+                          - goal setting
+                          - ' teacher tracker'
+                        keywords:
+                          - classroom observation, goal setting, feedback
+                        isDeleted: false
+                        recommendedFor: []
+                        tasks:
+                          - 5fd244701233354b094f1548
+                          - 5fd244701233354b094f1549
+                          - 5fd244701233354b094f154a
+                          - 5fd244701233354b094f154b
+                          - 5fd244701233354b094f154c
+                          - 5fd244701233354b094f1566
+                          - 5fd244701233354b094f1567
+                          - 5fd244701233354b094f1568
+                        createdBy: 140558b9-7df4-4993-be3c-31eb8b9ca368
+                        updatedBy: 140558b9-7df4-4993-be3c-31eb8b9ca368
+                        learningResources: []
+                        isReusable: true
+                        taskSequence: []
+                        averageRating: 0
+                        noOfRatings: 0
+                        ratings:
+                          '1': 0
+                          '2': 0
+                          '3': 0
+                          '4': 0
+                          '5': 0
+                        deleted: false
+                        title: Getting better day by day
+                        externalId: IMP-3147i
+                        entityType: ''
+                        taskCreationForm: ''
+                        metaInformation:
+                          rationale: ''
+                          primaryAudience:
+                            - School leader
+                          goal: To coach teachers to strengthen the teaching process
+                          duration: 1 month
+                          successIndicators: ''
+                          risks: ''
+                          approaches: ''
+                        status: published
+                        updatedAt: '2020-12-10T12:36:36.482Z'
+                        createdAt: '2020-12-10T12:36:36.482Z'
+                        __v: 0
+        '400': &ref_30
+          description: 'Bad response '
+          headers: *ref_23
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  message:
+                    type: string
+              examples:
+                FailureResponse:
+                  value:
+                    status: 400
+                    message: Bad request
+      description: >-
+        This endpoint retrieves all the project template.The request requires
+        authentication tokens in the headers.
+
+        * The API to retrieves all the project template
+        `/v1/project/templates/list`
+
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
+  /v1/certificateTemplates/createOrUpdate:
+    post:
+      tags:
+        - certificateTemplates
+      summary: Create a certificate template
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                criteria:
+                  type: object
+                  properties:
+                    validationText:
+                      type: string
+                    expression:
+                      type: string
+                    conditions:
+                      type: object
+                      properties:
+                        C1:
+                          type: object
+                          properties:
+                            validationText:
+                              type: string
+                            expression:
+                              type: string
+                            conditions:
+                              type: object
+                              properties:
+                                C1:
+                                  type: object
+                                  properties:
+                                    scope:
+                                      type: string
+                                    key:
+                                      type: string
+                                    operator:
+                                      type: string
+                                    value:
+                                      type: string
+                        C2:
+                          type: object
+                          properties:
+                            validationText:
+                              type: array
+                              items:
+                                type: string
+                            expression:
+                              type: string
+                            conditions:
+                              type: object
+                              properties:
+                                C1:
+                                  type: object
+                                  properties:
+                                    scope:
+                                      type: string
+                                    key:
+                                      type: string
+                                    function:
+                                      type: object
+                                      properties:
+                                        operator:
+                                          type: string
+                                        value:
+                                          type: number
+                                    filter:
+                                      type: object
+                                      properties:
+                                        key:
+                                          type: string
+                                        value:
+                                          type: string
+                        C3:
+                          type: object
+                          properties:
+                            validationText:
+                              type: string
+                            expression:
+                              type: string
+                            conditions:
+                              type: object
+                              properties:
+                                C1:
+                                  type: object
+                                  properties:
+                                    scope:
+                                      type: string
+                                    key:
+                                      type: string
+                                    function:
+                                      type: string
+                                    filter:
+                                      type: object
+                                      properties:
+                                        key:
+                                          type: string
+                                        value:
+                                          type: string
+                                    operator:
+                                      type: string
+                                    value:
+                                      type: number
+                                    taskDetails:
+                                      type: array
+                                      items:
+                                        type: string
+                issuer:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                status:
+                  type: string
+                solutionId:
+                  type: string
+                programId:
+                  type: string
+                baseTemplateId:
+                  type: string
+            examples:
+              sampleBodyData:
+                value:
+                  criteria:
+                    validationText: Complete validation message
+                    expression: C1&&C2&&C3
+                    conditions:
+                      C1:
+                        validationText: Submit your project.
+                        expression: C1
+                        conditions:
+                          C1:
+                            scope: project
+                            key: status
+                            operator: '=='
+                            value: submitted
+                      C2:
+                        validationText:
+                          - Add 2 evidence at the project level
+                        expression: C1
+                        conditions:
+                          C1:
+                            scope: project
+                            key: attachments
+                            function:
+                              operator: '>='
+                              value: 2
+                            filter:
+                              key: type
+                              value: all
+                      C3:
+                        validationText: >-
+                          Add 2 evidence for the task Todays welcome paret
+                          teckde
+                        expression: C1
+                        conditions:
+                          C1:
+                            scope: task
+                            key: attachments
+                            function: count
+                            filter:
+                              key: type
+                              value: all
+                            operator: '>='
+                            value: 2
+                            taskDetails:
+                              - 66c7f73e18bff742198c4f1d
+                  issuer:
+                    name: Karnataka
+                  status: active
+                  solutionId: 66c7f76e18bff742198c4f2a
+                  programId: 66c7f75f18bff742198c4f24
+                  baseTemplateId: 66bb5c3e196c83581cc26aa8
+      parameters:
+        - *ref_24
+        - *ref_25
+      responses:
+        '200':
+          description: Successful response
+          content:
+            text:
+              examples:
+                SuccessResponse:
+                  value:
+                    status: 200
+                    message: Template added successfully
+                    result:
+                      id": 6011136a2d25b926974d9ec9
+        '400':
+          description: 'Bad response '
+          headers: *ref_26
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  message:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        location:
+                          type: string
+                        param:
+                          type: string
+                        msg:
+                          type: string
+                      required:
+                        - location
+                        - param
+                        - msg
+              examples:
+                FailureResponse:
+                  value:
+                    status: 400
+                    message:
+                      - location: body
+                        param: solutionId
+                        msg: solutionId is required
+                      - location: body
+                        param: solutionId
+                        msg: solutionId is required
+                      - location: body
+                        param: programId
+                        msg: programId is required
+                      - location: body
+                        param: programId
+                        msg: programId is required
+                      - location: body
+                        param: issuer
+                        msg: issuer is required
+                      - location: body
+                        param: criteria
+                        msg: criteria is required
+                      - location: body
+                        param: status
+                        msg: status is required
+      description: >-
+        This endpoint allows the user to create a certificate template. The user
+        must provide the project id and solution id in the request body.
+
+
+        * The API allows the user to create a certificate
+        template`/v1/project/certificateBaseTemplates/createOrUpdate.`
+
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
+  /v1/certificateTemplates/uploadTemplate:
+    post:
+      tags: &ref_27
+        - certificateTemplates
+      summary: Helps to upload certificate template file
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: certificate to upload
+            examples:
+              SampleRequestBody:
+                value: ''
+      parameters:
+        - *ref_24
+        - *ref_25
+        - in: path
+          name: _id
+          description: ''
+          schema: &ref_28
+            type: number
+          required: true
+        - in: path
+          name: updateTemplate
+          description: ''
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Successful response
+          content:
+            text:
+              examples:
+                SuccessResponse:
+                  value:
+                    message: File uploaded successfully
+                    status: 200
+                    result:
+                      success: true
+                      data:
+                        templateUrl: >-
+                          certificate/b84ac8b2-2ca9-4132-9805-f11ca474aecc/168/516a3180-a52e-44f8-bcc8-055b335715e0/22-4-2024-1716363621461_3562.svg
+        '400':
+          description: 'Bad response '
+          headers: *ref_26
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  message:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        location:
+                          type: string
+                        param:
+                          type: string
+                        msg:
+                          type: string
+              examples:
+                FailureResponse:
+                  value:
+                    status: 400
+                    message:
+                      - location: params
+                        param: _id
+                        msg: required certificate templateId
+      description: >-
+        This endpoint allows the user to bulk update tasks for a specified
+        project template by uploading a csv file. The user must provide the
+        project template id in the path and the csv file containing the updated
+        tasks in the request body.
+
+
+        * The API allows the user to upload certificate template file```
+        /v1/project/certificateBaseTemplates/``uploadTemplate``. ```
+            It is mandatory to provide values for parameters which are marked as `required`
+        * This is a mandatory parameter and cannot be empty or null.
+  /v1/project/certificateTemplates/createSvg?{baseTemplateId}:
+    post:
+      tags: *ref_27
+      summary: helps to edit Svg files
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                stateLogo1:
+                  type: file
+                  format: binary
+                  description: png file to upload
+                stateLogo2:
+                  type: file
+                  format: binary
+                  description: png file to upload
+                stateTitle:
+                  type: string
+                  format: text
+                  description: state name
+                signatureImg1:
+                  type: file
+                  format: binary
+                  description: png file to upload
+                signatureImg2:
+                  type: file
+                  format: binary
+                  description: png file to upload
+                signatureTitle1a:
+                  type: string
+                  format: text
+                  description: Name1, Designation1
+                signatureTitle2a:
+                  type: string
+                  format: text
+                  description: Name2, Designation2
+      parameters:
+        - *ref_24
+        - *ref_25
+        - in: path
+          name: baseTemplateId
+          description: ''
+          schema: *ref_28
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            text:
+              examples:
+                SuccessResponse:
+                  value:
+                    message: Template edited successfully
+                    status: 200
+                    result:
+                      url: >-
+                        https://sunbirdstagingpublic.blob.core.windows.net/samiksha/certificateTemplates/BASE_TEMPLATE/_22-10-2022-1669120782574.svg?sv=2020-10-02&st=2022-11-22T12%3A39%3A42Z&se=2023-11-22T12%3A49%3A42Z&sr=b&sp=rw&sig=gLnKb1T32swAQQ%2Bgtaaa967d6c0GIL%2FGRcGCwjvpI30%3D
+        '400':
+          description: 'Bad response '
+          headers: *ref_26
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  message:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        location:
+                          type: string
+                        param:
+                          type: string
+                        msg:
+                          type: string
+                      required:
+                        - location
+                        - param
+                        - msg
+              examples:
+                FailureResponse:
+                  value:
+                    status: 400
+                    message:
+                      - location: query
+                        param: baseTemplateId
+                        msg: Please provide base template Id. This cannot be empty
+                      - location: query
+                        param: baseTemplateId
+                        msg: Base template Id is not valid
+      description: "This endpoint allows the user to edit Svg.The request requires\_authentication tokens in the headers and the baseTemplateId in the\_query parameters.\n\n* The API allows the user to edit Svg files`/v1/project/certificateBaseTemplates/createSvg?{baseTemplateId}``.`\n* It is mandatory to provide values for parameters which are marked as `required`\n* This is a mandatory parameter and cannot be empty or null."
+  /v1/project/configurations/read:
+    get:
+      tags:
+        - configurations
+      summary: Fetchs all the configurations meta
+      parameters: *ref_29
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              examples:
+                SuccessResponse:
+                  value:
+                    message: Configuration fetched successfully
+                    status: 200
+                    result:
+                      _id: 66c582d28580d1d544a2d12e
+                      code: keysAllowedForTargeting
+                      meta:
+                        profileKeys:
+                          - state
+                          - district
+                          - block
+                          - roles
+        '400': *ref_30
+      description: >-
+        This endpoint retrieves all the configurations meta.The request requires
+        authentication tokens in the headers.
+
+        * The API to retrieves all the configurations meta
+        `/v1/project/configurations/read`
+
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
+  /v1/profle/read:
+    get:
+      tags:
+        - profile
+      summary: Fetch user profile details
+      parameters:
+        - *ref_31
+        - *ref_32
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              examples:
+                SuccessResponse:
+                  value:
+                    message: Data fetched successfully
+                    status: 200
+                    result:
+                      id: 5
+                      email: rahul@gmail.com
+                      email_verified: 'false'
+                      name: Rahul
+                      about: PWA
+                      share_link: null
+                      status: ACTIVE
+                      image: >-
+                        https://mentoring-prod-storage-private.s3.ap-south-1.amazonaws.com/users/214-1720760597954-image_removebg_preview_2_png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIASKKP73WS75M2EBXZ%2F20240909%2Fap-south-1%2Fs3%2Faws4_request&X-Amz-Date=20240909T075359Z&X-Amz-Expires=900&X-Amz-Signature=fe677f81fb3f1e718bdbcdc9b90515c42a172dca7bb2c2d11973ba58e4e4b5b0&X-Amz-SignedHeaders=host&x-id=GetObject
+                      has_accepted_terms_and_conditions: true
+                      languages: []
+                      preferred_language:
+                        value: en
+                        label: English
+                      organization_id: 1
+                      roles:
+                        - 1
+                        - 3
+                        - 8
+                        - 6
+                      meta: {}
+                      created_at: '2024-07-19T06:52:35.604Z'
+                      updated_at: '2024-08-12T09:54:53.619Z'
+                      deleted_at: null
+                      organization:
+                        id: 1
+                        name: Default Organization
+                        code: default_code
+                      user_roles:
+                        - id: 8
+                          title: program_desiginer
+                          label: Program Desiginer
+                          user_type: 0
+                          status: ACTIVE
+                          organization_id: 1
+                          visibility: PUBLIC
+                        - id: 1
+                          title: session_manager
+                          label: Session Manager
+                          user_type: 0
+                          status: ACTIVE
+                          organization_id: 1
+                          visibility: PUBLIC
+                        - id: 3
+                          title: user
+                          label: User
+                          user_type: 0
+                          status: ACTIVE
+                          organization_id: 1
+                          visibility: PUBLIC
+                        - id: 6
+                          title: admin
+                          label: Admin
+                          user_type: 1
+                          status: ACTIVE
+                          organization_id: 1
+                          visibility: PUBLIC
+                      permissions:
+                        - module: user
+                          request_type:
+                            - POST
+                            - DELETE
+                            - GET
+                            - PUT
+                            - PATCH
+                          service: user
+                        - module: user-role
+                          request_type:
+                            - POST
+                            - DELETE
+                            - GET
+                            - PUT
+                            - PATCH
+                          service: user
+                        - module: form
+                          request_type:
+                            - POST
+                            - DELETE
+                            - GET
+                            - PUT
+                            - PATCH
+                          service: user
+                        - module: cloud-services
+                          request_type:
+                            - POST
+                            - DELETE
+                            - GET
+                            - PUT
+                            - PATCH
+                          service: user
+                        - module: organization
+                          request_type:
+                            - POST
+                            - GET
+                          service: user
+                        - module: entity-type
+                          request_type:
+                            - POST
+                            - DELETE
+                            - GET
+                            - PUT
+                            - PATCH
+                          service: user
+                        - module: entity
+                          request_type:
+                            - POST
+                            - DELETE
+                            - PUT
+                            - PATCH
+                            - GET
+                          service: user
+                        - module: notification
+                          request_type:
+                            - POST
+                            - DELETE
+                            - GET
+                            - PUT
+                            - PATCH
+                          service: user
+                        - module: account
+                          request_type:
+                            - GET
+                            - POST
+                          service: user
+                        - module: admin
+                          request_type:
+                            - DELETE
+                            - POST
+                          service: user
+                      block:
+                        - value: 5fd1b52ab53a6416aaeefb17
+                          label: PONDURU
+                          externalId: 5b6010b6-5394-4704-b05f-0bea83ff1fb7
+                      state:
+                        value: 5f33c3d85f637784791cd830
+                        label: Unknown
+                        externalId: Unknown
+                      district:
+                        value: 5fd098e2e049735a86b748ad
+                        label: VIZIANAGARAM
+                        externalId: b54a5c6d-98be-4313-af1c-33040b1703aa
+        '400':
+          description: Bad response
+          headers: *ref_33
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  message:
+                    type: string
+              examples:
+                FailureResponse:
+                  value:
+                    status: 400
+                    message: Bad request
+      description: >-
+        This endpoint retrieves detailed information about the user.The request requires
+        authentication tokens in the headers.
+
+
+        * The endpoint fetch user profile details is `/v1/profile/read`.
+
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
+  /v1/solutions/details/:{solutionId}:
+    post:
+      tags: *ref_34
+      summary: To fetch solution details
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                role:
+                  type: string
+                state:
+                  type: string
+            examples:
+              sampleBodyData:
+                value:
+                  role: district_education_officer
+                  state: 66bc5afebb293e9d6930ad7a
+      parameters: *ref_35
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              examples:
+                SuccessResponse:
+                  value:
+                    message: Successfully fetched details
+                    status: 200
+                    result:
+                      _id: 5f97d2f6bf3a3b1c0116c80a
+                      status: published
+                      isDeleted: false
+                      categories:
+                        - _id: 5f102331665bee6a740714e8
+                          name: Teachers
+                          externalId: teachers
+                        - name: newCategory
+                          externalId: ''
+                          _id: ''
+                      tasks:
+                        - _id: 289d9558-b98f-41cf-81d3-92486f114a49
+                          name: Task 1
+                          description: Task 1 description
+                          status: notStarted
+                          isACustomTask: false
+                          startDate: '2020-09-29T09:08:41.667Z'
+                          endDate: '2020-09-29T09:08:41.667Z'
+                          lastModifiedAt: '2020-09-29T09:08:41.667Z'
+                          type: single
+                          isDeleted: false
+                          attachments:
+                            - name: download(2).jpeg
+                              type: image/jpeg
+                              sourcePath: projectId/userId/imageName
+                          remarks: Tasks completed
+                          assignee: Aman
+                          children:
+                            - _id: 289d9558-b98f-41cf-81d3-92486f114a50
+                              name: Task 2
+                              description: Task 2 description
+                              status: notStarted
+                              children: []
+                              isACustomTask: false
+                              startDate: '2020-09-29T09:08:41.667Z'
+                              endDate: '2020-09-29T09:08:41.667Z'
+                              lastModifiedAt: '2020-09-29T09:08:41.667Z'
+                              type: single
+                              isDeleted: false
+                              externalId: task 2
+                              isDeleteable: false
+                              createdAt: '2020-10-28T05:58:24.907Z'
+                              updatedAt: '2020-10-28T05:58:24.907Z'
+                              isImportedFromLibrary: false
+                          externalId: task 1
+                          isDeleteable: false
+                          createdAt: '2020-10-28T05:58:24.907Z'
+                          updatedAt: '2020-10-28T05:58:24.907Z'
+                          isImportedFromLibrary: false
+                      resources: []
+                      deleted: false
+                      __v: 0
+                      description: Project 1 description
+        '400':
+          description: Bad response
+          headers: *ref_36
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  message:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        location:
+                          type: string
+                        param:
+                          type: string
+                        msg:
+                          type: string
+                      required:
+                        - location
+                        - param
+                        - msg
+              examples:
+                FailureResponse:
+                  value:
+                    status: 400
+                    message:
+                      - location: params
+                        param: _id
+                        msg: required solution id
+                      - location: params
+                        param: _id
+                        msg: Invalid solution ID
+      description: >-
+        The endpoint allows a user To fetch solution details.The request
+        requires authentication tokens in the headers and the project id in the
+        query parameters.
+
+
+        * The endpoint allows a user To fetch solution details```
+        /v1/solutions/details/:{``solutionId``} ```.
+
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
+  /v1/userProjects/certificateReIssue/:{projectId}:
+    post:
+      tags: *ref_37
+      summary: Reissue the certificate for a specified project.
+      requestBody: &ref_41 {}
+      parameters:
+        - *ref_38
+        - *ref_39
+        - in: path
+          name: projectId
+          description: To fetch the data we need to match its id
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              examples:
+                SuccessResponse:
+                  value:
+                    message: Submitted for project certificate reIssue
+                    status: 200
+                    result:
+                      _id: 66ac9949227504a96d8dce1c
+        '400':
+          description: 'Bad response '
+          headers: *ref_40
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  message:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        location:
+                          type: string
+                        param:
+                          type: string
+                        msg:
+                          type: string
+              examples:
+                FailureResponse:
+                  value:
+                    status: 400
+                    message:
+                      - location: params
+                        param: _id
+                        msg: required project id
+      description: >-
+        This endpoint allows to reissue the certificate for a specified
+        project.The request requires authentication tokens in the headers and
+        the project id in the query parameters.
+
+
+        * The API allows to reissue the certificate for a specified project.```
+        /v1/userProjects/certificateReIssue``/:{projectId} ```.
+
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
+  /v1/userProjects/verifyCertificate/:{projectId}:
+    post:
+      tags: *ref_37
+      summary: Verifies the project certificate.
+      requestBody: *ref_41
+      parameters:
+        - *ref_38
+        - *ref_39
+        - in: path
+          name: projectId
+          description: ''
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              examples:
+                SuccessResponse:
+                  value:
+                    message: Certificate verified successfully
+                    status: 200
+                    result:
+                      projectId: 66ac9949227504a96d8dce1c
+                      projectName: Tech Skill Club- Smart Learn
+                      programId: 66a2ba1f379d453de63b9242
+                      solutionId: 66a2ba2b379d453de63b9248
+                      userId: '1'
+                      isCertificateVerified: true
+                      completedDate: '2024-08-06T09:06:07.067Z'
+                      eligible: true
+                      certificatePdfUrl: >-
+                        https://storage.googleapis.com/mentoring-dev-storage-private/project/dff195ca-0641-4a18-bbcb-246961d34250/1/a61c8091-e70e-4083-99b8-844e5884c708/output.pdf?GoogleAccessId=sl-mentoring-dev-storage%40sl-dev-project.iam.gserviceaccount.com&Expires=1722956711&Signature=XGKVOQdH0hqjlMUr3%2FwJVOeGLXS4d62TS8Y1CAOUJ1ntHxxC7FCZanukYqi%2FPpYLjPPxTMihYLrM5L1xkcpDwimRBUaDXSITTtkPVS6o9tOi7OZxFGEENY%2FYDMQsNEjPwE0C4mIN2dCjF2t9u0DupDay0cg8Byyep0mPa6UamCsPdsnvysZfNyCG4Z%2F98e4n7a7QXFhm2vt1Z1k8KCQXIMGdVtyJyNXCLrUyq5VZESkT5TUfAtup8QnNqK1hkFOKBl7H0st%2BOb2HzoICqLXgS8%2BWxFj3j8R%2F5PHfY4WM1Xc49mwp6dfJDO7skPvBLIIQ6v3WYOTm3QBjk8B7tBq%2B%2BA%3D%3D
+                      certificateSvgUrl: >-
+                        https://storage.googleapis.com/mentoring-dev-storage-private/project/25291645-6583-46ac-becb-35ce2ac1064c/1/d664feff-1d12-4877-be46-6fac41172852/template.svg?GoogleAccessId=sl-mentoring-dev-storage%40sl-dev-project.iam.gserviceaccount.com&Expires=1722956711&Signature=gUGRNgykUz3Jp%2FiNC82UkSkJhOXR3E8qY58UhkvCSGmJ%2FD34AdkR8HYropHfNeX191CwV%2F7%2FNR0bvgHubCg3a2v9qDelYK5tvAwZ%2FC9pUoaIyYTdmq6yqq9m%2FbdjC%2BmBERpLT8IDVfHl7nttw%2FiIhP%2BVj8NnejVbS%2FgFa7jOe7iFwNVjxXiBspfjnq1Dh9v%2FN9d6NibyTljQx%2FLDUpJ6DfwoAwmnytZUg94%2FwuwGpgCK0FbR78UlJGSanDtJvyZ%2FGh3pkV4ulr%2BLqLfSIMjLI3yjxBVNmkLv0f%2FXP3cH8ULvRT%2BzYtWXU0yRUK%2ByJaCgF%2BIzTCXtzXLZuCLhxxnOeA%3D%3D
+        '400':
+          description: 'Bad response '
+          headers: *ref_40
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  message:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        location:
+                          type: string
+                        param:
+                          type: string
+                        msg:
+                          type: string
+              examples:
+                FailureResponse:
+                  value:
+                    status: 400
+                    message:
+                      - location: params
+                        param: _id
+                        msg: required project id
+      description: >-
+        This endpoint allows the user to verifies the project certificate. The
+        request requires authentication tokens in the headers and the project id
+        in the query parameters.
+
+
+        * The API allows the user to verifies the project certificate is```
+        /v1/userProjects/certificateReIssue``/:{projectId} ```.
+
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
+  /v1/certificateTemplates/createOrUpdate/:{_id}:
+    patch:
+      summary: Update a certificate template
+      description: >-
+        This endpoint allows the user to update a certificate template. The user
+        must provide the project id and solution id in the request body.
+
+
+        * The API allows the user to update a certificate
+        template`/v1/project/certificateBaseTemplates/createOrUpdate/:{_id}.`
+
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
+      operationId: ''
+      tags:
+        - certificateTemplates
+      parameters:
+        - in: path
+          name: _id
+          description: To update the data we need to match its id
+          schema: *ref_42
+          required: true
+        - in: header
+          name: X-auth-token
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
+          schema: *ref_43
+          required: true
+        - in: header
+          name: internal-access-token
+          description: ''
+          schema: *ref_43
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                criteria:
+                  type: object
+                  properties:
+                    validationText:
+                      type: string
+                    expression:
+                      type: string
+                    conditions:
+                      type: object
+                      properties:
+                        C1:
+                          type: object
+                          properties:
+                            validationText:
+                              type: string
+                            expression:
+                              type: string
+                            conditions:
+                              type: object
+                              properties:
+                                C1:
+                                  type: object
+                                  properties:
+                                    scope:
+                                      type: string
+                                    key:
+                                      type: string
+                                    operator:
+                                      type: string
+                                    value:
+                                      type: string
+                        C2:
+                          type: object
+                          properties:
+                            validationText:
+                              type: array
+                              items:
+                                type: string
+                            expression:
+                              type: string
+                            conditions:
+                              type: object
+                              properties:
+                                C1:
+                                  type: object
+                                  properties:
+                                    scope:
+                                      type: string
+                                    key:
+                                      type: string
+                                    function:
+                                      type: object
+                                      properties:
+                                        operator:
+                                          type: string
+                                        value:
+                                          type: number
+                                    filter:
+                                      type: object
+                                      properties:
+                                        key:
+                                          type: string
+                                        value:
+                                          type: string
+                        C3:
+                          type: object
+                          properties:
+                            validationText:
+                              type: string
+                            expression:
+                              type: string
+                            conditions:
+                              type: object
+                              properties:
+                                C1:
+                                  type: object
+                                  properties:
+                                    scope:
+                                      type: string
+                                    key:
+                                      type: string
+                                    function:
+                                      type: string
+                                    filter:
+                                      type: object
+                                      properties:
+                                        key:
+                                          type: string
+                                        value:
+                                          type: string
+                                    operator:
+                                      type: string
+                                    value:
+                                      type: number
+                                    taskDetails:
+                                      type: array
+                                      items:
+                                        type: string
+                issuer:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                status:
+                  type: string
+                solutionId:
+                  type: string
+                programId:
+                  type: string
+                baseTemplateId:
+                  type: string
+            examples:
+              sampleBodyData:
+                value:
+                  criteria:
+                    validationText: Complete validation message
+                    expression: C1&&C2&&C3
+                    conditions:
+                      C1:
+                        validationText: Submit your project.
+                        expression: C1
+                        conditions:
+                          C1:
+                            scope: project
+                            key: status
+                            operator: '=='
+                            value: submitted
+                      C2:
+                        validationText:
+                          - Add 2 evidence at the project level
+                        expression: C1
+                        conditions:
+                          C1:
+                            scope: project
+                            key: attachments
+                            function:
+                              operator: '>='
+                              value: 2
+                            filter:
+                              key: type
+                              value: all
+                      C3:
+                        validationText: >-
+                          Add 2 evidence for the task Todays welcome paret
+                          teckde
+                        expression: C1
+                        conditions:
+                          C1:
+                            scope: task
+                            key: attachments
+                            function: count
+                            filter:
+                              key: type
+                              value: all
+                            operator: '>='
+                            value: 2
+                            taskDetails:
+                              - 66c7f73e18bff742198c4f1d
+                  issuer:
+                    name: Karnataka
+                  status: active
+                  solutionId: 66c7f76e18bff742198c4f2a
+                  programId: 66c7f75f18bff742198c4f24
+                  baseTemplateId: 66bb5c3e196c83581cc26aa8
+      responses:
+        '200':
+          description: Successful response
+          headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  message:
+                    type: string
+                  result:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+              examples:
+                SuccessResponse:
+                  value:
+                    status: 200
+                    message: Template updated successfully
+                    result:
+                      id: 6011136a2d25b926974d9ec9
+        '400':
+          description: 'Bad response '
+          headers: {}
+          content:
+            application/json:
+              schema:
+                type: string
+              examples:
+                FailureResponse:
+                  value:
+                    status: 400
+                    message:
+                      - location: params
+                        param: _id
+                        msg: required certificate templateId

@@ -1989,7 +1989,7 @@ module.exports = class UserProjectsHelper {
 
 				if (projectDocument.recommendedFor && projectDocument.recommendedFor.length > 0) {
 					projectDocument.recommendedFor.forEach((recommend) => {
-						projectDocument.recommendedForRoles.push(recommend.code)
+						projectDocument.recommendedForRoles.push(recommend)
 					})
 				}
 

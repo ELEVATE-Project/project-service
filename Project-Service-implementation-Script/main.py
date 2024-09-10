@@ -728,7 +728,7 @@ def fetchEntityId(solutionName_for_folder_path, accessToken, entitiesNameList, s
     payload = {
 
     "query" : {
-        "entityType" : "state"
+        "entityType" : scopeEntityType
     },
 
     "projection": [
@@ -1263,11 +1263,11 @@ def validateSheets(filePathAddObs, accessToken, parentFolder):
     elif typeofSolutin == 4:
         criteria_id_arr = list()
         projectDetailsCols = ["title", "projectId", "is a SSO user?", "projectService_loginId", "categories",
-                              "objective","duration","keywords"]
+                              "objective","duration","recommendedFor","keywords"]
         detailsColCheck = wbObservation1.sheet_by_name('Project upload')
         keysColCheckDetai = [detailsColCheck.cell(0, col_index_check).value for col_index_check in
                                      range(detailsColCheck.ncols)]
-        lentasks = (len(keysColCheckDetai) - 8) // 2
+        lentasks = (len(keysColCheckDetai) - 10) // 2
         for i in range(lentasks):
             projectDetailsCols.append(f"learningResources{i+1}-name")
             projectDetailsCols.append(f"learningResources{i+1}-link")
@@ -1294,7 +1294,7 @@ def validateSheets(filePathAddObs, accessToken, parentFolder):
             if sheetColCheck.strip().lower() == 'Project upload'.lower():
                 print("--->Checking Project Upload sheet...")
                 detailsColCheck = wbObservation1.sheet_by_name(sheetColCheck)
-                keysColCheckDetai = [detailsColCheck.cell(0, col_index_check).value for col_index_check in
+                keysColCheckDetai = [detailsColCheck.cell(1, col_index_check).value for col_index_check in
                                      range(detailsColCheck.ncols)]
                 if len(keysColCheckDetai) != len(projectDetailsCols) or set(keysColCheckDetai) == set(
                         projectDetailsCols):
@@ -3161,7 +3161,7 @@ def prepareProjectAndTasksSheets(project_inputFile, projectName_for_folder_path,
     projectDetailsSheet = wbproject.sheet_by_name('Project upload')
     keysProject = [projectDetailsSheet.cell(1, col_index_env).value for col_index_env in
                    range(projectDetailsSheet.ncols)]
-    projectColnames1 = ["title", "externalId", "categories", "description", "entityType", "goal"]
+    projectColnames1 = ["title", "externalId", "categories","recommendedFor", "description", "entityType", "goal"]
     learningResource_count = 0
     for projectHeader in keysProject:
         if str(projectHeader).startswith('learningResources'):
@@ -3202,10 +3202,10 @@ def prepareProjectAndTasksSheets(project_inputFile, projectName_for_folder_path,
         global projectCreator, projectAuthor
 
         projectAuthor = str(dictProjectDetails["projectService_loginId"]).encode('utf-8').decode('utf-8').strip()
-        # recommendedFor = str(dictProjectDetails["recommendedFor"]).encode('utf-8').decode('utf-8').strip()
+        recommendedFor = str(dictProjectDetails["recommendedFor"]).encode('utf-8').decode('utf-8').strip()
         objective = str(dictProjectDetails["objective"]).encode('utf-8').decode('utf-8').strip()
         entityType = None
-        project_values = [title, externalId, categories_final, objective, entityType,projectGoal]
+        project_values = [title, externalId, categories_final, recommendedFor,objective, entityType,projectGoal]
         lr_value_count = 1
         for lr in range(0, int(learningResource_count)):
             lr_name = str(dictProjectDetails["learningResources" + str(lr_value_count) + "-name"]).strip()
@@ -3231,7 +3231,7 @@ def prepareProjectAndTasksSheets(project_inputFile, projectName_for_folder_path,
             except:
                 if values == "_arrayFields":
                     project_values.append(
-                        "categories,primaryAudience,successIndicators,risks,approaches")
+                        "categories,primaryAudience,successIndicators,risks,approaches,recommendedFor")
                 else:
                     project_values.append("")
                 
@@ -4533,36 +4533,36 @@ def mainFunc(MainFilePath, programFile, addObservationSolution, millisecond, isP
                                     keysEnv[col_index_env]: detailsEnvSheet.cell(row_index_env, col_index_env).value
                                     for
                                     col_index_env in range(detailsEnvSheet.ncols)}
-                                # if str(dictDetailsEnv['has certificate']).lower() == 'No'.lower():
-                                prepareProjectAndTasksSheets(addObservationSolution, projectName_for_folder_path,
+                                if str(dictDetailsEnv['has certificate']).lower() == 'No'.lower():
+                                    prepareProjectAndTasksSheets(addObservationSolution, projectName_for_folder_path,
                                                                  accessToken)
                                 #     # sys.exit()
-                                projectUpload(addObservationSolution, projectName_for_folder_path, accessToken)
-                                taskUpload(addObservationSolution, projectName_for_folder_path, accessToken)
-                                ProjectSolutionResp = solutionCreationAndMapping(projectName_for_folder_path,
+                                    projectUpload(addObservationSolution, projectName_for_folder_path, accessToken)
+                                    taskUpload(addObservationSolution, projectName_for_folder_path, accessToken)
+                                    ProjectSolutionResp = solutionCreationAndMapping(projectName_for_folder_path,
                                                                                      entityToUpload,
                                                                                      listOfFoundRoles, accessToken)
-                                ProjectSolutionExternalId = ProjectSolutionResp[0]
-                                ProjectSolutionId = ProjectSolutionResp[1]
+                                    ProjectSolutionExternalId = ProjectSolutionResp[0]
+                                    ProjectSolutionId = ProjectSolutionResp[1]
                                 #     ProjectSolutionId = ProjectSolutionResp[1]
-                                #     prepareProgramSuccessSheet(MainFilePath, projectName_for_folder_path, programFile,
-                                #                                ProjectSolutionExternalId,
-                                #                                ProjectSolutionId, accessToken)
-                                # elif str(dictDetailsEnv['has certificate']).lower()== 'Yes'.lower():
-                                #     print("---->this is certificate with project<---")
-                                baseTemplate_id=fetchCertificateBaseTemplate(filePathAddProject,accessToken,projectName_for_folder_path)
+                                    prepareProgramSuccessSheet(MainFilePath, projectName_for_folder_path, programFile,
+                                                               ProjectSolutionExternalId,
+                                                               ProjectSolutionId, accessToken)
+                                elif str(dictDetailsEnv['has certificate']).lower()== 'Yes'.lower():
+                                    print("---->this is certificate with project<---")
+                                    baseTemplate_id=fetchCertificateBaseTemplate(filePathAddProject,accessToken,projectName_for_folder_path)
                                 # sys.exit()
-                                downloadlogosign(filePathAddProject,projectName_for_folder_path)
-                                editsvg(accessToken,filePathAddProject,projectName_for_folder_path,baseTemplate_id)
-                                #     prepareProjectAndTasksSheets(addObservationSolution, projectName_for_folder_path,accessToken)
-                                #     projectUpload(addObservationSolution, projectName_for_folder_path, accessToken)
-                                #     taskUpload(addObservationSolution, projectName_for_folder_path, accessToken)
-                                # ProjectSolutionResp = solutionCreationAndMapping(projectName_for_folder_path,entityToUpload,listOfFoundRoles, accessToken)
-                                ProjectSolutionExternalId = ProjectSolutionResp[0]
-                                ProjectSolutionId = ProjectSolutionResp[1]
-                            certificatetemplateid= prepareaddingcertificatetemp(filePathAddProject,projectName_for_folder_path, accessToken,ProjectSolutionId,programID,baseTemplate_id)
+                                    downloadlogosign(filePathAddProject,projectName_for_folder_path)
+                                    editsvg(accessToken,filePathAddProject,projectName_for_folder_path,baseTemplate_id)
+                                    prepareProjectAndTasksSheets(addObservationSolution, projectName_for_folder_path,accessToken)
+                                    projectUpload(addObservationSolution, projectName_for_folder_path, accessToken)
+                                    taskUpload(addObservationSolution, projectName_for_folder_path, accessToken)
+                                    ProjectSolutionResp = solutionCreationAndMapping(projectName_for_folder_path,entityToUpload,listOfFoundRoles, accessToken)
+                                    ProjectSolutionExternalId = ProjectSolutionResp[0]
+                                    ProjectSolutionId = ProjectSolutionResp[1]
+                                    certificatetemplateid= prepareaddingcertificatetemp(filePathAddProject,projectName_for_folder_path, accessToken,ProjectSolutionId,programID,baseTemplate_id)
 
-                            prepareProgramSuccessSheet(MainFilePath, projectName_for_folder_path, programFile,
+                                    prepareProgramSuccessSheet(MainFilePath, projectName_for_folder_path, programFile,
                                                                ProjectSolutionExternalId,
                                                                ProjectSolutionId, accessToken)
 

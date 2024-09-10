@@ -134,7 +134,7 @@ let enviromentVariables = {
 	ENTITY_MANAGEMENT_SERVICE_NAME: {
 		message: 'Entity management service name required',
 		optional: false,
-	},
+	}
 }
 
 let success = true

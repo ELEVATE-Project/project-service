@@ -122,6 +122,10 @@ module.exports = async function (req, res, next, token = '') {
 		const rawData = fs.readFileSync(configFilePath)
 		try {
 			configData = JSON.parse(rawData)
+			if (!configData.authTokenUserInformation) {
+				defaultTokenExtraction = true
+			}
+			configData = configData.authTokenUserInformation
 		} catch (error) {
 			console.error('Error parsing config.json:', error)
 		}

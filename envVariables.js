@@ -119,6 +119,10 @@ let enviromentVariables = {
 		message: 'Elevate project service url required',
 		optional: false,
 	},
+	API_DOC_URL: {
+		message: 'Required api doc url',
+		optional: false,
+	},
 }
 
 let success = true

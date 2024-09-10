@@ -45,6 +45,10 @@ app.use(bodyParser.urlencoded({ limit: '50MB', extended: false }))
 
 app.use(express.static('public'))
 
+app.get(process.env.API_DOC_URL, function (req, res) {
+	res.sendFile(path.join(__dirname, './api-doc/index.html'))
+})
+
 app.all('*', (req, res, next) => {
 	console.log({ 'Debugging ML Projects Service': true })
 	console.log('<------------Request log starts here------------------>')

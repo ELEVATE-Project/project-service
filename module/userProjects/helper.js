@@ -3176,7 +3176,7 @@ module.exports = class UserProjectsHelper {
 	 * @returns {JSON} certificate re-issued details.
 	 */
 
-	static certificateReIssue(userToken, projectId) {
+	static certificateReIssue(projectId) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Get project details for the project that requires certificate re-issue
@@ -3198,7 +3198,7 @@ module.exports = class UserProjectsHelper {
 				}
 
 				// Fetch user data using userId from the project and call the profile API
-				let userProfileData = await projectService.profileRead(userToken, userProject[0].userId)
+				let userProfileData = await userService.profile(userProject[0].userId)
 				if (
 					userProfileData.success &&
 					userProfileData.data &&

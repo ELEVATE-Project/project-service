@@ -2683,7 +2683,7 @@ module.exports = class UserProjectsHelper {
 					issuer: certificateTemplateDetails[0].issuer,
 					status: data.certificate.status.toUpperCase(),
 					projectId: data._id.toString(),
-					projectName: data.title,
+					projectName: UTILS.handleSpecialCharsForCertificate(data.title),
 					programId: certificateTemplateDetails[0].programId.toString(),
 					programName:
 						data.programInformation && data.programInformation.name ? data.programInformation.name : '',

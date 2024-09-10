@@ -654,6 +654,40 @@ function formatISODateToReadableDate(isoDate) {
 	return readableDate
 }
 
+/**
+ * Handle special characters in the certificate
+ * @function
+ * @name handleSpecialCharsForCertificate
+ * @param {String} projectTitle - Title of the project.
+ * @returns {String} - Modified title of the project.
+ */
+function handleSpecialCharsForCertificate(projectTitle) {
+	// Object containing special characters as keys and their corresponding escaped values
+	const charsReservedInSvg = {
+		[`<`]: `&lt;`, // Less than sign
+		[`>`]: `&gt;`, // Greater than sign
+		[`&`]: `&amp;`, // Ampersand
+		[`"`]: `&quot;`, // Double quote
+		[`'`]: `&apos;`, // Single quote
+	}
+
+	let modifiedProjectTitle = ''
+
+	// Loop through each character of the project title
+	for (let i = 0; i < projectTitle.length; i++) {
+		// Check if the current character is a reserved character in SVG, If it is, append the escaped version of the character
+		if (projectTitle[i] in charsReservedInSvg) {
+			modifiedProjectTitle += charsReservedInSvg[projectTitle[i]]
+		} else {
+			// If not, append the character as is
+			modifiedProjectTitle += projectTitle[i]
+		}
+	}
+
+	// Return the modified project title with special characters escaped
+	return modifiedProjectTitle
+}
+
 module.exports = {
 	camelCaseToTitleCase: camelCaseToTitleCase,
 	lowerCase: lowerCase,
@@ -685,4 +719,5 @@ module.exports = {
 	arrayIdsTobjectIds: arrayIdsTobjectIds,
 	formatISODateToReadableDate: formatISODateToReadableDate,
 	generateChart: generateChart,
+	handleSpecialCharsForCertificate: handleSpecialCharsForCertificate,
 }

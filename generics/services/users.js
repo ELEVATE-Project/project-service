@@ -7,15 +7,14 @@
 
 //dependencies
 const request = require('request')
-const userServiceUrl = process.env.USER_SERVICE_URL
+const interfaceServiceUrl = process.env.INTERFACE_SERVICE_URL
 
 // Function to read the user profile based on the given userId
 const profile = function (userId = '') {
 	return new Promise(async (resolve, reject) => {
 		try {
 			// Construct the URL for the user service
-			let url = userServiceUrl + CONSTANTS.endpoints.USER_READ
-
+			let url = interfaceServiceUrl + process.env.USER_SERVICE_NAME + CONSTANTS.endpoints.USER_READ
 			// Append the userId to the URL if it is provided
 			if (userId !== '') {
 				url = url + '/' + userId

@@ -49,7 +49,7 @@ let enviromentVariables = {
 		optional: false,
 	},
 	SERVICE_NAME: {
-		message: 'current service name',
+		message: 'Project service name required',
 		optional: false,
 		default: 'project',
 	},
@@ -121,6 +121,18 @@ let enviromentVariables = {
 	},
 	API_DOC_URL: {
 		message: 'Required api doc url',
+		optional: false,
+	},
+	INTERFACE_SERVICE_URL: {
+		message: 'Interface service url required',
+		optional: false,
+	},
+	USER_SERVICE_NAME: {
+		message: 'User service name required',
+		optional: false,
+	},
+	ENTITY_MANAGEMENT_SERVICE_NAME: {
+		message: 'Entity management service name required',
 		optional: false,
 	},
 }

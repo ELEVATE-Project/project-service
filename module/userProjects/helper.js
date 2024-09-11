@@ -1417,7 +1417,7 @@ module.exports = class UserProjectsHelper {
 						//     } else {
 						//         //Fetch user profile information by calling sunbird's user read api.
 
-						//         let userProfile = await projectService.profileRead(userToken, userId)
+						//         let userProfile = await projectService.profileRead(userToken)
 						//         if ( userProfile.success &&
 						//              userProfile.data &&
 						//              userProfile.data.response
@@ -1430,7 +1430,7 @@ module.exports = class UserProjectsHelper {
 						// } else {
 						//     //Fetch user profile information by calling sunbird's user read api.
 
-						let userProfileData = await projectService.profileRead(userToken, userId)
+						let userProfileData = await projectService.profileRead(userToken)
 						// Check if the user profile fetch was successful
 						if (!userProfileData.success) {
 							throw {
@@ -1457,7 +1457,7 @@ module.exports = class UserProjectsHelper {
 							//     projectCreation.data.userProfile,
 							//     userRoleInformation
 							// );
-							let updatedUserProfile = await projectService.profileRead(userToken, userId)
+							let updatedUserProfile = await projectService.profileRead(userToken)
 
 							// Check if the user profile fetch was successful
 							if (!updatedUserProfile.success) {
@@ -1652,7 +1652,7 @@ module.exports = class UserProjectsHelper {
 
 				//Fetch user profile information by calling sunbird's user read api.
 
-				let userProfile = await projectService.profileRead(userToken, userId)
+				let userProfile = await projectService.profileRead(userToken)
 				// Check if the user profile fetch was successful
 				if (!userProfile.success) {
 					throw {
@@ -2439,7 +2439,7 @@ module.exports = class UserProjectsHelper {
 
 				//Fetch user profile information.
 				let addReportInfoToSolution = false
-				let userProfile = await projectService.profileRead(userToken, userId)
+				let userProfile = await projectService.profileRead(userToken)
 				// Check if the user profile fetch was successful
 				if (!userProfile.success) {
 					throw {

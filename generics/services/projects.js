@@ -9,16 +9,16 @@ const request = require('request')
 const projectServiceUrl = process.env.ELEVATE_PROJECT_SERVICE_URL
 
 // Function to read the user profile based on the given userId
-const profileRead = function (userToken, userId = '') {
+const profileRead = function (userToken) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			// Construct the URL for the user service
 			let url = `${projectServiceUrl}/${process.env.SERVICE_NAME}${CONSTANTS.endpoints.PROFILE_READ}`
 			console.log('<========================console added========================>', url, '\n')
 			// Append the userId to the URL if it is provided
-			if (userId !== '') {
-				url = url + '/' + userId
-			}
+			// if (userId !== '') {
+			// 	url = url + '/' + userId
+			// }
 
 			// Set the options for the HTTP GET request
 			const options = {

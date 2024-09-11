@@ -6086,12 +6086,6 @@ paths:
             To use this API, you require an X-auth-token. This token is
             available in the login API Response.
           required: true
-        - &ref_32
-          name: internal-access-token
-          in: header
-          schema:
-            type: string
-          example: '{{internal_access_token}}'
         - name: solutionId
           in: path
           schema:
@@ -8831,14 +8825,13 @@ paths:
                         param: _id
                         msg: required certificate templateId
       description: >-
-        This endpoint allows the user to bulk update tasks for a specified
-        project template by uploading a csv file. The user must provide the
-        project template id in the path and the csv file containing the updated
-        tasks in the request body.
+        This endpoint allows the user to upload certificate template file. The user must provide the
+        project template id in the path and the file containing the template
+      in the request body.
 
 
-        * The API allows the user to upload certificate template file```
-        /v1/project/certificateBaseTemplates/``uploadTemplate``. ```
+        * The API allows the user to upload certificate template file
+        /v1/project/certificateBaseTemplates/``uploadTemplate.
             It is mandatory to provide values for parameters which are marked as `required`
         * This is a mandatory parameter and cannot be empty or null.
   /v1/project/certificateTemplates/createSvg?{baseTemplateId}:

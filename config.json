@@ -1,0 +1,7 @@
+{
+	"authTokenUserInformation": {
+		"userId": "sub",
+		"userName": "preferred_username",
+		"firstName": "name"
+	}
+}

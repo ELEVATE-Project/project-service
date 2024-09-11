@@ -36,18 +36,10 @@ let enviromentVariables = {
 		message: 'Enable/Disable kafka communications',
 		optional: false,
 	},
-	ENTITY_MANAGEMENT_SERVICE_URL: {
-		message: 'Elevate-entity service base URL is required',
-		optional: false,
-	},
 	// "KAFKA_URL" : {
 	//   "message" : "Required",
 	//   "optional" : false
 	// },
-	USER_SERVICE_URL: {
-		message: 'Required user service base url',
-		optional: false,
-	},
 	SERVICE_NAME: {
 		message: 'Project service name required',
 		optional: false,
@@ -127,14 +119,14 @@ let enviromentVariables = {
 		message: 'Interface service url required',
 		optional: false,
 	},
-	USER_SERVICE_NAME: {
+	USER_SERVICE_BASE_URL: {
 		message: 'User service name required',
 		optional: false,
 	},
-	ENTITY_MANAGEMENT_SERVICE_NAME: {
+	ENTITY_MANAGEMENT_SERVICE_BASE_URL: {
 		message: 'Entity management service name required',
 		optional: false,
-	}
+	},
 }
 
 let success = true

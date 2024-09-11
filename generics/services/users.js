@@ -14,7 +14,7 @@ const profile = function (userId = '') {
 	return new Promise(async (resolve, reject) => {
 		try {
 			// Construct the URL for the user service
-			let url = interfaceServiceUrl + process.env.USER_SERVICE_NAME + CONSTANTS.endpoints.USER_READ
+			let url = interfaceServiceUrl + process.env.USER_SERVICE_BASE_URL + CONSTANTS.endpoints.USER_READ
 			// Append the userId to the URL if it is provided
 			if (userId !== '') {
 				url = url + '/' + userId

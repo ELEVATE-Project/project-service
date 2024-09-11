@@ -14,6 +14,7 @@ const profileRead = function (userToken, userId = '') {
 		try {
 			// Construct the URL for the user service
 			let url = `${projectServiceUrl}/${process.env.SERVICE_NAME}${CONSTANTS.endpoints.PROFILE_READ}`
+			console.log('<========================console added========================>', url, '\n')
 			// Append the userId to the URL if it is provided
 			if (userId !== '') {
 				url = url + '/' + userId
@@ -35,7 +36,9 @@ const profileRead = function (userToken, userId = '') {
 				if (err) {
 					result.success = false
 				} else {
+					console.log('<========================conosle added========================>', data.body, '\n')
 					let response = JSON.parse(data.body)
+					console.log('<========================conosle added========================>', response, '\n')
 					if (response.status === HTTP_STATUS_CODE.ok.status) {
 						result['data'] = response.result
 					} else {

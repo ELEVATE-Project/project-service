@@ -14,10 +14,6 @@ const profileRead = function (userToken) {
 		try {
 			// Construct the URL for the user service
 			let url = `${projectServiceUrl}/${process.env.SERVICE_NAME}${CONSTANTS.endpoints.PROFILE_READ}`
-			// Append the userId to the URL if it is provided
-			// if (userId !== '') {
-			// 	url = url + '/' + userId
-			// }
 
 			// Set the options for the HTTP GET request
 			const options = {

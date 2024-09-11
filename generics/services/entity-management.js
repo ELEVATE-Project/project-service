@@ -9,7 +9,7 @@
 const request = require('request')
 const fs = require('fs')
 
-const entityManagementServiceUrl = process.env.ENTITY_MANAGEMENT_SERVICE_URL
+const interfaceServiceUrl = process.env.INTERFACE_SERVICE_URL
 
 /**
  * List of entity data.
@@ -25,7 +25,10 @@ const entityDocuments = function (filterData = 'all', projection = 'all') {
 	return new Promise(async (resolve, reject) => {
 		try {
 			// Function to find entity documents based on the given filter and projection
-			const url = entityManagementServiceUrl + CONSTANTS.endpoints.FIND_ENTITY_DOCUMENTS
+			const url =
+				interfaceServiceUrl +
+				process.env.ENTITY_MANAGEMENT_SERVICE_BASE_URL +
+				CONSTANTS.endpoints.FIND_ENTITY_DOCUMENTS
 			// Set the options for the HTTP POST request
 			const options = {
 				headers: {
@@ -80,7 +83,10 @@ const entityTypeDocuments = function (filterData = 'all', projection = 'all', us
 	return new Promise(async (resolve, reject) => {
 		try {
 			// Construct the URL for the entity management service
-			const url = entityManagementServiceUrl + CONSTANTS.endpoints.FIND_ENTITY_TYPE_DOCUMENTS
+			const url =
+				interfaceServiceUrl +
+				process.env.ENTITY_MANAGEMENT_SERVICE_BASE_URL +
+				CONSTANTS.endpoints.FIND_ENTITY_TYPE_DOCUMENTS
 			// Set the options for the HTTP POST request
 			const options = {
 				headers: {

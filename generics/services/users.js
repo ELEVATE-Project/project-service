@@ -327,13 +327,15 @@ const fetchDefaultOrgDetails = function (organisationIdentifier, userToken) {
 			let url
 			if (!isNaN(organisationIdentifier)) {
 				url =
-					userServiceUrl +
+					interfaceServiceUrl +
+					process.env.USER_SERVICE_BASE_URL +
 					CONSTANTS.endpoints.ORGANIZATION_READ +
 					'?organisation_id=' +
 					organisationIdentifier
 			} else {
 				url =
-					userServiceUrl +
+					interfaceServiceUrl +
+					process.env.USER_SERVICE_BASE_URL +
 					CONSTANTS.endpoints.ORGANIZATION_READ +
 					'?organisation_code=' +
 					organisationIdentifier

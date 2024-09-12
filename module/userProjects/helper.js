@@ -2632,9 +2632,9 @@ module.exports = class UserProjectsHelper {
 	static createCertificatePayload(data) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				// Truncate the title if it exceeds 75 characters
-				if (data.title.length > 75) {
-					data.title = data.title.substring(0, 75) + '...'
+				// Truncate the title if it exceeds 60 characters
+				if (data.title.length > 60) {
+					data.title = data.title.substring(0, 60) + '...'
 				}
 
 				// Get downloadable URL for the certificate template
@@ -2674,6 +2674,11 @@ module.exports = class UserProjectsHelper {
 							message: CONSTANTS.apiResponses.CERTIFICATE_TEMPLATE_NOT_FOUND,
 						}
 					}
+				}
+
+				// Truncate the user-name if it exceeds 55 characters
+				if (data.userProfile.name.length > 55) {
+					data.userProfile.name = data.userProfile.name.substring(0, 55) + '...'
 				}
 
 				// Create the certificate request body

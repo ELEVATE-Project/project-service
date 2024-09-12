@@ -7320,7 +7320,7 @@ paths:
 
 
         * The API allows to lists the library projects```
-        /v1/project/categories/projects/:{categoryExternalId} ```
+        /v1/project/categories/projects/:{categoryExternalId}
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -8741,7 +8741,7 @@ paths:
 
 
         * The API allows the user to create a certificate
-        template`/v1/project/certificateBaseTemplates/createOrUpdate.`
+        template`/v1/project/certificateTemplates/createOrUpdate.`
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -8826,14 +8826,15 @@ paths:
                         msg: required certificate templateId
       description: >-
         This endpoint allows the user to upload certificate template file. The user must provide the
-        project template id in the path and the file containing the template
-      in the request body.
-
-
+        project template id in the path and the file containing the template in the request body.
+        
         * The API allows the user to upload certificate template file
-        /v1/project/certificateBaseTemplates/``uploadTemplate.
-            It is mandatory to provide values for parameters which are marked as `required`
+        `/v1/project/certificateTemplates/uploadTemplate.`
+        
+        * It is mandatory to provide values for parameters which are marked as `required`
+        
         * This is a mandatory parameter and cannot be empty or null.
+        
   /v1/project/certificateTemplates/createSvg?{baseTemplateId}:
     post:
       tags: *ref_27
@@ -8929,7 +8930,7 @@ paths:
                       - location: query
                         param: baseTemplateId
                         msg: Base template Id is not valid
-      description: "This endpoint allows the user to edit Svg.The request requires\_authentication tokens in the headers and the baseTemplateId in the\_query parameters.\n\n* The API allows the user to edit Svg files`/v1/project/certificateBaseTemplates/createSvg?{baseTemplateId}``.`\n* It is mandatory to provide values for parameters which are marked as `required`\n* This is a mandatory parameter and cannot be empty or null."
+      description: "This endpoint allows the user to edit Svg.The request requires\_authentication tokens in the headers and the baseTemplateId in the\_query parameters.\n\n* The API allows the user to edit Svg files`/v1/project/certificateTemplates/createSvg?{baseTemplateId}.`\n* It is mandatory to provide values for parameters which are marked as `required`\n* This is a mandatory parameter and cannot be empty or null."
   /v1/project/configurations/read:
     get:
       tags:
@@ -8974,7 +8975,6 @@ paths:
       summary: Fetch user profile details
       parameters:
         - *ref_31
-        - *ref_32
       responses:
         '200':
           description: Successful response
@@ -8993,8 +8993,6 @@ paths:
                       about: PWA
                       share_link: null
                       status: ACTIVE
-                      image: >-
-                        https://mentoring-prod-storage-private.s3.ap-south-1.amazonaws.com/users/214-1720760597954-image_removebg_preview_2_png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIASKKP73WS75M2EBXZ%2F20240909%2Fap-south-1%2Fs3%2Faws4_request&X-Amz-Date=20240909T075359Z&X-Amz-Expires=900&X-Amz-Signature=fe677f81fb3f1e718bdbcdc9b90515c42a172dca7bb2c2d11973ba58e4e4b5b0&X-Amz-SignedHeaders=host&x-id=GetObject
                       has_accepted_terms_and_conditions: true
                       languages: []
                       preferred_language:
@@ -9282,7 +9280,7 @@ paths:
 
 
         * The endpoint allows a user To fetch solution details```
-        /v1/solutions/details/:{``solutionId``} ```.
+        /v1/solutions/details/:{solutionId}`.
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -9350,7 +9348,7 @@ paths:
 
 
         * The API allows to reissue the certificate for a specified project.```
-        /v1/userProjects/certificateReIssue``/:{projectId} ```.
+        /v1/userProjects/certificateReIssue/:{projectId}.
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -9429,7 +9427,7 @@ paths:
 
 
         * The API allows the user to verifies the project certificate is```
-        /v1/userProjects/certificateReIssue``/:{projectId} ```.
+        /v1/userProjects/certificateReIssue/:{projectId}.
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -9444,7 +9442,7 @@ paths:
 
 
         * The API allows the user to update a certificate
-        template`/v1/project/certificateBaseTemplates/createOrUpdate/:{_id}.`
+        template`/v1/project/certificateTemplates/createOrUpdate/:{_id}.`
 
         * It is mandatory to provide values for parameters which are marked as
         `required`

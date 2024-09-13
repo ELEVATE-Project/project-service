@@ -2632,9 +2632,9 @@ module.exports = class UserProjectsHelper {
 	static createCertificatePayload(data) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				// Truncate the title if it exceeds 60 characters
-				if (data.title.length > 60) {
-					data.title = data.title.substring(0, 60) + '...'
+				// Truncate the title if it exceeds 42 characters
+				if (data.title.length > 42) {
+					data.title = data.title.substring(0, 42) + '...'
 				}
 
 				// Get downloadable URL for the certificate template
@@ -2676,9 +2676,9 @@ module.exports = class UserProjectsHelper {
 					}
 				}
 
-				// Truncate the user-name if it exceeds 55 characters
-				if (data.userProfile.name.length > 55) {
-					data.userProfile.name = data.userProfile.name.substring(0, 55) + '...'
+				// Truncate the user-name if it exceeds 38 characters
+				if (data.userProfile.name.length > 38) {
+					data.userProfile.name = data.userProfile.name.substring(0, 38) + '...'
 				}
 
 				// Create the certificate request body

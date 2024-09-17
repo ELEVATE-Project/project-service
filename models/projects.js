@@ -147,16 +147,13 @@ module.exports = {
 			templateId: 'ObjectId',
 			pdfPath: {
 				type: String,
-				unique: true,
 			},
 			svgPath: {
 				type: String,
-				unique: true,
 			},
 			transactionId: {
 				type: String,
 				index: true,
-				unique: true,
 			},
 			templateUrl: String,
 			status: String,

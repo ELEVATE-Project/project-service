@@ -34,7 +34,7 @@
 							]
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/project/templates/bulkUpdate/bulkCreate",
+							"raw": "{{baseUrl}}project/v1/project/templates/bulkCreate",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -75,7 +75,7 @@
 							]
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/project/templates/bulkUpdate",
+							"raw": "{{baseUrl}}project/v1/project/templates/bulkUpdate",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -120,7 +120,7 @@
 							"raw": "{\n    \"description\" : \"शिक्षकों को कक्षा में मापन - लंबाई , भार एवं धारिता के शिक्षण कौशलों का संवर्धन करना । updated\"\n\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/project/templates/update/64b534d32bf17aea84b3862f",
+							"raw": "{{baseUrl}}project/v1/project/templates/update/64b534d32bf17aea84b3862f",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -166,7 +166,7 @@
 							"raw": "{\n    \"externalIds\" : [\"TSCSLHAR02-1710148664591\"]\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/project/templates/listByIds",
+							"raw": "{{baseUrl}}project/v1/project/templates/listByIds",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -207,12 +207,11 @@
 							}
 						],
 						"url": {
-							"raw": "http://localhost:5000/project/v1/project/templates/importProjectTemplate/TSCSLHAR02-1710148664591=",
+							"raw": "{{baseUrl}}project/v1/project/templates/importProjectTemplate/TSCSLHAR02-1710148664591=",
 							"protocol": "http",
 							"host": [
-								"localhost"
+								"{{baseUrl}}"
 							],
-							"port": "5000",
 							"path": [
 								"project",
 								"v1",
@@ -255,7 +254,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/project/templates/details/TSCSLHAR02-1710148664591",
+							"raw": "{{baseUrl}}project/v1/project/templates/details/TSCSLHAR02-1710148664591",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -266,6 +265,33 @@
 								"templates",
 								"details",
 								"TSCSLHAR02-1710148664591"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "list",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{userToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}project/v1/project/templates/list",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"project",
+								"templates",
+								"list"
 							]
 						}
 					},
@@ -306,7 +332,7 @@
 							"raw": "{\n    \"name\" : \"educationLeader\",\n    \"externalId\" : \"educationLeader\",\n    \"icon\" : \"static/projectCategories/teacher.png\"\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/library/categories/create",
+							"raw": "{{baseUrl}}project/v1/library/categories/create",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -350,7 +376,7 @@
 							"raw": "{\n    \"name\" : \"Teachers\",\n    \"externalId\" : \"teachers\",\n    \"icon\" : \"static/projectCategories/teacher.png\"\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/library/categories/update/665ea7cccbf5d12ba8827223",
+							"raw": "{{baseUrl}}project/v1/library/categories/update/665ea7cccbf5d12ba8827223",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -395,7 +421,7 @@
 							"raw": "{\n    // \"name\" : \"Teachers\",\n    // \"externalId\" : \"teachers\",\n    // \"icon\" : \"static/projectCategories/teacher.png\"\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/library/categories/list",
+							"raw": "{{baseUrl}}project/v1/library/categories/list",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -405,6 +431,40 @@
 								"library",
 								"categories",
 								"list"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "projects",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-auth-token",
+								"value": "{{userToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}project/v1/library/categories/projects/:categoryExternalId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"library",
+								"categories",
+								"projects",
+								":categoryExternalId"
+							],
+							"variable": [
+								{
+									"key": "categoryExternalId",
+									"value": ""
+								}
 							]
 						}
 					},
@@ -440,7 +500,7 @@
 							]
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/project/templateTasks/bulkCreate/665430eb8f2943842b2ae46b",
+							"raw": "{{baseUrl}}project/v1/project/templateTasks/bulkCreate/665430eb8f2943842b2ae46b",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -536,7 +596,7 @@
 							"raw": "{\n  \"hasAcceptedTAndC\": true\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/userProjects/importFromLibrary/5fcf9954546a92494f2e587c?isATargetedSolution=false",
+							"raw": "{{baseUrl}}project/v1/userProjects/importFromLibrary/5fcf9954546a92494f2e587c?isATargetedSolution=false",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -587,7 +647,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/userProjects/importedProjects",
+							"raw": "{{baseUrl}}project/v1/userProjects/importedProjects",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -630,7 +690,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/userProjects/list?page=1&limit=2&search=&filter=",
+							"raw": "{{baseUrl}}project/v1/userProjects/list?page=1&limit=2&search=&filter=",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -684,7 +744,7 @@
 									"raw": ""
 								},
 								"url": {
-									"raw": "{{baseUrl}}/project/v1/userProjects/list?page=1&limit=2&search=&filter=",
+									"raw": "{{baseUrl}}project/v1/userProjects/list?page=1&limit=2&search=&filter=",
 									"host": [
 										"{{baseUrl}}"
 									],
@@ -885,7 +945,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/userProjects/add",
+							"raw": "{{baseUrl}}project/v1/userProjects/add",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -925,7 +985,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/userProjects/tasksStatus",
+							"raw": "{{baseUrl}}project/v1/userProjects/tasksStatus",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -963,18 +1023,76 @@
 							"formdata": []
 						},
 						"url": {
-							"raw": "http://localhost:5000/project/v1/userProjects/share/6018e75f14969a4cfd76f52c",
-							"protocol": "http",
+							"raw": "{{baseUrl}}project/v1/userProjects/share/6018e75f14969a4cfd76f52c",
 							"host": [
-								"localhost"
+								"{{baseUrl}}"
 							],
-							"port": "5000",
 							"path": [
 								"project",
 								"v1",
 								"userProjects",
 								"share",
 								"6018e75f14969a4cfd76f52c"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "certificateReIssue",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{userToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}project/v1/userProjects/certificateReIssue/66cedfd0c9c3f0714de096c1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"userProjects",
+								"certificateReIssue",
+								"66cedfd0c9c3f0714de096c1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "verifyCertificate",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{userToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}project/v1/userProjects/verifyCertificate/:_id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"userProjects",
+								"verifyCertificate",
+								":_id"
+							],
+							"variable": [
+								{
+									"key": "_id",
+									"value": ""
+								}
 							]
 						}
 					},
@@ -991,35 +1109,78 @@
 						"method": "GET",
 						"header": [
 							{
-								"key": "X-auth-token",
-								"value": "{{userToken}}",
+								"key": "internal-access-token",
+								"value": "internal_access_token",
 								"type": "text"
 							},
 							{
-								"key": "x-app-ver",
-								"value": "1.0",
+								"key": "X-auth-token",
+								"value": "{{userToken}}",
 								"type": "text"
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/v1/reports/entity/?requestPdf=false&reportType=1",
+							"raw": "{{baseUrl}}project/v1/reports/entity?requestPdf=true&reportType=0",
 							"host": [
-								"{{baseUrl}}"
+								"{{baseUrl}}project"
 							],
 							"path": [
 								"v1",
 								"reports",
-								"entity",
-								""
+								"entity"
 							],
 							"query": [
 								{
 									"key": "requestPdf",
-									"value": "false"
+									"value": "true"
 								},
 								{
 									"key": "reportType",
-									"value": "1"
+									"value": "0"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "detailView",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "internal-access-token",
+								"value": "8c3a94f0931e01a4940a",
+								"type": "text"
+							},
+							{
+								"key": "X-auth-token",
+								"value": "{{userToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}project/v1/reports/detailView?requestPdf=true&reportType=2&programId=5f3bc13016fdc4ed008171ae",
+							"host": [
+								"{{baseUrl}}project"
+							],
+							"path": [
+								"v1",
+								"reports",
+								"detailView"
+							],
+							"query": [
+								{
+									"key": "requestPdf",
+									"value": "true"
+								},
+								{
+									"key": "reportType",
+									"value": "2"
+								},
+								{
+									"key": "programId",
+									"value": "5f3bc13016fdc4ed008171ae"
 								}
 							]
 						}
@@ -1057,7 +1218,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/programs/create",
+							"raw": "{{baseUrl}}project/v1/programs/create",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1097,7 +1258,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/programs/update/667953639a5223446315e011",
+							"raw": "{{baseUrl}}project/v1/programs/update/667953639a5223446315e011",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1129,7 +1290,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/programs/details/667954289a5223446315e01c",
+							"raw": "{{baseUrl}}project/v1/programs/details/667954289a5223446315e01c",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1170,7 +1331,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/programs/addRolesInScope/667954289a5223446315e01c",
+							"raw": "{{baseUrl}}project/v1/programs/addRolesInScope/667954289a5223446315e01c",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1211,7 +1372,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/programs/addEntitiesInScope/667954289a5223446315e01c",
+							"raw": "{{baseUrl}}project/v1/programs/addEntitiesInScope/667954289a5223446315e01c",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1252,7 +1413,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/programs/removeRolesInScope/665eb764cbf5d12ba882722f",
+							"raw": "{{baseUrl}}project/v1/programs/removeRolesInScope/665eb764cbf5d12ba882722f",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1284,7 +1445,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/programs/list?page=1&limit=5&search=",
+							"raw": "{{baseUrl}}project/v1/programs/list?page=1&limit=5&search=",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1339,7 +1500,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/programs/join/665eb764cbf5d12ba882722f",
+							"raw": "{{baseUrl}}project/v1/programs/join/665eb764cbf5d12ba882722f",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1377,12 +1538,11 @@
 							"raw": "{\n    \"roles\": [\n                \"HM\",\n                \"BEO\"\n            ]\n}"
 						},
 						"url": {
-							"raw": "http://localhost:5000/project/v1/programs/removeEntitiesInScope/665eb764cbf5d12ba882722f",
+							"raw": "{{baseUrl}}project/v1/programs/removeEntitiesInScope/665eb764cbf5d12ba882722f",
 							"protocol": "http",
 							"host": [
-								"localhost"
+								"{{baseUrl}}"
 							],
-							"port": "5000",
 							"path": [
 								"project",
 								"v1",
@@ -1425,7 +1585,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/solutions/create",
+							"raw": "{{baseUrl}}project/v1/solutions/create",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1465,7 +1625,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/solutions/update/667957bbc9d3d7c5740dafb7",
+							"raw": "{{baseUrl}}project/v1/solutions/update/667957bbc9d3d7c5740dafb7",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1506,7 +1666,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/solutions/addRolesInScope/665ec2f8cbf5d12ba8827253",
+							"raw": "{{baseUrl}}project/v1/solutions/addRolesInScope/665ec2f8cbf5d12ba8827253",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1547,7 +1707,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/solutions/detailsBasedOnRoleAndLocation",
+							"raw": "{{baseUrl}}project/v1/solutions/detailsBasedOnRoleAndLocation",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1587,7 +1747,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/solutions/removeRolesInScope/665ec2f8cbf5d12ba8827253",
+							"raw": "{{baseUrl}}project/v1/solutions/removeRolesInScope/665ec2f8cbf5d12ba8827253",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1631,7 +1791,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/solutions/fetchLink/:solutionId",
+							"raw": "{{baseUrl}}project/v1/solutions/fetchLink/:solutionId",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1678,7 +1838,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/solutions/addEntitiesInScope/665ec2f8cbf5d12ba8827253",
+							"raw": "{{baseUrl}}project/v1/solutions/addEntitiesInScope/665ec2f8cbf5d12ba8827253",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1719,7 +1879,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/solutions/removeEntitiesInScope/665ec2f8cbf5d12ba8827253",
+							"raw": "{{baseUrl}}project/v1/solutions/removeEntitiesInScope/665ec2f8cbf5d12ba8827253",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1760,7 +1920,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/solutions/forUserRoleAndLocation?programId=5ff840ce383ae437eb02b96c&type=improvementProject&subType=improvementProject&page=1&limit=100&search=create solutio",
+							"raw": "{{baseUrl}}project/v1/solutions/forUserRoleAndLocation?programId=5ff840ce383ae437eb02b96c&type=improvementProject&subType=improvementProject&page=1&limit=100&search=create solutio",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1826,7 +1986,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/solutions/targetedSolutions?type=improvementProject&page=1&limit=10&search=&filter=",
+							"raw": "{{baseUrl}}project/v1/solutions/targetedSolutions?type=improvementProject&page=1&limit=10&search=&filter=",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1888,7 +2048,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/solutions/verifyLink",
+							"raw": "{{baseUrl}}project/v1/solutions/verifyLink",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1928,7 +2088,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/solutions/verifySolution/:solutionId",
+							"raw": "{{baseUrl}}project/v1/solutions/verifySolution/:solutionId",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1975,7 +2135,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/solutions/list?page=1&limit=100&search=&type=improvementProject&subType",
+							"raw": "{{baseUrl}}project/v1/solutions/list?page=1&limit=100&search=&type=improvementProject&subType",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -2028,7 +2188,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/solutions/getDetails/66727b63cf0222d7ec1fa7e0",
+							"raw": "{{baseUrl}}project/v1/solutions/getDetails/66727b63cf0222d7ec1fa7e0",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -2038,6 +2198,47 @@
 								"solutions",
 								"getDetails",
 								"66727b63cf0222d7ec1fa7e0"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "details",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{userToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "// {\n//     \"entityType\" : \"block\",\n//     // \"entityTypeId\" : \"5f32d8228e0dc8312404056e\",\n//     \"entities\" : [\n//         \"5fd1b52ab53a6416aaeefc80\",\n//         \"5fd098e2e049735a86b748ac\",\n//         \"5fd1b52ab53a6416aaeefc83\",\n//         \"5fd1b52ab53a6416aaeefb20\"\n//     ],\n//     \"role\" : \"BEO,HM\"\n// }\n\n{\n    \"role\": \"district_education_officer\",\n    \"state\": \"66bc5afebb293e9d6930ad7a\"\n   \n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}project/v1/solutions/details/:_id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"solutions",
+								"details",
+								":_id"
+							],
+							"variable": [
+								{
+									"key": "_id",
+									"value": "5f34ade5585244939f89f8f5"
+								}
 							]
 						}
 					},
@@ -2064,8 +2265,17 @@
 								"type": "text"
 							}
 						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"keys\": [\n        \"scope.state\",\n        \"scope.district\",\n        \"scope.block\",\n        \"scope.roles\"\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/admin/dbFind",
+							"raw": "{{baseUrl}}project/v1/admin/createIndex/:collectionName",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -2073,7 +2283,14 @@
 								"project",
 								"v1",
 								"admin",
-								"dbFind"
+								"createIndex",
+								":collectionName"
+							],
+							"variable": [
+								{
+									"key": "collectionName",
+									"value": "solutions"
+								}
 							]
 						}
 					},
@@ -2081,9 +2298,6 @@
 				},
 				{
 					"name": "dbFind",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
 					"request": {
 						"method": "POST",
 						"header": [
@@ -2105,12 +2319,11 @@
 							"raw": "{\n    \"query\": {\n       \"_id\":\"66975a4a4999c205ea017da9\"\n    },\n    \"mongoIdKeys\": [\n        \"_id\"\n    ],\n    \"limit\":2000\n}"
 						},
 						"url": {
-							"raw": "http://localhost:5000/project/v1/admin/dbFind/:collectionName",
+							"raw": "{{baseUrl}}project/v1/admin/dbFind/:collectionName",
 							"protocol": "http",
 							"host": [
-								"localhost"
+								"{{baseUrl}}"
 							],
-							"port": "5000",
 							"path": [
 								"project",
 								"v1",
@@ -2133,6 +2346,41 @@
 		{
 			"name": "cloud-services",
 			"item": [
+				{
+					"name": "download",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{userToken}}",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}project/v1/cloud-services/files/download",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"cloud-services",
+								"files",
+								"download"
+							],
+							"query": [
+								{
+									"key": "file",
+									"value": "project/4606a10b-aaec-4927-be60-35f20dde4e4f/288/ad49cf28-a08b-40f5-ac96-3b2a7580272d/38077262-4a3e-485d-85cc-be767c0868e7.pdf",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
 				{
 					"name": "preSignedUrls",
 					"request": {
@@ -2159,7 +2407,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/cloud-services/files/preSignedUrls",
+							"raw": "{{baseUrl}}project/v1/cloud-services/files/preSignedUrls",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -2198,7 +2446,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/cloud-services/files/getDownloadableUrl",
+							"raw": "{{baseUrl}}project/v1/cloud-services/files/getDownloadableUrl",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -2233,7 +2481,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/forms/read/:_id",
+							"raw": "{{baseUrl}}project/v1/forms/read/:_id",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -2278,7 +2526,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/forms/create",
+							"raw": "{{baseUrl}}project/v1/forms/create",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -2316,7 +2564,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/forms/update/",
+							"raw": "{{baseUrl}}project/v1/forms/update/",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -2428,6 +2676,278 @@
 								"certificateBaseTemplates",
 								"createOrUpdate",
 								"6646e0a7b5226e19a19edf37"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "certificateTemplates",
+			"item": [
+				{
+					"name": "createOrUpdate",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{userToken}}"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{devInternalAccessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"criteria\": {\n        \"validationText\": \"Complete validation message\",\n        \"expression\": \"C1&&C2&&C3\",\n        \"conditions\": {\n            \"C1\": {\n                \"validationText\": \"Submit your project.\",\n                \"expression\": \"C1\",\n                \"conditions\": {\n                    \"C1\": {\n                        \"scope\": \"project\",\n                        \"key\": \"status\",\n                        \"operator\": \"==\",\n                        \"value\": \"submitted\"\n                    }\n                }\n            },\n            \"C2\": {\n                \"validationText\": [\n                    \"Add 2 evidence at the project level\"\n                ],\n                \"expression\": \"C1\",\n                \"conditions\": {\n                    \"C1\": {\n                        \"scope\": \"project\",\n                        \"key\": \"attachments\",\n                        \"function\": {\n                            \"operator\": \">=\",\n                            \"value\": 2\n                        },\n                        \"filter\": {\n                            \"key\": \"type\",\n                            \"value\": \"all\"\n                        }\n                    }\n                }\n            },\n            \"C3\": {\n                \"validationText\": \"Add 2 evidence for the task Todays welcome paret teckde\",\n                \"expression\": \"C1\",\n                \"conditions\": {\n                    \"C1\": {\n                        \"scope\": \"task\",\n                        \"key\": \"attachments\",\n                        \"function\": \"count\",\n                        \"filter\": {\n                            \"key\": \"type\",\n                            \"value\": \"all\"\n                        },\n                        \"operator\": \">=\",\n                        \"value\": 2,\n                        \"taskDetails\": [\n                            \"66c7f73e18bff742198c4f1d\"\n                        ]\n                    }\n                }\n            }\n        }\n    },\n    \"issuer\": {\n        \"name\": \"Karnataka\"\n    },\n    \"status\": \"active\",\n    \"solutionId\": \"66c7f76e18bff742198c4f2a\",\n    \"programId\": \"66c7f75f18bff742198c4f24\",\n    \"baseTemplateId\": \"66bb5c3e196c83581cc26aa8\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}project/v1/certificateTemplates/createOrUpdate",
+							"host": [
+								"{{baseUrl}}project"
+							],
+							"path": [
+								"v1",
+								"certificateTemplates",
+								"createOrUpdate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "createOrUpdate",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{userToken}}"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{devInternalAccessToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"criteria\": {\n        \"validationText\": \"Complete validation message\",\n        \"expression\": \"C1&&C2&&C3\",\n        \"conditions\": {\n            \"C1\": {\n                \"validationText\": \"Submit your project.\",\n                \"expression\": \"C1\",\n                \"conditions\": {\n                    \"C1\": {\n                        \"scope\": \"project\",\n                        \"key\": \"status\",\n                        \"operator\": \"==\",\n                        \"value\": \"submitted\"\n                    }\n                }\n            },\n            \"C2\": {\n                \"validationText\": [\n                    \"Add 2 evidence at the project level\"\n                ],\n                \"expression\": \"C1\",\n                \"conditions\": {\n                    \"C1\": {\n                        \"scope\": \"project\",\n                        \"key\": \"attachments\",\n                        \"function\": {\n                            \"operator\": \">=\",\n                            \"value\": 2\n                        },\n                        \"filter\": {\n                            \"key\": \"type\",\n                            \"value\": \"all\"\n                        }\n                    }\n                }\n            },\n            \"C3\": {\n                \"validationText\": \"Add 2 evidence for the task Todays welcome paret teckde\",\n                \"expression\": \"C1\",\n                \"conditions\": {\n                    \"C1\": {\n                        \"scope\": \"task\",\n                        \"key\": \"attachments\",\n                        \"function\": \"count\",\n                        \"filter\": {\n                            \"key\": \"type\",\n                            \"value\": \"all\"\n                        },\n                        \"operator\": \">=\",\n                        \"value\": 2,\n                        \"taskDetails\": [\n                            \"66c7f73e18bff742198c4f1d\"\n                        ]\n                    }\n                }\n            }\n        }\n    },\n    \"issuer\": {\n        \"name\": \"Karnataka\"\n    },\n    \"status\": \"active\",\n    \"solutionId\": \"66c7f76e18bff742198c4f2a\",\n    \"programId\": \"66c7f75f18bff742198c4f24\",\n    \"baseTemplateId\": \"66bb5c3e196c83581cc26aa8\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}project/v1/certificateTemplates/createOrUpdate",
+							"host": [
+								"{{baseUrl}}project"
+							],
+							"path": [
+								"v1",
+								"certificateTemplates",
+								"createOrUpdate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "uploadTemplate",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{userToken}}"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/home/dell/Downloads/certificate_9b374be1-c71e-4190-923b-a770b8ab728c__f09b3167-1051-46d1-8fcb-369f46456b4f_28-7-2024-1724833633721_undefined"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}project/v1/certificateTemplates/uploadTemplate/:_id?updateTemplate=true",
+							"host": [
+								"{{baseUrl}}project"
+							],
+							"path": [
+								"v1",
+								"certificateTemplates",
+								"uploadTemplate",
+								":_id"
+							],
+							"query": [
+								{
+									"key": "updateTemplate",
+									"value": "true"
+								}
+							],
+							"variable": [
+								{
+									"key": "_id",
+									"value": "66c7f85718bff742198c4f42"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "createSvg",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{userToken}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "stateLogo1",
+									"type": "file",
+									"src": "/home/dell/Pictures/Screenshots/1437.png"
+								},
+								{
+									"key": "stateTitle",
+									"value": "Karunadu",
+									"type": "text"
+								},
+								{
+									"key": "signatureImg1",
+									"type": "file",
+									"src": "/home/dell/Pictures/Screenshots/Screenshot from 2024-08-06 16-30-03.png"
+								},
+								{
+									"key": "stateLogo2",
+									"type": "file",
+									"src": "/home/dell/Pictures/Screenshots/1437.png"
+								},
+								{
+									"key": "signatureImg2",
+									"type": "file",
+									"src": "/home/dell/Pictures/Screenshots/Screenshot from 2024-07-22 17-35-33.png"
+								},
+								{
+									"key": "signatureTitle1a",
+									"value": "Ankit Shahu, Software Engineer",
+									"type": "text"
+								},
+								{
+									"key": "signatureTitleDesignation1",
+									"value": "Software Engineer",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "signatureTitle2a",
+									"value": "Ankit Sabhapati Shahu, Software Engineer",
+									"type": "text"
+								},
+								{
+									"key": "signatureTitleDesignation2",
+									"value": "Senior Software Engineerdsdscdcs",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}project/v1/certificateTemplates/createSvg?baseTemplateId=66bb5c3e196c83581cc26aa8",
+							"host": [
+								"{{baseUrl}}project"
+							],
+							"path": [
+								"v1",
+								"certificateTemplates",
+								"createSvg"
+							],
+							"query": [
+								{
+									"key": "baseTemplateId",
+									"value": "66bb5c3e196c83581cc26aa8"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "configurations",
+			"item": [
+				{
+					"name": "read",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{userToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}project/v1/configurations/read",
+							"host": [
+								"{{baseUrl}}project"
+							],
+							"path": [
+								"v1",
+								"configurations",
+								"read"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "profile",
+			"item": [
+				{
+					"name": "read",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{userToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}project/v1/profile/read",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"project",
+								"v1",
+								"profile",
+								"read"
 							]
 						}
 					},

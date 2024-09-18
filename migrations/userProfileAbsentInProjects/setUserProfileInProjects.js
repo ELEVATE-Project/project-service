@@ -23,6 +23,9 @@
  const endPoint = "/v1/location/search";
  const userReadEndpoint =  "/private/user/v1/read";
 
+
+ const entitiesService = require(GENERICS_FILES_PATH + "/services/entity-management")
+
 (async () => {
 
     let connection = await MongoClient.connect(url, { useNewUrlParser: true });
@@ -229,10 +232,10 @@
                     //query for fetch location using id
                     if ( locationIds.length > 0 ) {
                         let locationQuery = {
-                            "id" : locationIds
+                            "_id" : {$in : locationIds}
                         }
 
-                        let entityData = await locationSearch(locationQuery);
+                        let entityData = await entitiesService.entityDocuments(locationQuery);
                         if ( entityData.success ) {
                             userLocations = entityData.data;
                         }
@@ -241,10 +244,10 @@
                     // query for fetch location using code
                     if ( locationCodes.length > 0 ) {
                         let codeQuery = {
-                            "code" : locationCodes
+                            "registryDetails.code" : {$in : locationCodes}
                         }
 
-                        let entityData = await locationSearch(codeQuery);
+                        let entityData = await entitiesService.entityDocuments(codeQuery);
                         if ( entityData.success ) {
                             userLocations =  userLocations.concat(entityData.data);
                         }
@@ -403,5 +406,5 @@
 
 function checkIfValidUUID(value) {
   const regexExp = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/gi;
-  return regexExp.test(value);
+  return regexExp.test(value)
 }

@@ -7,141 +7,129 @@
 
 // Dependencies
 
-const csv = require('csvtojson');
-const projectTemplatesHelper = require(MODULES_BASE_PATH + "/project/templates/helper");
+const csv = require('csvtojson')
+const projectTemplatesHelper = require(MODULES_BASE_PATH + '/project/templates/helper')
 
- /**
-    * ProjectTemplates
-    * @class
-*/
+/**
+ * ProjectTemplates
+ * @class
+ */
 
 module.exports = class ProjectTemplates extends Abstract {
+	/**
+	 * @apiDefine errorBody
+	 * @apiError {String} status 4XX,5XX
+	 * @apiError {String} message Error
+	 */
 
-    /**
-     * @apiDefine errorBody
-     * @apiError {String} status 4XX,5XX
-     * @apiError {String} message Error
-     */
+	/**
+	 * @apiDefine successBody
+	 * @apiSuccess {String} status 200
+	 * @apiSuccess {String} result Data
+	 */
 
-    /**
-     * @apiDefine successBody
-     * @apiSuccess {String} status 200
-     * @apiSuccess {String} result Data
-     */
-    
-    constructor() {
-        super("project-templates");
-    }
-   
+	constructor() {
+		super('project-templates')
+	}
 
-    /**
-    * @api {post} /improvement-project/api/v1/project/templates/bulkCreate 
-    * Bulk Create projects templates.
-    * @apiVersion 1.0.0
-    * @apiGroup Project Templates
-    * @apiParam {File} projectTemplates Mandatory project templates file of type CSV.
-    * @apiSampleRequest /improvement-project/api/v1/project/templates/bulkCreate
-    * @apiUse successBody
-    * @apiUse errorBody
-    */
+	/**
+	 * @api {post} /project/v1/project/templates/bulkCreate
+	 * Bulk Create projects templates.
+	 * @apiVersion 1.0.0
+	 * @apiGroup Project Templates
+	 * @apiParam {File} projectTemplates Mandatory project templates file of type CSV.
+	 * @apiSampleRequest /project/v1/project/templates/bulkCreate
+	 * @apiUse successBody
+	 * @apiUse errorBody
+	 */
 
-      /**
-      * Bulk Create project templates
-      * @method
-      * @name bulkCreate
-      * @returns {JSON} returns uploaded project templates.
-     */
+	/**
+	 * Bulk Create project templates
+	 * @method
+	 * @name bulkCreate
+	 * @returns {JSON} returns uploaded project templates.
+	 */
 
-    async bulkCreate(req) {
-        return new Promise(async (resolve, reject) => {
-            try {
-                
-                if ( !req.files || !req.files.projectTemplates ) {
-                    return resolve(
-                      {
-                        status : HTTP_STATUS_CODE["bad_request"].status, 
-                        message : CONSTANTS.apiResponses.PROJECT_TEMPLATES_CSV
-                      }
-                    )
-                }
+	async bulkCreate(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				if (!req.files || !req.files.projectTemplates) {
+					return resolve({
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.PROJECT_TEMPLATES_CSV,
+					})
+				}
 
-                const templatesData = 
-                await csv().fromString(req.files.projectTemplates.data.toString());
+				const templatesData = await csv().fromString(req.files.projectTemplates.data.toString())
 
-                const projectTemplates = await projectTemplatesHelper.bulkCreate(
-                    templatesData,
-                    req.userDetails.userInformation.userId
-                );
+				const projectTemplates = await projectTemplatesHelper.bulkCreate(
+					templatesData,
+					req.userDetails.userInformation.userId
+				)
 
-                return resolve(projectTemplates);
+				return resolve(projectTemplates)
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
+				})
+			}
+		})
+	}
 
-            } catch (error) {
-                return reject({
-                    status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
-                    message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
-                    errorObject: error
-                });
-            }
-        })
-    }
+	/**
+	 * @api {post} /project/v1/project/templates/bulkUpdate
+	 * Bulk Update projects templates.
+	 * @apiVersion 1.0.0
+	 * @apiGroup Project Templates
+	 * @apiParam {File} projectTemplates Mandatory project templates file of type CSV.
+	 * @apiSampleRequest /project/v1/project/templates/bulkUpdate
+	 * @apiUse successBody
+	 * @apiUse errorBody
+	 */
 
-    /**
-    * @api {post} /improvement-project/api/v1/project/templates/bulkUpdate 
-    * Bulk Update projects templates.
-    * @apiVersion 1.0.0
-    * @apiGroup Project Templates
-    * @apiParam {File} projectTemplates Mandatory project templates file of type CSV.
-    * @apiSampleRequest /improvement-project/api/v1/project/templates/bulkUpdate
-    * @apiUse successBody
-    * @apiUse errorBody
-    */
+	/**
+	 * Bulk Update project templates
+	 * @method
+	 * @name bulkUpdate
+	 * @returns {JSON} returns uploaded project templates.
+	 */
 
-      /**
-      * Bulk Update project templates
-      * @method
-      * @name bulkUpdate
-      * @returns {JSON} returns uploaded project templates.
-     */
+	async bulkUpdate(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				if (!req.files || !req.files.projectTemplates) {
+					return resolve({
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.PROJECT_TEMPLATES_CSV,
+					})
+				}
 
-    async bulkUpdate(req) {
-        return new Promise(async (resolve, reject) => {
-            try {
-                
-                if ( !req.files || !req.files.projectTemplates ) {
-                    return resolve(
-                      {
-                        status : HTTP_STATUS_CODE["bad_request"].status, 
-                        message : CONSTANTS.apiResponses.PROJECT_TEMPLATES_CSV
-                      }
-                    )
-                }
-                
-                const templatesData = 
-                await csv().fromString(req.files.projectTemplates.data.toString());
+				const templatesData = await csv().fromString(req.files.projectTemplates.data.toString())
 
-                const projectTemplates = await projectTemplatesHelper.bulkUpdate(
-                    templatesData,
-                    req.userDetails.userInformation.userId
-                );
+				const projectTemplates = await projectTemplatesHelper.bulkUpdate(
+					templatesData,
+					req.userDetails.userInformation.userId
+				)
 
-                return resolve(projectTemplates);
+				return resolve(projectTemplates)
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
+				})
+			}
+		})
+	}
 
-            } catch (error) {
-                return reject({
-                    status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
-                    message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
-                    errorObject: error
-                });
-            }
-        })
-    }
-
-     /**
-    * @api {post} /improvement-project/api/v1/project/templates/importProjectTemplate/:projectTemplateExternalId 
+	/**
+    * @api {post} /project/v1/project/templates/importProjectTemplate/:projectTemplateExternalId 
     * Import templates from existsing project templates.
     * @apiVersion 1.0.0
     * @apiGroup Project Templates
-    * @apiSampleRequest /improvement-project/api/v1/project/templates/importProjectTemplate/template-1
+    * @apiSampleRequest /project/v1/project/templates/importProjectTemplate/template-1
     * @apiParamExample {json} Request: 
     * {
     * "externalId" : "template1",
@@ -150,57 +138,54 @@ module.exports = class ProjectTemplates extends Abstract {
     * }
     * @apiParamExample {json} Response:
     * {
-    "message": "Successfully created duplicate project templates",
-    "status": 200,
-    "result": {
-        "_id": "5f2402f570d11462f8e9a591"
-    }
+        "message": "Successfully created duplicate project templates",
+        "status": 200,
+        "result": {
+            "_id": "5f2402f570d11462f8e9a591"
+        }
     }
     * @apiUse successBody
     * @apiUse errorBody
     */
 
-      /**
-      * Import templates from existsing project templates.
-      * @method
-      * @name importProjectTemplate
-      * @param {Object} req - request data.
-      * @param {String} req.params._id - project Template ExternalId.
-      * @returns {JSON} returns imported project templates.
-     */
+	/**
+	 * Import templates from existsing project templates.
+	 * @method
+	 * @name importProjectTemplate
+	 * @param {Object} req - request data.
+	 * @param {String} req.params._id - project Template ExternalId.
+	 * @returns {JSON} returns imported project templates.
+	 */
 
-    async importProjectTemplate(req) {
-        return new Promise(async (resolve, reject) => {
-            try {
+	async importProjectTemplate(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let projectTemplates = await projectTemplatesHelper.importProjectTemplate(
+					req.params._id,
+					req.userDetails.userInformation.userId,
+					req.userDetails.userToken,
+					req.query.solutionId ? req.query.solutionId : '',
+					req.body
+				)
 
-                let projectTemplates = 
-                await projectTemplatesHelper.importProjectTemplate(
-                    req.params._id,
-                    req.userDetails.userInformation.userId,
-                    req.userDetails.userToken,
-                    req.query.solutionId ? req.query.solutionId : "",
-                    req.body
-                );
+				projectTemplates.result = projectTemplates.data
 
-                projectTemplates.result = projectTemplates.data;
+				return resolve(projectTemplates)
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+				})
+			}
+		})
+	}
 
-                return resolve(projectTemplates);
-
-            } catch (error) {
-                return reject({
-                    status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
-                    message: error.message || HTTP_STATUS_CODE.internal_server_error.message
-                });
-            }
-        })
-    }
-
-     /**
-    * @api {post} /improvement-project/api/v1/project/templates/listByIds
+	/**
+    * @api {post} /project/v1/project/templates/listByIds
     * List templates based on ids.
     * @apiVersion 1.0.0
     * @apiGroup Project Templates
-    * @apiSampleRequest /improvement-project/api/v1/project/templates/listByIds
+    * @apiSampleRequest /project/v1/project/templates/listByIds
     * @apiParamExample {json} Request: 
     * {
     * "externalIds" : ["IDEAIMP 4"]
@@ -222,40 +207,37 @@ module.exports = class ProjectTemplates extends Abstract {
     * @apiUse errorBody
     */
 
-      /**
-       * List templates based on ids.
-      * @method
-      * @name listByIds
-      * @param {Object} req - request data.
-      * @returns {Array} List of templates.
-     */
+	/**
+	 * List templates based on ids.
+	 * @method
+	 * @name listByIds
+	 * @param {Object} req - request data.
+	 * @returns {Array} List of templates.
+	 */
 
-    async listByIds(req) {
-        return new Promise(async (resolve, reject) => {
-            try {
+	async listByIds(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let projectTemplates = await projectTemplatesHelper.listByIds(req.body.externalIds)
 
-                let projectTemplates = 
-                await projectTemplatesHelper.listByIds(req.body.externalIds);
+				projectTemplates.result = projectTemplates.data
 
-                projectTemplates.result = projectTemplates.data;
+				return resolve(projectTemplates)
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+				})
+			}
+		})
+	}
 
-                return resolve(projectTemplates);
-
-            } catch (error) {
-                return reject({
-                    status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
-                    message: error.message || HTTP_STATUS_CODE.internal_server_error.message
-                });
-            }
-        })
-    }
-
-    /**
-    * @api {get} /improvement-project/api/v1/project/templates/details/:templateId
+	/**
+    * @api {get} /project/v1/project/templates/details/:templateId
     * Project template details.
     * @apiVersion 1.0.0
     * @apiGroup Project Templates
-    * @apiSampleRequest /improvement-project/api/v1/project/templates/details/MAHARASTHA IMPROVEMENT PROJECT TEMPLATE
+    * @apiSampleRequest /project/v1/project/templates/details/MAHARASTHA IMPROVEMENT PROJECT TEMPLATE
     * @apiParamExample {json} Response:
     * {
     "message": "Successfully fetched project template details",
@@ -657,52 +639,49 @@ module.exports = class ProjectTemplates extends Abstract {
     * @apiUse errorBody
     */
 
-      /**
-       * Project templates details.
-      * @method
-      * @name details
-      * @param {Object} req - request data.
-      * @returns {Array} Details templates.
-     */
+	/**
+	 * Project templates details.
+	 * @method
+	 * @name details
+	 * @param {Object} req - request data.
+	 * @returns {Array} Details templates.
+	 */
 
-       async details(req) {
-        return new Promise(async (resolve, reject) => {
-            
-            try {
-                if( !req.params._id && !req.query.link ) {
-                    throw{
-                        status:HTTP_STATUS_CODE.bad_request.status,
-                        message:CONSTANTS.apiResponses.TEMPLATE_ID_OR_LINK_REQUIRED
-                    }
-                }
-                
-                let projectTemplatesDetails = 
-                await projectTemplatesHelper.details(
-                    req.params._id ? req.params._id : "",
-                    req.query.link ? req.query.link : "",
-                    req.userDetails && req.userDetails.userInformation && req.userDetails.userInformation.userId ? req.userDetails.userInformation.userId : "",
-                    req.query.isAPrivateProgram ? req.query.isAPrivateProgram : ""
-                );
+	async details(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				if (!req.params._id && !req.query.link) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.TEMPLATE_ID_OR_LINK_REQUIRED,
+					}
+				}
 
-                projectTemplatesDetails.result = projectTemplatesDetails.data;
+				let projectTemplatesDetails = await projectTemplatesHelper.details(
+					req.params._id ? req.params._id : '',
+					req.query.link ? req.query.link : '',
+					req.userDetails && req.userDetails.userInformation && req.userDetails.userInformation.userId
+						? req.userDetails.userInformation.userId
+						: '',
+					req.query.isAPrivateProgram ? req.query.isAPrivateProgram : ''
+				)
 
-                return resolve(projectTemplatesDetails);
+				return resolve(projectTemplatesDetails)
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+				})
+			}
+		})
+	}
 
-            } catch (error) {
-                return reject({
-                    status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
-                    message: error.message || HTTP_STATUS_CODE.internal_server_error.message
-                });
-            }
-        })
-    }
-
-    /**
-    * @api {post} /improvement-project/api/v1/project/templates/update/:templateId 
+	/**
+    * @api {post} /project/v1/project/templates/update/:templateId 
     * Update projects template.
     * @apiVersion 1.0.0
     * @apiGroup Project Templates
-    * @apiSampleRequest /improvement-project/api/v1/project/templates/update/6006b5cca1a95727dbcdf648
+    * @apiSampleRequest /project/v1/project/templates/update/6006b5cca1a95727dbcdf648
     * @apiHeader {String} internal-access-token internal access token 
     * @apiHeader {String} X-authenticated-user-token Authenticity token  
     * @apiUse successBody
@@ -714,38 +693,36 @@ module.exports = class ProjectTemplates extends Abstract {
     }
     */
 
-      /**
-      * Update project templates
-      * @method
-      * @name update
-      * @returns {JSON} returns uploaded project template.
-     */
+	/**
+	 * Update project templates
+	 * @method
+	 * @name update
+	 * @returns {JSON} returns uploaded project template.
+	 */
 
-    async update(req) {
-        return new Promise(async (resolve, reject) => {
-            try {
+	async update(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let projectTemplate = await projectTemplatesHelper.update(
+					req.params._id,
+					req.body,
+					req.userDetails.userInformation.userId
+				)
 
-                let projectTemplate = await projectTemplatesHelper.update(
-                  req.params._id, 
-                  req.body, 
-                  req.userDetails.id
-                );
+				projectTemplate.result = projectTemplate.data
 
-                projectTemplate.result = projectTemplate.data;
+				return resolve(projectTemplate)
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
+				})
+			}
+		})
+	}
 
-                return resolve(projectTemplate);
-
-            } catch (error) {
-                return reject({
-                    status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
-                    message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
-                    errorObject: error
-                });
-            }
-        })
-    }
-
-    /**
+	/**
     * @description          - List project Templates.
     * @method
     * @name                 - list
@@ -832,31 +809,24 @@ module.exports = class ProjectTemplates extends Abstract {
         }
     */
 
-    async list(req) {
-        return new Promise(async (resolve, reject) => {
-        try {
-            // Call the 'list' method from the 'projectTemplatesHelper' object,
-            // passing in the required parameters.
-            let projectTemplates = 
-            await projectTemplatesHelper.list(
-                req.pageNo,
-                req.pageSize,
-                req.searchText
-            );
+	async list(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				// Call the 'list' method from the 'projectTemplatesHelper' object,
+				// passing in the required parameters.
+				let projectTemplates = await projectTemplatesHelper.list(req.pageNo, req.pageSize, req.searchText)
 
-            // Assign the 'data' property of 'projectTemplates' to 'result'.
-            projectTemplates.result = projectTemplates.data;
+				// Assign the 'data' property of 'projectTemplates' to 'result'.
+				projectTemplates.result = projectTemplates.data
 
-            // Resolve the promise with the modified 'projectTemplates'.
-            return resolve(projectTemplates);
-
-            } catch (error) {
-                return reject({
-                    status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
-                    message: error.message || HTTP_STATUS_CODE.internal_server_error.message
-                });
-            }
-        })
-    }
-  
-};
+				// Resolve the promise with the modified 'projectTemplates'.
+				return resolve(projectTemplates)
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+				})
+			}
+		})
+	}
+}

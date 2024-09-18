@@ -150,9 +150,9 @@ module.exports = class LibraryCategoriesHelper {
 
                 let categoriesUpdated = await projectCategoriesQueries.updateMany(filterQuery,updateData);
 
-                if( !categoriesUpdated.ok ) {
+                if( !categoriesUpdated ) {
                     throw {
-                        status : HTTP_STATUS_CODE['bad_request'].status,
+                        status : HTTP_STATUS_CODE.bad_request.status,
                         message : CONSTANTS.apiResponses.PROJECT_CATEGORIES_NOT_UPDATED
                     }
                 }
@@ -194,7 +194,7 @@ module.exports = class LibraryCategoriesHelper {
 
                 if( !projectsData.length > 0 ) {
                     throw {
-                        status : HTTP_STATUS_CODE['bad_request'].status,
+                        status : HTTP_STATUS_CODE.bad_request.status,
                         message : CONSTANTS.apiResponses.PROJECT_NOT_FOUND,
                     };
                 }
@@ -261,7 +261,7 @@ module.exports = class LibraryCategoriesHelper {
 
             } catch (error) {
                 return resolve({
-                    status : error.status ? error.status : HTTP_STATUS_CODE['internal_server_error'].status,
+                    status : error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
                     success: false,
                     message: error.message,
                     data : {}
@@ -282,11 +282,11 @@ module.exports = class LibraryCategoriesHelper {
         return new Promise(async (resolve, reject) => {
             try {
                 let projectCategoriesData = 
-                await database.models.projectCategories.create(categoryData)
+                await projectCategoriesQueries.create(categoryData)
 
                 if( !projectCategoriesData._id ) {
                     throw {
-                        status : HTTP_STATUS_CODE['bad_request'].status,
+                        status : HTTP_STATUS_CODE.bad_request.status,
                         message : CONSTANTS.apiResponses.PROJECT_CATEGORIES_NOT_ADDED
                     }
                 }
@@ -332,7 +332,7 @@ module.exports = class LibraryCategoriesHelper {
 
                 if( !categoryData.length > 0 ) {
                     throw {
-                        status : HTTP_STATUS_CODE['ok'].status,
+                        status : HTTP_STATUS_CODE.ok.status,
                         message : CONSTANTS.apiResponses.LIBRARY_CATEGORIES_NOT_FOUND
                     };
                 }

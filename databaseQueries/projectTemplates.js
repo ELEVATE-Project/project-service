@@ -55,7 +55,6 @@ module.exports = class ProjectTemplates {
             try {
                 let queryObject = (filterData != "all") ? filterData : {};
                 let projection = {}
-           
                 if (fieldsArray != "all") {
                     fieldsArray.forEach(field => {
                         projection[field] = 1;
@@ -112,12 +111,12 @@ module.exports = class ProjectTemplates {
    * @returns {Array} - Project templates data.
    */
 
-    static findOneAndUpdate(findQuery,UpdateObject, returnData = {}) {
+    static findOneAndUpdate(findQuery,UpdateObject, returnData = {new:false}) {
         return new Promise(async (resolve, reject) => {
         
             try {
               
-              let projectTemplate = await database.models.projectTemplates.findOneAndUpdate(findQuery,UpdateObject, returnData);
+              let projectTemplate = await database.models.projectTemplates.findOneAndUpdate(findQuery,UpdateObject, returnData).lean()
               return resolve(projectTemplate);
 
             } catch (error) {

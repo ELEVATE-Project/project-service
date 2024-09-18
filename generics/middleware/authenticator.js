@@ -1,171 +1,173 @@
 /**
  * name : authenticator.js
- * author : Aman Karki
+ * author : vishnu
  * Date : 05-Aug-2020
- * Description : Authentication middleware. Call sunbird service for authentication.
+ * Description : Authentication middleware.
  */
 
 // dependencies
-const jwt = require('jsonwebtoken');
-// const fs = require('fs');
-// const keyCloakPublicKeyPath = (process.env.KEYCLOAK_PUBLIC_KEY_PATH && process.env.KEYCLOAK_PUBLIC_KEY_PATH != "") ? PROJECT_ROOT_DIRECTORY+"/"+process.env.KEYCLOAK_PUBLIC_KEY_PATH+"/" : PROJECT_ROOT_DIRECTORY+"/"+"keycloak-public-keys/" ;
-// const PEM_FILE_BEGIN_STRING = "-----BEGIN PUBLIC KEY-----";
-// const PEM_FILE_END_STRING = "-----END PUBLIC KEY-----";
+const jwt = require('jsonwebtoken')
+const fs = require('fs')
+const path = require('path')
 
 var respUtil = function (resp) {
-  return {
-    status: resp.errCode,
-    message: resp.errMsg,
-    currentDate: new Date().toISOString()
-  };
-};
+	return {
+		status: resp.errCode,
+		message: resp.errMsg,
+		currentDate: new Date().toISOString(),
+	}
+}
 
 var removedHeaders = [
-  "host",
-  "origin",
-  "accept",
-  "referer",
-  "content-length",
-  "accept-encoding",
-  "accept-language",
-  "accept-charset",
-  "cookie",
-  "dnt",
-  "postman-token",
-  "cache-control",
-  "connection"
-];
+	'host',
+	'origin',
+	'accept',
+	'referer',
+	'content-length',
+	'accept-encoding',
+	'accept-language',
+	'accept-charset',
+	'cookie',
+	'dnt',
+	'postman-token',
+	'cache-control',
+	'connection',
+]
 
-module.exports = async function (req, res, next, token = "") {
+module.exports = async function (req, res, next, token = '') {
+	removedHeaders.forEach(function (e) {
+		delete req.headers[e]
+	})
 
-  removedHeaders.forEach(function (e) {
-    delete req.headers[e];
-  });
+	var token = req.headers['x-auth-token']
+	if (!req.rspObj) req.rspObj = {}
+	var rspObj = req.rspObj
 
-  var token = req.headers["x-authenticated-user-token"];
-  if (!req.rspObj) req.rspObj = {};
-  var rspObj = req.rspObj;
+	// Allow search endpoints for non-logged in users.
+	let guestAccess = false
+	let guestAccessPaths = [
+		'/dataPipeline/',
+		'/templates/details',
+		'userProjects/certificateCallback',
+		'userProjects/certificateCallbackError',
+		'cloud-services/files/download',
+	]
+	await Promise.all(
+		guestAccessPaths.map(async function (path) {
+			if (req.path.includes(path)) {
+				guestAccess = true
+			}
+		})
+	)
 
+	if (guestAccess == true && !token) {
+		next()
+		return
+	}
 
-  // Allow search endpoints for non-logged in users.
-  let guestAccess = false;
-  let guestAccessPaths = ["/dataPipeline/","/templates/details","userProjects/certificateCallback"];
-  await Promise.all(guestAccessPaths.map(async function (path) {
-    if (req.path.includes(path)) {
-      guestAccess = true;
-    }
-  }));
+	let internalAccessApiPaths = ['/templates/bulkCreate']
+	let performInternalAccessTokenCheck = false
+	await Promise.all(
+		internalAccessApiPaths.map(async function (path) {
+			if (req.path.includes(path)) {
+				performInternalAccessTokenCheck = true
+			}
+		})
+	)
 
-  if( guestAccess == true && !token ) {
-    next();
-    return;
-  }
+	if (performInternalAccessTokenCheck) {
+		if (req.headers['internal-access-token'] !== process.env.INTERNAL_ACCESS_TOKEN) {
+			rspObj.errCode = CONSTANTS.apiResponses.TOKEN_MISSING_CODE
+			rspObj.errMsg = CONSTANTS.apiResponses.TOKEN_MISSING_MESSAGE
+			rspObj.responseCode = HTTP_STATUS_CODE['unauthorized'].status
+			return res.status(HTTP_STATUS_CODE['unauthorized'].status).send(respUtil(rspObj))
+		}
+		if (!token) {
+			next()
+			return
+		}
+	}
 
-  let internalAccessApiPaths = ["/templates/bulkCreate"];
-  let performInternalAccessTokenCheck = false;
-  await Promise.all(internalAccessApiPaths.map(async function (path) {
-    if (req.path.includes(path)) {
-      performInternalAccessTokenCheck = true;
-    }
-  }));
+	if (!token) {
+		rspObj.errCode = CONSTANTS.apiResponses.TOKEN_MISSING_CODE
+		rspObj.errMsg = CONSTANTS.apiResponses.TOKEN_MISSING_MESSAGE
+		rspObj.responseCode = HTTP_STATUS_CODE['unauthorized'].status
+		return res.status(HTTP_STATUS_CODE['unauthorized'].status).send(respUtil(rspObj))
+	}
 
-  if (performInternalAccessTokenCheck) {
-    if (req.headers["internal-access-token"] !== process.env.INTERNAL_ACCESS_TOKEN) {
-      rspObj.errCode = CONSTANTS.apiResponses.TOKEN_MISSING_CODE;
-      rspObj.errMsg = CONSTANTS.apiResponses.TOKEN_MISSING_MESSAGE;
-      rspObj.responseCode = HTTP_STATUS_CODE['unauthorized'].status;
-      return res.status(HTTP_STATUS_CODE["unauthorized"].status).send(respUtil(rspObj));
-    }
-    if(!token){
-      next();
-      return;
-    }
-  }
+	rspObj.errCode = CONSTANTS.apiResponses.TOKEN_INVALID_CODE
+	rspObj.errMsg = CONSTANTS.apiResponses.TOKEN_INVALID_MESSAGE
+	rspObj.responseCode = HTTP_STATUS_CODE['unauthorized'].status
 
+	// <---- For Elevate user service user compactibility ---->
+	try {
+		decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
+	} catch (err) {
+		return res.status(HTTP_STATUS_CODE['unauthorized'].status).send(respUtil(rspObj))
+	}
+	if (!decodedToken) {
+		return res.status(HTTP_STATUS_CODE['unauthorized'].status).send(respUtil(rspObj))
+	}
 
-  if (!token) {
-    rspObj.errCode = CONSTANTS.apiResponses.TOKEN_MISSING_CODE;
-    rspObj.errMsg = CONSTANTS.apiResponses.TOKEN_MISSING_MESSAGE;
-    rspObj.responseCode = HTTP_STATUS_CODE["unauthorized"].status;
-    return res.status(HTTP_STATUS_CODE["unauthorized"].status).send(respUtil(rspObj));
-  }
+	// Path to config.json
+	const configFilePath = path.resolve(__dirname, '../../', 'config.json')
 
-  rspObj.errCode = CONSTANTS.apiResponses.TOKEN_INVALID_CODE;
-  rspObj.errMsg = CONSTANTS.apiResponses.TOKEN_INVALID_MESSAGE;
-  rspObj.responseCode = HTTP_STATUS_CODE["unauthorized"].status;
+	// Initialize variables
+	let configData = {}
+	let defaultTokenExtraction = false
 
-  // <---- For Elevate user service user compactibility ---->
-  try {
-    decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
-  } catch (err) {
-    return res.status(HTTP_STATUS_CODE["unauthorized"].status).send(respUtil(rspObj));
-  }
-  if (!decodedToken) {
-    return res.status(HTTP_STATUS_CODE["unauthorized"].status).send(respUtil(rspObj));
-  }
+	// Check if config.json exists
+	if (fs.existsSync(configFilePath)) {
+		// Read and parse the config.json file
+		const rawData = fs.readFileSync(configFilePath)
+		try {
+			configData = JSON.parse(rawData)
+			if (!configData.authTokenUserInformation) {
+				defaultTokenExtraction = true
+			}
+			configData = configData.authTokenUserInformation
+		} catch (error) {
+			console.error('Error parsing config.json:', error)
+		}
+	} else {
+		// If file doesn't exist, set defaultTokenExtraction to false
+		defaultTokenExtraction = true
+	}
 
-  req.userDetails = {
-    userToken : token,
-    userInformation : {
-      userId : decodedToken.data.id.toString(),
-      userName : decodedToken.data.name,
-      // email : decodedToken.data.email, //email is removed from token
-      firstName : decodedToken.data.name
-    }
-  };
+	let userInformation = {}
+	// Create user details to request
+	req.userDetails = {
+		userToken: token,
+	}
 
-  console.log(req.userDetails,'req.userDetails')
-  next();
-  
-  // var decoded = jwt.decode(token, { complete: true });
-  // if(decoded === null || decoded.header === undefined){
-  //   return res.status(HTTP_STATUS_CODE["unauthorized"].status).send(respUtil(rspObj));
-  // }
+	// performing default token data extraction
+	if (defaultTokenExtraction) {
+		userInformation = {
+			userId: decodedToken.data.id.toString(),
+			userName: decodedToken.data.name,
+			organizationId: decodedToken.data.organization_id,
+			firstName: decodedToken.data.name,
+		}
+	} else {
+		// Iterate through each key in the config object
+		for (let key in configData) {
+			if (configData.hasOwnProperty(key)) {
+				let keyValue = getNestedValue(decodedToken, configData[key])
+				if (key === 'userId') {
+					keyValue = keyValue.toString()
+				}
+				// For each key in config, assign the corresponding value from decodedToken
+				userInformation[key] = keyValue
+			}
+		}
+	}
+	// Update user details object
+	req.userDetails.userInformation = userInformation
 
-  // const kid = decoded.header.kid
-  // let cert = "";
-  // let path = keyCloakPublicKeyPath + kid;
-    
-  // if (fs.existsSync(path)) {
+	// Helper function to access nested properties
+	function getNestedValue(obj, path) {
+		return path.split('.').reduce((acc, part) => acc && acc[part], obj)
+	}
 
-  //   let accessKeyFile  = await fs.readFileSync(path);
-
-  //   if(accessKeyFile) {
-  //     if(!accessKeyFile.includes(PEM_FILE_BEGIN_STRING)){
-  //       cert = PEM_FILE_BEGIN_STRING+"\n"+accessKeyFile+"\n"+PEM_FILE_END_STRING;
-  //     }else {
-  //       cert = fs.readFileSync(path);
-  //     }  
-  //   }
-    
-  //   jwt.verify(token, cert, { algorithm: ['sha1', 'RS256', 'HS256'] }, function (err, decode) {
-  //     if (err) {
-  //       return res.status(HTTP_STATUS_CODE["unauthorized"].status).send(respUtil(rspObj));
-  //     }
-
-  //     if (decode !== undefined) {
-  //       const expiry = decode.exp;
-  //       const now = new Date();
-  //       if (now.getTime() > expiry * 1000) {
-  //         return res.status(HTTP_STATUS_CODE["unauthorized"].status).send(respUtil(rspObj));
-  //       }
-
-  //       req.userDetails = {
-  //         userToken : token,
-  //         userInformation : {
-  //           userId : decode.sub.split(":").pop(),
-  //           userName : decode.preferred_username,
-  //           email : decode.email,
-  //           firstName : decode.name
-  //         }
-  //       };
-
-  //       next();
-  //     } else {
-  //       return res.status(HTTP_STATUS_CODE["unauthorized"].status).send(respUtil(rspObj));
-  //     }
-  //   });
-  // } else {
-  //   return res.status(HTTP_STATUS_CODE["unauthorized"].status).send(respUtil(rspObj));
-  // }
-};
+	next()
+}

@@ -95,4 +95,30 @@ module.exports = class ProjectCategories {
       });
     }
 
+    /**
+   * create project categories documents.
+   * @method
+   * @name create
+   * @param {Object} [filterQuery] - filtered Query.
+   * @returns {Object} - Library project categories data.
+   */
+
+  static create(filterQuery) {
+    return new Promise(async (resolve, reject) => {
+      
+      try {
+        
+        let createdProjectCategory = 
+              await database.models.projectCategories.create(
+                  filterQuery
+              );
+        
+        return resolve(createdProjectCategory);
+
+    } catch (error) {
+        return reject(error);
+      }
+    });
+  }
+
 };

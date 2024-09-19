@@ -18,4 +18,4 @@ EXPOSE 5000
 
 #Start the application
 # CMD ["npm", "run", "dev"]
-CMD ["nodemon", "app.js"]
+CMD ["node", "app.js"]

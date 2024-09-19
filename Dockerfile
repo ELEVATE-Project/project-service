@@ -1,4 +1,4 @@
-FROM node:16
+FROM node:20
 
 #Set working directory
 WORKDIR /opt/projects
@@ -18,4 +18,4 @@ EXPOSE 5000
 
 #Start the application
 # CMD ["npm", "run", "dev"]
-CMD ["nodemon", "app.js"]
+CMD ["node", "app.js"]

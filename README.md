@@ -382,11 +382,11 @@ In such cases, you can generate sample user accounts using the steps below. This
 
 ## PM2 Managed Services & Natively Installed Dependencies
 
-Expectation: Upon following the prescribed steps, you will achieve a fully operational MentorEd application setup. Both the portal and backend services are managed using PM2, with all dependencies installed natively on the host system.
+Expectation: Upon following the prescribed steps, you will achieve a fully operational ELEVATE-Project application setup. Both the portal and backend services are managed using PM2, with all dependencies installed natively on the host system.
 
 ## Prerequisites
 
-Before setting up the following MentorEd application, dependencies given below should be installed and verified to be running. Refer to the steps given below to install them and verify.
+Before setting up the following ELEVATE-Project application, dependencies given below should be installed and verified to be running. Refer to the steps given below to install them and verify.
 
 -   **Ubuntu/Linux**
 
@@ -548,14 +548,15 @@ Before setting up the following MentorEd application, dependencies given below s
 
 1. **Create Mentoring Directory:** Create a directory named **mentorEd**.
 
-    > Example Command: `mkdir mentorEd && cd mentorEd/`
+    > Example Command: `mkdir ELEVATE-Project && cd ELEVATE-Project/`
 
 2. **Git Clone Services And Portal Repositories**
 
     - **Ubuntu/Linux/MacOS**
 
         ```
-        git clone -b release-2.6.1 https://github.com/ELEVATE-Project/mentoring.git && \
+        git clone -b main https://github.com/ELEVATE-Project/project-service.git && \
+        git clone -b main https://github.com/ELEVATE-Project/entity-management.git && \
         git clone -b release-2.6.1 https://github.com/ELEVATE-Project/user.git && \
         git clone -b release-2.6.1 https://github.com/ELEVATE-Project/notification.git && \
         git clone -b release-2.6.1 https://github.com/ELEVATE-Project/interface-service.git && \
@@ -566,7 +567,8 @@ Before setting up the following MentorEd application, dependencies given below s
     - **Windows**
 
         ```
-        git clone -b release-2.6.1 https://github.com/ELEVATE-Project/mentoring.git & ^
+        git clone -b main https://github.com/ELEVATE-Project/project-service.git & ^
+        git clone -b main https://github.com/ELEVATE-Project/entity-management.git & ^
         git clone -b release-2.6.1 https://github.com/ELEVATE-Project/user.git & ^
         git clone -b release-2.6.1 https://github.com/ELEVATE-Project/notification.git & ^
         git clone -b release-2.6.1 https://github.com/ELEVATE-Project/interface-service.git & ^
@@ -579,7 +581,8 @@ Before setting up the following MentorEd application, dependencies given below s
     - **Ubuntu/Linux/MacOS**
 
         ```
-        cd mentoring/src && npm install && cd ../.. && \
+        cd project-service && npm install && cd ../ && \
+        cd entity-management/src && npm install && cd ../.. && \
         cd user/src && npm install && cd ../.. && \
         cd notification/src && npm install && cd ../.. && \
         cd interface-service/src && npm install && cd ../.. && \
@@ -590,7 +593,8 @@ Before setting up the following MentorEd application, dependencies given below s
     - **Windows**
 
         ```
-        cd mentoring\src & npm install & cd ..\.. & ^
+        cd project-service & npm install & cd ..\ & ^
+        cd entity-management\src & npm install & cd ..\.. & ^
         cd user\src & npm install & cd ..\.. & ^
         cd notification\src & npm install & cd ..\.. & ^
         cd interface-service\src & npm install & cd ..\.. & ^

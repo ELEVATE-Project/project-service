@@ -67,13 +67,6 @@ install_redis() {
     sudo systemctl restart redis.service
 }
 
-# Function to install Redis BullMQ (as a global Node.js package)
-install_bullmq() {
-    echo "Installing Redis BullMQ..."
-    sudo npm install -g bullmq
-    echo "Redis BullMQ has been installed globally."
-}
-
 # Function to install Citus
 install_citus() {
     echo "Installing Citus..."
@@ -171,7 +164,7 @@ install_gotenberg() {
 # Function to display options
 display_menu() {
     echo "Please select an installation option:"
-    options=("Install Node.js" "Install Kafka" "Install Redis" "Install Redis BullMQ" "Install Citus" "Install PM2" "Install MongoDB" "Install Gotenberg" "Exit")
+    options=("Install Node.js" "Install Kafka" "Install Redis" "Install Citus" "Install PM2" "Install MongoDB" "Install Gotenberg" "Exit")
     for i in ${!options[@]}; do
         echo "$((i+1)). ${options[i]}"
     done
@@ -187,12 +180,11 @@ while true; do
             1) install_nodejs ;;
             2) install_kafka ;;
             3) install_redis ;;
-            4) install_bullmq ;;
-            5) install_citus ;;
-            6) install_pm2 ;;
-            7) install_mongo ;;
-            8) install_gotenberg ;;
-            9) echo "Exiting the installation script."; break ;;
+            4) install_citus ;;
+            5) install_pm2 ;;
+            6) install_mongo ;;
+            7) install_gotenberg ;;
+            8) echo "Exiting the installation script."; break ;;
             *) echo "Invalid option. Please try again." ;;
         esac
         echo "Operation completed. Here are the next options:"

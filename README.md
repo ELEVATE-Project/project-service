@@ -75,7 +75,7 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
 2.  **Download Docker Compose File:** Retrieve the **[docker-compose-project.yml](https://github.com/ELEVATE-Project/mentoring/blob/readMe-test/src/scripts/setup/docker-compose-mentoring.yml)** file from the Project service repository and save it to the project directory.
 
     ```
-    curl -OJL https://github.com/ELEVATE-Project/project-service/raw/readMe-test/documentation/1.0.0/dockerized/docker-compose-project.yml
+    curl -OJL https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/docker-compose-project.yml
     ```
 
     > Note: All commands are run from the project directory.

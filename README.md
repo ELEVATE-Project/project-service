@@ -92,19 +92,20 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
     -   **Ubuntu/Linux/Mac**
         ```
         curl -L \
-         -O https://github.com/ELEVATE-Project/project-service/raw/master/documentation/1.0.0/dockerized/envs/interface_env \
-         -O https://github.com/ELEVATE-Project/project-service/raw/master/documentation/1.0.0/dockerized/envs/project_env \
-         -O https://github.com/ELEVATE-Project/project-service/raw/master/documentation/1.0.0/dockerized/envs/notification_env \
-         -O https://github.com/ELEVATE-Project/project-service/raw/master/documentation/1.0.0/dockerized/envs/scheduler_env \
-         -O https://github.com/ELEVATE-Project/project-service/raw/master/documentation/1.0.0/dockerized/envs/user_env \
-         -O https://github.com/ELEVATE-Project/project-service/raw/master/documentation/1.0.0/dockerized/envs/environment.ts
+         -O https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/envs/interface_env \
+         -O https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/envs/entity-management_env \
+         -O https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/envs/project_env \
+         -O https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/envs/notification_env \
+         -O https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/envs/scheduler_env \
+         -O https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/envs/user_env \
+         -O https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/envs/environment.ts
         ```
     -   **Windows**
 
         ```
         curl -L ^
         -O https://github.com/ELEVATE-Project/project-service/raw/master/documentation/1.0.0/dockerized/envs/interface_env \
-        -O https://github.com/ELEVATE-Project/project-service/raw/master/documentation/1.0.0/dockerized/envs/project_env \
+        -O https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/envs/project_env \
         -O https://github.com/ELEVATE-Project/project-service/raw/master/documentation/1.0.0/dockerized/envs/notification_env \
         -O https://github.com/ELEVATE-Project/project-service/raw/master/documentation/1.0.0/dockerized/envs/scheduler_env \
         -O https://github.com/ELEVATE-Project/project-service/raw/master/documentation/1.0.0/dockerized/envs/user_env \

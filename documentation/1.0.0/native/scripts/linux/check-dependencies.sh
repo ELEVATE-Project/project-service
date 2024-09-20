@@ -100,14 +100,6 @@ check_mongo() {
     fi
 }
 
-# Function to check if Redis BullMQ is installed (in Node.js context)
-check_bullmq() {
-    if npm list -g | grep -q bullmq; then
-        echo -e "${GREEN}Redis BullMQ is installed globally.${NC}"
-    else
-        echo -e "${RED}Redis BullMQ is not installed globally.${NC}"
-    fi
-}
 
 # Function to check Gotenberg installation and service status
 check_gotenberg() {
@@ -135,5 +127,4 @@ check_pm2
 check_postgres
 check_citus
 check_mongo
-check_bullmq
 check_gotenberg

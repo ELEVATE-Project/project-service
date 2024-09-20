@@ -8,9 +8,11 @@ sudo -u postgres psql -p 9700 -c "CREATE DATABASE users;"
 sudo -u postgres psql -p 9700 -d users -c "GRANT ALL PRIVILEGES ON DATABASE users TO postgres;"
 sudo -u postgres psql -p 9700 -d users -c "GRANT ALL ON SCHEMA public TO postgres;"
 
+echo "User database setup complete."
+
 # Create the notification database and assign privileges
 sudo -u postgres psql -p 9700 -c "CREATE DATABASE notification;"
 sudo -u postgres psql -p 9700 -d notification -c "GRANT ALL PRIVILEGES ON DATABASE notification TO postgres;"
 sudo -u postgres psql -p 9700 -d notification -c "GRANT ALL ON SCHEMA public TO postgres;"
 
-echo "Database setup complete."
+echo "Notification database setup complete."

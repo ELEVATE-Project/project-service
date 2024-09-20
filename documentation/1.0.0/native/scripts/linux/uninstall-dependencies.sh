@@ -57,13 +57,6 @@ uninstall_redis() {
     sudo apt-get autoremove -y
 }
 
-# Function to uninstall Redis BullMQ
-uninstall_bullmq() {
-    echo -e "${RED}Uninstalling Redis BullMQ...${NC}"
-    sudo npm uninstall -g bullmq
-    echo -e "${GREEN}Redis BullMQ has been uninstalled.${NC}"
-}
-
 # Function to uninstall MongoDB
 uninstall_mongodb() {
     echo -e "${RED}Uninstalling MongoDB...${NC}"
@@ -122,11 +115,10 @@ while true; do
         2) uninstall_nodejs ;;
         3) uninstall_kafka_zookeeper ;;
         4) uninstall_redis ;;
-        5) uninstall_bullmq ;;
-        6) uninstall_mongodb ;;
-        7) uninstall_citus_postgresql ;;
-        8) uninstall_gotenberg ;;
-        9) echo -e "${GREEN}Exiting uninstallation process.${NC}"; exit ;;
+        5) uninstall_mongodb ;;
+        6) uninstall_citus_postgresql ;;
+        7) uninstall_gotenberg ;;
+        8) echo -e "${GREEN}Exiting uninstallation process.${NC}"; exit ;;
         *) echo -e "${RED}Invalid option, please try again.${NC}" ;;
     esac
     echo -e "${GREEN}Operation completed.${NC}"

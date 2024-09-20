@@ -60,7 +60,7 @@ The Project building block enables creation, consumption of micro-improvement pr
 
 ## Dockerized Services & Dependencies
 
-Expectation: Upon following the prescribed steps, you will achieve a fully operational Proect application setup, complete with both the portal and backend services.
+Expectation: Upon following the prescribed steps, you will achieve a fully operational Project application setup, complete with both the portal and backend services.
 
 ## Prerequisites
 
@@ -72,10 +72,10 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
 
     > Example Command: `mkdir project && cd project/`
 
-2.  **Download Docker Compose File:** Retrieve the **[docker-compose-project.yml](https://github.com/ELEVATE-Project/mentoring/blob/readMe-test/src/scripts/setup/docker-compose-mentoring.yml)** file from the Mentoring repository and save it to the mentoring directory.
+2.  **Download Docker Compose File:** Retrieve the **[docker-compose-project.yml](https://github.com/ELEVATE-Project/mentoring/blob/readMe-test/src/scripts/setup/docker-compose-mentoring.yml)** file from the Project service repository and save it to the project directory.
 
     ```
-    curl -OJL https://github.com/ELEVATE-Project/project-service/raw/master/documentation/1.0.0/dockerized/docker-compose-project.yml
+    curl -OJL https://github.com/ELEVATE-Project/project-service/raw/readMe-test/documentation/1.0.0/dockerized/docker-compose-project.yml
     ```
 
     > Note: All commands are run from the project directory.

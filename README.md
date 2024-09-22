@@ -233,7 +233,7 @@ To enable the Citus extension for mentoring and user services, follow these step
 
 1. Create a sub-directory named `user` and download `distributionColumns.sql` into it.
     ```
-    mkdir user && curl -o ./user/distributionColumns.sql -JL https://github.com/ELEVATE-Project/mentoring/raw/dockerized-setup/documentation/1.0.0/distribution-columns/user/distributionColumns.sql
+    mkdir user && curl -o ./user/distributionColumns.sql -JL https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/distribution-columns/user/distributionColumns.sql
     ```
 2. Set up the citus_setup file by following the steps given below.
 
@@ -271,11 +271,23 @@ To enable the Citus extension for mentoring and user services, follow these step
 
 To ensure the persistence of database data when running `docker compose down`, it is necessary to modify the `docker-compose-project.yml` file according to the steps given below:
 
-1. **Modification Of The `docker-compose-mentoring.yml` File:**
+1. **Modification Of The `docker-compose-project.yml` File:**
 
-    Begin by opening the `docker-compose-mentoring.yml` file. Locate the section pertaining to the Citus container and proceed to uncomment the volume specification. This action is demonstrated in the snippet provided below:
+    Begin by opening the `docker-compose-project.yml` file. Locate the section pertaining to the Citus and mongo container and proceed to uncomment the volume specification. This action is demonstrated in the snippet provided below:
 
     ```yaml
+    mongo:
+    image: 'mongo:4.4.14'
+    restart: 'always'
+    ports:
+      - '27017:27017'
+    networks:
+      - project_net
+    volumes:
+       - mongo-data:/data/db
+    logging:
+      driver: none
+
     citus:
         image: citusdata/citus:11.2.0
         container_name: 'citus_master'
@@ -296,15 +308,16 @@ To ensure the persistence of database data when running `docker compose down`, i
 
     volumes:
         citus-data:
+        mongo-data:
     ```
 
 By implementing these adjustments, the configuration ensures that when the `docker-compose down` command is executed, the database data is securely stored within the specified volumes. Consequently, this data will be retained and remain accessible, even after the containers are terminated and subsequently reinstated using the `docker-compose up` command.
 
 ## Sample User Accounts Generation
 
-During the initial setup of MentorEd services with the default configuration, you may encounter issues creating new accounts through the regular SignUp flow on the MentorEd portal. This typically occurs because the default SignUp process includes OTP verification to prevent abuse. Until the notification service is configured correctly to send actual emails, you will not be able to create new accounts.
+During the initial setup of Project services with the default configuration, you may encounter issues creating new accounts through the regular SignUp flow on the MentorEd portal. This typically occurs because the default SignUp process includes OTP verification to prevent abuse. Until the notification service is configured correctly to send actual emails, you will not be able to create new accounts.
 
-In such cases, you can generate sample user accounts using the steps below. This allows you to explore the MentorEd services and portal immediately after setup.
+In such cases, you can generate sample user accounts using the steps below. This allows you to explore the Project services and portal immediately after setup.
 
 > **Warning:** Use this generator only immediately after the initial system setup and before any normal user accounts are created through the portal. It should not be used under any circumstances thereafter.
 
@@ -313,17 +326,15 @@ In such cases, you can generate sample user accounts using the steps below. This
     - **Ubuntu/Linux/Mac**
 
         ```
-        mkdir -p sample-data/mentoring sample-data/user && \
-        curl -L https://raw.githubusercontent.com/ELEVATE-Project/mentoring/master/documentation/2.6.1/sample-data/mac-linux/mentoring/sampleData.sql -o sample-data/mentoring/sampleData.sql && \
-        curl -L https://raw.githubusercontent.com/ELEVATE-Project/mentoring/master/documentation/2.6.1/sample-data/mac-linux/user/sampleData.sql -o sample-data/user/sampleData.sql
+        mkdir -p sample-data/user && \
+        curl -L https://raw.githubusercontent.com/ELEVATE-Project/project-service/dockerized-setup/documentation/1.0.0/sample-data/mac-linux/user/sampleData.sql -o sample-data/user/sampleData.sql
         ```
 
     - **Windows**
 
         ```
-        mkdir sample-data\mentoring 2>nul & mkdir sample-data\user 2>nul & ^
-        curl -L "https://raw.githubusercontent.com/ELEVATE-Project/mentoring/master/documentation/2.6.1/sample-data/windows/mentoring/sampleData.sql" -o sample-data\mentoring\sampleData.sql & ^
-        curl -L "https://raw.githubusercontent.com/ELEVATE-Project/mentoring/master/documentation/2.6.1/sample-data/windows/user/sampleData.sql" -o sample-data\user\sampleData.sql
+        mkdir sample-data\user 2>nul & ^
+        curl -L "https://raw.githubusercontent.com/ELEVATE-Project/project-service/master/documentation/1.0.0/sample-data/windows/user/sampleData.sql" -o sample-data\user\sampleData.sql
         ```
 
 2. **Download The `insert_sample_data` Script File:**
@@ -331,7 +342,7 @@ In such cases, you can generate sample user accounts using the steps below. This
     - **Ubuntu/Linux/Mac**
 
         ```
-        curl -L -o insert_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/mentoring/master/documentation/2.6.1/dockerized/scripts/mac-linux/insert_sample_data.sh && chmod +x insert_sample_data.sh
+        curl -L -o insert_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/project-service/dockerized-setup/documentation/1.0.0/dockerized/scripts/mac-linux/insert_sample_data.sh && chmod +x insert_sample_data.sh
         ```
 
     - **Windows**
@@ -345,15 +356,13 @@ In such cases, you can generate sample user accounts using the steps below. This
     - **Ubuntu/Linux/Mac**
 
         ```
-        ./insert_sample_data.sh user postgres://postgres:postgres@citus_master:5432/user && \
-        ./insert_sample_data.sh mentoring postgres://postgres:postgres@citus_master:5432/mentoring
+        ./insert_sample_data.sh user postgres://postgres:postgres@citus_master:5432/user
         ```
 
     - **Windows**
 
         ```
-        insert_sample_data.bat user postgres://postgres:postgres@citus_master:5432/user & ^
-        insert_sample_data.bat mentoring postgres://postgres:postgres@citus_master:5432/mentoring
+        insert_sample_data.bat user postgres://postgres:postgres@citus_master:5432/user
         ```
 
     After successfully running the script mentioned above, the following user accounts will be created and available for login:

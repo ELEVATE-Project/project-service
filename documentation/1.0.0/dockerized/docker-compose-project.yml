@@ -222,8 +222,8 @@ services:
       - '27017:27017'
     networks:
       - project_net
-    volumes:
-      - mongo-data:/data/db
+    # volumes:
+    #   - mongo-data:/data/db
     logging:
       driver: none
 
@@ -254,4 +254,5 @@ networks:
   project_net:
     external: false
 #volumes:
+#  mongo-data:
 #  citus-data:

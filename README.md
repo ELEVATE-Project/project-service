@@ -123,13 +123,13 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
     -   **Ubuntu/Linux/Mac**
 
         ```
-        curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/mentoring/master/documentation/2.6.1/dockerized/scripts/mac-linux/replace_volume_path.sh
+        curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/dockerized-setup/documentation/1.0.0/dockerized/scripts/mac-linux/replace_volume_path.sh
         ```
 
     -   **Windows**
 
         ```
-        curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/mentoring/master/documentation/2.6.1/dockerized/scripts/windows/replace_volume_path.bat
+        curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/dockerized-setup/documentation/1.0.0/dockerized/scripts/windows/replace_volume_path.bat
         ```
 
 5.  **Run `replace_volume_path` Script File**
@@ -151,7 +151,7 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
         replace_volume_path.bat
         ```
 
-        > **Note**: The provided script file replaces the host path for the **portal** service container volume in the `docker-compose-mentoring.yml` file with your current directory path.
+        > **Note**: The provided script file replaces the host path for the **portal** service container volume in the `docker-compose-project.yml` file with your current directory path.
         >
         > volumes:
         >
@@ -164,11 +164,11 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
         1. Download the files.
 
             ```
-            curl -OJL https://github.com/ELEVATE-Project/mentoring/raw/master/documentation/2.6.1/dockerized/scripts/mac-linux/docker-compose-up.sh
+            curl -OJL https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/scripts/mac-linux/docker-compose-up.sh
             ```
 
             ```
-            curl -OJL https://github.com/ELEVATE-Project/mentoring/raw/master/documentation/2.6.1/dockerized/scripts/mac-linux/docker-compose-down.sh
+            curl -OJL https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/scripts/mac-linux/docker-compose-down.sh
             ```
 
         2. Make the files executable by running the following commands.

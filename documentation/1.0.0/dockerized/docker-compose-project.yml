@@ -95,7 +95,7 @@ services:
       - '5001:5001'
     command: ['nodemon', 'app.js']
     env_file:
-      - ${entity-management_env}
+      - ${entity_management_env}
     depends_on:
       - mongo
     networks:

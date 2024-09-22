@@ -9,7 +9,7 @@ export scheduler_env="$SCRIPT_DIR/scheduler_env"
 export project_env="$SCRIPT_DIR/project_env"
 export users_env="$SCRIPT_DIR/user_env"
 export interface_env="$SCRIPT_DIR/interface_env"
-export entity-management_env="$SCRIPT_DIR/entity-management_env"
+export entity_management_env="$SCRIPT_DIR/entity_management_env"
 
 # Run docker-compose
 docker-compose -f "$SCRIPT_DIR/docker-compose-project.yml" up

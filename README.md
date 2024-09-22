@@ -207,7 +207,7 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
 
         > **Note**: During the first Docker Compose run, the database, migration seeder files, and the script to set the default organization will be executed automatically.
 
-8.  **Access The MentorEd Application**: Once the services are up and the front-end app bundle is built successfully, navigate to **[localhost:8100](http://localhost:8100/)** to access the MentorEd app.
+8.  **Access The Project Application**: Once the services are up and the front-end app bundle is built successfully, navigate to **[localhost:8100](http://localhost:8100/)** to access the MentorEd app.
 9.  **Gracefully Stop All Services & Dependencies:** All containers which are part of the docker-compose can be gracefully stopped by pressing `Ctrl + c` in the same terminal where the services are running.
 10. **Remove All Service & Dependency Containers**: All docker containers can be stopped and removed by using the `docker-compose-down` file.
 
@@ -225,28 +225,24 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
 
 ## Enable Citus Extension
 
-MentorEd relies on PostgreSQL as its core database system. To boost performance and scalability, users can opt to enable the Citus extension. This transforms PostgreSQL into a distributed database, spreading data across multiple nodes to handle large datasets more efficiently as demand grows.
+User management service comes with this bundle relies on PostgreSQL as its core database system. To boost performance and scalability, users can opt to enable the Citus extension. This transforms PostgreSQL into a distributed database, spreading data across multiple nodes to handle large datasets more efficiently as demand grows.
 
 For more information, refer **[Citus Data](https://www.citusdata.com/)**.
 
 To enable the Citus extension for mentoring and user services, follow these steps.
 
-1. Create a sub-directory named `mentoring` and download `distributionColumns.sql` into it.
+1. Create a sub-directory named `user` and download `distributionColumns.sql` into it.
     ```
-    mkdir mentoring && curl -o ./mentoring/distributionColumns.sql -JL https://github.com/ELEVATE-Project/mentoring/raw/master/documentation/2.6.1/distribution-columns/mentoring/distributionColumns.sql
+    mkdir user && curl -o ./user/distributionColumns.sql -JL https://github.com/ELEVATE-Project/mentoring/raw/dockerized-setup/documentation/1.0.0/distribution-columns/user/distributionColumns.sql
     ```
-2. Create a sub-directory named `user` and download `distributionColumns.sql` into it.
-    ```
-    mkdir user && curl -o ./user/distributionColumns.sql -JL https://github.com/ELEVATE-Project/mentoring/raw/master/documentation/2.6.1/distribution-columns/user/distributionColumns.sql
-    ```
-3. Set up the citus_setup file by following the steps given below.
+2. Set up the citus_setup file by following the steps given below.
 
     - **Ubuntu/Linux/Mac**
 
         1. Download the `citus_setup.sh` file.
 
             ```
-            curl -OJL https://github.com/ELEVATE-Project/mentoring/raw/master/documentation/2.6.1/dockerized/scripts/mac-linux/citus_setup.sh
+            curl -OJL https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/scripts/mac-linux/citus_setup.sh
             ```
 
         2. Make the setup file executable by running the following command.
@@ -255,11 +251,7 @@ To enable the Citus extension for mentoring and user services, follow these step
             chmod +x citus_setup.sh
             ```
 
-        3. Enable Citus and set distribution columns for `mentoring` database by running the `citus_setup.sh`with the following arguments.
-            ```
-            ./citus_setup.sh mentoring postgres://postgres:postgres@citus_master:5432/mentoring
-            ```
-        4. Enable Citus and set distribution columns for `user` database by running the `citus_setup.sh`with the following arguments.
+        3. Enable Citus and set distribution columns for `user` database by running the `citus_setup.sh`with the following arguments.
             ```
             ./citus_setup.sh user postgres://postgres:postgres@citus_master:5432/user
             ```
@@ -269,11 +261,7 @@ To enable the Citus extension for mentoring and user services, follow these step
             ```
              curl -OJL https://github.com/ELEVATE-Project/mentoring/raw/master/documentation/2.6.1/dockerized/scripts/windows/citus_setup.bat
             ```
-        2. Enable Citus and set distribution columns for `mentoring` database by running the `citus_setup.bat`with the following arguments.
-            ```
-            citus_setup.bat mentoring postgres://postgres:postgres@citus_master:5432/mentoring
-            ```
-        3. Enable Citus and set distribution columns for `user` database by running the `citus_setup.bat`with the following arguments.
+        2. Enable Citus and set distribution columns for `user` database by running the `citus_setup.bat`with the following arguments.
             ```
             citus_setup.bat user postgres://postgres:postgres@citus_master:5432/user
             ```
@@ -281,7 +269,7 @@ To enable the Citus extension for mentoring and user services, follow these step
 
 ## Persistence Of Database Data In Docker Container
 
-To ensure the persistence of database data when running `docker compose down`, it is necessary to modify the `docker-compose-mentoring.yml` file according to the steps given below:
+To ensure the persistence of database data when running `docker compose down`, it is necessary to modify the `docker-compose-project.yml` file according to the steps given below:
 
 1. **Modification Of The `docker-compose-mentoring.yml` File:**
 

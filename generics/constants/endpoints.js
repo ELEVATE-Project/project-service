@@ -47,6 +47,7 @@ module.exports = {
 	FILES_DOWNLOADABLE_URL: '/v1/cloud-services/files/getDownloadableUrl',
 	OBSERVATION_DETAILS: '/v1/observations/details',
 	USER_READ: '/v1/user/read',
+	PROFILE_READ: '/v1/profile/read',
 	GET_LOCATION_DATA: '/v1/location/search',
 	CERTIFICATE_CREATE: '/api/v1/ProjectCertificate',
 	PROJECT_CERTIFICATE_API_CALLBACK: '/v1/userProjects/certificateCallback',

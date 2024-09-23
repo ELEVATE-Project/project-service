@@ -42,7 +42,6 @@ module.exports = {
 		registry: Array,
 		frameworkId: 'ObjectId',
 		frameworkExternalId: String,
-		parentSolutionId: 'ObjectId',
 		noOfRatingLevels: Number,
 		isRubricDriven: { type: Boolean, default: false },
 		enableQuestionReadOut: { type: Boolean, default: false },

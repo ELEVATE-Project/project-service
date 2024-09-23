@@ -177,16 +177,6 @@ EOF
 
 echo "Project template data being added to $PROJECT_TEMPLATES_COLLECTION collection in $PROJECT_DB_NAME database...."
 
-# PROJECT_TEMPLATE_ID=$(mongosh --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
-#     var doc = $PROJECT_TEMPLATES_DOCUMENT
-#     var result = db.getSiblingDB('$PROJECT_DB_NAME').$PROJECT_TEMPLATES_COLLECTION.insertOne(doc);
-#     if (result.insertedId) {
-#         print(result.insertedId);
-#     } else {
-#         throw new Error('Insert failed');
-#     }
-# ")
-
 # Insert PROJECT_TEMPLATE_ID using docker exec
 PROJECT_TEMPLATE_ID=$(docker exec -it project-mongo-1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
     var doc = $PROJECT_TEMPLATES_DOCUMENT;

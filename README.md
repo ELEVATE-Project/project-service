@@ -50,7 +50,7 @@ The Project building block enables creation, consumption of micro-improvement pr
 -   **Node.js®:** v20
 -   **PostgreSQL:** 16
 -   **Apache Kafka®:** 3.5.0
--   **MongoDB:** 4.1.4
+-   **MongoDB:** 4.4.14
 
 # Setup Options
 

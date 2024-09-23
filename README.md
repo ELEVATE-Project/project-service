@@ -392,7 +392,8 @@ This step will guide us in implementing a sample project solution following the 
             ```
             chmod +x add_sample_project_entity_data.sh
             ```
-        3. Run the script file using the following command.
+        3. Make the setup file executable by running the following command.
+
             ```
             ./add_sample_project_entity_data.sh
             ```
@@ -402,6 +403,8 @@ This step will guide us in implementing a sample project solution following the 
         mkdir sample-data\user 2>nul & ^
         curl -L "https://raw.githubusercontent.com/ELEVATE-Project/project-service/dockerized-setup/documentation/1.0.0/sample-data/windows/user/sampleData.sql" -o sample-data\user\sampleData.sql
         ```
+
+</details>
 
 <details>
 <summary>Natively Installed Services & Dependencies </summary>

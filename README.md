@@ -75,7 +75,7 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
 2.  **Download Docker Compose File:** Retrieve the **[docker-compose-project.yml](https://github.com/ELEVATE-Project/mentoring/blob/readMe-test/src/scripts/setup/docker-compose-mentoring.yml)** file from the Project service repository and save it to the project directory.
 
     ```
-    curl -OJL https://github.com/ELEVATE-Project/project-service/raw/readMe-test/documentation/1.0.0/dockerized/docker-compose-project.yml
+    curl -OJL https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/docker-compose-project.yml
     ```
 
     > Note: All commands are run from the project directory.
@@ -92,26 +92,28 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
     -   **Ubuntu/Linux/Mac**
         ```
         curl -L \
-         -O https://github.com/ELEVATE-Project/project-service/raw/master/documentation/1.0.0/dockerized/envs/interface_env \
-         -O https://github.com/ELEVATE-Project/project-service/raw/master/documentation/1.0.0/dockerized/envs/project_env \
-         -O https://github.com/ELEVATE-Project/project-service/raw/master/documentation/1.0.0/dockerized/envs/notification_env \
-         -O https://github.com/ELEVATE-Project/project-service/raw/master/documentation/1.0.0/dockerized/envs/scheduler_env \
-         -O https://github.com/ELEVATE-Project/project-service/raw/master/documentation/1.0.0/dockerized/envs/user_env \
-         -O https://github.com/ELEVATE-Project/project-service/raw/master/documentation/1.0.0/dockerized/envs/environment.ts
+         -O https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/envs/interface_env \
+         -O https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/envs/entity_management_env \
+         -O https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/envs/project_env \
+         -O https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/envs/notification_env \
+         -O https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/envs/scheduler_env \
+         -O https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/envs/user_env \
+         -O https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/envs/environment.ts
         ```
     -   **Windows**
 
         ```
         curl -L ^
-        -O https://github.com/ELEVATE-Project/project-service/raw/master/documentation/1.0.0/dockerized/envs/interface_env \
-        -O https://github.com/ELEVATE-Project/project-service/raw/master/documentation/1.0.0/dockerized/envs/project_env \
-        -O https://github.com/ELEVATE-Project/project-service/raw/master/documentation/1.0.0/dockerized/envs/notification_env \
-        -O https://github.com/ELEVATE-Project/project-service/raw/master/documentation/1.0.0/dockerized/envs/scheduler_env \
-        -O https://github.com/ELEVATE-Project/project-service/raw/master/documentation/1.0.0/dockerized/envs/user_env \
-        -O https://github.com/ELEVATE-Project/project-service/raw/master/documentation/1.0.0/dockerized/envs/environment.ts
+         -O https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/envs/interface_env \
+         -O https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/envs/entity_management_env \
+         -O https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/envs/project_env \
+         -O https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/envs/notification_env \
+         -O https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/envs/scheduler_env \
+         -O https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/envs/user_env \
+         -O https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/envs/environment.ts
         ```
 
-    > **Note:** Modify the environment files as necessary for your deployment using any text editor, ensuring that the values are appropriate for your environment. The default values provided in the current files are functional and serve as a good starting point. Refer to the sample env files provided at the [Project](https://github.com/ELEVATE-Project/project-service/blob/master/.env.sample), [User](https://github.com/ELEVATE-Project/user/blob/master/src/.env.sample), [Notification](https://github.com/ELEVATE-Project/notification/blob/master/src/.env.sample), [Scheduler](https://github.com/ELEVATE-Project/scheduler/blob/master/src/.env.sample), and [Interface](https://github.com/ELEVATE-Project/interface-service/blob/main/src/.env.sample) repositories for reference.
+    > **Note:** Modify the environment files as necessary for your deployment using any text editor, ensuring that the values are appropriate for your environment. The default values provided in the current files are functional and serve as a good starting point. Refer to the sample env files provided at the [Project](https://github.com/ELEVATE-Project/project-service/blob/main/.env.sample), [User](https://github.com/ELEVATE-Project/user/blob/master/src/.env.sample), [Notification](https://github.com/ELEVATE-Project/notification/blob/master/src/.env.sample), [Scheduler](https://github.com/ELEVATE-Project/scheduler/blob/master/src/.env.sample), [Interface](https://github.com/ELEVATE-Project/interface-service/blob/main/src/.env.sample) and [Entity-management](https://github.com/ELEVATE-Project/entity-management/blob/main/src/.env.sample) repositories for reference.
 
     > **Caution:** While the default values in the downloaded environment files enable the Project Application to operate, certain features may not function correctly or could be impaired unless the adopter-specific environment variables are properly configured.
 
@@ -122,13 +124,13 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
     -   **Ubuntu/Linux/Mac**
 
         ```
-        curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/mentoring/master/documentation/2.6.1/dockerized/scripts/mac-linux/replace_volume_path.sh
+        curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/dockerized-setup/documentation/1.0.0/dockerized/scripts/mac-linux/replace_volume_path.sh
         ```
 
     -   **Windows**
 
         ```
-        curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/mentoring/master/documentation/2.6.1/dockerized/scripts/windows/replace_volume_path.bat
+        curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/dockerized-setup/documentation/1.0.0/dockerized/scripts/windows/replace_volume_path.bat
         ```
 
 5.  **Run `replace_volume_path` Script File**
@@ -150,7 +152,7 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
         replace_volume_path.bat
         ```
 
-        > **Note**: The provided script file replaces the host path for the **portal** service container volume in the `docker-compose-mentoring.yml` file with your current directory path.
+        > **Note**: The provided script file replaces the host path for the **portal** service container volume in the `docker-compose-project.yml` file with your current directory path.
         >
         > volumes:
         >
@@ -163,11 +165,11 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
         1. Download the files.
 
             ```
-            curl -OJL https://github.com/ELEVATE-Project/mentoring/raw/master/documentation/2.6.1/dockerized/scripts/mac-linux/docker-compose-up.sh
+            curl -OJL https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/scripts/mac-linux/docker-compose-up.sh
             ```
 
             ```
-            curl -OJL https://github.com/ELEVATE-Project/mentoring/raw/master/documentation/2.6.1/dockerized/scripts/mac-linux/docker-compose-down.sh
+            curl -OJL https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/scripts/mac-linux/docker-compose-down.sh
             ```
 
         2. Make the files executable by running the following commands.
@@ -183,11 +185,11 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
     -   **Windows**
 
         ```
-        curl -OJL https://github.com/ELEVATE-Project/mentoring/raw/master/documentation/2.6.1/dockerized/scripts/windows/docker-compose-up.bat
+        curl -OJL https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/scripts/windows/docker-compose-up.bat
         ```
 
         ```
-        curl -OJL https://github.com/ELEVATE-Project/mentoring/raw/master/documentation/2.6.1/dockerized/scripts/windows/docker-compose-down.bat
+        curl -OJL https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/scripts/windows/docker-compose-down.bat
         ```
 
 7.  **Run All Services & Dependencies:** All services and dependencies can be started using the `docker-compose-up` script file.
@@ -206,7 +208,7 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
 
         > **Note**: During the first Docker Compose run, the database, migration seeder files, and the script to set the default organization will be executed automatically.
 
-8.  **Access The MentorEd Application**: Once the services are up and the front-end app bundle is built successfully, navigate to **[localhost:8100](http://localhost:8100/)** to access the MentorEd app.
+8.  **Access The Project Application**: Once the services are up and the front-end app bundle is built successfully, navigate to **[localhost:8100](http://localhost:8100/)** to access the MentorEd app.
 9.  **Gracefully Stop All Services & Dependencies:** All containers which are part of the docker-compose can be gracefully stopped by pressing `Ctrl + c` in the same terminal where the services are running.
 10. **Remove All Service & Dependency Containers**: All docker containers can be stopped and removed by using the `docker-compose-down` file.
 
@@ -224,28 +226,24 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
 
 ## Enable Citus Extension
 
-MentorEd relies on PostgreSQL as its core database system. To boost performance and scalability, users can opt to enable the Citus extension. This transforms PostgreSQL into a distributed database, spreading data across multiple nodes to handle large datasets more efficiently as demand grows.
+User management service comes with this bundle relies on PostgreSQL as its core database system. To boost performance and scalability, users can opt to enable the Citus extension. This transforms PostgreSQL into a distributed database, spreading data across multiple nodes to handle large datasets more efficiently as demand grows.
 
 For more information, refer **[Citus Data](https://www.citusdata.com/)**.
 
 To enable the Citus extension for mentoring and user services, follow these steps.
 
-1. Create a sub-directory named `mentoring` and download `distributionColumns.sql` into it.
+1. Create a sub-directory named `user` and download `distributionColumns.sql` into it.
     ```
-    mkdir mentoring && curl -o ./mentoring/distributionColumns.sql -JL https://github.com/ELEVATE-Project/mentoring/raw/master/documentation/2.6.1/distribution-columns/mentoring/distributionColumns.sql
+    mkdir user && curl -o ./user/distributionColumns.sql -JL https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/distribution-columns/user/distributionColumns.sql
     ```
-2. Create a sub-directory named `user` and download `distributionColumns.sql` into it.
-    ```
-    mkdir user && curl -o ./user/distributionColumns.sql -JL https://github.com/ELEVATE-Project/mentoring/raw/master/documentation/2.6.1/distribution-columns/user/distributionColumns.sql
-    ```
-3. Set up the citus_setup file by following the steps given below.
+2. Set up the citus_setup file by following the steps given below.
 
     - **Ubuntu/Linux/Mac**
 
         1. Download the `citus_setup.sh` file.
 
             ```
-            curl -OJL https://github.com/ELEVATE-Project/mentoring/raw/master/documentation/2.6.1/dockerized/scripts/mac-linux/citus_setup.sh
+            curl -OJL https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/scripts/mac-linux/citus_setup.sh
             ```
 
         2. Make the setup file executable by running the following command.
@@ -254,11 +252,7 @@ To enable the Citus extension for mentoring and user services, follow these step
             chmod +x citus_setup.sh
             ```
 
-        3. Enable Citus and set distribution columns for `mentoring` database by running the `citus_setup.sh`with the following arguments.
-            ```
-            ./citus_setup.sh mentoring postgres://postgres:postgres@citus_master:5432/mentoring
-            ```
-        4. Enable Citus and set distribution columns for `user` database by running the `citus_setup.sh`with the following arguments.
+        3. Enable Citus and set distribution columns for `user` database by running the `citus_setup.sh`with the following arguments.
             ```
             ./citus_setup.sh user postgres://postgres:postgres@citus_master:5432/user
             ```
@@ -266,13 +260,9 @@ To enable the Citus extension for mentoring and user services, follow these step
     - **Windows**
         1. Download the `citus_setup.bat` file.
             ```
-             curl -OJL https://github.com/ELEVATE-Project/mentoring/raw/master/documentation/2.6.1/dockerized/scripts/windows/citus_setup.bat
+             curl -OJL https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/scripts/windows/citus_setup.bat
             ```
-        2. Enable Citus and set distribution columns for `mentoring` database by running the `citus_setup.bat`with the following arguments.
-            ```
-            citus_setup.bat mentoring postgres://postgres:postgres@citus_master:5432/mentoring
-            ```
-        3. Enable Citus and set distribution columns for `user` database by running the `citus_setup.bat`with the following arguments.
+        2. Enable Citus and set distribution columns for `user` database by running the `citus_setup.bat`with the following arguments.
             ```
             citus_setup.bat user postgres://postgres:postgres@citus_master:5432/user
             ```
@@ -280,13 +270,25 @@ To enable the Citus extension for mentoring and user services, follow these step
 
 ## Persistence Of Database Data In Docker Container
 
-To ensure the persistence of database data when running `docker compose down`, it is necessary to modify the `docker-compose-mentoring.yml` file according to the steps given below:
+To ensure the persistence of database data when running `docker compose down`, it is necessary to modify the `docker-compose-project.yml` file according to the steps given below:
 
-1. **Modification Of The `docker-compose-mentoring.yml` File:**
+1. **Modification Of The `docker-compose-project.yml` File:**
 
-    Begin by opening the `docker-compose-mentoring.yml` file. Locate the section pertaining to the Citus container and proceed to uncomment the volume specification. This action is demonstrated in the snippet provided below:
+    Begin by opening the `docker-compose-project.yml` file. Locate the section pertaining to the Citus and mongo container and proceed to uncomment the volume specification. This action is demonstrated in the snippet provided below:
 
     ```yaml
+    mongo:
+    image: 'mongo:4.4.14'
+    restart: 'always'
+    ports:
+        - '27017:27017'
+    networks:
+        - project_net
+    volumes:
+        - mongo-data:/data/db
+    logging:
+        driver: none
+
     citus:
         image: citusdata/citus:11.2.0
         container_name: 'citus_master'
@@ -307,15 +309,16 @@ To ensure the persistence of database data when running `docker compose down`, i
 
     volumes:
         citus-data:
+        mongo-data:
     ```
 
 By implementing these adjustments, the configuration ensures that when the `docker-compose down` command is executed, the database data is securely stored within the specified volumes. Consequently, this data will be retained and remain accessible, even after the containers are terminated and subsequently reinstated using the `docker-compose up` command.
 
 ## Sample User Accounts Generation
 
-During the initial setup of MentorEd services with the default configuration, you may encounter issues creating new accounts through the regular SignUp flow on the MentorEd portal. This typically occurs because the default SignUp process includes OTP verification to prevent abuse. Until the notification service is configured correctly to send actual emails, you will not be able to create new accounts.
+During the initial setup of Project services with the default configuration, you may encounter issues creating new accounts through the regular SignUp flow on the MentorEd portal. This typically occurs because the default SignUp process includes OTP verification to prevent abuse. Until the notification service is configured correctly to send actual emails, you will not be able to create new accounts.
 
-In such cases, you can generate sample user accounts using the steps below. This allows you to explore the MentorEd services and portal immediately after setup.
+In such cases, you can generate sample user accounts using the steps below. This allows you to explore the Project services and portal immediately after setup.
 
 > **Warning:** Use this generator only immediately after the initial system setup and before any normal user accounts are created through the portal. It should not be used under any circumstances thereafter.
 
@@ -324,17 +327,15 @@ In such cases, you can generate sample user accounts using the steps below. This
     - **Ubuntu/Linux/Mac**
 
         ```
-        mkdir -p sample-data/mentoring sample-data/user && \
-        curl -L https://raw.githubusercontent.com/ELEVATE-Project/mentoring/master/documentation/2.6.1/sample-data/mac-linux/mentoring/sampleData.sql -o sample-data/mentoring/sampleData.sql && \
-        curl -L https://raw.githubusercontent.com/ELEVATE-Project/mentoring/master/documentation/2.6.1/sample-data/mac-linux/user/sampleData.sql -o sample-data/user/sampleData.sql
+        mkdir -p sample-data/user && \
+        curl -L https://raw.githubusercontent.com/ELEVATE-Project/project-service/dockerized-setup/documentation/1.0.0/sample-data/mac-linux/user/sampleData.sql -o sample-data/user/sampleData.sql
         ```
 
     - **Windows**
 
         ```
-        mkdir sample-data\mentoring 2>nul & mkdir sample-data\user 2>nul & ^
-        curl -L "https://raw.githubusercontent.com/ELEVATE-Project/mentoring/master/documentation/2.6.1/sample-data/windows/mentoring/sampleData.sql" -o sample-data\mentoring\sampleData.sql & ^
-        curl -L "https://raw.githubusercontent.com/ELEVATE-Project/mentoring/master/documentation/2.6.1/sample-data/windows/user/sampleData.sql" -o sample-data\user\sampleData.sql
+        mkdir sample-data\user 2>nul & ^
+        curl -L "https://raw.githubusercontent.com/ELEVATE-Project/project-service/dockerized-setup/documentation/1.0.0/sample-data/windows/user/sampleData.sql" -o sample-data\user\sampleData.sql
         ```
 
 2. **Download The `insert_sample_data` Script File:**
@@ -342,7 +343,7 @@ In such cases, you can generate sample user accounts using the steps below. This
     - **Ubuntu/Linux/Mac**
 
         ```
-        curl -L -o insert_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/mentoring/master/documentation/2.6.1/dockerized/scripts/mac-linux/insert_sample_data.sh && chmod +x insert_sample_data.sh
+        curl -L -o insert_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/project-service/dockerized-setup/documentation/1.0.0/dockerized/scripts/mac-linux/insert_sample_data.sh && chmod +x insert_sample_data.sh
         ```
 
     - **Windows**
@@ -356,24 +357,55 @@ In such cases, you can generate sample user accounts using the steps below. This
     - **Ubuntu/Linux/Mac**
 
         ```
-        ./insert_sample_data.sh user postgres://postgres:postgres@citus_master:5432/user && \
-        ./insert_sample_data.sh mentoring postgres://postgres:postgres@citus_master:5432/mentoring
+        ./insert_sample_data.sh user postgres://postgres:postgres@citus_master:5432/user
         ```
 
     - **Windows**
 
         ```
-        insert_sample_data.bat user postgres://postgres:postgres@citus_master:5432/user & ^
-        insert_sample_data.bat mentoring postgres://postgres:postgres@citus_master:5432/mentoring
+        insert_sample_data.bat user postgres://postgres:postgres@citus_master:5432/user
         ```
 
     After successfully running the script mentioned above, the following user accounts will be created and available for login:
 
-    | Email ID                 | Password   | Role               |
-    | ------------------------ | ---------- | ------------------ |
-    | aaravpatel@example.com   | Password1@ | Mentee             |
-    | arunimareddy@example.com | Password1@ | Mentor             |
-    | aaravpatel@example.com   | Password1@ | Organization Admin |
+    | Email ID                 | Password   | Role                    |
+    | ------------------------ | ---------- | ----------------------- |
+    | aaravpatel@example.com   | Password1@ | State Education Officer |
+    | arunimareddy@example.com | Password1@ | State Education Officer |
+    | aaravpatel@example.com   | Password1@ | State Education Officer |
+
+# Project Service
+
+## Sample Project Creation
+
+This step will guide us in implementing a sample project solution following the initial setup of the project service.
+
+1. **Insert Sample Data To Database:**
+
+    - **Ubuntu/Linux/Mac**
+
+        1. Make the setup file executable by running the following command.
+            ```
+            curl -OJL https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/scripts/mac-linux/add_sample_project_entity_data.sh
+            ```
+        2. Make the setup file executable by running the following command.
+
+            ```
+            chmod +x add_sample_project_entity_data.sh
+            ```
+
+        3. Make the setup file executable by running the following command.
+
+            ```
+            ./add_sample_project_entity_data.sh
+            ```
+
+    - **Windows**
+
+        ```
+        mkdir sample-data\user 2>nul & ^
+        curl -L "https://raw.githubusercontent.com/ELEVATE-Project/project-service/dockerized-setup/documentation/1.0.0/sample-data/windows/user/sampleData.sql" -o sample-data\user\sampleData.sql
+        ```
 
 </details>
 
@@ -422,7 +454,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
 
         > Warning: This script should only be used to uninstall dependencies that were installed via installation script in step 3. If same dependencies were installed using other methods, refrain from using this script. This script is provided in-order to reverse installation in-case issues arise from a bad install.
 
-<!-- -   **MacOS**
+-   **MacOS**
 
     1. Install Node.js 20:
 
@@ -469,9 +501,9 @@ Before setting up the following ELEVATE-Project application, dependencies given 
 
         ```
         ./check-dependencies.sh
-        ``` -->
+        ```
 
-<!-- -   **Windows**
+-   **Windows**
 
     1. Install Node.js 20:
 
@@ -542,11 +574,11 @@ Before setting up the following ELEVATE-Project application, dependencies given 
 
             > Note: Set username and password for the default database to be 'postgres' during installation.
 
-        2. Once installed, Add `C:\Program Files\PostgreSQL\16\bin` to windows environment variables. Refer [here](https://www.computerhope.com/issues/ch000549.htm) or [here](https://stackoverflow.com/a/68851621) for more information regarding how to set it. -->
+        2. Once installed, Add `C:\Program Files\PostgreSQL\16\bin` to windows environment variables. Refer [here](https://www.computerhope.com/issues/ch000549.htm) or [here](https://stackoverflow.com/a/68851621) for more information regarding how to set it.
 
 ## Installation
 
-1. **Create ELEVATE-Project Directory:** Create a directory named **ELEVATE-Project**.
+1. **Create Mentoring Directory:** Create a directory named **mentorEd**.
 
     > Example Command: `mkdir ELEVATE-Project && cd ELEVATE-Project/`
 
@@ -564,6 +596,18 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         git clone -b release-2.6.1 https://github.com/ELEVATE-Project/mentoring-mobile-app.git
         ```
 
+    - **Windows**
+
+        ```
+        git clone -b main https://github.com/ELEVATE-Project/project-service.git & ^
+        git clone -b main https://github.com/ELEVATE-Project/entity-management.git & ^
+        git clone -b release-2.6.1 https://github.com/ELEVATE-Project/user.git & ^
+        git clone -b release-2.6.1 https://github.com/ELEVATE-Project/notification.git & ^
+        git clone -b release-2.6.1 https://github.com/ELEVATE-Project/interface-service.git & ^
+        git clone -b release-2.6.1 https://github.com/ELEVATE-Project/scheduler.git & ^
+        git clone -b release-2.6.1 https://github.com/ELEVATE-Project/mentoring-mobile-app.git
+        ```
+
 3. **Install NPM Packages**
 
     - **Ubuntu/Linux/MacOS**
@@ -576,6 +620,18 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         cd interface-service/src && npm install && cd ../.. && \
         cd scheduler/src && npm install && cd ../.. && \
         cd mentoring-mobile-app && npm install --force && cd ..
+        ```
+
+    - **Windows**
+
+        ```
+        cd project-service & npm install & cd ..\ & ^
+        cd entity-management\src & npm install & cd ..\.. & ^
+        cd user\src & npm install & cd ..\.. & ^
+        cd notification\src & npm install & cd ..\.. & ^
+        cd interface-service\src & npm install & cd ..\.. & ^
+        cd scheduler\src & npm install & cd ..\.. & ^
+        cd mentoring-mobile-app & npm install --force & cd ..
         ```
 
 4. **Download Environment Files**
@@ -591,9 +647,33 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         curl -L -o mentoring-mobile-app/src/environments/environment.ts https://github.com/ELEVATE-Project/mentoring/raw/master/documentation/2.6.1/native/envs/environment.ts
         ```
 
-    > **Note:** Modify the environment files as necessary for your deployment using any text editor, ensuring that the values are appropriate for your environment. The default values provided in the current files are functional and serve as a good starting point. Refer to the sample env files provided at the [Project](https://github.com/ELEVATE-Project/mentoring/blob/master/src/.env.sample), [User](https://github.com/ELEVATE-Project/user/blob/master/src/.env.sample), [Notification](https://github.com/ELEVATE-Project/notification/blob/master/src/.env.sample), [Scheduler](https://github.com/ELEVATE-Project/scheduler/blob/master/src/.env.sample), [Interface](https://github.com/ELEVATE-Project/interface-service/blob/main/src/.env.sample) and [Entity-Management]() repositories for reference.
+    - **MacOS**
 
-    > **Caution:** While the default values in the downloaded environment files enable the ELEVATE-Project Application to operate, certain features may not function correctly or could be impaired unless the adopter-specific environment variables are properly configured.
+        ```
+        curl -L -o mentoring/src/.env https://github.com/ELEVATE-Project/mentoring/raw/master/documentation/2.6.1/native/envs/non-citus/mentoring_env && \
+        curl -L -o user/src/.env https://github.com/ELEVATE-Project/mentoring/raw/master/documentation/2.6.1/native/envs/non-citus/user_env && \
+        curl -L -o notification/src/.env https://github.com/ELEVATE-Project/mentoring/raw/master/documentation/2.6.1/native/envs/non-citus/notification_env && \
+        curl -L -o interface-service/src/.env https://github.com/ELEVATE-Project/mentoring/raw/master/documentation/2.6.1/native/envs/interface_env && \
+        curl -L -o scheduler/src/.env https://github.com/ELEVATE-Project/mentoring/raw/master/documentation/2.6.1/native/envs/scheduler_env && \
+        curl -L -o mentoring-mobile-app/src/environments/environment.ts https://github.com/ELEVATE-Project/mentoring/raw/master/documentation/2.6.1/native/envs/environment.ts
+        ```
+
+    - **Windows**
+
+        ```
+        curl -L -o mentoring\src\.env https://github.com/ELEVATE-Project/mentoring/raw/master/documentation/2.6.1/native/envs/non-citus/mentoring_env & ^
+        curl -L -o user\src\.env https://github.com/ELEVATE-Project/mentoring/raw/master/documentation/2.6.1/native/envs/non-citus/user_env & ^
+        curl -L -o notification\src\.env https://github.com/ELEVATE-Project/mentoring/raw/master/documentation/2.6.1/native/envs/non-citus/notification_env & ^
+        curl -L -o interface-service\src\.env https://github.com/ELEVATE-Project/mentoring/raw/master/documentation/2.6.1/native/envs/interface_env & ^
+        curl -L -o scheduler\src\.env https://github.com/ELEVATE-Project/mentoring/raw/master/documentation/2.6.1/native/envs/scheduler_env & ^
+        curl -L -o mentoring-mobile-app\src\environments\environment.ts https://github.com/ELEVATE-Project/mentoring/raw/master/documentation/2.6.1/native/envs/environment.ts
+        ```
+
+    > **Note:** Modify the environment files as necessary for your deployment using any text editor, ensuring that the values are appropriate for your environment. The default values provided in the current files are functional and serve as a good starting point. Refer to the sample env files provided at the [Mentoring](https://github.com/ELEVATE-Project/mentoring/blob/master/src/.env.sample), [User](https://github.com/ELEVATE-Project/user/blob/master/src/.env.sample), [Notification](https://github.com/ELEVATE-Project/notification/blob/master/src/.env.sample), [Scheduler](https://github.com/ELEVATE-Project/scheduler/blob/master/src/.env.sample), and [Interface](https://github.com/ELEVATE-Project/interface-service/blob/main/src/.env.sample) repositories for reference.
+
+    > **Caution:** While the default values in the downloaded environment files enable the MentorEd Application to operate, certain features may not function correctly or could be impaired unless the adopter-specific environment variables are properly configured.
+    >
+    > For detailed instructions on adjusting these values, please consult the **[MentorEd Environment Variable Modification Guide](https://github.com/ELEVATE-Project/mentoring/blob/master/documentation/2.6.1/MentorEd-Env-Modification-README.md)**.
 
     > **Important:** As mentioned in the above linked document, the **User SignUp** functionality may be compromised if key environment variables are not set correctly during deployment. If you opt to skip this setup, consider using the sample user account generator detailed in the `Sample User Accounts Generation` section of this document.
 
@@ -612,6 +692,31 @@ Before setting up the following ELEVATE-Project application, dependencies given 
             ```
             ./create-databases.sh
             ```
+    - **MacOS**
+
+        1. Download `create-databases.sh` Script File:
+            ```
+            curl -OJL https://github.com/ELEVATE-Project/mentoring/raw/master/documentation/2.6.1/native/scripts/macos/create-databases.sh
+            ```
+        2. Make the executable by running the following command:
+            ```
+            chmod +x create-databases.sh
+            ```
+        3. Run the script file:
+            ```
+            ./create-databases.sh
+            ```
+
+    - **Windows**
+
+        1. Download `create-databases.bat` Script File:
+            ```
+            curl -OJL https://github.com/ELEVATE-Project/mentoring/raw/master/documentation/2.6.1/native/scripts/windows/create-databases.bat
+            ```
+        2. Run the script file from a command-prompt terminal:
+            ```
+            create-databases.bat
+            ```
 
 6. **Run Migrations To Create Tables**
 
@@ -623,47 +728,133 @@ Before setting up the following ELEVATE-Project application, dependencies given 
             ```
         2. Run Migrations:
             ```
+            cd mentoring/src && npx sequelize-cli db:migrate && cd ../.. && \
             cd user/src && npx sequelize-cli db:migrate && cd ../.. && \
             cd notification/src && npx sequelize-cli db:migrate && cd ../..
             ```
 
-7. **Insert Initial Data**
-   Use ELEVATE-Project scripts to insert the initial data.
+    - **Windows**
+        1. Install Sequelize-cli globally:
+            ```
+            npm i sequelize-cli -g
+            ```
+        2. Run Migrations:
+            ```
+            cd mentoring/src & npx sequelize-cli db:migrate & cd ../.. && ^
+            cd user/src & npx sequelize-cli db:migrate & cd ../.. & ^
+            cd notification/src & npx sequelize-cli db:migrate & cd ../..
+            ```
+
+7. **Enabling Citus And Setting Distribution Columns (Optional)**
+
+    MentorEd relies on PostgreSQL as its core database system. To boost performance and scalability, users can opt to enable the Citus extension. This transforms PostgreSQL into a distributed database, spreading data across multiple nodes to handle large datasets more efficiently as demand grows.
+
+    > NOTE: Currently only available for Linux based operation systems.
+
+    1. Download mentoring `distributionColumns.sql` file.
+
+        ```
+        curl -o ./mentoring/distributionColumns.sql -JL https://github.com/ELEVATE-Project/mentoring/raw/master/documentation/2.6.1/distribution-columns/mentoring/distributionColumns.sql
+        ```
+
+    2. Download user `distributionColumns.sql` file.
+
+        ```
+        curl -o ./user/distributionColumns.sql -JL https://github.com/ELEVATE-Project/mentoring/raw/master/documentation/2.6.1/distribution-columns/user/distributionColumns.sql
+        ```
+
+    3. Set up the `citus_setup` file by following the steps given below.
+
+        - **Ubuntu/Linux**
+
+            1. Download the `citus_setup.sh` file:
+
+                ```
+                curl -OJL https://github.com/ELEVATE-Project/mentoring/raw/master/documentation/2.6.1/native/scripts/linux/citus_setup.sh
+                ```
+
+            2. Make the setup file executable by running the following command:
+
+                ```
+                chmod +x citus_setup.sh
+                ```
+
+            3. Enable Citus and set distribution columns for `mentoring` database by running the `citus_setup.sh` with the following arguments.
+                ```
+                ./citus_setup.sh mentoring postgres://postgres:postgres@localhost:9700/mentoring
+                ```
+            4. Enable Citus and set distribution columns for `user` database by running the `citus_setup.sh`with the following arguments.
+                ```
+                ./citus_setup.sh user postgres://postgres:postgres@localhost:9700/users
+                ```
+
+8. **Insert Initial Data**
+   Use MentorEd in-build seeders to insert the initial data.
 
     - **Ubuntu/Linux/MacOS**
 
         ```
-        cd ELEVATE-Project/project-service/documentation/1.0.0/native/scripts/linux && \
-        sh entity-project-sample-data.sh && \
-        cd ~/ELEVATE-Project/ && \
+        cd mentoring/src && npm run db:seed:all && cd ../.. && \
         cd user/src && npm run db:seed:all && cd ../..
         ```
 
-8. **Start The Services**
+    - **Windows**
+        ```
+        cd mentoring/src & npm run db:seed:all & cd ../.. & ^
+        cd user/src & npm run db:seed:all & cd ../..
+        ```
 
-    Following the steps given below, 2 instances of each ELEVATE-Project backend service will be deployed and be managed by PM2 process manager.
+9. **Start The Services**
+
+    Following the steps given below, 2 instances of each MentorEd backend service will be deployed and be managed by PM2 process manager.
 
     - **Ubuntu/Linux**
 
         ```
-        cd project-service && pm2 start app.js -i 2 --name project-service && cd .. && \
-        cd entity-management/src && pm2 start app.js -i 2 --name entity-management && cd ../.. && \
-        cd user/src && pm2 start app.js -i 2 --name user && cd ../.. && \
-        cd notification/src && pm2 start app.js -i 2 --name notification && cd ../.. && \
-        cd interface-service/src && pm2 start app.js -i 2 --name interface && cd ../.. && \
-        cd scheduler/src && pm2 start app.js -i 2 --name scheduler && cd ../..
+        cd mentoring/src && pm2 start app.js -i 2 --name mentored-mentoring && cd ../.. && \
+        cd user/src && pm2 start app.js -i 2 --name mentored-user && cd ../.. && \
+        cd notification/src && pm2 start app.js -i 2 --name mentored-notification && cd ../.. && \
+        cd interface-service/src && pm2 start app.js -i 2 --name mentored-interface && cd ../.. && \
+        cd scheduler/src && pm2 start app.js -i 2 --name mentored-scheduler && cd ../..
         ```
 
-9. **Run Service Scripts**
+    - **MacOS**
+
+        ```
+        cd mentoring/src && npx pm2 start app.js -i 2 --name mentored-mentoring && cd ../.. && \
+        cd user/src && npx pm2 start app.js -i 2 --name mentored-user && cd ../.. && \
+        cd notification/src && npx pm2 start app.js -i 2 --name mentored-notification && cd ../.. && \
+        cd interface-service/src && npx pm2 start app.js -i 2 --name mentored-interface && cd ../.. && \
+        cd scheduler/src && npx pm2 start app.js -i 2 --name mentored-scheduler && cd ../..
+        ```
+
+    - **Windows**
+        ```
+        cd mentoring/src && pm2 start app.js -i 2 --name mentored-mentoring && cd ../.. && ^
+        cd user/src && pm2 start app.js -i 2 --name mentored-user && cd ../.. && ^
+        cd notification/src && pm2 start app.js -i 2 --name mentored-notification && cd ../.. && ^
+        cd interface-service/src && pm2 start app.js -i 2 --name mentored-interface && cd ../.. && ^
+        cd scheduler/src && pm2 start app.js -i 2 --name mentored-scheduler && cd ../..
+        ```
+
+10. **Run Service Scripts**
 
     - **Ubuntu/Linux/MacOS**
 
         ```
         cd user/src/scripts && node insertDefaultOrg.js && node viewsScript.js && \
-        node -r module-alias/register uploadSampleCSV.js && cd ../../..
+        node -r module-alias/register uploadSampleCSV.js && cd ../../.. && \
+        cd mentoring/src/scripts && node psqlFunction.js && node viewsScript.js && cd ../../..
         ```
 
-10. **Start The Portal**
+    - **Windows**
+        ```
+        cd user/src/scripts & node insertDefaultOrg.js & node viewsScript.js & ^
+        node -r module-alias/register uploadSampleCSV.js & cd ../../.. && ^
+        cd mentoring/src/scripts & node psqlFunction.js & node viewsScript.js & cd ../../..
+        ```
+
+11. **Start The Portal**
 
     MentorEd portal utilizes Ionic and Angular CLI for building the browser bundle, follow the steps given below to install them and start the portal.
 
@@ -698,13 +889,75 @@ Before setting up the following ELEVATE-Project application, dependencies given 
             pm2 start pm2.config.json && cd ..
             ```
 
+    - **MacOS**
+
+        1. Install Ionic CLI globally:
+
+            ```
+            sudo npm install -g @ionic/cli
+            ```
+
+        2. Install Angular CLI globally:
+
+            ```
+            sudo npm install -g @angular/cli
+            ```
+
+        3. Navigate to `mentoring-mobile-app` directory:
+
+            ```
+            cd mentoring-mobile-app
+            ```
+
+        4. Build the portal:
+
+            ```
+            npx ionic build
+            ```
+
+        5. Start the portal:
+            ```
+            npx pm2 start pm2.config.json && cd ..
+            ```
+
+    - **Windows**
+
+        1. Install Ionic CLI globally:
+
+            ```
+            npm install -g @ionic/cli
+            ```
+
+        2. Install Angular CLI globally:
+
+            ```
+            npm install -g @angular/cli
+            ```
+
+        3. Navigate to `mentoring-mobile-app` directory:
+
+            ```
+            cd mentoring-mobile-app
+            ```
+
+        4. Build the portal
+
+            ```
+            ionic build
+            ```
+
+        5. Start the portal:
+            ```
+            pm2 start pm2.config.json & cd ..
+            ```
+
     Navigate to http://localhost:7601 to access the MentorEd Portal.
 
 ## Sample User Accounts Generation
 
-During the initial setup of ELEVATE-Project services with the default configuration, you may encounter issues creating new accounts through the regular SignUp flow on the ELEVATE-Project portal. This typically occurs because the default SignUp process includes OTP verification to prevent abuse. Until the notification service is configured correctly to send actual emails, you will not be able to create new accounts.
+During the initial setup of MentorEd services with the default configuration, you may encounter issues creating new accounts through the regular SignUp flow on the MentorEd portal. This typically occurs because the default SignUp process includes OTP verification to prevent abuse. Until the notification service is configured correctly to send actual emails, you will not be able to create new accounts.
 
-In such cases, you can generate sample user accounts using the steps below. This allows you to explore the ELEVATE-Project services and portal immediately after setup.
+In such cases, you can generate sample user accounts using the steps below. This allows you to explore the MentorEd services and portal immediately after setup.
 
 > **Warning:** Use this generator only immediately after the initial system setup and before any normal user accounts are created through the portal. It should not be used under any circumstances thereafter.
 
@@ -714,6 +967,21 @@ In such cases, you can generate sample user accounts using the steps below. This
     curl -o insert_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/mentoring/master/documentation/2.6.1/native/scripts/linux/insert_sample_data.sh && \
     chmod +x insert_sample_data.sh && \
     ./insert_sample_data.sh
+    ```
+
+-   **MacOS**
+
+    ```
+    curl -o insert_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/mentoring/master/documentation/2.6.1/native/scripts/macos/insert_sample_data.sh && \
+    chmod +x insert_sample_data.sh && \
+    ./insert_sample_data.sh
+    ```
+
+-   **Windows**
+
+    ```
+    curl -o insert_sample_data.bat https://raw.githubusercontent.com/ELEVATE-Project/mentoring/master/documentation/2.6.1/native/scripts/windows/insert_sample_data.bat && ^
+    insert_sample_data.bat
     ```
 
 After successfully running the script mentioned above, the following user accounts will be created and available for login:
@@ -746,39 +1014,109 @@ $ sudo npm install pm2@latest -g
 
 ## Setting up Repositories
 
-### Clone the project-service repository to /opt/backend directory
+### Clone the mentoring repository to /opt/backend directory
 
 ```bash
-opt/backend$ git clone -b main --single-branch "https://github.com/ELEVATE-Project/project-service.git"
+opt/backend$ git clone -b develop-2.5 --single-branch "https://github.com/ELEVATE-Project/mentoring.git"
 ```
 
 ### Install Npm packages from src directory
 
-```bash
-backend/project-service$ sudo npm i
+````bash
+backend/mentoring/src$ sudo npm i
+
+BigBlueButton™ Service (Optional) can be setup using the following method:
+
+<details><summary>Setting up the BigBlueButton™ Service (Optional)</summary>
+
+## Setting up the BigBlueButton Service (Optional)
+
+## Installation
+
+**Expectation**: Integrate the BigBlueButton meeting platform with the mentoring application.
+
+1. Before installing, ensure that you meet all the prerequisites required to install BigBlueButton. To learn more, see Administration section in [BigBlueButton Docs](https://docs.bigbluebutton.org).
+
+2. Install BigBlueButton version 2.6 using the hostname and email address, which you want to use. To learn more, see Administration section in [BigBlueButton Docs](https://docs.bigbluebutton.org).
+
+3. After completing the installation, check the status of your server using the following command:
+
+    ```
+    sudo bbb-conf --check
+    ```
+
+    > **Note**: If you encounter any error which is flagged as _Potential problems_, check for installation or configuration errors on your server.
+
+4. Start the service using the following command:
+
+    ```
+    sudo bbb-conf --start
+    ```
+
+5. Check if the BigBlueButton service is running using the following command:
+
+    ```
+    sudo bbb-conf --status
+    ```
+
+6. Restart the BigBlueButton server using the following command:
+
+    ```
+    sudo bbb-conf --restart
+    ```
+
+## Obtaining the Secret Key
+
+If you wish to generate a new secret key, use the following command:
+
+````
+
+sudo bbb-conf --secret
+
 ```
 
+## Deleting the Demo Meeting
+
+If you want to delete the demo meeting, use the following command:
+
+```
+
+sudo apt-get purge bbb-demo
+
+````
+
+> **Tip**:
+>
+> -   To learn more, see the Administration section in <a href="https://docs.bigbluebutton.org">BigBlueButton Docs</a>.
+> -   To automatically delete the metadata of recordings which are converted to mp4 format and uploaded on the cloud storage, see <a href="https://github.com/ELEVATE-Project/elevate-utils/tree/master/BBB-Recordings">ELEVATE-Project on GitHub</a>.
+
 </details>
+
+</br>
 
 ### Create .env file in src directory
 
 ```bash
-project-service$ sudo nano .env
-```
+mentoring/src$ sudo nano .env
+````
 
 Copy-paste the following env variables to the `.env` file:
 
 ```env
-# Project Service Env Config
+# Mentoring Service Config
 
 # Port on which service runs
-APPLICATION_PORT=5000
+APPLICATION_PORT=3000
 
 # Service environment
 APPLICATION_ENV=development
 
+# Route after the base URL
+APPLICATION_BASE_URL=/mentoring/
+APPLICATION_URL=https://dev.mentoring.shikshalokam.org
+
 # Mongo db connectivity URL
-MONGODB_URL=mongodb://localhost:27017/elevate-project
+MONGODB_URL=mongodb://localhost:27017/elevate-mentoring
 
 # Token secret to verify the access token
 ACCESS_TOKEN_SECRET='asadsd8as7df9as8df987asdf'
@@ -790,54 +1128,120 @@ INTERNAL_ACCESS_TOKEN='internal_access_token'
 KAFKA_URL=localhost:9092
 
 # Kafka group to which consumer belongs
-KAFKA_GROUP_ID="projects"
+KAFKA_GROUP_ID="mentoring"
 
 # Kafka topic to push notification data
 NOTIFICATION_KAFKA_TOPIC='develop.notifications'
 
-# CLOUD_STORAGE_PROVIDER
-CLOUD_STORAGE_PROVIDER=gcloud
+# Kafka topic name to consume from mentoring topic
+KAFKA_MENTORING_TOPIC="mentoringtopic"
+SESSION_KAFKA_TOPIC='session'
+
+# Kafka topic to push recording data
+KAFKA_RECORDING_TOPIC="recordingtopic"
+
+# Any one of three features available for cloud storage
+CLOUD_STORAGE='AWS'
+MENTOR_SESSION_RESCHEDULE_EMAIL_TEMPLATE=mentor_session_reschedule
+
+# GCP json config file path
+GCP_PATH='gcp.json'
 
 # GCP bucket name which stores files
-CLOUD_STORAGE_BUCKETNAME='gcp-bucket-storage-name'
+DEFAULT_GCP_BUCKET_NAME='gcp-bucket-storage-name'
 
 # GCP project id
-CLOUD_STORAGE_PROJECT='project-id'
+GCP_PROJECT_ID='project-id'
 
-# GCP storage account name
-CLOUD_STORAGE_ACCOUNTNAME='gcp-storage-account-name'
+# AWS access key id
+AWS_ACCESS_KEY_ID='aws-access-key-id'
 
-# GCP cloud storage secret
-CLOUD_STORAGE_SECRET='gcp-secret-key'
+# AWS secret access key
+AWS_SECRET_ACCESS_KEY='aws-secret-access-key'
 
-# GCP cloud storage bucket type
-CLOUD_STORAGE_BUCKET_TYPE='public/private'
+# AWS region where the bucket will be located
+AWS_BUCKET_REGION='ap-south-1'
+
+# AWS endpoint
+AWS_BUCKET_ENDPOINT='s3.ap-south-1.amazonaws.com'
+
+# AWS bucket name which stores files
+DEFAULT_AWS_BUCKET_NAME='aws-bucket-storage-name'
+
+# Azure storage account name
+AZURE_ACCOUNT_NAME='account-name'
+
+# Azure storage account key
+AZURE_ACCOUNT_KEY='azure-account-key'
+
+# Azure storage container which stores files
+DEFAULT_AZURE_CONTAINER_NAME='azure-container-storage-name'
+
+# User service host
+USER_SERVICE_HOST='http://localhost:3001'
 
 # User service base URL
-USER_SERVICE_BASE_URL= "/user"
+USER_SERVICE_BASE_URL='/user/'
 
-#Elevate project service url
-ELEVATE_PROJECT_SERVICE_URL='http://localhost:5000'
+# Big blue button URL
+BIG_BLUE_BUTTON_URL=https://dev.some.temp.org
 
-# Validate entities
-VALIDATE_ENTITIES="ON/OFF"
+# Big blue button base URL
+BIB_BLUE_BUTTON_BASE_URL=/bigbluebutton/
 
-# Timezone difference
-TIMEZONE_DIFFRENECE_BETWEEN_LOCAL_TIME_AND_UTC= "+05:30"
+# Meeting end callback events endpoint
+MEETING_END_CALLBACK_EVENTS=https%3A%2F%2Fdev.some-apis.temp.org%2Fmentoring%2Fv1%2Fsessions%2Fcompleted
 
-# Project submission topic
-PROJECT_SUBMISSION_TOPIC= "sl-improvement-project-submission-dev",
+# Big blue button secret key
+BIG_BLUE_BUTTON_SECRET_KEY=sa9d0f8asdg7a9s8d7f
 
-#Kafka communications
-KAFKA_COMMUNICATIONS_ON_OFF="ON/OFF"
+# Big blue button recording ready callback URL
+RECORDING_READY_CALLBACK_URL=http%3A%2F%2Flocalhost%3A3000%2F%3FmeetingID%3Dmeet123
+BIG_BLUE_BUTTON_SECRET_KEY="s90df8g09sd8fg098sdfg"
 
-#Gotenberg Url
-GOTENBERG_URL= "http://localhost:3000"
+# Enable logging of network requests
+ENABLE_LOG=true
 
-# Entity Management service base url
-ENTITY_MANAGEMENT_SERVICE_BASE_URL= "/entity-management"
+# API doc URL
+API_DOC_URL='/api-doc'
 
-# Default org id
+# Internal cache expiry time
+INTERNAL_CACHE_EXP_TIME=86400
+
+# Redis Host connectivity URL
+REDIS_HOST='redis://localhost:6379'
+
+# Kafka internal communication
+CLEAR_INTERNAL_CACHE='mentoringInternal'
+
+# Enable email for reported issues
+ENABLE_EMAIL_FOR_REPORT_ISSUE=true
+
+# Email ID of the support team
+SUPPORT_EMAIL_ID='support@xyz.com,team@xyz.com'
+
+# Email template code for reported issues
+REPORT_ISSUE_EMAIL_TEMPLATE_CODE='user_issue_reported'
+
+BIG_BLUE_BUTTON_SESSION_END_URL='https%3A%2F%2Fdev.some-mentoring.temp.org%2F'
+
+SCHEDULER_SERVICE_ERROR_REPORTING_EMAIL_ID="rakesh.k@some.com"
+SCHEDULER_SERVICE_URL="http://localhost:4000/jobs/scheduleJob"
+ERROR_LOG_LEVEL='silly'
+DISABLE_LOG=false
+DEFAULT_MEETING_SERVICE="BBB"
+# BIG_BLUE_BUTTON_LAST_USER_TIMEOUT_MINUTES=15
+SESSION_EDIT_WINDOW_MINUTES=0
+SESSION_MENTEE_LIMIT=5
+DEV_DATABASE_URL=postgres://shikshalokam:slpassword@localhost:9700/elevate_mentoring
+MENTOR_SESSION_DELETE_EMAIL_TEMPLATE='mentor_session_delete'
+
+SCHEDULER_SERVICE_HOST="http://localhost:4000"
+SCHEDULER_SERVICE_BASE_URL= '/scheduler/'
+DEFAULT_ORGANISATION_CODE="default_code"
+
+REFRESH_VIEW_INTERVAL=30000
+MENTEE_SESSION_ENROLLMENT_EMAIL_TEMPLATE=mentee_session_enrollment
 DEFAULT_ORG_ID=1
 ```
 
@@ -845,30 +1249,104 @@ Save and exit.
 
 ## Setting up Databases
 
-**Log into the mongoDB**
+**Log into the postgres user**
 
 ```bash
-$ sudo su mongo --port 27017
+$ sudo su postgres
 ```
 
-**To create a user and database in MongoDB, run the following command in the MongoDB shell**
-
-```
-use admin;
-db.createUser({user: "shikshalokam", pwd: "slpassword",
-  roles: [
-    { role: "readWrite", db: "elevate-project" },
-    { role: "readWrite", db: "elevate-entity" }
-  ]
-});
-```
-
-## Running Script to Populate the Tables with Sample Data
-
-**Exit the mongo user navigate to the root folder of the project service and update the .env file with these variables:**
+**Log into psql**
 
 ```bash
-project-service$ nano /opt/backend/project-service/.env
+$ psql -p 9700
+```
+
+**Create a database user/role:**
+
+```sql
+CREATE USER shikshalokam WITH ENCRYPTED PASSWORD 'slpassword';
+```
+
+**Create the elevate_mentoring database**
+
+```sql
+CREATE DATABASE elevate_mentoring;
+GRANT ALL PRIVILEGES ON DATABASE elevate_mentoring TO shikshalokam;
+\c elevate_mentoring
+GRANT ALL ON SCHEMA public TO shikshalokam;
+```
+
+## Running Migrations To Create Tables
+
+**Exit the postgres user account and install sequelize-cli globally**
+
+```bash
+$ sudo npm i sequelize-cli -g
+```
+
+**Navigate to the src folder of mentoring service and run sequelize-cli migration command:**
+
+```bash
+mentoring/src$ npx sequelize-cli db:migrate
+```
+
+**Now all the tables must be available in the Citus databases**
+
+## Setting up Distribution Columns in Citus PostgreSQL Database
+
+Refer [Choosing Distribution Column](https://docs.citusdata.com/en/stable/sharding/data_modeling.html) for more information regarding Citus distribution columns.
+
+**Login into the postgres user**
+
+```bash
+$ sudo su postgres
+```
+
+**Login to psql**
+
+```bash
+$ psql -p 9700
+```
+
+**Login to the elevate_mentoring database**
+
+```sql
+\c elevate_mentoring
+```
+
+**Enable Citus for elevate_mentoring**
+
+```sql
+CREATE EXTENSION citus;
+```
+
+**Within elevate_mentoring, run the following queries:**
+
+```sql
+SELECT create_distributed_table('entities', 'entity_type_id');
+SELECT create_distributed_table('entity_types', 'organization_id');
+SELECT create_distributed_table('feedbacks', 'user_id');
+SELECT create_distributed_table('forms', 'organization_id');
+SELECT create_distributed_table('issues', 'id');
+SELECT create_distributed_table('mentor_extensions', 'user_id');
+SELECT create_distributed_table('notification_templates', 'organization_id');
+SELECT create_distributed_table('organization_extension', 'organization_id');
+SELECT create_distributed_table('post_session_details', 'session_id');
+SELECT create_distributed_table('questions', 'id');
+SELECT create_distributed_table('question_sets', 'code');
+SELECT create_distributed_table('session_attendees', 'session_id');
+SELECT create_distributed_table('session_enrollments', 'mentee_id');
+SELECT create_distributed_table('session_ownerships', 'mentor_id');
+SELECT create_distributed_table('sessions', 'id');
+SELECT create_distributed_table('user_extensions', 'user_id');
+```
+
+## Running Seeder to Populate the Tables with Seed Data
+
+**Exit the postgres user navigate to the src folder of the mentoring service and update the .env file with these variables:**
+
+```bash
+mentoring/src$ nano /opt/backend/mentoring/src/.env
 ```
 
 ```env
@@ -876,10 +1354,10 @@ DEFAULT_ORG_ID=<id generated by the insertDefaultOrg script>
 DEFAULT_ORGANISATION_CODE=default_code
 ```
 
-**Navigate to the script and execute the script**
+**Run the seeder command**
 
 ```bash
-sh /opt/backend/project-service/documentation/1.0.0/native/scripts/linux/entity-project-sample-data.sh
+mentoring/src$ npm run db:seed:all
 ```
 
 ## Start the Service
@@ -887,7 +1365,7 @@ sh /opt/backend/project-service/documentation/1.0.0/native/scripts/linux/entity-
 Run pm2 start command:
 
 ```bash
-project-service$ pm2 start app.js -i 2 --name elevate-projects
+mentoring/src$ pm2 start app.js -i 2 --name elevate-mentoring
 ```
 
 #### Run pm2 ls command
@@ -902,12 +1380,81 @@ Output should look like this (Sample output, might slightly differ in your insta
 ┌────┬─────────────────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
 │ id │ name                    │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
 ├────┼─────────────────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
-│ 23 │ elevate-projects        │ default     │ 1.0.0   │ cluster │ 90643    │ 46h    │ 0    │ online    │ 0%       │ 171.0mb  │ jenkins  │ disabled │
-│ 24 │ elevate-projects        │ default     │ 1.0.0   │ cluster │ 90653    │ 46h    │ 0    │ online    │ 0%       │ 168.9mb  │ jenkins  │ disabled │
+│ 23 │ elevate-mentoring       │ default     │ 1.0.0   │ cluster │ 90643    │ 46h    │ 0    │ online    │ 0%       │ 171.0mb  │ jenkins  │ disabled │
+│ 24 │ elevate-mentoring       │ default     │ 1.0.0   │ cluster │ 90653    │ 46h    │ 0    │ online    │ 0%       │ 168.9mb  │ jenkins  │ disabled │
 └────┴─────────────────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
 ```
 
 This concludes the services and dependency setup.
+
+## Postman Collections
+
+-   [Mentoring Service](https://github.com/ELEVATE-Project/mentoring/tree/develop-2.5/src/api-doc)
+
+</details>
+
+</br>
+
+**BigBlueButton™ Service (Optional) can be setup using the following method:**
+
+<details><summary>Setting up the BigBlueButton Service (Optional)</summary>
+
+## Setting up the BigBlueButton Service (Optional)
+
+## Installation
+
+**Expectation**: Integrate the BigBlueButton meeting platform with the mentoring application.
+
+1. Before installing, ensure that you meet all the prerequisites required to install BigBlueButton. To learn more, see Administration section in [BigBlueButton Docs](https://docs.bigbluebutton.org).
+
+2. Install BigBlueButton version 2.6 using the hostname and email address, which you want to use. To learn more, see Administration section in [BigBlueButton Docs](https://docs.bigbluebutton.org).
+
+3. After completing the installation, check the status of your server using the following command:
+
+    ```
+    sudo bbb-conf --check
+    ```
+
+    > **Note**: If you encounter any error which is flagged as _Potential problems_, check for installation or configuration errors on your server.
+
+4. Start the service using the following command:
+
+    ```
+    sudo bbb-conf --start
+    ```
+
+5. Check if the BigBlueButton service is running using the following command:
+
+    ```
+    sudo bbb-conf --status
+    ```
+
+6. Restart the BigBlueButton server using the following command:
+
+    ```
+    sudo bbb-conf --restart
+    ```
+
+## Obtaining the Secret Key
+
+If you wish to generate a new secret key, use the following command:
+
+```
+sudo bbb-conf --secret
+```
+
+## Deleting the Demo Meeting
+
+If you want to delete the demo meeting, use the following command:
+
+```
+sudo apt-get purge bbb-demo
+```
+
+> **Tip**:
+>
+> -   To learn more, see the Administration section in <a href="https://docs.bigbluebutton.org">BigBlueButton Docs</a>.
+> -   To automatically delete the metadata of recordings which are converted to mp4 format and uploaded on the cloud storage, see <a href="https://github.com/ELEVATE-Project/elevate-utils/tree/master/BBB-Recordings">ELEVATE-Project on GitHub</a>.
 
 </details>
 
@@ -915,17 +1462,15 @@ This concludes the services and dependency setup.
 
 # Postman Collections
 
--   [Project Service](https://github.com/ELEVATE-Project/project-service/tree/main/api-doc)
+-   [Mentoring Service](https://github.com/ELEVATE-Project/mentoring/tree/master/documentation/latest/postman-collections/mentoring)
 -   [User Service](https://github.com/ELEVATE-Project/mentoring/tree/master/documentation/latest/postman-collections/mentoring)
 -   [Notification Service](https://github.com/ELEVATE-Project/mentoring/tree/master/documentation/latest/postman-collections/mentoring)
 -   [Scheduler Service](https://github.com/ELEVATE-Project/mentoring/tree/master/documentation/latest/postman-collections/mentoring)
--   [Entity Management](https://github.com/ELEVATE-Project/entity-management/tree/main/src/api-doc)
 
 # Dependencies
 
 This project relies on the following services:
 
--   [Entity Management](https://github.com/ELEVATE-Project/entity-management.git)
 -   [User Service](https://github.com/ELEVATE-Project/user)
 -   [Notification Service](https://github.com/ELEVATE-Project/notification)
 -   [Scheduler Service](https://github.com/ELEVATE-Project/scheduler)
@@ -933,14 +1478,14 @@ This project relies on the following services:
 
 Please follow the setup guide provided with each service to ensure proper configuration. While these are the recommended services, feel free to utilize any alternative microservices that better suit your project's requirements.
 
-<!-- For a comprehensive overview of the MentorEd implementation, refer to the [MentorEd Documentation](https://elevate-docs.shikshalokam.org/.mentorEd/intro). -->
+For a comprehensive overview of the MentorEd implementation, refer to the [MentorEd Documentation](https://elevate-docs.shikshalokam.org/.mentorEd/intro).
 
 The source code for the frontend/mobile application can be found in its respective [GitHub repository](https://github.com/ELEVATE-Project/mentoring-mobile-app).
 
 # Team
 
-<a href="https://github.com/ELEVATE-Project/project-service/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=ELEVATE-Project/project-service" />
+<a href="https://github.com/ELEVATE-Project/mentoring/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=ELEVATE-Project/mentoring" />
 </a>
 
 # Open Source Dependencies
@@ -948,11 +1493,10 @@ The source code for the frontend/mobile application can be found in its respecti
 Several open source dependencies that have aided Mentoring's development:
 
 ![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
-![MongoDB](https://img.shields.io/badge/MongoDB-%234ea94b.svg?style=for-the-badge&logo=mongodb&logoColor=white)
 ![Apache Kafka](https://img.shields.io/badge/Apache%20Kafka-000?style=for-the-badge&logo=apachekafka)
-![Git](https://img.shields.io/badge/git-%23F05033.svg?style=for-the-badge&logo=git&logoColor=white)
-![Gotenberg](https://img.shields.io/badge/Gotenberg-%23007EC6.svg?style=for-the-badge&logoColor=white)
 ![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white)
+![Jest](https://img.shields.io/badge/-jest-%23C21325?style=for-the-badge&logo=jest&logoColor=white)
+![Git](https://img.shields.io/badge/git-%23F05033.svg?style=for-the-badge&logo=git&logoColor=white)
 
 <!-- ![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)
 ![CircleCI](https://img.shields.io/badge/circle%20ci-%23161616.svg?style=for-the-badge&logo=circleci&logoColor=white) -->

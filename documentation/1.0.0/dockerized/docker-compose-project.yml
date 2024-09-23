@@ -95,7 +95,7 @@ services:
       - '5001:5001'
     command: ['nodemon', 'app.js']
     env_file:
-      - ${entity-management_env}
+      - ${entity_management_env}
     depends_on:
       - mongo
     networks:
@@ -184,8 +184,8 @@ services:
   citus:
     image: citusdata/citus:11.2.0
     container_name: 'citus_master'
-    #ports:
-    #  - 5432:5432
+    ports:
+      - 5432:5432
     expose:
       - 5432
     environment: &AUTH
@@ -222,8 +222,8 @@ services:
       - '27017:27017'
     networks:
       - project_net
-    volumes:
-      - mongo-data:/data/db
+    # volumes:
+    #   - mongo-data:/data/db
     logging:
       driver: none
 
@@ -237,21 +237,22 @@ services:
       - project_net
     restart: 'always'
 
-  # portal:
-  #   # Update with latest image
-  #   image: shikshalokamqa/mentoring-mobile-app:2.6.1
-  #   container_name: portal
-  #   ports:
-  #     - '8100:8100'
-  #   volumes:
-  #     - /home/joffin/elevate/single-click/linux/environment.ts:/app/src/environments/environment.ts
-  #   command: >
-  #     /bin/bash -c "ionic build --prod && ionic serve --host 0.0.0.0"
-  #   networks:
-  #     - project_net
+  portal:
+    # Update with latest image
+    image: shikshalokamqa/mentoring-mobile-app:2.6.1
+    container_name: portal
+    ports:
+      - '8100:8100'
+    volumes:
+      - /home/joffin/elevate/single-click/linux/environment.ts:/app/src/environments/environment.ts
+    command: >
+      /bin/bash -c "ionic build --prod && ionic serve --host 0.0.0.0"
+    networks:
+      - project_net
 
 networks:
   project_net:
     external: false
 #volumes:
+#  mongo-data:
 #  citus-data:

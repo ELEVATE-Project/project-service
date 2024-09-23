@@ -1,0 +1,20 @@
+# Entity service configurations file
+
+APPLICATION_PORT = 5001
+APPLICATION_ENV ="development"
+APPLICATION_BASE_URL='/entity-management/'
+# INTERNAL_ACCESS_TOKEN ="8c3a94f0931e01a4940a"
+INTERNAL_ACCESS_TOKEN ="internal_access_token"
+
+ACCESS_TOKEN_SECRET = "asadsd8as7df9as8df987asdf"
+
+# DB 
+# MONGODB_URL=mongodb://localhost:27017/elevate-entity
+MONGODB_URL = mongodb://mongo:27017/elevate-entity
+
+# USER_SERVICE
+USER_SERVICE_URL = http://localhost:3001/user
+
+#service name
+SERVICE_NAME = elevate-entity-service
+API_DOC_URL="https://project-dev.elevate-apis.shikshalokam.org/entity-management/api-doc"

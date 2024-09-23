@@ -4,11 +4,12 @@ echo "Starting the installation script..."
 
 # Function to install Node.js LTS
 install_nodejs() {
-    echo "Installing Node.js LTS..."
-    curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+    echo "Installing Node.js version 20..."
+    curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
     sudo DEBIAN_FRONTEND=noninteractive apt-get install -y nodejs
     sudo DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential
 }
+
 
 # Function to install Kafka
 install_kafka() {
@@ -129,23 +130,24 @@ install_pm2() {
 
 # Function to install MongoDB
 install_mongo() {
-    echo "Installing MongoDB..."
+    echo "Installing MongoDB 4.4.14..."
 
     # Import MongoDB public GPG key
-    wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | sudo apt-key add -
+    wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -
 
-    # Create the MongoDB source list for Ubuntu
-    echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu $(lsb_release -cs)/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
+    # Create the MongoDB source list for Ubuntu (MongoDB 4.4)
+    echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu $(lsb_release -cs)/mongodb-org/4.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.4.list
 
-    # Update apt and install MongoDB
+    # Update apt and install MongoDB version 4.4.14
     sudo apt update
-    sudo DEBIAN_FRONTEND=noninteractive apt install -y mongodb-org
+    sudo DEBIAN_FRONTEND=noninteractive apt install -y mongodb-org=4.4.14 mongodb-org-server=4.4.14 mongodb-org-shell=4.4.14 mongodb-org-mongos=4.4.14 mongodb-org-tools=4.4.14
 
     # Start and enable MongoDB service
     sudo systemctl start mongod
     sudo systemctl enable mongod
-    echo "MongoDB has been installed and started."
+    echo "MongoDB 4.4.14 has been installed and started."
 }
+
 
 # Function to install Gotenberg (via Docker)
 install_gotenberg() {

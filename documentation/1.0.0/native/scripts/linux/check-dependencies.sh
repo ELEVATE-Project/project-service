@@ -126,7 +126,7 @@ check_gotenberg() {
 }
 
 # Main execution flow of the script
-echo "MentorEd Dependencies Status"
+echo "ELEVATE-Project Dependencies Status"
 
 check_nodejs
 check_kafka

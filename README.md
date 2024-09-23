@@ -368,13 +368,40 @@ In such cases, you can generate sample user accounts using the steps below. This
 
     After successfully running the script mentioned above, the following user accounts will be created and available for login:
 
-    | Email ID                 | Password   | Role               |
-    | ------------------------ | ---------- | ------------------ |
-    | aaravpatel@example.com   | Password1@ | Mentee             |
-    | arunimareddy@example.com | Password1@ | Mentor             |
-    | aaravpatel@example.com   | Password1@ | Organization Admin |
+    | Email ID                 | Password   | Role                                |
+    | ------------------------ | ---------- | ----------------------------------- |
+    | aaravpatel@example.com   | Password1@ | State Education Officer             |
+    | arunimareddy@example.com | Password1@ | State Education Officer             |
+    | aaravpatel@example.com   | Password1@ | State Education Officer             |
 
-</details>
+
+## Sample Project Creation
+
+This step will guide us in implementing a sample project solution following the initial setup of the project service.
+
+1. **Insert Sample Data To Database:**
+
+    - **Ubuntu/Linux/Mac**
+
+        1. Make the setup file executable by running the following command.
+            ```
+            curl -OJL https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/scripts/mac-linux/add_sample_project_entity_data.sh
+            ```
+        2. Make the setup file executable by running the following command.
+
+            ```
+            chmod +x add_sample_project_entity_data.sh
+            ```
+        3. Run the script file using the following command.
+            ```
+            ./add_sample_project_entity_data.sh
+            ```
+    - **Windows**
+
+        ```
+        mkdir sample-data\user 2>nul & ^
+        curl -L "https://raw.githubusercontent.com/ELEVATE-Project/project-service/dockerized-setup/documentation/1.0.0/sample-data/windows/user/sampleData.sql" -o sample-data\user\sampleData.sql
+        ```
 
 <details>
 <summary>Natively Installed Services & Dependencies </summary>

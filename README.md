@@ -104,12 +104,13 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
 
         ```
         curl -L ^
-        -O https://github.com/ELEVATE-Project/project-service/raw/master/documentation/1.0.0/dockerized/envs/interface_env \
-        -O https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/envs/project_env \
-        -O https://github.com/ELEVATE-Project/project-service/raw/master/documentation/1.0.0/dockerized/envs/notification_env \
-        -O https://github.com/ELEVATE-Project/project-service/raw/master/documentation/1.0.0/dockerized/envs/scheduler_env \
-        -O https://github.com/ELEVATE-Project/project-service/raw/master/documentation/1.0.0/dockerized/envs/user_env \
-        -O https://github.com/ELEVATE-Project/project-service/raw/master/documentation/1.0.0/dockerized/envs/environment.ts
+         -O https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/envs/interface_env \
+         -O https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/envs/entity_management_env \
+         -O https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/envs/project_env \
+         -O https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/envs/notification_env \
+         -O https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/envs/scheduler_env \
+         -O https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/envs/user_env \
+         -O https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/envs/environment.ts
         ```
 
     > **Note:** Modify the environment files as necessary for your deployment using any text editor, ensuring that the values are appropriate for your environment. The default values provided in the current files are functional and serve as a good starting point. Refer to the sample env files provided at the [Project](https://github.com/ELEVATE-Project/project-service/blob/main/.env.sample), [User](https://github.com/ELEVATE-Project/user/blob/master/src/.env.sample), [Notification](https://github.com/ELEVATE-Project/notification/blob/master/src/.env.sample), [Scheduler](https://github.com/ELEVATE-Project/scheduler/blob/master/src/.env.sample), [Interface](https://github.com/ELEVATE-Project/interface-service/blob/main/src/.env.sample) and [Entity-management](https://github.com/ELEVATE-Project/entity-management/blob/main/src/.env.sample) repositories for reference.
@@ -184,11 +185,11 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
     -   **Windows**
 
         ```
-        curl -OJL https://github.com/ELEVATE-Project/mentoring/raw/master/documentation/2.6.1/dockerized/scripts/windows/docker-compose-up.bat
+        curl -OJL https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/scripts/windows/docker-compose-up.bat
         ```
 
         ```
-        curl -OJL https://github.com/ELEVATE-Project/mentoring/raw/master/documentation/2.6.1/dockerized/scripts/windows/docker-compose-down.bat
+        curl -OJL https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/scripts/windows/docker-compose-down.bat
         ```
 
 7.  **Run All Services & Dependencies:** All services and dependencies can be started using the `docker-compose-up` script file.
@@ -259,7 +260,7 @@ To enable the Citus extension for mentoring and user services, follow these step
     - **Windows**
         1. Download the `citus_setup.bat` file.
             ```
-             curl -OJL https://github.com/ELEVATE-Project/mentoring/raw/master/documentation/2.6.1/dockerized/scripts/windows/citus_setup.bat
+             curl -OJL https://github.com/ELEVATE-Project/project-service/raw/dockerized-setup/documentation/1.0.0/dockerized/scripts/windows/citus_setup.bat
             ```
         2. Enable Citus and set distribution columns for `user` database by running the `citus_setup.bat`with the following arguments.
             ```
@@ -334,7 +335,7 @@ In such cases, you can generate sample user accounts using the steps below. This
 
         ```
         mkdir sample-data\user 2>nul & ^
-        curl -L "https://raw.githubusercontent.com/ELEVATE-Project/project-service/master/documentation/1.0.0/sample-data/windows/user/sampleData.sql" -o sample-data\user\sampleData.sql
+        curl -L "https://raw.githubusercontent.com/ELEVATE-Project/project-service/dockerized-setup/documentation/1.0.0/sample-data/windows/user/sampleData.sql" -o sample-data\user\sampleData.sql
         ```
 
 2. **Download The `insert_sample_data` Script File:**

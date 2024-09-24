@@ -6,7 +6,6 @@ Python script to upload a program and add multiple resources like Projects and a
 - [Programs](https://docs.google.com/spreadsheets/d/1mivwHzxrZyLHcM8ApOAeYIRLip-jJJXJ/edit?usp=sharing&ouid=113799545932705393937&rtpof=true&sd=true)
 - [Projects](https://docs.google.com/spreadsheets/d/10STEIdqJuM03NzopGPHPcD74YBUE7IzMct5WfmvnwFM/edit?usp=sharing)
 
-
 - Pull the code from latest release branch
 - To clone the repository 
 ``` git clone -b latestBranch <git-link>```

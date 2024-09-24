@@ -97,6 +97,7 @@ countImps = 0
 ecmToSection = dict()
 entitiesPGM = []
 entitiesPGMID = []
+entitiesType = []
 solutionRolesArr = []
 startDateOfResource = None
 endDateOfResource = None
@@ -348,7 +349,7 @@ def programsFileCheck(filePathAddPgm, accessToken, parentFolder, MainFilePath):
                     roles = dictDetailsEnv['Targeted subrole at program level'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Targeted subrole at program level'] else terminatingMessage("\"Program ID\" must not be Empty in \"Program details\" sheet")
                     returnvalues = []
                     global entitiesPGM
-                    entitiesPGM = dictDetailsEnv['Targeted state at program level'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Targeted state at program level'] else terminatingMessage("\"Targeted state at program level\" must not be Empty in \"Program details\" sheet")
+                    entitiesPGM = dictDetailsEnv['Targeted entities at program level'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Targeted entities at program level'] else terminatingMessage("\"Targeted entities at program level\" must not be Empty in \"Program details\" sheet")
                     districtentitiesPGM = dictDetailsEnv['Targeted district at program level'].encode('utf-8').decode('utf-8')
                     global startDateOfProgram, endDateOfProgram
                     startDateOfProgram = dictDetailsEnv['Start date of program']
@@ -365,14 +366,15 @@ def programsFileCheck(filePathAddPgm, accessToken, parentFolder, MainFilePath):
 
                     global scopeEntityType
                     scopeEntityType = "state"
-
-
+                    global entitiesType
+                    entitiesType = fetchEntityType(parentFolder, accessToken,
+                                                  entitiesPGM.lstrip().rstrip().split(","), scopeEntityType)
                     if districtentitiesPGM:
                         entitiesPGM = districtentitiesPGM
                         scopeEntityType = "district"
                     else:
                         entitiesPGM = entitiesPGM
-                        scopeEntityType = "state"
+                        scopeEntityType = entitiesType
                     global entitiesPGMID
                     entitiesPGMID = fetchEntityId(parentFolder, accessToken,
                                                   entitiesPGM.lstrip().rstrip().split(","), scopeEntityType)
@@ -387,7 +389,7 @@ def programsFileCheck(filePathAddPgm, accessToken, parentFolder, MainFilePath):
                             'Description of the Program'] else terminatingMessage(
                             "\"Description of the Program\" must not be Empty in \"Program details\" sheet")
                         keywordsPGM = dictDetailsEnv['Keywords'].encode('utf-8').decode('utf-8')
-                        entitiesPGM = dictDetailsEnv['Targeted state at program level'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Targeted state at program level'] else terminatingMessage("\"Targeted state at program level\" must not be Empty in \"Program details\" sheet")
+                        entitiesPGM = dictDetailsEnv['Targeted entities at program level'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Targeted entities at program level'] else terminatingMessage("\"Targeted entities at program level\" must not be Empty in \"Program details\" sheet")
                         districtentitiesPGM = dictDetailsEnv['Targeted district at program level'].encode('utf-8').decode('utf-8')
                         # selecting entity type based on the users input 
                         if districtentitiesPGM:
@@ -728,7 +730,9 @@ def fetchEntityId(solutionName_for_folder_path, accessToken, entitiesNameList, s
     payload = {
 
     "query" : {
-        "entityType" : scopeEntityType
+          "entityType": {
+            "$in": scopeEntityType
+        }
     },
 
     "projection": [
@@ -771,6 +775,66 @@ def fetchEntityId(solutionName_for_folder_path, accessToken, entitiesNameList, s
         createAPILog(solutionName_for_folder_path, messageArr)
         terminatingMessage("---> Error in location search.")
 
+def fetchEntityType(solutionName_for_folder_path, accessToken, entitiesPGM, scopeEntityType):
+    # Define the API URL and headers
+    urlFetchEntityListApi = config.get(environment, 'elevateentityhost') + config.get(environment, 'searchForLocation')
+    headerFetchEntityListApi = {
+        'Content-Type': config.get(environment, 'Content-Type'),
+        'internal-access-token': config.get(environment, 'internal-access-token'),
+    }
+
+    # Initialize a dictionary to store entity types for each entity
+    entityTypes = []
+
+    # Loop through each entity name in the entitiesPGM list
+    for entityName in entitiesPGM:
+        entityName = entityName.strip()  # Remove any extra spaces
+        print(entityName, "Processing entity...")  # Log the entity being processed
+
+        # Prepare the payload for the API request
+        payload = {
+            "query": {
+                "metaInformation.name": entityName  # Use the current entity name
+            },
+            "projection": [
+                "entityType"
+            ]
+        }
+        data = json.dumps(payload)
+
+        # Make the API call inside the loop to send one request per entity
+        responseFetchEntityListApi = requests.post(url=urlFetchEntityListApi, headers=headerFetchEntityListApi, data=data)
+        
+        # Log API call details
+        messageArr = ["Entities List Fetch API executed for entity: " + entityName, 
+                      "URL  : " + str(urlFetchEntityListApi),
+                      "Status : " + str(responseFetchEntityListApi.status_code)]
+        createAPILog(solutionName_for_folder_path, messageArr)
+
+        # Check if the API call was successful
+        if responseFetchEntityListApi.status_code == 200:
+            responseFetchEntityListApi = responseFetchEntityListApi.json()
+
+            # Loop through the result to find the entityType
+            entityToUpload = None  # Initialize for each entity
+            for listEntities in responseFetchEntityListApi['result']:
+                entityToUpload = listEntities['entityType']
+                # entityToUpload = listEntities.get('entityType', '').lower().strip()
+
+                # If a valid entityType is found, store it in the dictionary and break out of the loop
+                if entityToUpload:
+                    entityTypes.append(entityToUpload)
+                    break
+
+            # If no entityType is found for this entity, raise an error for that specific entity
+            if not entityToUpload:
+                raise ValueError(f"Entity type not found for entity '{entityName}'.")
+        else:
+            # Handle cases where the API call fails for a specific entity
+            raise RuntimeError(f"Failed to fetch entity type for '{entityName}'. Status code: {responseFetchEntityListApi.status_code}")
+
+    # Return all found entity types
+    return entityTypes
 # Fetches entity IDs based on the given entity names and scope entity type.
 def fetchScopeRole(solutionName_for_folder_path, accessToken, roleNameList):
     urlFetchRolesListApi = config.get(environment, 'INTERNAL_KONG_IP') + config.get(environment, 'listOfRolesApi')
@@ -888,9 +952,9 @@ def validateSheets(filePathAddObs, accessToken, parentFolder):
                     else:
                         isProgramnamePresent = True
                    
-                    userEntity = dictProgramDetails['Targeted state at program level'].encode('utf-8').decode('utf-8').lstrip().rstrip().split(",") if \
+                    userEntity = dictProgramDetails['Targeted entities at program level'].encode('utf-8').decode('utf-8').lstrip().rstrip().split(",") if \
                         dictProgramDetails[
-                            'Targeted state at program level'] else terminatingMessage(
+                            'Targeted entities at program level'] else terminatingMessage(
                         "\"scope_entity\" must not be Empty in \"details\" sheet")
                     
 
@@ -2716,36 +2780,36 @@ def prepareProgramSuccessSheet(MainFilePath, solutionName_for_folder_path, progr
         else:
             xfile = openpyxl.load_workbook(programFile)
 
-        # resourceDetailsSheet = xfile.get_sheet_by_name('Resource Details')
+        resourceDetailsSheet = xfile.get_sheet_by_name('Resource Details')
 
-        # greenFill = PatternFill(start_color='0000FF00',
-        #                         end_color='0000FF00',
-        #                         fill_type='solid')
-        # rowCountRD = resourceDetailsSheet.max_row
-        # columnCountRD = resourceDetailsSheet.max_column
-        # for row in range(3, rowCountRD + 1):
-        #     if str(resourceDetailsSheet["B" + str(row)].value).rstrip().lstrip().lower() == "course":
-        #         resourceDetailsSheet["D1"] = ""
-        #         resourceDetailsSheet["E1"] = ""
-        #         resourceDetailsSheet['I2'] = "External id of the resource"
-        #         resourceDetailsSheet['J2'] = "link to access the resource/Response"
-        #         resourceDetailsSheet['I2'].fill = greenFill
-        #         resourceDetailsSheet['J2'].fill = greenFill
-        #         resourceDetailsSheet['I' + str(row)] = solutionExternalId
-        #         resourceDetailsSheet['J' + str(row)] = "The course has been successfully mapped to the program"
-        #         resourceDetailsSheet['I' + str(row)].fill = greenFill
-        #         resourceDetailsSheet['J' + str(row)].fill = greenFill
-        #     elif str(resourceDetailsSheet["A" + str(row)].value).strip() == solutionName:
-        #         resourceDetailsSheet["D1"] = ""
-        #         resourceDetailsSheet["E1"] = ""
-        #         resourceDetailsSheet['I2'] = "External id of the resource"
-        #         resourceDetailsSheet['J2'] = "link to access the resource/Response"
-        #         resourceDetailsSheet['I2'].fill = greenFill
-        #         resourceDetailsSheet['J2'].fill = greenFill
-        #         resourceDetailsSheet['I' + str(row)] = solutionExternalId
-        #         resourceDetailsSheet['J' + str(row)] = solutionLink
-        #         resourceDetailsSheet['I' + str(row)].fill = greenFill
-        #         resourceDetailsSheet['J' + str(row)].fill = greenFill
+        greenFill = PatternFill(start_color='0000FF00',
+                                end_color='0000FF00',
+                                fill_type='solid')
+        rowCountRD = resourceDetailsSheet.max_row
+        columnCountRD = resourceDetailsSheet.max_column
+        for row in range(3, rowCountRD + 1):
+            if str(resourceDetailsSheet["B" + str(row)].value).rstrip().lstrip().lower() == "course":
+                resourceDetailsSheet["D1"] = ""
+                resourceDetailsSheet["E1"] = ""
+                resourceDetailsSheet['I2'] = "External id of the resource"
+                resourceDetailsSheet['J2'] = "link to access the resource/Response"
+                resourceDetailsSheet['I2'].fill = greenFill
+                resourceDetailsSheet['J2'].fill = greenFill
+                resourceDetailsSheet['I' + str(row)] = solutionExternalId
+                resourceDetailsSheet['J' + str(row)] = "The course has been successfully mapped to the program"
+                resourceDetailsSheet['I' + str(row)].fill = greenFill
+                resourceDetailsSheet['J' + str(row)].fill = greenFill
+            elif str(resourceDetailsSheet["A" + str(row)].value).strip() == solutionName:
+                resourceDetailsSheet["D1"] = ""
+                resourceDetailsSheet["E1"] = ""
+                resourceDetailsSheet['I2'] = "External id of the resource"
+                resourceDetailsSheet['J2'] = "link to access the resource/Response"
+                resourceDetailsSheet['I2'].fill = greenFill
+                resourceDetailsSheet['J2'].fill = greenFill
+                resourceDetailsSheet['I' + str(row)] = solutionExternalId
+                resourceDetailsSheet['J' + str(row)] = solutionLink
+                resourceDetailsSheet['I' + str(row)].fill = greenFill
+                resourceDetailsSheet['J' + str(row)].fill = greenFill
 
         programFile = str(programFile).replace(".xlsx", "")
         xfile.save(MainFilePath + "/" + programFile + '-SuccessSheet.xlsx')
@@ -2822,36 +2886,36 @@ def prepareProgramSuccessSheetcsv(MainFilePath, solutionName_for_folder_path, pr
         else:
             xfile = openpyxl.load_workbook(programFile)
 
-        # resourceDetailsSheet = xfile.get_sheet_by_name('Resource Details')
+        resourceDetailsSheet = xfile.get_sheet_by_name('Resource Details')
 
-        # greenFill = PatternFill(start_color='0000FF00',
-        #                         end_color='0000FF00',
-        #                         fill_type='solid')
-        # rowCountRD = resourceDetailsSheet.max_row
-        # columnCountRD = resourceDetailsSheet.max_column
-        # for row in range(3, rowCountRD + 1):
-        #     if str(resourceDetailsSheet["B" + str(row)].value).rstrip().lstrip().lower() == "course":
-        #         resourceDetailsSheet["D1"] = ""
-        #         resourceDetailsSheet["E1"] = ""
-        #         resourceDetailsSheet['I2'] = "External id of the resource"
-        #         resourceDetailsSheet['J2'] = "link to access the resource/Response"
-        #         resourceDetailsSheet['I2'].fill = greenFill
-        #         resourceDetailsSheet['J2'].fill = greenFill
-        #         resourceDetailsSheet['I' + str(row)] = solutionExternalId
-        #         resourceDetailsSheet['J' + str(row)] = "The course has been successfully mapped to the program"
-        #         resourceDetailsSheet['I' + str(row)].fill = greenFill
-        #         resourceDetailsSheet['J' + str(row)].fill = greenFill
-        #     elif str(resourceDetailsSheet["A" + str(row)].value).strip() == solutionName:
-        #         resourceDetailsSheet["D1"] = ""
-        #         resourceDetailsSheet["E1"] = ""
-        #         resourceDetailsSheet['I2'] = "External id of the resource"
-        #         resourceDetailsSheet['J2'] = "link to access the resource/Response"
-        #         resourceDetailsSheet['I2'].fill = greenFill
-        #         resourceDetailsSheet['J2'].fill = greenFill
-        #         resourceDetailsSheet['I' + str(row)] = solutionExternalId
-        #         resourceDetailsSheet['J' + str(row)] = solutionLink
-        #         resourceDetailsSheet['I' + str(row)].fill = greenFill
-        #         resourceDetailsSheet['J' + str(row)].fill = greenFill
+        greenFill = PatternFill(start_color='0000FF00',
+                                end_color='0000FF00',
+                                fill_type='solid')
+        rowCountRD = resourceDetailsSheet.max_row
+        columnCountRD = resourceDetailsSheet.max_column
+        for row in range(3, rowCountRD + 1):
+            if str(resourceDetailsSheet["B" + str(row)].value).rstrip().lstrip().lower() == "course":
+                resourceDetailsSheet["D1"] = ""
+                resourceDetailsSheet["E1"] = ""
+                resourceDetailsSheet['I2'] = "External id of the resource"
+                resourceDetailsSheet['J2'] = "link to access the resource/Response"
+                resourceDetailsSheet['I2'].fill = greenFill
+                resourceDetailsSheet['J2'].fill = greenFill
+                resourceDetailsSheet['I' + str(row)] = solutionExternalId
+                resourceDetailsSheet['J' + str(row)] = "The course has been successfully mapped to the program"
+                resourceDetailsSheet['I' + str(row)].fill = greenFill
+                resourceDetailsSheet['J' + str(row)].fill = greenFill
+            elif str(resourceDetailsSheet["A" + str(row)].value).strip() == solutionName:
+                resourceDetailsSheet["D1"] = ""
+                resourceDetailsSheet["E1"] = ""
+                resourceDetailsSheet['I2'] = "External id of the resource"
+                resourceDetailsSheet['J2'] = "link to access the resource/Response"
+                resourceDetailsSheet['I2'].fill = greenFill
+                resourceDetailsSheet['J2'].fill = greenFill
+                resourceDetailsSheet['I' + str(row)] = solutionExternalId
+                resourceDetailsSheet['J' + str(row)] = solutionLink
+                resourceDetailsSheet['I' + str(row)].fill = greenFill
+                resourceDetailsSheet['J' + str(row)].fill = greenFill
 
         programFile = str(programFile).replace(".xlsx", "")
         xfile.save(MainFilePath + "/" + programFile + '-SuccessSheet.xlsx')
@@ -4088,8 +4152,18 @@ def solutionCreationAndMapping(projectName_for_folder_path, entityToUpload, list
                                                                        solutionId, accessToken)
                 scopeEntities = entitiesPGMID
                 scopeRoles = solutionDetails[0]
+                scope = {}
+                for i in range(len(entitiesType)):
+                    entity_type = entitiesType[i]
+                    entity_value = scopeEntities[i]
+                    if entity_type in scope:
+                        scope[entity_type].append(entity_value)
+                    else:
+                        scope[entity_type] = [entity_value]
+                scope["roles"] = [rolesPGM]
                 bodySolutionUpdate = {
-                    "scope": { "state": scopeEntities, "roles": [rolesPGM]}}
+                  "scope": scope
+                }
                 solutionUpdate(projectName_for_folder_path, accessToken, solutionId, bodySolutionUpdate)
                 userDetails = fetchUserDetails(environment, accessToken, projectAuthor)
                 matchedShikshalokamLoginId = userDetails[0]
@@ -4428,7 +4502,7 @@ def mainFunc(MainFilePath, programFile, addObservationSolution, millisecond, isP
                     scopeEntities = entitiesPGMID
                     scopeRoles = solutionDetails[0]
                     bodySolutionUpdate = {
-                        "scope": {"state": scopeEntities, "roles": scopeRoles}}
+                        "scope": {entitiesType: scopeEntities, "roles": scopeRoles}}
                     solutionUpdate(parentFolder, accessToken, childId[0], bodySolutionUpdate)
                     if solutionDetails[1]:
                         startDateArr = str(solutionDetails[1]).split("-")
@@ -4474,7 +4548,7 @@ def mainFunc(MainFilePath, programFile, addObservationSolution, millisecond, isP
                         else:
                             isProgramnamePresent = True
                         scopeEntityType = scopeEntityType
-                        userEntity = dictProgramDetails['Targeted state at program level'].encode('utf-8').decode('utf-8').lstrip().rstrip().split(",") if dictProgramDetails['Targeted state at program level'] else terminatingMessage("\"scope_entity\" must not be Empty in \"details\" sheet")
+                        userEntity = dictProgramDetails['Targeted entities at program level'].encode('utf-8').decode('utf-8').lstrip().rstrip().split(",") if dictProgramDetails['Targeted entities at program level'] else terminatingMessage("\"scope_entity\" must not be Empty in \"details\" sheet")
                         
             for sheets in projectSheetNames:
                 if sheets.strip().lower() == 'Project upload'.lower():
@@ -4630,9 +4704,9 @@ if len(sheetNames) == len(pgmSheets) and sheetNames == pgmSheets:
                 else:
                     isProgramnamePresent = True
                 scopeEntityType = scopeEntityType
-                userEntity = dictProgramDetails['Targeted state at program level'].encode('utf-8').decode('utf-8').lstrip().rstrip().split(
+                userEntity = dictProgramDetails['Targeted entities at program level'].encode('utf-8').decode('utf-8').lstrip().rstrip().split(
                     ",") if \
-                    dictProgramDetails['Targeted state at program level'] else terminatingMessage("\"scope_entity\" must not be Empty in \"details\" sheet")
+                    dictProgramDetails['Targeted entities at program level'] else terminatingMessage("\"scope_entity\" must not be Empty in \"details\" sheet")
         if sheetEnv.strip().lower() == 'resource details':
             print("--->Checking Resource Details sheet...")
             messageArr = []

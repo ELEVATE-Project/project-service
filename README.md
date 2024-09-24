@@ -129,13 +129,13 @@ Service also uses gotenberg for creation of project certificate. You can read mo
         ```
         curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/dockerized/scripts/mac-linux/replace_volume_path.sh
         ```
-
+<!-- 
     -   **Windows**
 
         ```
         curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/dockerized/scripts/windows/replace_volume_path.bat
         ```
-
+ -->
 5.  **Run `replace_volume_path` Script File**
 
     -   **Ubuntu/Linux/Mac**
@@ -147,7 +147,7 @@ Service also uses gotenberg for creation of project certificate. You can read mo
             ```
             ./replace_volume_path.sh
             ```
-    -   **Windows**
+    <!-- -   **Windows** 
 
         Run the script file either by double clicking it or by executing the following command from the terminal.
 
@@ -159,7 +159,7 @@ Service also uses gotenberg for creation of project certificate. You can read mo
         >
         > volumes:
         >
-        > \- /home/joffin/elevate/backend/environment.ts:/app/src/environments/environment.ts
+        > \- /home/joffin/elevate/backend/environment.ts:/app/src/environments/environment.ts -->
 
 6.  **Download `docker-compose-up` & `docker-compose-down` Script Files**
 
@@ -185,7 +185,7 @@ Service also uses gotenberg for creation of project certificate. You can read mo
             chmod +x docker-compose-down.sh
             ```
 
-    -   **Windows**
+<!-- -   **Windows** 
 
         ```
         curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/windows/docker-compose-up.bat
@@ -194,14 +194,14 @@ Service also uses gotenberg for creation of project certificate. You can read mo
         ```
         curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/windows/docker-compose-down.bat
         ```
-
+    -->
 7.  **Run All Services & Dependencies:** All services and dependencies can be started using the `docker-compose-up` script file.
 
     -   **Ubuntu/Linux/Mac**
         ```
         ./docker-compose-up.sh
         ```
-    -   **Windows**
+<!-- -   **Windows** 
 
         ```
         docker-compose-up.bat
@@ -210,7 +210,7 @@ Service also uses gotenberg for creation of project certificate. You can read mo
         > Double-click the file or run the above command from the terminal.
 
         > **Note**: During the first Docker Compose run, the database, migration seeder files, and the script to set the default organization will be executed automatically.
-
+    -->
 8.  **Access The Project Application**: Once the services are up and the front-end app bundle is built successfully, navigate to **[localhost:8100](http://localhost:8100/)** to access the MentorEd app.
 9.  **Gracefully Stop All Services & Dependencies:** All containers which are part of the docker-compose can be gracefully stopped by pressing `Ctrl + c` in the same terminal where the services are running.
 10. **Remove All Service & Dependency Containers**: All docker containers can be stopped and removed by using the `docker-compose-down` file.
@@ -219,12 +219,12 @@ Service also uses gotenberg for creation of project certificate. You can read mo
         ```
         ./docker-compose-down.sh
         ```
-    -   **Windows**
+<!-- -   **Windows** 
 
         ```
         docker-compose-down.bat
         ```
-
+    -->
         > **Caution**: As per the default configuration in the `docker-compose-mentoring.yml` file, using the `down` command will lead to data loss since the database container does not persist data. To persist data across `down` commands and subsequent container removals, refer to the "Persistence of Database Data in Docker Containers" section of this documentation.
 
 ## Enable Citus Extension
@@ -260,7 +260,7 @@ To enable the Citus extension for mentoring and user services, follow these step
             ./citus_setup.sh user postgres://postgres:postgres@citus_master:5432/user
             ```
 
-    - **Windows**
+<!-- - **Windows** 
         1. Download the `citus_setup.bat` file.
             ```
              curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/windows/citus_setup.bat
@@ -270,7 +270,7 @@ To enable the Citus extension for mentoring and user services, follow these step
             citus_setup.bat user postgres://postgres:postgres@citus_master:5432/user
             ```
             > **Note:** Since the `citus_setup.bat` file requires arguments, it must be run from a terminal.
-
+    -->
 ## Persistence Of Database Data In Docker Container
 
 To ensure the persistence of database data when running `docker compose down`, it is necessary to modify the `docker-compose-project.yml` file according to the steps given below:
@@ -334,12 +334,12 @@ In such cases, you can generate sample user accounts using the steps below. This
         curl -L https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/sample-data/mac-linux/user/sampleData.sql -o sample-data/user/sampleData.sql
         ```
 
-    - **Windows**
+<!-- - **Windows** 
 
         ```
         mkdir sample-data\user 2>nul & ^
         curl -L "https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/sample-data/windows/user/sampleData.sql" -o sample-data\user\sampleData.sql
-        ```
+    -->    ```
 
 2. **Download The `insert_sample_data` Script File:**
 
@@ -349,12 +349,12 @@ In such cases, you can generate sample user accounts using the steps below. This
         curl -L -o insert_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/dockerized/scripts/mac-linux/insert_sample_data.sh && chmod +x insert_sample_data.sh
         ```
 
-    - **Windows**
+<!-- - **Windows** 
 
         ```
         curl -L -o insert_sample_data.bat https://raw.githubusercontent.com/ELEVATE-Project/mentoring/main/documentation/2.6.1/dockerized/scripts/windows/insert_sample_data.bat
         ```
-
+    -->
 3. **Run The `insert_sample_data` Script File:**
 
     - **Ubuntu/Linux/Mac**
@@ -363,12 +363,12 @@ In such cases, you can generate sample user accounts using the steps below. This
         ./insert_sample_data.sh user postgres://postgres:postgres@citus_master:5432/user
         ```
 
-    - **Windows**
+<!-- - **Windows** 
 
         ```
         insert_sample_data.bat user postgres://postgres:postgres@citus_master:5432/user
         ```
-
+    -->
     After successfully running the script mentioned above, the following user accounts will be created and available for login:
 
     | Email ID                 | Password   | Role                    |
@@ -403,12 +403,12 @@ This step will guide us in implementing a sample project solution following the 
             ./add_sample_project_entity_data.sh
             ```
 
-    - **Windows**
+<!-- - **Windows** 
 
         ```
         mkdir sample-data\user 2>nul & ^
         curl -L "https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/sample-data/windows/user/sampleData.sql" -o sample-data\user\sampleData.sql
-        ```
+    -->    ```
 
 </details>
 
@@ -428,9 +428,9 @@ Before setting up the following ELEVATE-Project application, dependencies given 
     1. Download dependency management scripts:
 
         ```
-        curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/chore/elevate-documentaion/documentation/1.0.0/native/scripts/linux/check-dependencies.sh && \
-        curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/chore/elevate-documentaion/documentation/1.0.0/native/scripts/linux/install-dependencies.sh && \
-        curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/chore/elevate-documentaion/documentation/1.0.0/native/scripts/linux/uninstall-dependencies.sh && \
+        curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/native/scripts/linux/check-dependencies.sh && \
+        curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/native/scripts/linux/install-dependencies.sh && \
+        curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/native/scripts/linux/uninstall-dependencies.sh && \
         chmod +x check-dependencies.sh && \
         chmod +x install-dependencies.sh && \
         chmod +x uninstall-dependencies.sh
@@ -460,7 +460,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
 
         > Warning: This script should only be used to uninstall dependencies that were installed via installation script in step 3. If same dependencies were installed using other methods, refrain from using this script. This script is provided in-order to reverse installation in-case issues arise from a bad install.
 
-<!-- -   **MacOS**
+-   **MacOS**
 
     1. Install Node.js 20:
 
@@ -499,7 +499,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
     6. Download `check-dependencies.sh` file:
 
         ```
-        curl -OJL https://github.com/ELEVATE-Project/mentoring/raw/master/documentation/2.6.1/native/scripts/macos/check-dependencies.sh && \
+        curl -OJL https://github.com/ELEVATE-Project/project-service/raw/service-setup/documentation/1.0.0/native/scripts/macos/check-dependencies.sh && \
         chmod +x check-dependencies.sh
         ```
 
@@ -507,7 +507,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
 
         ```
         ./check-dependencies.sh
-        ``` -->
+        ``` 
 
 <!-- -   **Windows**
 
@@ -621,16 +621,28 @@ Before setting up the following ELEVATE-Project application, dependencies given 
     - **Ubuntu/Linux**
 
         ```
-        curl -L -o project-service/.env https://github.com/ELEVATE-Project/project-service/blob/chore/elevate-documentaion/documentation/1.0.0/native/envs/project_env && \
-        curl -L -o entity-management/src/.env https://github.com/ELEVATE-Project/project-service/blob/chore/elevate-documentaion/documentation/1.0.0/dockerized/envs/entity_management_env && \
-        curl -L -o user/src/.env https://github.com/ELEVATE-Project/project-service/blob/chore/elevate-documentaion/documentation/1.0.0/native/envs/user_env && \
-        curl -L -o notification/src/.env https://github.com/ELEVATE-Project/project-service/blob/chore/elevate-documentaion/documentation/1.0.0/native/envs/notification_env && \
-        curl -L -o interface-service/src/.env https://github.com/ELEVATE-Project/project-service/blob/chore/elevate-documentaion/documentation/1.0.0/native/envs/interface_env && \
-        curl -L -o scheduler/src/.env https://github.com/ELEVATE-Project/project-service/blob/chore/elevate-documentaion/documentation/1.0.0/native/envs/scheduler_env && \
+        curl -L -o project-service/.env https://github.com/ELEVATE-Project/project-service/blob/main/documentation/1.0.0/native/envs/project_env && \
+        curl -L -o entity-management/src/.env https://github.com/ELEVATE-Project/project-service/blob/main/documentation/1.0.0/dockerized/envs/entity_management_env && \
+        curl -L -o user/src/.env https://github.com/ELEVATE-Project/project-service/blob/main/documentation/1.0.0/native/envs/user_env && \
+        curl -L -o notification/src/.env https://github.com/ELEVATE-Project/project-service/blob/main/documentation/1.0.0/native/envs/notification_env && \
+        curl -L -o interface-service/src/.env https://github.com/ELEVATE-Project/project-service/blob/main/documentation/1.0.0/native/envs/interface_env && \
+        curl -L -o scheduler/src/.env https://github.com/ELEVATE-Project/project-service/blob/main/documentation/1.0.0/native/envs/scheduler_env && \
         curl -L -o observation-survey-projects-pwa/src/environments/environment.ts https://github.com/ELEVATE-Project/observation-survey-projects-pwa/blob/release-2.0.0/src/environments/environment.ts
         ```
 
-    > **Note:** Modify the environment files as necessary for your deployment using any text editor, ensuring that the values are appropriate for your environment. The default values provided in the current files are functional and serve as a good starting point. Refer to the sample env files provided at the [Project](https://github.com/ELEVATE-Project/mentoring/blob/master/src/.env.sample), [User](https://github.com/ELEVATE-Project/user/blob/master/src/.env.sample), [Notification](https://github.com/ELEVATE-Project/notification/blob/master/src/.env.sample), [Scheduler](https://github.com/ELEVATE-Project/scheduler/blob/master/src/.env.sample), [Interface](https://github.com/ELEVATE-Project/interface-service/blob/main/src/.env.sample) and [Entity-Management](https://github.com/ELEVATE-Project/project-service/blob/chore/elevate-documentaion/documentation/1.0.0/dockerized/envs/entity_management_env) repositories for reference.
+    - **MacOs**
+
+        ```
+        curl -L -o project-service/.env https://github.com/ELEVATE-Project/project-service/blob/service-setup/documentation/1.0.0/native/envs/project_env && \
+        curl -L -o entity-management/src/.env https://github.com/ELEVATE-Project/project-service/blob/service-setup/documentation/1.0.0/dockerized/envs/entity_management_env && \
+        curl -L -o user/src/.env https://github.com/ELEVATE-Project/project-service/blob/service-setup/documentation/1.0.0/native/envs/non-citus/user_env && \
+        curl -L -o notification/src/.env https://github.com/ELEVATE-Project/project-service/blob/service-setup/documentation/1.0.0/native/envs/non-citus/notification_env && \
+        curl -L -o interface-service/src/.env https://github.com/ELEVATE-Project/project-service/blob/service-setup/documentation/1.0.0/native/envs/interface_env && \
+        curl -L -o scheduler/src/.env https://github.com/ELEVATE-Project/project-service/blob/service-setup/documentation/1.0.0/native/envs/scheduler_env && \
+        curl -L -o observation-survey-projects-pwa/src/environments/environment.ts https://github.com/ELEVATE-Project/ELEVATE-Project/project-service/blob/service-setup/documentation/1.0.0/native/envs/environment.ts
+        ```
+
+    > **Note:** Modify the environment files as necessary for your deployment using any text editor, ensuring that the values are appropriate for your environment. The default values provided in the current files are functional and serve as a good starting point. Refer to the sample env files provided at the [Project](https://github.com/ELEVATE-Project/mentoring/blob/master/src/.env.sample), [User](https://github.com/ELEVATE-Project/user/blob/master/src/.env.sample), [Notification](https://github.com/ELEVATE-Project/notification/blob/master/src/.env.sample), [Scheduler](https://github.com/ELEVATE-Project/scheduler/blob/master/src/.env.sample), [Interface](https://github.com/ELEVATE-Project/interface-service/blob/main/src/.env.sample) and [Entity-Management](https://github.com/ELEVATE-Project/project-service/blob/main/documentation/1.0.0/dockerized/envs/entity_management_env) repositories for reference.
 
     > **Caution:** While the default values in the downloaded environment files enable the ELEVATE-Project Application to operate, certain features may not function correctly or could be impaired unless the adopter-specific environment variables are properly configured.
 
@@ -643,7 +655,25 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         1. Download `create-databases.sh` Script File:
 
             ```
-            curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/chore/elevate-documentaion/documentation/1.0.0/native/scripts/linux/create-databases.sh
+            curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/native/scripts/linux/create-databases.sh
+
+            ```
+
+        2. Make the executable by running the following command:
+            ```
+            chmod +x create-databases.sh
+            ```
+        3. Run the script file:
+            ```
+            ./create-databases.sh
+            ```
+
+    - **MacOs**
+
+        1. Download `create-databases.sh` Script File:
+
+            ```
+            curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/service-setup/documentation/1.0.0/native/scripts/macos/create-databases.sh
 
             ```
 
@@ -679,7 +709,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
     1. Download user `distributionColumns.sql` file.
 
         ```
-        curl -o ./user/distributionColumns.sql -JL https://github.com/ELEVATE-Project/project-service/blob/chore/elevate-documentaion/documentation/1.0.0/distribution-columns/user/distributionColumns.sql
+        curl -o ./user/distributionColumns.sql -JL https://github.com/ELEVATE-Project/project-service/blob/main/documentation/1.0.0/distribution-columns/user/distributionColumns.sql
         ```
 
     2. Set up the `citus_setup` file by following the steps given below.
@@ -689,7 +719,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
             1. Download the `citus_setup.sh` file:
 
                 ```
-                curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/chore/elevate-documentaion/documentation/1.0.0/dockerized/scripts/mac-linux/citus_setup.sh
+                curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/dockerized/scripts/mac-linux/citus_setup.sh
 
 
                 ```
@@ -730,6 +760,17 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         cd notification/src && pm2 start app.js -i 2 --name notification && cd ../.. && \
         cd interface-service/src && pm2 start app.js -i 2 --name interface && cd ../.. && \
         cd scheduler/src && pm2 start app.js -i 2 --name scheduler && cd ../..
+        ```
+
+    - **MacOs**
+
+        ```
+        cd project-service && npx pm2 start app.js -i 2 --name project-service && cd .. && \
+        cd entity-management/src && npx pm2 start app.js -i 2 --name entity-management && cd ../.. && \
+        cd user/src && npx pm2 start app.js -i 2 --name user && cd ../.. && \
+        cd notification/src && npx pm2 start app.js -i 2 --name notification && cd ../.. && \
+        cd interface-service/src && npx pm2 start app.js -i 2 --name interface && cd ../.. && \
+        cd scheduler/src && npx pm2 start app.js -i 2 --name scheduler && cd ../..
         ```
 
 10. **Run Service Scripts**
@@ -789,7 +830,7 @@ In such cases, you can generate sample user accounts using the steps below. This
 -   **Ubuntu/Linux**
 
     ```
-    curl -o insert_sample_data.sh https://github.com/ELEVATE-Project/project-service/blob/chore/elevate-documentaion/documentation/1.0.0/native/scripts/linux/insert_sample_data.sh && \
+    curl -o insert_sample_data.sh https://github.com/ELEVATE-Project/project-service/blob/main/documentation/1.0.0/native/scripts/linux/insert_sample_data.sh && \
     chmod +x insert_sample_data.sh && \
     ./insert_sample_data.sh
     ```

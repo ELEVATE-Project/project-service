@@ -50,7 +50,8 @@ The Project building block enables creation, consumption of micro-improvement pr
 -   **Node.js®:** v20
 -   **PostgreSQL:** 16
 -   **Apache Kafka®:** 3.5.0
--   **MongoDB:** 4.1.4
+-   **MongoDB:** 4.4.14
+-   **Gotenberg:** 8.5.0 
 
 # Setup Options
 
@@ -66,13 +67,15 @@ Expectation: Upon following the prescribed steps, you will achieve a fully opera
 
 To set up the Project application, ensure you have Docker and Docker Compose installed on your system. For Ubuntu users, detailed installation instructions for both can be found in the documentation here: [How To Install and Use Docker Compose on Ubuntu](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-compose-on-ubuntu-20-04). For Windows and MacOS users, you can refer to the Docker documentation for installation instructions: [Docker Compose Installation Guide](https://docs.docker.com/compose/install/). Once these prerequisites are in place, you're all set to get started with setting up the Project application.
 
+Service also uses gotenberg for creation of project certificate. You can read more about it here : [Gotenberg](https://gotenberg.dev/docs/getting-started/introduction).
+
 ## Installation
 
 1.  **Create project Directory:** Create a directory named **project**.
 
     > Example Command: `mkdir project && cd project/`
 
-2.  **Download Docker Compose File:** Retrieve the **[docker-compose-project.yml](https://github.com/ELEVATE-Project/mentoring/blob/readMe-test/src/scripts/setup/docker-compose-mentoring.yml)** file from the Project service repository and save it to the project directory.
+2.  **Download Docker Compose File:** Retrieve the **[docker-compose-project.yml](https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/docker-compose-project.yml)** file from the Project service repository and save it to the project directory.
 
     ```
     curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/docker-compose-project.yml

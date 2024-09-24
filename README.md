@@ -812,7 +812,7 @@ After successfully running the script mentioned above, the following user accoun
     (1 row)
     ```
 
-### Install PM2
+<!-- ### Install PM2 
 
 Refer to [How To Set Up a Node.js Application for Production on Ubuntu 22.04](https://www.digitalocean.com/community/tutorials/how-to-set-up-a-node-js-application-for-production-on-ubuntu-22-04).
 
@@ -1290,7 +1290,7 @@ Please follow the setup guide provided with each service to ensure proper config
 
 For a comprehensive overview of the MentorEd implementation, refer to the [MentorEd Documentation](https://elevate-docs.shikshalokam.org/.mentorEd/intro).
 
-The source code for the frontend/mobile application can be found in its respective [GitHub repository](https://github.com/ELEVATE-Project/mentoring-mobile-app).
+The source code for the frontend/mobile application can be found in its respective [GitHub repository](https://github.com/ELEVATE-Project/mentoring-mobile-app). -->
 
 # Team
 
@@ -1300,7 +1300,7 @@ The source code for the frontend/mobile application can be found in its respecti
 
 # Open Source Dependencies
 
-Several open source dependencies that have aided Mentoring's development:
+Several open source dependencies that have aided Projects's development:
 
 ![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
 ![Apache Kafka](https://img.shields.io/badge/Apache%20Kafka-000?style=for-the-badge&logo=apachekafka)

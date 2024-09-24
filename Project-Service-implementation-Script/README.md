@@ -3,8 +3,9 @@
 Python script to upload a program and add multiple resources like Projects and also upload multiple resources like task.
 
 ### Resource templates
-- [Programs](https://docs.google.com/spreadsheets/d/1_pEomGIWxVZYwneQwY606zt26C72p9DU/edit?usp=drive_link&ouid=113799545932705393937&rtpof=true&sd=true)
-- [Projects](https://docs.google.com/spreadsheets/d/11a9HxukXCX0_LPNZh9OVDeStUYwC0Pio/edit?usp=drive_link&ouid=113799545932705393937&rtpof=true&sd=true)
+- [Programs](https://docs.google.com/spreadsheets/d/1mivwHzxrZyLHcM8ApOAeYIRLip-jJJXJ/edit?usp=sharing&ouid=113799545932705393937&rtpof=true&sd=true)
+- [Projects](https://docs.google.com/spreadsheets/d/10STEIdqJuM03NzopGPHPcD74YBUE7IzMct5WfmvnwFM/edit?usp=sharing)
+
 
 - Pull the code from latest release branch
 - To clone the repository 

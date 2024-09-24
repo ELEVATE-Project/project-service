@@ -20,10 +20,21 @@ module.exports = class Admin {
 	 * @returns {cursorObject} program details.
 	 */
 
+	// static listIndices(collectionName) {
+	// 	return new Promise(async (resolve, reject) => {
+	// 		try {
+	// 			let presentIndices = await database.models[collectionName].listIndexes()
+	// 			return resolve(presentIndices)
+	// 		} catch (error) {
+	// 			return reject(error)
+	// 		}
+	// 	})
+	// }
+
 	static listIndices(collectionName) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let presentIndices = await database.models[collectionName].listIndexes()
+				let presentIndices = await database.models[collectionName].db.collection(collectionName).listIndexes()
 				return resolve(presentIndices)
 			} catch (error) {
 				return reject(error)

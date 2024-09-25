@@ -207,7 +207,7 @@ services:
 
   portal:
     # Update with latest image
-    image: shikshalokamqa/mentoring-mobile-app:2.6.1
+    image: shikshalokamqa/elevate-project-obervation-pwa:2.2
     container_name: portal
     ports:
       - '8100:8100'

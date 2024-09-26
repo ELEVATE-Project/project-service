@@ -138,11 +138,11 @@ Service also uses gotenberg for creation of project certificate. You can read mo
 
 5.  **Run `replace_volume_path` Script File**
 
-        -   **Ubuntu/Linux/Mac**
-            1. Make the `replace_volume_path.sh` file an executable.
-                `      chmod +x replace_volume_path.sh`
-            2. Run the script file using the following command.
-                `      ./replace_volume_path.sh`
+    -   **Ubuntu/Linux/Mac**
+        1. Make the `replace_volume_path.sh` file an executable.
+           `      chmod +x replace_volume_path.sh`
+        2. Run the script file using the following command.
+           `      ./replace_volume_path.sh`
 
     <!-- -   **Windows**
 

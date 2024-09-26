@@ -51,7 +51,7 @@ The Project building block enables creation, consumption of micro-improvement pr
 -   **PostgreSQL:** 16
 -   **Apache Kafka®:** 3.5.0
 -   **MongoDB:** 4.4.14
--   **Gotenberg:** 8.5.0 
+-   **Gotenberg:** 8.5.0
 
 # Setup Options
 
@@ -124,30 +124,28 @@ Service also uses gotenberg for creation of project certificate. You can read mo
 
 4.  **Download `replace_volume_path` Script File**
 
-    -   **Ubuntu/Linux/Mac**
+        -   **Ubuntu/Linux/Mac**
 
-        ```
-        curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/dockerized/scripts/mac-linux/replace_volume_path.sh
-        ```
-<!-- 
-    -   **Windows**
+            ```
+            curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/dockerized/scripts/mac-linux/replace_volume_path.sh
+            ```
 
-        ```
-        curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/dockerized/scripts/windows/replace_volume_path.bat
-        ```
- -->
+    <!--
+        -   **Windows**
+
+            ```
+            curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/dockerized/scripts/windows/replace_volume_path.bat
+            ```
+     -->
+
 5.  **Run `replace_volume_path` Script File**
 
-    -   **Ubuntu/Linux/Mac**
-        1. Make the `replace_volume_path.sh` file an executable.
-            ```
-            chmod +x replace_volume_path.sh
-            ```
-        2. Run the script file using the following command.
-            ```
-            ./replace_volume_path.sh
-            ```
-    <!-- -   **Windows** 
+    -   **Ubuntu/Linux/Mac** 1. Make the `replace_volume_path.sh` file an executable.
+    `        chmod +x replace_volume_path.sh
+       ` 2. Run the script file using the following command.
+    `        ./replace_volume_path.sh
+       `
+    <!-- -   **Windows**
 
         Run the script file either by double clicking it or by executing the following command from the terminal.
 
@@ -185,7 +183,7 @@ Service also uses gotenberg for creation of project certificate. You can read mo
             chmod +x docker-compose-down.sh
             ```
 
-<!-- -   **Windows** 
+<!-- -   **Windows**
 
         ```
         curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/windows/docker-compose-up.bat
@@ -195,37 +193,42 @@ Service also uses gotenberg for creation of project certificate. You can read mo
         curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/windows/docker-compose-down.bat
         ```
     -->
+
 7.  **Run All Services & Dependencies:** All services and dependencies can be started using the `docker-compose-up` script file.
 
-    -   **Ubuntu/Linux/Mac**
-        ```
-        ./docker-compose-up.sh
-        ```
-<!-- -   **Windows** 
+        -   **Ubuntu/Linux/Mac**
+            ```
+            ./docker-compose-up.sh
+            ```
 
-        ```
-        docker-compose-up.bat
-        ```
+    <!-- -   **Windows**
 
-        > Double-click the file or run the above command from the terminal.
+            ```
+            docker-compose-up.bat
+            ```
 
-        > **Note**: During the first Docker Compose run, the database, migration seeder files, and the script to set the default organization will be executed automatically.
-    -->
-8.  **Access The Project Application**: Once the services are up and the front-end app bundle is built successfully, navigate to **[localhost:8100](http://localhost:8100/)** to access the MentorEd app.
+            > Double-click the file or run the above command from the terminal.
+
+            > **Note**: During the first Docker Compose run, the database, migration seeder files, and the script to set the default organization will be executed automatically.
+        -->
+
+8.  **Access The Project Application**: Once the services are up and the front-end app bundle is built successfully, navigate to **[localhost:7007](http://localhost:7007/)** to access the MentorEd app.
 9.  **Gracefully Stop All Services & Dependencies:** All containers which are part of the docker-compose can be gracefully stopped by pressing `Ctrl + c` in the same terminal where the services are running.
 10. **Remove All Service & Dependency Containers**: All docker containers can be stopped and removed by using the `docker-compose-down` file.
 
-    -   **Ubuntu/Linux/Mac**
-        ```
-        ./docker-compose-down.sh
-        ```
-<!-- -   **Windows** 
+        -   **Ubuntu/Linux/Mac**
+            ```
+            ./docker-compose-down.sh
+            ```
 
-        ```
-        docker-compose-down.bat
-        ```
-    -->
-        > **Caution**: As per the default configuration in the `docker-compose-mentoring.yml` file, using the `down` command will lead to data loss since the database container does not persist data. To persist data across `down` commands and subsequent container removals, refer to the "Persistence of Database Data in Docker Containers" section of this documentation.
+    <!-- -   **Windows**
+
+            ```
+            docker-compose-down.bat
+            ```
+        -->
+
+            > **Caution**: As per the default configuration in the `docker-compose-mentoring.yml` file, using the `down` command will lead to data loss since the database container does not persist data. To persist data across `down` commands and subsequent container removals, refer to the "Persistence of Database Data in Docker Containers" section of this documentation.
 
 ## Enable Citus Extension
 
@@ -260,7 +263,7 @@ To enable the Citus extension for mentoring and user services, follow these step
             ./citus_setup.sh user postgres://postgres:postgres@citus_master:5432/user
             ```
 
-<!-- - **Windows** 
+<!-- - **Windows**
         1. Download the `citus_setup.bat` file.
             ```
              curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/windows/citus_setup.bat
@@ -271,6 +274,7 @@ To enable the Citus extension for mentoring and user services, follow these step
             ```
             > **Note:** Since the `citus_setup.bat` file requires arguments, it must be run from a terminal.
     -->
+
 ## Persistence Of Database Data In Docker Container
 
 To ensure the persistence of database data when running `docker compose down`, it is necessary to modify the `docker-compose-project.yml` file according to the steps given below:
@@ -349,12 +353,13 @@ In such cases, you can generate sample user accounts using the steps below. This
         curl -L -o insert_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/dockerized/scripts/mac-linux/insert_sample_data.sh && chmod +x insert_sample_data.sh
         ```
 
-<!-- - **Windows** 
+<!-- - **Windows**
 
         ```
         curl -L -o insert_sample_data.bat https://raw.githubusercontent.com/ELEVATE-Project/mentoring/main/documentation/2.6.1/dockerized/scripts/windows/insert_sample_data.bat
         ```
     -->
+
 3. **Run The `insert_sample_data` Script File:**
 
     - **Ubuntu/Linux/Mac**
@@ -363,12 +368,13 @@ In such cases, you can generate sample user accounts using the steps below. This
         ./insert_sample_data.sh user postgres://postgres:postgres@citus_master:5432/user
         ```
 
-<!-- - **Windows** 
+<!-- - **Windows**
 
         ```
         insert_sample_data.bat user postgres://postgres:postgres@citus_master:5432/user
         ```
     -->
+
     After successfully running the script mentioned above, the following user accounts will be created and available for login:
 
     | Email ID                 | Password   | Role                    |
@@ -377,9 +383,7 @@ In such cases, you can generate sample user accounts using the steps below. This
     | arunimareddy@example.com | Password1@ | State Education Officer |
     | aaravpatel@example.com   | Password1@ | State Education Officer |
 
-# Project Service
-
-## Sample Project Creation
+## Sample Data Creation For Projects
 
 This step will guide us in implementing a sample project solution following the initial setup of the project service.
 
@@ -409,6 +413,8 @@ This step will guide us in implementing a sample project solution following the 
         mkdir sample-data\user 2>nul & ^
         curl -L "https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/sample-data/windows/user/sampleData.sql" -o sample-data\user\sampleData.sql
     -->    ```
+
+> **Warning:** upload related apis will not work because cloud integration is not enabled in this set-up.
 
 </details>
 
@@ -507,7 +513,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
 
         ```
         ./check-dependencies.sh
-        ``` 
+        ```
 
 <!-- -   **Windows**
 
@@ -844,16 +850,16 @@ After successfully running the script mentioned above, the following user accoun
 | devikasingh@example.com  | Password1@ | Organization Admin |
 
 </details>
-
+<!-- 
     ```sql
     postgres=# select citus_version();
                                            citus_version
     ----------------------------------------------------------------------------------------------------
      Citus 12.1.1 on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 9.4.0-1ubuntu1~20.04.2) 9.4.0, 64-bit
     (1 row)
-    ```
+    ``` -->
 
-<!-- ### Install PM2 
+<!-- ### Install PM2
 
 Refer to [How To Set Up a Node.js Application for Production on Ubuntu 22.04](https://www.digitalocean.com/community/tutorials/how-to-set-up-a-node-js-application-for-production-on-ubuntu-22-04).
 

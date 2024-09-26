@@ -140,9 +140,13 @@ Service also uses gotenberg for creation of project certificate. You can read mo
 
     -   **Ubuntu/Linux/Mac**
         1. Make the `replace_volume_path.sh` file an executable.
-           `      chmod +x replace_volume_path.sh`
+            ```
+            chmod +x replace_volume_path.sh
+            ```
         2. Run the script file using the following command.
-           `      ./replace_volume_path.sh`
+            ```
+            ./replace_volume_path.sh
+            ```
 
     <!-- -   **Windows**
 
@@ -193,11 +197,12 @@ Service also uses gotenberg for creation of project certificate. You can read mo
         ```
     -->
 
-7.  **Run All Services & Dependencies:**
-    All services and dependencies can be started using the `docker-compose-up` script file.
+7.  **Run All Services & Dependencies:**All services and dependencies can be started using the `docker-compose-up` script file.
 
     -   **Ubuntu/Linux/Mac**
-        `   ./docker-compose-up.sh`
+        ```
+        ./docker-compose-up.sh
+        ```
 
      <!-- -   **Windows**
     
@@ -210,15 +215,15 @@ Service also uses gotenberg for creation of project certificate. You can read mo
              > **Note**: During the first Docker Compose run, the database, migration seeder files, and the script to set the default organization will be executed automatically.
          -->
 
-8.  **Access The Project Application**:
-    Once the services are up and the front-end app bundle is built successfully, navigate to **[localhost:7007](http://localhost:7007/)** to access the MentorEd app.
-9.  **Gracefully Stop All Services & Dependencies:**
-    All containers which are part of the docker-compose can be gracefully stopped by pressing `Ctrl + c` in the same terminal where the services are running.
+8.  **Access The Project Application**:Once the services are up and the front-end app bundle is built successfully, navigate to **[localhost:7007](http://localhost:7007/)** to access the MentorEd app.
+9.  **Gracefully Stop All Services & Dependencies:**All containers which are part of the docker-compose can be gracefully stopped by pressing `Ctrl + c` in the same terminal where the services are running.
 10. **Remove All Service & Dependency Containers**:
     All docker containers can be stopped and removed by using the `docker-compose-down` file.
 
     -   **Ubuntu/Linux/Mac**
-        `   ./docker-compose-down.sh`
+        ```
+        ./docker-compose-down.sh
+        ```
 
      <!-- -   **Windows**
     

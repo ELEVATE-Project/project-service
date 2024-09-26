@@ -51,7 +51,7 @@ The Project building block enables creation, consumption of micro-improvement pr
 -   **PostgreSQL:** 16
 -   **Apache Kafka®:** 3.5.0
 -   **MongoDB:** 4.4.14
--   **Gotenberg:** 8.5.0 
+-   **Gotenberg:** 8.5.0
 
 # Setup Options
 
@@ -124,30 +124,28 @@ Service also uses gotenberg for creation of project certificate. You can read mo
 
 4.  **Download `replace_volume_path` Script File**
 
-    -   **Ubuntu/Linux/Mac**
+        -   **Ubuntu/Linux/Mac**
 
-        ```
-        curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/dockerized/scripts/mac-linux/replace_volume_path.sh
-        ```
-<!-- 
-    -   **Windows**
+            ```
+            curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/dockerized/scripts/mac-linux/replace_volume_path.sh
+            ```
 
-        ```
-        curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/dockerized/scripts/windows/replace_volume_path.bat
-        ```
- -->
+    <!--
+        -   **Windows**
+
+            ```
+            curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/dockerized/scripts/windows/replace_volume_path.bat
+            ```
+     -->
+
 5.  **Run `replace_volume_path` Script File**
 
-    -   **Ubuntu/Linux/Mac**
-        1. Make the `replace_volume_path.sh` file an executable.
-            ```
-            chmod +x replace_volume_path.sh
-            ```
-        2. Run the script file using the following command.
-            ```
-            ./replace_volume_path.sh
-            ```
-    <!-- -   **Windows** 
+    -   **Ubuntu/Linux/Mac** 1. Make the `replace_volume_path.sh` file an executable.
+    `        chmod +x replace_volume_path.sh
+       ` 2. Run the script file using the following command.
+    `        ./replace_volume_path.sh
+       `
+    <!-- -   **Windows**
 
         Run the script file either by double clicking it or by executing the following command from the terminal.
 
@@ -185,7 +183,7 @@ Service also uses gotenberg for creation of project certificate. You can read mo
             chmod +x docker-compose-down.sh
             ```
 
-<!-- -   **Windows** 
+<!-- -   **Windows**
 
         ```
         curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/windows/docker-compose-up.bat
@@ -195,37 +193,42 @@ Service also uses gotenberg for creation of project certificate. You can read mo
         curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/windows/docker-compose-down.bat
         ```
     -->
+
 7.  **Run All Services & Dependencies:** All services and dependencies can be started using the `docker-compose-up` script file.
 
-    -   **Ubuntu/Linux/Mac**
-        ```
-        ./docker-compose-up.sh
-        ```
-<!-- -   **Windows** 
+        -   **Ubuntu/Linux/Mac**
+            ```
+            ./docker-compose-up.sh
+            ```
 
-        ```
-        docker-compose-up.bat
-        ```
+    <!-- -   **Windows**
 
-        > Double-click the file or run the above command from the terminal.
+            ```
+            docker-compose-up.bat
+            ```
 
-        > **Note**: During the first Docker Compose run, the database, migration seeder files, and the script to set the default organization will be executed automatically.
-    -->
+            > Double-click the file or run the above command from the terminal.
+
+            > **Note**: During the first Docker Compose run, the database, migration seeder files, and the script to set the default organization will be executed automatically.
+        -->
+
 8.  **Access The Project Application**: Once the services are up and the front-end app bundle is built successfully, navigate to **[localhost:8100](http://localhost:8100/)** to access the MentorEd app.
 9.  **Gracefully Stop All Services & Dependencies:** All containers which are part of the docker-compose can be gracefully stopped by pressing `Ctrl + c` in the same terminal where the services are running.
 10. **Remove All Service & Dependency Containers**: All docker containers can be stopped and removed by using the `docker-compose-down` file.
 
-    -   **Ubuntu/Linux/Mac**
-        ```
-        ./docker-compose-down.sh
-        ```
-<!-- -   **Windows** 
+        -   **Ubuntu/Linux/Mac**
+            ```
+            ./docker-compose-down.sh
+            ```
 
-        ```
-        docker-compose-down.bat
-        ```
-    -->
-        > **Caution**: As per the default configuration in the `docker-compose-mentoring.yml` file, using the `down` command will lead to data loss since the database container does not persist data. To persist data across `down` commands and subsequent container removals, refer to the "Persistence of Database Data in Docker Containers" section of this documentation.
+    <!-- -   **Windows**
+
+            ```
+            docker-compose-down.bat
+            ```
+        -->
+
+            > **Caution**: As per the default configuration in the `docker-compose-mentoring.yml` file, using the `down` command will lead to data loss since the database container does not persist data. To persist data across `down` commands and subsequent container removals, refer to the "Persistence of Database Data in Docker Containers" section of this documentation.
 
 ## Enable Citus Extension
 
@@ -260,7 +263,7 @@ To enable the Citus extension for mentoring and user services, follow these step
             ./citus_setup.sh user postgres://postgres:postgres@citus_master:5432/user
             ```
 
-<!-- - **Windows** 
+<!-- - **Windows**
         1. Download the `citus_setup.bat` file.
             ```
              curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/windows/citus_setup.bat
@@ -271,6 +274,7 @@ To enable the Citus extension for mentoring and user services, follow these step
             ```
             > **Note:** Since the `citus_setup.bat` file requires arguments, it must be run from a terminal.
     -->
+
 ## Persistence Of Database Data In Docker Container
 
 To ensure the persistence of database data when running `docker compose down`, it is necessary to modify the `docker-compose-project.yml` file according to the steps given below:
@@ -349,12 +353,13 @@ In such cases, you can generate sample user accounts using the steps below. This
         curl -L -o insert_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/dockerized/scripts/mac-linux/insert_sample_data.sh && chmod +x insert_sample_data.sh
         ```
 
-<!-- - **Windows** 
+<!-- - **Windows**
 
         ```
         curl -L -o insert_sample_data.bat https://raw.githubusercontent.com/ELEVATE-Project/mentoring/main/documentation/2.6.1/dockerized/scripts/windows/insert_sample_data.bat
         ```
     -->
+
 3. **Run The `insert_sample_data` Script File:**
 
     - **Ubuntu/Linux/Mac**
@@ -363,12 +368,13 @@ In such cases, you can generate sample user accounts using the steps below. This
         ./insert_sample_data.sh user postgres://postgres:postgres@citus_master:5432/user
         ```
 
-<!-- - **Windows** 
+<!-- - **Windows**
 
         ```
         insert_sample_data.bat user postgres://postgres:postgres@citus_master:5432/user
         ```
     -->
+
     After successfully running the script mentioned above, the following user accounts will be created and available for login:
 
     | Email ID                 | Password   | Role                    |
@@ -434,7 +440,6 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         chmod +x check-dependencies.sh && \
         chmod +x install-dependencies.sh && \
         chmod +x uninstall-dependencies.sh
-
         ```
 
     2. Verify installed dependencies by running `check-dependencies.sh`:
@@ -507,7 +512,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
 
         ```
         ./check-dependencies.sh
-        ``` 
+        ```
 
 <!-- -   **Windows**
 
@@ -599,7 +604,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         git clone -b release-2.6.1 https://github.com/ELEVATE-Project/notification.git && \
         git clone -b release-2.6.1 https://github.com/ELEVATE-Project/interface-service.git && \
         git clone -b release-2.6.1 https://github.com/ELEVATE-Project/scheduler.git && \
-        git clone -b release-2.0.0 https://github.com/ELEVATE-Project/observation-survey-projects-pwa.git
+        git clone -b main https://github.com/ELEVATE-Project/observation-survey-projects-pwa
         ```
 
 3. **Install NPM Packages**
@@ -621,13 +626,13 @@ Before setting up the following ELEVATE-Project application, dependencies given 
     - **Ubuntu/Linux**
 
         ```
-        curl -L -o project-service/.env https://github.com/ELEVATE-Project/project-service/blob/main/documentation/1.0.0/native/envs/project_env && \
-        curl -L -o entity-management/src/.env https://github.com/ELEVATE-Project/project-service/blob/main/documentation/1.0.0/dockerized/envs/entity_management_env && \
-        curl -L -o user/src/.env https://github.com/ELEVATE-Project/project-service/blob/main/documentation/1.0.0/native/envs/user_env && \
-        curl -L -o notification/src/.env https://github.com/ELEVATE-Project/project-service/blob/main/documentation/1.0.0/native/envs/notification_env && \
-        curl -L -o interface-service/src/.env https://github.com/ELEVATE-Project/project-service/blob/main/documentation/1.0.0/native/envs/interface_env && \
-        curl -L -o scheduler/src/.env https://github.com/ELEVATE-Project/project-service/blob/main/documentation/1.0.0/native/envs/scheduler_env && \
-        curl -L -o observation-survey-projects-pwa/src/environments/environment.ts https://github.com/ELEVATE-Project/observation-survey-projects-pwa/blob/release-2.0.0/src/environments/environment.ts
+        curl -L -o project-service/.env https://github.com/ELEVATE-Project/project-service/blob/service-setup/documentation/1.0.0/native/envs/project_env && \
+        curl -L -o entity-management/src/.env https://github.com/ELEVATE-Project/project-service/blob/service-setup/documentation/1.0.0/native/envs/entity_management_env && \
+        curl -L -o user/src/.env https://github.com/ELEVATE-Project/project-service/blob/service-setup/documentation/1.0.0/native/envs/user_env && \
+        curl -L -o notification/src/.env https://github.com/ELEVATE-Project/project-service/blob/service-setup/documentation/1.0.0/native/envs/notification_env && \
+        curl -L -o interface-service/src/.env https://github.com/ELEVATE-Project/project-service/blob/service-setup/documentation/1.0.0/native/envs/interface_env && \
+        curl -L -o scheduler/src/.env https://github.com/ELEVATE-Project/project-service/blob/service-setup/documentation/1.0.0/native/envs/scheduler_env && \
+        curl -L -o observation-survey-projects-pwa/src/environments/environment.ts https://github.com/ELEVATE-Project/observation-survey-projects-pwa/blob/main/src/environments/environment.ts
         ```
 
     - **MacOs**
@@ -853,7 +858,7 @@ After successfully running the script mentioned above, the following user accoun
     (1 row)
     ```
 
-<!-- ### Install PM2 
+<!-- ### Install PM2
 
 Refer to [How To Set Up a Node.js Application for Production on Ubuntu 22.04](https://www.digitalocean.com/community/tutorials/how-to-set-up-a-node-js-application-for-production-on-ubuntu-22-04).
 

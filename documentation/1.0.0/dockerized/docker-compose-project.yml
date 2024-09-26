@@ -40,7 +40,7 @@ services:
       - project_net
     logging:
       driver: none
-      
+
   project:
     image: shikshalokamqa/elevate-project-service:1.0.0
     ports:
@@ -210,11 +210,11 @@ services:
     image: shikshalokamqa/elevate-project-obervation-pwa:2.2
     container_name: portal
     ports:
-      - '8100:8100'
+      - '7007:7007'
     volumes:
-      - /home/joffin/elevate/single-click/linux/environment.ts:/app/src/environments/environment.ts
-    command: >
-      /bin/bash -c "ionic build --prod && ionic serve --host 0.0.0.0"
+      - /home/joffin/elevate/single-click/linux/environment.ts:/usr/src/app/www/assets/env/env.js
+    # command: >
+    #   /bin/bash -c "ionic build --prod && ionic serve --host 0.0.0.0"
     networks:
       - project_net
 

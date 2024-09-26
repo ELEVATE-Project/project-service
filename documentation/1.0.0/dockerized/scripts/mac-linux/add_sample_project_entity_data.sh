@@ -24,7 +24,8 @@ ENTITY_TYPE_DOCUMENT=$(cat <<EOF
 {
     "name": "state",
     "toBeMappedToParentEntities": true,
-    "immediateChildrenEntityType": []
+    "immediateChildrenEntityType": ["district"],
+    "isDeleted": false
 }
 EOF
 )
@@ -44,12 +45,44 @@ ENTITY_TYPE_ID=$(docker exec -it project-mongo-1 mongo --host "$MONGO_HOST" --po
 ENTITY_TYPE_ID=$(clean_object_id "$ENTITY_TYPE_ID")
 echo "EntityType ID: $ENTITY_TYPE_ID"
 
+ENTITY_TYPE_DISTRICT_DOCUMENT=$(cat <<EOF
+{
+    "name" : "district",
+    "toBeMappedToParentEntities" : true,
+    "immediateChildrenEntityType" : [ 
+        "block"
+    ],
+    "isDeleted" : false
+}
+EOF
+)
+
+echo "EntityType data being added to $ENTITY_TYPE_COLLECTION collection in $ENTITY_SERVICE_DB_NAME database...."
+
+ENTITY_TYPE_DISTRICT_DOCUMENT_ID=$(docker exec -it project-mongo-1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
+    var doc = $ENTITY_TYPE_DISTRICT_DOCUMENT
+    var result = db.getSiblingDB('$ENTITY_SERVICE_DB_NAME').$ENTITY_TYPE_COLLECTION.insertOne(doc);
+    if (result.insertedId) {
+        print(result.insertedId);
+    } else {
+        throw new Error('Insert failed');
+    }
+")
+
+ENTITY_TYPE_DISTRICT_DOCUMENT_ID=$(clean_object_id "$ENTITY_TYPE_DISTRICT_DOCUMENT_ID")
+echo "EntityType ID for district doc: $ENTITY_TYPE_DISTRICT_DOCUMENT_ID"
+
 ENTITIES_DOCUMENT=$(cat <<EOF
 {
     "name" : "Karnataka",
     "entityType" : "state",
     "entityTypeId" : $ENTITY_TYPE_ID,
-    "userId" : "1"
+    "userId" : "1",
+    "metaInformation" : {
+        "externalId" : "KR001",
+        "name" : "Karnataka"
+    },
+    "childHierarchyPath": []
 }
 EOF
 )
@@ -67,7 +100,60 @@ ENTITY_ID=$(docker exec -it project-mongo-1 mongo --host "$MONGO_HOST" --port "$
 ")
 
 ENTITY_ID=$(clean_object_id "$ENTITY_ID")
+
 echo "Entity ID: $ENTITY_ID"
+
+
+ENTITIES_DOCUMENT_DISTRICT_TYPE=$(cat <<EOF
+{
+    "name" : "Bangalore",
+    "entityType" : "district",
+    "entityTypeId" : $ENTITY_TYPE_DISTRICT_DOCUMENT_ID,
+    "userId" : "1",
+    "metaInformation" : {
+        "externalId" : "BN001",
+        "name" : "Bangalore"
+    },
+    "childHierarchyPath" : [],
+    "groups" : {}
+}
+EOF
+)
+
+echo "Entity data being added to $ENTITIES_COLLECTION collection in $ENTITY_SERVICE_DB_NAME database...."
+
+ENTITY_ID_DISTRICT=$(docker exec -it project-mongo-1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
+    var doc = $ENTITIES_DOCUMENT_DISTRICT_TYPE
+    var result = db.getSiblingDB('$ENTITY_SERVICE_DB_NAME').$ENTITIES_COLLECTION.insertOne(doc);
+    if (result.insertedId) {
+        print(result.insertedId);
+    } else {
+        throw new Error('Insert failed');
+    }
+")
+
+ENTITY_ID_DISTRICT=$(clean_object_id "$ENTITY_ID_DISTRICT")
+echo "Entity ID bangalore: $ENTITY_ID_DISTRICT"
+
+echo "ObjectId($ENTITY_ID)"
+#updating groups
+docker exec project-mongo-1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
+    var updateResult = db.getSiblingDB('$ENTITY_SERVICE_DB_NAME').$ENTITIES_COLLECTION.updateOne(
+        {_id: ObjectId($ENTITY_ID)},
+        { 
+            \$set: { 
+                'groups.district': [ObjectId($ENTITY_ID_DISTRICT)] 
+            }
+        }
+    );
+    if (updateResult.matchedCount > 0) {
+        print('Document updated successfully');
+    } else {
+        throw new Error('Update failed');
+    }"
+
+
+
 
 # Project database details
 PROJECT_DB_NAME="elevate-project"
@@ -206,10 +292,18 @@ SOLUTION_DOCUMENT=$(cat <<EOF
     "programExternalId": "PG01",
     "scope": {
         "state": [$ENTITY_ID],
-        "roles": ["district_education_officer"],
+        "roles": ["state_education_officer"],
         "entityType": "state"
     },
-    "projectTemplateId": $PROJECT_TEMPLATE_ID
+    "projectTemplateId": ObjectId($PROJECT_TEMPLATE_ID),
+    "startDate" : ISODate("2021-08-30T00:00:00.000Z"),
+    "endDate" : ISODate("2029-08-30T00:00:00.000Z"),
+    "isDeleted" : false,
+    "isAPrivateProgram" : false,
+    "isReusable" : false,
+    "status" : "active",
+    "type" : "improvementProject",
+    "updatedAt" : ISODate("2021-08-30T00:00:00.000Z")
 }
 EOF
 )
@@ -230,6 +324,212 @@ SOLUTION_ID=$(docker exec -it project-mongo-1 mongo --host "$MONGO_HOST" --port 
 SOLUTION_ID=$(clean_object_id "$SOLUTION_ID")
 echo "Solution ID: $SOLUTION_ID"
 
+
+#updating project template with the solution id
+docker exec project-mongo-1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
+    var updateResult = db.getSiblingDB('$PROJECT_DB_NAME').$PROJECT_TEMPLATES_COLLECTION.updateOne(
+        {_id: ObjectId($PROJECT_TEMPLATE_ID)},
+        { 
+            \$set: { 
+                'solutionId': ObjectId($SOLUTION_ID)
+            }
+        }
+    );
+    if (updateResult.matchedCount > 0) {
+        print('Document updated successfully');
+    } else {
+        throw new Error('Update failed');
+    }"
+
+
+
+FORM_DOCUMENTS=$(cat <<EOF
+[{
+    "version" : 13,
+    "deleted" : false,
+    "type" : "homelist",
+    "subType" : "homelists",
+    "data" : [ 
+        {
+            "type" : "bannerList",
+            "listingData" : [ 
+                {
+                    "title" : "Hey, Welcome back!",
+                    "discription" : ""
+                }
+            ]
+        }, 
+        {
+            "type" : "solutionList",
+            "listingData" : [ 
+                {
+                    "name" : "Projects",
+                    "img" : "assets/images/ic_project.svg",
+                    "redirectionUrl" : "/listing/project",
+                    "listType" : "project",
+                    "solutionType" : "improvementProject",
+                    "reportPage" : false,
+                    "description" : "Manage and track your school improvement easily, by creating tasks and planning project timelines"
+                }, 
+                {
+                    "name" : "Survey",
+                    "img" : "assets/images/ic_survey.svg",
+                    "redirectionUrl" : "/listing/survey",
+                    "listType" : "survey",
+                    "solutionType" : "survey",
+                    "reportPage" : false,
+                    "reportIdentifier" : "surveyReportPage",
+                    "description" : "Provide information and feedback through quick and easy surveys"
+                }, 
+                {
+                    "name" : "Reports",
+                    "img" : "assets/images/ic_report.svg",
+                    "redirectionUrl" : "/project-report",
+                    "listType" : "report",
+                    "reportPage" : true,
+                    "description" : "Make sense of data to enable your decision-making based on your programs with ease",
+                    "list" : [ 
+                        {
+                            "name" : "Improvement Project Reports",
+                            "img" : "assets/images/ic_project.svg",
+                            "redirectionUrl" : "/project-report",
+                            "listType" : "project",
+                            "solutionType" : "improvementProject",
+                            "reportPage" : false,
+                            "description" : "Manage and track your school improvement easily, by creating tasks and planning project timelines"
+                        }, 
+                        {
+                            "name" : "Survey Reports",
+                            "img" : "assets/images/ic_survey.svg",
+                            "redirectionUrl" : "/listing/survey",
+                            "listType" : "survey",
+                            "solutionType" : "survey",
+                            "reportPage" : true,
+                            "reportIdentifier" : "surveyReportPage",
+                            "description" : "Provide information and feedback through quick and easy surveys"
+                        }
+                    ]
+                }, 
+                {
+                    "name" : "Library",
+                    "img" : "assets/images/library.svg",
+                    "redirectionUrl" : "/project-library",
+                    "listType" : "library",
+                    "description" : ""
+                }
+            ]
+        }
+    ],
+    "organizationId" : 1,
+    "updatedAt" : "2024-06-05T08:47:14.987Z",
+    "createdAt" : "2024-06-05T08:47:14.987Z",
+    "__v" : 0
+},
+{
+    "version" : 28,
+    "deleted" : false,
+    "type" : "form",
+    "subType" : "formFields",
+    "data" : [ 
+        {
+            "name" : "name",
+            "label" : "Enter your name",
+            "value" : "",
+            "type" : "text",
+            "placeHolder" : "Ex. Enter your name",
+            "errorMessage" : {
+                "required" : "Enter your name",
+                "pattern" : "This field can only contain alphabets"
+            },
+            "validators" : {
+                "required" : true,
+                "pattern" : "^[a-zA-Z\\s]*$"
+            },
+            "disable" : "false"
+        }, 
+        {
+            "name" : "state",
+            "label" : "Select your state",
+            "placeHolder" : "Select your state",
+            "value" : "",
+            "type" : "select",
+            "errorMessage" : {
+                "required" : "Please select your state"
+            },
+            "validators" : {
+                "required" : true
+            },
+            "dynamicEntity" : true,
+            "options" : [],
+            "disable" : "false"
+        }, 
+        {
+            "name" : "roles",
+            "label" : "Choose your role",
+            "value" : "",
+            "type" : "chip",
+            "dynamicUrl" : "/entity-management/v1/entities/targetedRoles/",
+            "errorMessage" : {
+                "required" : "Select a role"
+            },
+            "validators" : {
+                "required" : true
+            },
+            "options" : [],
+            "dependsOn" : "state",
+            "multiple" : true,
+            "disable" : "false"
+        }
+    ],
+    "organizationId" : 1,
+    "updatedAt" : "2024-06-25T10:08:58.689Z",
+    "createdAt" : "2024-06-25T10:08:58.689Z",
+    "__v" : 0
+},
+{
+    "version": 0,
+    "deleted": false,
+    "type": "KR001",
+    "subType": "KR001",
+    "data": [
+        {
+            "name": "district",
+            "label": "Select your district",
+            "placeHolder": "Select your district",
+            "value": "",
+            "type": "select",
+            "errorMessage": {
+                "required": "Please select your district"
+            },
+            "validators": {
+                "required": true
+            },
+            "options": [],
+            "dependsOn": "state",
+            "disable": "false"
+        }
+    ],
+    "organizationId": 1,
+    "updatedAt": "2024-08-23T11:32:06.172Z",
+    "createdAt": "2024-08-23T11:32:06.172Z",
+    "__v": 0
+}]
+EOF
+)
+
+echo "Forms data being added to forms collection in $PROJECT_DB_NAME database...."
+# Insert FORM using docker exec
+FORM_ID=$(docker exec -it project-mongo-1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
+    var doc = $FORM_DOCUMENTS;
+    var result = db.getSiblingDB('$PROJECT_DB_NAME').forms.insertMany(doc);
+    if (result.insertedId) {
+        print(result.insertedId);
+    } else {
+        throw new Error('Insert failed');
+    }
+")
+
+
 CONFIGURATIONS_COLLECTION="configurations"
 
 CONFIGURATIONS_DOCUMENT=$(cat <<EOF
@@ -245,6 +545,42 @@ CONFIGURATIONS_DOCUMENT=$(cat <<EOF
 }
 EOF
 )
+
+USER_EXTENSION_DOCUMENT=$(cat <<EOF
+{
+    "status" : "ACTIVE",
+    "createdBy" : "SYSTEM",
+    "updatedBy" : "SYSTEM",
+    "deleted" : false,
+    "userRoleId" : "8",
+    "title" : "State Education Officer",
+    "entityTypes" : [ 
+        {
+            "entityType" : "state",
+            "entityTypeId" : $ENTITY_TYPE_ID,
+        }
+    ],
+    "updatedAt" : "2024-09-09T09:31:47.135Z",
+    "createdAt" : "2024-09-09T09:31:47.135Z",
+    "__v" : 0
+}
+EOF
+)
+
+echo "user data being added to userRoleExtension collection in $ENTITY_SERVICE_DB_NAME database...."
+# Insert SOLUTION_ID using docker exec
+USER_EXTENSION_ID=$(docker exec -it project-mongo-1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
+    var doc = $USER_EXTENSION_DOCUMENT;
+    var result = db.getSiblingDB('$ENTITY_SERVICE_DB_NAME').userRoleExtension.insertOne(doc);
+    if (result.insertedId) {
+        print(result.insertedId);
+    } else {
+        throw new Error('Insert failed');
+    }
+")
+
+USER_EXTENSION_ID=$(clean_object_id "$USER_EXTENSION_ID")
+echo "UserExtention ID: $USER_EXTENSION_ID"
 
 echo "Configurations data being added to $CONFIGURATIONS_COLLECTION collection in $PROJECT_DB_NAME database...."
 

@@ -18,5 +18,4 @@ ESCAPED_CURRENT_DIR=$(printf '%s\n' "$CURRENT_DIR" | sed -e 's/[\/&]/\\&/g')
 # Use sed to replace the path leading up to 'env.js' in the docker-compose file
 # The pattern ensures that it only replaces the path component up to ':/usr/src/app/www/assets/env/env.js'
 sed -i -e "s|/[^:]*\(\/env\.js\):/usr/src/app/www/assets/env/env.js|$ESCAPED_CURRENT_DIR\1:/usr/src/app/www/assets/env/env.js|" "$DOCKER_COMPOSE_FILE"
-
 echo "Updated volume path for 'env.js' in $DOCKER_COMPOSE_FILE"

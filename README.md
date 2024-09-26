@@ -141,23 +141,21 @@ Service also uses gotenberg for creation of project certificate. You can read mo
 5.  **Run `replace_volume_path` Script File**
 
     -   **Ubuntu/Linux/Mac** 1. Make the `replace_volume_path.sh` file an executable.
-    `       chmod +x replace_volume_path.sh
-  ` 2. Run the script file using the following command.
-    `       ./replace_volume_path.sh
-  `
-    <!-- -   **Windows**
-
-        Run the script file either by double clicking it or by executing the following command from the terminal.
-
-        ```
-        replace_volume_path.bat
-        ```
-
-        > **Note**: The provided script file replaces the host path for the **portal** service container volume in the `docker-compose-project.yml` file with your current directory path.
-        >
-        > volumes:
-        >
-        > \- /home/joffin/elevate/backend/environment.ts:/app/src/environments/environment.ts -->
+    `      chmod +x replace_volume_path.sh` 2. Run the script file using the following command.
+    `      ./replace_volume_path.sh`
+      <!-- -   **Windows**
+    
+          Run the script file either by double clicking it or by executing the following command from the terminal.
+    
+          ```
+          replace_volume_path.bat
+          ```
+    
+          > **Note**: The provided script file replaces the host path for the **portal** service container volume in the `docker-compose-project.yml` file with your current directory path.
+          >
+          > volumes:
+          >
+          > \- /home/joffin/elevate/backend/environment.ts:/app/src/environments/environment.ts -->
 
 6.  **Download `docker-compose-up` & `docker-compose-down` Script Files**
 
@@ -723,7 +721,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
             1. Download the `citus_setup.sh` file:
 
                 ```
-                curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/service-setup-child/documentation/1.0.0/native/scripts/linux/citus_setup.sh
+                curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/service-setup/documentation/1.0.0/native/scripts/linux/citus_setup.sh
 
                 ```
 

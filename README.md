@@ -120,8 +120,6 @@ Service also uses gotenberg for creation of project certificate. You can read mo
 
     > **Caution:** While the default values in the downloaded environment files enable the Project Application to operate, certain features may not function correctly or could be impaired unless the adopter-specific environment variables are properly configured.
 
-    <!-- Basic dummychanges done  till here -->
-
 4.  **Download `replace_volume_path` Script File**
 
         -   **Ubuntu/Linux/Mac**
@@ -130,7 +128,7 @@ Service also uses gotenberg for creation of project certificate. You can read mo
             curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/dockerized/scripts/mac-linux/replace_volume_path.sh
             ```
 
-    <!--
+<!--
         -   **Windows**
 
             ```

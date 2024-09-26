@@ -1341,8 +1341,8 @@ The source code for the frontend/mobile application can be found in its respecti
 
 # Team
 
-<a href="https://github.com/ELEVATE-Project/mentoring/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=ELEVATE-Project/mentoring" />
+<a href="https://github.com/ELEVATE-Project/project-service/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=ELEVATE-Project/project-service" />
 </a>
 
 # Open Source Dependencies

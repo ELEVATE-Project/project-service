@@ -212,7 +212,7 @@ services:
     ports:
       - '7007:7007'
     volumes:
-      - /home/joffin/elevate/single-click/linux/environment.ts:/usr/src/app/www/assets/env/env.js
+      - /home/joffin/elevate/single-click/linux/env.js:/usr/src/app/www/assets/env/env.js
     # command: >
     #   /bin/bash -c "ionic build --prod && ionic serve --host 0.0.0.0"
     networks:

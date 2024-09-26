@@ -124,9 +124,9 @@ Service also uses gotenberg for creation of project certificate. You can read mo
 
     -   **Ubuntu/Linux/Mac**
 
-            ```
-            curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/dockerized/scripts/mac-linux/replace_volume_path.sh
-            ```
+        ```
+        curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/dockerized/scripts/mac-linux/replace_volume_path.sh
+        ```
 
 <!--
         -   **Windows**
@@ -197,19 +197,18 @@ Service also uses gotenberg for creation of project certificate. You can read mo
     All services and dependencies can be started using the `docker-compose-up` script file.
 
     -   **Ubuntu/Linux/Mac**
-        `    ./docker-compose-up.sh
-   `
+        `   ./docker-compose-up.sh`
 
-    <!-- -   **Windows**
-
-            ```
-            docker-compose-up.bat
-            ```
-
-            > Double-click the file or run the above command from the terminal.
-
-            > **Note**: During the first Docker Compose run, the database, migration seeder files, and the script to set the default organization will be executed automatically.
-        -->
+     <!-- -   **Windows**
+    
+             ```
+             docker-compose-up.bat
+             ```
+    
+             > Double-click the file or run the above command from the terminal.
+    
+             > **Note**: During the first Docker Compose run, the database, migration seeder files, and the script to set the default organization will be executed automatically.
+         -->
 
 8.  **Access The Project Application**:
     Once the services are up and the front-end app bundle is built successfully, navigate to **[localhost:7007](http://localhost:7007/)** to access the MentorEd app.
@@ -219,17 +218,16 @@ Service also uses gotenberg for creation of project certificate. You can read mo
     All docker containers can be stopped and removed by using the `docker-compose-down` file.
 
     -   **Ubuntu/Linux/Mac**
-        `    ./docker-compose-down.sh
-   `
+        `   ./docker-compose-down.sh`
 
-    <!-- -   **Windows**
+     <!-- -   **Windows**
+    
+             ```
+             docker-compose-down.bat
+             ```
+         -->
 
-            ```
-            docker-compose-down.bat
-            ```
-        -->
-
-        > **Caution**: As per the default configuration in the `docker-compose-mentoring.yml` file, using the `down` command will lead to data loss since the database container does not persist data. To persist data across `down` commands and subsequent container removals, refer to the "Persistence of Database Data in Docker Containers" section of this documentation.
+         > **Caution**: As per the default configuration in the `docker-compose-mentoring.yml` file, using the `down` command will lead to data loss since the database container does not persist data. To persist data across `down` commands and subsequent container removals, refer to the "Persistence of Database Data in Docker Containers" section of this documentation.
 
 ## Enable Citus Extension
 

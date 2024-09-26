@@ -12,11 +12,10 @@ show_menu() {
     echo "2) Node.js and npm"
     echo "3) Kafka and Zookeeper"
     echo "4) Redis"
-    echo "5) Redis BullMQ"
-    echo "6) MongoDB"
-    echo "7) Citus and PostgreSQL"
-    echo "8) Gotenberg"
-    echo "9) Exit"
+    echo "5) MongoDB"
+    echo "6) Citus and PostgreSQL"
+    echo "7) Gotenberg"
+    echo "8) Exit"
     echo -e "${GREEN}Enter your choice [1-9]: ${NC}"
 }
 
@@ -122,11 +121,10 @@ while true; do
         2) uninstall_nodejs ;;
         3) uninstall_kafka_zookeeper ;;
         4) uninstall_redis ;;
-        5) uninstall_bullmq ;;
-        6) uninstall_mongodb ;;
-        7) uninstall_citus_postgresql ;;
-        8) uninstall_gotenberg ;;
-        9) echo -e "${GREEN}Exiting uninstallation process.${NC}"; exit ;;
+        5) uninstall_mongodb ;;
+        6) uninstall_citus_postgresql ;;
+        7) uninstall_gotenberg ;;
+        8) echo -e "${GREEN}Exiting uninstallation process.${NC}"; exit ;;
         *) echo -e "${RED}Invalid option, please try again.${NC}" ;;
     esac
     echo -e "${GREEN}Operation completed.${NC}"

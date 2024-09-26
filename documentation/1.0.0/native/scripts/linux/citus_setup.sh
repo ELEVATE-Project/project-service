@@ -36,20 +36,9 @@ echo "DB_HOST: $DB_HOST"
 echo "DB_PORT: $DB_PORT"
 echo "DB_NAME: $DB_NAME"
 
-# Define the container name (same as DB_HOST)
-CONTAINER_NAME="$DB_HOST"
-
-# Wait for Docker container to be up
-echo "Waiting for Docker container '$CONTAINER_NAME' to be up..."
-while ! docker inspect "$CONTAINER_NAME" &>/dev/null; do
-    echo "Waiting for container..."
-    sleep 1
-done
-echo "Container is now up."
-
 # Wait for PostgreSQL to be ready to accept connections
 echo "Waiting for PostgreSQL on '$DB_HOST:$DB_PORT' to accept connections..."
-until docker exec "$CONTAINER_NAME" bash -c "pg_isready -h localhost -p $DB_PORT -U $DB_USER"; do
+until pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER"; do
     echo "Waiting for database to be ready..."
     sleep 1
 done
@@ -57,7 +46,7 @@ echo "Database is ready."
 
 # Function to check if the database exists
 check_database() {
-    docker exec "$CONTAINER_NAME" bash -c "PGPASSWORD='$DB_PASSWORD' psql -h localhost -U $DB_USER -p $DB_PORT -lqt | cut -d \| -f 1 | grep -qw '$DB_NAME'"
+    PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -U "$DB_USER" -p "$DB_PORT" -lqt | cut -d \| -f 1 | grep -qw "$DB_NAME"
 }
 
 echo "Checking existence of database '$DB_NAME'..."
@@ -73,16 +62,14 @@ if [ ! -f "$DISTRIBUTION_COLUMNS_FILE" ]; then
     echo "Error: distributionColumns.sql not found in folder '$FOLDER_NAME'."
     exit 1
 fi
-echo "Copying distributionColumns.sql to container '$CONTAINER_NAME'..."
-docker cp "$DISTRIBUTION_COLUMNS_FILE" "$CONTAINER_NAME:/distributionColumns.sql"
 
 echo "Creating Citus extension in the database..."
-docker exec --user "$DB_USER" "$CONTAINER_NAME" bash -c "PGPASSWORD='$DB_PASSWORD' psql -h localhost -U $DB_USER -d $DB_NAME -p $DB_PORT -c 'CREATE EXTENSION IF NOT EXISTS citus;'"
+PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -p "$DB_PORT" -c 'CREATE EXTENSION IF NOT EXISTS citus;'
 
 # Function to check if table exists
 check_table() {
     local table=$1
-    local exists=$(docker exec "$CONTAINER_NAME" bash -c "PGPASSWORD='$DB_PASSWORD' psql -h localhost -U $DB_USER -d $DB_NAME -p $DB_PORT -t -c \"SELECT EXISTS(SELECT 1 FROM pg_tables WHERE schemaname = 'public' AND tablename = '$table');\"")
+    local exists=$(PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -p "$DB_PORT" -t -c "SELECT EXISTS(SELECT 1 FROM pg_tables WHERE schemaname = 'public' AND tablename = '$table');")
     exists=$(echo "$exists" | tr -d '[:space:]')             # Trim whitespace
     echo "Debug: exists result for table $table = '$exists'" # Debug line
     [[ "$exists" == "t" ]]                                   # Checking specifically for 't'
@@ -99,7 +86,7 @@ while IFS= read -r line; do
             sleep 1
         done
         echo "Table '$table' exists, executing: $line"
-        docker exec --user "$DB_USER" "$CONTAINER_NAME" bash -c "PGPASSWORD='$DB_PASSWORD' psql -h localhost -U $DB_USER -d $DB_NAME -p $DB_PORT -c \"$line\""
+        PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -p "$DB_PORT" -c "$line"
     fi
 done <"$DISTRIBUTION_COLUMNS_FILE"
 

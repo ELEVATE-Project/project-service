@@ -45,10 +45,10 @@
         version: "{{ gitBranch }}"
     - name: Update npm
       shell: cd {{release_path}} && npm i && npm i redoc-cli 
-    
+        
     - name: Delete Old Folder 
       shell: rm -rf {{ current_path }} &&  cd {{ project_path }} && mkdir elevate-project-service
-    
+        
     - name: Move code
       shell: mv "{{ release_path }}"/* {{ current_path }}/
 
@@ -75,8 +75,10 @@
       command: pm2 delete elevate-project-service
       ignore_errors: yes
 
-    - name: Delete release folder
-      shell: rm -rf  {{ release_path }}
+    - name: Delete Old Folder 
+      file:
+        path: "{{ release_path }}"
+        state: absent
 
     - name: Start pm2
       command: "chdir={{current_path}} pm2 start app.js -i 2 --name elevate-project-service"

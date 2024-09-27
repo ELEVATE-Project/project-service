@@ -765,12 +765,24 @@ Before setting up the following ELEVATE-Project application, dependencies given 
 
     - **Ubuntu/Linux/MacOS**
 
-        ```
-        cd ELEVATE-Project/project-service/documentation/1.0.0/native/scripts/linux && \
-        sh entity-project-sample-data.sh && \
-        cd ~/ELEVATE-Project/ && \
-        cd user/src && npm run db:seed:all && cd ../..
-        ```
+        1. Download `entity-project-sample-data.sh` Script File:
+
+            ```
+            curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/service-setup/documentation/1.0.0/native/scripts/linux/entity-project-sample-data.sh
+            ```
+
+        2. Make the executable by running the following command:
+            ```
+            chmod +x entity-project-sample-data.sh
+            ```
+        3. Run the script file:
+            ```
+            ./entity-project-sample-data.sh
+            ```
+        4. Run seeders of user service
+            ```
+            cd user/src && npm run db:seed:all && cd ../..
+            ```
 
 9. **Start The Services**
 

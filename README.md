@@ -505,14 +505,32 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         brew install redis
         ```
 
-    6. Download `check-dependencies.sh` file:
+    6. Install mongDB:
+
+        ```
+        brew tap mongodb/brew
+        ```
+
+        ```
+        brew install mongodb-community@4.4
+        ```
+
+        ```
+        brew link mongodb-community@4.4 --force
+        ```
+
+        ```
+        brew services start mongodb-community@4.4
+        ```
+
+    7. Download `check-dependencies.sh` file:
 
         ```
         curl -OJL https://github.com/ELEVATE-Project/project-service/raw/service-setup/documentation/1.0.0/native/scripts/macos/check-dependencies.sh && \
         chmod +x check-dependencies.sh
         ```
 
-    7. Verify installed dependencies by running `check-dependencies.sh`:
+    8. Verify installed dependencies by running `check-dependencies.sh`:
 
         ```
         ./check-dependencies.sh

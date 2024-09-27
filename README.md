@@ -660,12 +660,12 @@ Before setting up the following ELEVATE-Project application, dependencies given 
     - **MacOs**
 
         ```
-        curl -L -o project-service/.env https://github.com/ELEVATE-Project/project-service/blob/service-setup/documentation/1.0.0/native/envs/project_env && \
-        curl -L -o entity-management/src/.env https://github.com/ELEVATE-Project/project-service/blob/service-setup/documentation/1.0.0/dockerized/envs/entity_management_env && \
-        curl -L -o user/src/.env https://github.com/ELEVATE-Project/project-service/blob/service-setup/documentation/1.0.0/native/envs/non-citus/user_env && \
-        curl -L -o notification/src/.env https://github.com/ELEVATE-Project/project-service/blob/service-setup/documentation/1.0.0/native/envs/non-citus/notification_env && \
-        curl -L -o interface-service/src/.env https://github.com/ELEVATE-Project/project-service/blob/service-setup/documentation/1.0.0/native/envs/interface_env && \
-        curl -L -o scheduler/src/.env https://github.com/ELEVATE-Project/project-service/blob/service-setup/documentation/1.0.0/native/envs/scheduler_env && \
+        curl -L -o project-service/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/service-setup/documentation/1.0.0/native/envs/project_env && \
+        curl -L -o entity-management/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/service-setup/documentation/1.0.0/native/envs/entity_management_env && \
+        curl -L -o user/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/service-setup/documentation/1.0.0/native/envs/non-citus/user_env && \
+        curl -L -o notification/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/service-setup/documentation/1.0.0/native/envs/non-citus/notification_env && \
+        curl -L -o interface-service/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/service-setup/documentation/1.0.0/native/envs/interface_env && \
+        curl -L -o scheduler/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/service-setup/documentation/1.0.0/native/envs/scheduler_env && \
         curl -L -o observation-survey-projects-pwa/src/environments/environment.ts https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/service-setup/documentation/1.0.0/native/envs/enviroment.ts
         ```
 

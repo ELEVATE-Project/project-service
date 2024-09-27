@@ -526,7 +526,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
     7. Download `check-dependencies.sh` file:
 
         ```
-        curl -OJL https://github.com/ELEVATE-Project/project-service/raw/service-setup/documentation/1.0.0/native/scripts/macos/check-dependencies.sh && \
+        curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/native/scripts/macos/check-dependencies.sh && \
         chmod +x check-dependencies.sh
         ```
 
@@ -648,25 +648,25 @@ Before setting up the following ELEVATE-Project application, dependencies given 
     -   **Ubuntu/Linux**
 
         ```
-        curl -L -o project-service/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/service-setup/documentation/1.0.0/native/envs/project_env && \
-        curl -L -o entity-management/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/service-setup/documentation/1.0.0/native/envs/entity_management_env && \
-        curl -L -o user/src/.env https://github.com/ELEVATE-Project/project-service/raw/refs/heads/service-setup/documentation/1.0.0/native/envs/non-citus/user_env && \
-        curl -L -o notification/src/.env https://github.com/ELEVATE-Project/project-service/raw/refs/heads/service-setup/documentation/1.0.0/native/envs/non-citus/notification_env && \
-        curl -L -o interface-service/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/service-setup/documentation/1.0.0/native/envs/interface_env && \
-        curl -L -o scheduler/src/.env https://github.com/ELEVATE-Project/project-service/raw/refs/heads/service-setup/documentation/1.0.0/native/envs/scheduler_env && \
+        curl -L -o project-service/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/project_env && \
+        curl -L -o entity-management/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/entity_management_env && \
+        curl -L -o user/src/.env https://github.com/ELEVATE-Project/project-service/raw/refs/heads/main/documentation/1.0.0/native/envs/non-citus/user_env && \
+        curl -L -o notification/src/.env https://github.com/ELEVATE-Project/project-service/raw/refs/heads/main/documentation/1.0.0/native/envs/non-citus/notification_env && \
+        curl -L -o interface-service/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/interface_env && \
+        curl -L -o scheduler/src/.env https://github.com/ELEVATE-Project/project-service/raw/refs/heads/main/documentation/1.0.0/native/envs/scheduler_env && \
         curl -L -o observation-survey-projects-pwa/src/environments/environment.ts https://github.com/ELEVATE-Project/observation-survey-projects-pwa/raw/refs/heads/main/src/environments/environment.ts
         ```
 
     -   **MacOs**
 
         ```
-        curl -L -o project-service/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/service-setup/documentation/1.0.0/native/envs/project_env && \
-        curl -L -o entity-management/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/service-setup/documentation/1.0.0/native/envs/entity_management_env && \
-        curl -L -o user/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/service-setup/documentation/1.0.0/native/envs/non-citus/user_env && \
-        curl -L -o notification/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/service-setup/documentation/1.0.0/native/envs/non-citus/notification_env && \
-        curl -L -o interface-service/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/service-setup/documentation/1.0.0/native/envs/interface_env && \
-        curl -L -o scheduler/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/service-setup/documentation/1.0.0/native/envs/scheduler_env && \
-        curl -L -o observation-survey-projects-pwa/src/environments/environment.ts https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/service-setup/documentation/1.0.0/native/envs/enviroment.ts
+        curl -L -o project-service/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/project_env && \
+        curl -L -o entity-management/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/entity_management_env && \
+        curl -L -o user/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/non-citus/user_env && \
+        curl -L -o notification/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/non-citus/notification_env && \
+        curl -L -o interface-service/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/interface_env && \
+        curl -L -o scheduler/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/scheduler_env && \
+        curl -L -o observation-survey-projects-pwa/src/environments/environment.ts https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/enviroment.ts
         ```
 
     > **Note:** Modify the environment files as necessary for your deployment using any text editor, ensuring that the values are appropriate for your environment. The default values provided in the current files are functional and serve as a good starting point. Refer to the sample env files provided at the [Project](https://github.com/ELEVATE-Project/mentoring/blob/master/src/.env.sample), [User](https://github.com/ELEVATE-Project/user/blob/master/src/.env.sample), [Notification](https://github.com/ELEVATE-Project/notification/blob/master/src/.env.sample), [Scheduler](https://github.com/ELEVATE-Project/scheduler/blob/master/src/.env.sample), [Interface](https://github.com/ELEVATE-Project/interface-service/blob/main/src/.env.sample) and [Entity-Management](https://github.com/ELEVATE-Project/project-service/blob/main/documentation/1.0.0/dockerized/envs/entity_management_env) repositories for reference.
@@ -682,7 +682,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         1. Download `create-databases.sh` Script File:
 
             ```
-            curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/service-setup/documentation/1.0.0/native/scripts/linux/create-databases.sh
+            curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/native/scripts/linux/create-databases.sh
             ```
 
         2. Make the executable by running the following command:
@@ -699,7 +699,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         1. Download `create-databases.sh` Script File:
 
             ```
-            curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/service-setup/documentation/1.0.0/native/scripts/macos/create-databases.sh
+            curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/native/scripts/macos/create-databases.sh
 
             ```
 
@@ -731,7 +731,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
     1. Download user `distributionColumns.sql` file.
 
         ```
-        curl -o ./user/distributionColumns.sql -JL https://github.com/ELEVATE-Project/project-service/raw/refs/heads/service-setup/documentation/1.0.0/distribution-columns/user/distributionColumns.sql
+        curl -o ./user/distributionColumns.sql -JL https://github.com/ELEVATE-Project/project-service/raw/refs/heads/main/documentation/1.0.0/distribution-columns/user/distributionColumns.sql
         ```
 
     2. Set up the `citus_setup` file by following the steps given below.
@@ -741,7 +741,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
             1. Download the `citus_setup.sh` file:
 
                 ```
-                curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/service-setup/documentation/1.0.0/native/scripts/linux/citus_setup.sh
+                curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/scripts/linux/citus_setup.sh
 
                 ```
 
@@ -766,13 +766,13 @@ Before setting up the following ELEVATE-Project application, dependencies given 
             1.1. For ubuntu/linux
 
             ```
-            curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/service-setup/documentation/1.0.0/native/scripts/linux/entity-project-sample-data.sh
+            curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/scripts/linux/entity-project-sample-data.sh
             ```
 
             1.1. For mac
 
             ```
-            curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/service-setup/documentation/1.0.0/native/scripts/macos/entity-project-sample-data.sh
+            curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/scripts/macos/entity-project-sample-data.sh
             ```
 
         2.  Make the executable by running the following command:
@@ -865,7 +865,7 @@ In such cases, you can generate sample user accounts using the steps below. This
 -   **Ubuntu/Linux**
 
     ```
-    curl -o insert_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/project-service/service-setup/documentation/1.0.0/native/scripts/linux/insert_sample_data.sh && \
+    curl -o insert_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/native/scripts/linux/insert_sample_data.sh && \
     chmod +x insert_sample_data.sh && \
     ./insert_sample_data.sh
     ```
@@ -873,7 +873,7 @@ In such cases, you can generate sample user accounts using the steps below. This
 -   **MacOS**
 
     ```
-    curl -o insert_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/service-setup/documentation/1.0.0/native/scripts/macos/insert_sample_data.sh && \
+    curl -o insert_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/scripts/macos/insert_sample_data.sh && \
     chmod +x insert_sample_data.sh && \
     ./insert_sample_data.sh
     ```

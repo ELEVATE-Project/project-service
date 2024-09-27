@@ -765,15 +765,15 @@ Before setting up the following ELEVATE-Project application, dependencies given 
 
             1.1. For ubuntu/linux
 
-                ```
-                curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/service-setup/documentation/1.0.0/native/scripts/linux/entity-project-sample-data.sh
-                ```
+            ```
+            curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/service-setup/documentation/1.0.0/native/scripts/linux/entity-project-sample-data.sh
+            ```
 
             1.1. For mac
 
-                ```
-                curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/service-setup/documentation/1.0.0/native/scripts/macos/entity-project-sample-data.sh
-                ```
+            ```
+            curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/service-setup/documentation/1.0.0/native/scripts/macos/entity-project-sample-data.sh
+            ```
 
         2.  Make the executable by running the following command:
             ```
@@ -887,7 +887,11 @@ In such cases, you can generate sample user accounts using the steps below. This
 | devikasingh@example.com  | Password1@ | state_educational_officer |
 
 </details>
-<!-- 
+
+## Postman Collections
+
+-   [Project Service](https://github.com/ELEVATE-Project/project-service/tree/main/api-doc)
+<!--
     ```sql
     postgres=# select citus_version();
                                            citus_version

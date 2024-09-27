@@ -795,12 +795,12 @@ Before setting up the following ELEVATE-Project application, dependencies given 
     -   **Ubuntu/Linux**
 
         ```
-        cd project-service && pm2 start app.js -i 2 --name project-service && cd .. && \
-        cd entity-management/src && pm2 start app.js -i 2 --name entity-management && cd ../.. && \
-        cd user/src && pm2 start app.js -i 2 --name user && cd ../.. && \
-        cd notification/src && pm2 start app.js -i 2 --name notification && cd ../.. && \
-        cd interface-service/src && pm2 start app.js -i 2 --name interface && cd ../.. && \
-        cd scheduler/src && pm2 start app.js -i 2 --name scheduler && cd ../..
+        pm2 start ./project-service/app.js --name project-service && \
+        pm2 start ./entity-management/src/app.js --name entity-management && \
+        pm2 start ./user/src/app.js --name user && \
+        pm2 start ./notification/src/app.js --name notification && \
+        pm2 start ./interface-service/src/app.js --name interface && \
+        pm2 start ./scheduler/src/app.js --name scheduler
         ```
 
     -   **MacOs**
@@ -865,7 +865,7 @@ In such cases, you can generate sample user accounts using the steps below. This
 -   **Ubuntu/Linux**
 
     ```
-    curl -o insert_sample_data.sh https://github.com/ELEVATE-Project/project-service/raw/refs/heads/service-setup/documentation/1.0.0/native/scripts/linux/insert_sample_data.sh && \
+    curl -o insert_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/project-service/service-setup/documentation/1.0.0/native/scripts/linux/insert_sample_data.sh && \
     chmod +x insert_sample_data.sh && \
     ./insert_sample_data.sh
     ```

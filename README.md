@@ -617,7 +617,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
 
 2.  **Git Clone Services And Portal Repositories**
 
-    - **Ubuntu/Linux/MacOS**
+    -   **Ubuntu/Linux/MacOS**
 
         ```
         git clone -b main https://github.com/ELEVATE-Project/project-service.git && \
@@ -631,7 +631,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
 
 3.  **Install NPM Packages**
 
-    - **Ubuntu/Linux/MacOS**
+    -   **Ubuntu/Linux/MacOS**
 
         ```
         cd project-service && npm install && cd ../ && \
@@ -645,7 +645,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
 
 4.  **Download Environment Files**
 
-    - **Ubuntu/Linux**
+    -   **Ubuntu/Linux**
 
         ```
         curl -L -o project-service/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/service-setup/documentation/1.0.0/native/envs/project_env && \
@@ -657,7 +657,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         curl -L -o observation-survey-projects-pwa/src/environments/environment.ts https://github.com/ELEVATE-Project/observation-survey-projects-pwa/raw/refs/heads/main/src/environments/environment.ts
         ```
 
-    - **MacOs**
+    -   **MacOs**
 
         ```
         curl -L -o project-service/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/service-setup/documentation/1.0.0/native/envs/project_env && \
@@ -677,7 +677,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
 
 5.  **Create Databases**
 
-    - **Ubuntu/Linux**
+    -   **Ubuntu/Linux**
 
         1. Download `create-databases.sh` Script File:
 
@@ -694,7 +694,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
             ./create-databases.sh
             ```
 
-    - **MacOs**
+    -   **MacOs**
 
         1. Download `create-databases.sh` Script File:
 
@@ -714,13 +714,9 @@ Before setting up the following ELEVATE-Project application, dependencies given 
 
 6.  **Run Migrations To Create Tables**
 
-    - **Ubuntu/Linux/MacOS**
+    -   **Ubuntu/Linux/MacOS**
 
-        1. Install Sequelize-cli globally:
-            ```
-            sudo npm i sequelize-cli -g
-            ```
-        2. Run Migrations:
+        1. Run Migrations:
             ```
             cd user/src && npx sequelize-cli db:migrate && cd ../.. && \
             cd notification/src && npx sequelize-cli db:migrate && cd ../..
@@ -796,7 +792,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
 
     Following the steps given below, 2 instances of each ELEVATE-Project backend service will be deployed and be managed by PM2 process manager.
 
-    - **Ubuntu/Linux**
+    -   **Ubuntu/Linux**
 
         ```
         cd project-service && pm2 start app.js -i 2 --name project-service && cd .. && \
@@ -807,7 +803,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         cd scheduler/src && pm2 start app.js -i 2 --name scheduler && cd ../..
         ```
 
-    - **MacOs**
+    -   **MacOs**
 
         ```
         cd project-service && npx pm2 start app.js -i 2 --name project-service && cd .. && \
@@ -820,7 +816,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
 
 10. **Run Service Scripts**
 
-    - **Ubuntu/Linux/MacOS**
+    -   **Ubuntu/Linux/MacOS**
 
         ```
         cd user/src/scripts && node insertDefaultOrg.js && node viewsScript.js && cd ../../..
@@ -828,40 +824,35 @@ Before setting up the following ELEVATE-Project application, dependencies given 
 
 11. **Start The Portal**
 
-    MentorEd portal utilizes Ionic and Angular CLI for building the browser bundle, follow the steps given below to install them and start the portal.
+    ELEVATE-Project portal utilizes Ionic for building the browser bundle, follow the steps given below to install them and start the portal.
 
-    - **Ubuntu/Linux**
+    -   **Ubuntu/Linux**
 
-        1. Install Ionic CLI globally:
-
-            ```
-            sudo npm install -g @ionic/cli
-            ```
-
-        2. Install Angular CLI globally:
+        1. Install the Ionic framework:
 
             ```
-            sudo npm install -g @angular/cli
+            npm install -g ionic
             ```
 
-        3. Navigate to `mentoring-mobile-app` directory:
+        2. Install the Ionic client:
 
             ```
-            cd mentoring-mobile-app
+            npm install -g @ionic/cli
             ```
 
-        4. Build the portal
+        3. Navigate to `observation-survey-projects-pwa` directory:
 
             ```
-            ionic build
+            cd observation-survey-projects-pwa
             ```
 
-        5. Start the portal:
+        4. Run the project on your local system using the following command:
+
             ```
-            pm2 start pm2.config.json && cd ..
+            ionic serve
             ```
 
-    Navigate to http://localhost:7601 to access the MentorEd Portal.
+    Navigate to http://localhost:8100 to access the ELEVATE-Project Portal.
 
 ## Sample User Accounts Generation
 

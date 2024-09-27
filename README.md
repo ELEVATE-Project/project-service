@@ -861,11 +861,11 @@ In such cases, you can generate sample user accounts using the steps below. This
 
 -   **MacOS**
 
-        ```
-        curl -o insert_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/mentoring/master/documentation/2.6.1/native/scripts/macos/insert_sample_data.sh && \
-        chmod +x insert_sample_data.sh && \
-        ./insert_sample_data.sh
-        ```
+    ```
+    curl -o insert_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/service-setup/documentation/1.0.0/native/scripts/macos/insert_sample_data.sh && \
+    chmod +x insert_sample_data.sh && \
+    ./insert_sample_data.sh
+    ```
 
     After successfully running the script mentioned above, the following user accounts will be created and available for login:
 

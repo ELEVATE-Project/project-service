@@ -757,7 +757,6 @@ Before setting up the following ELEVATE-Project application, dependencies given 
                 ```
 
 8.  **Insert Initial Data**
-    Use ELEVATE-Project scripts to insert the initial data.
 
     -   **Ubuntu/Linux/MacOS**
 

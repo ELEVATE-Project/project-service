@@ -197,7 +197,7 @@ Service also uses gotenberg for creation of project certificate. You can read mo
         ```
     -->
 
-7.  **Run All Services & Dependencies:**All services and dependencies can be started using the `docker-compose-up` script file.
+7.  **Run All Services & Dependencies**:All services and dependencies can be started using the `docker-compose-up` script file.
 
     -   **Ubuntu/Linux/Mac**
         ```
@@ -215,8 +215,8 @@ Service also uses gotenberg for creation of project certificate. You can read mo
              > **Note**: During the first Docker Compose run, the database, migration seeder files, and the script to set the default organization will be executed automatically.
          -->
 
-8.  **Access The Project Application**:Once the services are up and the front-end app bundle is built successfully, navigate to **[localhost:7007](http://localhost:7007/)** to access the MentorEd app.
-9.  **Gracefully Stop All Services & Dependencies:**All containers which are part of the docker-compose can be gracefully stopped by pressing `Ctrl + c` in the same terminal where the services are running.
+8.  **Access The Project Application**:Once the services are up and the front-end app bundle is built successfully, navigate to **[localhost:7007](http://localhost:7007/)** to access the Project app.
+9.  **Gracefully Stop All Services & Dependencies**:All containers which are part of the docker-compose can be gracefully stopped by pressing `Ctrl + c` in the same terminal where the services are running.
 10. **Remove All Service & Dependency Containers**:
     All docker containers can be stopped and removed by using the `docker-compose-down` file.
 
@@ -232,7 +232,7 @@ Service also uses gotenberg for creation of project certificate. You can read mo
              ```
          -->
 
-    > **Caution**: As per the default configuration in the `docker-compose-mentoring.yml` file, using the `down` command will lead to data loss since the database container does not persist data. To persist data across `down` commands and subsequent container removals, refer to the "Persistence of Database Data in Docker Containers" section of this documentation.
+    > **Caution**: As per the default configuration in the `docker-compose-project.yml` file, using the `down` command will lead to data loss since the database container does not persist data. To persist data across `down` commands and subsequent container removals, refer to the "Persistence of Database Data in Docker Containers" section of this documentation.
 
 ## Enable Citus Extension
 

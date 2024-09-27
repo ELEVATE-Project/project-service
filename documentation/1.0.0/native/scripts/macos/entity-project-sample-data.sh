@@ -31,7 +31,7 @@ EOF
 )
 
 echo "EntityType data being added to $ENTITY_TYPE_COLLECTION collection in $ENTITY_SERVICE_DB_NAME database...."
-ENTITY_TYPE_ID=$(mongosh --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
+ENTITY_TYPE_ID=$(mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
     var doc = $ENTITY_TYPE_DOCUMENT
     var result = db.getSiblingDB('$ENTITY_SERVICE_DB_NAME').$ENTITY_TYPE_COLLECTION.insertOne(doc);
     if (result.insertedId) {
@@ -59,7 +59,7 @@ EOF
 
 echo "EntityType data being added to $ENTITY_TYPE_COLLECTION collection in $ENTITY_SERVICE_DB_NAME database...."
 
-ENTITY_TYPE_DISTRICT_DOCUMENT_ID=$(mongosh --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
+ENTITY_TYPE_DISTRICT_DOCUMENT_ID=$(mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
     var doc = $ENTITY_TYPE_DISTRICT_DOCUMENT
     var result = db.getSiblingDB('$ENTITY_SERVICE_DB_NAME').$ENTITY_TYPE_COLLECTION.insertOne(doc);
     if (result.insertedId) {
@@ -77,7 +77,7 @@ ENTITIES_DOCUMENT=$(cat <<EOF
 {
     "name" : "Karnataka",
     "entityType" : "state",
-    "entityTypeId" : "$ENTITY_TYPE_ID",
+    "entityTypeId" : $ENTITY_TYPE_ID,
     "userId" : "1",
     "metaInformation" : {
         "externalId" : "KR001",
@@ -90,7 +90,7 @@ EOF
 
 echo "Entity data being added to $ENTITIES_COLLECTION collection in $ENTITY_SERVICE_DB_NAME database...."
 
-ENTITY_ID=$(mongosh --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
+ENTITY_ID=$(mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
     var doc = $ENTITIES_DOCUMENT
     var result = db.getSiblingDB('$ENTITY_SERVICE_DB_NAME').$ENTITIES_COLLECTION.insertOne(doc);
     if (result.insertedId) {
@@ -108,7 +108,7 @@ ENTITIES_DOCUMENT_DISTRICT_TYPE=$(cat <<EOF
 {
     "name" : "Bangalore",
     "entityType" : "district",
-    "entityTypeId" : "$ENTITY_TYPE_DISTRICT_DOCUMENT_ID",
+    "entityTypeId" : $ENTITY_TYPE_DISTRICT_DOCUMENT_ID,
     "userId" : "1",
     "metaInformation" : {
         "externalId" : "BN001",
@@ -122,7 +122,7 @@ EOF
 
 echo "Entity data being added to $ENTITIES_COLLECTION collection in $ENTITY_SERVICE_DB_NAME database...."
 
-ENTITY_ID_DISTRICT=$(mongosh --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
+ENTITY_ID_DISTRICT=$(mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
     var doc = $ENTITIES_DOCUMENT_DISTRICT_TYPE
     var result = db.getSiblingDB('$ENTITY_SERVICE_DB_NAME').$ENTITIES_COLLECTION.insertOne(doc);
     if (result.insertedId) {
@@ -136,12 +136,12 @@ ENTITY_ID_DISTRICT=$(clean_object_id "$ENTITY_ID_DISTRICT")
 echo "Entity ID bangalore: $ENTITY_ID_DISTRICT"
 
 # Updating groups
-mongosh --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
+mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
     var updateResult = db.getSiblingDB('$ENTITY_SERVICE_DB_NAME').$ENTITIES_COLLECTION.updateOne(
-        {_id: ObjectId('$ENTITY_ID')},
+        {_id: ObjectId($ENTITY_ID)},
         { 
             \$set: { 
-                'groups.district': ['$ENTITY_ID_DISTRICT']
+                'groups.district': [ObjectId($ENTITY_ID_DISTRICT)]
             }
         }
     );
@@ -169,7 +169,7 @@ EOF
 
 echo "Project category data being added to $PROJECT_CATEGORY_COLLECTION collection in $PROJECT_DB_NAME database...."
 
-PROJECT_CATEGORY_ID=$(mongosh --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
+PROJECT_CATEGORY_ID=$(mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
     var doc = $PROJECT_CATEGORY_DOCUMENT
     var result = db.getSiblingDB('$PROJECT_DB_NAME').$PROJECT_CATEGORY_COLLECTION.insertOne(doc);
     if (result.insertedId) {
@@ -207,7 +207,7 @@ PROGRAMS_DOCUMENT=$(cat <<EOF
     "startDate": "2024-04-16T00:00:00.000Z",
     "endDate": "2025-12-16T18:29:59.000Z",
     "scope": {
-        "state": ["$ENTITY_ID"],
+        "state": [$ENTITY_ID],
         "roles": ["district_education_officer"],
         "entityType": "state"
     }
@@ -217,7 +217,7 @@ EOF
 
 echo "Program data being added to $PROGRAMS_COLLECTION collection in $PROJECT_DB_NAME database...."
 
-PROGRAM_ID=$(mongosh --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
+PROGRAM_ID=$(mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
     var doc = $PROGRAMS_DOCUMENT
     var result = db.getSiblingDB('$PROJECT_DB_NAME').$PROGRAMS_COLLECTION.insertOne(doc);
     if (result.insertedId) {
@@ -249,19 +249,19 @@ PROJECT_TEMPLATES_DOCUMENT=$(cat <<EOF
     "title": "Washroom Hygiene",
     "externalId": "WASH-HYGIENE",
     "categories": [{
-        "_id": "$PROJECT_CATEGORY_ID",
+        "_id": $PROJECT_CATEGORY_ID,
         "externalId": "educationLeader",
         "name": "Education Leader"
     }],
     "status": "published",
-    "programId": "$PROGRAM_ID"
+    "programId": $PROGRAM_ID
 }
 EOF
 )
 
 echo "Project template data being added to $PROJECT_TEMPLATES_COLLECTION collection in $PROJECT_DB_NAME database...."
 
-PROJECT_TEMPLATE_ID=$(mongosh --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
+PROJECT_TEMPLATE_ID=$(mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
     var doc = $PROJECT_TEMPLATES_DOCUMENT
     var result = db.getSiblingDB('$PROJECT_DB_NAME').$PROJECT_TEMPLATES_COLLECTION.insertOne(doc);
     if (result.insertedId) {
@@ -281,17 +281,17 @@ SOLUTION_DOCUMENT=$(cat <<EOF
     "resourceType": ["Improvement Project Solution"],
     "language": ["English"],
     "keywords": ["Improvement Project"],
-    "entities": ["$ENTITY_ID"],
-    "programId": "$PROGRAM_ID",
+    "entities": [$ENTITY_ID],
+    "programId": $PROGRAM_ID,
     "name": "Washroom Hygiene",
     "description": "The School Hygiene Improvement Initiative is dedicated to ensuring clean, safe, and healthy environments in schools...",
     "programExternalId": "PG01",
     "scope": {
-        "state": ["$ENTITY_ID"],
+        "state": [$ENTITY_ID],
         "roles": ["state_education_officer"],
         "entityType": "state"
     },
-    "projectTemplateId": ObjectId("$PROJECT_TEMPLATE_ID"),
+    "projectTemplateId": ObjectId($PROJECT_TEMPLATE_ID),
     "startDate" : ISODate("2021-08-30T00:00:00.000Z"),
     "endDate" : ISODate("2029-08-30T00:00:00.000Z"),
     "isDeleted" : false,
@@ -307,7 +307,7 @@ EOF
 echo "Solution data being added to $SOLUTIONS_COLLECTION collection in $PROJECT_DB_NAME database...."
 
 # Insert SOLUTION_ID using docker exec
-SOLUTION_ID=$(mongosh --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
+SOLUTION_ID=$(mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
     var doc = $SOLUTION_DOCUMENT
     var result = db.getSiblingDB('$PROJECT_DB_NAME').$SOLUTIONS_COLLECTION.insertOne(doc);
     if (result.insertedId) {
@@ -320,12 +320,12 @@ SOLUTION_ID=$(clean_object_id "$SOLUTION_ID")
 echo "Solution ID: $SOLUTION_ID"
 
 # Updating project template with the solution ID
-mongosh --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
+mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
     var updateResult = db.getSiblingDB('$PROJECT_DB_NAME').$PROJECT_TEMPLATES_COLLECTION.updateOne(
-        {_id: ObjectId('$PROJECT_TEMPLATE_ID')},  // Assuming PROJECT_TEMPLATE_ID is an ObjectId
+        {_id: ObjectId($PROJECT_TEMPLATE_ID)},  // Assuming PROJECT_TEMPLATE_ID is an ObjectId
         { 
             \$set: { 
-                'solutionId': '$SOLUTION_ID'  // Use single quotes to avoid conflicts with Bash variable expansion
+                'solutionId': ObjectId($SOLUTION_ID)  // Use single quotes to avoid conflicts with Bash variable expansion
             }
         }
     );
@@ -512,7 +512,7 @@ FORM_DOCUMENTS='[{
 echo "Forms data being added to forms collection in $PROJECT_DB_NAME database...."
 
 # Insert FORM using docker exec
-FORM_ID=$(mongosh --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
+FORM_ID=$(mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
     var doc = $FORM_DOCUMENTS;
     var result = db.getSiblingDB('$PROJECT_DB_NAME').$FORMS_COLLECTION.insertMany(doc);
     
@@ -557,7 +557,7 @@ USER_EXTENSION_DOCUMENT=$(cat <<EOF
     "entityTypes" : [ 
         {
             "entityType" : "state",
-            "entityTypeId" : "$ENTITY_TYPE_ID",
+            "entityTypeId" : $ENTITY_TYPE_ID,
         }
     ],
     "updatedAt" : "2024-09-09T09:31:47.135Z",
@@ -569,7 +569,7 @@ EOF
 
 echo "User data being added to userRoleExtension collection in $ENTITY_SERVICE_DB_NAME database...."
 # Insert SOLUTION_ID using docker exec
-USER_EXTENSION_ID=$(mongosh --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
+USER_EXTENSION_ID=$(mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
     var doc = $USER_EXTENSION_DOCUMENT;
     var result = db.getSiblingDB('$ENTITY_SERVICE_DB_NAME').userRoleExtension.insertOne(doc);
     if (result.insertedId) {
@@ -585,7 +585,7 @@ echo "UserExtention ID: $USER_EXTENSION_ID"
 
 echo "Configurations data being added to $CONFIGURATIONS_COLLECTION collection in $PROJECT_DB_NAME database...."
 
-CONFIGURATION_ID=$(mongosh --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
+CONFIGURATION_ID=$(mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
     var doc = $CONFIGURATIONS_DOCUMENT
     var result = db.getSiblingDB('$PROJECT_DB_NAME').$CONFIGURATIONS_COLLECTION.insertOne(doc);
     if (result.insertedId) {

@@ -16,7 +16,7 @@ show_menu() {
     echo "6) Citus and PostgreSQL"
     echo "7) Gotenberg"
     echo "8) Exit"
-    echo -e "${GREEN}Enter your choice [1-9]: ${NC}"
+    echo -e "${GREEN}Enter your choice [1-8]: ${NC}"
 }
 
 # Function to uninstall PM2

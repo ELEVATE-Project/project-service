@@ -1,6 +1,6 @@
 <div align="center">
 
-# Project Service
+# Projects Service
 
 <a href="https://shikshalokam.org/elevate/">
 <img
@@ -505,14 +505,32 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         brew install redis
         ```
 
-    6. Download `check-dependencies.sh` file:
+    6. Install mongDB:
 
         ```
-        curl -OJL https://github.com/ELEVATE-Project/project-service/raw/service-setup/documentation/1.0.0/native/scripts/macos/check-dependencies.sh && \
+        brew tap mongodb/brew
+        ```
+
+        ```
+        brew install mongodb-community@4.4
+        ```
+
+        ```
+        brew link mongodb-community@4.4 --force
+        ```
+
+        ```
+        brew services start mongodb-community@4.4
+        ```
+
+    7. Download `check-dependencies.sh` file:
+
+        ```
+        curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/native/scripts/macos/check-dependencies.sh && \
         chmod +x check-dependencies.sh
         ```
 
-    7. Verify installed dependencies by running `check-dependencies.sh`:
+    8. Verify installed dependencies by running `check-dependencies.sh`:
 
         ```
         ./check-dependencies.sh
@@ -593,27 +611,27 @@ Before setting up the following ELEVATE-Project application, dependencies given 
 
 ## Installation
 
-1. **Create ELEVATE-Project Directory:** Create a directory named **ELEVATE-Project**.
+1.  **Create ELEVATE-Project Directory:** Create a directory named **ELEVATE-Project**.
 
     > Example Command: `mkdir ELEVATE-Project && cd ELEVATE-Project/`
 
-2. **Git Clone Services And Portal Repositories**
+2.  **Git Clone Services And Portal Repositories**
 
-    - **Ubuntu/Linux/MacOS**
+    -   **Ubuntu/Linux/MacOS**
 
         ```
         git clone -b main https://github.com/ELEVATE-Project/project-service.git && \
         git clone -b main https://github.com/ELEVATE-Project/entity-management.git && \
-        git clone -b release-2.6.1 https://github.com/ELEVATE-Project/user.git && \
-        git clone -b release-2.6.1 https://github.com/ELEVATE-Project/notification.git && \
-        git clone -b release-2.6.1 https://github.com/ELEVATE-Project/interface-service.git && \
-        git clone -b release-2.6.1 https://github.com/ELEVATE-Project/scheduler.git && \
+        git clone -b master https://github.com/ELEVATE-Project/user.git && \
+        git clone -b master https://github.com/ELEVATE-Project/notification.git && \
+        git clone -b main https://github.com/ELEVATE-Project/interface-service.git && \
+        git clone -b master https://github.com/ELEVATE-Project/scheduler.git && \
         git clone -b main https://github.com/ELEVATE-Project/observation-survey-projects-pwa
         ```
 
-3. **Install NPM Packages**
+3.  **Install NPM Packages**
 
-    - **Ubuntu/Linux/MacOS**
+    -   **Ubuntu/Linux/MacOS**
 
         ```
         cd project-service && npm install && cd ../ && \
@@ -625,30 +643,30 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         cd observation-survey-projects-pwa && npm install --force && cd ..
         ```
 
-4. **Download Environment Files**
+4.  **Download Environment Files**
 
-    - **Ubuntu/Linux**
+    -   **Ubuntu/Linux**
 
         ```
-        curl -L -o project-service/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/service-setup/documentation/1.0.0/native/envs/project_env && \
-        curl -L -o entity-management/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/service-setup/documentation/1.0.0/native/envs/entity_management_env && \
-        curl -L -o user/src/.env https://github.com/ELEVATE-Project/project-service/raw/refs/heads/service-setup/documentation/1.0.0/native/envs/user_env && \
-        curl -L -o notification/src/.env https://github.com/ELEVATE-Project/project-service/raw/refs/heads/service-setup/documentation/1.0.0/native/envs/notification_env && \
-        curl -L -o interface-service/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/service-setup/documentation/1.0.0/native/envs/interface_env && \
-        curl -L -o scheduler/src/.env https://github.com/ELEVATE-Project/project-service/raw/refs/heads/service-setup/documentation/1.0.0/native/envs/scheduler_env && \
+        curl -L -o project-service/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/project_env && \
+        curl -L -o entity-management/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/entity_management_env && \
+        curl -L -o user/src/.env https://github.com/ELEVATE-Project/project-service/raw/refs/heads/main/documentation/1.0.0/native/envs/non-citus/user_env && \
+        curl -L -o notification/src/.env https://github.com/ELEVATE-Project/project-service/raw/refs/heads/main/documentation/1.0.0/native/envs/non-citus/notification_env && \
+        curl -L -o interface-service/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/interface_env && \
+        curl -L -o scheduler/src/.env https://github.com/ELEVATE-Project/project-service/raw/refs/heads/main/documentation/1.0.0/native/envs/scheduler_env && \
         curl -L -o observation-survey-projects-pwa/src/environments/environment.ts https://github.com/ELEVATE-Project/observation-survey-projects-pwa/raw/refs/heads/main/src/environments/environment.ts
         ```
 
-    - **MacOs**
+    -   **MacOs**
 
         ```
-        curl -L -o project-service/.env https://github.com/ELEVATE-Project/project-service/blob/service-setup/documentation/1.0.0/native/envs/project_env && \
-        curl -L -o entity-management/src/.env https://github.com/ELEVATE-Project/project-service/blob/service-setup/documentation/1.0.0/dockerized/envs/entity_management_env && \
-        curl -L -o user/src/.env https://github.com/ELEVATE-Project/project-service/blob/service-setup/documentation/1.0.0/native/envs/non-citus/user_env && \
-        curl -L -o notification/src/.env https://github.com/ELEVATE-Project/project-service/blob/service-setup/documentation/1.0.0/native/envs/non-citus/notification_env && \
-        curl -L -o interface-service/src/.env https://github.com/ELEVATE-Project/project-service/blob/service-setup/documentation/1.0.0/native/envs/interface_env && \
-        curl -L -o scheduler/src/.env https://github.com/ELEVATE-Project/project-service/blob/service-setup/documentation/1.0.0/native/envs/scheduler_env && \
-        curl -L -o observation-survey-projects-pwa/src/environments/environment.ts https://github.com/ELEVATE-Project/ELEVATE-Project/project-service/blob/service-setup/documentation/1.0.0/native/envs/environment.ts
+        curl -L -o project-service/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/project_env && \
+        curl -L -o entity-management/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/entity_management_env && \
+        curl -L -o user/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/non-citus/user_env && \
+        curl -L -o notification/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/non-citus/notification_env && \
+        curl -L -o interface-service/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/interface_env && \
+        curl -L -o scheduler/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/scheduler_env && \
+        curl -L -o observation-survey-projects-pwa/src/environments/environment.ts https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/enviroment.ts
         ```
 
     > **Note:** Modify the environment files as necessary for your deployment using any text editor, ensuring that the values are appropriate for your environment. The default values provided in the current files are functional and serve as a good starting point. Refer to the sample env files provided at the [Project](https://github.com/ELEVATE-Project/mentoring/blob/master/src/.env.sample), [User](https://github.com/ELEVATE-Project/user/blob/master/src/.env.sample), [Notification](https://github.com/ELEVATE-Project/notification/blob/master/src/.env.sample), [Scheduler](https://github.com/ELEVATE-Project/scheduler/blob/master/src/.env.sample), [Interface](https://github.com/ELEVATE-Project/interface-service/blob/main/src/.env.sample) and [Entity-Management](https://github.com/ELEVATE-Project/project-service/blob/main/documentation/1.0.0/dockerized/envs/entity_management_env) repositories for reference.
@@ -657,14 +675,14 @@ Before setting up the following ELEVATE-Project application, dependencies given 
 
     > **Important:** As mentioned in the above linked document, the **User SignUp** functionality may be compromised if key environment variables are not set correctly during deployment. If you opt to skip this setup, consider using the sample user account generator detailed in the `Sample User Accounts Generation` section of this document.
 
-5. **Create Databases**
+5.  **Create Databases**
 
-    - **Ubuntu/Linux**
+    -   **Ubuntu/Linux**
 
         1. Download `create-databases.sh` Script File:
 
             ```
-            curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/service-setup/documentation/1.0.0/native/scripts/linux/create-databases.sh
+            curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/native/scripts/linux/create-databases.sh
             ```
 
         2. Make the executable by running the following command:
@@ -676,12 +694,12 @@ Before setting up the following ELEVATE-Project application, dependencies given 
             ./create-databases.sh
             ```
 
-    - **MacOs**
+    -   **MacOs**
 
         1. Download `create-databases.sh` Script File:
 
             ```
-            curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/service-setup/documentation/1.0.0/native/scripts/macos/create-databases.sh
+            curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/native/scripts/macos/create-databases.sh
 
             ```
 
@@ -694,21 +712,17 @@ Before setting up the following ELEVATE-Project application, dependencies given 
             ./create-databases.sh
             ```
 
-6. **Run Migrations To Create Tables**
+6.  **Run Migrations To Create Tables**
 
-    - **Ubuntu/Linux/MacOS**
+    -   **Ubuntu/Linux/MacOS**
 
-        1. Install Sequelize-cli globally:
-            ```
-            sudo npm i sequelize-cli -g
-            ```
-        2. Run Migrations:
+        1. Run Migrations:
             ```
             cd user/src && npx sequelize-cli db:migrate && cd ../.. && \
             cd notification/src && npx sequelize-cli db:migrate && cd ../..
             ```
 
-7. **Enabling Citus And Setting Distribution Columns (Optional)**
+7.  **Enabling Citus And Setting Distribution Columns (Optional)**
 
     To boost performance and scalability, users can opt to enable the Citus extension. This transforms PostgreSQL into a distributed database, spreading data across multiple nodes to handle large datasets more efficiently as demand grows.
 
@@ -717,7 +731,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
     1. Download user `distributionColumns.sql` file.
 
         ```
-        curl -o ./user/distributionColumns.sql -JL https://github.com/ELEVATE-Project/project-service/raw/refs/heads/service-setup/documentation/1.0.0/distribution-columns/user/distributionColumns.sql
+        curl -o ./user/distributionColumns.sql -JL https://github.com/ELEVATE-Project/project-service/raw/refs/heads/main/documentation/1.0.0/distribution-columns/user/distributionColumns.sql
         ```
 
     2. Set up the `citus_setup` file by following the steps given below.
@@ -727,7 +741,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
             1. Download the `citus_setup.sh` file:
 
                 ```
-                curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/service-setup/documentation/1.0.0/native/scripts/linux/citus_setup.sh
+                curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/scripts/linux/citus_setup.sh
 
                 ```
 
@@ -742,34 +756,54 @@ Before setting up the following ELEVATE-Project application, dependencies given 
                 ./citus_setup.sh user postgres://postgres:postgres@localhost:9700/users
                 ```
 
-8. **Insert Initial Data**
-   Use ELEVATE-Project scripts to insert the initial data.
+8.  **Insert Initial Data**
+    Use ELEVATE-Project scripts to insert the initial data.
 
-    - **Ubuntu/Linux/MacOS**
+    -   **Ubuntu/Linux/MacOS**
 
-        ```
-        cd ELEVATE-Project/project-service/documentation/1.0.0/native/scripts/linux && \
-        sh entity-project-sample-data.sh && \
-        cd ~/ELEVATE-Project/ && \
-        cd user/src && npm run db:seed:all && cd ../..
-        ```
+        1.  Download `entity-project-sample-data.sh` Script File:
 
-9. **Start The Services**
+            1.1. For ubuntu/linux
+
+            ```
+            curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/scripts/linux/entity-project-sample-data.sh
+            ```
+
+            1.1. For mac
+
+            ```
+            curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/scripts/macos/entity-project-sample-data.sh
+            ```
+
+        2.  Make the executable by running the following command:
+            ```
+            chmod +x entity-project-sample-data.sh
+            ```
+        3.  Run the script file:
+            ```
+            ./entity-project-sample-data.sh
+            ```
+        4.  Run seeders of user service
+            ```
+            cd user/src && npm run db:seed:all && cd ../..
+            ```
+
+9.  **Start The Services**
 
     Following the steps given below, 2 instances of each ELEVATE-Project backend service will be deployed and be managed by PM2 process manager.
 
-    - **Ubuntu/Linux**
+    -   **Ubuntu/Linux**
 
         ```
-        cd project-service && pm2 start app.js -i 2 --name project-service && cd .. && \
-        cd entity-management/src && pm2 start app.js -i 2 --name entity-management && cd ../.. && \
-        cd user/src && pm2 start app.js -i 2 --name user && cd ../.. && \
-        cd notification/src && pm2 start app.js -i 2 --name notification && cd ../.. && \
-        cd interface-service/src && pm2 start app.js -i 2 --name interface && cd ../.. && \
-        cd scheduler/src && pm2 start app.js -i 2 --name scheduler && cd ../..
+        pm2 start ./project-service/app.js --name project-service && \
+        pm2 start ./entity-management/src/app.js --name entity-management && \
+        pm2 start ./user/src/app.js --name user && \
+        pm2 start ./notification/src/app.js --name notification && \
+        pm2 start ./interface-service/src/app.js --name interface && \
+        pm2 start ./scheduler/src/app.js --name scheduler
         ```
 
-    - **MacOs**
+    -   **MacOs**
 
         ```
         cd project-service && npx pm2 start app.js -i 2 --name project-service && cd .. && \
@@ -782,7 +816,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
 
 10. **Run Service Scripts**
 
-    - **Ubuntu/Linux/MacOS**
+    -   **Ubuntu/Linux/MacOS**
 
         ```
         cd user/src/scripts && node insertDefaultOrg.js && node viewsScript.js && cd ../../..
@@ -790,40 +824,35 @@ Before setting up the following ELEVATE-Project application, dependencies given 
 
 11. **Start The Portal**
 
-    MentorEd portal utilizes Ionic and Angular CLI for building the browser bundle, follow the steps given below to install them and start the portal.
+    ELEVATE-Project portal utilizes Ionic for building the browser bundle, follow the steps given below to install them and start the portal.
 
-    - **Ubuntu/Linux**
+    -   **Ubuntu/Linux**
 
-        1. Install Ionic CLI globally:
-
-            ```
-            sudo npm install -g @ionic/cli
-            ```
-
-        2. Install Angular CLI globally:
+        1. Install the Ionic framework:
 
             ```
-            sudo npm install -g @angular/cli
+            npm install -g ionic
             ```
 
-        3. Navigate to `mentoring-mobile-app` directory:
+        2. Install the Ionic client:
 
             ```
-            cd mentoring-mobile-app
+            npm install -g @ionic/cli
             ```
 
-        4. Build the portal
+        3. Navigate to `observation-survey-projects-pwa` directory:
 
             ```
-            ionic build
+            cd observation-survey-projects-pwa
             ```
 
-        5. Start the portal:
+        4. Run the project on your local system using the following command:
+
             ```
-            pm2 start pm2.config.json && cd ..
+            ionic serve
             ```
 
-    Navigate to http://localhost:7601 to access the MentorEd Portal.
+    Navigate to http://localhost:8100 to access the ELEVATE-Project Portal.
 
 ## Sample User Accounts Generation
 
@@ -836,21 +865,33 @@ In such cases, you can generate sample user accounts using the steps below. This
 -   **Ubuntu/Linux**
 
     ```
-    curl -o insert_sample_data.sh https://github.com/ELEVATE-Project/project-service/raw/refs/heads/service-setup/documentation/1.0.0/native/scripts/linux/insert_sample_data.sh && \
+    curl -o insert_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/native/scripts/linux/insert_sample_data.sh && \
     chmod +x insert_sample_data.sh && \
     ./insert_sample_data.sh
     ```
 
-After successfully running the script mentioned above, the following user accounts will be created and available for login:
+-   **MacOS**
 
-| Email ID                 | Password   | Role               |
-| ------------------------ | ---------- | ------------------ |
-| aaravpatel@example.com   | Password1@ | Mentee             |
-| arunimareddy@example.com | Password1@ | Mentor             |
-| devikasingh@example.com  | Password1@ | Organization Admin |
+    ```
+    curl -o insert_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/scripts/macos/insert_sample_data.sh && \
+    chmod +x insert_sample_data.sh && \
+    ./insert_sample_data.sh
+    ```
+
+    After successfully running the script mentioned above, the following user accounts will be created and available for login:
+
+| Email ID                 | Password   | Role                      |
+| ------------------------ | ---------- | ------------------------- |
+| aaravpatel@example.com   | Password1@ | state_educational_officer |
+| arunimareddy@example.com | Password1@ | state_educational_officer |
+| devikasingh@example.com  | Password1@ | state_educational_officer |
 
 </details>
-<!-- 
+
+## Postman Collections
+
+-   [Project Service](https://github.com/ELEVATE-Project/project-service/tree/main/api-doc)
+<!--
     ```sql
     postgres=# select citus_version();
                                            citus_version

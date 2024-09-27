@@ -61,16 +61,6 @@ check_redis() {
     fi
 }
 
-# Function to check Redis BullMQ installation
-check_bullmq() {
-    # BullMQ is a Node.js package, so we check if it's installed globally
-    if npm list -g bullmq >/dev/null 2>&1; then
-        echo -e "${GREEN}BullMQ is installed globally.${NC}"
-    else
-        echo -e "${RED}BullMQ is not installed.${NC}"
-    fi
-}
-
 # Function to check MongoDB installation and service
 check_mongodb() {
     if brew list | grep -q mongodb-community; then
@@ -115,12 +105,11 @@ check_postgres() {
 }
 
 # Main execution flow of the script
-echo "MentorEd Dependencies Status"
+echo "Project Dependencies Status"
 
 check_nodejs
 check_kafka
 check_redis
-check_bullmq
 check_mongodb
 check_pm2
 check_postgres

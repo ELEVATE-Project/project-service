@@ -859,7 +859,15 @@ In such cases, you can generate sample user accounts using the steps below. This
     ./insert_sample_data.sh
     ```
 
-After successfully running the script mentioned above, the following user accounts will be created and available for login:
+-   **MacOS**
+
+        ```
+        curl -o insert_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/mentoring/master/documentation/2.6.1/native/scripts/macos/insert_sample_data.sh && \
+        chmod +x insert_sample_data.sh && \
+        ./insert_sample_data.sh
+        ```
+
+    After successfully running the script mentioned above, the following user accounts will be created and available for login:
 
 | Email ID                 | Password   | Role               |
 | ------------------------ | ---------- | ------------------ |

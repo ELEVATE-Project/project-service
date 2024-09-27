@@ -1,6 +1,6 @@
 <div align="center">
 
-# Project Service
+# Projects Service
 
 <a href="https://shikshalokam.org/elevate/">
 <img
@@ -611,11 +611,11 @@ Before setting up the following ELEVATE-Project application, dependencies given 
 
 ## Installation
 
-1. **Create ELEVATE-Project Directory:** Create a directory named **ELEVATE-Project**.
+1.  **Create ELEVATE-Project Directory:** Create a directory named **ELEVATE-Project**.
 
     > Example Command: `mkdir ELEVATE-Project && cd ELEVATE-Project/`
 
-2. **Git Clone Services And Portal Repositories**
+2.  **Git Clone Services And Portal Repositories**
 
     - **Ubuntu/Linux/MacOS**
 
@@ -629,7 +629,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         git clone -b main https://github.com/ELEVATE-Project/observation-survey-projects-pwa
         ```
 
-3. **Install NPM Packages**
+3.  **Install NPM Packages**
 
     - **Ubuntu/Linux/MacOS**
 
@@ -643,7 +643,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         cd observation-survey-projects-pwa && npm install --force && cd ..
         ```
 
-4. **Download Environment Files**
+4.  **Download Environment Files**
 
     - **Ubuntu/Linux**
 
@@ -675,7 +675,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
 
     > **Important:** As mentioned in the above linked document, the **User SignUp** functionality may be compromised if key environment variables are not set correctly during deployment. If you opt to skip this setup, consider using the sample user account generator detailed in the `Sample User Accounts Generation` section of this document.
 
-5. **Create Databases**
+5.  **Create Databases**
 
     - **Ubuntu/Linux**
 
@@ -712,7 +712,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
             ./create-databases.sh
             ```
 
-6. **Run Migrations To Create Tables**
+6.  **Run Migrations To Create Tables**
 
     - **Ubuntu/Linux/MacOS**
 
@@ -726,7 +726,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
             cd notification/src && npx sequelize-cli db:migrate && cd ../..
             ```
 
-7. **Enabling Citus And Setting Distribution Columns (Optional)**
+7.  **Enabling Citus And Setting Distribution Columns (Optional)**
 
     To boost performance and scalability, users can opt to enable the Citus extension. This transforms PostgreSQL into a distributed database, spreading data across multiple nodes to handle large datasets more efficiently as demand grows.
 
@@ -760,31 +760,39 @@ Before setting up the following ELEVATE-Project application, dependencies given 
                 ./citus_setup.sh user postgres://postgres:postgres@localhost:9700/users
                 ```
 
-8. **Insert Initial Data**
-   Use ELEVATE-Project scripts to insert the initial data.
+8.  **Insert Initial Data**
+    Use ELEVATE-Project scripts to insert the initial data.
 
-    - **Ubuntu/Linux/MacOS**
+    -   **Ubuntu/Linux/MacOS**
 
-        1. Download `entity-project-sample-data.sh` Script File:
+        1.  Download `entity-project-sample-data.sh` Script File:
 
-            ```
-            curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/service-setup/documentation/1.0.0/native/scripts/linux/entity-project-sample-data.sh
-            ```
+            1.1. For ubuntu/linux
 
-        2. Make the executable by running the following command:
+                ```
+                curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/service-setup/documentation/1.0.0/native/scripts/linux/entity-project-sample-data.sh
+                ```
+
+            1.1. For mac
+
+                ```
+                curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/service-setup/documentation/1.0.0/native/scripts/macos/entity-project-sample-data.sh
+                ```
+
+        2.  Make the executable by running the following command:
             ```
             chmod +x entity-project-sample-data.sh
             ```
-        3. Run the script file:
+        3.  Run the script file:
             ```
             ./entity-project-sample-data.sh
             ```
-        4. Run seeders of user service
+        4.  Run seeders of user service
             ```
             cd user/src && npm run db:seed:all && cd ../..
             ```
 
-9. **Start The Services**
+9.  **Start The Services**
 
     Following the steps given below, 2 instances of each ELEVATE-Project backend service will be deployed and be managed by PM2 process manager.
 
@@ -881,11 +889,11 @@ In such cases, you can generate sample user accounts using the steps below. This
 
     After successfully running the script mentioned above, the following user accounts will be created and available for login:
 
-| Email ID                 | Password   | Role               |
-| ------------------------ | ---------- | ------------------ |
-| aaravpatel@example.com   | Password1@ | Mentee             |
-| arunimareddy@example.com | Password1@ | Mentor             |
-| devikasingh@example.com  | Password1@ | Organization Admin |
+| Email ID                 | Password   | Role                      |
+| ------------------------ | ---------- | ------------------------- |
+| aaravpatel@example.com   | Password1@ | state_educational_officer |
+| arunimareddy@example.com | Password1@ | state_educational_officer |
+| devikasingh@example.com  | Password1@ | state_educational_officer |
 
 </details>
 <!-- 

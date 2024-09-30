@@ -889,7 +889,7 @@ In such cases, you can generate sample user accounts using the steps below. This
 
 ## Postman Collections
 
--   [Project Service](https://github.com/ELEVATE-Project/project-service/tree/main/api-doc)
+-   [Projects Service](https://github.com/ELEVATE-Project/project-service/tree/main/api-doc)
 <!--
     ```sql
     postgres=# select citus_version();

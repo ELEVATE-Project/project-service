@@ -107,12 +107,12 @@ Service also uses gotenberg for creation of project certificate. You can read mo
 
         ```
         curl -L ^
-         -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/interface_env \
-         -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/entity_management_env \
-         -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/project_env \
-         -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/notification_env \
-         -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/scheduler_env \
-         -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/user_env \
+         -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/interface_env ^
+         -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/entity_management_env ^
+         -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/project_env ^
+         -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/notification_env ^
+         -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/scheduler_env ^
+         -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/user_env ^
          -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/env.js
         ```
 
@@ -128,13 +128,13 @@ Service also uses gotenberg for creation of project certificate. You can read mo
         curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/dockerized/scripts/mac-linux/replace_volume_path.sh
         ```
 
-<!--
-        -   **Windows**
 
-            ```
-            curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/dockerized/scripts/windows/replace_volume_path.bat
-            ```
-     -->
+    -   **Windows**
+
+        ```
+        curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/dockerized/scripts/windows/replace_volume_path.bat
+        ```
+    
 
 5.  **Run `replace_volume_path` Script File**
 
@@ -148,19 +148,19 @@ Service also uses gotenberg for creation of project certificate. You can read mo
             ./replace_volume_path.sh
             ```
 
-    <!-- -   **Windows**
+    -   **Windows**
 
-              Run the script file either by double clicking it or by executing the following command from the terminal.
-
-              ```
-              replace_volume_path.bat
-              ```
-
-              > **Note**: The provided script file replaces the host path for the **portal** service container volume in the `docker-compose-project.yml` file with your current directory path.
-              >
-              > volumes:
-              >
-              > \- /home/joffin/elevate/backend/environment.ts:/app/src/environments/environment.ts -->
+         Run the script file either by double clicking it or by executing the following command from the terminal.
+         
+        ```
+        replace_volume_path.bat
+        ```
+         
+        > **Note**: The provided script file replaces the host path for the **portal** service container volume in the `docker-compose-project.yml` file with your    current directory path.
+        >
+        > volumes:
+        >
+        > \- /home/joffin/elevate/backend/environment.ts:/app/src/environments/environment.ts
 
 6.  **Download `docker-compose-up` & `docker-compose-down` Script Files**
 
@@ -186,7 +186,7 @@ Service also uses gotenberg for creation of project certificate. You can read mo
             chmod +x docker-compose-down.sh
             ```
 
-<!-- -   **Windows**
+    -   **Windows**
 
         ```
         curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/windows/docker-compose-up.bat
@@ -195,7 +195,7 @@ Service also uses gotenberg for creation of project certificate. You can read mo
         ```
         curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/windows/docker-compose-down.bat
         ```
-    -->
+   
 
 7.  **Run All Services & Dependencies**:All services and dependencies can be started using the `docker-compose-up` script file.
 
@@ -204,16 +204,16 @@ Service also uses gotenberg for creation of project certificate. You can read mo
         ./docker-compose-up.sh
         ```
 
-     <!-- -   **Windows**
+    -   **Windows**
     
-             ```
-             docker-compose-up.bat
-             ```
+        ```
+        docker-compose-up.bat
+        ```
     
-             > Double-click the file or run the above command from the terminal.
+        > Double-click the file or run the above command from the terminal.
     
-             > **Note**: During the first Docker Compose run, the database, migration seeder files, and the script to set the default organization will be executed automatically.
-         -->
+        > **Note**: During the first Docker Compose run, the database, migration seeder files, and the script to set the default organization will be executed automatically.
+        
 
 8.  **Access The Project Application**:Once the services are up and the front-end app bundle is built successfully, navigate to **[localhost:7007](http://localhost:7007/)** to access the Project app.
 9.  **Gracefully Stop All Services & Dependencies**:All containers which are part of the docker-compose can be gracefully stopped by pressing `Ctrl + c` in the same terminal where the services are running.
@@ -225,12 +225,12 @@ Service also uses gotenberg for creation of project certificate. You can read mo
         ./docker-compose-down.sh
         ```
 
-     <!-- -   **Windows**
+    -   **Windows**
     
-             ```
-             docker-compose-down.bat
-             ```
-         -->
+        ```
+        docker-compose-down.bat
+        ```
+        
 
     > **Caution**: As per the default configuration in the `docker-compose-project.yml` file, using the `down` command will lead to data loss since the database container does not persist data. To persist data across `down` commands and subsequent container removals, refer to the "Persistence of Database Data in Docker Containers" section of this documentation.
 
@@ -267,7 +267,7 @@ To enable the Citus extension for mentoring and user services, follow these step
             ./citus_setup.sh user postgres://postgres:postgres@citus_master:5432/user
             ```
 
-<!-- - **Windows**
+    - **Windows**
         1. Download the `citus_setup.bat` file.
             ```
              curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/windows/citus_setup.bat
@@ -277,7 +277,7 @@ To enable the Citus extension for mentoring and user services, follow these step
             citus_setup.bat user postgres://postgres:postgres@citus_master:5432/user
             ```
             > **Note:** Since the `citus_setup.bat` file requires arguments, it must be run from a terminal.
-    -->
+   
 
 ## Persistence Of Database Data In Docker Container
 
@@ -342,12 +342,12 @@ In such cases, you can generate sample user accounts using the steps below. This
         curl -L https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/sample-data/mac-linux/user/sampleData.sql -o sample-data/user/sampleData.sql
         ```
 
-<!-- - **Windows** 
+    - **Windows** 
 
         ```
         mkdir sample-data\user 2>nul & ^
         curl -L "https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/sample-data/windows/user/sampleData.sql" -o sample-data\user\sampleData.sql
-    -->    ```
+       ```
 
 2. **Download The `insert_sample_data` Script File:**
 
@@ -357,12 +357,12 @@ In such cases, you can generate sample user accounts using the steps below. This
         curl -L -o insert_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/dockerized/scripts/mac-linux/insert_sample_data.sh && chmod +x insert_sample_data.sh
         ```
 
-<!-- - **Windows**
+    - **Windows**
 
         ```
         curl -L -o insert_sample_data.bat https://raw.githubusercontent.com/ELEVATE-Project/mentoring/main/documentation/2.6.1/dockerized/scripts/windows/insert_sample_data.bat
         ```
-    -->
+   
 
 3. **Run The `insert_sample_data` Script File:**
 
@@ -372,12 +372,12 @@ In such cases, you can generate sample user accounts using the steps below. This
         ./insert_sample_data.sh user postgres://postgres:postgres@citus_master:5432/user
         ```
 
-<!-- - **Windows**
+    - **Windows**
 
         ```
         insert_sample_data.bat user postgres://postgres:postgres@citus_master:5432/user
         ```
-    -->
+   
 
     After successfully running the script mentioned above, the following user accounts will be created and available for login:
 
@@ -411,12 +411,12 @@ This step will guide us in implementing a sample project solution following the 
             ./add_sample_project_entity_data.sh
             ```
 
-<!-- - **Windows** 
+    - **Windows** 
 
         ```
         mkdir sample-data\user 2>nul & ^
         curl -L "https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/sample-data/windows/user/sampleData.sql" -o sample-data\user\sampleData.sql
-    -->    ```
+       ```
 
 > **Warning:** upload related apis will not work because cloud integration is not enabled in this set-up.
 

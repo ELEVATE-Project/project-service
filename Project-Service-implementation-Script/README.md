@@ -3,8 +3,8 @@
 Python script to upload a program and add multiple resources like Projects and also upload multiple resources like task.
 
 ### Resource templates
-- [Programs](https://docs.google.com/spreadsheets/d/1mivwHzxrZyLHcM8ApOAeYIRLip-jJJXJ/edit?usp=sharing&ouid=113799545932705393937&rtpof=true&sd=true)
-- [Projects](https://docs.google.com/spreadsheets/d/10STEIdqJuM03NzopGPHPcD74YBUE7IzMct5WfmvnwFM/edit?usp=sharing)
+- [Programs](https://github.com/ELEVATE-Project/project-service/blob/main/Project-Service-implementation-Script/Sample%20Templates/ProgramTemplate.xlsx)
+- [Projects](https://github.com/ELEVATE-Project/project-service/blob/main/Project-Service-implementation-Script/Sample%20Templates/ProjectTemplate.xlsx)
 
 - Pull the code from latest release branch
 - To clone the repository 

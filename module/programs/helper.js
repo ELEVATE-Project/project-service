@@ -353,6 +353,71 @@ module.exports = class ProgramsHelper {
 	static details(programId) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				const staticData = {
+					programName: 'Mahadevan testing2',
+					programId: '65cdb4d824827600082ea68c',
+					programEndDate: '2024-08-30T18:29:59.000Z',
+					description: 'Mahadevan testing2',
+					rootOrganisations: '01269878797503692810',
+					data: [
+						{
+							_id: '65cdbb570c6529000831fcbf',
+							language: ['English'],
+							externalId: 'c0f371e6-cbd2-11ee-a9da-5fbb0dac7d3a-OBSERVATION-TEMPLATE_CHILD',
+							name: 'mahadevan observtion with rubrics',
+							description: 'mahadevan observtion with rubrics testing',
+							entityType: 'school',
+							creator: 'Survey Support',
+							type: 'observation',
+							endDate: '2025-02-15T07:20:55.587Z',
+							link: '92b2913b1dd84ac15c6c003c09f7ac14',
+						},
+						{
+							_id: '65cdbadc0c6529000831fbd6',
+							language: ['English'],
+							externalId: '77e2a788-cbd2-11ee-a9da-5fbb0dac7d3a-OBSERVATION-TEMPLATE_CHILD',
+							name: 'mahadevan without rubrics',
+							description: 'mahadevan without rubrics testing',
+							entityType: 'district',
+							creator: 'Gagan',
+							type: 'observation',
+							endDate: '2025-02-15T07:18:52.552Z',
+							link: '29c3b3070bdb95642e9de6a3ac892edc',
+						},
+						{
+							_id: '65cdb4dc0c6529000831fb31',
+							language: ['English'],
+							externalId: 'e43f3ada-cbce-11ee-a9da-5fbb0dac7d3a-OBSERVATION-TEMPLATE_CHILD',
+							name: 'mahadevan observation without rubrics',
+							description: 'mahadevan scrpt implementation second',
+							entityType: 'school',
+							creator: 'Gagan',
+							type: 'observation',
+							endDate: '2025-02-15T06:53:16.458Z',
+							link: '7453b645f0079e39676c3cb4add61346',
+						},
+						{
+							_id: '65cdbb6224827600082ea6e1',
+							externalId: 'IDEAIMP-4-1707981665733-PROJECT-SOLUTION',
+							description: 'mahadevan project testing',
+							name: 'mahadevan project',
+							projectTemplateId: '65cdbb6227f4190008e35ef3',
+							projectId: '66a0ac1b67deaa0008f84093',
+							type: 'improvementProject',
+							certificateTemplateId: '65cdbb6324827600082ea6f8',
+						},
+					],
+					count: 4,
+					requestForPIIConsent: true,
+					programJoined: true,
+					consentShared: true,
+				}
+				return resolve({
+					message: CONSTANTS.apiResponses.PROGRAMS_FETCHED,
+					success: true,
+					data: staticData,
+					result: staticData,
+				})
 				let programData = await programsQueries.programsDocument({
 					_id: programId,
 				})
@@ -899,6 +964,244 @@ module.exports = class ProgramsHelper {
 	static list(pageNo = '', pageSize = '', searchText, filter = {}, projection) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				const staticData = {
+					data: [
+						{
+							_id: '65cdb4d824827600082ea68c',
+							externalId: 'pgm_mahadevannewimp_15',
+							name: 'Mahadevan testing2',
+							metaInformation: {
+								state: ['Andhra Pradesh'],
+								roles: ['Teacher', 'HT & Officials'],
+							},
+						},
+						{
+							_id: '65f99c5d810c4100084abc78',
+							externalId: 'OCI_Test_certificate_survey',
+							name: 'OCI-test-program-certificates&surveys',
+							metaInformation: {
+								state: ['Andhra Pradesh'],
+								roles: ['HT & Officials'],
+							},
+						},
+						{
+							_id: '65706b2436419500086bda08',
+							externalId: 'Program_with_Project_and_task_lavel_Observation_test_windows_test',
+							name: 'Program with Project and task lavel Observation test windows test',
+							metaInformation: {
+								state: ['Andhra Pradesh'],
+								roles: ['Teacher', 'HT & Official'],
+							},
+						},
+						{
+							_id: '6620f5d54eb5e400081a8ada',
+							externalId: 'pgm_Regression7.0_program_18/04/24',
+							name: 'Regression 7.0 program',
+							metaInformation: {
+								state: ['Andhra Pradesh'],
+								roles: ['Teacher', 'HT & Officials'],
+							},
+						},
+						{
+							_id: '6603efdff3c38200090d7f54',
+							externalId: 'pgm_Test_CBSE_program_Sunbird_27_03_24',
+							name: 'Test_CBSE program (Sunbird.)',
+							metaInformation: {
+								state: ['Andhra Pradesh'],
+								roles: ['Teacher', 'HT & Officials'],
+							},
+						},
+						{
+							_id: '66459791a8861d0008d07962',
+							externalId: 'pgm_Regression_17_05_24',
+							name: 'Regression 7.0 AD test',
+							metaInformation: {
+								state: ['Andhra Pradesh'],
+								roles: ['Teacher', 'HT & Officials'],
+							},
+						},
+						{
+							_id: '661e6100b9caff0008741f29',
+							externalId: 'PGM_Aao_SchoolChalein_2024-25_136688_updated',
+							name: 'Aao School Chalein 2024-25',
+							metaInformation: {
+								state: ['Andhra Pradesh'],
+								roles: ['HT & Officials'],
+							},
+						},
+						{
+							_id: '65fa900b5807d90008c7c9f6',
+							externalId: 'PGM_New_subtask_test_123',
+							name: 'New subtask test',
+							metaInformation: {
+								state: ['Andhra Pradesh'],
+								roles: ['Teacher', 'HT & Officials'],
+							},
+						},
+						{
+							_id: '65d46729ca08870008dbffb0',
+							externalId: 'pgm_Automationprogram',
+							name: 'Automation Test Program -1',
+							metaInformation: {
+								state: ['Andhra Pradesh'],
+								roles: ['Teacher', 'HT & Officials'],
+							},
+						},
+						{
+							_id: '64992b27955f600008e2d1ff',
+							externalId: 'CriteriaLevelProgram_2',
+							name: 'CriteriaLevelProgram-2',
+							metaInformation: {
+								state: ['Andhra Pradesh'],
+								roles: ['Teacher', 'HT & Officials'],
+							},
+						},
+						{
+							_id: '64943ddd955f600008e2a472',
+							externalId: 'Program_Expire_in_one_day_with_no_startDate',
+							name: 'Program expired in one day with no start date and end date',
+							metaInformation: {
+								state: ['Andhra Pradesh'],
+								roles: ['Teacher', 'HT & Officials'],
+							},
+						},
+						{
+							_id: '64943a13955f600008e2a3b7',
+							externalId: 'Pgm_Certificate_Test_Program_6.0_QA',
+							name: 'Certificate Test Program 6.0',
+							metaInformation: {
+								state: ['Andhra Pradesh'],
+								roles: ['Teacher', 'HT & Officials'],
+							},
+						},
+						{
+							_id: '6492968ba08e6200086f2ba8',
+							externalId: 'Pgm_Teacher_template-3-QA_new',
+							name: 'Program Teacher – 3',
+							metaInformation: {
+								state: ['Andhra Pradesh'],
+								roles: ['Teacher', 'HT & Officials'],
+							},
+						},
+						{
+							_id: '649a91b6e959de0008d3f28a',
+							externalId: 'Program_HT_officials_123',
+							name: 'Program - HT and officials',
+							metaInformation: {
+								state: ['Andhra Pradesh'],
+								roles: ['HT & Officials'],
+							},
+						},
+						{
+							_id: '648c3c0cd28df50009eea512',
+							externalId: 'PGM-Survey-Testing12',
+							name: 'Testing 6.0 regression program',
+							metaInformation: {
+								state: ['Andhra Pradesh'],
+								roles: ['Teacher', 'HT & Officials'],
+							},
+						},
+						{
+							_id: '64953f96955f600008e2b8ff',
+							externalId: 'PGM_Lengthy_obs_name',
+							name: 'CBSE program',
+							metaInformation: {
+								state: ['Andhra Pradesh'],
+								roles: ['Teacher', 'HT & Officials'],
+							},
+						},
+						{
+							_id: '649ac4f9e959de0008d3fbb6',
+							externalId: 'DGDEV_EXP1 ',
+							name: 'Chilly farming – Best practises – Andhrapradesh',
+							metaInformation: {
+								state: ['Andhra Pradesh'],
+								roles: ['Teacher', 'HT & Officials'],
+							},
+						},
+						{
+							_id: '649c14e4e959de0008d41178',
+							externalId: 'PGM_not_app_obs_name',
+							name: 'Not Applicable test',
+							metaInformation: {
+								state: ['Andhra Pradesh'],
+								roles: ['Teacher', 'HT & Officials'],
+							},
+						},
+						{
+							_id: '649ac5d9e959de0008d3fc12',
+							externalId: 'PGM_Parent-Child_QATicket',
+							name: 'Parent-Child',
+							metaInformation: {
+								state: ['Andhra Pradesh'],
+								roles: ['Teacher', 'HT & Officials'],
+							},
+						},
+						{
+							_id: '649569cf955f600008e2c063',
+							externalId: 'Multi_Language_Program',
+							name: 'Multi language program',
+							metaInformation: {
+								state: ['Andhra Pradesh'],
+								roles: ['Teacher', 'HT & Officials'],
+							},
+						},
+						{
+							_id: '648c1020d28df50009eea3b6',
+							externalId: 'Pgm_Teacher_2-QA',
+							name: 'Program Teacher-1',
+							metaInformation: {
+								state: ['Andhra Pradesh'],
+								roles: ['Teacher', 'HT & Officials'],
+							},
+						},
+						{
+							_id: '6492b9fda08e6200086f30c7',
+							externalId: 'Pgm_Teacher_template-2-QA_new',
+							name: 'Program Teacher-2,also called a schoolteacher or औपचारिक  रूप से एक शिक्षक, is a person who helps students to ಜ್ಞಾನವನ್ನು ಸಂಪಾದಿಸಿ, competence, or virtue, via the practice of బోధన.-Teacher4',
+							metaInformation: {
+								state: ['Andhra Pradesh'],
+								roles: ['Teacher', 'HT & Officials'],
+							},
+						},
+						{
+							_id: '66ed23604dcbe70008d37dcb',
+							externalId: 'Tempate_creation_program',
+							name: 'Walkthrough of project creation and template',
+							metaInformation: {
+								state: ['Andhra Pradesh'],
+								roles: ['Teacher', 'HT & Officials'],
+							},
+						},
+						{
+							_id: '66e1450d75823a000881a276',
+							externalId: 'test_DIET_Khagaria_DEP_11_09',
+							name: 'test_DIET_Khagaria_DEP',
+							metaInformation: {
+								state: ['Andhra Pradesh'],
+								roles: ['Teacher', 'HT & Officials'],
+							},
+						},
+						{
+							_id: '66e01b2475823a000881a220',
+							externalId: 'QA_testing samiksha',
+							name: 'Survey testing QA-1',
+							metaInformation: {
+								state: ['Andhra Pradesh'],
+								roles: ['Teacher', 'HT & Officials'],
+							},
+						},
+					],
+					count: 52,
+					description:
+						'View and participate in educational programs active in your location and designed for the role you selected',
+				}
+				return resolve({
+					success: true,
+					message: CONSTANTS.apiResponses.PROGRAM_LIST,
+					data: staticData,
+					result: staticData,
+				})
 				let programDocument = []
 
 				let matchQuery = { status: CONSTANTS.common.ACTIVE_STATUS }

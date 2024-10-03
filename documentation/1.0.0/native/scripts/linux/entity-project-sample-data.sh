@@ -132,7 +132,7 @@ ENTITY_ID_DISTRICT=$(mongosh --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet -
     }
 ")
 
-ENTITY_ID_DISTRICT=$(clean_object_id "$ENTITY_ID_DISTRICT")
+# ENTITY_ID_DISTRICT=$(clean_object_id "$ENTITY_ID_DISTRICT")
 echo "Entity ID bangalore: $ENTITY_ID_DISTRICT"
 
 # Updating groups
@@ -141,7 +141,7 @@ mongosh --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
         {_id: ObjectId('$ENTITY_ID')},
         { 
             \$set: { 
-                'groups.district': ['$ENTITY_ID_DISTRICT']
+                'groups.district': [$ENTITY_ID_DISTRICT]
             }
         }
     );
@@ -162,7 +162,8 @@ PROJECT_CATEGORY_COLLECTION="projectCategories"
 PROJECT_CATEGORY_DOCUMENT=$(cat <<EOF
 {
     "externalId" : "educationLeader",
-    "name" : "Education Leader"
+    "name" : "Education Leader",
+    "status" : "active"
 }
 EOF
 )

@@ -360,7 +360,7 @@ In such cases, you can generate sample user accounts using the steps below. This
     - **Windows**
 
         ```
-        curl -L -o insert_sample_data.bat https://raw.githubusercontent.com/ELEVATE-Project/mentoring/main/documentation/2.6.1/dockerized/scripts/windows/insert_sample_data.bat
+        curl -L -o insert_sample_data.bat https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/dockerized/scripts/windows/insert_sample_data.bat
         ```
    
 
@@ -411,12 +411,27 @@ This step will guide us in implementing a sample project solution following the 
             ./add_sample_project_entity_data.sh
             ```
 
-    - **Windows** 
+    -   **Windows**
+    
+        1.  Download `entity-project-sample-data.bat` Script File:
+    
+            ```
+            curl -L ^
+            -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/windows/entity-project-sample-data.bat ^
+            -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/windows/insert_entity_project_data.js ^
+            -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/windows/entity_data.js ^
+            -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/windows/project_data.js ^
+            ```
+        2.  Please navigate to the specified directory to execute the command.
 
-        ```
-        mkdir sample-data\user 2>nul & ^
-        curl -L "https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/sample-data/windows/user/sampleData.sql" -o sample-data\user\sampleData.sql
-       ```
+            ```
+            cd documentation/1.0.0/dockerized/scripts/windows/
+            ``` 
+        3.  Make the setup file executable by running the following command.
+
+            ```
+            entity-project-sample-data.bat
+            ```
 
 > **Warning:** upload related apis will not work because cloud integration is not enabled in this set-up.
 

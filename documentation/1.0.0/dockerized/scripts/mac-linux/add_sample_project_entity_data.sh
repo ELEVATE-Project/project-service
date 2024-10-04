@@ -12,7 +12,7 @@ clean_object_id() {
 }
 
 
-MONGO_HOST=project-mongo-1
+MONGO_HOST=project_mongo_1
 MONGO_PORT=27017
 
 # Entity database details
@@ -32,7 +32,7 @@ EOF
 
 echo "EntityType data being added to $ENTITY_TYPE_COLLECTION collection in $ENTITY_SERVICE_DB_NAME database...."
 
-ENTITY_TYPE_ID=$(docker exec -it project-mongo-1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
+ENTITY_TYPE_ID=$(docker exec -it project_mongo_1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
     var doc = $ENTITY_TYPE_DOCUMENT
     var result = db.getSiblingDB('$ENTITY_SERVICE_DB_NAME').$ENTITY_TYPE_COLLECTION.insertOne(doc);
     if (result.insertedId) {
@@ -59,7 +59,7 @@ EOF
 
 echo "EntityType data being added to $ENTITY_TYPE_COLLECTION collection in $ENTITY_SERVICE_DB_NAME database...."
 
-ENTITY_TYPE_DISTRICT_DOCUMENT_ID=$(docker exec -it project-mongo-1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
+ENTITY_TYPE_DISTRICT_DOCUMENT_ID=$(docker exec -it project_mongo_1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
     var doc = $ENTITY_TYPE_DISTRICT_DOCUMENT
     var result = db.getSiblingDB('$ENTITY_SERVICE_DB_NAME').$ENTITY_TYPE_COLLECTION.insertOne(doc);
     if (result.insertedId) {
@@ -89,7 +89,7 @@ EOF
 
 echo "Entity data being added to $ENTITIES_COLLECTION collection in $ENTITY_SERVICE_DB_NAME database...."
 
-ENTITY_ID=$(docker exec -it project-mongo-1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
+ENTITY_ID=$(docker exec -it project_mongo_1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
     var doc = $ENTITIES_DOCUMENT
     var result = db.getSiblingDB('$ENTITY_SERVICE_DB_NAME').$ENTITIES_COLLECTION.insertOne(doc);
     if (result.insertedId) {
@@ -122,7 +122,7 @@ EOF
 
 echo "Entity data being added to $ENTITIES_COLLECTION collection in $ENTITY_SERVICE_DB_NAME database...."
 
-ENTITY_ID_DISTRICT=$(docker exec -it project-mongo-1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
+ENTITY_ID_DISTRICT=$(docker exec -it project_mongo_1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
     var doc = $ENTITIES_DOCUMENT_DISTRICT_TYPE
     var result = db.getSiblingDB('$ENTITY_SERVICE_DB_NAME').$ENTITIES_COLLECTION.insertOne(doc);
     if (result.insertedId) {
@@ -137,7 +137,7 @@ echo "Entity ID bangalore: $ENTITY_ID_DISTRICT"
 
 echo "ObjectId($ENTITY_ID)"
 #updating groups
-docker exec project-mongo-1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
+docker exec project_mongo_1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
     var updateResult = db.getSiblingDB('$ENTITY_SERVICE_DB_NAME').$ENTITIES_COLLECTION.updateOne(
         {_id: ObjectId($ENTITY_ID)},
         { 
@@ -160,26 +160,43 @@ PROJECT_DB_NAME="elevate-project"
 PROJECT_CATEGORY_COLLECTION="projectCategories"
 
 PROJECT_CATEGORY_DOCUMENT=$(cat <<EOF
-{
+[{
     "externalId" : "educationLeader",
-    "name" : "Education Leader"
-}
+    "name" : "Education Leader",
+    "status" : "active"
+},{
+    "externalId" : "community",
+    "name" : "Community",
+    "status" : "active"
+},{
+    "externalId" : "teacher",
+    "name" : "Teacher",
+    "status" : "active"
+}]
 EOF
 )
 
 echo "Project category data being added to $PROJECT_CATEGORY_COLLECTION collection in $PROJECT_DB_NAME database...."
 
-PROJECT_CATEGORY_ID=$(docker exec -it project-mongo-1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
+PROJECT_CATEGORY_ID=$(docker exec -it project_mongo_1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
     var doc = $PROJECT_CATEGORY_DOCUMENT;
-    var result = db.getSiblingDB('$PROJECT_DB_NAME').$PROJECT_CATEGORY_COLLECTION.insertOne(doc);
-    if (result.insertedId) {
-        print(result.insertedId);
+    var result = db.getSiblingDB('$PROJECT_DB_NAME').$PROJECT_CATEGORY_COLLECTION.insertMany(doc);
+    if (result.insertedIds && Object.keys(result.insertedIds).length > 0) {
+        print(result.insertedIds);
     } else {
         throw new Error('Insert failed');
     }
 ")
 
-PROJECT_CATEGORY_ID=$(clean_object_id "$PROJECT_CATEGORY_ID")
+# Convert the string into an array
+IFS=',' read -r -a PROJECT_CATEGORY_ID_ARRAY <<< "$PROJECT_CATEGORY_ID"
+
+# Clean each ObjectId in the array and store the cleaned IDs back into the same array
+for i in "${!PROJECT_CATEGORY_ID_ARRAY[@]}"; do
+    PROJECT_CATEGORY_ID_ARRAY[i]=$(clean_object_id "${PROJECT_CATEGORY_ID_ARRAY[i]}")
+done
+
+PROJECT_CATEGORY_ID=$(clean_object_id "${PROJECT_CATEGORY_ID_ARRAY[0]}")
 echo "Project Category ID: $PROJECT_CATEGORY_ID"
 
 PROGRAMS_COLLECTION="programs"
@@ -218,7 +235,7 @@ EOF
 echo "Program data being added to $PROGRAMS_COLLECTION collection in $PROJECT_DB_NAME database...."
 
 # Insert PROGRAM_ID using mongosh
-PROGRAM_ID=$(docker exec -it project-mongo-1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
+PROGRAM_ID=$(docker exec -it project_mongo_1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
     var doc = $PROGRAMS_DOCUMENT;
     var result = db.getSiblingDB('$PROJECT_DB_NAME').$PROGRAMS_COLLECTION.insertOne(doc);
     if (result.insertedId) {
@@ -235,7 +252,7 @@ echo "Program ID: $PROGRAM_ID"
 PROJECT_TEMPLATES_COLLECTION="projectTemplates"
 
 PROJECT_TEMPLATES_DOCUMENT=$(cat <<EOF
-{
+[{
     "description": "The School Hygiene Improvement Initiative is dedicated to ensuring clean, safe, and healthy environments in schools...",
     "concepts": [""],
     "keywords": [""],
@@ -257,31 +274,112 @@ PROJECT_TEMPLATES_DOCUMENT=$(cat <<EOF
     }],
     "status": "published",
     "programId": $PROGRAM_ID
-}
+},
+{   "description": "A robust library management program fosters a culture of reading and learning, empowering students to explore diverse resources...",
+    "concepts": [""],
+    "keywords": [""],
+    "isDeleted": false,
+    "recommendedFor": [],
+    "tasks": [],
+    "learningResources": [{
+        "link": "https://youtu.be/libKVRa01L8?feature=shared",
+        "app": "projectService",
+        "id": "libKVRa01L8?feature=shared"
+    }],
+    "isReusable": false,
+    "title": "Library Management",
+    "externalId": "LIB-MANAGEMENT",
+    "categories": [{
+        "_id": $PROJECT_CATEGORY_ID,
+        "externalId": "educationLeader",
+        "name": "Education Leader"
+    }],
+    "status": "published",
+    "programId": $PROGRAM_ID
+},
+{   "description": "Ensuring access to clean and safe water in schools is vital for fostering a healthy learning environment, enhancing student well-being, and promoting overall academic success.",
+    "concepts": [""],
+    "keywords": [""],
+    "isDeleted": false,
+    "recommendedFor": [],
+    "tasks": [],
+    "learningResources": [{
+        "link": "https://youtu.be/libKVRa01L8?feature=shared",
+        "app": "projectService",
+        "id": "libKVRa01L8?feature=shared"
+    }],
+    "isReusable": false,
+    "title": "Drinking Water Availability",
+    "externalId": "DRINKING-WATER-AVAILABILITY",
+    "categories": [{
+        "_id": $PROJECT_CATEGORY_ID,
+        "externalId": "educationLeader",
+        "name": "Education Leader"
+    }],
+    "status": "published",
+    "programId": $PROGRAM_ID
+},
+{   "description": "Providing access to quality sports equipment fosters teamwork, promotes physical fitness, and nurtures the spirit of competition, ultimately contributing to the holistic development...",
+    "concepts": [""],
+    "keywords": [""],
+    "isDeleted": false,
+    "recommendedFor": [],
+    "tasks": [],
+    "learningResources": [{
+        "link": "https://youtu.be/libKVRa01L8?feature=shared",
+        "app": "projectService",
+        "id": "libKVRa01L8?feature=shared"
+    }],
+    "isReusable": false,
+    "title": "Sports Management",
+    "externalId": "SPORTS-MANAGEMENT",
+    "categories": [{
+        "_id": $PROJECT_CATEGORY_ID,
+        "externalId": "educationLeader",
+        "name": "Education Leader"
+    }],
+    "status": "published",
+    "programId": $PROGRAM_ID
+}]
 EOF
 )
 
 echo "Project template data being added to $PROJECT_TEMPLATES_COLLECTION collection in $PROJECT_DB_NAME database...."
 
 # Insert PROJECT_TEMPLATE_ID using docker exec
-PROJECT_TEMPLATE_ID=$(docker exec -it project-mongo-1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
+PROJECT_TEMPLATE_ID=$(docker exec -it project_mongo_1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
     var doc = $PROJECT_TEMPLATES_DOCUMENT;
-    var result = db.getSiblingDB('$PROJECT_DB_NAME').$PROJECT_TEMPLATES_COLLECTION.insertOne(doc);
-    if (result.insertedId) {
-        print(result.insertedId);
+    var result = db.getSiblingDB('$PROJECT_DB_NAME').$PROJECT_TEMPLATES_COLLECTION.insertMany(doc);
+    if (result.insertedIds && Object.keys(result.insertedIds).length > 0) {
+        print(result.insertedIds);
     } else {
         throw new Error('Insert failed');
     }
 ")
 
+# Convert the string into an array
+IFS=',' read -r -a PROJECT_TEMPLATE_ID_ARRAY <<< "$PROJECT_TEMPLATE_ID"
 
-PROJECT_TEMPLATE_ID=$(clean_object_id "$PROJECT_TEMPLATE_ID")
-echo "Project Template ID: $PROJECT_TEMPLATE_ID"
+# Clean each ObjectId in the array and store the cleaned IDs back into the same array
+for i in "${!PROJECT_TEMPLATE_ID_ARRAY[@]}"; do
+    PROJECT_TEMPLATE_ID_ARRAY[i]=$(clean_object_id "${PROJECT_TEMPLATE_ID_ARRAY[i]}")
+done
+
+# Now you can access the cleaned IDs
+echo "Project Template IDs:"
+for id in "${PROJECT_TEMPLATE_ID_ARRAY[@]}"; do
+    echo "$id"
+done
+
 
 SOLUTIONS_COLLECTION="solutions"
-
+# Convert the multiline JSON to a single line
+PROJECT_TEMPLATE_ID_1=$(clean_object_id "${PROJECT_TEMPLATE_ID_ARRAY[0]}")
+PROJECT_TEMPLATE_ID_2=$(clean_object_id "${PROJECT_TEMPLATE_ID_ARRAY[1]}")
+PROJECT_TEMPLATE_ID_3=$(clean_object_id "${PROJECT_TEMPLATE_ID_ARRAY[2]}")
+PROJECT_TEMPLATE_ID_4=$(clean_object_id "${PROJECT_TEMPLATE_ID_ARRAY[3]}")
 SOLUTION_DOCUMENT=$(cat <<EOF
-{
+[{
     "resourceType": ["Improvement Project Solution"],
     "language": ["English"],
     "keywords": ["Improvement Project"],
@@ -295,52 +393,168 @@ SOLUTION_DOCUMENT=$(cat <<EOF
         "roles": ["state_education_officer"],
         "entityType": "state"
     },
-    "projectTemplateId": ObjectId($PROJECT_TEMPLATE_ID),
+    "projectTemplateId": ObjectId($PROJECT_TEMPLATE_ID_1),
     "startDate" : ISODate("2021-08-30T00:00:00.000Z"),
     "endDate" : ISODate("2029-08-30T00:00:00.000Z"),
     "isDeleted" : false,
     "isAPrivateProgram" : false,
     "isReusable" : false,
     "status" : "active",
-    "type" : "improvementProject",
-    "updatedAt" : ISODate("2021-08-30T00:00:00.000Z")
-}
+    "type" : "improvementProject"
+},
+{
+    "resourceType": ["Improvement Project Solution"],
+    "language": ["English"],
+    "keywords": ["Improvement Project"],
+    "entities": [$ENTITY_ID],
+    "programId": $PROGRAM_ID,
+    "name": "Library Management",
+    "description": "A robust library management program fosters a culture of reading and learning, empowering students to explore diverse resources...",
+    "programExternalId": "PG01",
+    "scope": {
+        "state": [$ENTITY_ID],
+        "roles": ["state_education_officer"],
+        "entityType": "state"
+    },
+    "projectTemplateId": ObjectId($PROJECT_TEMPLATE_ID_2),
+    "startDate" : ISODate("2021-08-30T00:00:00.000Z"),
+    "endDate" : ISODate("2029-08-30T00:00:00.000Z"),
+    "isDeleted" : false,
+    "isAPrivateProgram" : false,
+    "isReusable" : false,
+    "status" : "active",
+    "type" : "improvementProject"
+},
+{
+    "resourceType": ["Improvement Project Solution"],
+    "language": ["English"],
+    "keywords": ["Improvement Project"],
+    "entities": [$ENTITY_ID],
+    "programId": $PROGRAM_ID,
+    "name": "Drinking Water Management",
+    "description": "Ensuring access to clean and safe water in schools is vital for fostering a healthy learning environment, enhancing student well-being, and promoting overall academic success.",
+    "programExternalId": "PG01",
+    "scope": {
+        "state": [$ENTITY_ID],
+        "roles": ["state_education_officer"],
+        "entityType": "state"
+    },
+    "projectTemplateId": ObjectId($PROJECT_TEMPLATE_ID_3),
+    "startDate" : ISODate("2021-08-30T00:00:00.000Z"),
+    "endDate" : ISODate("2029-08-30T00:00:00.000Z"),
+    "isDeleted" : false,
+    "isAPrivateProgram" : false,
+    "isReusable" : false,
+    "status" : "active",
+    "type" : "improvementProject"
+},
+{
+    "resourceType": ["Improvement Project Solution"],
+    "language": ["English"],
+    "keywords": ["Improvement Project"],
+    "entities": [$ENTITY_ID],
+    "programId": $PROGRAM_ID,
+    "name": "Sports Management",
+    "description": "Providing access to quality sports equipment fosters teamwork, promotes physical fitness, and nurtures the spirit of competition, ultimately contributing to the holistic development...",
+    "programExternalId": "PG01",
+    "scope": {
+        "state": [$ENTITY_ID],
+        "roles": ["state_education_officer"],
+        "entityType": "state"
+    },
+    "projectTemplateId": ObjectId($PROJECT_TEMPLATE_ID_4),
+    "startDate" : ISODate("2021-08-30T00:00:00.000Z"),
+    "endDate" : ISODate("2029-08-30T00:00:00.000Z"),
+    "isDeleted" : false,
+    "isAPrivateProgram" : false,
+    "isReusable" : false,
+    "status" : "active",
+    "type" : "improvementProject"
+}]
 EOF
 )
+
+# Convert the multiline JSON to a single line for MongoDB
+# SOLUTION_DOCUMENT_SINGLE_LINE=$(echo "$SOLUTION_DOCUMENT" | tr -d '\n' | sed 's/"/\\"/g')
 
 echo "Solution data being added to $SOLUTIONS_COLLECTION collection in $PROJECT_DB_NAME database...."
 
 # Insert SOLUTION_ID using docker exec
-SOLUTION_ID=$(docker exec -it project-mongo-1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
+SOLUTION_ID=$(docker exec -it project_mongo_1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
     var doc = $SOLUTION_DOCUMENT;
-    var result = db.getSiblingDB('$PROJECT_DB_NAME').$SOLUTIONS_COLLECTION.insertOne(doc);
-    if (result.insertedId) {
-        print(result.insertedId);
+    var result = db.getSiblingDB('$PROJECT_DB_NAME').$SOLUTIONS_COLLECTION.insertMany(doc);
+    if (result.insertedIds && Object.keys(result.insertedIds).length > 0) {
+        print(result.insertedIds);
     } else {
         throw new Error('Insert failed');
     }
 ")
 
-SOLUTION_ID=$(clean_object_id "$SOLUTION_ID")
-echo "Solution ID: $SOLUTION_ID"
+# Convert the string into an array
+IFS=',' read -r -a SOLUTION_ID_ARRAY <<< "$SOLUTION_ID"
+
+# Clean each ObjectId in the array and store the cleaned IDs back into the same array
+for i in "${!SOLUTION_ID_ARRAY[@]}"; do
+    SOLUTION_ID_ARRAY[i]=$(clean_object_id "${SOLUTION_ID_ARRAY[i]}")
+done
+
+# Now you can access the cleaned IDs
+echo "Solution IDs:"
+for id in "${SOLUTION_ID_ARRAY[@]}"; do
+    echo "$id"
+done
 
 
-#updating project template with the solution id
-docker exec project-mongo-1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
+# Updating project template with the solution ID
+SOLUTION_ID_1=$(clean_object_id "${SOLUTION_ID_ARRAY[0]}")
+SOLUTION_ID_2=$(clean_object_id "${SOLUTION_ID_ARRAY[1]}")
+SOLUTION_ID_3=$(clean_object_id "${SOLUTION_ID_ARRAY[2]}")
+SOLUTION_ID_4=$(clean_object_id "${SOLUTION_ID_ARRAY[3]}")
+
+docker exec project_mongo_1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
     var updateResult = db.getSiblingDB('$PROJECT_DB_NAME').$PROJECT_TEMPLATES_COLLECTION.updateOne(
-        {_id: ObjectId($PROJECT_TEMPLATE_ID)},
+        {_id: ObjectId($PROJECT_TEMPLATE_ID_1)},
         { 
             \$set: { 
-                'solutionId': ObjectId($SOLUTION_ID)
+                'solutionId': ObjectId($SOLUTION_ID_1)
             }
         }
     );
     if (updateResult.matchedCount > 0) {
-        print('Document updated successfully');
+        print('Document updated successfully for ID: $PROJECT_TEMPLATE_ID_1');  // Output the specific ID
     } else {
-        throw new Error('Update failed');
+        throw new Error('Update failed for ID: $PROJECT_TEMPLATE_ID_1');
     }"
 
+docker exec project_mongo_1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
+    var updateResult = db.getSiblingDB('$PROJECT_DB_NAME').$PROJECT_TEMPLATES_COLLECTION.updateOne(
+        {_id: ObjectId($PROJECT_TEMPLATE_ID_2)},
+        { 
+            \$set: { 
+                'solutionId': ObjectId($SOLUTION_ID_2)
+            }
+        }
+    );
+    if (updateResult.matchedCount > 0) {
+        print('Document updated successfully for ID: $PROJECT_TEMPLATE_ID_2');  // Output the specific ID
+    } else {
+        throw new Error('Update failed for ID: $PROJECT_TEMPLATE_ID_2');
+    }"
+
+docker exec project_mongo_1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
+    var updateResult = db.getSiblingDB('$PROJECT_DB_NAME').$PROJECT_TEMPLATES_COLLECTION.updateOne(
+        {_id: ObjectId($PROJECT_TEMPLATE_ID_3)},
+        {
+            \$set: {
+                'solutionId': ObjectId($SOLUTION_ID_3)
+            }
+        }
+    );
+    if (updateResult.matchedCount > 0) {
+        print('Document updated successfully for ID: $PROJECT_TEMPLATE_ID_3');  // Output the specific ID
+    } else {
+        throw new Error('Update failed for ID: $PROJECT_TEMPLATE_ID_3');
+    }"
 
 
 FORM_DOCUMENTS=$(cat <<EOF
@@ -519,7 +733,7 @@ EOF
 
 echo "Forms data being added to forms collection in $PROJECT_DB_NAME database...."
 # Insert FORM using docker exec
-FORM_ID=$(docker exec -it project-mongo-1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
+FORM_ID=$(docker exec -it project_mongo_1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
     var doc = $FORM_DOCUMENTS;
     var result = db.getSiblingDB('$PROJECT_DB_NAME').forms.insertMany(doc);
     if (result.insertedId) {
@@ -569,7 +783,7 @@ EOF
 
 echo "user data being added to userRoleExtension collection in $ENTITY_SERVICE_DB_NAME database...."
 # Insert SOLUTION_ID using docker exec
-USER_EXTENSION_ID=$(docker exec -it project-mongo-1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
+USER_EXTENSION_ID=$(docker exec -it project_mongo_1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
     var doc = $USER_EXTENSION_DOCUMENT;
     var result = db.getSiblingDB('$ENTITY_SERVICE_DB_NAME').userRoleExtension.insertOne(doc);
     if (result.insertedId) {
@@ -585,7 +799,7 @@ echo "UserExtention ID: $USER_EXTENSION_ID"
 echo "Configurations data being added to $CONFIGURATIONS_COLLECTION collection in $PROJECT_DB_NAME database...."
 
 # Insert CONFIGURATION_ID using docker exec
-CONFIGURATION_ID=$(docker exec -it project-mongo-1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
+CONFIGURATION_ID=$(docker exec -it project_mongo_1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
     var doc = $CONFIGURATIONS_DOCUMENT;
     var result = db.getSiblingDB('$PROJECT_DB_NAME').$CONFIGURATIONS_COLLECTION.insertOne(doc);
     if (result.insertedId) {

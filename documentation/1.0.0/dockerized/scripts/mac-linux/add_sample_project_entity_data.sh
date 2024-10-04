@@ -162,7 +162,8 @@ PROJECT_CATEGORY_COLLECTION="projectCategories"
 PROJECT_CATEGORY_DOCUMENT=$(cat <<EOF
 {
     "externalId" : "educationLeader",
-    "name" : "Education Leader"
+    "name" : "Education Leader",
+    "status" : "active"
 }
 EOF
 )

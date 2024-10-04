@@ -422,12 +422,7 @@ This step will guide us in implementing a sample project solution following the 
             -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/windows/entity_data.js ^
             -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/windows/project_data.js ^
             ```
-        2.  Please navigate to the specified directory to execute the command.
-
-            ```
-            cd documentation/1.0.0/dockerized/scripts/windows/
-            ``` 
-        3.  Make the setup file executable by running the following command.
+        2.  Make the setup file executable by running the following command.
 
             ```
             entity-project-sample-data.bat

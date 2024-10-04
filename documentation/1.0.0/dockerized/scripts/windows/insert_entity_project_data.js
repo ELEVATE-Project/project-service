@@ -50,8 +50,8 @@ async function main({dataToBeInserted}) {
 }
 
 main({dataToBeInserted:projectData}).then(()=>{
-    console.log('survey data populated successfully.')
+    console.log('project data populated successfully.')
 }).catch(console.error);
 main({dataToBeInserted:entityData}).then(()=>{
-    console.log('Observation data populated successfully.')
+    console.log('entity data populated successfully.')
 }).catch(console.error);

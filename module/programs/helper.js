@@ -353,6 +353,7 @@ module.exports = class ProgramsHelper {
 	static details(programId, projections = 'all', skipFields = 'none') {
 		return new Promise(async (resolve, reject) => {
 			try {
+
 				let programData = await programsQueries.programsDocument(
 					{
 						_id: programId,

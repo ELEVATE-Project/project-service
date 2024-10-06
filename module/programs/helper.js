@@ -350,12 +350,16 @@ module.exports = class ProgramsHelper {
 	 * @returns {Object} - Details of the program.
 	 */
 
-	static details(programId) {
+	static details(programId, projections = 'all', skipFields = 'none') {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let programData = await programsQueries.programsDocument({
-					_id: programId,
-				})
+				let programData = await programsQueries.programsDocument(
+					{
+						_id: programId,
+					},
+					projections,
+					skipFields
+				)
 
 				if (!programData.length > 0) {
 					return resolve({

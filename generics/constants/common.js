@@ -84,4 +84,6 @@ module.exports = {
 	PDF_REPORT_GENERATED_: 'PDF_REPORT_GENERATED_SUCCESSFULLY',
 	COULD_NOT_GENERATE_PDF: 'COULD_NOT_GENERATE_PDF_REPORT',
 	SOLUTION_MODEL_NAME: 'solutions',
+	TARGETED_SOLUTION_TEXT:
+		'View and participate in educational programs active in your location and designed for the role you selected',
 }

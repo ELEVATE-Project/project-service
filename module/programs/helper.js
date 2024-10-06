@@ -347,64 +347,21 @@ module.exports = class ProgramsHelper {
 	 * @method
 	 * @name details
 	 * @param {String} programId - Program Id.
+	 * @param {Array} projections - Projections.
+	 * @param {Array} skipFields - Skip fields
 	 * @returns {Object} - Details of the program.
 	 */
 
-	static details(programId) {
+	static details(programId, projections = 'all', skipFields = 'none') {
 		return new Promise(async (resolve, reject) => {
 			try {
-				const staticData = {
-					programName: 'Mahadevan testing2',
-					programId: '65cdb4d824827600082ea68c',
-					programEndDate: '2024-08-30T18:29:59.000Z',
-					description: 'Mahadevan testing2',
-					rootOrganisations: '01269878797503692810',
-					data: [
-						{
-							_id: '65cdbb6224827600082ea6e1',
-							externalId: 'IDEAIMP-4-1707981665733-PROJECT-SOLUTION',
-							description: 'mahadevan project testing',
-							name: 'mahadevan project',
-							projectTemplateId: '65cdbb6227f4190008e35ef3',
-							projectId: '66a0ac1b67deaa0008f84093',
-							type: 'improvementProject',
-							certificateTemplateId: '65cdbb6324827600082ea6f8',
-						},
-						{
-							_id: '65cdbb6224827600082ea6e2',
-							externalId: 'IDEAIMP-4-1707981665733-PROJECT-SOLUTION',
-							description: 'mahadevan-1 project testing',
-							name: 'mahadevan project',
-							projectTemplateId: '65cdbb6227f4190008e35ef3',
-							projectId: '66a0ac1b67deaa0008f84093',
-							type: 'improvementProject',
-							certificateTemplateId: '65cdbb6324827600082ea6f8',
-						},
-						{
-							_id: '65cdbb6224827600082ea6e3',
-							externalId: 'IDEAIMP-4-1707981665733-PROJECT-SOLUTION',
-							description: 'mahadevan-2 project testing',
-							name: 'mahadevan project',
-							projectTemplateId: '65cdbb6227f4190008e35ef3',
-							projectId: '66a0ac1b67deaa0008f84093',
-							type: 'improvementProject',
-							certificateTemplateId: '65cdbb6324827600082ea6f8',
-						},
-					],
-					count: 3,
-					requestForPIIConsent: true,
-					programJoined: true,
-					consentShared: true,
-				}
-				return resolve({
-					message: CONSTANTS.apiResponses.PROGRAMS_FETCHED,
-					success: true,
-					data: staticData,
-					result: staticData,
-				})
-				let programData = await programsQueries.programsDocument({
-					_id: programId,
-				})
+				let programData = await programsQueries.programsDocument(
+					{
+						_id: programId,
+					},
+					projections,
+					skipFields
+				)
 
 				if (!programData.length > 0) {
 					return resolve({

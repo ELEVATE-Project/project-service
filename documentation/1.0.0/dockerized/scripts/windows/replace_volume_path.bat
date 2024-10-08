@@ -2,7 +2,7 @@
 SETLOCAL EnableDelayedExpansion
 
 REM Define the path of your docker-compose file
-SET "DOCKER_COMPOSE_FILE=docker-compose-mentoring.yml"
+SET "DOCKER_COMPOSE_FILE=docker-compose-project.yml"
 
 REM Check if the Docker Compose file exists
 IF NOT EXIST "%DOCKER_COMPOSE_FILE%" (
@@ -18,8 +18,8 @@ powershell -NoProfile -Command ^
   "$filePath = '%DOCKER_COMPOSE_FILE%';" ^
   "$currentDir = '%CURRENT_DIR%';" ^
   "$content = Get-Content $filePath -Raw;" ^
-  "$pattern = '(\s*- ).*?(:/app/src/environments/environment.ts)';" ^
-  "$replacement = \"`$1$currentDir\environment.ts`$2\";" ^
+  "$pattern = '(\s*- ).*?(:/app/src/environments/env.js)';" ^
+  "$replacement = \"`$1$currentDir\env.js`$2\";" ^
   "$updatedContent = $content -replace $pattern, $replacement;" ^
   "Set-Content $filePath $updatedContent -Force;" ^
   "Write-Host 'Updated volume path for environment.ts in ' $filePath;"

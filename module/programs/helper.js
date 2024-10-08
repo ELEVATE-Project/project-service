@@ -10,6 +10,7 @@
 const timeZoneDifference = process.env.TIMEZONE_DIFFRENECE_BETWEEN_LOCAL_TIME_AND_UTC
 const programsQueries = require(DB_QUERY_BASE_PATH + '/programs')
 const entitiesService = require(GENERICS_FILES_PATH + '/services/entity-management')
+const validateEntity = process.env.VALIDATE_ENTITIES
 
 /**
  * ProgramsHelper
@@ -908,7 +909,6 @@ module.exports = class ProgramsHelper {
 				let programDocument = []
 
 				let matchQuery = { status: CONSTANTS.common.ACTIVE_STATUS }
-
 				if (Object.keys(filter).length > 0) {
 					matchQuery = _.merge(matchQuery, filter)
 				}
@@ -972,7 +972,6 @@ module.exports = class ProgramsHelper {
 					facetQuery,
 					projection2
 				)
-
 				let programDocuments = await programsQueries.getAggregate(programDocument)
 				return resolve({
 					success: true,
@@ -1035,6 +1034,195 @@ module.exports = class ProgramsHelper {
 					success: false,
 					message: error.message,
 					data: false,
+				})
+			}
+		})
+	}
+
+	/**
+	 * List of user created programs
+	 * @method
+	 * @name userPrivatePrograms
+	 * @param {String} userId
+	 * @returns {JSON} - List of programs that user created on app.
+	 */
+
+	static userPrivatePrograms(userId) {
+		return new Promise(async (resolve, reject) => {
+			console.log(userId)
+			try {
+				let programsData = await programsQueries.programsDocument(
+					{
+						createdBy: userId,
+						isAPrivateProgram: true,
+					},
+					['name', 'externalId', 'description', '_id', 'isAPrivateProgram']
+				)
+
+				if (!(programsData.length > 0)) {
+					return resolve({
+						message: CONSTANTS.apiResponses.PROGRAM_NOT_FOUND,
+						result: [],
+					})
+				}
+
+				return resolve(programsData)
+			} catch (error) {
+				return reject(error)
+			}
+		})
+	}
+
+	/**
+	 * Auto targeted query field.
+	 * @method
+	 * @name queryBasedOnRoleAndLocation
+	 * @param {String} data - Requested body data.
+	 * @returns {JSON} - Auto targeted programs query.
+	 */
+
+	static queryBasedOnRoleAndLocation(data, type = '') {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let registryIds = []
+				let entityTypes = []
+				let filterQuery = {
+					isDeleted: false,
+				}
+				Object.keys(_.omit(data, ['role', 'filter', 'factors', 'type'])).forEach((key) => {
+					data[key] = data[key].split(',')
+				})
+
+				// If validate entity set to ON . strict scoping should be applied
+				if (validateEntity !== CONSTANTS.common.OFF) {
+					Object.keys(_.omit(data, ['filter', 'role', 'factors', 'type'])).forEach((requestedDataKey) => {
+						registryIds.push(...data[requestedDataKey])
+						entityTypes.push(requestedDataKey)
+					})
+					if (!registryIds.length > 0) {
+						throw {
+							message: CONSTANTS.apiResponses.NO_LOCATION_ID_FOUND_IN_DATA,
+						}
+					}
+
+					if (!data.role) {
+						throw {
+							message: CONSTANTS.apiResponses.USER_ROLES_NOT_FOUND,
+						}
+					}
+
+					filterQuery['scope.roles'] = {
+						$in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')],
+					}
+
+					filterQuery.$or = []
+					Object.keys(_.omit(data, ['filter', 'role', 'factors', 'type'])).forEach((key) => {
+						filterQuery.$or.push({
+							[`scope.${key}`]: { $in: data[key] },
+						})
+					})
+					filterQuery['scope.entityType'] = { $in: entityTypes }
+				} else {
+					// Obtain userInfo
+					let userRoleInfo = _.omit(data, ['filter', 'factors', 'role', 'type'])
+					let userRoleKeys = Object.keys(userRoleInfo)
+					let queryFilter = []
+
+					// if factors are passed or query has to be build based on the keys passed
+					if (data.hasOwnProperty('factors') && data.factors.length > 0) {
+						let factors = data.factors
+						// Build query based on each key
+						factors.forEach((factor) => {
+							let scope = 'scope.' + factor
+							let values = userRoleInfo[factor]
+							if (factor === 'role') {
+								queryFilter.push({
+									['scope.roles']: { $in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')] },
+								})
+							} else if (!Array.isArray(values)) {
+								queryFilter.push({ [scope]: { $in: values.split(',') } })
+							} else {
+								queryFilter.push({ [scope]: { $in: [...values] } })
+							}
+						})
+						// append query filter
+						filterQuery['$or'] = queryFilter
+					} else {
+						userRoleKeys.forEach((key) => {
+							let scope = 'scope.' + key
+							let values = userRoleInfo[key]
+							if (!Array.isArray(values)) {
+								queryFilter.push({ [scope]: { $in: values.split(',') } })
+							} else {
+								queryFilter.push({ [scope]: { $in: [...values] } })
+							}
+						})
+
+						if (data.role) {
+							queryFilter.push({
+								['scope.roles']: { $in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')] },
+							})
+						}
+
+						// append query filter
+						filterQuery['$and'] = queryFilter
+					}
+				}
+
+				filterQuery.status = CONSTANTS.common.ACTIVE_STATUS
+				if (type != '') {
+					filterQuery.type = type
+				}
+				return resolve({
+					success: true,
+					data: filterQuery,
+				})
+			} catch (error) {
+				return resolve({
+					success: false,
+					status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message,
+					data: {},
+				})
+			}
+		})
+	}
+
+	/**
+	 * List of programs based on role and location.
+	 * @method
+	 * @name forUserRoleAndLocation
+	 * @param {String} bodyData - Requested body data.
+	 * @param {String} pageSize - Page size.
+	 * @param {String} pageNo - Page no.
+	 * @param {String} searchText - search text.
+	 * @returns {JSON} - List of programs based on role and location.
+	 */
+
+	static forUserRoleAndLocation(bodyData, pageSize, pageNo, searchText = '', programId = '', projection) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let queryData = await this.queryBasedOnRoleAndLocation(bodyData)
+				if (!queryData.success) {
+					return resolve(queryData)
+				}
+				if (programId !== '') {
+					queryData.data._id = UTILS.convertStringToObjectId(programId)
+				}
+				queryData.data.startDate = { $lte: new Date() }
+				queryData.data.endDate = { $gte: new Date() }
+				let targetedPrograms = await this.list(pageNo, pageSize, searchText, queryData.data, projection)
+				return resolve({
+					success: true,
+					message: CONSTANTS.apiResponses.TARGETED_PROGRAMS_FETCHED,
+					data: targetedPrograms.data.data,
+					count: targetedPrograms.data.count,
+				})
+			} catch (error) {
+				return resolve({
+					success: false,
+					message: error.message,
+					data: {},
 				})
 			}
 		})

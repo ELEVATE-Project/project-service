@@ -1,8 +1,5 @@
 const { ObjectId } = require("mongodb");
 
-
-
-
 let entitiesData = [{
    "_id" : new ObjectId("66fbcc38da3622a5b9a26a13"),
    "name" : "Karnataka",
@@ -22,7 +19,7 @@ let entitiesData = [{
    }
 },
 {
-   "_id" : new ObjectId("66fbcc38f0891af41ca26a13"),
+   "_id" : new ObjectId("66fbcc3aa4c3a568b1a26a13"),
    "name" : "Bangalore",
    "entityType" : "district",
    "entityTypeId" : "66fbcc3780123e9f0fa26a13",
@@ -51,7 +48,7 @@ let entityTypesData = [
        "isDeleted" : false
     },
     {
-       "_id" : new ObjectId("66fbcc3780123e9f0fa26a13"),
+       "_id" : new ObjectId("66fbcc3780123e9f0fa26a14"),
        "name" : "district",
        "toBeMappedToParentEntities" : true,
        "immediateChildrenEntityType" : [
@@ -66,7 +63,7 @@ let entityTypesData = [
 
 
 let userRoleExtensionData = [{
-   "_id" : new ObjectId("66fbcc3dd64f10357ea26a13"),
+   "_id" : new ObjectId("66fbcc3dd64f10357ea26a14"),
    "status" : "ACTIVE",
    "createdBy" : "SYSTEM",
    "updatedBy" : "SYSTEM",
@@ -79,8 +76,8 @@ let userRoleExtensionData = [{
            "entityTypeId" : "66fbcc374017f43d2ca26a13"
        }
    ],
-   "updatedAt" : new Date("2024-09-09T09:31:47.135Z"),
-   "createdAt" : new Date("2024-09-09T09:31:47.135Z"),
+   "updatedAt" : "2024-11-04T00:59:24.000Z",
+   "createdAt" : "2024-11-04T00:59:24.000Z",
    "__v" : Number(0)
 }];
 

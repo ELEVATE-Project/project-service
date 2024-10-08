@@ -1,5 +1,6 @@
 const { ObjectId } = require("mongodb");
-
+const {getEndDate,getStartDate} = require("./time")
+// const {getStartDate} = require("./time")
 
 let programData = [{
    "_id" : new  ObjectId("66fbcc3a7cbf47f6fba26a13"),
@@ -30,8 +31,8 @@ let programData = [{
    "externalId" : "PG01",
    "name" : "School Hygiene Improvement Initiative",
    "description" : "The School Hygiene Improvement Initiative is dedicated to ensuring clean, safe, and healthy environments in schools. This program focuses on promoting hygiene best practices among students, staff, and administrators to prevent the spread of illnesses, enhance student well-being, and foster an atmosphere conducive to learning. Through regular cleanliness audits, sanitation drives, and hygiene awareness campaigns, the program aims to improve the condition of school facilities, particularly washrooms, classrooms, and common areas. Special emphasis is placed on educating students about personal hygiene, proper handwashing techniques, and maintaining a clean environment to create a culture of responsibility and care within the school community.",
-   "startDate" : new Date("2024-04-16T00:00:00.000Z"),
-   "endDate" : new Date("2025-12-16T18:29:59.000Z"),
+   "startDate" : getStartDate("2024-08-15 18:50:00"),
+   "endDate" : getEndDate("2029-08-15 18:50:00"),
    "scope" : {
        "state" : [
            "66fbcc38da3622a5b9a26a13"
@@ -44,103 +45,55 @@ let programData = [{
 }];
 
 
+
 let solutionData = [{
-   "_id" : new ObjectId("66fbcc3b2be2b9057aa26a13"),
-   "resourceType" : [
-       "Improvement Project Solution"
-   ],
-   "language" : [
-       "English"
-   ],
-   "keywords" : [
-       "Improvement Project"
-   ],
-   "entities" : [
-       "66fbcc38da3622a5b9a26a13"
-   ],
-   "programId" : "66fbcc3a7cbf47f6fba26a13",
-   "name" : "Washroom Hygiene",
-   "description" : "The School Hygiene Improvement Initiative is dedicated to ensuring clean, safe, and healthy environments in schools...",
-   "programExternalId" : "PG01",
-   "scope" : {
-       "state" : [
-           "66fbcc38da3622a5b9a26a13"
-       ],
-       "roles" : [
-           "state_education_officer"
-       ],
-       "entityType" : "state"
-   },
-   "projectTemplateId" : new ObjectId("66fbcc3aa4c3a568b1a26a13"),
-   "startDate" : Date("2021-08-30T00:00:00.000+0000"),
-   "endDate" : Date("2029-08-30T00:00:00.000+0000"),
-   "isDeleted" : false,
-   "isAPrivateProgram" : false,
-   "isReusable" : false,
-   "status" : "active",
-   "type" : "improvementProject",
-   "updatedAt" : Date("2021-08-30T00:00:00.000+0000")
-}];
+    "_id" : new ObjectId("66fbcc3b2be2b9057aa26a13"),
+    "resourceType" : [
+        "Improvement Project Solution"
+    ],
+    "language" : [
+        "English"
+    ],
+    "keywords" : [
+        "Improvement Project"
+    ],
+    "entities" : [
+        "66fbcc38da3622a5b9a26a13"
+    ],
+    "programId" : "66fbcc3a7cbf47f6fba26a13",
+    "name" : "Washroom Hygiene",
+    "description" : "The School Hygiene Improvement Initiative is dedicated to ensuring clean, safe, and healthy environments in schools...",
+    "programExternalId" : "PG01",
+    "scope" : {
+        "state" : [
+            "66fbcc38da3622a5b9a26a13"
+        ],
+        "roles" : [
+            "state_education_officer"
+        ],
+        "entityType" : "state"
+    },
+    "externalId": "PGM",
+    "projectTemplateId" : new ObjectId("66fbcc3aa4c3a568b1a26a13"),
+      "startDate": getStartDate("2024-08-15 18:50:00"),
+    "endDate": getEndDate("2029-09-15 18:50:00"),
+    "isDeleted" : false,
+    "isAPrivateProgram" : false,
+    "isReusable" : false,
+    "status" : "active",
+    "type" : "improvementProject",
+    "updatedAt": "2024-08-15 18:50:00",
+    "createdAt": "2024-08-15 18:50:00"
+ }];
+ 
+
+// let projectsData = [{
 
 
-let projectTemplatesData = [{
-   "_id" : new ObjectId("66fbcc3aa4c3a568b1a26a13"),
-   "description" : "The School Hygiene Improvement Initiative is dedicated to ensuring clean, safe, and healthy environments in schools...",
-   "concepts" : [
-       ""
-   ],
-   "keywords" : [
-       ""
-   ],
-   "isDeleted" : false,
-   "recommendedFor" : [
-   ],
-   "tasks" : [
-   ],
-   "learningResources" : [
-       {
-           "link" : "https://youtu.be/libKVRa01L8?feature=shared",
-           "app" : "projectService",
-           "id" : "libKVRa01L8?feature=shared"
-       }
-   ],
-   "isReusable" : false,
-   "title" : "Washroom Hygiene",
-   "externalId" : "WASH-HYGIENE",
-   "categories" : [
-       {
-           "_id" : "66fbcc39a64322692fa26a13",
-           "externalId" : "educationLeader",
-           "name" : "Education Leader"
-       }
-   ],
-   "status" : "published",
-   "programId" : "66fbcc3a7cbf47f6fba26a13",
-   "solutionId" : "66fbcc3b2be2b9057aa26a13"
-}];
+// }];
 
 
-let projectTemplateTasksData = [{
-
-
-}];
-
-
-let projectCategoriesData = [{
-   "_id" : new ObjectId("66fbcc39a64322692fa26a13"),
-   "externalId" : "educationLeader",
-   "name" : "Education Leader",
-   "status" : "active"
-}];
-
-
-let projectsData = [{
-
-
-}];
-
-
-let programUsersData = [{}];
+// let programUsersData = [{}];
 
 
 let formsData = [{
@@ -220,10 +173,10 @@ let formsData = [{
            ]
        }
    ],
-   "organizationId" : Number(1),
-   "updatedAt" : new Date("2024-06-05T08:47:14.987Z"),
-   "createdAt" : new Date("2024-06-05T08:47:14.987Z"),
-   "__v" : Number(0)
+   "organizationId" : 1,
+   "updatedAt" : "2024-08-15 18:50:00",
+   "createdAt" : "2024-08-15 18:50:00",
+   "__v" : 0
 },
 {
    "_id" : new ObjectId("66fbcc3cf312590398a26a14"),
@@ -285,8 +238,8 @@ let formsData = [{
        }
    ],
    "organizationId" : Number(1),
-   "updatedAt" : new Date("2024-06-25T10:08:58.689Z"),
-   "createdAt" : new Date("2024-06-25T10:08:58.689Z"),
+   "updatedAt" : "2024-08-15 18:50:00",
+   "createdAt" : "2024-08-15 18:50:00",
    "__v" : Number(0)
 },
 {
@@ -315,8 +268,8 @@ let formsData = [{
        }
    ],
    "organizationId" : Number(1),
-   "updatedAt" : new Date("2024-08-23T11:32:06.172Z"),
-   "createdAt" : new Date("2024-08-23T11:32:06.172Z"),
+   "updatedAt" : "2024-08-15 18:50:00",
+   "createdAt" : "2024-08-15 18:50:00",
    "__v" : Number(0)
 }];
 let configurationsData = [{
@@ -340,20 +293,63 @@ let configurationsData = [{
        ]
    }
 }];
-let certificateTemplatesData = [{}];
+
+let projectCategoriesData = [{
+    "_id" : new ObjectId("66fbcc39a64322692fa26a13"),
+    "externalId" : "educationLeader",
+    "name" : "Education Leader",
+    "status" : "active"
+ }];
+ 
+// let certificateTemplatesData = [{}];
 
 
 
+let projectTemplatesData = [{
+    "_id" : new ObjectId("66fbcc3aa4c3a568b1a26a13"),
+    "description" : "The School Hygiene Improvement Initiative is dedicated to ensuring clean, safe, and healthy environments in schools...",
+    "concepts" : [
+        ""
+    ],
+    "keywords" : [
+        ""
+    ],
+    "isDeleted" : false,
+    "recommendedFor" : [
+    ],
+    "tasks" : [
+    ],
+    "learningResources" : [
+        {
+            "link" : "https://youtu.be/libKVRa01L8?feature=shared",
+            "app" : "projectService",
+            "id" : "libKVRa01L8?feature=shared"
+        }
+    ],
+    "isReusable" : false,
+    "title" : "Washroom Hygiene",
+    "externalId" : "WASH-HYGIENE",
+    "categories" : [
+        {
+            "_id" : "66fbcc39a64322692fa26a13",
+            "externalId" : "educationLeader",
+            "name" : "Education Leader"
+        }
+    ],
+    "status" : "published",
+    "programId" : "66fbcc3a7cbf47f6fba26a13",
+    "solutionId" : "66fbcc3b2be2b9057aa26a13"
+ }];
 
 module.exports = {
  programData,
  solutionData,
  projectTemplatesData,
- projectTemplateTasksData,
+//  projectTemplateTasksData,
  projectCategoriesData,
- projectsData,
- programUsersData,
+//  projectsData,
+//  programUsersData,
  formsData,
  configurationsData,
- certificateTemplatesData,
+//  certificateTemplatesData,
 };

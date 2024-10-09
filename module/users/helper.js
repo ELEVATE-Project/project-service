@@ -253,7 +253,7 @@ module.exports = class UsersHelper {
 				//fetching all the programsDocuments
 				let userRelatedProgramsData = await programsQueries.programsDocument(
 					{ _id: { $in: targetedProgramIds } },
-					['name', 'externalId', 'scope'],
+					['name', 'externalId', 'metaInformation'],
 					'none', //not passing skip fields
 					'', // not passing pageSize
 					'' // not passing pageNo
@@ -271,10 +271,6 @@ module.exports = class UsersHelper {
 				// 	(data) => data._id.toString() === id.toString()
 				//   );
 				// });
-				userRelatedProgramsData.map((obj) => {
-					obj.metaInformation = obj.scope
-					delete obj.scope
-				})
 				let programsResult = userRelatedProgramsData
 
 				programDetails.data = programsResult

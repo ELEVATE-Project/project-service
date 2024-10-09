@@ -96,6 +96,7 @@ scopeRoles = []
 countImps = 0
 ecmToSection = dict()
 entitiesPGM = []
+districtentitiesPGM = []
 entitiesPGMID = []
 entitiesType = []
 solutionRolesArr = []
@@ -104,6 +105,7 @@ endDateOfResource = None
 startDateOfProgram = None
 endDateOfProgram = None
 rolesPGM =None
+mainRole = None
 solutionRolesArray = []
 solutionStartDate = ""
 solutionEndDate = ""
@@ -124,6 +126,10 @@ def programCreation(accessToken,parentFolder,externalId,pName,pDescription,roles
     programCreationurl = config.get(environment, 'elevateprojecthost') + config.get(environment, 'programCreationurl')
     messageArr.append("Program Creation URL : " + programCreationurl)
     # program creation payload
+
+    entities = districtentitiesPGM.split(',')
+    role = mainRole.split(',')
+    entitiesTypeStr = entitiesType[0]
     payload = json.dumps({
         "externalId" : externalId,
       "name" : pName,
@@ -135,6 +141,10 @@ def programCreation(accessToken,parentFolder,externalId,pName,pDescription,roles
       "language" : [ 
           "English"
       ],
+      "metaInformation" : {
+        "state" : [entities],
+        "roles" : [role]
+      },
       "keywords" : [],
       "concepts" : [],
       "userId":userId,
@@ -146,9 +156,8 @@ def programCreation(accessToken,parentFolder,externalId,pName,pDescription,roles
       "components" : [
       ],
        "scope": {
-            "entityType": scopeEntityType,
-            "entities": entitiesPGMID,
-            "roles": roles
+            entitiesTypeStr: entitiesPGMID,
+            "roles": [roles]
         },
         
       "requestForPIIConsent" : True
@@ -350,7 +359,8 @@ def programsFileCheck(filePathAddPgm, accessToken, parentFolder, MainFilePath):
                     returnvalues = []
                     global entitiesPGM
                     entitiesPGM = dictDetailsEnv['Targeted entities at program level'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Targeted entities at program level'] else terminatingMessage("\"Targeted entities at program level\" must not be Empty in \"Program details\" sheet")
-                    districtentitiesPGM = dictDetailsEnv['Targeted district at program level'].encode('utf-8').decode('utf-8')
+                    global districtentitiesPGM
+                    districtentitiesPGM = dictDetailsEnv['Targeted state at program level'].encode('utf-8').decode('utf-8')
                     global startDateOfProgram, endDateOfProgram
                     startDateOfProgram = dictDetailsEnv['Start date of program']
                     endDateOfProgram = dictDetailsEnv['End date of program']
@@ -363,16 +373,14 @@ def programsFileCheck(filePathAddPgm, accessToken, parentFolder, MainFilePath):
 
                     endDateArr = str(endDateOfProgram).split("-")
                     endDateOfProgram = endDateArr[2] + "-" + endDateArr[1] + "-" + endDateArr[0] + " 23:59:59"
-
+                    global mainRole
+                    mainRole = dictDetailsEnv['Targeted role at program level'] if dictDetailsEnv['Targeted role at program level'] else terminatingMessage("\"Targeted role at program level\" must not be Empty in \"Program details\" sheet")
                     global scopeEntityType
                     scopeEntityType = "state"
                     global entitiesType
                     entitiesType = fetchEntityType(parentFolder, accessToken,
                                                   entitiesPGM.lstrip().rstrip().split(","), scopeEntityType)
-                    if districtentitiesPGM:
-                        entitiesPGM = districtentitiesPGM
-                        scopeEntityType = "district"
-                    else:
+                    if entitiesPGM:
                         entitiesPGM = entitiesPGM
                         scopeEntityType = entitiesType
                     global entitiesPGMID
@@ -390,7 +398,7 @@ def programsFileCheck(filePathAddPgm, accessToken, parentFolder, MainFilePath):
                             "\"Description of the Program\" must not be Empty in \"Program details\" sheet")
                         keywordsPGM = dictDetailsEnv['Keywords'].encode('utf-8').decode('utf-8')
                         entitiesPGM = dictDetailsEnv['Targeted entities at program level'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Targeted entities at program level'] else terminatingMessage("\"Targeted entities at program level\" must not be Empty in \"Program details\" sheet")
-                        districtentitiesPGM = dictDetailsEnv['Targeted district at program level'].encode('utf-8').decode('utf-8')
+                        districtentitiesPGM = dictDetailsEnv['Targeted state at program level'].encode('utf-8').decode('utf-8')
                         # selecting entity type based on the users input 
                         if districtentitiesPGM:
                             entitiesPGM = districtentitiesPGM
@@ -400,11 +408,8 @@ def programsFileCheck(filePathAddPgm, accessToken, parentFolder, MainFilePath):
                             EntityType = "state"
 
                         scopeEntityType = EntityType
-
-                        mainRole = dictDetailsEnv['Targeted role at program level'] if dictDetailsEnv['Targeted role at program level'] else terminatingMessage("\"Targeted role at program level\" must not be Empty in \"Program details\" sheet")
                         global rolesPGM
                         rolesPGM = dictDetailsEnv['Targeted subrole at program level'] if dictDetailsEnv['Targeted subrole at program level'] else terminatingMessage("\"Targeted subrole at program level\" must not be Empty in \"Program details\" sheet")
-                        
                         if "teacher" in mainRole.strip().lower():
                             rolesPGM = str(rolesPGM).strip() + ",TEACHER"
                         userDetails = fetchUserDetails(environment, accessToken, dictDetailsEnv['projectService username/user id/email id/phone no. of Program Designer'])

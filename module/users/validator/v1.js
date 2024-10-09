@@ -4,7 +4,7 @@ module.exports = (req) => {
 			req.checkParams('_id').exists().withMessage('required Program id')
 		},
 		programs: function () {
-			req.checkParams('isAPrivateProgram').exists().withMessage('required isAPrivateProgram')
+			req.checkQuery('isAPrivateProgram').exists().withMessage('required isAPrivateProgram')
 		},
 	}
 

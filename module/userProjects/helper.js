@@ -2236,13 +2236,13 @@ module.exports = class UserProjectsHelper {
 				if (programId !== '') {
 					filterQuery['programId'] = programId
 				}
-
 				let importedProjects = await projectQueries.projectDocument(filterQuery, [
 					'solutionInformation',
 					'programInformation',
 					'title',
 					'description',
 					'projectTemplateId',
+					'certificate',
 				])
 
 				return resolve({

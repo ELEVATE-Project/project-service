@@ -84,7 +84,90 @@ module.exports = class Users {
 				return resolve(targetedSolutions)
 			} catch (error) {
 				return reject({
-					status: error.status || HTTP_STATUS_CODE['internal_server_error'].status,
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+
+					errorObject: error,
+				})
+			}
+		})
+	}
+
+	/**
+      * @api {post} /project/v1/users/programs?isAPrivateProgram=true&page=:page&limit=:limit&search=:search 
+      * Program List
+      * @apiVersion 1.0.0
+      * @apiGroup Users
+      * @apiHeader {String} X-auth-token Authenticity token
+      * @apiSampleRequest /project/v1/users/programs?isAPrivateProgram=false&page=:page&limit=:limit&search=:search 
+      * @apiUse successBody
+      * @apiUse errorBody
+      * @apiParamExample {json} Request:
+      *{
+            "state": "665d8df5c6892808846230e7",
+            "district": "668240135fb8bc3e93ceae39",
+            "block": "6682771aa845ef3e891db070",
+            "cluster": "668242835fb8bc3e93ceae44",
+            "role": "head_master,district_education_officer"
+        }
+       * @apiParamExample {json} Response:
+       * {
+       * "message": "Users programs fetched successfully",
+         "status": 200,
+         "result": {
+             "data": [
+                 {
+                     "_id": "5ff438b04698083dbfab7284",
+                     "externalId": "TEST_SCOPE_PROGRAM",
+                     "name": "TEST scope in program",
+                     "metaInformation" : {
+                        "state" : ["Karnataka"],
+                        "recommendedFor" : ["District Education Officer", "Head Master"]
+                     }
+                 }
+             ],
+             "count": 1,
+             "description": "View and participate in educational programs active in your location and designed for your role"
+         }
+     }
+     */
+
+	/**
+	 * List of targeted user programs
+	 * @method
+	 * @name programs
+	 * @param  {Request} req request body.
+	 * @param {String} req.pageNo - pageNo
+	 * @param {String} req.pageSize - pageSize
+	 * @param {String} req.searchText - searchText
+	 * @param {String} req.query.isAPrivateProgram - isAPrivateProgram
+	 * @returns {Object} list of targeted user programs.
+	 */
+
+	programs(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let isAPrivateProgram = UTILS.convertStringToBoolean(req.query.isAPrivateProgram)
+
+				if (isAPrivateProgram) {
+					let programsData = await usersHelper.privatePrograms(req.userDetails.userInformation.userId)
+					return resolve(programsData)
+				} else {
+					let programs = await usersHelper.programs(
+						req.body,
+						req.pageNo,
+						req.pageSize,
+						req.searchText,
+						req.userDetails.userInformation.userId
+					)
+
+					programs.result = programs.data
+					return resolve(programs)
+				}
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
 
 					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
 

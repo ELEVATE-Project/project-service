@@ -9,6 +9,7 @@
 const programsHelper = require(MODULES_BASE_PATH + '/programs/helper')
 const solutionsHelper = require(MODULES_BASE_PATH + '/solutions/helper')
 const userProjectsHelper = require(MODULES_BASE_PATH + '/userProjects/helper')
+const programsQueries = require(DB_QUERY_BASE_PATH + '/programs')
 
 /**
  * UsersHelper
@@ -146,6 +147,146 @@ module.exports = class UsersHelper {
 				return resolve({
 					success: false,
 					result: {
+						description: CONSTANTS.common.TARGETED_SOLUTION_TEXT,
+						data: [],
+						count: 0,
+					},
+				})
+			}
+		})
+	}
+
+	/**
+	 * List of all private programs created by user
+	 * @method
+	 * @name privatePrograms
+	 * @param {string} userId - logged in user Id.
+	 * @returns {Array} - List of all private programs created by user.
+	 */
+
+	static privatePrograms(userId) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let userPrivatePrograms = await programsHelper.userPrivatePrograms(userId)
+
+				return resolve({
+					message: CONSTANTS.apiResponses.PRIVATE_PROGRAMS_LIST,
+					result: userPrivatePrograms,
+				})
+			} catch (error) {
+				return reject(error)
+			}
+		})
+	}
+
+	/**
+	 * User targeted programs.
+	 * @method
+	 * @name programs
+	 * @param {Object} bodyData - request body data.
+	 * @param {String} pageNo - Page number.
+	 * @param {String} pageSize - Page size.
+	 * @param {String} searchText - Search text.
+	 * @param {String} userId - User Id.
+	 * @returns {Array} - Get user targeted programs.
+	 */
+
+	static programs(bodyData, pageNo, pageSize, searchText, userId) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let programDetails = {}
+				let targetedProgramIds = []
+				let alreadyStartedProgramsIds = []
+				let programCount = 0
+				//get all programs which user has joined irrespective of targeted and non targeted programs
+				// let alreadyStartedPrograms = await this.getUserJoinedPrograms(
+				//   searchText,
+				//   userId
+				// );
+
+				// if (alreadyStartedPrograms.success && alreadyStartedPrograms.data) {
+				//   alreadyStartedProgramsIds = alreadyStartedPrograms.data;
+				// }
+
+				// getting all program details matching the user profile. not passing pageSize and pageNo to get all data.
+				let targetedPrograms = await programsHelper.forUserRoleAndLocation(
+					bodyData,
+					'', // not passing page size
+					'', // not passing page number
+					searchText
+					//   ["_id"]
+				)
+
+				// targetedPrograms.data contain all programIds targeted to current user profile.
+				if (targetedPrograms.success && targetedPrograms.data && targetedPrograms.data.length > 0) {
+					targetedProgramIds = UTILS.arrayOfObjectToArrayOfObjectId(targetedPrograms.data)
+				}
+				// filter tagregeted program ids if any targetedProgramIds are prsent in alreadyStartedPrograms then remove that
+				// let allTargetedProgramButNotJoined = _.differenceWith(
+				//   targetedProgramIds,
+				//   alreadyStartedProgramsIds,
+				//   _.isEqual
+				// );
+
+				//find total number of programs related to user
+				// let userRelatedPrograms = alreadyStartedProgramsIds.concat(
+				//   allTargetedProgramButNotJoined
+				// );
+				//total number of programs
+				programCount = targetedProgramIds
+				if (!(programCount.length > 0)) {
+					throw {
+						message: CONSTANTS.apiResponses.PROGRAM_NOT_FOUND,
+					}
+				}
+
+				// Splitting the userRelatedPrograms array based on the page number and size.
+				// The returned data is not coming in the order of userRelatedPrograms elements when all the IDs are passed.
+				// We can't add a sort to the programDocuments function because it will also sort programs joined from the previous profile, which should come at the end of the list for us.
+				// We have two requirements:
+				// 1. Current profile programs should come in the order of their creation.
+				// 2. Previous profile programs should always come last.
+				let startIndex = pageSize * (pageNo - 1)
+				let endIndex = startIndex + pageSize
+				targetedProgramIds = targetedProgramIds.slice(startIndex, endIndex)
+
+				//fetching all the programsDocuments
+				let userRelatedProgramsData = await programsQueries.programsDocument(
+					{ _id: { $in: targetedProgramIds } },
+					['name', 'externalId', 'metaInformation'],
+					'none', //not passing skip fields
+					'', // not passing pageSize
+					'' // not passing pageNo
+				)
+				if (!(userRelatedProgramsData.length > 0)) {
+					throw {
+						message: CONSTANTS.apiResponses.PROGRAM_NOT_FOUND,
+					}
+				}
+
+				// programDocuments function will not return result in the order which ids are passed. This code block will ensure that the response is rearranged in correct order
+				// We can't implement sort logic in programDocuments function because userRelatedPrograms can contain prev profile programs also
+				// let programsResult = userRelatedPrograms.map((id) => {
+				//   return userRelatedProgramsData.find(
+				// 	(data) => data._id.toString() === id.toString()
+				//   );
+				// });
+				let programsResult = userRelatedProgramsData
+
+				programDetails.data = programsResult
+				programDetails.count = programsResult.length
+				programDetails.description = CONSTANTS.apiResponses.PROGRAM_DESCRIPTION
+
+				return resolve({
+					success: true,
+					message: CONSTANTS.apiResponses.PROGRAMS_FETCHED,
+					data: programDetails,
+				})
+			} catch (error) {
+				return resolve({
+					success: false,
+					message: error.message,
+					data: {
 						description: CONSTANTS.common.TARGETED_SOLUTION_TEXT,
 						data: [],
 						count: 0,

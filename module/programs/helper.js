@@ -1049,7 +1049,6 @@ module.exports = class ProgramsHelper {
 
 	static userPrivatePrograms(userId) {
 		return new Promise(async (resolve, reject) => {
-			console.log(userId)
 			try {
 				let programsData = await programsQueries.programsDocument(
 					{

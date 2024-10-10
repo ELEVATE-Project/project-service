@@ -2438,12 +2438,17 @@ module.exports = class SolutionsHelper {
 	 * @returns {Object}
 	 */
 
-	static assignedProjects(userId, search, filter, pageNo, pageSize) {
+	static assignedProjects(userId, search, filter, pageNo, pageSize, entityId = '') {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let query = {
-					userId: userId,
 					isDeleted: false,
+				}
+
+				if (entityId !== '') {
+					query['entityId'] = entityId // to fetch projects based on entityId key
+				} else {
+					query['userId'] = userId // to fetch projects based on userId key
 				}
 
 				let searchQuery = []
@@ -2596,12 +2601,24 @@ module.exports = class SolutionsHelper {
 	 * @returns {Object} - Details of the solution.
 	 */
 
-	static assignedUserSolutions(solutionType, userId, search, filter, pageNo, pageSize) {
+	static assignedUserSolutions(solutionType, userId, search, filter, pageNo, pageSize, entityId = '') {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let userAssignedSolutions = {}
 				if (solutionType === CONSTANTS.common.IMPROVEMENT_PROJECT) {
-					userAssignedSolutions = await this.assignedProjects(userId, search, filter, pageNo, pageSize)
+					// if entityId is provided fetch projects based on entityId key
+					if (entityId !== '') {
+						userAssignedSolutions = await this.assignedProjects(
+							userId,
+							search,
+							filter,
+							pageNo,
+							pageSize,
+							entityId
+						)
+					} else {
+						userAssignedSolutions = await this.assignedProjects(userId, search, filter, pageNo, pageSize)
+					}
 				} else {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
@@ -2637,12 +2654,21 @@ module.exports = class SolutionsHelper {
 		search,
 		filter,
 		surveyReportPage = '',
-		currentScopeOnly = false
+		currentScopeOnly = false,
+		entityId = ''
 	) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				currentScopeOnly = UTILS.convertStringToBoolean(currentScopeOnly)
-				let assignedSolutions = await this.assignedUserSolutions(solutionType, userId, search, filter, '', '')
+				let assignedSolutions = await this.assignedUserSolutions(
+					solutionType,
+					userId,
+					search,
+					filter,
+					'',
+					'',
+					entityId
+				)
 				if (!assignedSolutions.success) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,

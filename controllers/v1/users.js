@@ -109,7 +109,7 @@ module.exports = class Users {
             "district": "668240135fb8bc3e93ceae39",
             "block": "6682771aa845ef3e891db070",
             "cluster": "668242835fb8bc3e93ceae44",
-            "role": "mentee,program_creator,block_education_officer,principle,district_education_officer"
+            "role": "head_master,district_education_officer"
         }
        * @apiParamExample {json} Response:
        * {
@@ -122,8 +122,8 @@ module.exports = class Users {
                      "externalId": "TEST_SCOPE_PROGRAM",
                      "name": "TEST scope in program",
                      "metaInformation" : {
-                        "state" : ["665d8df5c6892808846230e7"],
-                        "roles" : ["district_education_officer","principle","block_education_officer","program_creator","mentee"]
+                        "state" : ["Karnataka"],
+                        "roles" : ["District Education Officer", "Head Master"]
                      }
                  }
              ],

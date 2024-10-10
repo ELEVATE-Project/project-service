@@ -100,7 +100,7 @@ module.exports = class Users {
       * @apiVersion 1.0.0
       * @apiGroup Users
       * @apiHeader {String} X-auth-token Authenticity token
-      * @apiSampleRequest /project/v1/users/programs?isAPrivateProgram=true&page=:page&limit=:limit&search=:search 
+      * @apiSampleRequest /project/v1/users/programs?isAPrivateProgram=false&page=:page&limit=:limit&search=:search 
       * @apiUse successBody
       * @apiUse errorBody
       * @apiParamExample {json} Request:
@@ -123,7 +123,7 @@ module.exports = class Users {
                      "name": "TEST scope in program",
                      "metaInformation" : {
                         "state" : ["Karnataka"],
-                        "roles" : ["District Education Officer", "Head Master"]
+                        "recommendedFor" : ["District Education Officer", "Head Master"]
                      }
                  }
              ],

@@ -12,10 +12,10 @@ if errorlevel 1 (
 
 REM Start MongoDB Docker container if not running
 echo Checking if MongoDB container is running...
-docker inspect -f "{{.State.Running}}" project-mongo-1 >nul 2>&1
+docker inspect -f "{{.State.Running}}" project_mongo_1 >nul 2>&1
 if errorlevel 1 (
     echo Starting MongoDB container...
-    docker start project-mongo-1
+    docker start project_mongo_1
 ) else (
     echo MongoDB container is already running.
 )
@@ -40,7 +40,7 @@ set MONGODB_URL=mongodb://localhost:27017
 
 REM Execute Node.js script to insert data
 @REM node insert_entity_project_data.js
-docker exec -it projects sh -c "node documentation/1.0.0/dockerized/scripts/windows/insert_entity_project_data.js"
+docker exec -it project sh -c "node documentation/1.0.0/dockerized/scripts/windows/insert_entity_project_data.js"
 REM Check if the script was executed successfully
 if errorlevel 1 (
     echo An error occurred while populating the database.

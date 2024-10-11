@@ -729,11 +729,11 @@ module.exports = class Solutions extends Abstract {
 	}
 
 	/**
-    * @api {post} /project/v1/solutions/targetedSolutions?type=:solutionType&page=:page&limit=:limit&search=:search&filter=:filter
+    * @api {post} /project/v1/solutions/targetedSolutions?type=:solutionType&page=:page&limit=:limit&search=:search&filter=:filter&currentScopeOnly=:&entityId=:
     * List of assigned solutions and targetted ones.
     * @apiVersion 1.0.0
     * @apiGroup Solutions
-    * @apiSampleRequest /project/v1/solutions/targetedSolutions?type=observation&page=1&limit=10&search=a&filter=assignedToMe
+    * @apiSampleRequest /project/v1/solutions/targetedSolutions?type=observation&page=1&limit=10&search=a&filter=assignedToMe&currentScopeOnly=true&entityId=English
     * @apiParamExample {json} Request:
     * {
         "roles": "head_master,district_education_officer",
@@ -747,18 +747,74 @@ module.exports = class Solutions extends Abstract {
     "result": {
         "data": [
             {
-                "_id": "5f9288fd5e25636ce6dcad66",
-                "name": "obs1",
-                "description": "observation1",
-                "solutionId": "5f9288fd5e25636ce6dcad65",
-                "programId": "5d287326652f311044f41dbb"
+                "_id": "6708b3fcdf2bce38acf4119f",
+                "solutionId": "66bf077ae74aa1727af8b1d4",
+                "creator": "",
+                "solutionMetaInformation": {},
+                "type": "improvementProject",
+                "externalId": "sol-1-IM-5",
+                "projectTemplateId": "66bf07a1e74aa1727af8b1dc",
+                "certificateTemplateId": "66bf0822e74aa1727af8b1e7",
+                "programId": "66bb85bebf682a1f367c55b9",
+                "programName": "Certificate test VVP4",
+                "name": "Certificate_Testing_VVP5",
+                "certificate": {
+                    "templateUrl": "certificate/c4320cd4-7f63-4d48-b065-0d8f6f732153/162/cb234a78-f252-49f5-8cac-2b7f0dc7e631/66bf0822e74aa1727af8b1e7/16-7-2024-1723795534888_dev_s2l2",
+                    "status": "active",
+                    "criteria": {
+                        "validationText": "Complete validation message",
+                        "expression": "C1&&C2",
+                        "conditions": {
+                            "C1": {
+                                "validationText": "Project Should be submitted.",
+                                "expression": "C1",
+                                "conditions": {
+                                    "C1": {
+                                        "scope": "project",
+                                        "key": "status",
+                                        "operator": "==",
+                                        "value": "submitted"
+                                    }
+                                }
+                            },
+                            "C2": {
+                                "validationText": "Evidence project level validation",
+                                "expression": "C1",
+                                "conditions": {
+                                    "C1": {
+                                        "scope": "project",
+                                        "key": "attachments",
+                                        "function": "count",
+                                        "filter": {
+                                            "key": "type",
+                                            "value": "all"
+                                        },
+                                        "operator": ">=",
+                                        "value": 1
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "templateId": "66bf0822e74aa1727af8b1e7"
+                },
+                "status": "started",
+                "hasAcceptedTAndC": false,
+                "description": "Encourage school leaders to learn about various digital initiatives and share ideas that would be implemented in their schools.",
+                "lastDownloadedAt": "2024-10-11T05:13:32.795Z"
             },
-            {
-                "_id": "5fc7aa9e73434430731f6a10",
-                "solutionId": "5fb4fce4c7439a3412ff013b",
-                "programId": "5f5b216a9c70bd2973aee29f",
-                "name": "My Solution",
-                "description": "My Solution Description"
+             {
+                "_id": "",
+                "solutionId": "66d83cf920413cc3c03ed131",
+                "creator": "Priyanka",
+                "solutionMetaInformation": {},
+                "type": "improvementProject",
+                "externalId": "IDE-1725447416207-PROJECT-SOLUTION",
+                "projectTemplateId": "66d83cf95675a3c3b6fced6d",
+                "programId": "66d834343a240f0b7407bb53",
+                "programName": "Test elevate_shiksha",
+                "name": "OneThree",
+                "description": "Send an invitation to parents with the PTM date and time, and prepare the agenda with teachers. During the meeting, welcome parents, conduct an ice breaker, discuss the 'Parents as Partners' initiative, and have one-on-one conversations. Collect feedback and encourage sharing photos of learning spaces. After the meeting, record attendance, review feedback, and upload data to the app."
             }
         ],
         "count": 2
@@ -771,7 +827,15 @@ module.exports = class Solutions extends Abstract {
 	 * List of solutions and targetted ones.
 	 * @method
 	 * @name targetedSolutions
-	 * @param {Object} req - request data.
+	 * @param {Object} req.body - request data.
+	 * @param {String} req.query.type - solution type
+	 * @param {String} req.userDetails.userInformation.userId - user id
+	 * @param {Number} req.pageSize - page size limit
+	 * @param {Number} req.pageNo - page number
+	 * @param {String} req.searchText - search text
+	 * @param {String} req.filter - filter data
+	 * @param {Boolean} req.query.currentScopeOnly - boolean value to fetch only current scope documents/projects
+	 * @param {String} req.query.entityId - helps to fetch documents/projects based on entity id
 	 * @returns {JSON} List of solutions with targetted ones.
 	 */
 
@@ -787,7 +851,8 @@ module.exports = class Solutions extends Abstract {
 					req.searchText,
 					req.query.filter,
 					req.query.surveyReportPage ? req.query.surveyReportPage : '',
-					req.query.currentScopeOnly ? req.query.currentScopeOnly : false
+					req.query.currentScopeOnly ? req.query.currentScopeOnly : false,
+					req.query.entityId ? req.query.entityId : '' // to fetch projects based on entityId key
 				)
 
 				return resolve(observations)

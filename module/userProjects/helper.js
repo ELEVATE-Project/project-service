@@ -1101,8 +1101,13 @@ module.exports = class UserProjectsHelper {
 					solutionId = templateDocuments[0].solutionId ? templateDocuments[0].solutionId : solutionId
 					solutionExternalId = templateDocuments[0].solutionExternalId
 				}
-
-				let userRoleInformation = _.omit(bodyData, ['referenceFrom', 'submissions', 'hasAcceptedTAndC', 'link'])
+				let userRoleInformation = _.omit(bodyData, [
+					'referenceFrom',
+					'submissions',
+					'hasAcceptedTAndC',
+					'link',
+					'entityId',
+				])
 
 				if (projectId === '') {
 					// This will check wether the user user is targeted to solution or not based on his userRoleInformation
@@ -1161,7 +1166,7 @@ module.exports = class UserProjectsHelper {
 							} else {
 								solutionDetails = await solutionsHelper.detailsBasedOnRoleAndLocation(
 									solutionId,
-									bodyData,
+									_.omit(bodyData, ['entityId']),
 									'',
 									isAPrivateSolution
 								)
@@ -1474,7 +1479,9 @@ module.exports = class UserProjectsHelper {
 								projectCreation.data.userProfile = updatedUserProfile.data
 							}
 						}
-
+						if (bodyData.entityId !== '') {
+							projectCreation.data['entityId'] = bodyData.entityId
+						}
 						let project = await projectQueries.createProject(projectCreation.data)
 
 						// if ( addReportInfoToSolution && project.solutionId ) {

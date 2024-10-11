@@ -1126,7 +1126,6 @@ module.exports = class SolutionsHelper {
 				if (!queryData.success) {
 					return resolve(queryData)
 				}
-
 				queryData.data['_id'] = solutionId
 				let matchQuery = queryData.data
 				let solutionData = await solutionsQueries.solutionsDocument(matchQuery, [
@@ -2435,15 +2434,21 @@ module.exports = class SolutionsHelper {
 	 * @param {Number} pageNo - Page No.
 	 * @param {String} search - Search text.
 	 * @param {String} filter - filter text.
+	 * @param {String} entityId - entity id.
 	 * @returns {Object}
 	 */
 
-	static assignedProjects(userId, search, filter, pageNo, pageSize) {
+	static assignedProjects(userId, search, filter, pageNo, pageSize, entityId = '') {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let query = {
-					userId: userId,
 					isDeleted: false,
+				}
+
+				if (entityId !== '') {
+					query['entityId'] = entityId // to fetch projects based on entityId key
+				} else {
+					query['userId'] = userId // to fetch projects based on userId key
 				}
 
 				let searchQuery = []
@@ -2592,16 +2597,36 @@ module.exports = class SolutionsHelper {
 	 * Solution details.
 	 * @method
 	 * @name assignedUserSolutions
-	 * @param {String} solutionId - Program Id.
+	 * @param {String} solutionType - solution type.
+	 * @param {String} userId - user id
+	 * @param {String} search - search.
+	 * @param {String} filter - filter text
+	 * @param {Number} pageNo - page number
+	 * @param {Number} pageSize - page limit
+	 * @param {String} entityId - entity id.
 	 * @returns {Object} - Details of the solution.
 	 */
 
-	static assignedUserSolutions(solutionType, userId, search, filter, pageNo, pageSize) {
+	static assignedUserSolutions(solutionType, userId, search, filter, pageNo, pageSize, entityId = '') {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let userAssignedSolutions = {}
 				if (solutionType === CONSTANTS.common.IMPROVEMENT_PROJECT) {
-					userAssignedSolutions = await this.assignedProjects(userId, search, filter, pageNo, pageSize)
+					// if entityId is provided, fetch projects whose entityId matches to that provided in the query, hence any user will be able to fetch the project if they provide valid entityId
+					if (entityId !== '') {
+						userAssignedSolutions = await this.assignedProjects(
+							userId,
+							search,
+							filter,
+							pageNo,
+							pageSize,
+							entityId
+						)
+					}
+					// if entityId is not provided fetch projects created by the loggedin user
+					else {
+						userAssignedSolutions = await this.assignedProjects(userId, search, filter, pageNo, pageSize)
+					}
 				} else {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
@@ -2637,12 +2662,21 @@ module.exports = class SolutionsHelper {
 		search,
 		filter,
 		surveyReportPage = '',
-		currentScopeOnly = false
+		currentScopeOnly = false,
+		entityId = ''
 	) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				currentScopeOnly = UTILS.convertStringToBoolean(currentScopeOnly)
-				let assignedSolutions = await this.assignedUserSolutions(solutionType, userId, search, filter, '', '')
+				let assignedSolutions = await this.assignedUserSolutions(
+					solutionType,
+					userId,
+					search,
+					filter,
+					'',
+					'',
+					entityId
+				)
 				if (!assignedSolutions.success) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,

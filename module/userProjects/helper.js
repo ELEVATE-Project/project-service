@@ -1102,7 +1102,13 @@ module.exports = class UserProjectsHelper {
 					solutionExternalId = templateDocuments[0].solutionExternalId
 				}
 
-				let userRoleInformation = _.omit(bodyData, ['referenceFrom', 'submissions', 'hasAcceptedTAndC', 'link'])
+				let userRoleInformation = _.omit(bodyData, [
+					'referenceFrom',
+					'submissions',
+					'hasAcceptedTAndC',
+					'link',
+					'entityId',
+				])
 
 				if (projectId === '') {
 					// This will check wether the user user is targeted to solution or not based on his userRoleInformation

@@ -1126,7 +1126,6 @@ module.exports = class SolutionsHelper {
 				if (!queryData.success) {
 					return resolve(queryData)
 				}
-
 				queryData.data['_id'] = solutionId
 				let matchQuery = queryData.data
 				let solutionData = await solutionsQueries.solutionsDocument(matchQuery, [
@@ -2435,6 +2434,7 @@ module.exports = class SolutionsHelper {
 	 * @param {Number} pageNo - Page No.
 	 * @param {String} search - Search text.
 	 * @param {String} filter - filter text.
+	 * @param {String} entityId - entity id.
 	 * @returns {Object}
 	 */
 
@@ -2597,7 +2597,13 @@ module.exports = class SolutionsHelper {
 	 * Solution details.
 	 * @method
 	 * @name assignedUserSolutions
-	 * @param {String} solutionId - Program Id.
+	 * @param {String} solutionType - solution type.
+	 * @param {String} userId - user id
+	 * @param {String} search - search.
+	 * @param {String} filter - filter text
+	 * @param {Number} pageNo - page number
+	 * @param {Number} pageSize - page limit
+	 * @param {String} entityId - entity id.
 	 * @returns {Object} - Details of the solution.
 	 */
 
@@ -2606,7 +2612,7 @@ module.exports = class SolutionsHelper {
 			try {
 				let userAssignedSolutions = {}
 				if (solutionType === CONSTANTS.common.IMPROVEMENT_PROJECT) {
-					// if entityId is provided fetch projects based on entityId key
+					// if entityId is provided, fetch projects whose entityId matches to that provided in the query, hence any user will be able to fetch the project if they provide valid entityId
 					if (entityId !== '') {
 						userAssignedSolutions = await this.assignedProjects(
 							userId,
@@ -2616,7 +2622,9 @@ module.exports = class SolutionsHelper {
 							pageSize,
 							entityId
 						)
-					} else {
+					}
+					// if entityId is not provided fetch projects created by the loggedin user
+					else {
 						userAssignedSolutions = await this.assignedProjects(userId, search, filter, pageNo, pageSize)
 					}
 				} else {

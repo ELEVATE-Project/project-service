@@ -1474,7 +1474,9 @@ module.exports = class UserProjectsHelper {
 								projectCreation.data.userProfile = updatedUserProfile.data
 							}
 						}
-
+						if (bodyData.entityId !== '') {
+							projectCreation.data['entityId'] = bodyData.entityId
+						}
 						let project = await projectQueries.createProject(projectCreation.data)
 
 						// if ( addReportInfoToSolution && project.solutionId ) {

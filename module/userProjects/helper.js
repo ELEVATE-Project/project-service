@@ -1101,7 +1101,6 @@ module.exports = class UserProjectsHelper {
 					solutionId = templateDocuments[0].solutionId ? templateDocuments[0].solutionId : solutionId
 					solutionExternalId = templateDocuments[0].solutionExternalId
 				}
-
 				let userRoleInformation = _.omit(bodyData, [
 					'referenceFrom',
 					'submissions',
@@ -1167,7 +1166,7 @@ module.exports = class UserProjectsHelper {
 							} else {
 								solutionDetails = await solutionsHelper.detailsBasedOnRoleAndLocation(
 									solutionId,
-									bodyData,
+									_.omit(bodyData, ['entityId']),
 									'',
 									isAPrivateSolution
 								)

@@ -237,9 +237,9 @@ module.exports = class UsersHelper {
 				if (!(programCount.length > 0)) {
 					throw {
 						message: CONSTANTS.apiResponses.PROGRAM_NOT_FOUND,
+						count: 0,
 					}
 				}
-
 				// Splitting the userRelatedPrograms array based on the page number and size.
 				// The returned data is not coming in the order of userRelatedPrograms elements when all the IDs are passed.
 				// We can't add a sort to the programDocuments function because it will also sort programs joined from the previous profile, which should come at the end of the list for us.
@@ -261,6 +261,7 @@ module.exports = class UsersHelper {
 				if (!(userRelatedProgramsData.length > 0)) {
 					throw {
 						message: CONSTANTS.apiResponses.PROGRAM_NOT_FOUND,
+						count: programCount.length,
 					}
 				}
 
@@ -289,7 +290,7 @@ module.exports = class UsersHelper {
 					data: {
 						description: CONSTANTS.common.TARGETED_SOLUTION_TEXT,
 						data: [],
-						count: 0,
+						count: error.count,
 					},
 				})
 			}

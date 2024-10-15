@@ -274,7 +274,7 @@ module.exports = class UsersHelper {
 				let programsResult = userRelatedProgramsData
 
 				programDetails.data = programsResult
-				programDetails.count = programsResult.length
+				programDetails.count = programCount.length
 				programDetails.description = CONSTANTS.apiResponses.PROGRAM_DESCRIPTION
 
 				return resolve({

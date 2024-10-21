@@ -13,9 +13,6 @@ module.exports = (req) => {
 		detailView: function () {
 			req.checkQuery('reportType').exists().withMessage('required report type')
 		},
-		getProgramsByEntity: function () {
-			req.checkParams('_id').exists().withMessage('required program id')
-		},
 	}
 
 	if (reportsValidator[req.params.method]) {

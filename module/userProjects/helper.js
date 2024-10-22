@@ -108,7 +108,6 @@ module.exports = class UserProjectsHelper {
 				const userProject = await projectQueries.projectDocument(
 					{
 						_id: projectId,
-						userId: userId,
 					},
 					[
 						'_id',
@@ -120,6 +119,9 @@ module.exports = class UserProjectsHelper {
 						'lastDownloadedAt',
 						'appInformation',
 						'status',
+						'updateHistory',
+						'acl',
+						'userId',
 					]
 				)
 
@@ -130,6 +132,50 @@ module.exports = class UserProjectsHelper {
 					}
 				}
 
+				// validate user authenticity before allowing him to edit the project
+				if (
+					process.env.SUBMISSION_LEVEL === 'USER' &&
+					(userProject[0].acl.visibility == CONSTANTS.common.PROJECT_VISIBILITY_ALL ||
+						userProject[0].acl.visibility == CONSTANTS.common.PROJECT_VISIBILITY_SPECIFIC ||
+						userProject[0].acl.visibility == CONSTANTS.common.PROJECT_VISIBILITY_SCOPE)
+				) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.USER_NOT_ALLOWED_TO_EDIT_PROJECT,
+					}
+				}
+				// validate user authenticity if the acl.visibility of project is SELf or SPECIFIC
+				else if (
+					(userProject[0].acl.visibility == CONSTANTS.common.PROJECT_VISIBILITY_SELF &&
+						!(userProject[0].userId == userId)) ||
+					(userProject[0].acl.visibility == CONSTANTS.common.PROJECT_VISIBILITY_SPECIFIC &&
+						!(userProject[0].acl.hasOwnProperty('users') && userProject[0].acl.users.includes(userId)))
+				) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.USER_NOT_ALLOWED_TO_EDIT_PROJECT,
+					}
+				}
+				// validate user authenticity if the acl.visibility of project is SCOPE
+				else if (userProject[0].acl.visibility == CONSTANTS.common.PROJECT_VISIBILITY_SCOPE) {
+					let scopeData = data.userProfileInformation.scope
+					let queryData = await solutionsHelper.queryBasedOnRoleAndLocation(scopeData, '', 'acl')
+					if (!queryData.success) {
+						return resolve(queryData)
+					}
+					delete queryData.data.isReusable
+					delete queryData.data.isDeleted
+					delete queryData.data.status
+					let matchQuery = {}
+					matchQuery = queryData.data
+					let projects = await projectQueries.projectDocument(matchQuery, 'all')
+					if (!Array.isArray(projects) || projects.length < 1) {
+						throw {
+							status: HTTP_STATUS_CODE.bad_request.status,
+							message: CONSTANTS.apiResponses.USER_NOT_ALLOWED_TO_EDIT_PROJECT,
+						}
+					}
+				}
 				if (userProject[0].lastDownloadedAt.toISOString() !== lastDownloadedAt) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
@@ -350,7 +396,12 @@ module.exports = class UserProjectsHelper {
 				) {
 					updateProject.completedDate = new Date()
 				}
-
+				// maintain history of project edits
+				userProject[0].updateHistory.push({
+					userId: userId,
+					timeStamp: new Date(),
+				})
+				updateProject['updateHistory'] = userProject[0].updateHistory
 				let projectUpdated = await projectQueries.findOneAndUpdate(
 					{
 						_id: userProject[0]._id,
@@ -1083,6 +1134,11 @@ module.exports = class UserProjectsHelper {
 			try {
 				let solutionExternalId = ''
 				let templateDocuments
+				let defaultACL = {
+					visibility: CONSTANTS.common.PROJECT_VISIBILITY_SELF,
+					users: [],
+					scope: {},
+				}
 
 				if (templateId !== '') {
 					templateDocuments = await projectTemplateQueries.templateDocument({
@@ -1107,6 +1163,7 @@ module.exports = class UserProjectsHelper {
 					'hasAcceptedTAndC',
 					'link',
 					'entityId',
+					'acl',
 				])
 
 				if (projectId === '') {
@@ -1166,7 +1223,7 @@ module.exports = class UserProjectsHelper {
 							} else {
 								solutionDetails = await solutionsHelper.detailsBasedOnRoleAndLocation(
 									solutionId,
-									_.omit(bodyData, ['entityId']),
+									_.omit(bodyData, ['entityId', 'acl']),
 									'',
 									isAPrivateSolution
 								)
@@ -1266,7 +1323,6 @@ module.exports = class UserProjectsHelper {
 						}
 
 						projectCreation.data['isAPrivateProgram'] = solutionDetails.isAPrivateProgram
-
 						if (Object.keys(solutionDetails).length > 0) {
 							projectCreation.data.programInformation = {
 								_id: ObjectId(solutionDetails.programId),
@@ -1282,6 +1338,10 @@ module.exports = class UserProjectsHelper {
 								externalId: solutionDetails.externalId,
 								description: solutionDetails.description ? solutionDetails.description : '',
 								name: solutionDetails.name,
+								submissionLevel: solutionDetails.submissionLevel
+									? solutionDetails.submissionLevel
+									: process.env.SUBMISSION_LEVEL,
+								scope: solutionDetails.scope,
 							}
 
 							projectCreation.data['programId'] = projectCreation.data.programInformation._id
@@ -1293,7 +1353,28 @@ module.exports = class UserProjectsHelper {
 
 							projectCreation.data['solutionExternalId'] =
 								projectCreation.data.solutionInformation.externalId
+
+							// If req.body contains acl add it, else add defaultACL
+							if (bodyData.hasOwnProperty('acl')) {
+								bodyData.acl.visibility = bodyData.acl.visibility.toUpperCase()
+								bodyData.acl.users.push(userId)
+								if (!bodyData.acl.hasOwnProperty('scope') || !(bodyData.acl.scope.length > 0)) {
+									bodyData.acl['scope'] = solutionDetails.scope
+								}
+								projectCreation.data['acl'] = bodyData.acl
+							} else {
+								defaultACL.users.push(userId)
+								defaultACL.scope = solutionDetails.scope
+								projectCreation.data['acl'] = defaultACL
+							}
+							projectCreation.data['updateHistory'] = [
+								{
+									userId: userId,
+									timeStamp: new Date(),
+								},
+							]
 						}
+						console.log(projectCreation.data)
 
 						projectCreation.data['userRole'] = bodyData.role
 

@@ -172,6 +172,24 @@ module.exports = {
 				type: Boolean,
 			},
 		},
+		acl: {
+			visibility: {
+				type: String,
+				default: 'SELF',
+			},
+			users: {
+				type: Array,
+				default: [],
+			},
+			scope: {
+				type: Object,
+				default: {},
+			},
+		},
+		updateHistory: {
+			type: Array,
+			default: [],
+		},
 	},
 	compoundIndex: [
 		{

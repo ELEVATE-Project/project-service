@@ -20,6 +20,7 @@ module.exports = class Programs {
 	 * @param {Array} [filterData = "all"] - programs filter query.
 	 * @param {Array} [fieldsArray = "all"] - projected fields.
 	 * @param {Array} [skipFields = "none"] - field not to include
+	 * @param {Object} [sort = {}] - object to sort in descending/ascending order
 	 * @returns {Array} program details.
 	 */
 

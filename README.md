@@ -55,7 +55,7 @@ Service also uses gotenberg for creation of project certificate. You can read mo
 2.  **Download Docker Compose File:** Retrieve the **[docker-compose-project.yml](https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/docker-compose-project.yml)** file from the Project service repository and save it to the project directory.
 
     ```
-    curl -OJL https://github.com/ELEVATE-Project/project-service/raw/Docker-Doc/documentation/1.0.0/dockerized/docker-compose-project.yml
+    curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/docker-compose-project.yml
     ```
 
     > Note: All commands are run from the project directory.
@@ -72,7 +72,7 @@ Service also uses gotenberg for creation of project certificate. You can read mo
     -   **Ubuntu/Linux/Mac**
         ```
         curl -L \
-         -O https://github.com/ELEVATE-Project/project-service/raw/Docker-Doc/documentation/1.0.0/dockerized/envs/interface_env \
+         -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/interface_env \
          -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/entity_management_env \
          -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/project_env \
          -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/notification_env \

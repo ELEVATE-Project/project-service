@@ -255,8 +255,7 @@ module.exports = class UsersHelper {
 					{ _id: { $in: targetedProgramIds } },
 					['name', 'externalId', 'metaInformation'],
 					'none', //not passing skip fields
-					'', // not passing pageSize
-					'' // not passing pageNo
+					{ createdAt: -1 } // sort by 'createdAt' in descending order
 				)
 				if (!(userRelatedProgramsData.length > 0)) {
 					throw {

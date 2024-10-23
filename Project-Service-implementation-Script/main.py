@@ -400,15 +400,13 @@ def programsFileCheck(filePathAddPgm, accessToken, parentFolder, MainFilePath):
                         keywordsPGM = dictDetailsEnv['Keywords'].encode('utf-8').decode('utf-8')
                         entitiesPGM = dictDetailsEnv['Targeted entities at program level'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Targeted entities at program level'] else terminatingMessage("\"Targeted entities at program level\" must not be Empty in \"Program details\" sheet")
                         stateEntitiesPGM = dictDetailsEnv['Targeted state at program level'].encode('utf-8').decode('utf-8')
+                        entitiesType = fetchEntityType(parentFolder, accessToken,
+                                                  entitiesPGM.lstrip().rstrip().split(","), scopeEntityType)
                         # selecting entity type based on the users input 
-                        if stateEntitiesPGM:
-                            entitiesPGM = stateEntitiesPGM
-                            EntityType = "district"
-                        else:
+                        if entitiesPGM:
                             entitiesPGM = entitiesPGM
-                            EntityType = "state"
+                            scopeEntityType = entitiesType
 
-                        scopeEntityType = EntityType
                         global rolesPGM
                         rolesPGM = dictDetailsEnv['Targeted subrole at program level'] if dictDetailsEnv['Targeted subrole at program level'] else terminatingMessage("\"Targeted subrole at program level\" must not be Empty in \"Program details\" sheet")
                         if "teacher" in mainRole.strip().lower():
@@ -417,7 +415,7 @@ def programsFileCheck(filePathAddPgm, accessToken, parentFolder, MainFilePath):
                         userId = userDetails[0]
                         messageArr = []
 
-                        scopeEntityType = EntityType
+                        scopeEntityType = entitiesType
                         # fetch entity details 
                         entitiesPGMID = fetchEntityId(parentFolder, accessToken,entitiesPGM.lstrip().rstrip().split(","), scopeEntityType)
                         
@@ -4624,7 +4622,6 @@ def mainFunc(MainFilePath, programFile, addObservationSolution, millisecond, isP
                                                                                      listOfFoundRoles, accessToken)
                                     ProjectSolutionExternalId = ProjectSolutionResp[0]
                                     ProjectSolutionId = ProjectSolutionResp[1]
-                                #     ProjectSolutionId = ProjectSolutionResp[1]
                                     prepareProgramSuccessSheet(MainFilePath, projectName_for_folder_path, programFile,
                                                                ProjectSolutionExternalId,
                                                                ProjectSolutionId, accessToken)
@@ -4656,17 +4653,29 @@ def mainFunc(MainFilePath, programFile, addObservationSolution, millisecond, isP
     else:
         parentFolder = createFileStructre(MainFilePath, addObservationSolution)
         accessToken = generateAccessToken(parentFolder)
-        prepareProjectAndTasksSheets(addObservationSolution, parentFolder,
-                                                                            accessToken)
-        projectUpload(addObservationSolution, parentFolder, accessToken)
-        taskUpload(addObservationSolution, parentFolder, accessToken)
-        # ProjectSolutionResp = solutionCreationAndMapping(parentFolder,entityToUpload, listOfFoundRoles, accessToken)
-        # ProjectSolutionExternalId = ProjectSolutionResp[0]  
-        # ProjectSolutionResp = solutionCreationAndMapping(parentFolder,entityToUpload,listOfFoundRoles, accessToken)
-        # ProjectSolutionExternalId = ProjectSolutionResp[0]
-        ProjectSolutionId = ProjectSolutionResp[1]
-        certificatetemplateid= prepareaddingcertificatetemp(filePathAddProject,projectName_for_folder_path, accessToken,ProjectSolutionId,programID,baseTemplate_id)
-        prepareProgramSuccessProjectSheet(MainFilePath, parentFolder, programFile ,accessToken)                                                                           
+        wbproject = xlrd.open_workbook(programFile, on_demand=True)
+        projectSheetNames = wbproject.sheet_names()
+        for projectSheets in projectSheetNames:
+            if projectSheets.strip().lower() == 'project upload':
+                print("Checking project details sheet...")
+                detailsColCheck = wbproject.sheet_by_name(projectSheets)
+                keysColCheckDetai = [detailsColCheck.cell(0, col_index_check).value for col_index_check in range(detailsColCheck.ncols)]
+                detailsEnvSheet = wbproject.sheet_by_name(projectSheets)
+                keysEnv = [detailsEnvSheet.cell(1, col_index_env).value for col_index_env in range(detailsEnvSheet.ncols)]
+                for row_index_env in range(2, detailsEnvSheet.nrows):
+                    dictDetailsEnv = { keysEnv[col_index_env]: detailsEnvSheet.cell(row_index_env, col_index_env).value for col_index_env in range(detailsEnvSheet.ncols)}
+                    if str(dictDetailsEnv['has certificate']).lower() == 'No'.lower():
+                        prepareProjectAndTasksSheets(addObservationSolution, parentFolder,  accessToken)
+                        projectUpload(addObservationSolution, parentFolder, accessToken)
+                        taskUpload(addObservationSolution, parentFolder, accessToken)
+                    elif str(dictDetailsEnv['has certificate']).lower()== 'Yes'.lower():
+                        print("---->this is certificate with project<---")
+                        baseTemplate_id=fetchCertificateBaseTemplate(addObservationSolution,accessToken,parentFolder)
+                        downloadlogosign(addObservationSolution,parentFolder)
+                        editsvg(accessToken,addObservationSolution,parentFolder,baseTemplate_id)
+                        prepareProjectAndTasksSheets(addObservationSolution, parentFolder,accessToken)
+                        projectUpload(addObservationSolution, parentFolder, accessToken)
+                        taskUpload(addObservationSolution, parentFolder, accessToken)                                                                     
                                                                                            
                                                                                       
                                                                                                                    

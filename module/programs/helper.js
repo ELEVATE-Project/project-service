@@ -1055,7 +1055,9 @@ module.exports = class ProgramsHelper {
 						createdBy: userId,
 						isAPrivateProgram: true,
 					},
-					['name', 'externalId', 'description', '_id', 'isAPrivateProgram']
+					['name', 'externalId', 'description', '_id', 'isAPrivateProgram'],
+					'none',
+					{ createdAt: -1 } // sort by 'createdAt' in descending order
 				)
 
 				if (!(programsData.length > 0)) {

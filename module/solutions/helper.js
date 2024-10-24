@@ -658,7 +658,12 @@ module.exports = class SolutionsHelper {
 
 				facetQuery['$facet']['totalCount'] = [{ $count: 'count' }]
 
-				facetQuery['$facet']['data'] = [{ $skip: pageSize * (pageNo - 1) }, { $limit: pageSize }]
+				// facetQuery['$facet']['data'] = [{ $skip: pageSize * (pageNo - 1) }, { $limit: pageSize }]
+				if (pageSize === '' && pageNo === '') {
+					facetQuery['$facet']['data'] = [{ $skip: 0 }]
+				} else {
+					facetQuery['$facet']['data'] = [{ $skip: pageSize * (pageNo - 1) }, { $limit: pageSize }]
+				}
 
 				let projection2 = {}
 
@@ -957,6 +962,8 @@ module.exports = class SolutionsHelper {
 	 * @method
 	 * @name queryBasedOnRoleAndLocation
 	 * @param {String} data - Requested body data.
+	 * @param {String} type - solution type
+	 * @param {String} prefix - prefix word/letters for query making
 	 * @returns {JSON} - Auto targeted solutions query.
 	 */
 
@@ -991,6 +998,7 @@ module.exports = class SolutionsHelper {
 						}
 					}
 
+					// If prefix is given use it to form query
 					if (prefix != '') {
 						filterQuery[`${prefix}.scope.roles`] = {
 							$in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')],
@@ -1003,6 +1011,7 @@ module.exports = class SolutionsHelper {
 
 					filterQuery.$or = []
 					Object.keys(_.omit(data, ['filter', 'role', 'factors', 'type'])).forEach((key) => {
+						// If prefix is given use it to form query
 						if (prefix != '') {
 							filterQuery.$or.push({
 								[`${prefix}.scope.${key}`]: { $in: data[key] },
@@ -1013,6 +1022,8 @@ module.exports = class SolutionsHelper {
 							})
 						}
 					})
+
+					// If prefix is given use it to form query
 					if (prefix != '') {
 						filterQuery[`${prefix}.scope.entityType`] = { $in: entityTypes }
 					} else {
@@ -1030,11 +1041,14 @@ module.exports = class SolutionsHelper {
 						// Build query based on each key
 						factors.forEach((factor) => {
 							let scope = 'scope.' + factor
+
+							// If prefix is given use it to form query
 							if (prefix != '') {
 								scope = `${prefix}.scope.${factor}`
 							}
 							let values = userRoleInfo[factor]
 							if (factor === 'role') {
+								// If prefix is given use it to form query
 								if (prefix != '') {
 									queryFilter.push({
 										[`${prefix}.scope.roles`]: {
@@ -1057,6 +1071,8 @@ module.exports = class SolutionsHelper {
 					} else {
 						userRoleKeys.forEach((key) => {
 							let scope = 'scope.' + key
+
+							// If prefix is given use it to form query
 							if (prefix != '') {
 								scope = `${prefix}.scope.${key}`
 							}
@@ -1069,6 +1085,7 @@ module.exports = class SolutionsHelper {
 						})
 
 						if (data.role) {
+							// If prefix is given use it to form query
 							if (prefix != '') {
 								queryFilter.push({
 									[`${prefix}.scope.roles`]: {
@@ -2640,7 +2657,6 @@ module.exports = class SolutionsHelper {
 	 * @param {String} filter - filter text
 	 * @param {Number} pageNo - page number
 	 * @param {Number} pageSize - page limit
-	 * @param {String} entityId - entity id.
 	 * @returns {Object} - Details of the solution.
 	 */
 
@@ -2712,9 +2728,7 @@ module.exports = class SolutionsHelper {
 					success: false,
 				}
 				let searchQuery
-				let aclVisibilityAllProjects
-				let aclVisibilitySpecificProjects
-				let aclVisibilityScopeProjects
+				let projectsBasedOnEntityID = []
 
 				if (filter && filter !== '') {
 					if (filter === CONSTANTS.common.CREATED_BY_ME) {
@@ -2871,61 +2885,27 @@ module.exports = class SolutionsHelper {
 
 				if (search == undefined || search == '') search = ''
 				searchQuery = [{ title: new RegExp(search, 'i') }, { description: new RegExp(search, 'i') }]
+				let fieldsArray = [
+					'name',
+					'title',
+					'description',
+					'solutionId',
+					'programId',
+					'programInformation.name',
+					'projectTemplateId',
+					'solutionExternalId',
+					'lastDownloadedAt',
+					'hasAcceptedTAndC',
+					'referenceFrom',
+					'status',
+					'certificate',
+				]
 				if (process.env.SUBMISSION_LEVEL == 'ENTITY' && requestedData.hasOwnProperty('entityId')) {
 					mergedData = []
 					totalCount = 0
-					// Fetch projects accessible by the user, when acl.visibility = ALL
-					aclVisibilityAllProjects = await projectQueries.projectDocument(
-						{
-							entityId: requestedData.entityId,
-							'solutionInformation.submissionLevel': process.env.SUBMISSION_LEVEL,
-							'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_ALL,
-							$or: searchQuery,
-						},
-						[
-							'name',
-							'title',
-							'description',
-							'solutionId',
-							'programId',
-							'programInformation.name',
-							'projectTemplateId',
-							'solutionExternalId',
-							'lastDownloadedAt',
-							'hasAcceptedTAndC',
-							'referenceFrom',
-							'status',
-							'certificate',
-						]
-					)
-					// Fetch projects accessible by the user, when acl.visibility = SPECIFIC
-					aclVisibilitySpecificProjects = await projectQueries.projectDocument(
-						{
-							entityId: requestedData.entityId,
-							'solutionInformation.submissionLevel': process.env.SUBMISSION_LEVEL,
-							'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_SPECIFIC,
-							'acl.users': { $in: [userId] },
-							$or: searchQuery,
-						},
-						[
-							'name',
-							'title',
-							'description',
-							'solutionId',
-							'programId',
-							'programInformation.name',
-							'projectTemplateId',
-							'solutionExternalId',
-							'lastDownloadedAt',
-							'hasAcceptedTAndC',
-							'referenceFrom',
-							'status',
-							'certificate',
-						]
-					)
 
-					// Fetch projects accessible by the user when acl.visibility = SCOPE
 					copiedRequestedData = _.cloneDeep(requestedData)
+					// use queryBasedOnRoleAndLocation function to form query for acl.visibility = SCOPE projects
 					let queryData = await this.queryBasedOnRoleAndLocation(
 						_.omit(copiedRequestedData, ['entityId']),
 						'',
@@ -2934,51 +2914,40 @@ module.exports = class SolutionsHelper {
 					delete queryData.data.isReusable
 					delete queryData.data.isDeleted
 					delete queryData.data.status
-					let matchQuery = {
-						$and: [
-							queryData.data,
-							{
-								$or: searchQuery,
-							},
-						],
-					}
+					let matchQuery = queryData.data
 
-					aclVisibilityScopeProjects = await projectQueries.projectDocument(
+					// Fetch projects accessible by the user when acl.visibility = (SCOPE or ALL or SPECIFIC)
+					projectsBasedOnEntityID = await projectQueries.projectDocument(
 						{
-							entityId: requestedData.entityId,
+							entityId: requestedData.entityId, // userId : {'$ne' : userId}, this condition is not mentioned based on the understanding that entityId will be unique
 							'solutionInformation.submissionLevel': process.env.SUBMISSION_LEVEL,
-							'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_SCOPE,
-							$or: searchQuery,
-							...matchQuery,
+							$or: [
+								{
+									'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_ALL,
+									$or: searchQuery,
+								},
+								{
+									'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_SPECIFIC,
+									'acl.users': { $in: [userId] },
+									$or: searchQuery,
+								},
+								{
+									'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_SCOPE,
+									$or: searchQuery,
+									...matchQuery,
+								},
+							],
 						},
-						[
-							'name',
-							'title',
-							'description',
-							'solutionId',
-							'programId',
-							'programInformation.name',
-							'projectTemplateId',
-							'solutionExternalId',
-							'lastDownloadedAt',
-							'hasAcceptedTAndC',
-							'referenceFrom',
-							'status',
-							'certificate',
-						]
+						fieldsArray
 					)
-					aclVisibilityAllProjects = aclVisibilityAllProjects.concat(
-						aclVisibilitySpecificProjects,
-						aclVisibilityScopeProjects
-					)
-					totalCount = aclVisibilityAllProjects.length
-					if (aclVisibilityAllProjects.length > 0) {
-						let startIndex = pageSize * (pageNo - 1)
-						let endIndex = startIndex + pageSize
-						aclVisibilityAllProjects = aclVisibilityAllProjects.slice(startIndex, endIndex)
-						mergedData = aclVisibilityAllProjects
-						totalCount = mergedData.length
-					}
+					mergedData = projectsBasedOnEntityID
+					totalCount = projectsBasedOnEntityID.length
+				}
+				if (mergedData.length > 0) {
+					let startIndex = pageSize * (pageNo - 1)
+					let endIndex = startIndex + pageSize
+					mergedData = mergedData.slice(startIndex, endIndex)
+					totalCount = mergedData.length
 				}
 				return resolve({
 					success: true,

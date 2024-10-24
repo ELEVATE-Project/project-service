@@ -135,9 +135,7 @@ module.exports = class UserProjectsHelper {
 				// validate user authenticity before allowing him to edit the project
 				if (
 					process.env.SUBMISSION_LEVEL === 'USER' &&
-					(userProject[0].acl.visibility == CONSTANTS.common.PROJECT_VISIBILITY_ALL ||
-						userProject[0].acl.visibility == CONSTANTS.common.PROJECT_VISIBILITY_SPECIFIC ||
-						userProject[0].acl.visibility == CONSTANTS.common.PROJECT_VISIBILITY_SCOPE)
+					!(userProject[0].acl.visibility == CONSTANTS.common.PROJECT_VISIBILITY_SELF)
 				) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
@@ -1134,11 +1132,7 @@ module.exports = class UserProjectsHelper {
 			try {
 				let solutionExternalId = ''
 				let templateDocuments
-				let defaultACL = {
-					visibility: CONSTANTS.common.PROJECT_VISIBILITY_SELF,
-					users: [],
-					scope: {},
-				}
+				let defaultACL = CONSTANTS.common.DEFAULT_ACL
 
 				if (templateId !== '') {
 					templateDocuments = await projectTemplateQueries.templateDocument({
@@ -1374,7 +1368,6 @@ module.exports = class UserProjectsHelper {
 								},
 							]
 						}
-						console.log(projectCreation.data)
 
 						projectCreation.data['userRole'] = bodyData.role
 

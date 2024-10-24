@@ -471,6 +471,8 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         brew install kafka
         ```
 
+        > Note: To install Kafka on older macOS versions like Monterey (Intel architecture), you need to follow the manual installation process instead of using Homebrew. The process includes downloading Kafka, setting up ZooKeeper, and running Kafka services. You can find the official Kafka installation guide here: [Kafka Quickstart Guide](https://kafka.apache.org/quickstart).This ensures compatibility with older macOS systems. Follow the steps outlined in the documentation for a smooth setup.
+
     3. Install PostgreSQL 16:
 
         ```
@@ -519,6 +521,8 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         ```
         ./check-dependencies.sh
         ```
+
+        > Note : If you've manually installed Kafka without Homebrew, the script might incorrectly indicate that Kafka and Homebrew are not installed, as it checks only for Homebrew installations. In such cases, you can safely ignore this warning. Ensure that both Kafka and ZooKeeper are running on their default ports (ZooKeeper on `2181`, Kafka on `9092`). This will confirm proper installation and functionality despite the script's output.
 
 <!-- -   **Windows**
 

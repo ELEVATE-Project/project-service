@@ -3,7 +3,7 @@ const {getEndDate,getStartDate} = require("./time")
 // const {getStartDate} = require("./time")
 
 let programData = [{
-   "_id" : new  ObjectId("66fbcc3a7cbf47f6fba26a13"),
+   "_id" : new ObjectId("66fbcc3a7cbf47f6fba26a13"),
    "resourceType" : [
        "program"
    ],
@@ -35,10 +35,10 @@ let programData = [{
    "endDate" : getEndDate("2029-08-15 18:50:00"),
    "scope" : {
        "state" : [
-           "66fbcc38da3622a5b9a26a13"
+           "66fbcc38da3622a5b9a26b13"
        ],
        "roles" : [
-           "district_education_officer"
+           "district_education_officer","state_education_officer"
        ],
        "entityType" : "state"
    }
@@ -46,7 +46,8 @@ let programData = [{
 
 
 
-let solutionData = [{
+let solutionData = [
+    {
     "_id" : new ObjectId("66fbcc3b2be2b9057aa26a13"),
     "resourceType" : [
         "Improvement Project Solution"
@@ -60,19 +61,19 @@ let solutionData = [{
     "entities" : [
         "66fbcc38da3622a5b9a26a13"
     ],
-    "programId" : "66fbcc3a7cbf47f6fba26a13",
+    "programId" : new ObjectId("66fbcc3a7cbf47f6fba26a13"),
     "name" : "Washroom Hygiene",
     "description" : "The School Hygiene Improvement Initiative is dedicated to ensuring clean, safe, and healthy environments in schools...",
     "programExternalId" : "PG01",
     "scope" : {
-        "state" : [
-            "66fbcc38da3622a5b9a26a13"
-        ],
-        "roles" : [
-            "state_education_officer"
-        ],
-        "entityType" : "state"
-    },
+       "state" : [
+           "66fbcc38da3622a5b9a26b13"
+       ],
+       "roles" : [
+           "district_education_officer","state_education_officer"
+       ],
+       "entityType" : "state"
+   },
     "externalId": "PGM",
     "projectTemplateId" : new ObjectId("66fbcc3aa4c3a568b1a26a13"),
       "startDate": getStartDate("2024-08-15 18:50:00"),
@@ -84,7 +85,87 @@ let solutionData = [{
     "type" : "improvementProject",
     "updatedAt": "2024-08-15 18:50:00",
     "createdAt": "2024-08-15 18:50:00"
- }];
+ },
+
+{
+    "_id" : new ObjectId("66fbcc3b2be2b9057aa26a14"),
+    "resourceType" : [
+        "Improvement Project Solution"
+    ],
+    "language" : [
+        "English"
+    ],
+    "keywords" : [
+        "Improvement Project"
+    ],
+    "entities" : [
+        "66fbcc38da3622a5b9a26a13"
+    ],
+    "programId" : new ObjectId("66fbcc3a7cbf47f6fba26a13"),
+    "name" : "Updating a school library",
+    "description" : "Updating a school library with books for all class levels can greatly enhance the educational experience of students...",
+    "programExternalId" : "PG01",
+    "scope" : {
+       "state" : [
+           "66fbcc38da3622a5b9a26b13"
+       ],
+       "roles" : [
+           "district_education_officer","state_education_officer"
+       ],
+       "entityType" : "state"
+   },
+    "externalId": "PGML",
+    "projectTemplateId" : new ObjectId("66fbcc3aa4c3a568b1a26b14"),
+      "startDate": getStartDate("2024-08-15 18:50:00"),
+    "endDate": getEndDate("2029-09-15 18:50:00"),
+    "isDeleted" : false,
+    "isAPrivateProgram" : false,
+    "isReusable" : false,
+    "status" : "active",
+    "type" : "improvementProject",
+    "updatedAt": "2024-08-15 18:50:00",
+    "createdAt": "2024-08-15 18:50:00"
+},
+   {
+    "_id" : new ObjectId("66fbcc3b2be2b9057aa26a15"),
+    "resourceType" : [
+        "Improvement Project Solution"
+    ],
+    "language" : [
+        "English"
+    ],
+    "keywords" : [
+        "Improvement Project"
+    ],
+    "entities" : [
+        "66fbcc38da3622a5b9a26a13"
+    ],
+    "programId" : new ObjectId("66fbcc3a7cbf47f6fba26a13"),
+    "name" : "StressFree School",
+    "description" : "Creating a stress-free school environment is essential for promoting the overall well-being and academic success of students...",
+    "programExternalId" : "PG01",
+    "scope" : {
+       "state" : [
+           "66fbcc38da3622a5b9a26b13"
+       ],
+       "roles" : [
+           "district_education_officer","state_education_officer"
+       ],
+       "entityType" : "state"
+   },
+    "externalId": "PGMLS",
+    "projectTemplateId" : new ObjectId("66fbcc3aa4c3a568b1a26b15"),
+      "startDate": getStartDate("2024-08-15 18:50:00"),
+    "endDate": getEndDate("2029-09-15 18:50:00"),
+    "isDeleted" : false,
+    "isAPrivateProgram" : false,
+    "isReusable" : false,
+    "status" : "active",
+    "type" : "improvementProject",
+    "updatedAt": "2024-08-15 18:50:00",
+    "createdAt": "2024-08-15 18:50:00"
+ }
+];
  
 
 // let projectsData = [{
@@ -305,7 +386,8 @@ let projectCategoriesData = [{
 
 
 
-let projectTemplatesData = [{
+let projectTemplatesData = [
+{
     "_id" : new ObjectId("66fbcc3aa4c3a568b1a26a13"),
     "description" : "The School Hygiene Improvement Initiative is dedicated to ensuring clean, safe, and healthy environments in schools...",
     "concepts" : [
@@ -337,9 +419,80 @@ let projectTemplatesData = [{
         }
     ],
     "status" : "published",
-    "programId" : "66fbcc3a7cbf47f6fba26a13",
-    "solutionId" : "66fbcc3b2be2b9057aa26a13"
- }];
+    "programId" : new ObjectId("66fbcc3a7cbf47f6fba26a13"),
+    "solutionId" : new ObjectId("66fbcc3b2be2b9057aa26a13")
+ },
+ {
+    "_id" : new ObjectId("66fbcc3aa4c3a568b1a26b14"),
+    "description" : "Updating a school library with books for all class levels can greatly enhance the educational experience of students...",
+    "concepts" : [
+        ""
+    ],
+    "keywords" : [
+        ""
+    ],
+    "isDeleted" : false,
+    "recommendedFor" : [
+    ],
+    "tasks" : [
+    ],
+    "learningResources" : [
+        {
+            "link" : "https://www.youtube.com/watch?v=2yt1mlCePzs",
+            "app" : "projectService",
+            "id" : "2yt1mlCePzs?feature=shared"
+        }
+    ],
+    "isReusable" : false,
+    "title" : "Updating a school library",
+    "externalId" : "SCHOOL-LIBRARY",
+    "categories" : [
+        {
+            "_id" : "66fbcc39a64322692fa26a13",
+            "externalId" : "educationLeader",
+            "name" : "Education Leader"
+        }
+    ],
+    "status" : "published",
+    "programId" : new ObjectId("66fbcc3a7cbf47f6fba26a13"),
+    "solutionId" : new ObjectId("66fbcc3b2be2b9057aa26a14")
+ },
+ {
+    "_id" : new ObjectId("66fbcc3aa4c3a568b1a26b15"),
+    "description" : "Creating a stress-free school environment is essential for promoting the overall well-being and academic success of students...",
+    "concepts" : [
+        ""
+    ],
+    "keywords" : [
+        ""
+    ],
+    "isDeleted" : false,
+    "recommendedFor" : [
+    ],
+    "tasks" : [
+    ],
+    "learningResources" : [
+        {
+            "link" : "https://www.youtube.com/watch?v=3Nf2Pzcketg",
+            "app" : "projectService",
+            "id" : "3Nf2Pzcketg?feature=shared"
+        }
+    ],
+    "isReusable" : false,
+    "title" : "Updating a school library",
+    "externalId" : "LEARN-STUDENT",
+    "categories" : [
+        {
+            "_id" : "66fbcc39a64322692fa26a13",
+            "externalId" : "educationLeader",
+            "name" : "Education Leader"
+        }
+    ],
+    "status" : "published",
+    "programId" : new ObjectId("66fbcc3a7cbf47f6fba26a13"),
+    "solutionId" : new ObjectId("66fbcc3b2be2b9057aa26a15")
+ }
+];
 
 module.exports = {
  programData,

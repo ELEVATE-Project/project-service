@@ -437,11 +437,8 @@ def programsFileCheck(filePathAddPgm, accessToken, parentFolder, MainFilePath):
                         # check if program is created or not 
                         if getProgramInfo(accessToken, parentFolder, extIdPGM):
                             print("Program Created SuccessFully.")
-                    else :
-                         userDetails = fetchUserDetails(environment, accessToken, dictDetailsEnv['projectService username/user id/email id/phone no. of Program Designer'])
-                         userId = userDetails[0]
-                         programCreation(accessToken,parentFolder,extIdPGM,programNameInp,proDesc,roles,userId)
-                         getProgramInfo(accessToken, parentFolder, extIdPGM)
+                        else :
+                            terminatingMessage("Program creation failed! Please check logs.")
 
             elif sheetEnv.strip().lower() == 'resource details':
                 # checking Resource details sheet 
@@ -3819,7 +3816,7 @@ def prepareaddingcertificatetemp(filePathAddProject, projectName_for_folder_path
                 cn = "C" + str(c)
                 taskconditions = {
                     cn: {
-                        "validationText": f"Add {int(taskMinNooEvide[c-3])} evidence for the task {tasksLevelEvidance[c-3]}",
+                        "validationText": f"Add {int(taskMinNooEvide[c-3])} evidence for the task {task['name']}",
                         "expression": "C1",
                         "conditions": {
                             "C1": {

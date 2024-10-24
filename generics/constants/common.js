@@ -90,4 +90,9 @@ module.exports = {
 	PROJECT_VISIBILITY_SELF: 'SELF',
 	PROJECT_VISIBILITY_SPECIFIC: 'SPECIFIC',
 	PROJECT_VISIBILITY_SCOPE: 'SCOPE',
+	DEFAULT_ACL: {
+		visibility: 'SELF',
+		users: [],
+		scope: {},
+	},
 }

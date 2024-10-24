@@ -1,7 +1,7 @@
 const { ObjectId } = require("mongodb");
 
 let entitiesData = [{
-   "_id" : new ObjectId("66fbcc38da3622a5b9a26a13"),
+   "_id" : new ObjectId("66fbcc38da3622a5b9a26b13"),
    "name" : "Karnataka",
    "entityType" : "state",
    "entityTypeId" : "66fbcc374017f43d2ca26a13",
@@ -14,15 +14,15 @@ let entitiesData = [{
    ],
    "groups" : {
        "district" : [
-          new ObjectId("66fbcc38f0891af41ca26a13")
+          new ObjectId("66fbcc3aa4c3a568b1a26b14")
        ]
    }
 },
 {
-   "_id" : new ObjectId("66fbcc3aa4c3a568b1a26a13"),
+   "_id" : new ObjectId("66fbcc3aa4c3a568b1a26b14"),
    "name" : "Bangalore",
    "entityType" : "district",
-   "entityTypeId" : "66fbcc3780123e9f0fa26a13",
+   "entityTypeId" : "66fbcc3780123e9f0fa26a14",
    "userId" : "1",
    "metaInformation" : {
        "externalId" : "BN001",

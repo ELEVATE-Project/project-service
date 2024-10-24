@@ -5,6 +5,9 @@
  * Description : Solution related helper functionality.
  */
 
+const { body } = require('express-validator/check')
+const { series } = require('gulp')
+const { merge } = require('lodash')
 const { ObjectId } = require('mongodb')
 
 // Dependencies
@@ -417,6 +420,7 @@ module.exports = class SolutionsHelper {
 					}
 				}
 
+				solutionData['submissionLevel'] = process.env.SUBMISSION_LEVEL
 				let solutionCreation = await solutionsQueries.createSolution(_.omit(solutionData, ['scope']))
 
 				if (!solutionCreation._id) {
@@ -654,7 +658,12 @@ module.exports = class SolutionsHelper {
 
 				facetQuery['$facet']['totalCount'] = [{ $count: 'count' }]
 
-				facetQuery['$facet']['data'] = [{ $skip: pageSize * (pageNo - 1) }, { $limit: pageSize }]
+				// facetQuery['$facet']['data'] = [{ $skip: pageSize * (pageNo - 1) }, { $limit: pageSize }]
+				if (pageSize === '' && pageNo === '') {
+					facetQuery['$facet']['data'] = [{ $skip: 0 }]
+				} else {
+					facetQuery['$facet']['data'] = [{ $skip: pageSize * (pageNo - 1) }, { $limit: pageSize }]
+				}
 
 				let projection2 = {}
 
@@ -953,10 +962,12 @@ module.exports = class SolutionsHelper {
 	 * @method
 	 * @name queryBasedOnRoleAndLocation
 	 * @param {String} data - Requested body data.
+	 * @param {String} type - solution type
+	 * @param {String} prefix - prefix word/letters for query making
 	 * @returns {JSON} - Auto targeted solutions query.
 	 */
 
-	static queryBasedOnRoleAndLocation(data, type = '') {
+	static queryBasedOnRoleAndLocation(data, type = '', prefix = '') {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let registryIds = []
@@ -987,17 +998,37 @@ module.exports = class SolutionsHelper {
 						}
 					}
 
-					filterQuery['scope.roles'] = {
-						$in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')],
+					// If prefix is given use it to form query
+					if (prefix != '') {
+						filterQuery[`${prefix}.scope.roles`] = {
+							$in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')],
+						}
+					} else {
+						filterQuery['scope.roles'] = {
+							$in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')],
+						}
 					}
 
 					filterQuery.$or = []
 					Object.keys(_.omit(data, ['filter', 'role', 'factors', 'type'])).forEach((key) => {
-						filterQuery.$or.push({
-							[`scope.${key}`]: { $in: data[key] },
-						})
+						// If prefix is given use it to form query
+						if (prefix != '') {
+							filterQuery.$or.push({
+								[`${prefix}.scope.${key}`]: { $in: data[key] },
+							})
+						} else {
+							filterQuery.$or.push({
+								[`scope.${key}`]: { $in: data[key] },
+							})
+						}
 					})
-					filterQuery['scope.entityType'] = { $in: entityTypes }
+
+					// If prefix is given use it to form query
+					if (prefix != '') {
+						filterQuery[`${prefix}.scope.entityType`] = { $in: entityTypes }
+					} else {
+						filterQuery['scope.entityType'] = { $in: entityTypes }
+					}
 				} else {
 					// Obtain userInfo
 					let userRoleInfo = _.omit(data, ['filter', 'factors', 'role', 'type'])
@@ -1010,11 +1041,25 @@ module.exports = class SolutionsHelper {
 						// Build query based on each key
 						factors.forEach((factor) => {
 							let scope = 'scope.' + factor
+
+							// If prefix is given use it to form query
+							if (prefix != '') {
+								scope = `${prefix}.scope.${factor}`
+							}
 							let values = userRoleInfo[factor]
 							if (factor === 'role') {
-								queryFilter.push({
-									['scope.roles']: { $in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')] },
-								})
+								// If prefix is given use it to form query
+								if (prefix != '') {
+									queryFilter.push({
+										[`${prefix}.scope.roles`]: {
+											$in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')],
+										},
+									})
+								} else {
+									queryFilter.push({
+										['scope.roles']: { $in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')] },
+									})
+								}
 							} else if (!Array.isArray(values)) {
 								queryFilter.push({ [scope]: { $in: values.split(',') } })
 							} else {
@@ -1026,6 +1071,11 @@ module.exports = class SolutionsHelper {
 					} else {
 						userRoleKeys.forEach((key) => {
 							let scope = 'scope.' + key
+
+							// If prefix is given use it to form query
+							if (prefix != '') {
+								scope = `${prefix}.scope.${key}`
+							}
 							let values = userRoleInfo[key]
 							if (!Array.isArray(values)) {
 								queryFilter.push({ [scope]: { $in: values.split(',') } })
@@ -1035,9 +1085,18 @@ module.exports = class SolutionsHelper {
 						})
 
 						if (data.role) {
-							queryFilter.push({
-								['scope.roles']: { $in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')] },
-							})
+							// If prefix is given use it to form query
+							if (prefix != '') {
+								queryFilter.push({
+									[`${prefix}.scope.roles`]: {
+										$in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')],
+									},
+								})
+							} else {
+								queryFilter.push({
+									['scope.roles']: { $in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')] },
+								})
+							}
 						}
 
 						// append query filter
@@ -2438,17 +2497,12 @@ module.exports = class SolutionsHelper {
 	 * @returns {Object}
 	 */
 
-	static assignedProjects(userId, search, filter, pageNo, pageSize, entityId = '') {
+	static assignedProjects(userId, search, filter, pageNo, pageSize) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let query = {
 					isDeleted: false,
-				}
-
-				if (entityId !== '') {
-					query['entityId'] = entityId // to fetch projects based on entityId key
-				} else {
-					query['userId'] = userId // to fetch projects based on userId key
+					userId: userId,
 				}
 
 				let searchQuery = []
@@ -2603,30 +2657,15 @@ module.exports = class SolutionsHelper {
 	 * @param {String} filter - filter text
 	 * @param {Number} pageNo - page number
 	 * @param {Number} pageSize - page limit
-	 * @param {String} entityId - entity id.
 	 * @returns {Object} - Details of the solution.
 	 */
 
-	static assignedUserSolutions(solutionType, userId, search, filter, pageNo, pageSize, entityId = '') {
+	static assignedUserSolutions(solutionType, userId, search, filter, pageNo, pageSize) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let userAssignedSolutions = {}
 				if (solutionType === CONSTANTS.common.IMPROVEMENT_PROJECT) {
-					// if entityId is provided, fetch projects whose entityId matches to that provided in the query, hence any user will be able to fetch the project if they provide valid entityId
-					if (entityId !== '') {
-						userAssignedSolutions = await this.assignedProjects(
-							userId,
-							search,
-							filter,
-							pageNo,
-							pageSize,
-							entityId
-						)
-					}
-					// if entityId is not provided fetch projects created by the loggedin user
-					else {
-						userAssignedSolutions = await this.assignedProjects(userId, search, filter, pageNo, pageSize)
-					}
+					userAssignedSolutions = await this.assignedProjects(userId, search, filter, pageNo, pageSize)
 				} else {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
@@ -2649,7 +2688,14 @@ module.exports = class SolutionsHelper {
 	 * List of solutions and targeted ones.
 	 * @method
 	 * @name targetedSolutions
-	 * @param {String} solutionId - Program Id.
+	 * @param {Object} requestedData - Request body.
+	 * @param {String} solutionType - solution type
+	 * @param {String} userId - user id
+	 * @param {Number} pageSize - Number of solutions to display per page.
+	 * @param {Number} pageNo - The page number to retrieve.
+	 * @param {String} search - Search term to filter solutions by title or description.
+	 * @param {String} filter - Filter criteria to further refine the solution search.
+	 * @param {Boolean} currentScopeOnly - If true, limits results to the current scope only. Default: false.
 	 * @returns {Object} - Details of the solution.
 	 */
 
@@ -2659,37 +2705,93 @@ module.exports = class SolutionsHelper {
 		userId,
 		pageSize,
 		pageNo,
-		search,
+		search = '',
 		filter,
 		surveyReportPage = '',
-		currentScopeOnly = false,
-		entityId = ''
+		currentScopeOnly = false
 	) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				currentScopeOnly = UTILS.convertStringToBoolean(currentScopeOnly)
-				let assignedSolutions = await this.assignedUserSolutions(
-					solutionType,
-					userId,
-					search,
-					filter,
-					'',
-					'',
-					entityId
-				)
-				if (!assignedSolutions.success) {
+				if (currentScopeOnly && process.env.SUBMISSION_LEVEL == 'ENTITY') {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
-						message: assignedSolutions.message,
+						message: CONSTANTS.apiResponses.CURRENT_SCOPE_ONLY_AND_ENTITYID_BOTH_CANNOT_BE_TRUE,
 					}
 				}
 				let totalCount = 0
 				let mergedData = []
 				let solutionIds = []
+				requestedData['filter'] = {}
+				let getTargetedSolution = true
+				let targetedSolutions = {
+					success: false,
+				}
+				let searchQuery
+				let projectsBasedOnEntityID = []
 
-				if (assignedSolutions.success && assignedSolutions.data) {
-					totalCount = assignedSolutions.data.count
-					mergedData = assignedSolutions.data.data
+				if (filter && filter !== '') {
+					if (filter === CONSTANTS.common.CREATED_BY_ME) {
+						requestedData['filter']['isAPrivateProgram'] = {
+							$ne: false,
+						}
+					} else if (filter === CONSTANTS.common.ASSIGN_TO_ME) {
+						requestedData['filter']['isAPrivateProgram'] = false
+					} else if (filter === CONSTANTS.common.DISCOVERED_BY_ME) {
+						getTargetedSolution = false
+					}
+				}
+				// surveyReportPage = UTILS.convertStringToBoolean(surveyReportPage)
+
+				// if (filter === CONSTANTS.common.DISCOVERED_BY_ME) {
+				// 	getTargetedSolution = false
+				// }
+
+				let copiedRequestedData = _.cloneDeep(requestedData)
+
+				// Fetch all the targeted solutions
+				if (getTargetedSolution) {
+					targetedSolutions = await this.forUserRoleAndLocation(
+						copiedRequestedData,
+						solutionType,
+						'',
+						'',
+						CONSTANTS.common.DEFAULT_PAGE_SIZE,
+						CONSTANTS.common.DEFAULT_PAGE_NO,
+						search
+					)
+				}
+				// Send empty response if targetedSolutions is empty and either currentScopeOnly is true or submission level = USER
+				if (
+					!(targetedSolutions.data.data.length > 0) &&
+					(currentScopeOnly || process.env.SUBMISSION_LEVEL == 'USER')
+				) {
+					return resolve({
+						success: true,
+						message: CONSTANTS.apiResponses.TARGETED_SOLUTIONS_FETCHED,
+						data: {
+							data: targetedSolutions.data.data,
+							count: targetedSolutions.data.data.length,
+						},
+						result: {
+							data: targetedSolutions.data.data,
+							count: targetedSolutions.data.data.length,
+						},
+					})
+				}
+
+				// fetch projects created by the user
+				let userCreatedProjects = await this.assignedUserSolutions(solutionType, userId, search, filter, '', '')
+				if (!userCreatedProjects.success) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: userCreatedProjects.message,
+					}
+				}
+				// Add program data to the fetched projects
+				if (userCreatedProjects.success && userCreatedProjects.data) {
+					totalCount = userCreatedProjects.data.count
+					mergedData = userCreatedProjects.data.data
 
 					if (mergedData.length > 0) {
 						let programIds = []
@@ -2727,121 +2829,126 @@ module.exports = class SolutionsHelper {
 					}
 				}
 
-				requestedData['filter'] = {}
-				// if (solutionIds.length > 0) {
-				// 	requestedData['filter']['skipSolutions'] = solutionIds
-				// }
+				// When targetedSolutions is not empty alter the response based on the value of currentScopeOnly
+				if (targetedSolutions.data.data && targetedSolutions.data.data.length > 0) {
+					let filteredTargetedSolutions = []
+					targetedSolutions.data.data.forEach((solution) => {
+						let newEntry = Object.assign(
+							{
+								_id: '',
+								solutionId: solution._id,
+								creator: solution.creator || '',
+								solutionMetaInformation: solution.metaInformation || {},
+							},
+							_.pick(solution, [
+								'type',
+								'externalId',
+								'projectTemplateId',
+								'certificateTemplateId',
+								'programId',
+								'programName',
+								'name',
+								'description',
+							])
+						)
+						filteredTargetedSolutions.push(newEntry)
+					})
+					if (currentScopeOnly) {
+						filteredTargetedSolutions.forEach((solution) => {
+							// Find the corresponding project in mergedData where solutionId matches _id
+							const matchingProject = _.find(mergedData, (project) => {
+								return String(project.solutionId) === String(solution.solutionId)
+							})
 
-				if (filter && filter !== '') {
-					if (filter === CONSTANTS.common.CREATED_BY_ME) {
-						requestedData['filter']['isAPrivateProgram'] = {
-							$ne: false,
-						}
-					} else if (filter === CONSTANTS.common.ASSIGN_TO_ME) {
-						requestedData['filter']['isAPrivateProgram'] = false
+							if (matchingProject) {
+								// Add all keys from the matching project to the solution object
+								Object.assign(solution, matchingProject)
+							}
+						})
+						mergedData = filteredTargetedSolutions
+						totalCount = mergedData.length
+					} else if (process.env.SUBMISSION_LEVEL === 'USER') {
+						filteredTargetedSolutions.forEach((solution) => {
+							// Check if the solution _id exists in mergedData solutionId
+							const existsInMergedData = _.some(mergedData, (project) => {
+								return String(project.solutionId) === String(solution.solutionId)
+							})
+
+							if (!existsInMergedData) {
+								mergedData.push(solution)
+							}
+						})
+
+						totalCount = mergedData.length
 					}
 				}
 
-				let targetedSolutions = {
-					success: false,
-				}
+				if (search == undefined || search == '') search = ''
+				searchQuery = [{ title: new RegExp(search, 'i') }, { description: new RegExp(search, 'i') }]
+				let fieldsArray = [
+					'name',
+					'title',
+					'description',
+					'solutionId',
+					'programId',
+					'programInformation.name',
+					'projectTemplateId',
+					'solutionExternalId',
+					'lastDownloadedAt',
+					'hasAcceptedTAndC',
+					'referenceFrom',
+					'status',
+					'certificate',
+				]
+				if (process.env.SUBMISSION_LEVEL == 'ENTITY' && requestedData.hasOwnProperty('entityId')) {
+					mergedData = []
+					totalCount = 0
 
-				surveyReportPage = UTILS.convertStringToBoolean(surveyReportPage)
-
-				let getTargetedSolution = true
-
-				if (filter === CONSTANTS.common.DISCOVERED_BY_ME) {
-					getTargetedSolution = false
-				}
-				if (getTargetedSolution) {
-					targetedSolutions = await this.forUserRoleAndLocation(
-						requestedData,
-						solutionType,
+					copiedRequestedData = _.cloneDeep(requestedData)
+					// use queryBasedOnRoleAndLocation function to form query for acl.visibility = SCOPE projects
+					let queryData = await this.queryBasedOnRoleAndLocation(
+						_.omit(copiedRequestedData, ['entityId']),
 						'',
-						'',
-						CONSTANTS.common.DEFAULT_PAGE_SIZE,
-						CONSTANTS.common.DEFAULT_PAGE_NO,
-						search
+						'acl'
 					)
-				}
+					delete queryData.data.isReusable
+					delete queryData.data.isDeleted
+					delete queryData.data.status
+					let matchQuery = queryData.data
 
-				if (targetedSolutions.success) {
-					// When targetedSolutions is empty and currentScopeOnly is set to true send empty response
-					if (!(targetedSolutions.data.data.length > 0) && currentScopeOnly) {
-						return resolve({
-							success: true,
-							message: CONSTANTS.apiResponses.TARGETED_SOLUTIONS_FETCHED,
-							data: {
-								data: targetedSolutions.data.data,
-								count: targetedSolutions.data.data.length,
-							},
-							result: {
-								data: targetedSolutions.data.data,
-								count: targetedSolutions.data.data.length,
-							},
-						})
-					}
-					// When targetedSolutions is not empty alter the response based on the value of currentScopeOnly
-					if (targetedSolutions.data.data && targetedSolutions.data.data.length > 0) {
-						let filteredTargetedSolutions = []
-						targetedSolutions.data.data.forEach((solution) => {
-							let newEntry = Object.assign(
+					// Fetch projects accessible by the user when acl.visibility = (SCOPE or ALL or SPECIFIC)
+					projectsBasedOnEntityID = await projectQueries.projectDocument(
+						{
+							entityId: requestedData.entityId, // userId : {'$ne' : userId}, this condition is not mentioned based on the understanding that entityId will be unique
+							'solutionInformation.submissionLevel': process.env.SUBMISSION_LEVEL,
+							$or: [
 								{
-									_id: '',
-									solutionId: solution._id,
-									creator: solution.creator || '',
-									solutionMetaInformation: solution.metaInformation || {},
+									'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_ALL,
+									$or: searchQuery,
 								},
-								_.pick(solution, [
-									'type',
-									'externalId',
-									'projectTemplateId',
-									'certificateTemplateId',
-									'programId',
-									'programName',
-									'name',
-									'description',
-								])
-							)
-							filteredTargetedSolutions.push(newEntry)
-						})
-						if (currentScopeOnly) {
-							filteredTargetedSolutions.forEach((solution) => {
-								// Find the corresponding project in mergedData where solutionId matches _id
-								const matchingProject = _.find(mergedData, (project) => {
-									return String(project.solutionId) === String(solution.solutionId)
-								})
-
-								if (matchingProject) {
-									// Add all keys from the matching project to the solution object
-									Object.assign(solution, matchingProject)
-								}
-							})
-							mergedData = filteredTargetedSolutions
-							totalCount = mergedData.length
-						} else {
-							filteredTargetedSolutions.forEach((solution) => {
-								// Check if the solution _id exists in mergedData solutionId
-								const existsInMergedData = _.some(mergedData, (project) => {
-									return String(project.solutionId) === String(solution.solutionId)
-								})
-
-								if (!existsInMergedData) {
-									mergedData.push(solution)
-								}
-							})
-
-							totalCount = mergedData.length
-						}
-					}
+								{
+									'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_SPECIFIC,
+									'acl.users': { $in: [userId] },
+									$or: searchQuery,
+								},
+								{
+									'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_SCOPE,
+									$or: searchQuery,
+									...matchQuery,
+								},
+							],
+						},
+						fieldsArray
+					)
+					mergedData = projectsBasedOnEntityID
+					totalCount = projectsBasedOnEntityID.length
 				}
-
 				if (mergedData.length > 0) {
 					let startIndex = pageSize * (pageNo - 1)
 					let endIndex = startIndex + pageSize
 					mergedData = mergedData.slice(startIndex, endIndex)
+					totalCount = mergedData.length
 				}
-
 				return resolve({
 					success: true,
 					message: CONSTANTS.apiResponses.TARGETED_SOLUTIONS_FETCHED,
@@ -2863,6 +2970,217 @@ module.exports = class SolutionsHelper {
 			}
 		})
 	}
+
+	// static targetedSolutions(
+	// 	requestedData,
+	// 	solutionType,
+	// 	userId,
+	// 	pageSize,
+	// 	pageNo,
+	// 	search,
+	// 	filter,
+	// 	surveyReportPage = '',
+	// 	currentScopeOnly = false,
+	// 	entityId = ''
+	// ) {
+	// 	return new Promise(async (resolve, reject) => {
+	// 		try {
+	// 			currentScopeOnly = UTILS.convertStringToBoolean(currentScopeOnly)
+	// 			let assignedSolutions = await this.assignedUserSolutions(
+	// 				solutionType,
+	// 				userId,
+	// 				search,
+	// 				filter,
+	// 				'',
+	// 				'',
+	// 				entityId
+	// 			)
+	// 			if (!assignedSolutions.success) {
+	// 				throw {
+	// 					status: HTTP_STATUS_CODE.bad_request.status,
+	// 					message: assignedSolutions.message,
+	// 				}
+	// 			}
+	// 			let totalCount = 0
+	// 			let mergedData = []
+	// 			let solutionIds = []
+
+	// 			if (assignedSolutions.success && assignedSolutions.data) {
+	// 				totalCount = assignedSolutions.data.count
+	// 				mergedData = assignedSolutions.data.data
+
+	// 				if (mergedData.length > 0) {
+	// 					let programIds = []
+
+	// 					mergedData.forEach((mergeSolutionData) => {
+	// 						if (mergeSolutionData.solutionId) {
+	// 							solutionIds.push(mergeSolutionData.solutionId)
+	// 						}
+
+	// 						if (mergeSolutionData.programId) {
+	// 							programIds.push(mergeSolutionData.programId)
+	// 						}
+	// 					})
+
+	// 					let programsData = await programQueries.programsDocument(
+	// 						{
+	// 							_id: { $in: programIds },
+	// 						},
+	// 						['name']
+	// 					)
+
+	// 					if (programsData.length > 0) {
+	// 						let programs = programsData.reduce(
+	// 							(ac, program) => ({ ...ac, [program._id.toString()]: program }),
+	// 							{}
+	// 						)
+
+	// 						mergedData = mergedData.map((data) => {
+	// 							if (data.programId && programs[data.programId.toString()]) {
+	// 								data.programName = programs[data.programId.toString()].name
+	// 							}
+	// 							return data
+	// 						})
+	// 					}
+	// 				}
+	// 			}
+
+	// 			requestedData['filter'] = {}
+	// 			// if (solutionIds.length > 0) {
+	// 			// 	requestedData['filter']['skipSolutions'] = solutionIds
+	// 			// }
+
+	// 			if (filter && filter !== '') {
+	// 				if (filter === CONSTANTS.common.CREATED_BY_ME) {
+	// 					requestedData['filter']['isAPrivateProgram'] = {
+	// 						$ne: false,
+	// 					}
+	// 				} else if (filter === CONSTANTS.common.ASSIGN_TO_ME) {
+	// 					requestedData['filter']['isAPrivateProgram'] = false
+	// 				}
+	// 			}
+
+	// 			let targetedSolutions = {
+	// 				success: false,
+	// 			}
+
+	// 			surveyReportPage = UTILS.convertStringToBoolean(surveyReportPage)
+
+	// 			let getTargetedSolution = true
+
+	// 			if (filter === CONSTANTS.common.DISCOVERED_BY_ME) {
+	// 				getTargetedSolution = false
+	// 			}
+	// 			if (getTargetedSolution) {
+	// 				targetedSolutions = await this.forUserRoleAndLocation(
+	// 					requestedData,
+	// 					solutionType,
+	// 					'',
+	// 					'',
+	// 					CONSTANTS.common.DEFAULT_PAGE_SIZE,
+	// 					CONSTANTS.common.DEFAULT_PAGE_NO,
+	// 					search
+	// 				)
+	// 			}
+
+	// 			if (targetedSolutions.success) {
+	// 				// When targetedSolutions is empty and currentScopeOnly is set to true send empty response
+	// 				if (!(targetedSolutions.data.data.length > 0) && currentScopeOnly) {
+	// 					return resolve({
+	// 						success: true,
+	// 						message: CONSTANTS.apiResponses.TARGETED_SOLUTIONS_FETCHED,
+	// 						data: {
+	// 							data: targetedSolutions.data.data,
+	// 							count: targetedSolutions.data.data.length,
+	// 						},
+	// 						result: {
+	// 							data: targetedSolutions.data.data,
+	// 							count: targetedSolutions.data.data.length,
+	// 						},
+	// 					})
+	// 				}
+	// 				// When targetedSolutions is not empty alter the response based on the value of currentScopeOnly
+	// 				if (targetedSolutions.data.data && targetedSolutions.data.data.length > 0) {
+	// 					let filteredTargetedSolutions = []
+	// 					targetedSolutions.data.data.forEach((solution) => {
+	// 						let newEntry = Object.assign(
+	// 							{
+	// 								_id: '',
+	// 								solutionId: solution._id,
+	// 								creator: solution.creator || '',
+	// 								solutionMetaInformation: solution.metaInformation || {},
+	// 							},
+	// 							_.pick(solution, [
+	// 								'type',
+	// 								'externalId',
+	// 								'projectTemplateId',
+	// 								'certificateTemplateId',
+	// 								'programId',
+	// 								'programName',
+	// 								'name',
+	// 								'description',
+	// 							])
+	// 						)
+	// 						filteredTargetedSolutions.push(newEntry)
+	// 					})
+	// 					if (currentScopeOnly) {
+	// 						filteredTargetedSolutions.forEach((solution) => {
+	// 							// Find the corresponding project in mergedData where solutionId matches _id
+	// 							const matchingProject = _.find(mergedData, (project) => {
+	// 								return String(project.solutionId) === String(solution.solutionId)
+	// 							})
+
+	// 							if (matchingProject) {
+	// 								// Add all keys from the matching project to the solution object
+	// 								Object.assign(solution, matchingProject)
+	// 							}
+	// 						})
+	// 						mergedData = filteredTargetedSolutions
+	// 						totalCount = mergedData.length
+	// 					} else {
+	// 						filteredTargetedSolutions.forEach((solution) => {
+	// 							// Check if the solution _id exists in mergedData solutionId
+	// 							const existsInMergedData = _.some(mergedData, (project) => {
+	// 								return String(project.solutionId) === String(solution.solutionId)
+	// 							})
+
+	// 							if (!existsInMergedData) {
+	// 								mergedData.push(solution)
+	// 							}
+	// 						})
+
+	// 						totalCount = mergedData.length
+	// 					}
+	// 				}
+	// 			}
+
+	// 			if (mergedData.length > 0) {
+	// 				let startIndex = pageSize * (pageNo - 1)
+	// 				let endIndex = startIndex + pageSize
+	// 				mergedData = mergedData.slice(startIndex, endIndex)
+	// 			}
+
+	// 			return resolve({
+	// 				success: true,
+	// 				message: CONSTANTS.apiResponses.TARGETED_SOLUTIONS_FETCHED,
+	// 				data: {
+	// 					data: mergedData,
+	// 					count: totalCount,
+	// 				},
+	// 				result: {
+	// 					data: mergedData,
+	// 					count: totalCount,
+	// 				},
+	// 			})
+	// 		} catch (error) {
+	// 			return reject({
+	// 				status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+	// 				message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+	// 				errorObject: error,
+	// 			})
+	// 		}
+	// 	})
+	// }
 
 	/**
 	 * privateProgramAndSolutionDetails

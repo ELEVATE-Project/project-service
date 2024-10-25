@@ -88,7 +88,7 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
 
 ## Operating Systems: Windows
 
-2.  **Download Docker Compose File:** Retrieve the **[docker-compose-project.yml](https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/docker-compose-project.yml)** file from the Project service repository and save it to the project directory.
+1.  **Download Docker Compose File:** Retrieve the **[docker-compose-project.yml](https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/docker-compose-project.yml)** file from the Project service repository and save it to the project directory.
 
     ```
     curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/docker-compose-project.yml
@@ -103,19 +103,8 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
     └── docker-compose-project.yml
     ```
 
-3.  **Download Environment Files**: Using the OS specific commands given below, download environment files for all the services.
+2.  **Download Environment Files**: Using the OS specific commands given below, download environment files for all the services.
 
-    -   **Ubuntu/Linux/Mac**
-        ```
-        curl -L \
-         -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/interface_env \
-         -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/entity_management_env \
-         -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/project_env \
-         -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/notification_env \
-         -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/scheduler_env \
-         -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/user_env \
-         -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/env.js
-        ```
     -   **Windows**
 
         ```
@@ -133,13 +122,7 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
 
     > **Caution:** While the default values in the downloaded environment files enable the Project Application to operate, certain features may not function correctly or could be impaired unless the adopter-specific environment variables are properly configured.
 
-4.  **Download `replace_volume_path` Script File**
-
-    -   **Ubuntu/Linux/Mac**
-
-        ```
-        curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/dockerized/scripts/mac-linux/replace_volume_path.sh
-        ```
+3.  **Download `replace_volume_path` Script File**
 
     -   **Windows**
 
@@ -147,18 +130,7 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
         curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/dockerized/scripts/windows/replace_volume_path.bat
         ```
 
-5.  **Run `replace_volume_path` Script File**
-
-    -   **Ubuntu/Linux/Mac**
-
-        1. Make the `replace_volume_path.sh` file an executable.
-            ```
-            chmod +x replace_volume_path.sh
-            ```
-        2. Run the script file using the following command.
-            ```
-            ./replace_volume_path.sh
-            ```
+4.  **Run `replace_volume_path` Script File**
 
     -   **Windows**
 
@@ -174,29 +146,7 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
         >
         > \- /home/joffin/elevate/backend/environment.ts:/app/src/environments/environment.ts
 
-6.  **Download `docker-compose-up` & `docker-compose-down` Script Files**
-
-    -   **Ubuntu/Linux/Mac**
-
-        1. Download the files.
-
-            ```
-            curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/mac-linux/docker-compose-up.sh
-            ```
-
-            ```
-            curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/mac-linux/docker-compose-down.sh
-            ```
-
-        2. Make the files executable by running the following commands.
-
-            ```
-            chmod +x docker-compose-up.sh
-            ```
-
-            ```
-            chmod +x docker-compose-down.sh
-            ```
+5.  **Download `docker-compose-up` & `docker-compose-down` Script Files**
 
     -   **Windows**
 
@@ -208,13 +158,7 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
         curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/windows/docker-compose-down.bat
         ```
 
-7.  **Run All Services & Dependencies**:All services and dependencies can be started using the `docker-compose-up` script file.
-
-    -   **Ubuntu/Linux/Mac**
-
-        ```
-        ./docker-compose-up.sh
-        ```
+6.  **Run All Services & Dependencies**:All services and dependencies can be started using the `docker-compose-up` script file.
 
     -   **Windows**
 
@@ -226,16 +170,8 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
 
         > **Note**: During the first Docker Compose run, the database, migration seeder files, and the script to set the default organization will be executed automatically.
 
-8.  **Access The Project Application**:Once the services are up and the front-end app bundle is built successfully, navigate to **[localhost:7007](http://localhost:7007/)** to access the Project app.
-9.  **Gracefully Stop All Services & Dependencies**:All containers which are part of the docker-compose can be gracefully stopped by pressing `Ctrl + c` in the same terminal where the services are running.
-10. **Remove All Service & Dependency Containers**:
+7. **Remove All Service & Dependency Containers**:
     All docker containers can be stopped and removed by using the `docker-compose-down` file.
-
-    -   **Ubuntu/Linux/Mac**
-
-        ```
-        ./docker-compose-down.sh
-        ```
 
     -   **Windows**
 

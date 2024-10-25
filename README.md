@@ -17,42 +17,87 @@
 </details>
 
 </br>
-The Project building block enables creation, consumption of micro-improvement projects
+The Project building block facilitates the creation and engagement with micro-improvement projects.
 
 </div>
+</br>
 
-# System Requirements
+# Supported Operating Systems
+
+-   **Ubuntu (Recommended: Version 20 and above)** 
+-   **Windows (Recommended: Version 11 and above)** 
+-   **macOs (Recommended: Version 12 and above)**
+
+<!-- # System Requirements
 
 -   **Operating System:** Ubuntu 22/Windows 11/macos 12
 -   **Node.js®:** v20
 -   **PostgreSQL:** 16
 -   **Apache Kafka®:** 3.5.0
 -   **MongoDB:** 4.4.14
--   **Gotenberg:** 8.5.0
+-   **Gotenberg:** 8.5.0 -->
 
 # Setup Options
 
-**Elevate services can be setup in local using two methods:**
+**Project services can be setup using two methods:**
+> Note : This guide outlines two setup methods, detailed below. For a quick, beginner-friendly setup and walkthrough of services, it is recommended to use the Dockerized Services & Dependencies setup with the Docker-Compose file.
 
 <details><summary>Dockerized Services & Dependencies Using Docker-Compose File</summary>
 
 ## Dockerized Services & Dependencies
 
-Expectation: Upon following the prescribed steps, you will achieve a fully operational Project application setup, complete with both the portal and backend services.
+Expectation: By diligently following the outlined steps, you will successfully establish a fully operational Project application setup, including both the portal and backend services.
 
 ## Prerequisites
 
 To set up the Project application, ensure you have Docker and Docker Compose installed on your system. For Ubuntu users, detailed installation instructions for both can be found in the documentation here: [How To Install and Use Docker Compose on Ubuntu](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-compose-on-ubuntu-20-04). For Windows and MacOS users, you can refer to the Docker documentation for installation instructions: [Docker Compose Installation Guide](https://docs.docker.com/compose/install/). Once these prerequisites are in place, you're all set to get started with setting up the Project application.
 
-Service also uses gotenberg for creation of project certificate. You can read more about it here : [Gotenberg](https://gotenberg.dev/docs/getting-started/introduction).
-
 ## Installation
 
-1.  **Create project Directory:** Create a directory named **project**.
+**Create project Directory:** Establish a directory titled **project**.
 
-    > Example Command: `mkdir project && cd project/`
+> Example Command: `mkdir project && cd project/`
 
-2.  **Download Docker Compose File:** Retrieve the **[docker-compose-project.yml](https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/docker-compose-project.yml)** file from the Project service repository and save it to the project directory.
+> Note: All commands are run from the project directory.
+## Operating Systems: Linux / macOS
+
+>**Caution:** Before proceeding, please ensure that the ports given here are available and open. It is essential to verify their availability prior to moving forward. You can run below command in your teminal to check this
+```
+for port in 3000 3001 3002 5000 5001 4000 9092 5432 7007 2181 2707 3569; do
+    if lsof -iTCP:$port -sTCP:LISTEN &>/dev/null; then
+        echo "Port $port is in use"
+    else
+        echo "Port $port is available"
+    fi
+done
+```
+
+1.  **Download and execute main setup script:** Execute the following command in your terminal from the project directory.
+    ```
+    curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/mac-linux/setup_project.sh && chmod +x setup_project.sh && ./setup_project.sh
+    ```
+
+    > Note : The script will download all the essential files and launch the services in Docker. Once all services are successfully up and running, you can proceed to the next steps.
+
+    **General Instructions :**
+
+    1. All containers which are part of the docker-compose can be gracefully stopped by pressing Ctrl + c in the same terminal where the services are running.
+
+    2. All docker containers can be stopped and removed by using below command.
+        ```
+        ./docker-compose-down.sh
+        ```
+    3. All services and dependencies can be started using below command.
+        ```
+        ./docker-compose-up.sh
+        ```
+**Keep the current terminal session active, and kindly open a new terminal window within the project directory.**
+
+**After successfully completing this, please move to the next section: [Enable Citus Extension](#enable-citus-extension-optional)**
+
+## Operating Systems: Windows
+
+1.  **Download Docker Compose File:** Retrieve the **[docker-compose-project.yml](https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/docker-compose-project.yml)** file from the Project service repository and save it to the project directory.
 
     ```
     curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/docker-compose-project.yml
@@ -60,26 +105,8 @@ Service also uses gotenberg for creation of project certificate. You can read mo
 
     > Note: All commands are run from the project directory.
 
-    Directory structure:
+2.  **Download Environment Files**: Using the OS specific commands given below, download environment files for all the services.
 
-    ```
-    ./project
-    └── docker-compose-project.yml
-    ```
-
-3.  **Download Environment Files**: Using the OS specific commands given below, download environment files for all the services.
-
-    -   **Ubuntu/Linux/Mac**
-        ```
-        curl -L \
-         -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/interface_env \
-         -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/entity_management_env \
-         -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/project_env \
-         -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/notification_env \
-         -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/scheduler_env \
-         -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/user_env \
-         -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/env.js
-        ```
     -   **Windows**
 
         ```
@@ -97,13 +124,7 @@ Service also uses gotenberg for creation of project certificate. You can read mo
 
     > **Caution:** While the default values in the downloaded environment files enable the Project Application to operate, certain features may not function correctly or could be impaired unless the adopter-specific environment variables are properly configured.
 
-4.  **Download `replace_volume_path` Script File**
-
-    -   **Ubuntu/Linux/Mac**
-
-        ```
-        curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/dockerized/scripts/mac-linux/replace_volume_path.sh
-        ```
+3.  **Download `replace_volume_path` Script File**
 
     -   **Windows**
 
@@ -111,18 +132,7 @@ Service also uses gotenberg for creation of project certificate. You can read mo
         curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/dockerized/scripts/windows/replace_volume_path.bat
         ```
 
-5.  **Run `replace_volume_path` Script File**
-
-    -   **Ubuntu/Linux/Mac**
-
-        1. Make the `replace_volume_path.sh` file an executable.
-            ```
-            chmod +x replace_volume_path.sh
-            ```
-        2. Run the script file using the following command.
-            ```
-            ./replace_volume_path.sh
-            ```
+4.  **Run `replace_volume_path` Script File**
 
     -   **Windows**
 
@@ -138,29 +148,7 @@ Service also uses gotenberg for creation of project certificate. You can read mo
         >
         > \- /home/joffin/elevate/backend/environment.ts:/app/src/environments/environment.ts
 
-6.  **Download `docker-compose-up` & `docker-compose-down` Script Files**
-
-    -   **Ubuntu/Linux/Mac**
-
-        1. Download the files.
-
-            ```
-            curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/mac-linux/docker-compose-up.sh
-            ```
-
-            ```
-            curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/mac-linux/docker-compose-down.sh
-            ```
-
-        2. Make the files executable by running the following commands.
-
-            ```
-            chmod +x docker-compose-up.sh
-            ```
-
-            ```
-            chmod +x docker-compose-down.sh
-            ```
+5.  **Download `docker-compose-up` & `docker-compose-down` Script Files**
 
     -   **Windows**
 
@@ -172,13 +160,7 @@ Service also uses gotenberg for creation of project certificate. You can read mo
         curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/windows/docker-compose-down.bat
         ```
 
-7.  **Run All Services & Dependencies**:All services and dependencies can be started using the `docker-compose-up` script file.
-
-    -   **Ubuntu/Linux/Mac**
-
-        ```
-        ./docker-compose-up.sh
-        ```
+6.  **Run All Services & Dependencies**:All services and dependencies can be started using the `docker-compose-up` script file.
 
     -   **Windows**
 
@@ -190,16 +172,8 @@ Service also uses gotenberg for creation of project certificate. You can read mo
 
         > **Note**: During the first Docker Compose run, the database, migration seeder files, and the script to set the default organization will be executed automatically.
 
-8.  **Access The Project Application**:Once the services are up and the front-end app bundle is built successfully, navigate to **[localhost:7007](http://localhost:7007/)** to access the Project app.
-9.  **Gracefully Stop All Services & Dependencies**:All containers which are part of the docker-compose can be gracefully stopped by pressing `Ctrl + c` in the same terminal where the services are running.
-10. **Remove All Service & Dependency Containers**:
+7. **Remove All Service & Dependency Containers**:
     All docker containers can be stopped and removed by using the `docker-compose-down` file.
-
-    -   **Ubuntu/Linux/Mac**
-
-        ```
-        ./docker-compose-down.sh
-        ```
 
     -   **Windows**
 
@@ -209,7 +183,7 @@ Service also uses gotenberg for creation of project certificate. You can read mo
 
     > **Caution**: As per the default configuration in the `docker-compose-project.yml` file, using the `down` command will lead to data loss since the database container does not persist data. To persist data across `down` commands and subsequent container removals, refer to the "Persistence of Database Data in Docker Containers" section of this documentation.
 
-## Enable Citus Extension
+## Enable Citus Extension (Optional)
 
 User management service comes with this bundle relies on PostgreSQL as its core database system. To boost performance and scalability, users can opt to enable the Citus extension. This transforms PostgreSQL into a distributed database, spreading data across multiple nodes to handle large datasets more efficiently as demand grows.
 
@@ -217,7 +191,7 @@ For more information, refer **[Citus Data](https://www.citusdata.com/)**.
 
 To enable the Citus extension for mentoring and user services, follow these steps.
 
-1. Create a sub-directory named `user` and download `distributionColumns.sql` into it.
+1. Create a sub-directory named `user` and download `distributionColumns.sql` into it. (Skip this for linux/macOs)
     ```
     mkdir user && curl -o ./user/distributionColumns.sql -JL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/distribution-columns/user/distributionColumns.sql
     ```
@@ -225,19 +199,7 @@ To enable the Citus extension for mentoring and user services, follow these step
 
     - **Ubuntu/Linux/Mac**
 
-        1. Download the `citus_setup.sh` file.
-
-            ```
-            curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/mac-linux/citus_setup.sh
-            ```
-
-        2. Make the setup file executable by running the following command.
-
-            ```
-            chmod +x citus_setup.sh
-            ```
-
-        3. Enable Citus and set distribution columns for `user` database by running the `citus_setup.sh`with the following arguments.
+        1. Enable Citus and set distribution columns for `user` database by running the `citus_setup.sh`with the following arguments.
             ```
             ./citus_setup.sh user postgres://postgres:postgres@citus_master:5432/user
             ```
@@ -253,7 +215,7 @@ To enable the Citus extension for mentoring and user services, follow these step
             ```
             > **Note:** Since the `citus_setup.bat` file requires arguments, it must be run from a terminal.
 
-## Persistence Of Database Data In Docker Container
+## Persistence Of Database Data In Docker Container (Optional)
 
 To ensure the persistence of database data when running `docker compose down`, it is necessary to modify the `docker-compose-project.yml` file according to the steps given below:
 
@@ -301,51 +263,31 @@ By implementing these adjustments, the configuration ensures that when the `dock
 
 ## Sample User Accounts Generation
 
-During the initial setup of Project services with the default configuration, you may encounter issues creating new accounts through the regular SignUp flow on the MentorEd portal. This typically occurs because the default SignUp process includes OTP verification to prevent abuse. Until the notification service is configured correctly to send actual emails, you will not be able to create new accounts.
+During the initial setup of Project services with the default configuration, you may encounter issues creating new accounts through the regular SignUp flow on the project portal. This typically occurs because the default SignUp process includes OTP verification to prevent abuse. Until the notification service is configured correctly to send actual emails, you will not be able to create new accounts.
 
 In such cases, you can generate sample user accounts using the steps below. This allows you to explore the Project services and portal immediately after setup.
 
 > **Warning:** Use this generator only immediately after the initial system setup and before any normal user accounts are created through the portal. It should not be used under any circumstances thereafter.
+- **Ubuntu/Linux/Mac**
 
-1. **Download The `sampleData.sql` Files:**
-
-    - **Ubuntu/Linux/Mac**
-
-        ```
-        mkdir -p sample-data/user && \
-        curl -L https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/sample-data/mac-linux/user/sampleData.sql -o sample-data/user/sampleData.sql
-        ```
-
-    - **Windows**
+    ```
+    ./insert_sample_data.sh user postgres://postgres:postgres@citus_master:5432/user
+    ```
+- **Windows**
+    1. **Download The `sampleData.sql` Files:**
 
         ```
         mkdir sample-data\user 2>nul & ^
         curl -L "https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/sample-data/windows/user/sampleData.sql" -o sample-data\user\sampleData.sql
         ```
 
-2. **Download The `insert_sample_data` Script File:**
-
-    - **Ubuntu/Linux/Mac**
-
-        ```
-        curl -L -o insert_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/dockerized/scripts/mac-linux/insert_sample_data.sh && chmod +x insert_sample_data.sh
-        ```
-
-    - **Windows**
+    2. **Download The `insert_sample_data` Script File:**
 
         ```
         curl -L -o insert_sample_data.bat https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/dockerized/scripts/windows/insert_sample_data.bat
         ```
 
-3. **Run The `insert_sample_data` Script File:**
-
-    - **Ubuntu/Linux/Mac**
-
-        ```
-        ./insert_sample_data.sh user postgres://postgres:postgres@citus_master:5432/user
-        ```
-
-    - **Windows**
+    3. **Run The `insert_sample_data` Script File:**
 
         ```
         insert_sample_data.bat user postgres://postgres:postgres@citus_master:5432/user
@@ -367,17 +309,7 @@ This step will guide us in implementing a sample project solution following the 
 
     - **Ubuntu/Linux/Mac**
 
-        1. Make the setup file executable by running the following command.
-            ```
-            curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/mac-linux/add_sample_project_entity_data.sh
-            ```
-        2. Make the setup file executable by running the following command.
-
-            ```
-            chmod +x add_sample_project_entity_data.sh
-            ```
-
-        3. Make the setup file executable by running the following command.
+        1. Insert sample data by running the following command.
 
             ```
             ./add_sample_project_entity_data.sh
@@ -401,8 +333,10 @@ This step will guide us in implementing a sample project solution following the 
             ```
             entity-project-sample-data.bat
             ```
+## Explore the Portal
+Once the services are up and the front-end app bundle is built successfully, navigate to **[localhost:7007](http://localhost:7007/)** to access the Project app.
 
-> **Warning:** upload related apis will not work because cloud integration is not enabled in this set-up.
+> **Warning:** In this setup, features such as **Sign-Up, Project Certificate, Project Sharing, and Project PDF Report** will not be available because cloud storage credentials have been masked in the environment files for security reasons.
 
 </details>
 

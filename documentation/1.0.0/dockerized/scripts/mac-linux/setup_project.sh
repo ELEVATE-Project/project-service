@@ -51,7 +51,7 @@ log "Made docker-compose scripts executable."
 
 # Step 8: Create user directory and download SQL file
 log "Creating user directory and downloading distributionColumns.sql..."
-mkdir user && curl -o ./user/distributionColumns.sql -JL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/distribution-columns/user/distributionColumns.sql
+mkdir -p user && curl -o ./user/distributionColumns.sql -JL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/distribution-columns/user/distributionColumns.sql
 log "User directory created and distributionColumns.sql downloaded."
 
 # Step 9: Download and make citus_setup.sh executable

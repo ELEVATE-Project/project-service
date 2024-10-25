@@ -65,7 +65,7 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
 
 1.  **Download and execute main setup script:** Execute the following command in your terminal from the project directory.
     ```
-    curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/mac-linux/setup_project.sh && chmod +x setup_project.sh && ./setup_project.sh
+    curl -OJL https://github.com/ELEVATE-Project/project-service/raw/Readme-review-changes/documentation/1.0.0/dockerized/scripts/mac-linux/setup_project.sh && chmod +x setup_project.sh && ./setup_project.sh
     ```
 
     > Note : The script will download all the essential files and launch the services in Docker. Once all services are successfully up and running, you can proceed to the next steps.
@@ -76,7 +76,7 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
 
     2. All docker containers can be stopped and removed by using below command.
         ```
-        chmod +x docker-compose-down.sh
+        ./docker-compose-down.sh
         ```
     3. All services and dependencies can be started using below command.
         ```

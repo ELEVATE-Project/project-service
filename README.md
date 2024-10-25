@@ -61,11 +61,20 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
 > Note: All commands are run from the project directory.
 ## Operating Systems: Linux / macOS
 
->**Caution:** Before proceeding, please ensure that the ports given here are available and open. It is essential to verify their availability prior to moving forward. **Ports : 3000,3001,3002,5000,5001,4000,9092,5432,7007,2181,2707,3569**
+>**Caution:** Before proceeding, please ensure that the ports given here are available and open. It is essential to verify their availability prior to moving forward. You can run below command in your teminal to check this
+```
+for port in 3000 3001 3002 5000 5001 4000 9092 5432 7007 2181 2707 3569; do
+    if lsof -iTCP:$port -sTCP:LISTEN &>/dev/null; then
+        echo "Port $port is in use"
+    else
+        echo "Port $port is available"
+    fi
+done
+```
 
 1.  **Download and execute main setup script:** Execute the following command in your terminal from the project directory.
     ```
-    curl -OJL https://github.com/ELEVATE-Project/project-service/raw/Readme-review-changes/documentation/1.0.0/dockerized/scripts/mac-linux/setup_project.sh && chmod +x setup_project.sh && ./setup_project.sh
+    curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/mac-linux/setup_project.sh && chmod +x setup_project.sh && ./setup_project.sh
     ```
 
     > Note : The script will download all the essential files and launch the services in Docker. Once all services are successfully up and running, you can proceed to the next steps.
@@ -95,13 +104,6 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
     ```
 
     > Note: All commands are run from the project directory.
-
-    Directory structure:
-
-    ```
-    ./project
-    └── docker-compose-project.yml
-    ```
 
 2.  **Download Environment Files**: Using the OS specific commands given below, download environment files for all the services.
 

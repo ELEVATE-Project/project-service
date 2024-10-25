@@ -61,7 +61,7 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
 > Note: All commands are run from the project directory.
 ## Operating Systems: Linux / macOS
 
->**Caution:** Before proceeding, please ensure that the ports listed below are available and open. It is essential to verify their availability prior to moving forward.
+>**Caution:** Before proceeding, please ensure that the ports given here are available and open. It is essential to verify their availability prior to moving forward. **Ports : 3000,3001,3002,5000,5001,4000,9092,5432,7007,2181,2707,3569**
 
 1.  **Download and execute main setup script:** Execute the following command in your terminal from the project directory.
     ```

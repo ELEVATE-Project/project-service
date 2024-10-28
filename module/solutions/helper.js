@@ -2722,6 +2722,7 @@ module.exports = class SolutionsHelper {
 				}
 				let searchQuery
 				let projectsBasedOnEntityID = []
+				let filteredTargetedSolutions = []
 
 				if (filter && filter !== '') {
 					if (filter === CONSTANTS.common.CREATED_BY_ME) {
@@ -2749,8 +2750,8 @@ module.exports = class SolutionsHelper {
 						solutionType,
 						'',
 						'',
-						CONSTANTS.common.DEFAULT_PAGE_SIZE,
-						CONSTANTS.common.DEFAULT_PAGE_NO,
+						'',
+						'',
 						search
 					)
 				}
@@ -2824,7 +2825,7 @@ module.exports = class SolutionsHelper {
 
 				// When targetedSolutions is not empty alter the response based on the value of currentScopeOnly
 				if (targetedSolutions.data.data && targetedSolutions.data.data.length > 0) {
-					let filteredTargetedSolutions = []
+					filteredTargetedSolutions = []
 					targetedSolutions.data.data.forEach((solution) => {
 						let newEntry = Object.assign(
 							{
@@ -2860,7 +2861,7 @@ module.exports = class SolutionsHelper {
 						})
 						mergedData = filteredTargetedSolutions
 						totalCount = mergedData.length
-					} else if (process.env.SUBMISSION_LEVEL === 'USER') {
+					} else {
 						filteredTargetedSolutions.forEach((solution) => {
 							// Check if the solution _id exists in mergedData solutionId
 							const existsInMergedData = _.some(mergedData, (project) => {
@@ -2893,6 +2894,7 @@ module.exports = class SolutionsHelper {
 					'status',
 					'certificate',
 				]
+
 				if (process.env.SUBMISSION_LEVEL == 'ENTITY' && requestedData.hasOwnProperty('entityId')) {
 					mergedData = []
 					totalCount = 0
@@ -2929,18 +2931,20 @@ module.exports = class SolutionsHelper {
 									$or: searchQuery,
 									...matchQuery,
 								},
+								{
+									userId: userId,
+								},
 							],
 						},
 						fieldsArray
 					)
 					mergedData = projectsBasedOnEntityID
-					totalCount = projectsBasedOnEntityID.length
+					totalCount = mergedData.length
 				}
 				if (mergedData.length > 0) {
 					let startIndex = pageSize * (pageNo - 1)
 					let endIndex = startIndex + pageSize
 					mergedData = mergedData.slice(startIndex, endIndex)
-					totalCount = mergedData.length
 				}
 				return resolve({
 					success: true,

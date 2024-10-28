@@ -774,191 +774,191 @@ docker exec project_mongo_1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --qu
     }"
 
 
-FORM_DOCUMENTS=$(cat <<EOF
-[{
-    "version" : 13,
-    "deleted" : false,
-    "type" : "homelist",
-    "subType" : "homelists",
-    "data" : [ 
-        {
-            "type" : "bannerList",
-            "listingData" : [ 
-                {
-                    "title" : "Hey, Welcome back!",
-                    "discription" : ""
-                }
-            ]
-        }, 
-        {
-            "type" : "solutionList",
-            "listingData" : [ 
-                {
-                    "name" : "Projects",
-                    "img" : "assets/images/ic_project.svg",
-                    "redirectionUrl" : "/listing/project",
-                    "listType" : "project",
-                    "solutionType" : "improvementProject",
-                    "reportPage" : false,
-                    "description" : "Manage and track your school improvement easily, by creating tasks and planning project timelines"
-                }, 
-                {
-                    "name" : "Survey",
-                    "img" : "assets/images/ic_survey.svg",
-                    "redirectionUrl" : "/listing/survey",
-                    "listType" : "survey",
-                    "solutionType" : "survey",
-                    "reportPage" : false,
-                    "reportIdentifier" : "surveyReportPage",
-                    "description" : "Provide information and feedback through quick and easy surveys"
-                }, 
-                {
-                    "name" : "Reports",
-                    "img" : "assets/images/ic_report.svg",
-                    "redirectionUrl" : "/project-report",
-                    "listType" : "report",
-                    "reportPage" : true,
-                    "description" : "Make sense of data to enable your decision-making based on your programs with ease",
-                    "list" : [ 
-                        {
-                            "name" : "Improvement Project Reports",
-                            "img" : "assets/images/ic_project.svg",
-                            "redirectionUrl" : "/project-report",
-                            "listType" : "project",
-                            "solutionType" : "improvementProject",
-                            "reportPage" : false,
-                            "description" : "Manage and track your school improvement easily, by creating tasks and planning project timelines"
-                        }, 
-                        {
-                            "name" : "Survey Reports",
-                            "img" : "assets/images/ic_survey.svg",
-                            "redirectionUrl" : "/listing/survey",
-                            "listType" : "survey",
-                            "solutionType" : "survey",
-                            "reportPage" : true,
-                            "reportIdentifier" : "surveyReportPage",
-                            "description" : "Provide information and feedback through quick and easy surveys"
-                        }
-                    ]
-                }, 
-                {
-                    "name" : "Library",
-                    "img" : "assets/images/library.svg",
-                    "redirectionUrl" : "/project-library",
-                    "listType" : "library",
-                    "description" : ""
-                }
-            ]
-        }
-    ],
-    "organizationId" : 1,
-    "updatedAt" : "2024-06-05T08:47:14.987Z",
-    "createdAt" : "2024-06-05T08:47:14.987Z",
-    "__v" : 0
-},
-{
-    "version" : 28,
-    "deleted" : false,
-    "type" : "form",
-    "subType" : "formFields",
-    "data" : [ 
-        {
-            "name" : "name",
-            "label" : "Enter your name",
-            "value" : "",
-            "type" : "text",
-            "placeHolder" : "Ex. Enter your name",
-            "errorMessage" : {
-                "required" : "Enter your name",
-                "pattern" : "This field can only contain alphabets"
-            },
-            "validators" : {
-                "required" : true,
-                "pattern" : "^[a-zA-Z\\s]*$"
-            },
-            "disable" : "false"
-        }, 
-        {
-            "name" : "state",
-            "label" : "Select your state",
-            "placeHolder" : "Select your state",
-            "value" : "",
-            "type" : "select",
-            "errorMessage" : {
-                "required" : "Please select your state"
-            },
-            "validators" : {
-                "required" : true
-            },
-            "dynamicEntity" : true,
-            "options" : [],
-            "disable" : "false"
-        }, 
-        {
-            "name" : "roles",
-            "label" : "Choose your role",
-            "value" : "",
-            "type" : "chip",
-            "dynamicUrl" : "/entity-management/v1/entities/targetedRoles/",
-            "errorMessage" : {
-                "required" : "Select a role"
-            },
-            "validators" : {
-                "required" : true
-            },
-            "options" : [],
-            "dependsOn" : "state",
-            "multiple" : true,
-            "disable" : "false"
-        }
-    ],
-    "organizationId" : 1,
-    "updatedAt" : "2024-06-25T10:08:58.689Z",
-    "createdAt" : "2024-06-25T10:08:58.689Z",
-    "__v" : 0
-},
-{
-    "version": 0,
-    "deleted": false,
-    "type": "KR001",
-    "subType": "KR001",
-    "data": [
-        {
-            "name": "district",
-            "label": "Select your district",
-            "placeHolder": "Select your district",
-            "value": "",
-            "type": "select",
-            "errorMessage": {
-                "required": "Please select your district"
-            },
-            "validators": {
-                "required": true
-            },
-            "options": [],
-            "dependsOn": "state",
-            "disable": "false"
-        }
-    ],
-    "organizationId": 1,
-    "updatedAt": "2024-08-23T11:32:06.172Z",
-    "createdAt": "2024-08-23T11:32:06.172Z",
-    "__v": 0
-}]
-EOF
-)
+# FORM_DOCUMENTS=$(cat <<EOF
+# [{
+#     "version" : 13,
+#     "deleted" : false,
+#     "type" : "homelist",
+#     "subType" : "homelists",
+#     "data" : [ 
+#         {
+#             "type" : "bannerList",
+#             "listingData" : [ 
+#                 {
+#                     "title" : "Hey, Welcome back!",
+#                     "discription" : ""
+#                 }
+#             ]
+#         }, 
+#         {
+#             "type" : "solutionList",
+#             "listingData" : [ 
+#                 {
+#                     "name" : "Projects",
+#                     "img" : "assets/images/ic_project.svg",
+#                     "redirectionUrl" : "/listing/project",
+#                     "listType" : "project",
+#                     "solutionType" : "improvementProject",
+#                     "reportPage" : false,
+#                     "description" : "Manage and track your school improvement easily, by creating tasks and planning project timelines"
+#                 }, 
+#                 {
+#                     "name" : "Survey",
+#                     "img" : "assets/images/ic_survey.svg",
+#                     "redirectionUrl" : "/listing/survey",
+#                     "listType" : "survey",
+#                     "solutionType" : "survey",
+#                     "reportPage" : false,
+#                     "reportIdentifier" : "surveyReportPage",
+#                     "description" : "Provide information and feedback through quick and easy surveys"
+#                 }, 
+#                 {
+#                     "name" : "Reports",
+#                     "img" : "assets/images/ic_report.svg",
+#                     "redirectionUrl" : "/project-report",
+#                     "listType" : "report",
+#                     "reportPage" : true,
+#                     "description" : "Make sense of data to enable your decision-making based on your programs with ease",
+#                     "list" : [ 
+#                         {
+#                             "name" : "Improvement Project Reports",
+#                             "img" : "assets/images/ic_project.svg",
+#                             "redirectionUrl" : "/project-report",
+#                             "listType" : "project",
+#                             "solutionType" : "improvementProject",
+#                             "reportPage" : false,
+#                             "description" : "Manage and track your school improvement easily, by creating tasks and planning project timelines"
+#                         }, 
+#                         {
+#                             "name" : "Survey Reports",
+#                             "img" : "assets/images/ic_survey.svg",
+#                             "redirectionUrl" : "/listing/survey",
+#                             "listType" : "survey",
+#                             "solutionType" : "survey",
+#                             "reportPage" : true,
+#                             "reportIdentifier" : "surveyReportPage",
+#                             "description" : "Provide information and feedback through quick and easy surveys"
+#                         }
+#                     ]
+#                 }, 
+#                 {
+#                     "name" : "Library",
+#                     "img" : "assets/images/library.svg",
+#                     "redirectionUrl" : "/project-library",
+#                     "listType" : "library",
+#                     "description" : ""
+#                 }
+#             ]
+#         }
+#     ],
+#     "organizationId" : 1,
+#     "updatedAt" : "2024-06-05T08:47:14.987Z",
+#     "createdAt" : "2024-06-05T08:47:14.987Z",
+#     "__v" : 0
+# },
+# {
+#     "version" : 28,
+#     "deleted" : false,
+#     "type" : "form",
+#     "subType" : "formFields",
+#     "data" : [ 
+#         {
+#             "name" : "name",
+#             "label" : "Enter your name",
+#             "value" : "",
+#             "type" : "text",
+#             "placeHolder" : "Ex. Enter your name",
+#             "errorMessage" : {
+#                 "required" : "Enter your name",
+#                 "pattern" : "This field can only contain alphabets"
+#             },
+#             "validators" : {
+#                 "required" : true,
+#                 "pattern" : "^[a-zA-Z\\s]*$"
+#             },
+#             "disable" : "false"
+#         }, 
+#         {
+#             "name" : "state",
+#             "label" : "Select your state",
+#             "placeHolder" : "Select your state",
+#             "value" : "",
+#             "type" : "select",
+#             "errorMessage" : {
+#                 "required" : "Please select your state"
+#             },
+#             "validators" : {
+#                 "required" : true
+#             },
+#             "dynamicEntity" : true,
+#             "options" : [],
+#             "disable" : "false"
+#         }, 
+#         {
+#             "name" : "roles",
+#             "label" : "Choose your role",
+#             "value" : "",
+#             "type" : "chip",
+#             "dynamicUrl" : "/entity-management/v1/entities/targetedRoles/",
+#             "errorMessage" : {
+#                 "required" : "Select a role"
+#             },
+#             "validators" : {
+#                 "required" : true
+#             },
+#             "options" : [],
+#             "dependsOn" : "state",
+#             "multiple" : true,
+#             "disable" : "false"
+#         }
+#     ],
+#     "organizationId" : 1,
+#     "updatedAt" : "2024-06-25T10:08:58.689Z",
+#     "createdAt" : "2024-06-25T10:08:58.689Z",
+#     "__v" : 0
+# },
+# {
+#     "version": 0,
+#     "deleted": false,
+#     "type": "KR001",
+#     "subType": "KR001",
+#     "data": [
+#         {
+#             "name": "district",
+#             "label": "Select your district",
+#             "placeHolder": "Select your district",
+#             "value": "",
+#             "type": "select",
+#             "errorMessage": {
+#                 "required": "Please select your district"
+#             },
+#             "validators": {
+#                 "required": true
+#             },
+#             "options": [],
+#             "dependsOn": "state",
+#             "disable": "false"
+#         }
+#     ],
+#     "organizationId": 1,
+#     "updatedAt": "2024-08-23T11:32:06.172Z",
+#     "createdAt": "2024-08-23T11:32:06.172Z",
+#     "__v": 0
+# }]
+# EOF
+# )
 
-echo "Forms data being added to forms collection in $PROJECT_DB_NAME database...."
-# Insert FORM using docker exec
-FORM_ID=$(docker exec -it project_mongo_1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
-    var doc = $FORM_DOCUMENTS;
-    var result = db.getSiblingDB('$PROJECT_DB_NAME').forms.insertMany(doc);
-    if (result.insertedId) {
-        print(result.insertedId);
-    } else {
-        throw new Error('Insert failed');
-    }
-")
+# echo "Forms data being added to forms collection in $PROJECT_DB_NAME database...."
+# # Insert FORM using docker exec
+# FORM_ID=$(docker exec -it project_mongo_1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
+#     var doc = $FORM_DOCUMENTS;
+#     var result = db.getSiblingDB('$PROJECT_DB_NAME').forms.insertMany(doc);
+#     if (result.insertedId) {
+#         print(result.insertedId);
+#     } else {
+#         throw new Error('Insert failed');
+#     }
+# ")
 
 
 CONFIGURATIONS_COLLECTION="configurations"

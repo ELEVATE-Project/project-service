@@ -2752,7 +2752,7 @@ module.exports = class SolutionsHelper {
 						search
 					)
 				}
-				// Send empty response if targetedSolutions is empty and either currentScopeOnly is true or submission level = USER
+				// Send empty response if targetedSolutions is empty
 				if (!(targetedSolutions.data.data.length > 0)) {
 					return resolve({
 						success: true,

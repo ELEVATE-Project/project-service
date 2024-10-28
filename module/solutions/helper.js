@@ -5,9 +5,6 @@
  * Description : Solution related helper functionality.
  */
 
-const { body } = require('express-validator/check')
-const { series } = require('gulp')
-const { merge } = require('lodash')
 const { ObjectId } = require('mongodb')
 
 // Dependencies

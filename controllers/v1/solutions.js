@@ -842,6 +842,12 @@ module.exports = class Solutions extends Abstract {
 	async targetedSolutions(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				if (req.query.currentScopeOnly && process.env.SUBMISSION_LEVEL == 'ENTITY') {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.CURRENT_SCOPE_ONLY_AND_ENTITYID_BOTH_CANNOT_BE_TRUE,
+					}
+				}
 				let observations = await solutionsHelper.targetedSolutions(
 					req.body,
 					req.query.type,

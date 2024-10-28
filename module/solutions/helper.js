@@ -2753,10 +2753,7 @@ module.exports = class SolutionsHelper {
 					)
 				}
 				// Send empty response if targetedSolutions is empty and either currentScopeOnly is true or submission level = USER
-				if (
-					!(targetedSolutions.data.data.length > 0) &&
-					(currentScopeOnly || process.env.SUBMISSION_LEVEL == 'USER')
-				) {
+				if (!(targetedSolutions.data.data.length > 0)) {
 					return resolve({
 						success: true,
 						message: CONSTANTS.apiResponses.TARGETED_SOLUTIONS_FETCHED,

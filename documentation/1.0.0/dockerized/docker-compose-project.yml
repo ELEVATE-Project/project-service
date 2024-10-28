@@ -209,12 +209,12 @@ services:
 
   portal:
     # Update with latest image
-    image: shikshalokamqa/elevate-project-obervation-pwa:2.2
+    image: shikshalokamqa/elevate-project-obervation-pwa:1.0
     container_name: portal
     ports:
       - '7007:7007'
     volumes:
-      - /home/joffin/elevate/single-click/linux/env.js:/usr/src/app/www/assets/env/env.js
+      - /home/shikshalokam/elevate/single-click/linux/env.js:/usr/src/app/www/assets/env/env.js
     # command: >
     #   /bin/bash -c "ionic build --prod && ionic serve --host 0.0.0.0"
     networks:

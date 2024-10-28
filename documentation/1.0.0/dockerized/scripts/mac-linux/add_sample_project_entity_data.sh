@@ -260,6 +260,7 @@ PROJECT_TEMPLATES_DOCUMENT=$(cat <<EOF
     "recommendedFor": [],
     "tasks": [],
     "learningResources": [{
+        "name" : "Washroom management learning resource",
         "link": "https://youtu.be/libKVRa01L8?feature=shared",
         "app": "projectService",
         "id": "libKVRa01L8?feature=shared"
@@ -282,6 +283,7 @@ PROJECT_TEMPLATES_DOCUMENT=$(cat <<EOF
     "recommendedFor": [],
     "tasks": [],
     "learningResources": [{
+        "name" : "Library Management learning resource",
         "link": "https://youtu.be/libKVRa01L8?feature=shared",
         "app": "projectService",
         "id": "libKVRa01L8?feature=shared"
@@ -304,6 +306,7 @@ PROJECT_TEMPLATES_DOCUMENT=$(cat <<EOF
     "recommendedFor": [],
     "tasks": [],
     "learningResources": [{
+        "name" : "Drinking water management learning resource",
         "link": "https://youtu.be/libKVRa01L8?feature=shared",
         "app": "projectService",
         "id": "libKVRa01L8?feature=shared"
@@ -326,6 +329,7 @@ PROJECT_TEMPLATES_DOCUMENT=$(cat <<EOF
     "recommendedFor": [],
     "tasks": [],
     "learningResources": [{
+        "name" : "Sports management learning resource",
         "link": "https://youtu.be/libKVRa01L8?feature=shared",
         "app": "projectService",
         "id": "libKVRa01L8?feature=shared"
@@ -371,13 +375,214 @@ for id in "${PROJECT_TEMPLATE_ID_ARRAY[@]}"; do
     echo "$id"
 done
 
+# Convert the multiline JSON to a single line
+for ((i = 0; i < ${#PROJECT_TEMPLATE_ID_ARRAY[@]}; i++)); do
+  eval "PROJECT_TEMPLATE_ID_$((i+1))=\$(clean_object_id \"\${PROJECT_TEMPLATE_ID_ARRAY[$i]}\")"
+done
+
+PROJECT_TEMPLATE_TASKS_COLLECTION="projectTemplateTasks"
+PROJECT_TEMPLATE_TASKS_DOCUMENTS=$(cat <<EOF
+[
+{
+    "isDeleted" : false,
+    "isDeletable" : false,
+    "taskSequence" : [
+
+    ],
+    "children" : [
+
+    ],
+    "visibleIf" : [
+
+    ],
+    "hasSubTasks" : false,
+    "learningResources" : [
+        {
+            "name" : "Washroom management learning resource",
+            "link" : "https://youtube.com/watch?v=XExMb0XBhw4",
+            "app" : "projectService",
+            "id" : "watch?v=XExMb0XBhw4"
+        }
+    ],
+    "deleted" : false,
+    "type" : "content",
+    "projectTemplateId": ObjectId($PROJECT_TEMPLATE_ID_1),
+    "projectTemplateExternalId" : "WASH-HYGIENE",
+    "name" : "Keep the washroom clean.",
+    "externalId" : "Wash-Hyg-01",
+    "description" : "",
+    "sequenceNumber" : "1",
+    "metaInformation" : {
+        "hasAParentTask" : "NO",
+        "parentTaskOperator" : "",
+        "parentTaskValue" : "",
+        "parentTaskId" : "",
+        "startDate" : "30/08/2021",
+        "endDate" : "30/08/2029",
+        "minNoOfSubmissionsRequired" : ""
+    },
+    "__v" : NumberInt(0)
+},
+{
+    "isDeleted" : false,
+    "isDeletable" : false,
+    "taskSequence" : [
+
+    ],
+    "children" : [
+
+    ],
+    "visibleIf" : [
+
+    ],
+    "hasSubTasks" : false,
+    "learningResources" : [
+        {
+            "name" : "Library management learning resource",
+            "link" : "https://youtube.com/watch?v=XExMb0XBhw4",
+            "app" : "projectService",
+            "id" : "watch?v=XExMb0XBhw4"
+        }
+    ],
+    "deleted" : false,
+    "type" : "content",
+    "projectTemplateId": ObjectId($PROJECT_TEMPLATE_ID_2),
+    "projectTemplateExternalId" : "LIB-MANAGEMENT",
+    "name" : "Stack the books properly in the library.",
+    "externalId" : "Lib-Mana-01",
+    "description" : "",
+    "sequenceNumber" : "1",
+    "metaInformation" : {
+        "hasAParentTask" : "NO",
+        "parentTaskOperator" : "",
+        "parentTaskValue" : "",
+        "parentTaskId" : "",
+        "startDate" : "30/08/2021",
+        "endDate" : "30/08/2029",
+        "minNoOfSubmissionsRequired" : ""
+    },
+    "__v" : NumberInt(0)
+},
+{
+    "isDeleted" : false,
+    "isDeletable" : false,
+    "taskSequence" : [
+
+    ],
+    "children" : [
+
+    ],
+    "visibleIf" : [
+
+    ],
+    "hasSubTasks" : false,
+    "learningResources" : [
+        {
+            "name" : "Drinking water management learning resource",
+            "link" : "https://youtube.com/watch?v=XExMb0XBhw4",
+            "app" : "projectService",
+            "id" : "watch?v=XExMb0XBhw4"
+        }
+    ],
+    "deleted" : false,
+    "type" : "content",
+    "projectTemplateId": ObjectId($PROJECT_TEMPLATE_ID_3),
+    "projectTemplateExternalId" : "DRINKING-WATER-AVAILABILITY",
+    "name" : "Keep the drinking water vessels clean.",
+    "externalId" : "Drink-Wat-01",
+    "description" : "",
+    "sequenceNumber" : "1",
+    "metaInformation" : {
+        "hasAParentTask" : "NO",
+        "parentTaskOperator" : "",
+        "parentTaskValue" : "",
+        "parentTaskId" : "",
+        "startDate" : "30/08/2021",
+        "endDate" : "30/08/2029",
+        "minNoOfSubmissionsRequired" : ""
+    },
+    "__v" : NumberInt(0)
+
+},
+{
+    "isDeleted" : false,
+    "isDeletable" : false,
+    "taskSequence" : [
+
+    ],
+    "children" : [
+
+    ],
+    "visibleIf" : [
+
+    ],
+    "hasSubTasks" : false,
+    "learningResources" : [
+        {
+            "name" : "Sports management learning resource",
+            "link" : "https://youtube.com/watch?v=XExMb0XBhw4",
+            "app" : "projectService",
+            "id" : "watch?v=XExMb0XBhw4"
+        }
+    ],
+    "deleted" : false,
+    "type" : "content",
+    "projectTemplateId": ObjectId($PROJECT_TEMPLATE_ID_4),
+    "projectTemplateExternalId" : "SPORTS-MANAGEMENT",
+    "name" : "Stack the sport equipments in correct order.",
+    "externalId" : "Spor-Mana-01",
+    "description" : "",
+    "sequenceNumber" : "1",
+    "metaInformation" : {
+        "hasAParentTask" : "NO",
+        "parentTaskOperator" : "",
+        "parentTaskValue" : "",
+        "parentTaskId" : "",
+        "startDate" : "30/08/2021",
+        "endDate" : "30/08/2029",
+        "minNoOfSubmissionsRequired" : ""
+    },
+    "__v" : NumberInt(0)
+
+}]
+EOF
+)
+
+echo "Project template tasks data being added to $PROJECT_TEMPLATE_TASKS_COLLECTION collection in $PROJECT_DB_NAME database...."
+
+# Insert PROJECT_TEMPLATE_ID using docker exec
+PROJECT_TEMPLATE_TASKS_ID=$(docker exec -it project_mongo_1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
+    var doc = $PROJECT_TEMPLATE_TASKS_DOCUMENTS;
+    var result = db.getSiblingDB('$PROJECT_DB_NAME').$PROJECT_TEMPLATE_TASKS_COLLECTION.insertMany(doc);
+    if (result.insertedIds && Object.keys(result.insertedIds).length > 0) {
+        print(result.insertedIds);
+    } else {
+        throw new Error('Insert failed');
+    }
+")
+
+# Convert the string into an array
+IFS=',' read -r -a PROJECT_TEMPLATE_TASKS_ID_ARRAY <<< "$PROJECT_TEMPLATE_TASKS_ID"
+
+# Clean each ObjectId in the array and store the cleaned IDs back into the same array
+for i in "${!PROJECT_TEMPLATE_TASKS_ID_ARRAY[@]}"; do
+    PROJECT_TEMPLATE_TASKS_ID_ARRAY[i]=$(clean_object_id "${PROJECT_TEMPLATE_TASKS_ID_ARRAY[i]}")
+done
+
+# Now you can access the cleaned IDs
+echo "Project Template Tasks IDs:"
+for id in "${PROJECT_TEMPLATE_TASKS_ID_ARRAY[@]}"; do
+    echo "$id"
+done
+
+# Convert the multiline JSON to a single line
+for ((i = 0; i < ${#PROJECT_TEMPLATE_TASKS_ID_ARRAY[@]}; i++)); do
+  eval "PROJECT_TEMPLATE_TASK_ID_$((i+1))=\$(clean_object_id \"\${PROJECT_TEMPLATE_TASKS_ID_ARRAY[$i]}\")"
+done
+
 
 SOLUTIONS_COLLECTION="solutions"
-# Convert the multiline JSON to a single line
-PROJECT_TEMPLATE_ID_1=$(clean_object_id "${PROJECT_TEMPLATE_ID_ARRAY[0]}")
-PROJECT_TEMPLATE_ID_2=$(clean_object_id "${PROJECT_TEMPLATE_ID_ARRAY[1]}")
-PROJECT_TEMPLATE_ID_3=$(clean_object_id "${PROJECT_TEMPLATE_ID_ARRAY[2]}")
-PROJECT_TEMPLATE_ID_4=$(clean_object_id "${PROJECT_TEMPLATE_ID_ARRAY[3]}")
+
 SOLUTION_DOCUMENT=$(cat <<EOF
 [{
     "resourceType": ["Improvement Project Solution"],
@@ -459,7 +664,7 @@ SOLUTION_DOCUMENT=$(cat <<EOF
     "programExternalId": "PG01",
     "scope": {
         "state": [$ENTITY_ID],
-        "roles": ["state_education_officer"],
+        "roles": ["district_education_officer"],
         "entityType": "state"
     },
     "projectTemplateId": ObjectId($PROJECT_TEMPLATE_ID_4),
@@ -505,11 +710,12 @@ for id in "${SOLUTION_ID_ARRAY[@]}"; do
 done
 
 
-# Updating project template with the solution ID
-SOLUTION_ID_1=$(clean_object_id "${SOLUTION_ID_ARRAY[0]}")
-SOLUTION_ID_2=$(clean_object_id "${SOLUTION_ID_ARRAY[1]}")
-SOLUTION_ID_3=$(clean_object_id "${SOLUTION_ID_ARRAY[2]}")
-SOLUTION_ID_4=$(clean_object_id "${SOLUTION_ID_ARRAY[3]}")
+# Updating project template with the solution ID and respective tasks
+for ((i = 0; i < ${#SOLUTION_ID_ARRAY[@]}; i++)); do
+  eval "SOLUTION_ID_$((i+1))=\$(clean_object_id \"\${SOLUTION_ID_ARRAY[$i]}\")"
+done
+
+
 
 docker exec project_mongo_1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
     var updateResult = db.getSiblingDB('$PROJECT_DB_NAME').$PROJECT_TEMPLATES_COLLECTION.updateOne(
@@ -517,6 +723,9 @@ docker exec project_mongo_1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --qu
         { 
             \$set: { 
                 'solutionId': ObjectId($SOLUTION_ID_1)
+            },
+            \$push: {
+                'tasks': ObjectId($PROJECT_TEMPLATE_TASK_ID_1)
             }
         }
     );
@@ -526,12 +735,16 @@ docker exec project_mongo_1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --qu
         throw new Error('Update failed for ID: $PROJECT_TEMPLATE_ID_1');
     }"
 
+
 docker exec project_mongo_1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
     var updateResult = db.getSiblingDB('$PROJECT_DB_NAME').$PROJECT_TEMPLATES_COLLECTION.updateOne(
         {_id: ObjectId($PROJECT_TEMPLATE_ID_2)},
         { 
             \$set: { 
                 'solutionId': ObjectId($SOLUTION_ID_2)
+            },
+            \$push: {
+                'tasks': ObjectId($PROJECT_TEMPLATE_TASK_ID_2)
             }
         }
     );
@@ -541,12 +754,16 @@ docker exec project_mongo_1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --qu
         throw new Error('Update failed for ID: $PROJECT_TEMPLATE_ID_2');
     }"
 
+
 docker exec project_mongo_1 mongo --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
     var updateResult = db.getSiblingDB('$PROJECT_DB_NAME').$PROJECT_TEMPLATES_COLLECTION.updateOne(
         {_id: ObjectId($PROJECT_TEMPLATE_ID_3)},
-        {
-            \$set: {
+        { 
+            \$set: { 
                 'solutionId': ObjectId($SOLUTION_ID_3)
+            },
+            \$push: {
+                'tasks': ObjectId($PROJECT_TEMPLATE_TASK_ID_3)
             }
         }
     );

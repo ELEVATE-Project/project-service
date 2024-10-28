@@ -338,6 +338,36 @@ Once the services are up and the front-end app bundle is built successfully, nav
 
 > **Warning:** In this setup, features such as **Sign-Up, Project Certificate, Project Sharing, and Project PDF Report** will not be available because cloud storage credentials have been masked in the environment files for security reasons.
 
+### Default Forms Creation for Portal Configuration
+
+This step inserts configuration forms into MongoDB, enabling or disabling features and fields on portal pages.
+
+#### Insert Forms Data into Database
+
+- **Ubuntu/Linux/Mac**:
+    1. Download the setup file:
+       ```bash
+       curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/mac-linux/import_forms_mongo.sh
+       ```
+    2. Make the file executable:
+       ```bash
+       chmod +x import_forms_mongo.sh
+       ```
+    3. Run the script:
+       ```bash
+       ./import_forms_mongo.sh mongodb://localhost:27017/elevate-project
+       ```
+
+- **Windows**:
+    1. Download the `import_forms_mongo.bat` file:
+       ```cmd
+       curl -L -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/windows/import_forms_mongo.bat
+       ```
+    2. Run the script:
+       ```cmd
+       import_forms_mongo.bat mongodb://localhost:27017/elevate-project
+       ```
+
 </details>
 
 <details>

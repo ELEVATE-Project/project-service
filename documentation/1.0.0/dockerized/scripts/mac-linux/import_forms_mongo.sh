@@ -23,7 +23,7 @@ fi
 
 # Wait for MongoDB to be ready
 echo "Waiting for MongoDB to be ready..."
-until mongo --host $DB_HOST --port $DB_PORT --eval "print(\"waited for connection\")"; do
+until docker exec project_mongo_1 mongo --host $DB_HOST --port $DB_PORT --eval "print(\"waited for connection\")"; do
     sleep 1
 done
 
@@ -33,21 +33,46 @@ echo "MongoDB is ready."
 echo "Downloading forms.json from GitHub..."
 curl -o forms.json https://raw.githubusercontent.com/ELEVATE-Project/observation-survey-projects-pwa/refs/heads/release-2.0.0/forms.json
 
-# Add default organizationId and deleted:false to forms.json
-echo "Adding default organizationId and deleted:false to forms.json..."
-jq '[.[] | .organizationId = 1 | .deleted = false | .version = 0]' forms.json > /tmp/forms_with_orgId.json
+# Modify forms.json using Node.js
+echo "Modifying forms.json to add organizationId, deleted, and version fields..."
+cat << 'EOF' > modify_forms.js
+const fs = require('fs');
+
+// Load the original forms.json file
+const data = JSON.parse(fs.readFileSync('forms.json', 'utf8'));
+
+// Modify each form document
+const modifiedData = data.map(form => ({
+    ...form,
+    organizationId: 1,
+    deleted: false,
+    version: 0
+}));
+
+// Write the modified data to a new JSON file
+fs.writeFileSync('/tmp/forms_with_orgId.json', JSON.stringify(modifiedData, null, 2));
+console.log('Modified forms.json with organizationId, deleted, and version fields.');
+EOF
+
+# Run the Node.js script to modify forms.json
+node modify_forms.js
 
 # Check the contents of the modified file
 echo "Checking contents of /tmp/forms_with_orgId.json:"
 cat /tmp/forms_with_orgId.json
 
+# Copy the modified JSON file into the MongoDB container
+docker cp /tmp/forms_with_orgId.json project_mongo_1:/tmp/forms_with_orgId.json
+
 # Delete existing documents from the forms collection
 echo "Deleting existing documents from the forms collection..."
-mongo --host $DB_HOST --port $DB_PORT $DB_NAME --eval 'db.forms.deleteMany({})'
+docker exec project_mongo_1 mongo --host $DB_HOST --port $DB_PORT $DB_NAME --eval 'db.forms.deleteMany({})'
 
 # Insert new documents from modified forms.json into MongoDB
 echo "Inserting new documents from modified forms.json into MongoDB..."
-mongoimport --host $DB_HOST --port $DB_PORT --db $DB_NAME --collection forms --file /tmp/forms_with_orgId.json --jsonArray
+docker exec project_mongo_1 mongoimport --host $DB_HOST --port $DB_PORT --db $DB_NAME --collection forms --file /tmp/forms_with_orgId.json --jsonArray
 
 # Clean up
 rm forms.json /tmp/forms_with_orgId.json
+docker exec project_mongo_1 rm /tmp/forms_with_orgId.json
+rm modify_forms.js

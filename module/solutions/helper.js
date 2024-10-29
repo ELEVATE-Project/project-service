@@ -2728,15 +2728,13 @@ module.exports = class SolutionsHelper {
 						}
 					} else if (filter === CONSTANTS.common.ASSIGN_TO_ME) {
 						requestedData['filter']['isAPrivateProgram'] = false
-					} else if (filter === CONSTANTS.common.DISCOVERED_BY_ME) {
-						getTargetedSolution = false
 					}
 				}
 				// surveyReportPage = UTILS.convertStringToBoolean(surveyReportPage)
 
-				// if (filter === CONSTANTS.common.DISCOVERED_BY_ME) {
-				// 	getTargetedSolution = false
-				// }
+				if (filter === CONSTANTS.common.DISCOVERED_BY_ME) {
+					getTargetedSolution = false
+				}
 
 				let copiedRequestedData = _.cloneDeep(requestedData)
 
@@ -2751,21 +2749,6 @@ module.exports = class SolutionsHelper {
 						'',
 						search
 					)
-				}
-				// Send empty response if targetedSolutions is empty
-				if (!(targetedSolutions.data.data.length > 0)) {
-					return resolve({
-						success: true,
-						message: CONSTANTS.apiResponses.TARGETED_SOLUTIONS_FETCHED,
-						data: {
-							data: targetedSolutions.data.data,
-							count: targetedSolutions.data.data.length,
-						},
-						result: {
-							data: targetedSolutions.data.data,
-							count: targetedSolutions.data.data.length,
-						},
-					})
 				}
 
 				// fetch projects created by the user
@@ -2817,57 +2800,73 @@ module.exports = class SolutionsHelper {
 					}
 				}
 
-				// When targetedSolutions is not empty alter the response based on the value of currentScopeOnly
-				if (targetedSolutions.data.data && targetedSolutions.data.data.length > 0) {
-					filteredTargetedSolutions = []
-					targetedSolutions.data.data.forEach((solution) => {
-						let newEntry = Object.assign(
-							{
-								_id: '',
-								solutionId: solution._id,
-								creator: solution.creator || '',
-								solutionMetaInformation: solution.metaInformation || {},
+				if (targetedSolutions.success) {
+					// When targetedSolutions is empty and currentScopeOnly is set to true send empty response
+					if (!(targetedSolutions.data.data.length > 0) && currentScopeOnly) {
+						return resolve({
+							success: true,
+							message: CONSTANTS.apiResponses.TARGETED_SOLUTIONS_FETCHED,
+							data: {
+								data: targetedSolutions.data.data,
+								count: targetedSolutions.data.data.length,
 							},
-							_.pick(solution, [
-								'type',
-								'externalId',
-								'projectTemplateId',
-								'certificateTemplateId',
-								'programId',
-								'programName',
-								'name',
-								'description',
-							])
-						)
-						filteredTargetedSolutions.push(newEntry)
-					})
-					if (currentScopeOnly) {
-						filteredTargetedSolutions.forEach((solution) => {
-							// Find the corresponding project in mergedData where solutionId matches _id
-							const matchingProject = _.find(mergedData, (project) => {
-								return String(project.solutionId) === String(solution.solutionId)
+							result: {
+								data: targetedSolutions.data.data,
+								count: targetedSolutions.data.data.length,
+							},
+						})
+					}
+					// When targetedSolutions is not empty alter the response based on the value of currentScopeOnly
+					if (targetedSolutions.data.data && targetedSolutions.data.data.length > 0) {
+						targetedSolutions.data.data.forEach((solution) => {
+							let newEntry = Object.assign(
+								{
+									_id: '',
+									solutionId: solution._id,
+									creator: solution.creator || '',
+									solutionMetaInformation: solution.metaInformation || {},
+								},
+								_.pick(solution, [
+									'type',
+									'externalId',
+									'projectTemplateId',
+									'certificateTemplateId',
+									'programId',
+									'programName',
+									'name',
+									'description',
+								])
+							)
+							filteredTargetedSolutions.push(newEntry)
+						})
+						if (currentScopeOnly) {
+							filteredTargetedSolutions.forEach((solution) => {
+								// Find the corresponding project in mergedData where solutionId matches _id
+								const matchingProject = _.find(mergedData, (project) => {
+									return String(project.solutionId) === String(solution.solutionId)
+								})
+
+								if (matchingProject) {
+									// Add all keys from the matching project to the solution object
+									Object.assign(solution, matchingProject)
+								}
+							})
+							mergedData = filteredTargetedSolutions
+							totalCount = mergedData.length
+						} else {
+							filteredTargetedSolutions.forEach((solution) => {
+								// Check if the solution _id exists in mergedData solutionId
+								const existsInMergedData = _.some(mergedData, (project) => {
+									return String(project.solutionId) === String(solution.solutionId)
+								})
+
+								if (!existsInMergedData) {
+									mergedData.push(solution)
+								}
 							})
 
-							if (matchingProject) {
-								// Add all keys from the matching project to the solution object
-								Object.assign(solution, matchingProject)
-							}
-						})
-						mergedData = filteredTargetedSolutions
-						totalCount = mergedData.length
-					} else {
-						filteredTargetedSolutions.forEach((solution) => {
-							// Check if the solution _id exists in mergedData solutionId
-							const existsInMergedData = _.some(mergedData, (project) => {
-								return String(project.solutionId) === String(solution.solutionId)
-							})
-
-							if (!existsInMergedData) {
-								mergedData.push(solution)
-							}
-						})
-
-						totalCount = mergedData.length
+							totalCount = mergedData.length
+						}
 					}
 				}
 
@@ -2888,7 +2887,6 @@ module.exports = class SolutionsHelper {
 					'status',
 					'certificate',
 				]
-
 				if (process.env.SUBMISSION_LEVEL == 'ENTITY' && requestedData.hasOwnProperty('entityId')) {
 					mergedData = []
 					totalCount = 0

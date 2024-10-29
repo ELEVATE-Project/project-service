@@ -125,55 +125,55 @@ module.exports = class UserProjectsHelper {
 					]
 				)
 
-				if (!userProject.length > 0) {
+				if (!(userProject.length > 0)) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.USER_PROJECT_NOT_FOUND,
 					}
 				}
 
-				// validate user authenticity before allowing him to edit the project
-				if (
-					process.env.SUBMISSION_LEVEL === 'USER' &&
-					!(userProject[0].acl.visibility == CONSTANTS.common.PROJECT_VISIBILITY_SELF)
-				) {
-					throw {
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: CONSTANTS.apiResponses.USER_NOT_ALLOWED_TO_EDIT_PROJECT,
+				if (process.env.SUBMISSION_LEVEL == 'USER') {
+					if (!(userProject[0].userId == userId)) {
+						throw {
+							status: HTTP_STATUS_CODE.bad_request.status,
+							message: CONSTANTS.apiResponses.USER_PROJECT_NOT_FOUND,
+						}
 					}
-				}
-				// validate user authenticity if the acl.visibility of project is SELf or SPECIFIC
-				else if (
-					(userProject[0].acl.visibility == CONSTANTS.common.PROJECT_VISIBILITY_SELF &&
-						!(userProject[0].userId == userId)) ||
-					(userProject[0].acl.visibility == CONSTANTS.common.PROJECT_VISIBILITY_SPECIFIC &&
-						!(userProject[0].acl.hasOwnProperty('users') && userProject[0].acl.users.includes(userId)))
-				) {
-					throw {
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: CONSTANTS.apiResponses.USER_NOT_ALLOWED_TO_EDIT_PROJECT,
-					}
-				}
-				// validate user authenticity if the acl.visibility of project is SCOPE
-				else if (userProject[0].acl.visibility == CONSTANTS.common.PROJECT_VISIBILITY_SCOPE) {
-					let scopeData = data.userProfileInformation.scope
-					let queryData = await solutionsHelper.queryBasedOnRoleAndLocation(scopeData, '', 'acl')
-					if (!queryData.success) {
-						return resolve(queryData)
-					}
-					delete queryData.data.isReusable
-					delete queryData.data.isDeleted
-					delete queryData.data.status
-					let matchQuery = {}
-					matchQuery = queryData.data
-					let projects = await projectQueries.projectDocument(matchQuery, 'all')
-					if (!Array.isArray(projects) || projects.length < 1) {
+				} else {
+					// validate user authenticity if the acl.visibility of project is SELf or SPECIFIC
+					if (
+						(userProject[0].acl.visibility == CONSTANTS.common.PROJECT_VISIBILITY_SELF &&
+							!(userProject[0].userId == userId)) ||
+						(userProject[0].acl.visibility == CONSTANTS.common.PROJECT_VISIBILITY_SPECIFIC &&
+							!(userProject[0].acl.hasOwnProperty('users') && userProject[0].acl.users.includes(userId)))
+					) {
 						throw {
 							status: HTTP_STATUS_CODE.bad_request.status,
 							message: CONSTANTS.apiResponses.USER_NOT_ALLOWED_TO_EDIT_PROJECT,
 						}
 					}
+					// validate user authenticity if the acl.visibility of project is SCOPE
+					else if (userProject[0].acl.visibility == CONSTANTS.common.PROJECT_VISIBILITY_SCOPE) {
+						let scopeData = data.userProfileInformation.scope
+						let queryData = await solutionsHelper.queryBasedOnRoleAndLocation(scopeData, '', 'acl')
+						if (!queryData.success) {
+							return resolve(queryData)
+						}
+						delete queryData.data.isReusable
+						delete queryData.data.isDeleted
+						delete queryData.data.status
+						let matchQuery = {}
+						matchQuery = queryData.data
+						let projects = await projectQueries.projectDocument(matchQuery, 'all')
+						if (!Array.isArray(projects) || projects.length < 1) {
+							throw {
+								status: HTTP_STATUS_CODE.bad_request.status,
+								message: CONSTANTS.apiResponses.USER_NOT_ALLOWED_TO_EDIT_PROJECT,
+							}
+						}
+					}
 				}
+
 				if (userProject[0].lastDownloadedAt.toISOString() !== lastDownloadedAt) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
@@ -394,12 +394,14 @@ module.exports = class UserProjectsHelper {
 				) {
 					updateProject.completedDate = new Date()
 				}
-				// maintain history of project edits
-				userProject[0].updateHistory.push({
-					userId: userId,
-					timeStamp: new Date(),
-				})
-				updateProject['updateHistory'] = userProject[0].updateHistory
+				if (userProject[0].updateHistory) {
+					// maintain history of project edits
+					userProject[0].updateHistory.push({
+						userId: userId,
+						timeStamp: new Date(),
+					})
+					updateProject['updateHistory'] = userProject[0].updateHistory
+				}
 				let projectUpdated = await projectQueries.findOneAndUpdate(
 					{
 						_id: userProject[0]._id,

@@ -2490,46 +2490,82 @@ module.exports = class SolutionsHelper {
 	 * @param {Number} pageNo - Page No.
 	 * @param {String} search - Search text.
 	 * @param {String} filter - filter text.
+	 * @param {Object} bodyData - request body data
 	 * @returns {Object}
 	 */
 
-	static assignedProjects(userId, search, filter, pageNo, pageSize) {
+	static assignedProjects(userId, search, filter, pageNo, pageSize, bodyData) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let query = {
 					isDeleted: false,
-					userId: userId,
 				}
-
 				let searchQuery = []
 
 				if (search !== '') {
 					searchQuery = [{ title: new RegExp(search, 'i') }, { description: new RegExp(search, 'i') }]
 				}
+				let requestedData = _.cloneDeep(bodyData)
+				if (process.env.SUBMISSION_LEVEL == 'ENTITY' && requestedData.hasOwnProperty('entityId')) {
+					// use queryBasedOnRoleAndLocation function to form query for acl.visibility = SCOPE projects
+					let queryData = await this.queryBasedOnRoleAndLocation(
+						_.omit(requestedData, ['entityId']),
+						'',
+						'acl'
+					)
+					delete queryData.data.isReusable
+					delete queryData.data.isDeleted
+					delete queryData.data.status
+					let matchQuery = queryData.data
 
-				if (filter && filter !== '') {
-					if (filter === CONSTANTS.common.CREATED_BY_ME) {
-						query['referenceFrom'] = {
-							$ne: CONSTANTS.common.LINK,
-						}
-						query['isAPrivateProgram'] = {
-							$ne: false,
-						}
-					} else if (filter == CONSTANTS.common.ASSIGN_TO_ME) {
-						query['isAPrivateProgram'] = false
-					} else {
-						query['$or'] = [
+					// Fetch projects accessible by the user when acl.visibility = (SCOPE or ALL or SPECIFIC)
+					query = {
+						entityId: requestedData.entityId, // userId : {'$ne' : userId}, this condition is not mentioned based on the understanding that entityId will be unique
+						'solutionInformation.submissionLevel': process.env.SUBMISSION_LEVEL,
+						$or: [
 							{
-								$and: [{ programId: { $exists: false } }, { projectTemplateId: { $exists: true } }],
+								'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_ALL,
 							},
 							{
-								$and: [
-									{ programId: { $exists: true } },
-									{ isAPrivateProgram: true },
-									{ projectTemplateId: { $exists: true } },
-								],
+								'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_SPECIFIC,
+								'acl.users': { $in: [userId] },
 							},
-						]
+							{
+								'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_SCOPE,
+								...matchQuery,
+							},
+							{
+								'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_SELF,
+								userId: userId,
+							},
+						],
+					}
+				} else {
+					query['userId'] = userId
+					if (filter && filter !== '') {
+						if (filter === CONSTANTS.common.CREATED_BY_ME) {
+							query['referenceFrom'] = {
+								$ne: CONSTANTS.common.LINK,
+							}
+							query['isAPrivateProgram'] = {
+								$ne: false,
+							}
+						} else if (filter == CONSTANTS.common.ASSIGN_TO_ME) {
+							query['isAPrivateProgram'] = false
+						} else {
+							query['$or'] = [
+								{
+									$and: [{ programId: { $exists: false } }, { projectTemplateId: { $exists: true } }],
+								},
+								{
+									$and: [
+										{ programId: { $exists: true } },
+										{ isAPrivateProgram: true },
+										{ projectTemplateId: { $exists: true } },
+									],
+								},
+							]
+						}
 					}
 				}
 
@@ -2653,15 +2689,23 @@ module.exports = class SolutionsHelper {
 	 * @param {String} filter - filter text
 	 * @param {Number} pageNo - page number
 	 * @param {Number} pageSize - page limit
+	 * @param {Object} bodyData - request body data
 	 * @returns {Object} - Details of the solution.
 	 */
 
-	static assignedUserSolutions(solutionType, userId, search, filter, pageNo, pageSize) {
+	static assignedUserSolutions(solutionType, userId, search, filter, pageNo, pageSize, bodyData) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let userAssignedSolutions = {}
 				if (solutionType === CONSTANTS.common.IMPROVEMENT_PROJECT) {
-					userAssignedSolutions = await this.assignedProjects(userId, search, filter, pageNo, pageSize)
+					userAssignedSolutions = await this.assignedProjects(
+						userId,
+						search,
+						filter,
+						pageNo,
+						pageSize,
+						bodyData
+					)
 				} else {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
@@ -2717,8 +2761,7 @@ module.exports = class SolutionsHelper {
 				let targetedSolutions = {
 					success: false,
 				}
-				let searchQuery
-				let projectsBasedOnEntityID = []
+
 				let filteredTargetedSolutions = []
 
 				if (filter && filter !== '') {
@@ -2730,7 +2773,6 @@ module.exports = class SolutionsHelper {
 						requestedData['filter']['isAPrivateProgram'] = false
 					}
 				}
-				// surveyReportPage = UTILS.convertStringToBoolean(surveyReportPage)
 
 				if (filter === CONSTANTS.common.DISCOVERED_BY_ME) {
 					getTargetedSolution = false
@@ -2752,12 +2794,42 @@ module.exports = class SolutionsHelper {
 				}
 
 				// fetch projects created by the user
-				let userCreatedProjects = await this.assignedUserSolutions(solutionType, userId, search, filter, '', '')
+				let userCreatedProjects = await this.assignedUserSolutions(
+					solutionType,
+					userId,
+					search,
+					filter,
+					'',
+					'',
+					requestedData
+				)
 				if (!userCreatedProjects.success) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: userCreatedProjects.message,
 					}
+				}
+
+				if (process.env.SUBMISSION_LEVEL == 'ENTITY' && requestedData.hasOwnProperty('entityId')) {
+					mergedData = userCreatedProjects.data.data
+					totalCount = mergedData.length
+					if (mergedData.length > 0) {
+						let startIndex = pageSize * (pageNo - 1)
+						let endIndex = startIndex + pageSize
+						mergedData = mergedData.slice(startIndex, endIndex)
+					}
+					return resolve({
+						success: true,
+						message: CONSTANTS.apiResponses.TARGETED_SOLUTIONS_FETCHED,
+						data: {
+							data: mergedData,
+							count: totalCount,
+						},
+						result: {
+							data: mergedData,
+							count: totalCount,
+						},
+					})
 				}
 				// Add program data to the fetched projects
 				if (userCreatedProjects.success && userCreatedProjects.data) {
@@ -2870,69 +2942,6 @@ module.exports = class SolutionsHelper {
 					}
 				}
 
-				if (search == undefined || search == '') search = ''
-				searchQuery = [{ title: new RegExp(search, 'i') }, { description: new RegExp(search, 'i') }]
-				let fieldsArray = [
-					'name',
-					'title',
-					'description',
-					'solutionId',
-					'programId',
-					'programInformation.name',
-					'projectTemplateId',
-					'solutionExternalId',
-					'lastDownloadedAt',
-					'hasAcceptedTAndC',
-					'referenceFrom',
-					'status',
-					'certificate',
-				]
-				if (process.env.SUBMISSION_LEVEL == 'ENTITY' && requestedData.hasOwnProperty('entityId')) {
-					mergedData = []
-					totalCount = 0
-
-					copiedRequestedData = _.cloneDeep(requestedData)
-					// use queryBasedOnRoleAndLocation function to form query for acl.visibility = SCOPE projects
-					let queryData = await this.queryBasedOnRoleAndLocation(
-						_.omit(copiedRequestedData, ['entityId']),
-						'',
-						'acl'
-					)
-					delete queryData.data.isReusable
-					delete queryData.data.isDeleted
-					delete queryData.data.status
-					let matchQuery = queryData.data
-
-					// Fetch projects accessible by the user when acl.visibility = (SCOPE or ALL or SPECIFIC)
-					projectsBasedOnEntityID = await projectQueries.projectDocument(
-						{
-							entityId: requestedData.entityId, // userId : {'$ne' : userId}, this condition is not mentioned based on the understanding that entityId will be unique
-							'solutionInformation.submissionLevel': process.env.SUBMISSION_LEVEL,
-							$or: [
-								{
-									'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_ALL,
-									$or: searchQuery,
-								},
-								{
-									'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_SPECIFIC,
-									'acl.users': { $in: [userId] },
-									$or: searchQuery,
-								},
-								{
-									'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_SCOPE,
-									$or: searchQuery,
-									...matchQuery,
-								},
-								{
-									userId: userId,
-								},
-							],
-						},
-						fieldsArray
-					)
-					mergedData = projectsBasedOnEntityID
-					totalCount = mergedData.length
-				}
 				if (mergedData.length > 0) {
 					let startIndex = pageSize * (pageNo - 1)
 					let endIndex = startIndex + pageSize

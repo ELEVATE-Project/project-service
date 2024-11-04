@@ -470,7 +470,7 @@ module.exports = class UserProjectsHelper {
 		programName = '',
 		entities,
 		userId,
-		solutionId,
+		solutionId = '',
 		isATargetedSolution = ''
 	) {
 		return new Promise(async (resolve, reject) => {
@@ -506,7 +506,7 @@ module.exports = class UserProjectsHelper {
 					}
 				}
 
-				result.solutionInformation = _.pick(solutionAndProgramCreation.data.solution, [
+				result.solutionInformation = _.pick(solutionAndProgramCreation.result.solution, [
 					'name',
 					'externalId',
 					'description',
@@ -520,7 +520,7 @@ module.exports = class UserProjectsHelper {
 				result['solutionId'] = ObjectId(result.solutionInformation._id)
 				result['solutionExternalId'] = result.solutionInformation.externalId
 
-				result.programInformation = _.pick(solutionAndProgramCreation.data.program, [
+				result.programInformation = _.pick(solutionAndProgramCreation.result.program, [
 					'_id',
 					'name',
 					'externalId',
@@ -534,12 +534,11 @@ module.exports = class UserProjectsHelper {
 
 				result.programInformation._id = ObjectId(result.programInformation._id)
 
-				if (solutionAndProgramCreation.data.parentSolutionInformation) {
-					result['link'] = solutionAndProgramCreation.data.parentSolutionInformation.link
-						? solutionAndProgramCreation.data.parentSolutionInformation.link
+				if (solutionAndProgramCreation.result.parentSolutionInformation) {
+					result['link'] = solutionAndProgramCreation.result.parentSolutionInformation.link
+						? solutionAndProgramCreation.result.parentSolutionInformation.link
 						: ''
 				}
-
 				return resolve({
 					success: true,
 					data: result,
@@ -1320,6 +1319,17 @@ module.exports = class UserProjectsHelper {
 
 						projectCreation.data['isAPrivateProgram'] = solutionDetails.isAPrivateProgram
 						if (Object.keys(solutionDetails).length > 0) {
+							let programInformation = await __getProgramEntityData(solutionDetails.programId)
+							if (
+								!programInformation.success ||
+								!programInformation.data ||
+								!(Object.keys(programInformation.data).length > 0)
+							) {
+								throw {
+									status: HTTP_STATUS_CODE.bad_request.status,
+									message: CONSTANTS.apiResponses.PROGRAM_ENTITY_DATA_NOT_POPULATED,
+								}
+							}
 							projectCreation.data.programInformation = {
 								_id: ObjectId(solutionDetails.programId),
 								externalId: solutionDetails.programExternalId,
@@ -1327,8 +1337,8 @@ module.exports = class UserProjectsHelper {
 									? solutionDetails.programDescription
 									: '',
 								name: solutionDetails.programName,
+								...programInformation.data,
 							}
-
 							projectCreation.data.solutionInformation = {
 								_id: ObjectId(solutionDetails._id),
 								externalId: solutionDetails.externalId,
@@ -1509,8 +1519,7 @@ module.exports = class UserProjectsHelper {
 						//     }
 
 						// } else {
-						//     //Fetch user profile information by calling sunbird's user read api.
-
+						//Fetch user profile information by calling sunbird's user read api.
 						let userProfileData = await projectService.profileRead(userToken)
 						// Check if the user profile fetch was successful
 						if (!userProfileData.success) {
@@ -2496,6 +2505,23 @@ module.exports = class UserProjectsHelper {
 					}
 
 					libraryProjects.data = _.merge(libraryProjects.data, programAndSolutionInformation.data)
+				}
+
+				if (libraryProjects.data['programId'] && libraryProjects.data['programId'] != '') {
+					let programInformation = await __getProgramEntityData(libraryProjects.data['programId'])
+					if (
+						!programInformation.success ||
+						!programInformation.data ||
+						!(Object.keys(programInformation.data).length > 0)
+					) {
+						throw {
+							status: HTTP_STATUS_CODE.bad_request.status,
+							message: CONSTANTS.apiResponses.PROGRAM_ENTITY_DATA_NOT_POPULATED,
+						}
+					}
+					Object.keys(programInformation.data).forEach((key) => {
+						libraryProjects.data[`programInformation.${key}`] = programInformation.data[key]
+					})
 				}
 
 				if (requestedData.referenceFrom && requestedData.referenceFrom !== '') {
@@ -4184,6 +4210,77 @@ function _projectData(data) {
 			return resolve({
 				success: true,
 				data: projectData,
+			})
+		} catch (error) {
+			return resolve({
+				message: error.message,
+				status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
+				success: false,
+				data: {},
+			})
+		}
+	})
+}
+
+/**
+ * Fetch program entity data.
+ * @method
+ * @name __getProgramEntityData
+ * @param {String} programId - program id.
+ * @returns {Object} program entity related data.
+ */
+function __getProgramEntityData(programId) {
+	return new Promise(async (resolve, reject) => {
+		try {
+			let programDetails = await programQueries.programsDocument(
+				{
+					_id: ObjectId(programId),
+				},
+				['scope']
+			)
+			if (!(programDetails.length > 0)) {
+				throw {
+					status: HTTP_STATUS_CODE.bad_request.status,
+					message: CONSTANTS.apiResponses.PROGRAM_NOT_FOUND,
+				}
+			}
+			programDetails = programDetails[0]
+			let entityTypes = programDetails.scope.entityType.split(',')
+			let entityIds = []
+			let entityDataQuery = {}
+			entityTypes.forEach((item) => {
+				entityIds.push(...programDetails.scope[item])
+			})
+
+			entityDataQuery['_id'] = { $in: entityIds }
+
+			let entitydata = await entitiesService.entityDocuments(entityDataQuery, [
+				'_id',
+				'metaInformation.name',
+				'entityType',
+			])
+
+			if (!entitydata.success || !entitydata.data) {
+				throw {
+					status: HTTP_STATUS_CODE.bad_request.status,
+					message: CONSTANTS.apiResponses.ENTITIES_NOT_FOUND,
+				}
+			}
+			let programInformation = {}
+			entitydata.data.forEach((item) => {
+				let type = item.entityType
+				let name = item.metaInformation.name
+				// Check if the entityType already exists in programInformation
+				if (!programInformation[type]) {
+					// If not, create a new array for this entityType
+					programInformation[type] = []
+				}
+				// Add the name to the entityType array
+				programInformation[type].push(name)
+			})
+			return resolve({
+				success: true,
+				data: programInformation,
 			})
 		} catch (error) {
 			return resolve({

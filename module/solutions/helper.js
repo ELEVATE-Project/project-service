@@ -2482,84 +2482,6 @@ module.exports = class SolutionsHelper {
 	}
 
 	/**
-	 * Generate assigned projects query
-	 * @method
-	 * @name generateAssignedProjectsQuery
-	 * @param {String} userId - Logged in user id.
-	 * @param {Object} requestedData - request body data.
-	 * @param {String} filter - query filters.
-	 * @returns {Object}
-	 */
-	static async generateAssignedProjectsQuery(userId, requestedData, filter) {
-		return new Promise(async (resolve, reject) => {
-			try {
-				let query = { isDeleted: false }
-
-				if (process.env.SUBMISSION_LEVEL === 'ENTITY' && requestedData.hasOwnProperty('entityId')) {
-					// Use queryBasedOnRoleAndLocation function to form query for acl.visibility = SCOPE projects
-					let queryData = await this.queryBasedOnRoleAndLocation(
-						_.omit(requestedData, ['entityId']),
-						'',
-						'acl'
-					)
-					// status of the project could be anything, hence deleting status property from the querydata
-					delete queryData.data.status
-					let matchQuery = queryData.data
-
-					// Construct query for projects accessible by the user
-					query = {
-						entityId: requestedData.entityId,
-						'solutionInformation.submissionLevel': process.env.SUBMISSION_LEVEL,
-						$or: [
-							{ 'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_ALL },
-							{
-								'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_SPECIFIC,
-								'acl.users': { $in: [userId] },
-							},
-							{ 'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_SCOPE, ...matchQuery },
-							{ 'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_SELF, userId: userId },
-						],
-					}
-				} else {
-					query['userId'] = userId
-
-					if (filter && filter !== '') {
-						if (filter === CONSTANTS.common.CREATED_BY_ME) {
-							query['referenceFrom'] = { $ne: CONSTANTS.common.LINK }
-							query['isAPrivateProgram'] = { $ne: false }
-						} else if (filter === CONSTANTS.common.ASSIGN_TO_ME) {
-							query['isAPrivateProgram'] = false
-						} else {
-							query['$or'] = [
-								{ $and: [{ programId: { $exists: false } }, { projectTemplateId: { $exists: true } }] },
-								{
-									$and: [
-										{ programId: { $exists: true } },
-										{ isAPrivateProgram: true },
-										{ projectTemplateId: { $exists: true } },
-									],
-								},
-							]
-						}
-					}
-				}
-				return resolve({
-					success: true,
-					data: query,
-				})
-			} catch (error) {
-				return reject({
-					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
-
-					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
-
-					errorObject: error,
-				})
-			}
-		})
-	}
-
-	/**
 	 * Get list of user projects with the targetted ones.
 	 * @method
 	 * @name userAssigned
@@ -3409,6 +3331,84 @@ module.exports = class SolutionsHelper {
 					success: false,
 					status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
 					message: error.message,
+				})
+			}
+		})
+	}
+
+	/**
+	 * Generate assigned projects query
+	 * @method
+	 * @name generateAssignedProjectsQuery
+	 * @param {String} userId - Logged in user id.
+	 * @param {Object} requestedData - request body data.
+	 * @param {String} filter - query filters.
+	 * @returns {Object}
+	 */
+	static async generateAssignedProjectsQuery(userId, requestedData, filter) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let query = { isDeleted: false }
+
+				if (process.env.SUBMISSION_LEVEL === 'ENTITY' && requestedData.hasOwnProperty('entityId')) {
+					// Use queryBasedOnRoleAndLocation function to form query for acl.visibility = SCOPE projects
+					let queryData = await this.queryBasedOnRoleAndLocation(
+						_.omit(requestedData, ['entityId']),
+						'',
+						'acl'
+					)
+					// status of the project could be anything, hence deleting status property from the querydata
+					delete queryData.data.status
+					let matchQuery = queryData.data
+
+					// Construct query for projects accessible by the user
+					query = {
+						entityId: requestedData.entityId,
+						'solutionInformation.submissionLevel': process.env.SUBMISSION_LEVEL,
+						$or: [
+							{ 'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_ALL },
+							{
+								'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_SPECIFIC,
+								'acl.users': { $in: [userId] },
+							},
+							{ 'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_SCOPE, ...matchQuery },
+							{ 'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_SELF, userId: userId },
+						],
+					}
+				} else {
+					query['userId'] = userId
+
+					if (filter && filter !== '') {
+						if (filter === CONSTANTS.common.CREATED_BY_ME) {
+							query['referenceFrom'] = { $ne: CONSTANTS.common.LINK }
+							query['isAPrivateProgram'] = { $ne: false }
+						} else if (filter === CONSTANTS.common.ASSIGN_TO_ME) {
+							query['isAPrivateProgram'] = false
+						} else {
+							query['$or'] = [
+								{ $and: [{ programId: { $exists: false } }, { projectTemplateId: { $exists: true } }] },
+								{
+									$and: [
+										{ programId: { $exists: true } },
+										{ isAPrivateProgram: true },
+										{ projectTemplateId: { $exists: true } },
+									],
+								},
+							]
+						}
+					}
+				}
+				return resolve({
+					success: true,
+					data: query,
+				})
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+
+					errorObject: error,
 				})
 			}
 		})

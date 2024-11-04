@@ -4232,6 +4232,7 @@ function _projectData(data) {
 function __getProgramEntityData(programId) {
 	return new Promise(async (resolve, reject) => {
 		try {
+			// Fetch program details
 			let programDetails = await programQueries.programsDocument(
 				{
 					_id: ObjectId(programId),
@@ -4254,6 +4255,7 @@ function __getProgramEntityData(programId) {
 
 			entityDataQuery['_id'] = { $in: entityIds }
 
+			// Fetch entity data
 			let entitydata = await entitiesService.entityDocuments(entityDataQuery, [
 				'_id',
 				'metaInformation.name',

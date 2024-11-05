@@ -7,24 +7,24 @@ log() {
 
 # Step 1: Download Docker Compose file
 log "Downloading Docker Compose file..."
-curl -OJL https://github.com/ELEVATE-Project/project-service/raw/doc-fe/documentation/1.0.0/dockerized/docker-compose-project.yml
+curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/docker-compose-project.yml
 log "Docker Compose file downloaded."
 
 # Step 2: Download environment files
 log "Downloading environment files..."
 curl -L \
-    -O https://github.com/ELEVATE-Project/project-service/raw/doc-fe/documentation/1.0.0/dockerized/envs/interface_env \
+    -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/interface_env \
     -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/entity_management_env \
     -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/project_env \
     -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/notification_env \
     -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/scheduler_env \
     -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/user_env \
-    -O https://github.com/ELEVATE-Project/project-service/raw/doc-fe/documentation/1.0.0/dockerized/envs/env.js
+    -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/env.js
 log "Environment files downloaded."
 
 # Step 3: Download replace_volume_path.sh script
 log "Downloading replace_volume_path.sh script..."
-curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/doc-fe/documentation/1.0.0/dockerized/scripts/mac-linux/replace_volume_path.sh
+curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/dockerized/scripts/mac-linux/replace_volume_path.sh
 log "replace_volume_path.sh script downloaded."
 
 # Step 4: Make replace_volume_path.sh executable

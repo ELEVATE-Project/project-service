@@ -28,15 +28,6 @@ The Project building block facilitates the creation and engagement with micro-im
 -   **Windows (Recommended: Version 11 and above)** 
 -   **macOs (Recommended: Version 12 and above)**
 
-<!-- # System Requirements
-
--   **Operating System:** Ubuntu 22/Windows 11/macos 12
--   **Node.js®:** v20
--   **PostgreSQL:** 16
--   **Apache Kafka®:** 3.5.0
--   **MongoDB:** 4.4.14
--   **Gotenberg:** 8.5.0 -->
-
 # Setup Options
 
 **Project services can be setup using two methods:**
@@ -333,30 +324,16 @@ This step will guide us in implementing a sample project solution following the 
             ```
             entity-project-sample-data.bat
             ```
-## Explore the Portal
-Once the services are up and the front-end app bundle is built successfully, navigate to **[localhost:7007](http://localhost:7007/)** to access the Project app.
-
-> **Warning:** In this setup, features such as **Sign-Up, Project Certificate, Project Sharing, and Project PDF Report** will not be available because cloud storage credentials have been masked in the environment files for security reasons.
-
-### Default Forms Creation for Portal Configuration
+## Default Forms Creation for Portal Configuration
 
 This step inserts configuration forms into MongoDB, enabling or disabling features and fields on portal pages.
 
 #### Insert Forms Data into Database
 
 - **Ubuntu/Linux/Mac**:
-    1. Download the setup file:
-       ```bash
-       curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/mac-linux/import_forms_mongo.sh
-       ```
-    2. Make the file executable:
-       ```bash
-       chmod +x import_forms_mongo.sh
-       ```
-    3. Run the script:
-       ```bash
-       ./import_forms_mongo.sh mongodb://localhost:27017/elevate-project
-       ```
+    ```
+    curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/mac-linux/import_forms_mongo.sh && chmod +x import_forms_mongo.sh && ./import_forms_mongo.sh mongodb://mongo:27017/elevate-project
+    ```
 
 - **Windows**:
     1. Download the `import_forms_mongo.bat` file:
@@ -367,6 +344,12 @@ This step inserts configuration forms into MongoDB, enabling or disabling featur
        ```cmd
        import_forms_mongo.bat mongodb://localhost:27017/elevate-project
        ```
+       
+## Explore the Portal
+Once the services are up and the front-end app bundle is built successfully, navigate to **[localhost:7007](http://localhost:7007/)** to access the Project app.
+
+> **Warning:** In this setup, features such as **Sign-Up, Project Certificate, Project Sharing, and Project PDF Report** will not be available because cloud storage credentials have been masked in the environment files for security reasons.
+
 
 </details>
 
@@ -375,7 +358,16 @@ This step inserts configuration forms into MongoDB, enabling or disabling featur
 
 ## PM2 Managed Services & Natively Installed Dependencies
 
+### System Requirements
+-   **Node.js®:** v20
+-   **PostgreSQL:** 16
+-   **Apache Kafka®:** 3.5.0
+-   **MongoDB:** 4.4.14
+-   **Gotenberg:** 8.5.0
+
 Expectation: Upon following the prescribed steps, you will achieve a fully operational ELEVATE-Project application setup. Both the portal and backend services are managed using PM2, with all dependencies installed natively on the host system.
+
+#### Coming up : Native setup of service in windows OS will be added in upcoming release 
 
 ## Prerequisites
 
@@ -842,6 +834,9 @@ In such cases, you can generate sample user accounts using the steps below. This
 ## Postman Collections
 
 -   [Projects Service](https://github.com/ELEVATE-Project/project-service/tree/main/api-doc)
+
+## Adding New Projects to the System
+With implementation scripts, you can seamlessly add new projects to the system. Once a project is successfully added, it becomes visible on the portal, ready for use and interaction. For a comprehensive guide on setting up and using the implementation script, please refer to the [documentation here](https://github.com/ELEVATE-Project/project-service/tree/main/Project-Service-implementation-Script).
 <!--
     ```sql
     postgres=# select citus_version();

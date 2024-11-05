@@ -417,6 +417,7 @@ module.exports = class SolutionsHelper {
 					}
 				}
 
+				solutionData['submissionLevel'] = process.env.SUBMISSION_LEVEL
 				let solutionCreation = await solutionsQueries.createSolution(_.omit(solutionData, ['scope']))
 
 				if (!solutionCreation._id) {
@@ -654,7 +655,12 @@ module.exports = class SolutionsHelper {
 
 				facetQuery['$facet']['totalCount'] = [{ $count: 'count' }]
 
-				facetQuery['$facet']['data'] = [{ $skip: pageSize * (pageNo - 1) }, { $limit: pageSize }]
+				// facetQuery['$facet']['data'] = [{ $skip: pageSize * (pageNo - 1) }, { $limit: pageSize }]
+				if (pageSize === '' && pageNo === '') {
+					facetQuery['$facet']['data'] = [{ $skip: 0 }]
+				} else {
+					facetQuery['$facet']['data'] = [{ $skip: pageSize * (pageNo - 1) }, { $limit: pageSize }]
+				}
 
 				let projection2 = {}
 
@@ -953,10 +959,12 @@ module.exports = class SolutionsHelper {
 	 * @method
 	 * @name queryBasedOnRoleAndLocation
 	 * @param {String} data - Requested body data.
+	 * @param {String} type - solution type
+	 * @param {String} prefix - prefix word/letters for query making
 	 * @returns {JSON} - Auto targeted solutions query.
 	 */
 
-	static queryBasedOnRoleAndLocation(data, type = '') {
+	static queryBasedOnRoleAndLocation(data, type = '', prefix = '') {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let registryIds = []
@@ -987,17 +995,37 @@ module.exports = class SolutionsHelper {
 						}
 					}
 
-					filterQuery['scope.roles'] = {
-						$in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')],
+					// If prefix is given use it to form query
+					if (prefix != '') {
+						filterQuery[`${prefix}.scope.roles`] = {
+							$in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')],
+						}
+					} else {
+						filterQuery['scope.roles'] = {
+							$in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')],
+						}
 					}
 
 					filterQuery.$or = []
 					Object.keys(_.omit(data, ['filter', 'role', 'factors', 'type'])).forEach((key) => {
-						filterQuery.$or.push({
-							[`scope.${key}`]: { $in: data[key] },
-						})
+						// If prefix is given use it to form query
+						if (prefix != '') {
+							filterQuery.$or.push({
+								[`${prefix}.scope.${key}`]: { $in: data[key] },
+							})
+						} else {
+							filterQuery.$or.push({
+								[`scope.${key}`]: { $in: data[key] },
+							})
+						}
 					})
-					filterQuery['scope.entityType'] = { $in: entityTypes }
+
+					// If prefix is given use it to form query
+					if (prefix != '') {
+						filterQuery[`${prefix}.scope.entityType`] = { $in: entityTypes }
+					} else {
+						filterQuery['scope.entityType'] = { $in: entityTypes }
+					}
 				} else {
 					// Obtain userInfo
 					let userRoleInfo = _.omit(data, ['filter', 'factors', 'role', 'type'])
@@ -1010,11 +1038,25 @@ module.exports = class SolutionsHelper {
 						// Build query based on each key
 						factors.forEach((factor) => {
 							let scope = 'scope.' + factor
+
+							// If prefix is given use it to form query
+							if (prefix != '') {
+								scope = `${prefix}.scope.${factor}`
+							}
 							let values = userRoleInfo[factor]
 							if (factor === 'role') {
-								queryFilter.push({
-									['scope.roles']: { $in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')] },
-								})
+								// If prefix is given use it to form query
+								if (prefix != '') {
+									queryFilter.push({
+										[`${prefix}.scope.roles`]: {
+											$in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')],
+										},
+									})
+								} else {
+									queryFilter.push({
+										['scope.roles']: { $in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')] },
+									})
+								}
 							} else if (!Array.isArray(values)) {
 								queryFilter.push({ [scope]: { $in: values.split(',') } })
 							} else {
@@ -1026,6 +1068,11 @@ module.exports = class SolutionsHelper {
 					} else {
 						userRoleKeys.forEach((key) => {
 							let scope = 'scope.' + key
+
+							// If prefix is given use it to form query
+							if (prefix != '') {
+								scope = `${prefix}.scope.${key}`
+							}
 							let values = userRoleInfo[key]
 							if (!Array.isArray(values)) {
 								queryFilter.push({ [scope]: { $in: values.split(',') } })
@@ -1035,9 +1082,18 @@ module.exports = class SolutionsHelper {
 						})
 
 						if (data.role) {
-							queryFilter.push({
-								['scope.roles']: { $in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')] },
-							})
+							// If prefix is given use it to form query
+							if (prefix != '') {
+								queryFilter.push({
+									[`${prefix}.scope.roles`]: {
+										$in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')],
+									},
+								})
+							} else {
+								queryFilter.push({
+									['scope.roles']: { $in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')] },
+								})
+							}
 						}
 
 						// append query filter
@@ -2434,55 +2490,33 @@ module.exports = class SolutionsHelper {
 	 * @param {Number} pageNo - Page No.
 	 * @param {String} search - Search text.
 	 * @param {String} filter - filter text.
-	 * @param {String} entityId - entity id.
+	 * @param {Object} bodyData - request body data
 	 * @returns {Object}
 	 */
 
-	static assignedProjects(userId, search, filter, pageNo, pageSize, entityId = '') {
+	static assignedProjects(userId, search, filter, pageNo, pageSize, bodyData) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let query = {
-					isDeleted: false,
-				}
-
-				if (entityId !== '') {
-					query['entityId'] = entityId // to fetch projects based on entityId key
-				} else {
-					query['userId'] = userId // to fetch projects based on userId key
-				}
-
 				let searchQuery = []
+				let query
 
 				if (search !== '') {
 					searchQuery = [{ title: new RegExp(search, 'i') }, { description: new RegExp(search, 'i') }]
 				}
 
-				if (filter && filter !== '') {
-					if (filter === CONSTANTS.common.CREATED_BY_ME) {
-						query['referenceFrom'] = {
-							$ne: CONSTANTS.common.LINK,
-						}
-						query['isAPrivateProgram'] = {
-							$ne: false,
-						}
-					} else if (filter == CONSTANTS.common.ASSIGN_TO_ME) {
-						query['isAPrivateProgram'] = false
-					} else {
-						query['$or'] = [
-							{
-								$and: [{ programId: { $exists: false } }, { projectTemplateId: { $exists: true } }],
-							},
-							{
-								$and: [
-									{ programId: { $exists: true } },
-									{ isAPrivateProgram: true },
-									{ projectTemplateId: { $exists: true } },
-								],
-							},
-						]
+				let requestedData = _.cloneDeep(bodyData)
+				let generateAssignedProjectsQueryData = await this.generateAssignedProjectsQuery(
+					userId,
+					requestedData,
+					filter
+				)
+				if (generateAssignedProjectsQueryData.success) {
+					query = generateAssignedProjectsQueryData.data
+				} else {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
 					}
 				}
-
 				let projects = await this.projects(
 					query,
 					searchQuery,
@@ -2603,30 +2637,23 @@ module.exports = class SolutionsHelper {
 	 * @param {String} filter - filter text
 	 * @param {Number} pageNo - page number
 	 * @param {Number} pageSize - page limit
-	 * @param {String} entityId - entity id.
+	 * @param {Object} bodyData - request body data
 	 * @returns {Object} - Details of the solution.
 	 */
 
-	static assignedUserSolutions(solutionType, userId, search, filter, pageNo, pageSize, entityId = '') {
+	static assignedUserSolutions(solutionType, userId, search, filter, pageNo, pageSize, bodyData) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let userAssignedSolutions = {}
 				if (solutionType === CONSTANTS.common.IMPROVEMENT_PROJECT) {
-					// if entityId is provided, fetch projects whose entityId matches to that provided in the query, hence any user will be able to fetch the project if they provide valid entityId
-					if (entityId !== '') {
-						userAssignedSolutions = await this.assignedProjects(
-							userId,
-							search,
-							filter,
-							pageNo,
-							pageSize,
-							entityId
-						)
-					}
-					// if entityId is not provided fetch projects created by the loggedin user
-					else {
-						userAssignedSolutions = await this.assignedProjects(userId, search, filter, pageNo, pageSize)
-					}
+					userAssignedSolutions = await this.assignedProjects(
+						userId,
+						search,
+						filter,
+						pageNo,
+						pageSize,
+						bodyData
+					)
 				} else {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
@@ -2649,7 +2676,14 @@ module.exports = class SolutionsHelper {
 	 * List of solutions and targeted ones.
 	 * @method
 	 * @name targetedSolutions
-	 * @param {String} solutionId - Program Id.
+	 * @param {Object} requestedData - Request body.
+	 * @param {String} solutionType - solution type
+	 * @param {String} userId - user id
+	 * @param {Number} pageSize - Number of solutions to display per page.
+	 * @param {Number} pageNo - The page number to retrieve.
+	 * @param {String} search - Search term to filter solutions by title or description.
+	 * @param {String} filter - Filter criteria to further refine the solution search.
+	 * @param {Boolean} currentScopeOnly - If true, limits results to the current scope only. Default: false.
 	 * @returns {Object} - Details of the solution.
 	 */
 
@@ -2659,37 +2693,96 @@ module.exports = class SolutionsHelper {
 		userId,
 		pageSize,
 		pageNo,
-		search,
+		search = '',
 		filter,
 		surveyReportPage = '',
-		currentScopeOnly = false,
-		entityId = ''
+		currentScopeOnly = false
 	) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				currentScopeOnly = UTILS.convertStringToBoolean(currentScopeOnly)
-				let assignedSolutions = await this.assignedUserSolutions(
+				let totalCount = 0
+				let mergedData = []
+				let solutionIds = []
+				requestedData['filter'] = {}
+				let getTargetedSolution = true
+				let targetedSolutions = {
+					success: false,
+				}
+
+				let filteredTargetedSolutions = []
+
+				if (filter && filter !== '') {
+					if (filter === CONSTANTS.common.CREATED_BY_ME) {
+						requestedData['filter']['isAPrivateProgram'] = {
+							$ne: false,
+						}
+					} else if (filter === CONSTANTS.common.ASSIGN_TO_ME) {
+						requestedData['filter']['isAPrivateProgram'] = false
+					}
+				}
+
+				if (filter === CONSTANTS.common.DISCOVERED_BY_ME) {
+					getTargetedSolution = false
+				}
+
+				let copiedRequestedData = _.cloneDeep(requestedData)
+
+				// Fetch all the targeted solutions
+				if (getTargetedSolution) {
+					targetedSolutions = await this.forUserRoleAndLocation(
+						copiedRequestedData,
+						solutionType,
+						'',
+						'',
+						'',
+						'',
+						search
+					)
+				}
+
+				// fetch projects created by the user
+				let userCreatedProjects = await this.assignedUserSolutions(
 					solutionType,
 					userId,
 					search,
 					filter,
 					'',
 					'',
-					entityId
+					requestedData
 				)
-				if (!assignedSolutions.success) {
+				if (!userCreatedProjects.success) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
-						message: assignedSolutions.message,
+						message: userCreatedProjects.message,
 					}
 				}
-				let totalCount = 0
-				let mergedData = []
-				let solutionIds = []
 
-				if (assignedSolutions.success && assignedSolutions.data) {
-					totalCount = assignedSolutions.data.count
-					mergedData = assignedSolutions.data.data
+				if (process.env.SUBMISSION_LEVEL == 'ENTITY' && requestedData.hasOwnProperty('entityId')) {
+					mergedData = userCreatedProjects.data.data
+					totalCount = mergedData.length
+					if (mergedData.length > 0) {
+						let startIndex = pageSize * (pageNo - 1)
+						let endIndex = startIndex + pageSize
+						mergedData = mergedData.slice(startIndex, endIndex)
+					}
+					return resolve({
+						success: true,
+						message: CONSTANTS.apiResponses.TARGETED_SOLUTIONS_FETCHED,
+						data: {
+							data: mergedData,
+							count: totalCount,
+						},
+						result: {
+							data: mergedData,
+							count: totalCount,
+						},
+					})
+				}
+				// Add program data to the fetched projects
+				if (userCreatedProjects.success && userCreatedProjects.data) {
+					totalCount = userCreatedProjects.data.count
+					mergedData = userCreatedProjects.data.data
 
 					if (mergedData.length > 0) {
 						let programIds = []
@@ -2727,44 +2820,6 @@ module.exports = class SolutionsHelper {
 					}
 				}
 
-				requestedData['filter'] = {}
-				// if (solutionIds.length > 0) {
-				// 	requestedData['filter']['skipSolutions'] = solutionIds
-				// }
-
-				if (filter && filter !== '') {
-					if (filter === CONSTANTS.common.CREATED_BY_ME) {
-						requestedData['filter']['isAPrivateProgram'] = {
-							$ne: false,
-						}
-					} else if (filter === CONSTANTS.common.ASSIGN_TO_ME) {
-						requestedData['filter']['isAPrivateProgram'] = false
-					}
-				}
-
-				let targetedSolutions = {
-					success: false,
-				}
-
-				surveyReportPage = UTILS.convertStringToBoolean(surveyReportPage)
-
-				let getTargetedSolution = true
-
-				if (filter === CONSTANTS.common.DISCOVERED_BY_ME) {
-					getTargetedSolution = false
-				}
-				if (getTargetedSolution) {
-					targetedSolutions = await this.forUserRoleAndLocation(
-						requestedData,
-						solutionType,
-						'',
-						'',
-						CONSTANTS.common.DEFAULT_PAGE_SIZE,
-						CONSTANTS.common.DEFAULT_PAGE_NO,
-						search
-					)
-				}
-
 				if (targetedSolutions.success) {
 					// When targetedSolutions is empty and currentScopeOnly is set to true send empty response
 					if (!(targetedSolutions.data.data.length > 0) && currentScopeOnly) {
@@ -2783,7 +2838,6 @@ module.exports = class SolutionsHelper {
 					}
 					// When targetedSolutions is not empty alter the response based on the value of currentScopeOnly
 					if (targetedSolutions.data.data && targetedSolutions.data.data.length > 0) {
-						let filteredTargetedSolutions = []
 						targetedSolutions.data.data.forEach((solution) => {
 							let newEntry = Object.assign(
 								{
@@ -2841,7 +2895,6 @@ module.exports = class SolutionsHelper {
 					let endIndex = startIndex + pageSize
 					mergedData = mergedData.slice(startIndex, endIndex)
 				}
-
 				return resolve({
 					success: true,
 					message: CONSTANTS.apiResponses.TARGETED_SOLUTIONS_FETCHED,
@@ -3278,6 +3331,84 @@ module.exports = class SolutionsHelper {
 					success: false,
 					status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
 					message: error.message,
+				})
+			}
+		})
+	}
+
+	/**
+	 * Generate assigned projects query
+	 * @method
+	 * @name generateAssignedProjectsQuery
+	 * @param {String} userId - Logged in user id.
+	 * @param {Object} requestedData - request body data.
+	 * @param {String} filter - query filters.
+	 * @returns {Object}
+	 */
+	static async generateAssignedProjectsQuery(userId, requestedData, filter) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let query = { isDeleted: false }
+
+				if (process.env.SUBMISSION_LEVEL === 'ENTITY' && requestedData.hasOwnProperty('entityId')) {
+					// Use queryBasedOnRoleAndLocation function to form query for acl.visibility = SCOPE projects
+					let queryData = await this.queryBasedOnRoleAndLocation(
+						_.omit(requestedData, ['entityId']),
+						'',
+						'acl'
+					)
+					// status of the project could be anything, hence deleting status property from the querydata
+					delete queryData.data.status
+					let matchQuery = queryData.data
+
+					// Construct query for projects accessible by the user
+					query = {
+						entityId: requestedData.entityId,
+						'solutionInformation.submissionLevel': process.env.SUBMISSION_LEVEL,
+						$or: [
+							{ 'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_ALL },
+							{
+								'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_SPECIFIC,
+								'acl.users': { $in: [userId] },
+							},
+							{ 'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_SCOPE, ...matchQuery },
+							{ 'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_SELF, userId: userId },
+						],
+					}
+				} else {
+					query['userId'] = userId
+
+					if (filter && filter !== '') {
+						if (filter === CONSTANTS.common.CREATED_BY_ME) {
+							query['referenceFrom'] = { $ne: CONSTANTS.common.LINK }
+							query['isAPrivateProgram'] = { $ne: false }
+						} else if (filter === CONSTANTS.common.ASSIGN_TO_ME) {
+							query['isAPrivateProgram'] = false
+						} else {
+							query['$or'] = [
+								{ $and: [{ programId: { $exists: false } }, { projectTemplateId: { $exists: true } }] },
+								{
+									$and: [
+										{ programId: { $exists: true } },
+										{ isAPrivateProgram: true },
+										{ projectTemplateId: { $exists: true } },
+									],
+								},
+							]
+						}
+					}
+				}
+				return resolve({
+					success: true,
+					data: query,
+				})
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+
+					errorObject: error,
 				})
 			}
 		})

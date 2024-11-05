@@ -225,4 +225,6 @@ module.exports = {
 	TARGETED_PROGRAMS_FETCHED: 'Targetted programs fetched successfully',
 	PROGRAM_DESCRIPTION:
 		'View and participate in educational programs active in your location and designed for the role you selected',
+	USER_NOT_ALLOWED_TO_EDIT_PROJECT: 'User is not allowed to edit the project',
+	PROJECT_NOT_FOUND_OR_NOT_A_TARGETED: 'Project not targeted to the role',
 }

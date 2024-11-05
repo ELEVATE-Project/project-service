@@ -94,5 +94,9 @@ module.exports = {
 			index: true,
 		},
 		metaInformation: Object,
+		submissionLevel: {
+			type: String,
+			default: 'USER',
+		},
 	},
 }

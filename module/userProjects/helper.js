@@ -1319,6 +1319,7 @@ module.exports = class UserProjectsHelper {
 
 						projectCreation.data['isAPrivateProgram'] = solutionDetails.isAPrivateProgram
 						if (Object.keys(solutionDetails).length > 0) {
+							// Fetch program entity details from entity-service
 							let programInformation = await __getProgramEntityData(solutionDetails.programId)
 							if (
 								!programInformation.success ||

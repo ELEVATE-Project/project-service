@@ -851,8 +851,7 @@ module.exports = class Solutions extends Abstract {
 					req.searchText,
 					req.query.filter,
 					req.query.surveyReportPage ? req.query.surveyReportPage : '',
-					req.query.currentScopeOnly ? req.query.currentScopeOnly : false,
-					req.query.entityId ? req.query.entityId : '' // to fetch projects based on entityId key
+					req.query.currentScopeOnly ? req.query.currentScopeOnly : false
 				)
 
 				return resolve(observations)

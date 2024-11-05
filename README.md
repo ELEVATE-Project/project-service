@@ -54,7 +54,7 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
 
 >**Caution:** Before proceeding, please ensure that the ports given here are available and open. It is essential to verify their availability prior to moving forward. You can run below command in your teminal to check this
 ```
-for port in 3000 3001 3002 5000 5001 4000 9092 5432 7007 2181 2707 3569; do
+for port in 3000 3001 3002 6000 5001 4000 9092 5432 7007 2181 2707 3569; do
     if lsof -iTCP:$port -sTCP:LISTEN &>/dev/null; then
         echo "Port $port is in use"
     else
@@ -738,12 +738,12 @@ Before setting up the following ELEVATE-Project application, dependencies given 
     -   **Ubuntu/Linux**
 
         ```
-        pm2 start ./project-service/app.js --name project-service && \
-        pm2 start ./entity-management/src/app.js --name entity-management && \
-        pm2 start ./user/src/app.js --name user && \
-        pm2 start ./notification/src/app.js --name notification && \
-        pm2 start ./interface-service/src/app.js --name interface && \
-        pm2 start ./scheduler/src/app.js --name scheduler
+        (cd project-service && pm2 start app.js --name project-service && cd -) && \
+        (cd entity-management/src && pm2 start app.js --name entity-management && cd -) && \
+        (cd user/src && pm2 start app.js --name user && cd -) && \
+        (cd notification/src && pm2 start app.js --name notification && cd -) && \
+        (cd interface-service/src && pm2 start app.js --name interface && cd -) && \
+        (cd scheduler/src && pm2 start app.js --name scheduler && cd -)
         ```
 
     -   **MacOs**

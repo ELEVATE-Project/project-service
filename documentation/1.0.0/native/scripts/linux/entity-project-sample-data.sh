@@ -160,27 +160,39 @@ PROJECT_DB_NAME="elevate-project"
 PROJECT_CATEGORY_COLLECTION="projectCategories"
 
 PROJECT_CATEGORY_DOCUMENT=$(cat <<EOF
-{
+[{
     "externalId" : "educationLeader",
     "name" : "Education Leader",
     "status" : "active"
-}
+},{
+    "externalId" : "community",
+    "name" : "Community",
+    "status" : "active"
+},{
+    "externalId" : "teacher",
+    "name" : "Teacher",
+    "status" : "active"
+}]
 EOF
 )
 
 echo "Project category data being added to $PROJECT_CATEGORY_COLLECTION collection in $PROJECT_DB_NAME database...."
 
 PROJECT_CATEGORY_ID=$(mongosh --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
-    var doc = $PROJECT_CATEGORY_DOCUMENT
-    var result = db.getSiblingDB('$PROJECT_DB_NAME').$PROJECT_CATEGORY_COLLECTION.insertOne(doc);
-    if (result.insertedId) {
-        print(result.insertedId);
+    var doc = $PROJECT_CATEGORY_DOCUMENT;
+    var result = db.getSiblingDB('$PROJECT_DB_NAME').$PROJECT_CATEGORY_COLLECTION.insertMany(doc);
+    if (result.insertedIds && Object.keys(result.insertedIds).length > 0) {
+        print(result.insertedIds);
     } else {
         throw new Error('Insert failed');
     }
 ")
 
-PROJECT_CATEGORY_ID=$(clean_object_id "$PROJECT_CATEGORY_ID")
+
+# Convert the string into an array
+IFS=',' read -r -a PROJECT_CATEGORY_ID_ARRAY <<< "$PROJECT_CATEGORY_ID"
+PROJECT_CATEGORY_ID=$(echo "$PROJECT_CATEGORY_ID" | grep -oP "ObjectId\('\K[0-9a-f]{24}" | head -n 1)
+
 echo "Project Category ID: $PROJECT_CATEGORY_ID"
 
 PROGRAMS_COLLECTION="programs"
@@ -208,7 +220,7 @@ PROGRAMS_DOCUMENT=$(cat <<EOF
     "startDate": "2024-04-16T00:00:00.000Z",
     "endDate": "2025-12-16T18:29:59.000Z",
     "scope": {
-        "state": ["$ENTITY_ID"],
+        "state": ['$ENTITY_ID'],
         "roles": ["district_education_officer"],
         "entityType": "state"
     }
@@ -218,8 +230,9 @@ EOF
 
 echo "Program data being added to $PROGRAMS_COLLECTION collection in $PROJECT_DB_NAME database...."
 
+# Insert PROGRAM_ID using mongosh
 PROGRAM_ID=$(mongosh --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
-    var doc = $PROGRAMS_DOCUMENT
+    var doc = $PROGRAMS_DOCUMENT;
     var result = db.getSiblingDB('$PROJECT_DB_NAME').$PROGRAMS_COLLECTION.insertOne(doc);
     if (result.insertedId) {
         print(result.insertedId);
@@ -234,7 +247,7 @@ echo "Program ID: $PROGRAM_ID"
 PROJECT_TEMPLATES_COLLECTION="projectTemplates"
 
 PROJECT_TEMPLATES_DOCUMENT=$(cat <<EOF
-{
+[{
     "description": "The School Hygiene Improvement Initiative is dedicated to ensuring clean, safe, and healthy environments in schools...",
     "concepts": [""],
     "keywords": [""],
@@ -242,6 +255,7 @@ PROJECT_TEMPLATES_DOCUMENT=$(cat <<EOF
     "recommendedFor": [],
     "tasks": [],
     "learningResources": [{
+        "name" : "Washroom management learning resource",
         "link": "https://youtu.be/libKVRa01L8?feature=shared",
         "app": "projectService",
         "id": "libKVRa01L8?feature=shared"
@@ -255,91 +269,480 @@ PROJECT_TEMPLATES_DOCUMENT=$(cat <<EOF
         "name": "Education Leader"
     }],
     "status": "published",
-    "programId": "$PROGRAM_ID"
-}
+    "programId": "$PROGRAM_ID",
+},
+{   "description": "A robust library management program fosters a culture of reading and learning, empowering students to explore diverse resources...",
+    "concepts": [""],
+    "keywords": [""],
+    "isDeleted": false,
+    "recommendedFor": [],
+    "tasks": [],
+    "learningResources": [{
+        "name" : "Library Management learning resource",
+        "link": "https://youtu.be/libKVRa01L8?feature=shared",
+        "app": "projectService",
+        "id": "libKVRa01L8?feature=shared"
+    }],
+    "isReusable": false,
+    "title": "Library Management",
+    "externalId": "LIB-MANAGEMENT",
+    "categories": [{
+        "_id": "$PROJECT_CATEGORY_ID",
+        "externalId": "educationLeader",
+        "name": "Education Leader"
+    }],
+    "status": "published",
+    "programId": "$PROGRAM_ID",
+},
+{   "description": "Ensuring access to clean and safe water in schools is vital for fostering a healthy learning environment, enhancing student well-being, and promoting overall academic success.",
+    "concepts": [""],
+    "keywords": [""],
+    "isDeleted": false,
+    "recommendedFor": [],
+    "tasks": [],
+    "learningResources": [{
+        "name" : "Drinking water management learning resource",
+        "link": "https://youtu.be/libKVRa01L8?feature=shared",
+        "app": "projectService",
+        "id": "libKVRa01L8?feature=shared"
+    }],
+    "isReusable": false,
+    "title": "Drinking Water Availability",
+    "externalId": "DRINKING-WATER-AVAILABILITY",
+    "categories": [{
+        "_id": "$PROJECT_CATEGORY_ID",
+        "externalId": "educationLeader",
+        "name": "Education Leader"
+    }],
+    "status": "published",
+    "programId": "$PROGRAM_ID",
+},
+{   "description": "Providing access to quality sports equipment fosters teamwork, promotes physical fitness, and nurtures the spirit of competition, ultimately contributing to the holistic development...",
+    "concepts": [""],
+    "keywords": [""],
+    "isDeleted": false,
+    "recommendedFor": [],
+    "tasks": [],
+    "learningResources": [{
+        "name" : "Sports management learning resource",
+        "link": "https://youtu.be/libKVRa01L8?feature=shared",
+        "app": "projectService",
+        "id": "libKVRa01L8?feature=shared"
+    }],
+    "isReusable": false,
+    "title": "Sports Management",
+    "externalId": "SPORTS-MANAGEMENT",
+    "categories": [{
+        "_id": "$PROJECT_CATEGORY_ID",
+        "externalId": "educationLeader",
+        "name": "Education Leader"
+    }],
+    "status": "published",
+    "programId": "$PROGRAM_ID",
+}]
 EOF
 )
 
 echo "Project template data being added to $PROJECT_TEMPLATES_COLLECTION collection in $PROJECT_DB_NAME database...."
 
+# Insert PROJECT_TEMPLATE_ID using docker exec
 PROJECT_TEMPLATE_ID=$(mongosh --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
-    var doc = $PROJECT_TEMPLATES_DOCUMENT
-    var result = db.getSiblingDB('$PROJECT_DB_NAME').$PROJECT_TEMPLATES_COLLECTION.insertOne(doc);
-    if (result.insertedId) {
-        print(result.insertedId);
+    var doc = $PROJECT_TEMPLATES_DOCUMENT;
+    var result = db.getSiblingDB('$PROJECT_DB_NAME').$PROJECT_TEMPLATES_COLLECTION.insertMany(doc);
+    if (result.insertedIds && Object.keys(result.insertedIds).length > 0) {
+        print(result.insertedIds);
     } else {
         throw new Error('Insert failed');
     }
 ")
 
-PROJECT_TEMPLATE_ID=$(clean_object_id "$PROJECT_TEMPLATE_ID")
-echo "Project Template ID: $PROJECT_TEMPLATE_ID"
+# Convert the string into an array
+IFS=',' read -r -a PROJECT_TEMPLATE_ID_ARRAY <<< "$PROJECT_TEMPLATE_ID"
+
+
+PROJECT_TEMPLATE_ID_1=$(echo "$PROJECT_TEMPLATE_ID" | grep -oP "ObjectId\('\K[0-9a-f]{24}" | head -n 1)
+PROJECT_TEMPLATE_ID_2=$(echo "$PROJECT_TEMPLATE_ID" | grep -oP "ObjectId\('\K[0-9a-f]{24}" | sed -n '2p')
+PROJECT_TEMPLATE_ID_3=$(echo "$PROJECT_TEMPLATE_ID" | grep -oP "ObjectId\('\K[0-9a-f]{24}" | sed -n '3p')
+PROJECT_TEMPLATE_ID_4=$(echo "$PROJECT_TEMPLATE_ID" | grep -oP "ObjectId\('\K[0-9a-f]{24}" | sed -n '4p')
+
+
+PROJECT_TEMPLATE_TASKS_COLLECTION="projectTemplateTasks"
+PROJECT_TEMPLATE_TASKS_DOCUMENTS=$(cat <<EOF
+[
+{
+    "isDeleted" : false,
+    "isDeletable" : false,
+    "taskSequence" : [
+
+    ],
+    "children" : [
+
+    ],
+    "visibleIf" : [
+
+    ],
+    "hasSubTasks" : false,
+    "learningResources" : [
+        {
+            "name" : "Washroom management learning resource",
+            "link" : "https://youtube.com/watch?v=XExMb0XBhw4",
+            "app" : "projectService",
+            "id" : "watch?v=XExMb0XBhw4"
+        }
+    ],
+    "deleted" : false,
+    "type" : "content",
+    "projectTemplateId": ObjectId('$PROJECT_TEMPLATE_ID_1'),
+    "projectTemplateExternalId" : "WASH-HYGIENE",
+    "name" : "Keep the washroom clean.",
+    "externalId" : "Wash-Hyg-01",
+    "description" : "",
+    "sequenceNumber" : "1",
+    "metaInformation" : {
+        "hasAParentTask" : "NO",
+        "parentTaskOperator" : "",
+        "parentTaskValue" : "",
+        "parentTaskId" : "",
+        "startDate" : "30/08/2021",
+        "endDate" : "30/08/2029",
+        "minNoOfSubmissionsRequired" : ""
+    },
+    "__v" : NumberInt(0)
+},
+{
+    "isDeleted" : false,
+    "isDeletable" : false,
+    "taskSequence" : [
+
+    ],
+    "children" : [
+
+    ],
+    "visibleIf" : [
+
+    ],
+    "hasSubTasks" : false,
+    "learningResources" : [
+        {
+            "name" : "Library management learning resource",
+            "link" : "https://youtube.com/watch?v=XExMb0XBhw4",
+            "app" : "projectService",
+            "id" : "watch?v=XExMb0XBhw4"
+        }
+    ],
+    "deleted" : false,
+    "type" : "content",
+    "projectTemplateId": ObjectId('$PROJECT_TEMPLATE_ID_2'),
+    "projectTemplateExternalId" : "LIB-MANAGEMENT",
+    "name" : "Stack the books properly in the library.",
+    "externalId" : "Lib-Mana-01",
+    "description" : "",
+    "sequenceNumber" : "1",
+    "metaInformation" : {
+        "hasAParentTask" : "NO",
+        "parentTaskOperator" : "",
+        "parentTaskValue" : "",
+        "parentTaskId" : "",
+        "startDate" : "30/08/2021",
+        "endDate" : "30/08/2029",
+        "minNoOfSubmissionsRequired" : ""
+    },
+    "__v" : NumberInt(0)
+},
+{
+    "isDeleted" : false,
+    "isDeletable" : false,
+    "taskSequence" : [
+
+    ],
+    "children" : [
+
+    ],
+    "visibleIf" : [
+
+    ],
+    "hasSubTasks" : false,
+    "learningResources" : [
+        {
+            "name" : "Drinking water management learning resource",
+            "link" : "https://youtube.com/watch?v=XExMb0XBhw4",
+            "app" : "projectService",
+            "id" : "watch?v=XExMb0XBhw4"
+        }
+    ],
+    "deleted" : false,
+    "type" : "content",
+    "projectTemplateId": ObjectId('$PROJECT_TEMPLATE_ID_3'),
+    "projectTemplateExternalId" : "DRINKING-WATER-AVAILABILITY",
+    "name" : "Keep the drinking water vessels clean.",
+    "externalId" : "Drink-Wat-01",
+    "description" : "",
+    "sequenceNumber" : "1",
+    "metaInformation" : {
+        "hasAParentTask" : "NO",
+        "parentTaskOperator" : "",
+        "parentTaskValue" : "",
+        "parentTaskId" : "",
+        "startDate" : "30/08/2021",
+        "endDate" : "30/08/2029",
+        "minNoOfSubmissionsRequired" : ""
+    },
+    "__v" : NumberInt(0)
+
+},
+{
+    "isDeleted" : false,
+    "isDeletable" : false,
+    "taskSequence" : [
+
+    ],
+    "children" : [
+
+    ],
+    "visibleIf" : [
+
+    ],
+    "hasSubTasks" : false,
+    "learningResources" : [
+        {
+            "name" : "Sports management learning resource",
+            "link" : "https://youtube.com/watch?v=XExMb0XBhw4",
+            "app" : "projectService",
+            "id" : "watch?v=XExMb0XBhw4"
+        }
+    ],
+    "deleted" : false,
+    "type" : "content",
+    "projectTemplateId": ObjectId('$PROJECT_TEMPLATE_ID_4'),
+    "projectTemplateExternalId" : "SPORTS-MANAGEMENT",
+    "name" : "Stack the sport equipments in correct order.",
+    "externalId" : "Spor-Mana-01",
+    "description" : "",
+    "sequenceNumber" : "1",
+    "metaInformation" : {
+        "hasAParentTask" : "NO",
+        "parentTaskOperator" : "",
+        "parentTaskValue" : "",
+        "parentTaskId" : "",
+        "startDate" : "30/08/2021",
+        "endDate" : "30/08/2029",
+        "minNoOfSubmissionsRequired" : ""
+    },
+    "__v" : NumberInt(0)
+
+}]
+EOF
+)
+
+echo "Project template tasks data being added to $PROJECT_TEMPLATE_TASKS_COLLECTION collection in $PROJECT_DB_NAME database...."
+
+# Insert PROJECT_TEMPLATE_ID using docker exec
+PROJECT_TEMPLATE_TASKS_ID=$(mongosh --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
+    var doc = $PROJECT_TEMPLATE_TASKS_DOCUMENTS;
+    var result = db.getSiblingDB('$PROJECT_DB_NAME').$PROJECT_TEMPLATE_TASKS_COLLECTION.insertMany(doc);
+    if (result.insertedIds && Object.keys(result.insertedIds).length > 0) {
+        print(result.insertedIds);
+    } else {
+        throw new Error('Insert failed');
+    }
+")
+
+# Convert the string into an array
+IFS=',' read -r -a PROJECT_TEMPLATE_TASKS_ID_ARRAY <<< "$PROJECT_TEMPLATE_TASKS_ID"
+
+
+echo $PROJECT_TEMPLATE_TASKS_ID
+
+
+PROJECT_TEMPLATE_TASK_ID_1=$(echo "$PROJECT_TEMPLATE_TASKS_ID" | grep -oP "ObjectId\('\K[0-9a-f]{24}" | head -n 1)
+PROJECT_TEMPLATE_TASK_ID_2=$(echo "$PROJECT_TEMPLATE_TASKS_ID" | grep -oP "ObjectId\('\K[0-9a-f]{24}" | sed -n '2p')
+PROJECT_TEMPLATE_TASK_ID_3=$(echo "$PROJECT_TEMPLATE_TASKS_ID" | grep -oP "ObjectId\('\K[0-9a-f]{24}" | sed -n '3p')
+PROJECT_TEMPLATE_TASK_ID_4=$(echo "$PROJECT_TEMPLATE_TASKS_ID" | grep -oP "ObjectId\('\K[0-9a-f]{24}" | sed -n '4p')
 
 SOLUTIONS_COLLECTION="solutions"
 
 SOLUTION_DOCUMENT=$(cat <<EOF
-{
+[{
     "resourceType": ["Improvement Project Solution"],
     "language": ["English"],
     "keywords": ["Improvement Project"],
-    "entities": ["$ENTITY_ID"],
-    "programId": "$PROGRAM_ID",
+    "entities": ['$ENTITY_ID'],
+    "programId": ObjectId('$PROGRAM_ID'),
     "name": "Washroom Hygiene",
     "description": "The School Hygiene Improvement Initiative is dedicated to ensuring clean, safe, and healthy environments in schools...",
     "programExternalId": "PG01",
     "scope": {
-        "state": ["$ENTITY_ID"],
+        "state": ['$ENTITY_ID'],
         "roles": ["state_education_officer"],
         "entityType": "state"
     },
-    "projectTemplateId": ObjectId("$PROJECT_TEMPLATE_ID"),
+    "projectTemplateId": ObjectId('$PROJECT_TEMPLATE_ID_1'),
     "startDate" : ISODate("2021-08-30T00:00:00.000Z"),
     "endDate" : ISODate("2029-08-30T00:00:00.000Z"),
     "isDeleted" : false,
     "isAPrivateProgram" : false,
     "isReusable" : false,
     "status" : "active",
-    "type" : "improvementProject",
-    "updatedAt" : ISODate("2021-08-30T00:00:00.000Z")
-}
+    "type" : "improvementProject"
+},
+{
+    "resourceType": ["Improvement Project Solution"],
+    "language": ["English"],
+    "keywords": ["Improvement Project"],
+    "entities": ['$ENTITY_ID'],
+    "programId": ObjectId('$PROGRAM_ID'),
+    "name": "Library Management",
+    "description": "A robust library management program fosters a culture of reading and learning, empowering students to explore diverse resources...",
+    "programExternalId": "PG01",
+    "scope": {
+        "state": ['$ENTITY_ID'],
+        "roles": ["state_education_officer"],
+        "entityType": "state"
+    },
+    "projectTemplateId": ObjectId('$PROJECT_TEMPLATE_ID_2'),
+    "startDate" : ISODate("2021-08-30T00:00:00.000Z"),
+    "endDate" : ISODate("2029-08-30T00:00:00.000Z"),
+    "isDeleted" : false,
+    "isAPrivateProgram" : false,
+    "isReusable" : false,
+    "status" : "active",
+    "type" : "improvementProject"
+},
+{
+    "resourceType": ["Improvement Project Solution"],
+    "language": ["English"],
+    "keywords": ["Improvement Project"],
+    "entities": ['$ENTITY_ID'],
+    "programId": ObjectId('$PROGRAM_ID'),
+    "name": "Drinking Water Management",
+    "description": "Ensuring access to clean and safe water in schools is vital for fostering a healthy learning environment, enhancing student well-being, and promoting overall academic success.",
+    "programExternalId": "PG01",
+    "scope": {
+        "state": ['$ENTITY_ID'],
+        "roles": ["state_education_officer"],
+        "entityType": "state"
+    },
+    "projectTemplateId": ObjectId('$PROJECT_TEMPLATE_ID_3'),
+    "startDate" : ISODate("2021-08-30T00:00:00.000Z"),
+    "endDate" : ISODate("2029-08-30T00:00:00.000Z"),
+    "isDeleted" : false,
+    "isAPrivateProgram" : false,
+    "isReusable" : false,
+    "status" : "active",
+    "type" : "improvementProject"
+},
+{
+    "resourceType": ["Improvement Project Solution"],
+    "language": ["English"],
+    "keywords": ["Improvement Project"],
+    "entities": ['$ENTITY_ID'],
+    "programId": ObjectId('$PROGRAM_ID'),
+    "name": "Sports Management",
+    "description": "Providing access to quality sports equipment fosters teamwork, promotes physical fitness, and nurtures the spirit of competition, ultimately contributing to the holistic development...",
+    "programExternalId": "PG01",
+    "scope": {
+        "state": ['$ENTITY_ID'],
+        "roles": ["district_education_officer"],
+        "entityType": "state"
+    },
+    "projectTemplateId": ObjectId('$PROJECT_TEMPLATE_ID_4'),
+    "startDate" : ISODate("2021-08-30T00:00:00.000Z"),
+    "endDate" : ISODate("2029-08-30T00:00:00.000Z"),
+    "isDeleted" : false,
+    "isAPrivateProgram" : false,
+    "isReusable" : false,
+    "status" : "active",
+    "type" : "improvementProject"
+}]
 EOF
 )
+
+# Convert the multiline JSON to a single line for MongoDB
+# SOLUTION_DOCUMENT_SINGLE_LINE=$(echo "$SOLUTION_DOCUMENT" | tr -d '\n' | sed 's/"/\\"/g')
 
 echo "Solution data being added to $SOLUTIONS_COLLECTION collection in $PROJECT_DB_NAME database...."
 
 # Insert SOLUTION_ID using docker exec
 SOLUTION_ID=$(mongosh --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
-    var doc = $SOLUTION_DOCUMENT
-    var result = db.getSiblingDB('$PROJECT_DB_NAME').$SOLUTIONS_COLLECTION.insertOne(doc);
-    if (result.insertedId) {
-        print(result.insertedId);
+    var doc = $SOLUTION_DOCUMENT;
+    var result = db.getSiblingDB('$PROJECT_DB_NAME').$SOLUTIONS_COLLECTION.insertMany(doc);
+    if (result.insertedIds && Object.keys(result.insertedIds).length > 0) {
+        print(result.insertedIds);
     } else {
         throw new Error('Insert failed');
     }
 ")
-SOLUTION_ID=$(clean_object_id "$SOLUTION_ID")
-echo "Solution ID: $SOLUTION_ID"
 
-# Updating project template with the solution ID
+# Convert the string into an array
+IFS=',' read -r -a SOLUTION_ID_ARRAY <<< "$SOLUTION_ID"
+
+echo $SOLUTION_ID
+
+SOLUTION_ID_1=$(echo "$SOLUTION_ID" | grep -oP "ObjectId\('\K[0-9a-f]{24}" | head -n 1)
+SOLUTION_ID_2=$(echo "$SOLUTION_ID" | grep -oP "ObjectId\('\K[0-9a-f]{24}" | sed -n '2p')
+SOLUTION_ID_3=$(echo "$SOLUTION_ID" | grep -oP "ObjectId\('\K[0-9a-f]{24}" | sed -n '3p')
+SOLUTION_ID_4=$(echo "$SOLUTION_ID" | grep -oP "ObjectId\('\K[0-9a-f]{24}" | sed -n '4p')
+
+
 mongosh --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
     var updateResult = db.getSiblingDB('$PROJECT_DB_NAME').$PROJECT_TEMPLATES_COLLECTION.updateOne(
-        {_id: ObjectId('$PROJECT_TEMPLATE_ID')},  // Assuming PROJECT_TEMPLATE_ID is an ObjectId
+        {_id: ObjectId('$PROJECT_TEMPLATE_ID_1')},
         { 
             \$set: { 
-                'solutionId': '$SOLUTION_ID'  // Use single quotes to avoid conflicts with Bash variable expansion
+                'solutionId': ObjectId('$SOLUTION_ID_1')
+            },
+            \$push: {
+                'tasks': ObjectId('$PROJECT_TEMPLATE_TASK_ID_1')
             }
         }
     );
     if (updateResult.matchedCount > 0) {
-        print('Solution document updated successfully');
+        print('Document updated successfully for ID: $PROJECT_TEMPLATE_ID_1');  // Output the specific ID
     } else {
-        throw new Error('Update failed');
-    }
-"
+        throw new Error('Update failed for ID: $PROJECT_TEMPLATE_ID_1');
+    }"
 
 
-FORMS_COLLECTION='forms'
-FORM_DOCUMENTS='[{
+mongosh --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
+    var updateResult = db.getSiblingDB('$PROJECT_DB_NAME').$PROJECT_TEMPLATES_COLLECTION.updateOne(
+        {_id: ObjectId('$PROJECT_TEMPLATE_ID_2')},
+        { 
+            \$set: { 
+                'solutionId': ObjectId('$SOLUTION_ID_2')
+            },
+            \$push: {
+                'tasks': ObjectId('$PROJECT_TEMPLATE_TASK_ID_2')
+            }
+        }
+    );
+    if (updateResult.matchedCount > 0) {
+        print('Document updated successfully for ID: $PROJECT_TEMPLATE_ID_2');  // Output the specific ID
+    } else {
+        throw new Error('Update failed for ID: $PROJECT_TEMPLATE_ID_2');
+    }"
+
+
+mongosh --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
+    var updateResult = db.getSiblingDB('$PROJECT_DB_NAME').$PROJECT_TEMPLATES_COLLECTION.updateOne(
+        {_id: ObjectId('$PROJECT_TEMPLATE_ID_3')},
+        { 
+            \$set: { 
+                'solutionId': ObjectId('$SOLUTION_ID_3')
+            },
+            \$push: {
+                'tasks': ObjectId('$PROJECT_TEMPLATE_TASK_ID_3')
+            }
+        }
+    );
+    if (updateResult.matchedCount > 0) {
+        print('Document updated successfully for ID: $PROJECT_TEMPLATE_ID_3');  // Output the specific ID
+    } else {
+        throw new Error('Update failed for ID: $PROJECT_TEMPLATE_ID_3');
+    }"
+
+
+FORM_DOCUMENTS=$(cat <<EOF
+[{
     "version" : 13,
     "deleted" : false,
     "type" : "homelist",
@@ -508,27 +911,18 @@ FORM_DOCUMENTS='[{
     "updatedAt": "2024-08-23T11:32:06.172Z",
     "createdAt": "2024-08-23T11:32:06.172Z",
     "__v": 0
-}]'
+}]
+EOF
+)
 
 echo "Forms data being added to forms collection in $PROJECT_DB_NAME database...."
 
 # Insert FORM using docker exec
 FORM_ID=$(mongosh --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
     var doc = $FORM_DOCUMENTS;
-    var result = db.getSiblingDB('$PROJECT_DB_NAME').$FORMS_COLLECTION.insertMany(doc);
+    var result = db.getSiblingDB('$PROJECT_DB_NAME').forms.insertMany(doc);
     
-    if (result.insertedIds && Object.keys(result.insertedIds).length > 0) {
-        print(result.insertedIds);
-    } else {
-        throw new Error('Insert failed'); // Throw an error if no IDs were inserted
-    }
 ")
-
-# Print the inserted Form IDs
-echo "Form IDs: $FORM_ID"
-
-
-
 
 CONFIGURATIONS_COLLECTION="configurations"
 
@@ -558,7 +952,8 @@ USER_EXTENSION_DOCUMENT=$(cat <<EOF
     "entityTypes" : [ 
         {
             "entityType" : "state",
-            "entityTypeId" : "$ENTITY_TYPE_ID",
+            "entityTypeId" : "$ENTITY_TYPE_ID"
+            
         }
     ],
     "updatedAt" : "2024-09-09T09:31:47.135Z",
@@ -568,7 +963,7 @@ USER_EXTENSION_DOCUMENT=$(cat <<EOF
 EOF
 )
 
-echo "User data being added to userRoleExtension collection in $ENTITY_SERVICE_DB_NAME database...."
+echo "user data being added to userRoleExtension collection in $ENTITY_SERVICE_DB_NAME database...."
 # Insert SOLUTION_ID using docker exec
 USER_EXTENSION_ID=$(mongosh --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
     var doc = $USER_EXTENSION_DOCUMENT;
@@ -586,15 +981,17 @@ echo "UserExtention ID: $USER_EXTENSION_ID"
 
 echo "Configurations data being added to $CONFIGURATIONS_COLLECTION collection in $PROJECT_DB_NAME database...."
 
+# Insert CONFIGURATION_ID using docker exec
 CONFIGURATION_ID=$(mongosh --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
-    var doc = $CONFIGURATIONS_DOCUMENT
+    var doc = $CONFIGURATIONS_DOCUMENT;
     var result = db.getSiblingDB('$PROJECT_DB_NAME').$CONFIGURATIONS_COLLECTION.insertOne(doc);
     if (result.insertedId) {
-        print(result.insertedId.valueOf()); // Print the ID directly
+        print(result.insertedId);
     } else {
         throw new Error('Insert failed');
     }
 ")
+
 
 CONFIGURATION_ID=$(clean_object_id "$CONFIGURATION_ID")
 echo "Configurations ID: $CONFIGURATION_ID"

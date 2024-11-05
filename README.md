@@ -723,13 +723,12 @@ Before setting up the following ELEVATE-Project application, dependencies given 
     -   **Ubuntu/Linux**
 
         ```
-        (cd project-service && pm2 start app.js --name project-service && cd -) && \
-        (cd entity-management/src && pm2 start app.js --name entity-management && cd -) && \
-        (cd user/src && pm2 start app.js --name user && cd -) && \
-        (cd notification/src && pm2 start app.js --name notification && cd -) && \
-        (cd interface-service/src && pm2 start app.js --name interface && cd -) && \
-        (cd scheduler/src && pm2 start app.js --name scheduler && cd -)
-
+        pm2 start ./project-service/app.js --name project-service && \
+        pm2 start ./entity-management/src/app.js --name entity-management && \
+        pm2 start ./user/src/app.js --name user && \
+        pm2 start ./notification/src/app.js --name notification && \
+        pm2 start ./interface-service/src/app.js --name interface && \
+        pm2 start ./scheduler/src/app.js --name scheduler
         ```
 
     -   **MacOs**

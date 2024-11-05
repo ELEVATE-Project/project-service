@@ -45,7 +45,7 @@ services:
     image: shikshalokamqa/elevate-project-service:1.0.1
     container_name: project
     ports:
-      - '5000:5000'
+      - '6000:6000'
     command: ['nodemon', 'app.js']
     environment:
       - MONGODB_URL=mongodb://mongo:27017/elevate-project

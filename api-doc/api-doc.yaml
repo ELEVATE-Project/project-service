@@ -5610,7 +5610,8 @@ paths:
                     - 5fd098e2e049735a86b748ac
                     - 5fd1b52ab53a6416aaeefc83
                     - 5fd1b52ab53a6416aaeefb20
-                  role: HM,BEO
+                  role: head_master,district_education_officer
+                  entityId: EnglishClass
       parameters:
         - name: X-auth-token
           in: header
@@ -5663,13 +5664,6 @@ paths:
             projects/solutions only
           schema:
             type: boolean
-        - in: query
-          name: entityId
-          description: >-
-            entityId field helps to fetch projects whose entityId matches
-            irrespective of user
-          schema:
-            type: string
       responses:
         '200':
           description: Successful response

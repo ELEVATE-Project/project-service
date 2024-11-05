@@ -3359,6 +3359,9 @@ module.exports = class SolutionsHelper {
 					)
 					// status of the project could be anything, hence deleting status property from the querydata
 					delete queryData.data.status
+					// isReusable field doesn't exist for projects model hence removing the key
+					delete queryData.data.isReusable
+
 					let matchQuery = queryData.data
 
 					// Construct query for projects accessible by the user

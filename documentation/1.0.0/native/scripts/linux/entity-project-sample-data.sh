@@ -824,6 +824,77 @@ FORM_DOCUMENTS=$(cat <<EOF
     "__v" : 0
 },
 {
+    "version" : 13,
+    "deleted" : false,
+    "type" : "projectHome",
+    "subType" : "project",
+    "data" : [ 
+        {
+            "type" : "bannerList",
+            "listingData" : [ 
+                {
+                    "title" : "Hey, Welcome back!",
+                    "discription" : ""
+                }
+            ]
+        }, 
+        {
+            "type" : "solutionList",
+            "listingData" : [ 
+                {
+                    "name" : "Projects",
+                    "img" : "assets/images/ic_project.svg",
+                    "redirectionUrl" : "/listing/project",
+                    "listType" : "project",
+                    "solutionType" : "improvementProject",
+                    "reportPage" : false,
+                    "description" : "Manage and track your school improvement easily, by creating tasks and planning project timelines"
+                }, 
+                {
+                    "name" : "Reports",
+                    "img" : "assets/images/ic_report.svg",
+                    "redirectionUrl" : "/project-report",
+                    "listType" : "report",
+                    "reportPage" : true,
+                    "description" : "Make sense of data to enable your decision-making based on your programs with ease",
+                    "list" : [ 
+                        {
+                            "name" : "Improvement Project Reports",
+                            "img" : "assets/images/ic_project.svg",
+                            "redirectionUrl" : "/project-report",
+                            "listType" : "project",
+                            "solutionType" : "improvementProject",
+                            "reportPage" : false,
+                            "description" : "Manage and track your school improvement easily, by creating tasks and planning project timelines"
+                        }, 
+                        {
+                            "name" : "Survey Reports",
+                            "img" : "assets/images/ic_survey.svg",
+                            "redirectionUrl" : "/listing/survey",
+                            "listType" : "survey",
+                            "solutionType" : "survey",
+                            "reportPage" : true,
+                            "reportIdentifier" : "surveyReportPage",
+                            "description" : "Provide information and feedback through quick and easy surveys"
+                        }
+                    ]
+                }, 
+                {
+                    "name" : "Library",
+                    "img" : "assets/images/library.svg",
+                    "redirectionUrl" : "/project-library",
+                    "listType" : "library",
+                    "description" : ""
+                }
+            ]
+        }
+    ],
+    "organizationId" : 1,
+    "updatedAt" : "2024-06-05T08:47:14.987Z",
+    "createdAt" : "2024-06-05T08:47:14.987Z",
+    "__v" : 0
+},
+{
     "version" : 28,
     "deleted" : false,
     "type" : "form",

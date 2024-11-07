@@ -748,9 +748,9 @@ Before setting up the following ELEVATE-Project application, dependencies given 
 
 10.  **Start The Services**
 
-    Following the steps given below, 2 instances of each ELEVATE-Project backend service will be deployed and be managed by PM2 process manager.
+     Following the steps given below, 2 instances of each ELEVATE-Project backend service will be deployed and be managed by PM2 process manager.
 
-    -   **Ubuntu/Linux**
+     -   **Ubuntu/Linux**
 
         ```
         (cd project-service && pm2 start app.js --name project-service && cd -) && \

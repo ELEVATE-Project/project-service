@@ -52,7 +52,7 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
 > Note: All commands are run from the project directory.
 ## Operating Systems: Linux / macOS
 
-> **Caution:** Before proceeding, please ensure that the ports given here are available and open. It is essential to verify their availability prior to moving forward. You can run below command in your teminal to check this
+>**Caution:** Before proceeding, please ensure that the ports given here are available and open. It is essential to verify their availability prior to moving forward. You can run below command in your teminal to check this
 ```
 for port in 3000 3001 3002 6000 5001 4000 9092 5432 7007 2181 2707 3569; do
     if lsof -iTCP:$port -sTCP:LISTEN &>/dev/null; then
@@ -67,7 +67,7 @@ done
     ```
     curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/mac-linux/setup_project.sh && chmod +x setup_project.sh && ./setup_project.sh
     ```
-    
+
     > Note : The script will download all the essential files and launch the services in Docker. Once all services are successfully up and running, you can proceed to the next steps.
 
     **General Instructions :**
@@ -259,12 +259,12 @@ During the initial setup of Project services with the default configuration, you
 In such cases, you can generate sample user accounts using the steps below. This allows you to explore the Project services and portal immediately after setup.
 
 > **Warning:** Use this generator only immediately after the initial system setup and before any normal user accounts are created through the portal. It should not be used under any circumstances thereafter.
--   **Ubuntu/Linux/Mac**
+- **Ubuntu/Linux/Mac**
 
     ```
     ./insert_sample_data.sh user postgres://postgres:postgres@citus_master:5432/user
     ```
--   **Windows**
+- **Windows**
     1. **Download The `sampleData.sql` Files:**
 
         ```
@@ -330,11 +330,11 @@ This step inserts configuration forms into MongoDB, enabling or disabling featur
 
 #### Insert Forms Data into Database
 
--   **Ubuntu/Linux/Mac**:
-
+- **Ubuntu/Linux/Mac**:
     ```
     curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/mac-linux/import_forms_mongo.sh && chmod +x import_forms_mongo.sh && ./import_forms_mongo.sh mongodb://mongo:27017/elevate-project
     ```
+
 - **Windows**:
     1. Download the `import_forms_mongo.bat` file:
        ```cmd
@@ -730,10 +730,6 @@ Before setting up the following ELEVATE-Project application, dependencies given 
             ```
             cd user/src && npm run db:seed:all && cd ../..
             ```
-
-<!-- 9.  **Default Forms Creation for Portal Configuration**
-
-This step inserts configuration forms into MongoDB, enabling or disabling features and fields on portal pages. -->
 
 9.  **Insert Forms Data into Database**
 

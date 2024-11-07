@@ -761,7 +761,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         (cd scheduler/src && pm2 start app.js --name scheduler && cd -)
         ```
 
-    -   **MacOs**
+     -   **MacOs**
 
         ```
         cd project-service && npx pm2 start app.js -i 2 --name project-service && cd .. && \

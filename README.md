@@ -749,25 +749,25 @@ Before setting up the following ELEVATE-Project application, dependencies given 
 
     -   **Ubuntu/Linux**
 
-    ```
-    (cd project-service && pm2 start app.js --name project-service && cd -) && \
-    (cd entity-management/src && pm2 start app.js --name entity-management && cd -) && \
-    (cd user/src && pm2 start app.js --name user && cd -) && \
-    (cd notification/src && pm2 start app.js --name notification && cd -) && \
-    (cd interface-service/src && pm2 start app.js --name interface && cd -) && \
-    (cd scheduler/src && pm2 start app.js --name scheduler && cd -)
-    ```
+        ```
+        (cd project-service && pm2 start app.js --name project-service && cd -) && \
+        (cd entity-management/src && pm2 start app.js --name entity-management && cd -) && \
+        (cd user/src && pm2 start app.js --name user && cd -) && \
+        (cd notification/src && pm2 start app.js --name notification && cd -) && \
+        (cd interface-service/src && pm2 start app.js --name interface && cd -) && \
+        (cd scheduler/src && pm2 start app.js --name scheduler && cd -)
+        ```
 
     -   **MacOs**
 
-    ```
-    cd project-service && npx pm2 start app.js -i 2 --name project-service && cd .. && \
-    cd entity-management/src && npx pm2 start app.js -i 2 --name entity-management && cd ../.. && \
-    cd user/src && npx pm2 start app.js -i 2 --name user && cd ../.. && \
-    cd notification/src && npx pm2 start app.js -i 2 --name notification && cd ../.. && \
-    cd interface-service/src && npx pm2 start app.js -i 2 --name interface && cd ../.. && \
-    cd scheduler/src && npx pm2 start app.js -i 2 --name scheduler && cd ../..
-    ```
+        ```
+        cd project-service && npx pm2 start app.js -i 2 --name project-service && cd .. && \
+        cd entity-management/src && npx pm2 start app.js -i 2 --name entity-management && cd ../.. && \
+        cd user/src && npx pm2 start app.js -i 2 --name user && cd ../.. && \
+        cd notification/src && npx pm2 start app.js -i 2 --name notification && cd ../.. && \
+        cd interface-service/src && npx pm2 start app.js -i 2 --name interface && cd ../.. && \
+        cd scheduler/src && npx pm2 start app.js -i 2 --name scheduler && cd ../..
+        ```
 
 11. **Run Service Scripts**
 

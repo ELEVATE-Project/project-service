@@ -50,6 +50,7 @@
 		"dotenv": "^8.2.0",
 		"ejs": "^3.1.10",
 		"elevate-cloud-storage": "^2.1.0",
+		"elevate-logger": "^3.1.0",
 		"express": "^4.17.1",
 		"express-fileupload": "^1.1.6",
 		"express-validator": "^5.3.1",
@@ -66,6 +67,7 @@
 		"log": "^1.4.0",
 		"md5": "^2.3.0",
 		"mocha": "^6.2.2",
+		"module-alias": "^2.2.3",
 		"moment-timezone": "^0.5.31",
 		"mongodb": "^3.7.4",
 		"mongoose": "^5.9.4",
@@ -96,5 +98,22 @@
 	"lint-staged": {
 		".*": "prettier --ignore-unknown --write",
 		"*": "prettier --ignore-unknown --write"
+	},
+	"_moduleAliases": {
+		"@root": ".",
+		"@modules": "module",
+		"@databaseQueries": "databaseQueries",
+		"@generics": "generics",
+		"@services": "generics/services",
+		"@helpers": "generics/helpers",
+		"@models": "models",
+		"@controllers": "controllers",
+		"@constants": "generics/constants",
+		"@kafkaConsumers": "generics/kafka/consumers",
+		"@config": "config",
+		"@routes": "routes",
+		"@utils": "utils",
+		"@envVariables": "envVariables",
+		"@healthCheck": "healthCheck"
 	}
 }

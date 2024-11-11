@@ -731,7 +731,19 @@ Before setting up the following ELEVATE-Project application, dependencies given 
             cd user/src && npm run db:seed:all && cd ../..
             ```
 
-9.  **Start The Services**
+9.  **Insert Forms Data into Database**
+
+    -   **Ubuntu/Linux/MacOS/Windows**
+
+        1.  Download `import_forms.js` Script File And Make the setup file executable by running the following command:
+
+            ```
+            curl -s https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/scripts/linux/import_forms.js | node
+            ```
+            
+
+
+10. **Start The Services**
 
     Following the steps given below, 2 instances of each ELEVATE-Project backend service will be deployed and be managed by PM2 process manager.
 
@@ -757,7 +769,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         cd scheduler/src && npx pm2 start app.js -i 2 --name scheduler && cd ../..
         ```
 
-10. **Run Service Scripts**
+11. **Run Service Scripts**
 
     -   **Ubuntu/Linux/MacOS**
 
@@ -765,7 +777,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         cd user/src/scripts && node insertDefaultOrg.js && node viewsScript.js && cd ../../..
         ```
 
-11. **Start The Portal**
+12. **Start The Portal**
 
     ELEVATE-Project portal utilizes Ionic for building the browser bundle, follow the steps given below to install them and start the portal.
 
@@ -836,7 +848,9 @@ In such cases, you can generate sample user accounts using the steps below. This
 -   [Projects Service](https://github.com/ELEVATE-Project/project-service/tree/main/api-doc)
 
 ## Adding New Projects to the System
+
 With implementation scripts, you can seamlessly add new projects to the system. Once a project is successfully added, it becomes visible on the portal, ready for use and interaction. For a comprehensive guide on setting up and using the implementation script, please refer to the [documentation here](https://github.com/ELEVATE-Project/project-service/tree/main/Project-Service-implementation-Script).
+
 <!--
     ```sql
     postgres=# select citus_version();

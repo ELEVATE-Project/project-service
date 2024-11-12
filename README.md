@@ -137,7 +137,7 @@ done
         >
         > volumes:
         >
-        > \- /home/joffin/elevate/backend/environment.ts:/app/src/environments/environment.ts
+        > \- /home/shikshalokam/elevate/single-click/linux/env.js:/usr/src/app/www/assets/env/env.js
 
 5.  **Download `docker-compose-up` & `docker-compose-down` Script Files**
 

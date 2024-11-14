@@ -1046,6 +1046,11 @@ module.exports = class ProjectTemplatesHelper {
 					}
 
 					tasks = await _taskAndSubTaskinSequence(findQuery, projectionKey)
+					// sort the order of the tasks
+					let orderedTasks = templateDocument[0]['taskSequence'].map((id) =>
+						tasks.find((task) => String(task.externalId) === String(id))
+					)
+					tasks = orderedTasks
 				} else {
 					if (templateDocument[0].tasks && templateDocument[0].tasks.length > 0) {
 						let projectionKey = CONSTANTS.common.CHILDREN
@@ -1058,6 +1063,11 @@ module.exports = class ProjectTemplatesHelper {
 							}
 
 							tasks = await _taskAndSubTaskinSequence(findQuery, projectionKey)
+							// sort the order of the tasks
+							let orderedTasks = templateDocument[0]['tasks'].map((id) =>
+								tasks.find((task) => String(task._id) === String(id))
+							)
+							tasks = orderedTasks
 						}
 					}
 				}

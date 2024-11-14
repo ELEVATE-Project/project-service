@@ -220,4 +220,11 @@ module.exports = {
 	CONFIGURATION_FETCHED_SUCCESSFULLY: 'Configuration fetched successfully',
 	CONFIGURATION_NOT_AVAILABLE: 'Configuration is not available',
 	SCOPE_DATA_MISSING: 'Scope data missing',
+	PROGRAM_SOLUTIONS_FETCHED: 'Program solutions fetched successfully',
+	PRIVATE_PROGRAMS_LIST: 'Private programs fetched successfully',
+	TARGETED_PROGRAMS_FETCHED: 'Targetted programs fetched successfully',
+	PROGRAM_DESCRIPTION:
+		'View and participate in educational programs active in your location and designed for the role you selected',
+	USER_NOT_ALLOWED_TO_EDIT_PROJECT: 'User is not allowed to edit the project',
+	PROJECT_NOT_FOUND_OR_NOT_A_TARGETED: 'Project not targeted to the role',
 }

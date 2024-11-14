@@ -96,6 +96,7 @@ scopeRoles = []
 countImps = 0
 ecmToSection = dict()
 entitiesPGM = []
+stateEntitiesPGM = []
 entitiesPGMID = []
 entitiesType = []
 solutionRolesArr = []
@@ -104,6 +105,7 @@ endDateOfResource = None
 startDateOfProgram = None
 endDateOfProgram = None
 rolesPGM =None
+mainRole = None
 solutionRolesArray = []
 solutionStartDate = ""
 solutionEndDate = ""
@@ -123,6 +125,11 @@ def programCreation(accessToken,parentFolder,externalId,pName,pDescription,roles
     # program creation url 
     programCreationurl = config.get(environment, 'elevateprojecthost') + config.get(environment, 'programCreationurl')
     messageArr.append("Program Creation URL : " + programCreationurl)
+
+    # adding state entities
+    entities = stateEntitiesPGM.split(',')
+    role = mainRole.split(',')
+    entitiesTypeStr = entitiesType[0]
     # program creation payload
     payload = json.dumps({
         "externalId" : externalId,
@@ -135,6 +142,10 @@ def programCreation(accessToken,parentFolder,externalId,pName,pDescription,roles
       "language" : [ 
           "English"
       ],
+      "metaInformation" : {
+        "state" : entities,
+        "recommendedFor" : role
+      },
       "keywords" : [],
       "concepts" : [],
       "userId":userId,
@@ -146,9 +157,8 @@ def programCreation(accessToken,parentFolder,externalId,pName,pDescription,roles
       "components" : [
       ],
        "scope": {
-            "entityType": scopeEntityType,
-            "entities": entitiesPGMID,
-            "roles": roles
+            entitiesTypeStr: entitiesPGMID,
+            "roles": [roles]
         },
         
       "requestForPIIConsent" : True
@@ -350,7 +360,8 @@ def programsFileCheck(filePathAddPgm, accessToken, parentFolder, MainFilePath):
                     returnvalues = []
                     global entitiesPGM
                     entitiesPGM = dictDetailsEnv['Targeted entities at program level'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Targeted entities at program level'] else terminatingMessage("\"Targeted entities at program level\" must not be Empty in \"Program details\" sheet")
-                    districtentitiesPGM = dictDetailsEnv['Targeted district at program level'].encode('utf-8').decode('utf-8')
+                    global stateEntitiesPGM
+                    stateEntitiesPGM = dictDetailsEnv['Targeted state at program level'].encode('utf-8').decode('utf-8')
                     global startDateOfProgram, endDateOfProgram
                     startDateOfProgram = dictDetailsEnv['Start date of program']
                     endDateOfProgram = dictDetailsEnv['End date of program']
@@ -363,16 +374,14 @@ def programsFileCheck(filePathAddPgm, accessToken, parentFolder, MainFilePath):
 
                     endDateArr = str(endDateOfProgram).split("-")
                     endDateOfProgram = endDateArr[2] + "-" + endDateArr[1] + "-" + endDateArr[0] + " 23:59:59"
-
+                    global mainRole
+                    mainRole = dictDetailsEnv['Targeted role at program level'] if dictDetailsEnv['Targeted role at program level'] else terminatingMessage("\"Targeted role at program level\" must not be Empty in \"Program details\" sheet")
                     global scopeEntityType
                     scopeEntityType = "state"
                     global entitiesType
                     entitiesType = fetchEntityType(parentFolder, accessToken,
                                                   entitiesPGM.lstrip().rstrip().split(","), scopeEntityType)
-                    if districtentitiesPGM:
-                        entitiesPGM = districtentitiesPGM
-                        scopeEntityType = "district"
-                    else:
+                    if entitiesPGM:
                         entitiesPGM = entitiesPGM
                         scopeEntityType = entitiesType
                     global entitiesPGMID
@@ -390,28 +399,23 @@ def programsFileCheck(filePathAddPgm, accessToken, parentFolder, MainFilePath):
                             "\"Description of the Program\" must not be Empty in \"Program details\" sheet")
                         keywordsPGM = dictDetailsEnv['Keywords'].encode('utf-8').decode('utf-8')
                         entitiesPGM = dictDetailsEnv['Targeted entities at program level'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Targeted entities at program level'] else terminatingMessage("\"Targeted entities at program level\" must not be Empty in \"Program details\" sheet")
-                        districtentitiesPGM = dictDetailsEnv['Targeted district at program level'].encode('utf-8').decode('utf-8')
+                        stateEntitiesPGM = dictDetailsEnv['Targeted state at program level'].encode('utf-8').decode('utf-8')
+                        entitiesType = fetchEntityType(parentFolder, accessToken,
+                                                  entitiesPGM.lstrip().rstrip().split(","), scopeEntityType)
                         # selecting entity type based on the users input 
-                        if districtentitiesPGM:
-                            entitiesPGM = districtentitiesPGM
-                            EntityType = "district"
-                        else:
+                        if entitiesPGM:
                             entitiesPGM = entitiesPGM
-                            EntityType = "state"
+                            scopeEntityType = entitiesType
 
-                        scopeEntityType = EntityType
-
-                        mainRole = dictDetailsEnv['Targeted role at program level'] if dictDetailsEnv['Targeted role at program level'] else terminatingMessage("\"Targeted role at program level\" must not be Empty in \"Program details\" sheet")
                         global rolesPGM
                         rolesPGM = dictDetailsEnv['Targeted subrole at program level'] if dictDetailsEnv['Targeted subrole at program level'] else terminatingMessage("\"Targeted subrole at program level\" must not be Empty in \"Program details\" sheet")
-                        
                         if "teacher" in mainRole.strip().lower():
                             rolesPGM = str(rolesPGM).strip() + ",TEACHER"
                         userDetails = fetchUserDetails(environment, accessToken, dictDetailsEnv['projectService username/user id/email id/phone no. of Program Designer'])
                         userId = userDetails[0]
                         messageArr = []
 
-                        scopeEntityType = EntityType
+                        scopeEntityType = entitiesType
                         # fetch entity details 
                         entitiesPGMID = fetchEntityId(parentFolder, accessToken,entitiesPGM.lstrip().rstrip().split(","), scopeEntityType)
                         
@@ -433,11 +437,8 @@ def programsFileCheck(filePathAddPgm, accessToken, parentFolder, MainFilePath):
                         # check if program is created or not 
                         if getProgramInfo(accessToken, parentFolder, extIdPGM):
                             print("Program Created SuccessFully.")
-                    else :
-                         userDetails = fetchUserDetails(environment, accessToken, dictDetailsEnv['projectService username/user id/email id/phone no. of Program Designer'])
-                         userId = userDetails[0]
-                         programCreation(accessToken,parentFolder,extIdPGM,programNameInp,proDesc,roles,userId)
-                         getProgramInfo(accessToken, parentFolder, extIdPGM)
+                        else :
+                            terminatingMessage("Program creation failed! Please check logs.")
 
             elif sheetEnv.strip().lower() == 'resource details':
                 # checking Resource details sheet 
@@ -3815,7 +3816,7 @@ def prepareaddingcertificatetemp(filePathAddProject, projectName_for_folder_path
                 cn = "C" + str(c)
                 taskconditions = {
                     cn: {
-                        "validationText": f"Add {int(taskMinNooEvide[c-3])} evidence for the task {tasksLevelEvidance[c-3]}",
+                        "validationText": f"Add {int(taskMinNooEvide[c-3])} evidence for the task {task['name']}",
                         "expression": "C1",
                         "conditions": {
                             "C1": {
@@ -4618,7 +4619,6 @@ def mainFunc(MainFilePath, programFile, addObservationSolution, millisecond, isP
                                                                                      listOfFoundRoles, accessToken)
                                     ProjectSolutionExternalId = ProjectSolutionResp[0]
                                     ProjectSolutionId = ProjectSolutionResp[1]
-                                #     ProjectSolutionId = ProjectSolutionResp[1]
                                     prepareProgramSuccessSheet(MainFilePath, projectName_for_folder_path, programFile,
                                                                ProjectSolutionExternalId,
                                                                ProjectSolutionId, accessToken)
@@ -4650,17 +4650,29 @@ def mainFunc(MainFilePath, programFile, addObservationSolution, millisecond, isP
     else:
         parentFolder = createFileStructre(MainFilePath, addObservationSolution)
         accessToken = generateAccessToken(parentFolder)
-        prepareProjectAndTasksSheets(addObservationSolution, parentFolder,
-                                                                            accessToken)
-        projectUpload(addObservationSolution, parentFolder, accessToken)
-        taskUpload(addObservationSolution, parentFolder, accessToken)
-        # ProjectSolutionResp = solutionCreationAndMapping(parentFolder,entityToUpload, listOfFoundRoles, accessToken)
-        # ProjectSolutionExternalId = ProjectSolutionResp[0]  
-        # ProjectSolutionResp = solutionCreationAndMapping(parentFolder,entityToUpload,listOfFoundRoles, accessToken)
-        # ProjectSolutionExternalId = ProjectSolutionResp[0]
-        ProjectSolutionId = ProjectSolutionResp[1]
-        certificatetemplateid= prepareaddingcertificatetemp(filePathAddProject,projectName_for_folder_path, accessToken,ProjectSolutionId,programID,baseTemplate_id)
-        prepareProgramSuccessProjectSheet(MainFilePath, parentFolder, programFile ,accessToken)                                                                           
+        wbproject = xlrd.open_workbook(programFile, on_demand=True)
+        projectSheetNames = wbproject.sheet_names()
+        for projectSheets in projectSheetNames:
+            if projectSheets.strip().lower() == 'project upload':
+                print("Checking project details sheet...")
+                detailsColCheck = wbproject.sheet_by_name(projectSheets)
+                keysColCheckDetai = [detailsColCheck.cell(0, col_index_check).value for col_index_check in range(detailsColCheck.ncols)]
+                detailsEnvSheet = wbproject.sheet_by_name(projectSheets)
+                keysEnv = [detailsEnvSheet.cell(1, col_index_env).value for col_index_env in range(detailsEnvSheet.ncols)]
+                for row_index_env in range(2, detailsEnvSheet.nrows):
+                    dictDetailsEnv = { keysEnv[col_index_env]: detailsEnvSheet.cell(row_index_env, col_index_env).value for col_index_env in range(detailsEnvSheet.ncols)}
+                    if str(dictDetailsEnv['has certificate']).lower() == 'No'.lower():
+                        prepareProjectAndTasksSheets(addObservationSolution, parentFolder,  accessToken)
+                        projectUpload(addObservationSolution, parentFolder, accessToken)
+                        taskUpload(addObservationSolution, parentFolder, accessToken)
+                    elif str(dictDetailsEnv['has certificate']).lower()== 'Yes'.lower():
+                        print("---->this is certificate with project<---")
+                        baseTemplate_id=fetchCertificateBaseTemplate(addObservationSolution,accessToken,parentFolder)
+                        downloadlogosign(addObservationSolution,parentFolder)
+                        editsvg(accessToken,addObservationSolution,parentFolder,baseTemplate_id)
+                        prepareProjectAndTasksSheets(addObservationSolution, parentFolder,accessToken)
+                        projectUpload(addObservationSolution, parentFolder, accessToken)
+                        taskUpload(addObservationSolution, parentFolder, accessToken)                                                                     
                                                                                            
                                                                                       
                                                                                                                    

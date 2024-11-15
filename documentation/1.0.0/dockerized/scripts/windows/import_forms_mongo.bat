@@ -1,63 +1,86 @@
 @echo off
 setlocal enabledelayedexpansion
 
-rem Extract the MongoDB connection string
-set MONGODB_URL=%1
-
-rem Extract the database variables
-for /f "tokens=4,5,6 delims=/: " %%a in ("%MONGODB_URL%") do (
-    set DB_HOST=%%a
-    set DB_PORT=%%b
-    set DB_NAME=%%c
+REM Check if MongoDB connection string is provided
+if "%~1"=="" (
+    echo Please provide the MongoDB connection string.
+    exit /b 1
 )
+echo %~1
+set MONGODB_URL=%~1
+set ORGANIZATION_ID=%~2
+if "%ORGANIZATION_ID%"=="" set ORGANIZATION_ID=1
+REM
+for /f "tokens=2 delims=/" %%a in ("%MONGODB_URL%") do (
+    set "URL_PART=%%a"
+)
+
+for /f "tokens=1,2 delims=:" %%a in ("%URL_PART%") do (
+    set "DB_HOST=%%a"
+    set "DB_PORT=%%b"
+)
+
+for /f "tokens=3 delims=/" %%a in ("%MONGODB_URL%") do (
+    set "DB_NAME=%%a"
+)
+
+echo Host: %DB_HOST%
+echo Port: %DB_PORT%
+echo Database: %DB_NAME%
 
 echo Extracted Database Variables:
-echo DB_HOST: %DB_HOST%
-echo DB_PORT: %DB_PORT%
-echo DB_NAME: %DB_NAME%
+echo DB_HOST: !DB_HOST!
+echo DB_PORT: !DB_PORT!
+echo DB_NAME: !DB_NAME!
+echo Using organizationId: !ORGANIZATION_ID!
 
-rem Check if the MongoDB container is up
-for /f "tokens=*" %%i in ('docker ps -q -f name=project_mongo_1') do (
-    set CONTAINER_UP=1
-)
-if not defined CONTAINER_UP (
+REM Check if the MongoDB container is up
+docker ps -q -f name=project_mongo_1 >nul
+if %errorlevel% neq 0 (
     echo MongoDB container is not running.
     exit /b 1
 )
-echo MongoDB container is up.
 
-rem Wait for MongoDB to be ready
 echo Waiting for MongoDB to be ready...
-:wait_for_connection
-mongo --host %DB_HOST% --port %DB_PORT% --eval "print('waited for connection')" >nul 2>&1
-if errorlevel 1 (
+:wait_for_mongo
+docker exec project_mongo_1 mongo --host !DB_HOST! --port !DB_PORT! --eval "print(\"waited for connection\")" >nul 2>&1
+if %errorlevel% neq 0 (
     timeout /t 1 >nul
-    goto wait_for_connection
+    goto wait_for_mongo
 )
 
 echo MongoDB is ready.
 
-rem Download the forms.json file
-echo Downloading forms.json from GitHub...
+REM Download the forms.json file
+:: Download the forms.json file from GitHub
 curl -o forms.json https://raw.githubusercontent.com/ELEVATE-Project/observation-survey-projects-pwa/refs/heads/release-2.0.0/forms.json
+curl -o modifyform.js https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/dockerized/scripts/windows/modifyform.js
+:: Modify forms.json to add organizationId, deleted, and version fields
+echo Running Node.js script to modify forms.json...
+node modifyform.js
 
-rem Add default organizationId and deleted:false to forms.json
-echo Adding default organizationId and deleted:false to forms.json...
-jq "[.[] | .organizationId = 1 | .deleted = false | .version = 0]" forms.json > forms_with_orgId.json
+:: Check if the modified file was created
+if exist forms_with_orgId.json (
+    echo forms_with_orgId.json created successfully.
+) else (
+    echo Failed to create forms_with_orgId.json.
+    exit /b 1
+)
 
-rem Check the contents of the modified file
-echo Checking contents of forms_with_orgId.json:
-type forms_with_orgId.json
 
-rem Delete existing documents from the forms collection
+REM Copy the modified JSON file into the MongoDB container
+docker cp forms_with_orgId.json project_mongo_1:/tmp/forms_with_orgId.json
+REM Delete existing documents from the forms collection
 echo Deleting existing documents from the forms collection...
-mongo --host %DB_HOST% --port %DB_PORT% %DB_NAME% --eval "db.forms.deleteMany({})"
+docker exec project_mongo_1 mongo --host !DB_HOST! --port !DB_PORT! !DB_NAME! --eval "db.forms.deleteMany({})"
 
-rem Insert new documents from modified forms.json into MongoDB
+REM Insert new documents from modified forms.json into MongoDB
 echo Inserting new documents from modified forms.json into MongoDB...
-mongoimport --host %DB_HOST% --port %DB_PORT% --db %DB_NAME% --collection forms --file forms_with_orgId.json --jsonArray
+docker exec project_mongo_1 mongoimport --host !DB_HOST! --port !DB_PORT! --db !DB_NAME! --collection forms --file /tmp/forms_with_orgId.json --jsonArray
 
-rem Clean up
-del forms.json forms_with_orgId.json
+REM Clean up
+del forms.json
+del forms_with_orgId.json
+docker exec project_mongo_1 del /tmp/forms_with_orgId.json
 
 endlocal

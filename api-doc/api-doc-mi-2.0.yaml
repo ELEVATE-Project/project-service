@@ -240,3 +240,122 @@ paths:
                         type: string
                         format: date-time
                         example: '2024-06-24T06:56:58.448Z'
+  /project/userProjects/update:
+    put:
+      tags:
+        - userProjects
+      summary: Update an existing project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                story:
+                  type: object
+                  description: Story details for the project.
+                  properties:
+                    title:
+                      type: string
+                      example: 'DCPCR School Development Index 2018-19'
+                      description: Title of the story.
+                    problemStatement:
+                      type: string
+                      example: 'problemStatement'
+                      description: Problem statement for the story.
+                    objective:
+                      type: string
+                      example: 'sample object'
+                      description: Objective of the story.
+                    timeline:
+                      type: string
+                      example: '2 weeks'
+                      description: Estimated timeline for the story.
+                    actionSteps:
+                      type: array
+                      items:
+                        type: string
+                      example: []
+                    resources:
+                      type: array
+                      items:
+                        type: string
+                      example: []
+                    impact:
+                      type: string
+                      example: 'sample impact'
+                      description: Impact of the story.
+                    summary:
+                      type: string
+                      example: 'sample summary'
+                      description: Summary of the story.
+                    authorName:
+                      type: string
+                      example: 'jon'
+                      description: Author's name.
+                    location:
+                      type: string
+                      example: 'authorLocation'
+                      description: Author's location.
+                    conversation:
+                      type: array
+                      items:
+                        type: object
+                      example: []
+                    chatHistory:
+                      type: array
+                      items:
+                        type: object
+                      example: []
+                    attachments:
+                      type: array
+                      description: Attachments associated with the story.
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                            example: '1729251446851.png'
+                          type:
+                            type: string
+                            example: 'image/png'
+                          sourcePath:
+                            type: string
+                            example: 'project/668e33a24999c205ea017747/3/5cc85295-b244-4139-88c8-4802c2ad41ad/1729251446851.png'
+                    pdfInformation:
+                      type: array
+                      description: PDF details associated with the story.
+                      items:
+                        type: object
+                        properties:
+                          filePath:
+                            type: string
+                            example: 'sampleFilepath'
+                          language:
+                            type: string
+                            example: 'hindi'
+                reflectionStatus:
+                  type: string
+                  enum: [started, completed]
+                  example: 'started'
+      responses:
+        '200':
+          description: Project updated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Project updated successfully'
+                  status:
+                    type: integer
+                    example: 200
+                  result:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                        example: '667505a649de1ae76e9e1033'

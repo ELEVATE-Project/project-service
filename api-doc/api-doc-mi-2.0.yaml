@@ -1,0 +1,232 @@
+openapi: 3.0.0
+info:
+  title: MI.2.0
+  version: 1.0.0
+  description: New APIs and API changes
+
+paths:
+  /project/userProjects/add:
+    post:
+      tags:
+        - userProjects
+      summary: Add a user project
+      description: API to create a new user project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - program
+                - projects
+              properties:
+                program:
+                  type: object
+                  required:
+                    - name
+                    - startDate
+                    - endDate
+                    - source
+                  properties:
+                    name:
+                      type: string
+                      example: DCPCR School Development Index 2018-19
+                    description:
+                      type: string
+                      example: ''
+                    language:
+                      type: array
+                      items:
+                        type: string
+                      example: ['English']
+                    startDate:
+                      type: string
+                      format: date-time
+                      example: '2024-04-16T00:00:00.000Z'
+                    endDate:
+                      type: string
+                      format: date-time
+                      example: '2024-04-16T00:00:00.000Z'
+                    source:
+                      type: object
+                      required:
+                        - model
+                        - provider
+                        - apiVersion
+                        - confidenceScore
+                      properties:
+                        model:
+                          type: string
+                          example: GPT-4
+                        provider:
+                          type: string
+                          example: OpenAI
+                        apiVersion:
+                          type: string
+                          example: '4.0'
+                        confidenceScore:
+                          type: number
+                          format: float
+                          example: 0.98
+                        info:
+                          type: object
+                          properties:
+                            url:
+                              type: string
+                              example: ''
+                            title:
+                              type: string
+                              example: ''
+                            pageNo:
+                              type: string
+                              example: ''
+                projects:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - title
+                      - duration
+                      - startDate
+                      - endDate
+                      - source
+                      - tasks
+                    properties:
+                      title:
+                        type: string
+                        example: Understand Importance of Reading
+                      description:
+                        type: string
+                        example: ''
+                      duration:
+                        type: string
+                        example: 2 weeks
+                      recommendedFor:
+                        type: array
+                        items:
+                          type: string
+                        example: ['students', 'teachers']
+                      category:
+                        type: array
+                        items:
+                          type: string
+                        example: []
+                      startDate:
+                        type: string
+                        format: date-time
+                        example: '2024-04-16T00:00:00.000Z'
+                      endDate:
+                        type: string
+                        format: date-time
+                        example: '2024-04-16T00:00:00.000Z'
+                      source:
+                        type: object
+                        required:
+                          - model
+                          - provider
+                          - apiVersion
+                          - confidenceScore
+                        properties:
+                          model:
+                            type: string
+                            example: GPT-4
+                          provider:
+                            type: string
+                            example: OpenAI
+                          apiVersion:
+                            type: string
+                            example: '4.0'
+                          confidenceScore:
+                            type: number
+                            format: float
+                            example: 0.98
+                          info:
+                            type: object
+                            properties:
+                              url:
+                                type: string
+                                example: ''
+                              title:
+                                type: string
+                                example: ''
+                              pageNo:
+                                type: string
+                                example: ''
+                      tasks:
+                        type: array
+                        items:
+                          type: object
+                          required:
+                            - name
+                            - source
+                          properties:
+                            name:
+                              type: string
+                              example: Task 1
+                            isDeletable:
+                              type: boolean
+                              example: false
+                            sequenceNumber:
+                              type: string
+                              example: '1'
+                            source:
+                              type: object
+                              required:
+                                - model
+                                - provider
+                                - apiVersion
+                                - confidenceScore
+                              properties:
+                                model:
+                                  type: string
+                                  example: GPT-4
+                                provider:
+                                  type: string
+                                  example: OpenAI
+                                apiVersion:
+                                  type: string
+                                  example: '4.0'
+                                confidenceScore:
+                                  type: number
+                                  format: float
+                                  example: 0.98
+                                info:
+                                  type: object
+                                  properties:
+                                    url:
+                                      type: string
+                                      example: ''
+                                    title:
+                                      type: string
+                                      example: ''
+                                    pageNo:
+                                      type: string
+                                      example: ''
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Project created successfully
+                  status:
+                    type: integer
+                    example: 200
+                  result:
+                    type: object
+                    properties:
+                      programId:
+                        type: string
+                        example: 667505a649de1ae76e9e1033
+                      projectId:
+                        type: string
+                        example: 667918baf8063086b629f007
+                      lastDownloadedAt:
+                        type: string
+                        format: date-time
+                        example: '2024-06-24T06:56:58.448Z'

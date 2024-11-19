@@ -1,8 +1,8 @@
 openapi: 3.0.0
 info:
-  title: MI.2.0
+  title: Project User API
   version: 1.0.0
-  description: New APIs and API changes
+  description: API for adding user projects
 
 paths:
   /project/userProjects/add:
@@ -31,6 +31,7 @@ paths:
                   properties:
                     name:
                       type: string
+                      description: Problem statement defined by the user
                       example: DCPCR School Development Index 2018-19
                     description:
                       type: string
@@ -43,6 +44,7 @@ paths:
                     startDate:
                       type: string
                       format: date-time
+                      description: Date when the user defined the problem statement
                       example: '2024-04-16T00:00:00.000Z'
                     endDate:
                       type: string
@@ -50,6 +52,7 @@ paths:
                       example: '2024-04-16T00:00:00.000Z'
                     source:
                       type: object
+                      description: Information related to AI and reference data used to generate the answer
                       required:
                         - model
                         - provider
@@ -95,12 +98,14 @@ paths:
                     properties:
                       title:
                         type: string
+                        description: Objective of the problem statement
                         example: Understand Importance of Reading
                       description:
                         type: string
                         example: ''
                       duration:
                         type: string
+                        description: Duration given by the user
                         example: 2 weeks
                       recommendedFor:
                         type: array
@@ -115,13 +120,16 @@ paths:
                       startDate:
                         type: string
                         format: date-time
+                        description: Objective start date
                         example: '2024-04-16T00:00:00.000Z'
                       endDate:
                         type: string
                         format: date-time
+                        description: End date of the objective based on duration
                         example: '2024-04-16T00:00:00.000Z'
                       source:
                         type: object
+                        description: Information related to AI and reference data used to generate the answer
                         required:
                           - model
                           - provider
@@ -163,6 +171,7 @@ paths:
                           properties:
                             name:
                               type: string
+                              description: Activity under the objective
                               example: Task 1
                             isDeletable:
                               type: boolean
@@ -172,6 +181,7 @@ paths:
                               example: '1'
                             source:
                               type: object
+                              description: Information related to AI and reference data used to generate the answer
                               required:
                                 - model
                                 - provider

@@ -560,31 +560,33 @@ module.exports = class UserProjectsHelper {
 	 * @method
 	 * @name details
 	 * @param {String} projectId - project id.
-	 * @returns {Object}
+	 * @param {String} userId - user id
+	 * @param {Object} userRoleInformation - user role information
+	 * @returns {Object} projects fetched from DB
 	 */
 
 	static details(projectId, userId, userRoleInformation = {}) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				const projectDetails = await projectQueries.projectDocument(
-					{
-						_id: projectId,
-						userId: userId,
-					},
-					'all',
-					[
-						'taskReport',
-						'projectTemplateId',
-						'projectTemplateExternalId',
-						'userId',
-						'createdBy',
-						'updatedBy',
-						'createdAt',
-						'updatedAt',
-						'userRoleInformation',
-						'__v',
-					]
-				)
+				// create query based on submission level
+				let queryObject = {
+					_id: projectId,
+				}
+				if (process.env.SUBMISSION_LEVEL == 'USER') {
+					queryObject['userId'] = userId
+				}
+				const projectDetails = await projectQueries.projectDocument(queryObject, 'all', [
+					'taskReport',
+					'projectTemplateId',
+					'projectTemplateExternalId',
+					'userId',
+					'createdBy',
+					'updatedBy',
+					'createdAt',
+					'updatedAt',
+					'userRoleInformation',
+					'__v',
+				])
 				if (!projectDetails.length > 0) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,

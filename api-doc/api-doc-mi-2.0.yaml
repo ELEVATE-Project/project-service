@@ -1,8 +1,8 @@
 openapi: 3.0.0
 info:
-  title: Project User API
+  title: MI-2.0 API
   version: 1.0.0
-  description: API for adding user projects
+  description: API for MI-2.0 (new and upgraded apis)
 
 paths:
   /project/userProjects/add:
@@ -10,7 +10,7 @@ paths:
       tags:
         - userProjects
       summary: Add a user project
-      description: API to create a new user project
+      description: API to create a new user project - call after initial AI flows
       requestBody:
         required: true
         content:

@@ -52,7 +52,7 @@ if errorlevel 1 (
 echo Database setup complete.
 
 REM Unset the environment variable for security
-set PGPASSWORD=
+set PGPASSWORD=postgres
 
 endlocal
 pause

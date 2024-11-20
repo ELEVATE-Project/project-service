@@ -919,7 +919,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
 
     ELEVATE-Project portal utilizes Ionic for building the browser bundle, follow the steps given below to install them and start the portal.
 
-    -   **Ubuntu/Linux**
+    -   **Ubuntu/Linux/Windows**
 
         1. Install the Ionic framework:
 

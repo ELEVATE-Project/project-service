@@ -974,7 +974,7 @@ In such cases, you can generate sample user accounts using the steps below. This
 -   **Windows**
 
     ```
-    curl -o insert_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/native/scripts/windows/insert_sample_data.bat && ^
+    curl -o insert_sample_data.bat https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/native/scripts/windows/insert_sample_data.bat && ^
     insert_sample_data.bat
     ```
 

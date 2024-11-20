@@ -476,7 +476,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
 
         > Note : If you've manually installed Kafka without Homebrew, the script might incorrectly indicate that Kafka and Homebrew are not installed, as it checks only for Homebrew installations. In such cases, you can safely ignore this warning. Ensure that both Kafka and ZooKeeper are running on their default ports (ZooKeeper on `2181`, Kafka on `9092`). This will confirm proper installation and functionality despite the script's output.
 
-<!-- -   **Windows**
+-   **Windows**
 
     1. Install Node.js 20:
 
@@ -547,7 +547,37 @@ Before setting up the following ELEVATE-Project application, dependencies given 
 
             > Note: Set username and password for the default database to be 'postgres' during installation.
 
-        2. Once installed, Add `C:\Program Files\PostgreSQL\16\bin` to windows environment variables. Refer [here](https://www.computerhope.com/issues/ch000549.htm) or [here](https://stackoverflow.com/a/68851621) for more information regarding how to set it. -->
+        2. Once installed, Add `C:\Program Files\PostgreSQL\16\bin` to windows environment variables. Refer [here](https://www.computerhope.com/issues/ch000549.htm) or [here](https://stackoverflow.com/a/68851621) for more information regarding how to set it.
+
+    6. Install MongoDB:
+
+        Follow the official [MongoDB Website](https://www.mongodb.com/try/download/community) to install MongoDB.
+
+    7. Install Gotenberg via Docker:
+
+        1. Download Docker Desktop for Windows from [Docker Website](https://docs.docker.com/desktop/setup/install/windows-install/)
+
+        2. Run the installer and follow the setup instructions.
+
+        3. Ensure Docker Desktop is running and configured to use Linux containers(default settings).
+
+        4. Open a terminal (e.g., Command Prompt).
+
+        5. Pull the Gotenberg image:
+            ```
+            docker pull gotenberg/gotenberg:latest
+            ```
+        
+        6. Run the Gotenberg container with the following command:
+            ```
+            docker run -d --name gotenberg -p 3000:3000 gotenberg/gotenberg:latest
+            ```
+
+        7. Verify the container is running. You should see the Gotenberg container listed after running the below command.
+            ```
+            docker ps
+            ```
+
 
 ## Installation
 
@@ -569,6 +599,18 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         git clone -b main https://github.com/ELEVATE-Project/observation-survey-projects-pwa
         ```
 
+    -   **Windows**
+
+        ```
+        git clone -b staging https://github.com/ELEVATE-Project/project-service.git &
+        git clone -b staging https://github.com/ELEVATE-Project/entity-management.git &
+        git clone -b master https://github.com/ELEVATE-Project/user.git &
+        git clone -b master https://github.com/ELEVATE-Project/notification.git &
+        git clone -b main https://github.com/ELEVATE-Project/interface-service.git &
+        git clone -b master https://github.com/ELEVATE-Project/scheduler.git &
+        git clone -b main https://github.com/ELEVATE-Project/observation-survey-projects-pwa
+        ```
+
 3.  **Install NPM Packages**
 
     -   **Ubuntu/Linux/MacOS**
@@ -582,6 +624,29 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         cd scheduler/src && npm install && cd ../.. && \
         cd observation-survey-projects-pwa && npm install --force && cd ..
         ```
+
+    -   **Windows**
+
+        ```
+        cd project-service && npm install && cd ..
+        cd user\src && npm install && cd ..\..
+        cd notification\src && npm install && cd ..\..
+        cd interface-service\src && npm install && cd ..\..
+        cd scheduler\src && npm install && cd ..\..
+        cd observation-survey-projects-pwa && npm install --force && cd ..
+        ```
+
+        > Note: Entity-management service runs only on node-16 for Windows native setup.
+
+        ```
+        nvm use 16
+        ```
+
+        ```
+        cd entity-management\src && npm install && cd ..\..
+        ```
+
+        > Note: Change the node version as it was before.
 
 4.  **Download Environment Files**
 
@@ -607,6 +672,18 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         curl -L -o interface-service/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/interface_env && \
         curl -L -o scheduler/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/scheduler_env && \
         curl -L -o observation-survey-projects-pwa/src/environments/environment.ts https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/enviroment.ts
+        ```
+
+    -   **Windows**
+
+        ```
+        curl -L -o project-service\.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/project_env &
+        curl -L -o entity-management\src\.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/entity_management_env &
+        curl -L -o user\src\.env https://github.com/ELEVATE-Project/project-service/raw/refs/heads/main/documentation/1.0.0/native/envs/user_env &
+        curl -L -o notification\src\.env https://github.com/ELEVATE-Project/project-service/raw/refs/heads/main/documentation/1.0.0/native/envs/notification_env &
+        curl -L -o interface-service\src\.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/interface_env &
+        curl -L -o scheduler\src\.env https://github.com/ELEVATE-Project/project-service/raw/refs/heads/main/documentation/1.0.0/native/envs/scheduler_env &
+        curl -L -o observation-survey-projects-pwa\src\environments\environment.ts https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/enviroment.ts
         ```
 
     > **Note:** Modify the environment files as necessary for your deployment using any text editor, ensuring that the values are appropriate for your environment. The default values provided in the current files are functional and serve as a good starting point. Refer to the sample env files provided at the [Project](https://github.com/ELEVATE-Project/mentoring/blob/master/src/.env.sample), [User](https://github.com/ELEVATE-Project/user/blob/master/src/.env.sample), [Notification](https://github.com/ELEVATE-Project/notification/blob/master/src/.env.sample), [Scheduler](https://github.com/ELEVATE-Project/scheduler/blob/master/src/.env.sample), [Interface](https://github.com/ELEVATE-Project/interface-service/blob/main/src/.env.sample) and [Entity-Management](https://github.com/ELEVATE-Project/entity-management/blob/main/src/.env.sample) repositories for reference.
@@ -652,6 +729,17 @@ Before setting up the following ELEVATE-Project application, dependencies given 
             ./create-databases.sh
             ```
 
+    -   **Windows**
+
+        1. Download `create-databases.bat` Script File:
+            ```
+            curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/native/scripts/windows/create-databases.bat
+            ```
+        2. Run the script file:
+            ```
+            create-databases.bat
+            ```
+
 6.  **Run Migrations To Create Tables**
 
     -   **Ubuntu/Linux/MacOS**
@@ -660,6 +748,13 @@ Before setting up the following ELEVATE-Project application, dependencies given 
             ```
             cd user/src && npx sequelize-cli db:migrate && cd ../.. && \
             cd notification/src && npx sequelize-cli db:migrate && cd ../..
+            ```
+
+    -   **Windows**
+
+        1. Run Migrations:
+            ```
+            cd user\src && npx sequelize-cli db:migrate && cd ..\.. && cd notification\src && npx sequelize-cli db:migrate && cd ..\..
             ```
 
 7.  **Enabling Citus And Setting Distribution Columns (Optional)**
@@ -727,17 +822,47 @@ Before setting up the following ELEVATE-Project application, dependencies given 
             cd user/src && npm run db:seed:all && cd ../..
             ```
 
+    -   **Windows**
+
+        1.  Download `entity-project-sample-data.bat` Script File:
+
+            ```
+            curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/scripts/windows/entity-project-sample-data.bat
+            ```
+
+        2.  Run the script file:
+
+            ```
+            entity-project-sample-data.bat
+            ```
+
+        3.  Run seeders of user service
+
+            ```
+            cd user\src && npm run db:seed:all && cd ..\..
+            ```
+
 9.  **Insert Forms Data into Database**
 
-    -   **Ubuntu/Linux/MacOS/Windows**
+    -   **Ubuntu/Linux/MacOS**
 
         1.  Download `import_forms.js` Script File And Make the setup file executable by running the following command:
 
             ```
             curl -s https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/scripts/linux/import_forms.js | node
             ```
-            
 
+    -   **Windows**
+
+        1.  Download `import_forms_mongo.bat` Script File and execute the file by running the following commands:
+
+            ```
+            curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/scripts/windows/import_forms_mongo.bat
+            ```
+
+            ```
+            import_forms_mongo.bat
+            ```
 
 10. **Start The Services**
 
@@ -765,12 +890,29 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         cd scheduler/src && npx pm2 start app.js -i 2 --name scheduler && cd ../..
         ```
 
+    -   **Windows**
+
+        ```
+        cd project-service && pm2 start app.js --name project-service && cd ..
+        cd entity-management\src && pm2 start app.js --name entity-management && cd ..\..
+        cd user\src && pm2 start app.js --name user && cd ..\..
+        cd notification\src && pm2 start app.js --name notification && cd ..\..
+        cd interface-service\src && pm2 start app.js --name interface && cd ..\..
+        cd scheduler\src && pm2 start app.js --name scheduler && cd ..\..
+        ```
+
 11. **Run Service Scripts**
 
     -   **Ubuntu/Linux/MacOS**
 
         ```
         cd user/src/scripts && node insertDefaultOrg.js && node viewsScript.js && cd ../../..
+        ```
+
+    -   **Windows**
+
+        ```
+        cd user\src\scripts && node insertDefaultOrg.js && node viewsScript.js && cd ..\..\..
         ```
 
 12. **Start The Portal**
@@ -829,13 +971,20 @@ In such cases, you can generate sample user accounts using the steps below. This
     ./insert_sample_data.sh
     ```
 
+-   **Windows**
+
+    ```
+    curl -o insert_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/native/scripts/windows/insert_sample_data.bat && ^
+    insert_sample_data.bat
+    ```
+
     After successfully running the script mentioned above, the following user accounts will be created and available for login:
 
 | Email ID                 | Password   | Role                      |
 | ------------------------ | ---------- | ------------------------- |
-| aaravpatel@example.com   | Password1@ | state_educational_officer |
-| arunimareddy@example.com | Password1@ | state_educational_officer |
-| devikasingh@example.com  | Password1@ | state_educational_officer |
+| aaravpatel@example.com   | Password1@ | State Educational Officer |
+| arunimareddy@example.com | Password1@ | State Educational Officer |
+| devikasingh@example.com  | Password1@ | State Educational Officer |
 
 </details>
 

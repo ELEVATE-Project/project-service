@@ -486,7 +486,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
 
         1. Adapt the instructions given in the following ["Apache Kafka on Windows"](https://www.conduktor.io/kafka/how-to-install-apache-kafka-on-windows/) documentation to install Kafka version 3.5.0.
 
-            > Note: As per the instructions, Kafka server and Zookeeper has to be kept active on different WSL terminals for the entire lifetime of MentorEd services.
+            > Note: As per the instructions, Kafka server and Zookeeper has to be kept active on different WSL terminals for the entire lifetime of ELEVATE-Project services.
 
             > Note: Multiple WSL terminals can be opened by launching `Ubuntu` from start menu.
 
@@ -978,7 +978,7 @@ In such cases, you can generate sample user accounts using the steps below. This
     insert_sample_data.bat
     ```
 
-    After successfully running the script mentioned above, the following user accounts will be created and available for login:
+After successfully running the script mentioned above, the following user accounts will be created and available for login:
 
 | Email ID                 | Password   | Role                      |
 | ------------------------ | ---------- | ------------------------- |

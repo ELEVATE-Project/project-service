@@ -363,7 +363,6 @@ Once the services are up and the front-end app bundle is built successfully, nav
 
 Expectation: Upon following the prescribed steps, you will achieve a fully operational ELEVATE-Project application setup. Both the portal and backend services are managed using PM2, with all dependencies installed natively on the host system.
 
-#### Coming up : Native setup of service in windows OS will be added in upcoming release 
 
 ## Prerequisites
 

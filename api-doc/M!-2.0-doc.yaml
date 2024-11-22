@@ -1,0 +1,2759 @@
+openapi: 3.0.2
+servers:
+  - url: /v3
+info:
+  description: >-
+    This is a sample Pet Store Server based on the OpenAPI 3.0 specification. 
+    You can find out more about
+
+    Swagger at [http://swagger.io](http://swagger.io). In the third iteration of
+    the pet store, we've switched to the design first approach!
+
+    You can now help us improve the API whether it's by making changes to the
+    definition itself or to the code.
+
+    That way, with time, we can improve the API in general, and expose some of
+    the new features in OAS3.
+
+
+    Some useful links:
+
+    - [The Pet Store
+    repository](https://github.com/swagger-api/swagger-petstore)
+
+    - [The source API definition for the Pet
+    Store](https://github.com/swagger-api/swagger-petstore/blob/master/src/main/resources/openapi.yaml)
+  version: 1.0.17
+  title: Swagger Petstore - OpenAPI 3.0
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: apiteam@swagger.io
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+tags:
+  - name: MI-2.0
+    description: ''
+    externalDocs:
+      description: ''
+      url: ''
+paths:
+  /project/v1/library/categories/projects&hasSpotLight=false:
+    get:
+      summary: Fetches projects from category  based on hasSpotLight boolean value.
+      description: ''
+      operationId: ''
+      tags:
+        - MI-2.0
+      parameters: &ref_0 []
+      responses:
+        '200':
+          headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: number
+                  result:
+                    type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            _id:
+                              type: string
+                            description:
+                              type: string
+                            averageRating:
+                              type: number
+                            noOfRatings:
+                              type: number
+                            title:
+                              type: string
+                            externalId:
+                              type: string
+                            categories:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  _id:
+                                    type: string
+                                  externalId:
+                                    type: string
+                                  name:
+                                    type: string
+                            createdAt:
+                              type: string
+                            duration:
+                              type: string
+                            coverImage:
+                              type: string
+                            translations:
+                              type: object
+                              properties:
+                                hi:
+                                  type: object
+                                  properties:
+                                    description:
+                                      type: string
+                                    title:
+                                      type: string
+                            new:
+                              type: boolean
+              examples:
+                example1:
+                  value:
+                    message: Successfully fetched projects
+                    status: 200
+                    result:
+                      data:
+                        - _id: 6735bda260db15acd6ad9a6e
+                          description: >-
+                            Send an invitation to parents with the PTM date and
+                            time, and prepare the agenda with teachers. During
+                            the meeting, welcome parents, conduct an ice
+                            breaker, discuss the 'Parents as Partners'
+                            initiative, and have one-on-one conversations.
+                            Collect feedback and encourage sharing photos of
+                            learning spaces. After the meeting, record
+                            attendance, review feedback, and upload data to the
+                            app.
+                          averageRating: 0
+                          noOfRatings: 0
+                          title: Windows
+                          externalId: IDE-12
+                          categories:
+                            - _id: 66399a1204785762f7e8e4c1
+                              externalId: educationLeader
+                              name: Education Leader
+                          createdAt: '2024-11-14T09:06:42.809Z'
+                          duration: 2 weeks
+                          coverImage: >-
+                            https://app.apigit.com/repository/prajwal/ELEVATE-Project/api/example/petstore.yaml#Paths//project
+                          translations:
+                            hi:
+                              description: >-
+                                माता-पिता को PTM की तारीख और समय की जानकारी देकर
+                                उन्हें बैठक के लिए आमंत्रित करें। शिक्षकों के
+                                साथ मिलकर बैठक का एजेंडा तैयार करें ताकि चर्चा
+                                सुचारू रूप से हो सके। बैठक की शुरुआत में
+                                माता-पिता का गर्मजोशी से स्वागत करें और एक आइस
+                                ब्रेकर गतिविधि के माध्यम से माहौल को सहज और
+                                संवादात्मक बनाएं। इसके बाद 'माता-पिता भागीदार'
+                                पहल पर विस्तार से चर्चा करें, जिसमें माता-पिता
+                                की भूमिका और इस पहल के लाभों पर प्रकाश डालें।
+                              title: विंडोज़
+                          new: true
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                filter:
+                  type: object
+                  properties:
+                    duration:
+                      type: string
+                      description: duration of the project
+                    roles:
+                      type: string
+                      description: roles related to the project
+                  required:
+                    - duration
+                    - roles
+              required:
+                - filter
+    parameters:
+      - in: query
+        name: hasSpotLight
+        description: Fetches projects based on hasSpotLight boolean value.
+        schema: &ref_3
+          type: boolean
+        required: true
+  /project/v1/project/templates/details/:_id:
+    get:
+      description: ''
+      operationId: ''
+      tags:
+        - MI-2.0
+      parameters: *ref_0
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: number
+                  result:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                      description:
+                        type: string
+                      concepts:
+                        type: array
+                        items:
+                          type: string
+                      keywords:
+                        type: array
+                        items:
+                          type: string
+                      isDeleted:
+                        type: boolean
+                      recommendedFor:
+                        type: array
+                        items:
+                          type: string
+                      tasks:
+                        type: array
+                        items:
+                          type: string
+                      learningResources:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                            link:
+                              type: string
+                            app:
+                              type: string
+                            id:
+                              type: string
+                      isReusable:
+                        type: boolean
+                      taskSequence:
+                        type: array
+                        items:
+                          type: string
+                      deleted:
+                        type: boolean
+                      title:
+                        type: string
+                      externalId:
+                        type: string
+                      categories:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            _id:
+                              type: string
+                            externalId:
+                              type: string
+                            name:
+                              type: string
+                      entityType:
+                        type: string
+                      taskCreationForm:
+                        type: string
+                      status:
+                        type: string
+                      programInformation:
+                        type: object
+                        properties: {}
+                      solutionInformation:
+                        type: object
+                        properties: {}
+                      translations:
+                        type: object
+                        properties:
+                          hi:
+                            type: object
+                            properties:
+                              description:
+                                type: string
+                              title:
+                                type: string
+              examples:
+                example1:
+                  value:
+                    message: Successfully fetched project template details
+                    status: 200
+                    result:
+                      _id: 66399e6304785762f7e8e4cb
+                      description: >-
+                        Encourage school leaders to learn about various digital
+                        initiatives and share ideas that would be implemented in
+                        their schools.
+                      concepts:
+                        - ''
+                      keywords:
+                        - Smart Learn, Assembly
+                      isDeleted: false
+                      recommendedFor:
+                        - Head Master/Mistress (HM)
+                        - Principal
+                        - Head Teacher
+                        - Elementary School Head Master (ESHM)
+                      tasks: []
+                      learningResources:
+                        - name: >-
+                            View the learning resources to understand about
+                            Smart Learn
+                          link: >-
+                            https://diksha.gov.in/resources/play/content/do_31400164030265753613820
+                          app: Diksha
+                          id: do_31400164030265753613820
+                      isReusable: true
+                      taskSequence: []
+                      deleted: false
+                      title: Tech Skill Club- Smart
+                      externalId: TSCSLHAR02-1710148664592
+                      categories:
+                        - _id: 66399dff04785762f7e8e4c7
+                          externalId: teacher
+                          name: Teacher
+                      entityType: ''
+                      taskCreationForm: ''
+                      status: published
+                      programInformation: {}
+                      solutionInformation: {}
+                      translations:
+                        hi:
+                          description: >-
+                            माता-पिता को PTM की तारीख और समय की जानकारी देकर
+                            उन्हें बैठक के लिए                          
+                            आमंत्रित करें। शिक्षकों के साथ मिलकर बैठक का एजेंडा
+                            तैयार करें ताकि                            चर्चा
+                            सुचारू रूप से हो सके। बैठक की शुरुआत में माता-पिता
+                            का गर्मजोशी से स्वागत करें और एक आइस ब्रेकर गतिविधि
+                            के माध्यम से माहौल को सहज और संवादात्मक बनाएं। इसके
+                            बाद 'माता-पिता भागीदार' पहल पर विस्तार से चर्चा
+                            करें, जिसमें माता-पिता की भूमिका और इस पहल के लाभों
+                            पर प्रकाश डालें।
+                          title: विंडोज़
+    parameters:
+      - in: path
+        name: _id
+        description: >-
+          You can either pass projectTemplateId or externalId of the project
+          template.
+        schema: &ref_1
+          type: string
+        required: true
+  /project/v1/users/programs:
+    post:
+      description: ''
+      operationId: ''
+      tags:
+        - MI-2.0
+      parameters: *ref_0
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: number
+                  result:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        _id:
+                          type: string
+                        isAPrivateProgram:
+                          type: boolean
+                        externalId:
+                          type: string
+                        name:
+                          type: string
+                        description:
+                          type: string
+                        translations:
+                          type: object
+                          properties:
+                            hi:
+                              type: object
+                              properties:
+                                description:
+                                  type: string
+                                name:
+                                  type: string
+              examples:
+                example1:
+                  value:
+                    message: Private programs fetched successfully
+                    status: 200
+                    result:
+                      - _id: 66d07b06022c0ec797668790
+                        isAPrivateProgram: true
+                        externalId: EP program 1 - with program
+                        name: windows
+                        description: DCPCR School Development Index 2018-19
+                        translations:
+                          hi:
+                            description: >-
+                              माता-पिता को PTM की तारीख और समय की जानकारी देकर
+                              उन्हें बैठक के लिए                          
+                              आमंत्रित करें। शिक्षकों के साथ मिलकर बैठक का
+                              एजेंडा तैयार करें ताकि                           
+                              चर्चा सुचारू रूप से हो सके। बैठक की शुरुआत में
+                              माता-पिता का गर्मजोशी से स्वागत करें और एक आइस
+                              ब्रेकर गतिविधि के माध्यम से माहौल को सहज और
+                              संवादात्मक बनाएं। इसके बाद 'माता-पिता भागीदार' पहल
+                              पर विस्तार से चर्चा करें, जिसमें माता-पिता की
+                              भूमिका और इस पहल के लाभों पर प्रकाश डालें।
+                            name: विंडोज़
+    parameters:
+      - in: query
+        name: isAPrivateProgram
+        description: Should always be set to true.
+        schema: *ref_1
+        required: true
+      - in: query
+        name: page
+        description: ''
+        schema: &ref_2
+          type: number
+        required: true
+      - in: query
+        name: limit
+        description: ''
+        schema: *ref_2
+        required: true
+      - in: query
+        name: filter
+        description: ''
+        schema: *ref_1
+        required: true
+      - in: query
+        name: search
+        description: ''
+        schema: *ref_1
+        required: true
+  /project/v1/userProjects/importFromLibrary/{projectTemplateId}:
+    post:
+      summary: This api will start the improvement.
+      description: ''
+      operationId: ''
+      tags:
+        - MI-2.0
+      parameters: *ref_0
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: number
+                  result:
+                    type: object
+                    properties:
+                      acl:
+                        type: object
+                        properties:
+                          visibility:
+                            type: string
+                          users:
+                            type: array
+                            items:
+                              type: string
+                          scope:
+                            type: object
+                            properties: {}
+                      userId:
+                        type: string
+                      userRole:
+                        type: string
+                      status:
+                        type: string
+                      isDeleted:
+                        type: boolean
+                      categories:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            _id:
+                              type: string
+                            externalId:
+                              type: string
+                            name:
+                              type: string
+                      createdBy:
+                        type: string
+                      tasks:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            _id:
+                              type: string
+                            createdBy:
+                              type: string
+                            updatedBy:
+                              type: string
+                            isDeleted:
+                              type: boolean
+                            isDeletable:
+                              type: boolean
+                            taskSequence:
+                              type: array
+                              items:
+                                type: string
+                            children:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  _id:
+                                    type: string
+                                  createdBy:
+                                    type: string
+                                  updatedBy:
+                                    type: string
+                                  isDeleted:
+                                    type: boolean
+                                  isDeletable:
+                                    type: boolean
+                                  taskSequence:
+                                    type: array
+                                    items:
+                                      type: string
+                                  children:
+                                    type: array
+                                    items:
+                                      type: string
+                                  visibleIf:
+                                    type: array
+                                    items:
+                                      type: object
+                                      properties:
+                                        operator:
+                                          type: string
+                                        _id:
+                                          type: string
+                                        value:
+                                          type: string
+                                      required:
+                                        - operator
+                                        - _id
+                                        - value
+                                  hasSubTasks:
+                                    type: boolean
+                                  learningResources:
+                                    type: array
+                                    items:
+                                      type: string
+                                  deleted:
+                                    type: boolean
+                                  type:
+                                    type: string
+                                  projectTemplateId:
+                                    type: string
+                                  projectTemplateExternalId:
+                                    type: string
+                                  name:
+                                    type: string
+                                  externalId:
+                                    type: string
+                                  description:
+                                    type: string
+                                  sequenceNumber:
+                                    type: string
+                                  solutionDetails:
+                                    type: object
+                                    properties:
+                                      solutionType:
+                                        type: string
+                                      solutionId:
+                                        type: string
+                                      solutionSubType:
+                                        type: string
+                                  updatedAt:
+                                    type: string
+                                  createdAt:
+                                    type: string
+                                  __v:
+                                    type: number
+                                  status:
+                                    type: string
+                                  attachments:
+                                    type: array
+                                    items:
+                                      type: string
+                                  referenceId:
+                                    type: string
+                                  isImportedFromLibrary:
+                                    type: boolean
+                                  syncedAt:
+                                    type: string
+                                required:
+                                  - _id
+                                  - createdBy
+                                  - updatedBy
+                                  - isDeleted
+                                  - isDeletable
+                                  - taskSequence
+                                  - children
+                                  - visibleIf
+                                  - hasSubTasks
+                                  - learningResources
+                                  - deleted
+                                  - type
+                                  - projectTemplateId
+                                  - projectTemplateExternalId
+                                  - name
+                                  - externalId
+                                  - description
+                                  - sequenceNumber
+                                  - solutionDetails
+                                  - updatedAt
+                                  - createdAt
+                                  - __v
+                                  - status
+                                  - attachments
+                                  - referenceId
+                                  - isImportedFromLibrary
+                                  - syncedAt
+                            visibleIf:
+                              type: array
+                              items:
+                                type: string
+                            hasSubTasks:
+                              type: boolean
+                            learningResources:
+                              type: array
+                              items:
+                                type: string
+                            deleted:
+                              type: boolean
+                            type:
+                              type: string
+                            projectTemplateId:
+                              type: string
+                            projectTemplateExternalId:
+                              type: string
+                            name:
+                              type: string
+                            externalId:
+                              type: string
+                            description:
+                              type: string
+                            sequenceNumber:
+                              type: string
+                            solutionDetails:
+                              type: object
+                              properties:
+                                solutionId:
+                                  type: string
+                                solutionSubType:
+                                  type: string
+                                solutionType:
+                                  type: string
+                            updatedAt:
+                              type: string
+                            createdAt:
+                              type: string
+                            __v:
+                              type: number
+                            status:
+                              type: string
+                            attachments:
+                              type: array
+                              items:
+                                type: string
+                            referenceId:
+                              type: string
+                            isImportedFromLibrary:
+                              type: boolean
+                            syncedAt:
+                              type: string
+                          required:
+                            - _id
+                            - createdBy
+                            - updatedBy
+                            - isDeleted
+                            - isDeletable
+                            - taskSequence
+                            - children
+                            - visibleIf
+                            - hasSubTasks
+                            - learningResources
+                            - deleted
+                            - type
+                            - projectTemplateId
+                            - projectTemplateExternalId
+                            - name
+                            - externalId
+                            - description
+                            - sequenceNumber
+                            - solutionDetails
+                            - updatedAt
+                            - createdAt
+                            - __v
+                            - status
+                            - attachments
+                            - referenceId
+                            - isImportedFromLibrary
+                            - syncedAt
+                      updatedBy:
+                        type: string
+                      learningResources:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                            link:
+                              type: string
+                            app:
+                              type: string
+                            id:
+                              type: string
+                      hasAcceptedTAndC:
+                        type: boolean
+                      taskSequence:
+                        type: array
+                        items:
+                          type: string
+                      recommendedFor:
+                        type: array
+                        items:
+                          type: string
+                      attachments:
+                        type: array
+                        items:
+                          type: string
+                      updateHistory:
+                        type: array
+                        items:
+                          type: string
+                      _id:
+                        type: string
+                      deleted:
+                        type: boolean
+                      description:
+                        type: string
+                      title:
+                        type: string
+                      updatedAt:
+                        type: string
+                      createdAt:
+                        type: string
+                      taskReport:
+                        type: object
+                        properties:
+                          total:
+                            type: number
+                          notStarted:
+                            type: number
+                      userProfile:
+                        type: object
+                        properties:
+                          id:
+                            type: number
+                          email:
+                            type: string
+                          email_verified:
+                            type: string
+                          name:
+                            type: string
+                          about:
+                            type: string
+                          share_link:
+                            type: 'null'
+                          status:
+                            type: string
+                          image:
+                            type: string
+                          has_accepted_terms_and_conditions:
+                            type: boolean
+                          languages:
+                            type: array
+                            items:
+                              type: string
+                          preferred_language:
+                            type: object
+                            properties:
+                              value:
+                                type: string
+                              label:
+                                type: string
+                          organization_id:
+                            type: number
+                          roles:
+                            type: array
+                            items:
+                              type: number
+                          meta:
+                            type: object
+                            properties: {}
+                          created_at:
+                            type: string
+                          updated_at:
+                            type: string
+                          deleted_at:
+                            type: 'null'
+                          organization:
+                            type: object
+                            properties:
+                              id:
+                                type: number
+                              name:
+                                type: string
+                              code:
+                                type: string
+                          user_roles:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                id:
+                                  type: number
+                                title:
+                                  type: string
+                                label:
+                                  type: string
+                                user_type:
+                                  type: number
+                                status:
+                                  type: string
+                                organization_id:
+                                  type: number
+                                visibility:
+                                  type: string
+                              required:
+                                - id
+                                - title
+                                - label
+                                - user_type
+                                - status
+                                - organization_id
+                                - visibility
+                          permissions:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                module:
+                                  type: string
+                                request_type:
+                                  type: array
+                                  items:
+                                    type: string
+                                service:
+                                  type: string
+                              required:
+                                - module
+                                - request_type
+                                - service
+                          block:
+                            type: object
+                            properties:
+                              value:
+                                type: string
+                              label:
+                                type: string
+                              externalId:
+                                type: string
+                          state:
+                            type: object
+                            properties:
+                              value:
+                                type: string
+                              label:
+                                type: string
+                              externalId:
+                                type: string
+                          cluster:
+                            type: object
+                            properties:
+                              value:
+                                type: string
+                              label:
+                                type: string
+                              externalId:
+                                type: string
+                          district:
+                            type: object
+                            properties:
+                              value:
+                                type: string
+                              label:
+                                type: string
+                              externalId:
+                                type: string
+                      lastDownloadedAt:
+                        type: string
+                      projectTemplateId:
+                        type: string
+                      projectTemplateExternalId:
+                        type: string
+                      goal:
+                        type: string
+                      rationale:
+                        type: string
+                      primaryAudience:
+                        type: string
+                      duration:
+                        type: string
+                      successIndicators:
+                        type: string
+                      risks:
+                        type: string
+                      approaches:
+                        type: string
+              examples:
+                example1:
+                  value:
+                    message: Successfully fetched projects
+                    status: 200
+                    result:
+                      acl:
+                        visibility: SELF
+                        users: []
+                        scope: {}
+                      userId: '162'
+                      userRole: ''
+                      status: started
+                      isDeleted: false
+                      categories:
+                        - _id: 66399a1204785762f7e8e4c1
+                          externalId: educationLeader
+                          name: Education Leader
+                      createdBy: '162'
+                      tasks:
+                        - _id: 2b5ebf8f-fcb1-4829-8d97-034101df2bf1
+                          createdBy: '168'
+                          updatedBy: '168'
+                          isDeleted: false
+                          isDeletable: false
+                          taskSequence: []
+                          children: []
+                          visibleIf: []
+                          hasSubTasks: false
+                          learningResources: []
+                          deleted: false
+                          type: simple
+                          projectTemplateId: 66399a3443d18862ed097ff1
+                          projectTemplateExternalId: TSCSLHAR02-1710148664591
+                          name: >-
+                            Address the assembly and share ideas about Smart
+                            Learn
+                          externalId: Task1-1710148664591
+                          description: ''
+                          sequenceNumber: '1'
+                          solutionDetails:
+                            solutionId: ''
+                            solutionSubType: ''
+                            solutionType: ''
+                          updatedAt: '2024-11-22T09:13:31.424Z'
+                          createdAt: '2024-05-13T07:20:59.437Z'
+                          __v: 0
+                          status: notStarted
+                          attachments: []
+                          referenceId: 6641bf5b7d401713c8a3f7a2
+                          isImportedFromLibrary: false
+                          syncedAt: '2024-11-22T09:13:31.424Z'
+                        - _id: 8a722778-c931-4623-81f3-6e3ec8f71a10
+                          createdBy: '168'
+                          updatedBy: '168'
+                          isDeleted: false
+                          isDeletable: false
+                          taskSequence: []
+                          children: []
+                          visibleIf: []
+                          hasSubTasks: false
+                          learningResources: []
+                          deleted: false
+                          type: simple
+                          projectTemplateId: 66399a3443d18862ed097ff1
+                          projectTemplateExternalId: TSCSLHAR02-1710148664591
+                          name: Online Training
+                          externalId: Task2-1710148664591
+                          description: ''
+                          sequenceNumber: '2'
+                          solutionDetails:
+                            solutionId: ''
+                            solutionSubType: ''
+                            solutionType: ''
+                          updatedAt: '2024-11-22T09:13:31.424Z'
+                          createdAt: '2024-05-13T07:20:59.464Z'
+                          __v: 0
+                          status: notStarted
+                          attachments: []
+                          referenceId: 6641bf5b7d401713c8a3f7a5
+                          isImportedFromLibrary: false
+                          syncedAt: '2024-11-22T09:13:31.424Z'
+                        - _id: 5ef5a882-ac7e-47c8-9512-5d2dd0adf1ba
+                          createdBy: '168'
+                          updatedBy: '168'
+                          isDeleted: false
+                          isDeletable: false
+                          taskSequence:
+                            - Task3-1710148664591-subtask-8
+                          children:
+                            - _id: 4c4b5e79-5405-4d50-ab54-572fd74fd8aa
+                              createdBy: '168'
+                              updatedBy: '168'
+                              isDeleted: false
+                              isDeletable: false
+                              taskSequence: []
+                              children: []
+                              visibleIf:
+                                - operator: '==='
+                                  _id: 5ef5a882-ac7e-47c8-9512-5d2dd0adf1ba
+                                  value: started
+                              hasSubTasks: false
+                              learningResources: []
+                              deleted: false
+                              type: simple
+                              projectTemplateId: 66399a3443d18862ed097ff1
+                              projectTemplateExternalId: TSCSLHAR02-1710148664591
+                              name: >-
+                                How to use Browsers , Share number of students
+                                can use Browsers out of total students enrolled
+                              externalId: Task3-1710148664591-subtask-8
+                              description: ''
+                              sequenceNumber: ''
+                              solutionDetails:
+                                solutionType: ''
+                                solutionId: ''
+                                solutionSubType: ''
+                              updatedAt: '2024-11-22T09:13:31.424Z'
+                              createdAt: '2024-05-13T07:20:59.498Z'
+                              __v: 0
+                              status: notStarted
+                              attachments: []
+                              referenceId: 6641bf5b7d401713c8a3f7b4
+                              isImportedFromLibrary: false
+                              syncedAt: '2024-11-22T09:13:31.424Z'
+                          visibleIf: []
+                          hasSubTasks: true
+                          learningResources: []
+                          deleted: false
+                          type: simple
+                          projectTemplateId: 66399a3443d18862ed097ff1
+                          projectTemplateExternalId: TSCSLHAR02-1710148664591
+                          name: Smart Learn for Students
+                          externalId: Task3-1710148664591
+                          description: ''
+                          sequenceNumber: '3'
+                          solutionDetails:
+                            solutionType: ''
+                            solutionId: ''
+                            solutionSubType: ''
+                          updatedAt: '2024-11-22T09:13:31.424Z'
+                          createdAt: '2024-05-13T07:20:59.472Z'
+                          __v: 0
+                          status: notStarted
+                          attachments: []
+                          referenceId: 6641bf5b7d401713c8a3f7a8
+                          isImportedFromLibrary: false
+                          syncedAt: '2024-11-22T09:13:31.424Z'
+                        - _id: a85f41d6-49e8-4a09-acae-07d45c3f0e33
+                          createdBy: '168'
+                          updatedBy: '168'
+                          isDeleted: false
+                          isDeletable: false
+                          taskSequence:
+                            - Task4-1710148664591-subtask-8
+                          children:
+                            - _id: 6e665087-149e-468e-a2fe-baa6c02d4e80
+                              createdBy: '168'
+                              updatedBy: '168'
+                              isDeleted: false
+                              isDeletable: false
+                              taskSequence: []
+                              children: []
+                              visibleIf:
+                                - operator: '==='
+                                  _id: a85f41d6-49e8-4a09-acae-07d45c3f0e33
+                                  value: started
+                              hasSubTasks: false
+                              learningResources: []
+                              deleted: false
+                              type: simple
+                              projectTemplateId: 66399a3443d18862ed097ff1
+                              projectTemplateExternalId: TSCSLHAR02-1710148664591
+                              name: >-
+                                How to create an Email Id, Share number of
+                                students created email ids ut of total and Share
+                                list of created email ids
+                              externalId: Task4-1710148664591-subtask-8
+                              description: ''
+                              sequenceNumber: ''
+                              solutionDetails:
+                                solutionType: ''
+                                solutionId: ''
+                                solutionSubType: ''
+                              updatedAt: '2024-11-22T09:13:31.424Z'
+                              createdAt: '2024-05-13T07:20:59.515Z'
+                              __v: 0
+                              status: notStarted
+                              attachments: []
+                              referenceId: 6641bf5b7d401713c8a3f7b9
+                              isImportedFromLibrary: false
+                              syncedAt: '2024-11-22T09:13:31.424Z'
+                          visibleIf: []
+                          hasSubTasks: true
+                          learningResources: []
+                          deleted: false
+                          type: simple
+                          projectTemplateId: 66399a3443d18862ed097ff1
+                          projectTemplateExternalId: TSCSLHAR02-1710148664591
+                          name: Smart Learn for Students
+                          externalId: Task4-1710148664591
+                          description: ''
+                          sequenceNumber: '4'
+                          solutionDetails:
+                            solutionType: ''
+                            solutionId: ''
+                            solutionSubType: ''
+                          updatedAt: '2024-11-22T09:13:31.424Z'
+                          createdAt: '2024-05-13T07:20:59.478Z'
+                          __v: 0
+                          status: notStarted
+                          attachments: []
+                          referenceId: 6641bf5b7d401713c8a3f7ab
+                          isImportedFromLibrary: false
+                          syncedAt: '2024-11-22T09:13:31.424Z'
+                        - _id: 8e19d513-7d89-4441-93fb-f685750c5050
+                          createdBy: '168'
+                          updatedBy: '168'
+                          isDeleted: false
+                          isDeletable: false
+                          taskSequence:
+                            - Task5-1710148664591-subtask-8
+                          children:
+                            - _id: c5111a2f-fe2c-4781-a5d2-ad70af8085e2
+                              createdBy: '168'
+                              updatedBy: '168'
+                              isDeleted: false
+                              isDeletable: false
+                              taskSequence: []
+                              children: []
+                              visibleIf:
+                                - operator: '==='
+                                  _id: 8e19d513-7d89-4441-93fb-f685750c5050
+                                  value: started
+                              hasSubTasks: false
+                              learningResources: []
+                              deleted: false
+                              type: simple
+                              projectTemplateId: 66399a3443d18862ed097ff1
+                              projectTemplateExternalId: TSCSLHAR02-1710148664591
+                              name: >-
+                                Learning with Smart Board, share number of
+                                students can learn easily with Smart board.
+                              externalId: Task5-1710148664591-subtask-8
+                              description: ''
+                              sequenceNumber: ''
+                              solutionDetails:
+                                solutionType: ''
+                                solutionId: ''
+                                solutionSubType: ''
+                              updatedAt: '2024-11-22T09:13:31.424Z'
+                              createdAt: '2024-05-13T07:20:59.526Z'
+                              __v: 0
+                              status: notStarted
+                              attachments: []
+                              referenceId: 6641bf5b7d401713c8a3f7be
+                              isImportedFromLibrary: false
+                              syncedAt: '2024-11-22T09:13:31.424Z'
+                          visibleIf: []
+                          hasSubTasks: true
+                          learningResources: []
+                          deleted: false
+                          type: simple
+                          projectTemplateId: 66399a3443d18862ed097ff1
+                          projectTemplateExternalId: TSCSLHAR02-1710148664591
+                          name: Smart Learn for Students
+                          externalId: Task5-1710148664591
+                          description: ''
+                          sequenceNumber: '5'
+                          solutionDetails:
+                            solutionType: ''
+                            solutionId: ''
+                            solutionSubType: ''
+                          updatedAt: '2024-11-22T09:13:31.424Z'
+                          createdAt: '2024-05-13T07:20:59.485Z'
+                          __v: 0
+                          status: notStarted
+                          attachments: []
+                          referenceId: 6641bf5b7d401713c8a3f7ae
+                          isImportedFromLibrary: false
+                          syncedAt: '2024-11-22T09:13:31.424Z'
+                        - _id: d17501cf-5e80-40b9-bbe7-cf64aecca548
+                          createdBy: '168'
+                          updatedBy: '168'
+                          isDeleted: false
+                          isDeletable: false
+                          taskSequence:
+                            - Task6-1710148664591-subtask-8
+                          children:
+                            - _id: 444c9fce-5136-42d7-ae96-a120ea11bec6
+                              createdBy: '168'
+                              updatedBy: '168'
+                              isDeleted: false
+                              isDeletable: false
+                              taskSequence: []
+                              children: []
+                              visibleIf:
+                                - operator: '==='
+                                  _id: d17501cf-5e80-40b9-bbe7-cf64aecca548
+                                  value: started
+                              hasSubTasks: false
+                              learningResources: []
+                              deleted: false
+                              type: simple
+                              projectTemplateId: 66399a3443d18862ed097ff1
+                              projectTemplateExternalId: TSCSLHAR02-1710148664591
+                              name: >-
+                                Training of Teaching with Smart Board, Share
+                                number of teachers who can use smart board out
+                                of total teachers in school
+                              externalId: Task6-1710148664591-subtask-8
+                              description: ''
+                              sequenceNumber: ''
+                              solutionDetails:
+                                solutionType: ''
+                                solutionId: ''
+                                solutionSubType: ''
+                              updatedAt: '2024-11-22T09:13:31.424Z'
+                              createdAt: '2024-05-13T07:20:59.539Z'
+                              __v: 0
+                              status: notStarted
+                              attachments: []
+                              referenceId: 6641bf5b7d401713c8a3f7c3
+                              isImportedFromLibrary: false
+                              syncedAt: '2024-11-22T09:13:31.424Z'
+                          visibleIf: []
+                          hasSubTasks: true
+                          learningResources: []
+                          deleted: false
+                          type: simple
+                          projectTemplateId: 66399a3443d18862ed097ff1
+                          projectTemplateExternalId: TSCSLHAR02-1710148664591
+                          name: Smart Learn for Teachers
+                          externalId: Task6-1710148664591
+                          description: ''
+                          sequenceNumber: '6'
+                          solutionDetails:
+                            solutionType: ''
+                            solutionId: ''
+                            solutionSubType: ''
+                          updatedAt: '2024-11-22T09:13:31.424Z'
+                          createdAt: '2024-05-13T07:20:59.491Z'
+                          __v: 0
+                          status: notStarted
+                          attachments: []
+                          referenceId: 6641bf5b7d401713c8a3f7b1
+                          isImportedFromLibrary: false
+                          syncedAt: '2024-11-22T09:13:31.424Z'
+                      updatedBy: '162'
+                      learningResources:
+                        - name: >-
+                            View the learning resources to understand about
+                            Smart Learn
+                          link: >-
+                            https://diksha.gov.in/resources/play/content/do_31400164030265753613820
+                          app: Diksha
+                          id: do_31400164030265753613820
+                      hasAcceptedTAndC: false
+                      taskSequence:
+                        - Task1-1710148664591
+                        - Task2-1710148664591
+                        - Task3-1710148664591
+                        - Task4-1710148664591
+                        - Task5-1710148664591
+                        - Task6-1710148664591
+                      recommendedFor:
+                        - Head Master/Mistress (HM)
+                        - Principal
+                        - Head Teacher
+                        - Elementary School Head Master (ESHM)
+                      attachments: []
+                      updateHistory: []
+                      _id: 67404b3b83aa65755d2b992a
+                      deleted: false
+                      description: >-
+                        Encourage school leaders to learn about various digital
+                        initiatives and share ideas that would be implemented in
+                        their schools.
+                      title: Tech Skill Club- Smart Learn
+                      updatedAt: '2024-11-22T09:13:31.556Z'
+                      createdAt: '2024-05-07T03:04:20.973Z'
+                      taskReport:
+                        total: 6
+                        notStarted: 6
+                      userProfile:
+                        id: 162
+                        email: priyanka@tunerlabs.com
+                        email_verified: 'false'
+                        name: Priyanka
+                        about: PWA
+                        share_link: null
+                        status: ACTIVE
+                        image: >-
+                          https://storage.googleapis.com/mentoring-dev-storage-private/users/162-1726202771113-screenshot_from_2024_08_20_19_19_43_png?GoogleAccessId=sl-mentoring-dev-storage%40sl-dev-project.iam.gserviceaccount.com&Expires=1732320812&Signature=wD8ZfJ%2BIAIKZrpuCAPbqs0VYIOSn0Ebclg8MObxlUgKRrpMzJdxkUOP%2BDyps53qcDIA9xA0Y5bPQr8yyiIjCx%2BtTL9rZo3kuZySCn71x%2FSGjfnsoXMl07qvjYS29en0xvItzzlZVno60d1rd%2BzXbLrzzu2PyDFZpTMF3QdVHMx6TAakD%2BQJOp02lmARSFdWOmUAQSgG%2FEgX9e8Ogsc253PUTJIUeb2YnF570PfNeuabJmN6vXaCpgu9%2FUcP65koiBpDyUVpMK58NjWE52wZlQZxXqr5ml6%2FD03PGZym5TD6PVKCUuBoF9OZevqcQcXdpDmQSSVLya7IDgShRh5h8vA%3D%3D
+                        has_accepted_terms_and_conditions: true
+                        languages: []
+                        preferred_language:
+                          value: en
+                          label: English
+                        organization_id: 24
+                        roles:
+                          - 1
+                          - 10
+                          - 16
+                          - 18
+                          - 17
+                          - 19
+                          - 20
+                          - 23
+                          - 4
+                          - 5
+                        meta: {}
+                        created_at: '2024-01-11T11:44:44.632Z'
+                        updated_at: '2024-10-18T08:25:24.562Z'
+                        deleted_at: null
+                        organization:
+                          id: 24
+                          name: Tunerlabs
+                          code: tl
+                        user_roles:
+                          - id: 1
+                            title: user
+                            label: User
+                            user_type: 0
+                            status: ACTIVE
+                            organization_id: 1
+                            visibility: PUBLIC
+                          - id: 4
+                            title: admin
+                            label: Admin
+                            user_type: 1
+                            status: ACTIVE
+                            organization_id: 1
+                            visibility: PUBLIC
+                          - id: 5
+                            title: org_admin
+                            label: Org Admin
+                            user_type: 1
+                            status: ACTIVE
+                            organization_id: 1
+                            visibility: PUBLIC
+                          - id: 10
+                            title: reviewer
+                            label: Reviewer
+                            user_type: 0
+                            status: ACTIVE
+                            organization_id: 1
+                            visibility: PUBLIC
+                          - id: 16
+                            title: head_master
+                            label: Head Master
+                            user_type: 0
+                            status: ACTIVE
+                            organization_id: 24
+                            visibility: PUBLIC
+                          - id: 18
+                            title: block_education_officer
+                            label: Block Education Officer
+                            user_type: 0
+                            status: ACTIVE
+                            organization_id: 24
+                            visibility: PUBLIC
+                          - id: 17
+                            title: principle
+                            label: Principle
+                            user_type: 0
+                            status: ACTIVE
+                            organization_id: 24
+                            visibility: PUBLIC
+                          - id: 19
+                            title: block_academic_coordinator
+                            label: Block Academic Coordinator
+                            user_type: 0
+                            status: ACTIVE
+                            organization_id: 24
+                            visibility: PUBLIC
+                          - id: 20
+                            title: district_education_officer
+                            label: District Education Officer
+                            user_type: 0
+                            status: ACTIVE
+                            organization_id: 24
+                            visibility: PUBLIC
+                          - id: 23
+                            title: state_project_director
+                            label: State Project Director
+                            user_type: 0
+                            status: ACTIVE
+                            organization_id: 24
+                            visibility: PUBLIC
+                        permissions:
+                          - module: user
+                            request_type:
+                              - POST
+                              - DELETE
+                              - GET
+                              - PUT
+                              - PATCH
+                            service: user
+                          - module: user-role
+                            request_type:
+                              - POST
+                              - DELETE
+                              - GET
+                              - PUT
+                              - PATCH
+                            service: user
+                          - module: form
+                            request_type:
+                              - POST
+                              - DELETE
+                              - GET
+                              - PUT
+                              - PATCH
+                            service: user
+                          - module: cloud-services
+                            request_type:
+                              - POST
+                              - DELETE
+                              - GET
+                              - PUT
+                              - PATCH
+                            service: user
+                          - module: organization
+                            request_type:
+                              - POST
+                              - GET
+                            service: user
+                          - module: entity-type
+                            request_type:
+                              - POST
+                              - DELETE
+                              - GET
+                              - PUT
+                              - PATCH
+                            service: user
+                          - module: entity
+                            request_type:
+                              - POST
+                              - DELETE
+                              - PUT
+                              - PATCH
+                              - GET
+                            service: user
+                          - module: org-admin
+                            request_type:
+                              - POST
+                              - DELETE
+                              - GET
+                              - PUT
+                              - PATCH
+                            service: user
+                          - module: notification
+                            request_type:
+                              - POST
+                              - DELETE
+                              - GET
+                              - PUT
+                              - PATCH
+                            service: user
+                          - module: account
+                            request_type:
+                              - GET
+                              - POST
+                            service: user
+                          - module: admin
+                            request_type:
+                              - DELETE
+                              - POST
+                            service: user
+                        block:
+                          value: 6682771aa845ef3e891db070
+                          label: 'Bangalore South '
+                          externalId: enkhjg
+                        state:
+                          value: 665d8df5c6892808846230e7
+                          label: Karnataka
+                          externalId: hsjj
+                        cluster:
+                          value: 668242835fb8bc3e93ceae44
+                          label: Indiranagar
+                          externalId: efflfh3
+                        district:
+                          value: 668240135fb8bc3e93ceae39
+                          label: Bengaluru
+                          externalId: enff3
+                      lastDownloadedAt: '2024-11-22T09:13:31.537Z'
+                      projectTemplateId: 66399a3443d18862ed097ff1
+                      projectTemplateExternalId: TSCSLHAR02-1710148664591
+                      goal: TEMP
+                      rationale: ''
+                      primaryAudience: ''
+                      duration: 1 month
+                      successIndicators: ''
+                      risks: ''
+                      approaches: ''
+    parameters:
+      - in: path
+        name: projectTemplateId
+        description: project template id is required
+        schema: *ref_1
+        required: true
+  /project/v1/userProjects/list:
+    get:
+      summary: >-
+        Fetches the projects from the database where the projects are not
+        submitted.
+      description: ''
+      operationId: ''
+      tags:
+        - MI-2.0
+      parameters: *ref_0
+      responses:
+        '200':
+          description: OK
+          content:
+            others:
+              schema:
+                type: string
+              examples:
+                example1:
+                  value: ''
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: number
+                  result:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        _id:
+                          type: string
+                        userId:
+                          type: string
+                        userRole:
+                          type: string
+                        status:
+                          type: string
+                        isDeleted:
+                          type: boolean
+                        categories:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              _id:
+                                type: string
+                              externalId:
+                                type: string
+                              name:
+                                type: string
+                        createdBy:
+                          type: string
+                        tasks:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              _id:
+                                type: string
+                              createdBy:
+                                type: string
+                              updatedBy:
+                                type: string
+                              isDeleted:
+                                type: boolean
+                              isDeletable:
+                                type: boolean
+                              taskSequence:
+                                type: array
+                                items:
+                                  type: string
+                              children:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    _id:
+                                      type: string
+                                    createdBy:
+                                      type: string
+                                    updatedBy:
+                                      type: string
+                                    isDeleted:
+                                      type: boolean
+                                    isDeletable:
+                                      type: boolean
+                                    taskSequence:
+                                      type: array
+                                      items:
+                                        type: string
+                                    children:
+                                      type: array
+                                      items:
+                                        type: string
+                                    visibleIf:
+                                      type: array
+                                      items:
+                                        type: object
+                                        properties:
+                                          operator:
+                                            type: string
+                                          _id:
+                                            type: string
+                                          value:
+                                            type: string
+                                        required:
+                                          - operator
+                                          - _id
+                                          - value
+                                    hasSubTasks:
+                                      type: boolean
+                                    learningResources:
+                                      type: array
+                                      items:
+                                        type: string
+                                    deleted:
+                                      type: boolean
+                                    type:
+                                      type: string
+                                    projectTemplateId:
+                                      type: string
+                                    projectTemplateExternalId:
+                                      type: string
+                                    name:
+                                      type: string
+                                    externalId:
+                                      type: string
+                                    description:
+                                      type: string
+                                    sequenceNumber:
+                                      type: string
+                                    solutionDetails:
+                                      type: object
+                                      properties:
+                                        solutionType:
+                                          type: string
+                                        solutionId:
+                                          type: string
+                                        solutionSubType:
+                                          type: string
+                                    updatedAt:
+                                      type: string
+                                    createdAt:
+                                      type: string
+                                    __v:
+                                      type: number
+                                    status:
+                                      type: string
+                                    referenceId:
+                                      type: string
+                                    isImportedFromLibrary:
+                                      type: boolean
+                                    syncedAt:
+                                      type: string
+                                  required:
+                                    - _id
+                                    - createdBy
+                                    - updatedBy
+                                    - isDeleted
+                                    - isDeletable
+                                    - taskSequence
+                                    - children
+                                    - visibleIf
+                                    - hasSubTasks
+                                    - learningResources
+                                    - deleted
+                                    - type
+                                    - projectTemplateId
+                                    - projectTemplateExternalId
+                                    - name
+                                    - externalId
+                                    - description
+                                    - sequenceNumber
+                                    - solutionDetails
+                                    - updatedAt
+                                    - createdAt
+                                    - __v
+                                    - status
+                                    - referenceId
+                                    - isImportedFromLibrary
+                                    - syncedAt
+                              visibleIf:
+                                type: array
+                                items:
+                                  type: string
+                              hasSubTasks:
+                                type: boolean
+                              learningResources:
+                                type: array
+                                items:
+                                  type: string
+                              deleted:
+                                type: boolean
+                              type:
+                                type: string
+                              projectTemplateId:
+                                type: string
+                              projectTemplateExternalId:
+                                type: string
+                              name:
+                                type: string
+                              externalId:
+                                type: string
+                              description:
+                                type: string
+                              sequenceNumber:
+                                type: string
+                              solutionDetails:
+                                type: object
+                                properties:
+                                  solutionId:
+                                    type: string
+                                  solutionSubType:
+                                    type: string
+                                  solutionType:
+                                    type: string
+                              updatedAt:
+                                type: string
+                              createdAt:
+                                type: string
+                              __v:
+                                type: number
+                              status:
+                                type: string
+                              referenceId:
+                                type: string
+                              isImportedFromLibrary:
+                                type: boolean
+                              syncedAt:
+                                type: string
+                            required:
+                              - _id
+                              - createdBy
+                              - updatedBy
+                              - isDeleted
+                              - isDeletable
+                              - taskSequence
+                              - children
+                              - visibleIf
+                              - hasSubTasks
+                              - learningResources
+                              - deleted
+                              - type
+                              - projectTemplateId
+                              - projectTemplateExternalId
+                              - name
+                              - externalId
+                              - description
+                              - sequenceNumber
+                              - solutionDetails
+                              - updatedAt
+                              - createdAt
+                              - __v
+                              - status
+                              - referenceId
+                              - isImportedFromLibrary
+                              - syncedAt
+                        updatedBy:
+                          type: string
+                        learningResources:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                              link:
+                                type: string
+                              app:
+                                type: string
+                              id:
+                                type: string
+                        hasAcceptedTAndC:
+                          type: boolean
+                        taskSequence:
+                          type: array
+                          items:
+                            type: string
+                        recommendedFor:
+                          type: array
+                          items:
+                            type: string
+                        attachments:
+                          type: array
+                          items:
+                            type: string
+                        deleted:
+                          type: boolean
+                        description:
+                          type: string
+                        title:
+                          type: string
+                        metaInformation:
+                          type: object
+                          properties:
+                            goal:
+                              type: string
+                            rationale:
+                              type: string
+                            primaryAudience:
+                              type: string
+                            duration:
+                              type: string
+                            successIndicators:
+                              type: string
+                            risks:
+                              type: string
+                            approaches:
+                              type: string
+                        updatedAt:
+                          type: string
+                        createdAt:
+                          type: string
+                        taskReport:
+                          type: object
+                          properties:
+                            total:
+                              type: number
+                            notStarted:
+                              type: number
+                        lastDownloadedAt:
+                          type: string
+                        projectTemplateId:
+                          type: string
+                        projectTemplateExternalId:
+                          type: string
+                        __v:
+                          type: number
+              examples:
+                example1:
+                  value:
+                    message: Successfully fetched projects
+                    status: 200
+                    result:
+                      - _id: 664222138838bc4911890573
+                        userId: '209'
+                        userRole: ''
+                        status: started
+                        isDeleted: false
+                        categories:
+                          - _id: 66399a1204785762f7e8e4c1
+                            externalId: educationLeader
+                            name: Education Leader
+                        createdBy: '209'
+                        tasks:
+                          - _id: 38dadf16-ca2f-479c-bacc-3e9e993afe8f
+                            createdBy: '168'
+                            updatedBy: '168'
+                            isDeleted: false
+                            isDeletable: false
+                            taskSequence: []
+                            children: []
+                            visibleIf: []
+                            hasSubTasks: false
+                            learningResources: []
+                            deleted: false
+                            type: simple
+                            projectTemplateId: 66399a3443d18862ed097ff1
+                            projectTemplateExternalId: TSCSLHAR02-1710148664591
+                            name: >-
+                              Address the assembly and share ideas about Smart
+                              Learn
+                            externalId: Task1-1710148664591
+                            description: ''
+                            sequenceNumber: '1'
+                            solutionDetails:
+                              solutionId: ''
+                              solutionSubType: ''
+                              solutionType: ''
+                            updatedAt: '2024-05-13T14:22:11.889Z'
+                            createdAt: '2024-05-13T07:20:59.437Z'
+                            __v: 0
+                            status: notStarted
+                            referenceId: 6641bf5b7d401713c8a3f7a2
+                            isImportedFromLibrary: false
+                            syncedAt: '2024-05-13T14:22:11.889Z'
+                          - _id: 82153afb-43e3-4f61-b39d-6368a6580c59
+                            createdBy: '168'
+                            updatedBy: '168'
+                            isDeleted: false
+                            isDeletable: false
+                            taskSequence: []
+                            children: []
+                            visibleIf: []
+                            hasSubTasks: false
+                            learningResources: []
+                            deleted: false
+                            type: simple
+                            projectTemplateId: 66399a3443d18862ed097ff1
+                            projectTemplateExternalId: TSCSLHAR02-1710148664591
+                            name: Online Training
+                            externalId: Task2-1710148664591
+                            description: ''
+                            sequenceNumber: '2'
+                            solutionDetails:
+                              solutionId: ''
+                              solutionSubType: ''
+                              solutionType: ''
+                            updatedAt: '2024-05-13T14:22:11.889Z'
+                            createdAt: '2024-05-13T07:20:59.464Z'
+                            __v: 0
+                            status: notStarted
+                            referenceId: 6641bf5b7d401713c8a3f7a5
+                            isImportedFromLibrary: false
+                            syncedAt: '2024-05-13T14:22:11.889Z'
+                          - _id: 814e5fae-45be-4ff1-aca9-7cef6d22696d
+                            createdBy: '168'
+                            updatedBy: '168'
+                            isDeleted: false
+                            isDeletable: false
+                            taskSequence:
+                              - Task3-1710148664591-subtask-8
+                            children:
+                              - _id: cdc675cd-4d4f-4080-af3c-9a8917d5953a
+                                createdBy: '168'
+                                updatedBy: '168'
+                                isDeleted: false
+                                isDeletable: false
+                                taskSequence: []
+                                children: []
+                                visibleIf:
+                                  - operator: '==='
+                                    _id: 814e5fae-45be-4ff1-aca9-7cef6d22696d
+                                    value: started
+                                hasSubTasks: false
+                                learningResources: []
+                                deleted: false
+                                type: simple
+                                projectTemplateId: 66399a3443d18862ed097ff1
+                                projectTemplateExternalId: TSCSLHAR02-1710148664591
+                                name: >-
+                                  How to use Browsers , Share number of students
+                                  can use Browsers out of total students
+                                  enrolled
+                                externalId: Task3-1710148664591-subtask-8
+                                description: ''
+                                sequenceNumber: ''
+                                solutionDetails:
+                                  solutionType: ''
+                                  solutionId: ''
+                                  solutionSubType: ''
+                                updatedAt: '2024-05-13T14:22:11.889Z'
+                                createdAt: '2024-05-13T07:20:59.498Z'
+                                __v: 0
+                                status: notStarted
+                                referenceId: 6641bf5b7d401713c8a3f7b4
+                                isImportedFromLibrary: false
+                                syncedAt: '2024-05-13T14:22:11.889Z'
+                            visibleIf: []
+                            hasSubTasks: true
+                            learningResources: []
+                            deleted: false
+                            type: simple
+                            projectTemplateId: 66399a3443d18862ed097ff1
+                            projectTemplateExternalId: TSCSLHAR02-1710148664591
+                            name: Smart Learn for Students
+                            externalId: Task3-1710148664591
+                            description: ''
+                            sequenceNumber: '3'
+                            solutionDetails:
+                              solutionType: ''
+                              solutionId: ''
+                              solutionSubType: ''
+                            updatedAt: '2024-05-13T14:22:11.889Z'
+                            createdAt: '2024-05-13T07:20:59.472Z'
+                            __v: 0
+                            status: notStarted
+                            referenceId: 6641bf5b7d401713c8a3f7a8
+                            isImportedFromLibrary: false
+                            syncedAt: '2024-05-13T14:22:11.889Z'
+                          - _id: 7fba2568-5e5a-4174-b036-de525791a2ae
+                            createdBy: '168'
+                            updatedBy: '168'
+                            isDeleted: false
+                            isDeletable: false
+                            taskSequence:
+                              - Task4-1710148664591-subtask-8
+                            children:
+                              - _id: 6008c986-aa26-488d-afdd-3ebd190b2c89
+                                createdBy: '168'
+                                updatedBy: '168'
+                                isDeleted: false
+                                isDeletable: false
+                                taskSequence: []
+                                children: []
+                                visibleIf:
+                                  - operator: '==='
+                                    _id: 7fba2568-5e5a-4174-b036-de525791a2ae
+                                    value: started
+                                hasSubTasks: false
+                                learningResources: []
+                                deleted: false
+                                type: simple
+                                projectTemplateId: 66399a3443d18862ed097ff1
+                                projectTemplateExternalId: TSCSLHAR02-1710148664591
+                                name: >-
+                                  How to create an Email Id, Share number of
+                                  students created email ids ut of total and
+                                  Share list of created email ids
+                                externalId: Task4-1710148664591-subtask-8
+                                description: ''
+                                sequenceNumber: ''
+                                solutionDetails:
+                                  solutionType: ''
+                                  solutionId: ''
+                                  solutionSubType: ''
+                                updatedAt: '2024-05-13T14:22:11.889Z'
+                                createdAt: '2024-05-13T07:20:59.515Z'
+                                __v: 0
+                                status: notStarted
+                                referenceId: 6641bf5b7d401713c8a3f7b9
+                                isImportedFromLibrary: false
+                                syncedAt: '2024-05-13T14:22:11.889Z'
+                            visibleIf: []
+                            hasSubTasks: true
+                            learningResources: []
+                            deleted: false
+                            type: simple
+                            projectTemplateId: 66399a3443d18862ed097ff1
+                            projectTemplateExternalId: TSCSLHAR02-1710148664591
+                            name: Smart Learn for Students
+                            externalId: Task4-1710148664591
+                            description: ''
+                            sequenceNumber: '4'
+                            solutionDetails:
+                              solutionType: ''
+                              solutionId: ''
+                              solutionSubType: ''
+                            updatedAt: '2024-05-13T14:22:11.889Z'
+                            createdAt: '2024-05-13T07:20:59.478Z'
+                            __v: 0
+                            status: notStarted
+                            referenceId: 6641bf5b7d401713c8a3f7ab
+                            isImportedFromLibrary: false
+                            syncedAt: '2024-05-13T14:22:11.889Z'
+                          - _id: da6d256b-8425-4e3b-978a-2bbf5f89ee55
+                            createdBy: '168'
+                            updatedBy: '168'
+                            isDeleted: false
+                            isDeletable: false
+                            taskSequence:
+                              - Task5-1710148664591-subtask-8
+                            children:
+                              - _id: d182fe2b-6fa7-4005-bce7-b79bda737cb5
+                                createdBy: '168'
+                                updatedBy: '168'
+                                isDeleted: false
+                                isDeletable: false
+                                taskSequence: []
+                                children: []
+                                visibleIf:
+                                  - operator: '==='
+                                    _id: da6d256b-8425-4e3b-978a-2bbf5f89ee55
+                                    value: started
+                                hasSubTasks: false
+                                learningResources: []
+                                deleted: false
+                                type: simple
+                                projectTemplateId: 66399a3443d18862ed097ff1
+                                projectTemplateExternalId: TSCSLHAR02-1710148664591
+                                name: >-
+                                  Learning with Smart Board, share number of
+                                  students can learn easily with Smart board.
+                                externalId: Task5-1710148664591-subtask-8
+                                description: ''
+                                sequenceNumber: ''
+                                solutionDetails:
+                                  solutionType: ''
+                                  solutionId: ''
+                                  solutionSubType: ''
+                                updatedAt: '2024-05-13T14:22:11.889Z'
+                                createdAt: '2024-05-13T07:20:59.526Z'
+                                __v: 0
+                                status: notStarted
+                                referenceId: 6641bf5b7d401713c8a3f7be
+                                isImportedFromLibrary: false
+                                syncedAt: '2024-05-13T14:22:11.890Z'
+                            visibleIf: []
+                            hasSubTasks: true
+                            learningResources: []
+                            deleted: false
+                            type: simple
+                            projectTemplateId: 66399a3443d18862ed097ff1
+                            projectTemplateExternalId: TSCSLHAR02-1710148664591
+                            name: Smart Learn for Students
+                            externalId: Task5-1710148664591
+                            description: ''
+                            sequenceNumber: '5'
+                            solutionDetails:
+                              solutionType: ''
+                              solutionId: ''
+                              solutionSubType: ''
+                            updatedAt: '2024-05-13T14:22:11.889Z'
+                            createdAt: '2024-05-13T07:20:59.485Z'
+                            __v: 0
+                            status: notStarted
+                            referenceId: 6641bf5b7d401713c8a3f7ae
+                            isImportedFromLibrary: false
+                            syncedAt: '2024-05-13T14:22:11.889Z'
+                          - _id: a085d37b-c2a4-408b-8aea-3d3c32d84a3a
+                            createdBy: '168'
+                            updatedBy: '168'
+                            isDeleted: false
+                            isDeletable: false
+                            taskSequence:
+                              - Task6-1710148664591-subtask-8
+                            children:
+                              - _id: 4ab4e2a1-d5d6-47bc-8846-2c00018d5186
+                                createdBy: '168'
+                                updatedBy: '168'
+                                isDeleted: false
+                                isDeletable: false
+                                taskSequence: []
+                                children: []
+                                visibleIf:
+                                  - operator: '==='
+                                    _id: a085d37b-c2a4-408b-8aea-3d3c32d84a3a
+                                    value: started
+                                hasSubTasks: false
+                                learningResources: []
+                                deleted: false
+                                type: simple
+                                projectTemplateId: 66399a3443d18862ed097ff1
+                                projectTemplateExternalId: TSCSLHAR02-1710148664591
+                                name: >-
+                                  Training of Teaching with Smart Board, Share
+                                  number of teachers who can use smart board out
+                                  of total teachers in school
+                                externalId: Task6-1710148664591-subtask-8
+                                description: ''
+                                sequenceNumber: ''
+                                solutionDetails:
+                                  solutionType: ''
+                                  solutionId: ''
+                                  solutionSubType: ''
+                                updatedAt: '2024-05-13T14:22:11.890Z'
+                                createdAt: '2024-05-13T07:20:59.539Z'
+                                __v: 0
+                                status: notStarted
+                                referenceId: 6641bf5b7d401713c8a3f7c3
+                                isImportedFromLibrary: false
+                                syncedAt: '2024-05-13T14:22:11.890Z'
+                            visibleIf: []
+                            hasSubTasks: true
+                            learningResources: []
+                            deleted: false
+                            type: simple
+                            projectTemplateId: 66399a3443d18862ed097ff1
+                            projectTemplateExternalId: TSCSLHAR02-1710148664591
+                            name: Smart Learn for Teachers
+                            externalId: Task6-1710148664591
+                            description: ''
+                            sequenceNumber: '6'
+                            solutionDetails:
+                              solutionType: ''
+                              solutionId: ''
+                              solutionSubType: ''
+                            updatedAt: '2024-05-13T14:22:11.890Z'
+                            createdAt: '2024-05-13T07:20:59.491Z'
+                            __v: 0
+                            status: notStarted
+                            referenceId: 6641bf5b7d401713c8a3f7b1
+                            isImportedFromLibrary: false
+                            syncedAt: '2024-05-13T14:22:11.890Z'
+                        updatedBy: '209'
+                        learningResources:
+                          - name: >-
+                              View the learning resources to understand about
+                              Smart Learn
+                            link: >-
+                              https://diksha.gov.in/resources/play/content/do_31400164030265753613820
+                            app: Diksha
+                            id: do_31400164030265753613820
+                        hasAcceptedTAndC: true
+                        taskSequence:
+                          - Task1-1710148664591
+                          - Task2-1710148664591
+                          - Task3-1710148664591
+                          - Task4-1710148664591
+                          - Task5-1710148664591
+                          - Task6-1710148664591
+                        recommendedFor:
+                          - Head Master/Mistress (HM)
+                          - Principal
+                          - Head Teacher
+                          - Elementary School Head Master (ESHM)
+                        attachments: []
+                        deleted: false
+                        description: >-
+                          Encourage school leaders to learn about various
+                          digital initiatives and share ideas that would be
+                          implemented in their schools.
+                        title: Tech Skill Club- Smart Learn
+                        metaInformation:
+                          goal: TEMP
+                          rationale: ''
+                          primaryAudience: ''
+                          duration: 1 month
+                          successIndicators: ''
+                          risks: ''
+                          approaches: ''
+                        updatedAt: '2024-05-13T14:22:11.935Z'
+                        createdAt: '2024-05-07T03:04:20.973Z'
+                        taskReport:
+                          total: 6
+                          notStarted: 6
+                        lastDownloadedAt: '2024-05-13T14:22:11.923Z'
+                        projectTemplateId: 66399a3443d18862ed097ff1
+                        projectTemplateExternalId: TSCSLHAR02-1710148664591
+                        __v: 0
+    parameters:
+      - in: query
+        name: submitted
+        description: this value should always be set to false.
+        schema: *ref_3
+        required: true
+      - in: query
+        name: page
+        description: ''
+        schema: *ref_2
+        required: true
+      - in: query
+        name: limit
+        description: ''
+        schema: *ref_2
+        required: true
+      - in: query
+        name: search
+        description: ''
+        schema: *ref_1
+        required: true
+      - in: query
+        name: filter
+        description: ''
+        schema: *ref_1
+        required: true
+  /project/v1/projectAttributes/filter:
+    get:
+      summary: Fetches project attributes (project-filters) from the DB
+      description: ''
+      operationId: ''
+      tags:
+        - MI-2.0
+      parameters: *ref_0
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: number
+                  result:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        code:
+                          type: string
+                        values:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              label:
+                                type: string
+                              value:
+                                type: string
+                            required:
+                              - label
+                              - value
+                      required:
+                        - name
+                        - code
+                        - values
+              examples:
+                example1:
+                  value: |-
+                    {
+                        "message": "Successfully fetched projects",
+                        "status": 200,
+                        "result": [
+                          {
+                              "name" : "Duration",
+                              "code" : "duration",
+                              "values" : [
+                                {
+                                  "label" : "1 week",
+                                  "value" : "1 week"
+                                },
+                                {
+                                  "label" : "2 week",
+                                  "value" : "2 week"
+                                }
+                              ]
+                          },
+                          {
+                              "name" : "Role",
+                              "code" : "role"
+                              "values" : [
+                                {
+                                  "label" : "Head Master",
+                                  "value" : "head_master"
+                                },
+                                {
+                                  "label" : "School Teacher",
+                                  "value" : "school_teacher"
+                                }
+                              ]
+                          }
+                        ]
+                    }
+  /project/v1/userExtension/wishList/add/{projectTemaplateId}:
+    post:
+      summary: Adds a project template to the users wish list
+      description: ''
+      operationId: ''
+      tags: &ref_4
+        - MI-2.0
+      parameters: *ref_0
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: number
+                required:
+                  - message
+                  - status
+              examples:
+                example1:
+                  value:
+                    message: Successfully added the project to wishlist
+                    status: 200
+    parameters: &ref_5
+      - in: path
+        name: projectTemaplateId
+        description: project template id
+        schema: *ref_1
+        required: true
+  /project/v1/userExtension/wishList/remove/{projectTemaplateId}/:
+    post:
+      summary: Removes a project template id from the users wishlist.
+      description: ''
+      operationId: ''
+      tags: *ref_4
+      parameters: *ref_0
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: number
+                required:
+                  - message
+                  - status
+              examples:
+                example1:
+                  value:
+                    message: Successfully removed the project from wishlist
+                    status: 200
+    parameters: *ref_5
+  /project/v1/userExtension/wishList/list:
+    post:
+      summary: Lists the projects from users wishlist.
+      description: ''
+      operationId: ''
+      tags: *ref_4
+      parameters: *ref_0
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: number
+                  result:
+                    type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            _id:
+                              type: string
+                            description:
+                              type: string
+                            averageRating:
+                              type: number
+                            noOfRatings:
+                              type: number
+                            title:
+                              type: string
+                            externalId:
+                              type: string
+                            categories:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  _id:
+                                    type: string
+                                  externalId:
+                                    type: string
+                                  name:
+                                    type: string
+                            createdAt:
+                              type: string
+                            duration:
+                              type: string
+                            coverImage:
+                              type: string
+                            translations:
+                              type: object
+                              properties:
+                                hi:
+                                  type: object
+                                  properties:
+                                    description:
+                                      type: string
+                                    title:
+                                      type: string
+                            new:
+                              type: boolean
+              examples:
+                example1:
+                  value:
+                    message: Successfully fetched projects
+                    status: 200
+                    result:
+                      data:
+                        - _id: 6735bda260db15acd6ad9a6e
+                          description: >-
+                            Send an invitation to parents with the PTM date and
+                            time, and prepare the agenda with teachers. During
+                            the meeting, welcome parents, conduct an ice
+                            breaker, discuss the 'Parents as Partners'
+                            initiative, and have one-on-one conversations.
+                            Collect feedback and encourage sharing photos of
+                            learning spaces. After the meeting, record
+                            attendance, review feedback, and upload data to the
+                            app.
+                          averageRating: 0
+                          noOfRatings: 0
+                          title: Windows
+                          externalId: IDE-12
+                          categories:
+                            - _id: 66399a1204785762f7e8e4c1
+                              externalId: educationLeader
+                              name: Education Leader
+                          createdAt: '2024-11-14T09:06:42.809Z'
+                          duration: 2 weeks
+                          coverImage: >-
+                            https://app.apigit.com/repository/prajwal/ELEVATE-Project/api/example/petstore.yaml#Paths//project
+                          translations:
+                            hi:
+                              description: >-
+                                माता-पिता को PTM की तारीख और समय की जानकारी देकर
+                                उन्हें बैठक के लिए आमंत्रित करें। शिक्षकों के
+                                साथ मिलकर बैठक का एजेंडा तैयार करें ताकि चर्चा
+                                सुचारू रूप से हो सके। बैठक की शुरुआत में
+                                माता-पिता का गर्मजोशी से स्वागत करें और एक आइस
+                                ब्रेकर गतिविधि के माध्यम से माहौल को सहज और
+                                संवादात्मक बनाएं। इसके बाद 'माता-पिता भागीदार'
+                                पहल पर विस्तार से चर्चा करें, जिसमें माता-पिता
+                                की भूमिका और इस पहल के लाभों पर प्रकाश डालें।
+                              title: विंडोज़
+                          new: true
+    parameters:
+      - in: query
+        name: page
+        description: ''
+        schema: &ref_6
+          type: number
+        required: true
+      - in: query
+        name: limit
+        description: ''
+        schema: *ref_6
+        required: true
+      - in: query
+        name: search
+        description: ''
+        schema: &ref_7
+          type: string
+        required: true
+      - in: query
+        name: filter
+        description: ''
+        schema: *ref_7
+        required: true
+externalDocs:
+  description: Find out more about Swagger
+  url: http://swagger.io
+components:
+  schemas:
+    Order:
+      x-swagger-router-model: io.swagger.petstore.model.Order
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        petId:
+          type: integer
+          format: int64
+          example: 198772
+        quantity:
+          type: integer
+          format: int32
+          example: 7
+        shipDate:
+          type: string
+          format: date-time
+        status:
+          type: string
+          description: Order Status
+          enum:
+            - placed
+            - approved
+            - delivered
+          example: approved
+        complete:
+          type: boolean
+      xml:
+        name: order
+      type: object
+    Customer:
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 100000
+        username:
+          type: string
+          example: fehguy
+        address:
+          type: array
+          items:
+            $ref: '#/components/schemas/Address'
+          xml:
+            wrapped: true
+            name: addresses
+      xml:
+        name: customer
+      type: object
+    Address:
+      properties:
+        street:
+          type: string
+          example: 437 Lytton
+        city:
+          type: string
+          example: Palo Alto
+        state:
+          type: string
+          example: CA
+        zip:
+          type: string
+          example: 94301
+      xml:
+        name: address
+      type: object
+    Category:
+      x-swagger-router-model: io.swagger.petstore.model.Category
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        name:
+          type: string
+          example: Dogs
+      xml:
+        name: category
+      type: object
+    User:
+      x-swagger-router-model: io.swagger.petstore.model.User
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        username:
+          type: string
+          example: theUser
+        firstName:
+          type: string
+          example: John
+        lastName:
+          type: string
+          example: James
+        email:
+          type: string
+          example: john@email.com
+        password:
+          type: string
+          example: 12345
+        phone:
+          type: string
+          example: 12345
+        userStatus:
+          type: integer
+          format: int32
+          example: 1
+          description: User Status
+      xml:
+        name: user
+      type: object
+    Tag:
+      x-swagger-router-model: io.swagger.petstore.model.Tag
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+      xml:
+        name: tag
+      type: object
+    Pet:
+      x-swagger-router-model: io.swagger.petstore.model.Pet
+      required:
+        - name
+        - photoUrls
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        name:
+          type: string
+          example: doggie
+        category:
+          $ref: '#/components/schemas/Category'
+        photoUrls:
+          type: array
+          xml:
+            wrapped: true
+          items:
+            type: string
+            xml:
+              name: photoUrl
+        tags:
+          type: array
+          xml:
+            wrapped: true
+          items:
+            $ref: '#/components/schemas/Tag'
+            xml:
+              name: tag
+        status:
+          type: string
+          description: pet status in the store
+          enum:
+            - available
+            - pending
+            - sold
+      xml:
+        name: pet
+      type: object
+    ApiResponse:
+      properties:
+        code:
+          type: integer
+          format: int32
+        type:
+          type: string
+        message:
+          type: string
+      xml:
+        name: '##default'
+      type: object
+  requestBodies:
+    Pet:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Pet'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/Pet'
+      description: Pet object that needs to be added to the store
+    UserArray:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/User'
+      description: List of user object
+  securitySchemes:
+    petstore_auth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: https://petstore.swagger.io/oauth/authorize
+          scopes:
+            write:pets: modify pets in your account
+            read:pets: read your pets
+    api_key:
+      type: apiKey
+      name: api_key
+      in: header

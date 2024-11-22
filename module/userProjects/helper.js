@@ -108,7 +108,6 @@ module.exports = class UserProjectsHelper {
 				const userProject = await projectQueries.projectDocument(
 					{
 						_id: projectId,
-						userId: userId,
 					},
 					[
 						'_id',
@@ -120,13 +119,58 @@ module.exports = class UserProjectsHelper {
 						'lastDownloadedAt',
 						'appInformation',
 						'status',
+						'updateHistory',
+						'acl',
+						'userId',
 					]
 				)
 
-				if (!userProject.length > 0) {
+				if (!(userProject.length > 0)) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.USER_PROJECT_NOT_FOUND,
+					}
+				}
+
+				if (process.env.SUBMISSION_LEVEL == 'USER') {
+					if (!(userProject[0].userId == userId)) {
+						throw {
+							status: HTTP_STATUS_CODE.bad_request.status,
+							message: CONSTANTS.apiResponses.USER_PROJECT_NOT_FOUND,
+						}
+					}
+				} else {
+					// validate user authenticity if the acl.visibility of project is SELf or SPECIFIC
+					if (
+						(userProject[0].acl.visibility == CONSTANTS.common.PROJECT_VISIBILITY_SELF &&
+							!(userProject[0].userId == userId)) ||
+						(userProject[0].acl.visibility == CONSTANTS.common.PROJECT_VISIBILITY_SPECIFIC &&
+							!(userProject[0].acl.hasOwnProperty('users') && userProject[0].acl.users.includes(userId)))
+					) {
+						throw {
+							status: HTTP_STATUS_CODE.bad_request.status,
+							message: CONSTANTS.apiResponses.USER_NOT_ALLOWED_TO_EDIT_PROJECT,
+						}
+					}
+					// validate user authenticity if the acl.visibility of project is SCOPE
+					else if (userProject[0].acl.visibility == CONSTANTS.common.PROJECT_VISIBILITY_SCOPE) {
+						let scopeData = data.userProfileInformation.scope
+						let queryData = await solutionsHelper.queryBasedOnRoleAndLocation(scopeData, '', 'acl')
+						if (!queryData.success) {
+							return resolve(queryData)
+						}
+						delete queryData.data.isReusable
+						delete queryData.data.isDeleted
+						delete queryData.data.status
+						let matchQuery = {}
+						matchQuery = queryData.data
+						let projects = await projectQueries.projectDocument(matchQuery, 'all')
+						if (!Array.isArray(projects) || projects.length < 1) {
+							throw {
+								status: HTTP_STATUS_CODE.bad_request.status,
+								message: CONSTANTS.apiResponses.USER_NOT_ALLOWED_TO_EDIT_PROJECT,
+							}
+						}
 					}
 				}
 
@@ -350,7 +394,14 @@ module.exports = class UserProjectsHelper {
 				) {
 					updateProject.completedDate = new Date()
 				}
-
+				if (userProject[0].updateHistory) {
+					// maintain history of project edits
+					userProject[0].updateHistory.push({
+						userId: userId,
+						timeStamp: new Date(),
+					})
+					updateProject['updateHistory'] = userProject[0].updateHistory
+				}
 				let projectUpdated = await projectQueries.findOneAndUpdate(
 					{
 						_id: userProject[0]._id,
@@ -509,31 +560,33 @@ module.exports = class UserProjectsHelper {
 	 * @method
 	 * @name details
 	 * @param {String} projectId - project id.
-	 * @returns {Object}
+	 * @param {String} userId - user id
+	 * @param {Object} userRoleInformation - user role information
+	 * @returns {Object} projects fetched from DB
 	 */
 
 	static details(projectId, userId, userRoleInformation = {}) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				const projectDetails = await projectQueries.projectDocument(
-					{
-						_id: projectId,
-						userId: userId,
-					},
-					'all',
-					[
-						'taskReport',
-						'projectTemplateId',
-						'projectTemplateExternalId',
-						'userId',
-						'createdBy',
-						'updatedBy',
-						'createdAt',
-						'updatedAt',
-						'userRoleInformation',
-						'__v',
-					]
-				)
+				// create query based on submission level
+				let queryObject = {
+					_id: projectId,
+				}
+				if (process.env.SUBMISSION_LEVEL == 'USER') {
+					queryObject['userId'] = userId
+				}
+				const projectDetails = await projectQueries.projectDocument(queryObject, 'all', [
+					'taskReport',
+					'projectTemplateId',
+					'projectTemplateExternalId',
+					'userId',
+					'createdBy',
+					'updatedBy',
+					'createdAt',
+					'updatedAt',
+					'userRoleInformation',
+					'__v',
+				])
 				if (!projectDetails.length > 0) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
@@ -1083,6 +1136,7 @@ module.exports = class UserProjectsHelper {
 			try {
 				let solutionExternalId = ''
 				let templateDocuments
+				let defaultACL = CONSTANTS.common.DEFAULT_ACL
 
 				if (templateId !== '') {
 					templateDocuments = await projectTemplateQueries.templateDocument({
@@ -1101,8 +1155,14 @@ module.exports = class UserProjectsHelper {
 					solutionId = templateDocuments[0].solutionId ? templateDocuments[0].solutionId : solutionId
 					solutionExternalId = templateDocuments[0].solutionExternalId
 				}
-
-				let userRoleInformation = _.omit(bodyData, ['referenceFrom', 'submissions', 'hasAcceptedTAndC', 'link'])
+				let userRoleInformation = _.omit(bodyData, [
+					'referenceFrom',
+					'submissions',
+					'hasAcceptedTAndC',
+					'link',
+					'entityId',
+					'acl',
+				])
 
 				if (projectId === '') {
 					// This will check wether the user user is targeted to solution or not based on his userRoleInformation
@@ -1161,7 +1221,7 @@ module.exports = class UserProjectsHelper {
 							} else {
 								solutionDetails = await solutionsHelper.detailsBasedOnRoleAndLocation(
 									solutionId,
-									bodyData,
+									_.omit(bodyData, ['entityId', 'acl']),
 									'',
 									isAPrivateSolution
 								)
@@ -1261,7 +1321,6 @@ module.exports = class UserProjectsHelper {
 						}
 
 						projectCreation.data['isAPrivateProgram'] = solutionDetails.isAPrivateProgram
-
 						if (Object.keys(solutionDetails).length > 0) {
 							projectCreation.data.programInformation = {
 								_id: ObjectId(solutionDetails.programId),
@@ -1277,6 +1336,10 @@ module.exports = class UserProjectsHelper {
 								externalId: solutionDetails.externalId,
 								description: solutionDetails.description ? solutionDetails.description : '',
 								name: solutionDetails.name,
+								submissionLevel: solutionDetails.submissionLevel
+									? solutionDetails.submissionLevel
+									: process.env.SUBMISSION_LEVEL,
+								scope: solutionDetails.scope,
 							}
 
 							projectCreation.data['programId'] = projectCreation.data.programInformation._id
@@ -1288,6 +1351,26 @@ module.exports = class UserProjectsHelper {
 
 							projectCreation.data['solutionExternalId'] =
 								projectCreation.data.solutionInformation.externalId
+
+							// If req.body contains acl add it, else add defaultACL
+							if (bodyData.hasOwnProperty('acl')) {
+								bodyData.acl.visibility = bodyData.acl.visibility.toUpperCase()
+								bodyData.acl.users.push(userId)
+								if (!bodyData.acl.hasOwnProperty('scope') || !(bodyData.acl.scope.length > 0)) {
+									bodyData.acl['scope'] = solutionDetails.scope
+								}
+								projectCreation.data['acl'] = bodyData.acl
+							} else {
+								defaultACL.users.push(userId)
+								defaultACL.scope = solutionDetails.scope
+								projectCreation.data['acl'] = defaultACL
+							}
+							projectCreation.data['updateHistory'] = [
+								{
+									userId: userId,
+									timeStamp: new Date(),
+								},
+							]
 						}
 
 						projectCreation.data['userRole'] = bodyData.role
@@ -1474,7 +1557,9 @@ module.exports = class UserProjectsHelper {
 								projectCreation.data.userProfile = updatedUserProfile.data
 							}
 						}
-
+						if (bodyData.entityId !== '') {
+							projectCreation.data['entityId'] = bodyData.entityId
+						}
 						let project = await projectQueries.createProject(projectCreation.data)
 
 						// if ( addReportInfoToSolution && project.solutionId ) {
@@ -2236,13 +2321,13 @@ module.exports = class UserProjectsHelper {
 				if (programId !== '') {
 					filterQuery['programId'] = programId
 				}
-
 				let importedProjects = await projectQueries.projectDocument(filterQuery, [
 					'solutionInformation',
 					'programInformation',
 					'title',
 					'description',
 					'projectTemplateId',
+					'certificate',
 				])
 
 				return resolve({

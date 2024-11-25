@@ -361,7 +361,7 @@ def programsFileCheck(filePathAddPgm, accessToken, parentFolder, MainFilePath):
                     global entitiesPGM
                     entitiesPGM = dictDetailsEnv['Targeted entities at program level'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Targeted entities at program level'] else terminatingMessage("\"Targeted entities at program level\" must not be Empty in \"Program details\" sheet")
                     global stateEntitiesPGM
-                    stateEntitiesPGM = dictDetailsEnv['Targeted state at program level'].encode('utf-8').decode('utf-8')
+                    stateEntitiesPGM = dictDetailsEnv['Targeted district at program level'].encode('utf-8').decode('utf-8')
                     global startDateOfProgram, endDateOfProgram
                     startDateOfProgram = dictDetailsEnv['Start date of program']
                     endDateOfProgram = dictDetailsEnv['End date of program']
@@ -399,7 +399,7 @@ def programsFileCheck(filePathAddPgm, accessToken, parentFolder, MainFilePath):
                             "\"Description of the Program\" must not be Empty in \"Program details\" sheet")
                         keywordsPGM = dictDetailsEnv['Keywords'].encode('utf-8').decode('utf-8')
                         entitiesPGM = dictDetailsEnv['Targeted entities at program level'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Targeted entities at program level'] else terminatingMessage("\"Targeted entities at program level\" must not be Empty in \"Program details\" sheet")
-                        stateEntitiesPGM = dictDetailsEnv['Targeted state at program level'].encode('utf-8').decode('utf-8')
+                        stateEntitiesPGM = dictDetailsEnv['Targeted district at program level'].encode('utf-8').decode('utf-8')
                         entitiesType = fetchEntityType(parentFolder, accessToken,
                                                   entitiesPGM.lstrip().rstrip().split(","), scopeEntityType)
                         # selecting entity type based on the users input 
@@ -748,9 +748,15 @@ def fetchEntityId(solutionName_for_folder_path, accessToken, entitiesNameList, s
     if responseFetchEntityListApi.status_code == 200:
         responseFetchEntityListApi = responseFetchEntityListApi.json()
         entitiesLookup = dict()
-        entityToUpload = list()
+        entityToUpload = []
         for listEntities in responseFetchEntityListApi['result']:
-            entitiesLookup[listEntities['metaInformation']['name'].lower().lstrip().rstrip()] = listEntities['_id'].lstrip().rstrip()
+            # entitiesLookup[listEntities['metaInformation']['name'].lower().lstrip().rstrip()] = listEntities['_id'].lstrip().rstrip()
+            name_key = listEntities['metaInformation']['name'].lower().strip()
+            entity_id = listEntities['_id'].strip()
+            if name_key in entitiesLookup:
+                entitiesLookup[name_key].append(entity_id)
+            else:
+                 entitiesLookup[name_key] = [entity_id]
         entitiesFlag = False
         for eachUserEntity in entitiesNameList:
             try:
@@ -759,7 +765,7 @@ def fetchEntityId(solutionName_for_folder_path, accessToken, entitiesNameList, s
             except:
                 entitiesFlag = False
             if entitiesFlag:
-                entityToUpload.append(entityId)
+                entityToUpload.extend(entityId)
             else:
                 print("Entity Not found in DB...")
                 print("Entity name : " + str(eachUserEntity))
@@ -817,15 +823,14 @@ def fetchEntityType(solutionName_for_folder_path, accessToken, entitiesPGM, scop
             responseFetchEntityListApi = responseFetchEntityListApi.json()
 
             # Loop through the result to find the entityType
-            entityToUpload = None  # Initialize for each entity
+            # entityToUpload = None  # Initialize for each entity
             for listEntities in responseFetchEntityListApi['result']:
-                entityToUpload = listEntities['entityType']
+                entityToUpload = listEntities.get('entityType')
                 # entityToUpload = listEntities.get('entityType', '').lower().strip()
 
                 # If a valid entityType is found, store it in the dictionary and break out of the loop
                 if entityToUpload:
                     entityTypes.append(entityToUpload)
-                    break
 
             # If no entityType is found for this entity, raise an error for that specific entity
             if not entityToUpload:

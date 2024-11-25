@@ -6,48 +6,29 @@
  */
 
 module.exports = {
-    name: "projectAttributes",
-    schema: {
-
-        externalId : {
-            type : String,
-            required : true,
-            index: true,
-            unique: true
-            
-        },
-        name : {
-            type : String,
-            required : true,
-            index: true
-        },
-        input : {
-            type : String,
-            required : true
-        },
-        options : {
-            type : Array,
-            default : []
-        },
-        createdBy : {
-            type : String,
-            default : "SYSTEM"
-        },
-        updatedBy : {
-            type : String,
-            default : "SYSTEM"
-        },
-        isDeleted : {
-            type : Boolean,
-            default : false
-        },
-        isVisible : {
-            type : Boolean,
-            default : true
-        },
-        status : {
-            type : String,
-            default : "active"
-        }
-    }
-};
+	name: 'projectAttributes',
+	schema: {
+		name: {
+			type: String,
+			required: true,
+			index: true,
+		},
+		code: {
+			type: String,
+			required: true,
+			index: true,
+		},
+		createdBy: {
+			type: String,
+			default: 'SYSTEM',
+		},
+		hasEntity: {
+			type: Boolean,
+			default: true,
+		},
+		entities: {
+			type: Array,
+			default: [],
+		},
+	},
+}

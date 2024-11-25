@@ -95,4 +95,47 @@ module.exports = {
 		users: [],
 		scope: {},
 	},
+	DEFAULT_ATTRIBUTES: [
+		{
+			name: 'Duration',
+			code: 'duration',
+			hasEntityTrue: true,
+			entities: [
+				{
+					value: '1 week',
+					label: '1 week',
+				},
+				{
+					value: '2 week',
+					label: '2 week',
+				},
+				{
+					value: '3 week',
+					label: '3 week',
+				},
+				{
+					value: '4 week',
+					label: '4 week',
+				},
+				{
+					value: '5 week',
+					label: '5 week',
+				},
+				{
+					value: '6 week',
+					label: '6 week',
+				},
+				{
+					value: 'More than 6 weeks',
+					label: 'More than 6 weeks',
+				},
+			],
+		},
+		{
+			name: 'Role',
+			code: 'role',
+			hasEntityTrue: true,
+			entities: [],
+		},
+	],
 }

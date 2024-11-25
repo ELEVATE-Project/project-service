@@ -30,5 +30,9 @@ module.exports = {
 			type: Array,
 			default: [],
 		},
+		translation: {
+			type: Object,
+			default: {},
+		},
 	},
 }

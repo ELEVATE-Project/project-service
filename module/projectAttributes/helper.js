@@ -1,7 +1,7 @@
 const projectAttributesQueries = require(DB_QUERY_BASE_PATH + '/projectAttributes')
 const entitiesService = require(GENERICS_FILES_PATH + '/services/entity-management')
 
-module.exports = class ProfileAttributesHelper {
+module.exports = class ProjectAttributesHelper {
 	/**
 	 * create project attributes
 	 * @method
@@ -10,7 +10,9 @@ module.exports = class ProfileAttributesHelper {
 	 */
 	static async create() {
 		try {
-			const getProjectAttribute = await getProjectAttributes()
+			// Get the default project attributes
+			let getProjectAttribute = CONSTANTS.common.DEFAULT_ATTRIBUTES
+			//Getting roles from the entity service
 			let userRoleInformation = await entitiesService.userExtensionDocuments(
 				{
 					status: CONSTANTS.common.ACTIVE_STATUS.toUpperCase(),
@@ -19,7 +21,7 @@ module.exports = class ProfileAttributesHelper {
 			)
 
 			if (!userRoleInformation.success) {
-				return userRoleInformation
+				throw new Error(userRoleInformation)
 			}
 			let roleToAddForFilter = []
 			if (userRoleInformation.data.length > 0) {
@@ -30,6 +32,7 @@ module.exports = class ProfileAttributesHelper {
 					})
 				})
 			}
+			// Adding the roles into entities of projectAttributes
 			getProjectAttribute[1].entities = roleToAddForFilter
 			await projectAttributesQueries.createProjectAttributes(getProjectAttribute)
 			return {
@@ -50,11 +53,72 @@ module.exports = class ProfileAttributesHelper {
 	 * update project attributes
 	 * @method
 	 * @name update
+	 * @param {codeToUpdate} - which attributes need to be updated
+	 * @param {languageCode} - language code for multilingual
+	 * @param {Object} translateData  - TranslatedData object(reqBody)
 	 * @returns {Object} .
 	 */
-	static async update(keyToFilter = 'entities', name = 'role', filterData) {
+
+	static async update(codeToUpdate, languageCode, translateData) {
 		try {
-			// Fetch user role information
+			// getting name and data from reqBody
+			const { name, data } = translateData
+
+			// Fetch the project attributes document for the given code and language
+			const projectAttributesDocument = await projectAttributesQueries.projectAttributesDocument(
+				{
+					code: codeToUpdate,
+					[`translation.${languageCode}`]: { $exists: true },
+				},
+				[`translation.${languageCode}`]
+			)
+
+			if (projectAttributesDocument && projectAttributesDocument.length > 0) {
+				// Filter data to exclude already existing codes in the document
+				const existingCodes = projectAttributesDocument[0].translation[languageCode].data || []
+				const filteredData = data.filter((eachValue) => !existingCodes.includes(eachValue.code))
+
+				if (filteredData.length > 0) {
+					// Update only if there is filtered data
+					await projectAttributesQueries.findAndUpdate(
+						{ code: codeToUpdate },
+						{ $set: { [`translation.${languageCode}`]: { name, data: filteredData } } }
+					)
+				}
+			} else {
+				// If no document matches, upsert a new one
+				await projectAttributesQueries.findAndUpdate(
+					{ code: codeToUpdate },
+					{ $set: { [`translation.${languageCode}`]: { name, data } } },
+					{ upsert: true }
+				)
+			}
+
+			return {
+				success: true,
+				message: 'Successfully updated the project attributes',
+			}
+		} catch (error) {
+			// Handle errors gracefully
+			console.error('Error updating project attributes:', error)
+			return {
+				success: false,
+				status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+				message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+				errorObject: error,
+			}
+		}
+	}
+
+	/**
+	 * update project attributes Entities
+	 * @method
+	 * @name update
+	 * @returns {Object} .
+	 */
+	static async updateEntities(keyToFilter = 'entities', name = 'role', filterData) {
+		try {
+			// Fetch latest user role information from entityService
 			let userRoleInformation = await entitiesService.userExtensionDocuments(
 				{
 					status: CONSTANTS.common.ACTIVE_STATUS.toUpperCase(),
@@ -82,7 +146,7 @@ module.exports = class ProfileAttributesHelper {
 				'code',
 				keyToFilter,
 			])
-
+			// If current role filter doesn't match with userRole of entityService then updating the existing role filter
 			if (
 				createProjectAttributes[keyToFilter].length > 0 &&
 				createProjectAttributes[keyToFilter].length < roleToAddForFilter.length
@@ -112,20 +176,22 @@ module.exports = class ProfileAttributesHelper {
 	 * @name find
 	 * @returns {Object} projectAttributesData.
 	 */
-	static async find() {
+	static async find(languageCode = '') {
 		try {
-			// Get the role updated
-			await this.update()
+			// Get the role updated with the current entityService Roles
+			await this.updateEntities()
 
 			let createProjectAttributes = await projectAttributesQueries.projectAttributesDocument({}, [
 				'name',
 				'code',
 				'entities',
+				languageCode != '' ? 'translation' : '',
 			])
+			// Get the response object based on languageCode
 			const filterData = createProjectAttributes.map((eachValue) => {
 				return {
-					Name: eachValue.name,
-					values: eachValue.entities,
+					Name: (languageCode && eachValue.translation?.[languageCode]?.name) || eachValue.name,
+					values: (languageCode && eachValue.translation?.[languageCode]?.data) || eachValue.entities,
 				}
 			})
 			return {
@@ -141,52 +207,4 @@ module.exports = class ProfileAttributesHelper {
 			}
 		}
 	}
-}
-
-function getProjectAttributes() {
-	let attributesvalue = [
-		{
-			name: 'Duration',
-			code: 'duration',
-			hasEntityTrue: true,
-			entities: [
-				{
-					value: '1 week',
-					label: '1 week',
-				},
-				{
-					value: '2 week',
-					label: '2 week',
-				},
-				{
-					value: '3 week',
-					label: '3 week',
-				},
-				{
-					value: '4 week',
-					label: '4 week',
-				},
-				{
-					value: '5 week',
-					label: '5 week',
-				},
-				{
-					value: '6 week',
-					label: '6 week',
-				},
-				{
-					value: 'More than 6 weeks',
-					label: 'More than 6 weeks',
-				},
-			],
-		},
-		{
-			name: 'Role',
-			code: 'role',
-			hasEntityTrue: true,
-			entities: [],
-		},
-	]
-
-	return attributesvalue
 }

@@ -1,15 +1,15 @@
 /**
- * name : profile.js
- * author : Mallanagouda R Biradar
- * created-date : 13-Jun-2024
- * Description :  profile Controller.
+ * name : projectAttributes.js
+ * author : PraveenDass
+ * created-date : 25-Nov-2024
+ * Description :  projectAttributes Controller.
  */
 
 // dependencies
 let projectAttributesHelper = require(MODULES_BASE_PATH + '/projectAttributes/helper')
 
 /**
- * profile service.
+ * projectAttributes service.
  * @class
  */
 module.exports = class ProjectAttributes extends Abstract {
@@ -39,6 +39,8 @@ module.exports = class ProjectAttributes extends Abstract {
 					success: true,
 					message: CONSTANTS.apiResponses.PROJECT_ATTRIBUTES_CREATED,
 				}
+			} else {
+				throw new Error(JSON.stringify(projectAttributes))
 			}
 		} catch (error) {
 			// If an error occurs, return an error response with status, message, and the error object
@@ -82,11 +84,58 @@ module.exports = class ProjectAttributes extends Abstract {
 }
 */
 	async find(req) {
-		// Return a new Promise, as the function is asynchronous
 		try {
-			const projectAttributesData = await projectAttributesHelper.find()
+			const projectAttributesData = await projectAttributesHelper.find(req.query.language)
+			return projectAttributesData
+		} catch (error) {
+			// If an error occurs, return an error response with status, message, and the error object
+			return {
+				status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+				message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+				errorObject: error,
+			}
+		}
+	}
 
-			// If successful, resolve the Promise with a success message and the fetched data
+	/**
+* @api {post} /project/v1/projectAttributes/update
+* @apiVersion 1.0.0
+* @apiName Find
+* @apiGroup 
+* @apiParam reqBody
+* @samplerequestBody
+{
+
+    "translateData":{
+      "name":"Duration",
+       "data": [
+        {
+            "lable":"1 varamlu",
+             "value":"1 Week"
+        },
+                {
+            "lable":"2 varamlu",
+             "value":"2 Week"
+        }
+    ]
+    }
+}
+* @apiUse successBody
+* @apiUse errorBody
+* @apiParamExample {json} Response:
+{
+    "message": "Successfully updated the project attributes",
+    "status": 200
+}
+**/
+	async update(req) {
+		try {
+			const projectAttributesData = await projectAttributesHelper.update(
+				req.query.code,
+				req.query.language,
+				req.body.translateData
+			)
+
 			return projectAttributesData
 		} catch (error) {
 			// If an error occurs, return an error response with status, message, and the error object

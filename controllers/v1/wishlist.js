@@ -102,9 +102,9 @@ module.exports = class Wishlist extends Abstract {
 		}
 	}
 	/**
-* @api {post} /project/v1/wishlist/remove/:projectTemplateId
+* @api {post} /project/v1/wishlist/list?language=ka&page=1&limit=10
 * @apiVersion 1.0.0
-* @apiName remove
+* @apiName list
 * @apiGroup wishlist
 * @apiHeader {String} X-user-token Authenticity token
 * @apiUse successBody

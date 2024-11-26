@@ -227,4 +227,10 @@ module.exports = {
 		'View and participate in educational programs active in your location and designed for the role you selected',
 	USER_NOT_ALLOWED_TO_EDIT_PROJECT: 'User is not allowed to edit the project',
 	PROJECT_NOT_FOUND_OR_NOT_A_TARGETED: 'Project not targeted to the role',
+	PROJECT_ATTRIBUTES_CREATED: 'Project Attributes Created successfully',
+	PROJECT_ATTRIBUTES_FETCHED: 'Project Attributes Fetched successfully',
+	PROJECT_ATTRIBUTES_UPDATED: 'Project Attributes Updated successfully',
+	PROJECT_ATTRIBUTES_NOT_UPDATED: 'Project Attributes Update Failed',
+	PROJECT_ATTRIBUTES_CREATION_FAILED: 'Project Attributes Creation Failed',
+	FAILED_TO_FETCH_USERROLE: 'Failed to fetch userRole information',
 }

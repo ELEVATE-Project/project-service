@@ -4298,13 +4298,14 @@ def getPreSignedUrl(projectFile, projectName_for_folder_path, accessToken):
                 file_data = binary_file.read()
         # Define headers and data (if needed)
         headers = {
-            'Content-Type': 'multipart/form-data'
+            'Content-Type': 'multipart/form-data',
+            'x-ms-blob-type' : 'BlockBlob'
         }
         try:
             # Send PUT request
             response = requests.put(url, headers=headers, data=file_data)
             # Check the response
-            if response.status_code in [200, 204]:
+            if response.status_code in [200, 201]:
                 print(f"Successfully uploaded: {file_name}")
             else:
                 print(f"Failed to upload {file_name}. Status code: {response.status_code}, Response: {response.text}")

@@ -231,5 +231,6 @@ module.exports = {
 	PROJECT_ATTRIBUTES_FETCHED: 'Project Attributes Fetched successfully',
 	PROJECT_ATTRIBUTES_UPDATED: 'Project Attributes Updated successfully',
 	PROJECT_ATTRIBUTES_NOT_UPDATED: 'Project Attributes Update Failed',
+	PROJECT_ATTRIBUTES_CREATION_FAILED: 'Project Attributes Creation Failed',
 	FAILED_TO_FETCH_USERROLE: 'Failed to fetch userRole information',
 }

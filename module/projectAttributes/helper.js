@@ -21,7 +21,10 @@ module.exports = class ProjectAttributesHelper {
 			)
 
 			if (!userRoleInformation.success) {
-				throw new Error(userRoleInformation)
+				throw {
+					message: CONSTANTS.apiResponses.FAILED_TO_FETCH_USERROLE,
+					status: HTTP_STATUS_CODE.bad_request.status,
+				}
 			}
 			let roleToAddForFilter = []
 			if (userRoleInformation.data.length > 0) {
@@ -108,6 +111,7 @@ module.exports = class ProjectAttributesHelper {
 				} else {
 					throw {
 						message: CONSTANTS.apiResponses.PROJECT_ATTRIBUTES_NOT_UPDATED,
+						status: HTTP_STATUS_CODE.bad_request.status,
 					}
 				}
 			}
@@ -149,6 +153,7 @@ module.exports = class ProjectAttributesHelper {
 				if (!userRoleInformation.success) {
 					throw {
 						message: CONSTANTS.apiResponses.FAILED_TO_FETCH_USERROLE,
+						status: HTTP_STATUS_CODE.bad_request.status,
 					}
 				}
 				if (userRoleInformation.data.length > 0) {

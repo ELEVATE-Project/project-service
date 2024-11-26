@@ -41,7 +41,10 @@ module.exports = class ProjectAttributes extends Abstract {
 					message: CONSTANTS.apiResponses.PROJECT_ATTRIBUTES_CREATED,
 				}
 			} else {
-				throw new Error(JSON.stringify(projectAttributes))
+				throw {
+					message: CONSTANTS.apiResponses.PROJECT_ATTRIBUTES_CREATION_FAILED,
+					status: HTTP_STATUS_CODE.bad_request.status,
+				}
 			}
 		} catch (error) {
 			// If an error occurs, return an error response with status, message, and the error object

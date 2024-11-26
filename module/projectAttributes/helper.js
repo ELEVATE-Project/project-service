@@ -13,7 +13,7 @@ module.exports = class ProjectAttributesHelper {
 			// Get the default project attributes
 			let getProjectAttribute = CONSTANTS.common.DEFAULT_ATTRIBUTES
 			//Getting roles from the entity service
-			let userRoleInformation = await entitiesService.userExtensionDocuments(
+			let userRoleInformation = await entitiesService.getUserRoleExtensionDocuments(
 				{
 					status: CONSTANTS.common.ACTIVE_STATUS.toUpperCase(),
 				},
@@ -53,50 +53,63 @@ module.exports = class ProjectAttributesHelper {
 	 * update project attributes
 	 * @method
 	 * @name update
-	 * @param {codeToUpdate} - which attributes need to be updated
-	 * @param {languageCode} - language code for multilingual
-	 * @param {Object} translateData  - TranslatedData object(reqBody)
+	 * @param {code} - which attributes need to be updated
+	 * @param {language} - language code for multilingual
+	 * @param {Object} bodyData  - reqBody
 	 * @returns {Object} .
 	 */
 
-	static async update(codeToUpdate, languageCode, translateData) {
+	static async update(code, language, bodyData) {
 		try {
-			// getting name and data from reqBody
-			const { name, data } = translateData
+			if (bodyData.translateData) {
+				// getting name and data from reqBody
+				const { name, data } = bodyData.translateData
 
-			// Fetch the project attributes document for the given code and language
-			const projectAttributesDocument = await projectAttributesQueries.projectAttributesDocument(
-				{
-					code: codeToUpdate,
-					[`translation.${languageCode}`]: { $exists: true },
-				},
-				[`translation.${languageCode}`]
-			)
+				// Fetch the project attributes document for the given code and language
+				const projectAttributesDocument = await projectAttributesQueries.projectAttributesDocument(
+					{
+						code: code,
+						[`translation.${language}`]: { $exists: true },
+					},
+					[`translation.${language}`]
+				)
 
-			if (projectAttributesDocument && projectAttributesDocument.length > 0) {
-				// Filter data to exclude already existing codes in the document
-				const existingCodes = projectAttributesDocument[0].translation[languageCode].data || []
-				const filteredData = data.filter((eachValue) => !existingCodes.includes(eachValue.code))
+				if (projectAttributesDocument && projectAttributesDocument.length > 0) {
+					// Filter data to exclude already existing codes in the document
+					const existingCodes = projectAttributesDocument[0].translation[language].data || []
+					const filteredData = data.filter((eachValue) => !existingCodes.includes(eachValue.code))
 
-				if (filteredData.length > 0) {
-					// Update only if there is filtered data
+					if (filteredData.length > 0) {
+						// Update only if there is filtered data
+						await projectAttributesQueries.findAndUpdate(
+							{ code: code },
+							{ $set: { [`translation.${language}`]: { name, data: filteredData } } }
+						)
+					}
+				} else {
+					// If no document matches, upsert a new one
 					await projectAttributesQueries.findAndUpdate(
-						{ code: codeToUpdate },
-						{ $set: { [`translation.${languageCode}`]: { name, data: filteredData } } }
+						{ code: code },
+						{ $set: { [`translation.${language}`]: { name, data } } },
+						{ upsert: true }
 					)
 				}
+				return {
+					success: true,
+					message: CONSTANTS.apiResponses.PROJECT_ATTRIBUTES_UPDATED,
+				}
 			} else {
-				// If no document matches, upsert a new one
-				await projectAttributesQueries.findAndUpdate(
-					{ code: codeToUpdate },
-					{ $set: { [`translation.${languageCode}`]: { name, data } } },
-					{ upsert: true }
-				)
-			}
-
-			return {
-				success: true,
-				message: 'Successfully updated the project attributes',
+				let projectAttributesDocument = await this.updateEntities('entities', code, bodyData.data)
+				if (projectAttributesDocument.success) {
+					return {
+						success: true,
+						message: CONSTANTS.apiResponses.PROJECT_ATTRIBUTES_UPDATED,
+					}
+				} else {
+					throw {
+						message: CONSTANTS.apiResponses.PROJECT_ATTRIBUTES_NOT_UPDATED,
+					}
+				}
 			}
 		} catch (error) {
 			// Handle errors gracefully
@@ -113,53 +126,50 @@ module.exports = class ProjectAttributesHelper {
 	/**
 	 * update project attributes Entities
 	 * @method
-	 * @name update
+	 * @name updateEntities
+	 * @param {keyToFilter} - which attributes key need to be updated
+	 * @param {code}       -  attributes code for update
+	 * @param {Object} filterData  - reqBody
 	 * @returns {Object} .
 	 */
-	static async updateEntities(keyToFilter = 'entities', name = 'role', filterData) {
+	static async updateEntities(keyToFilter = 'entities', code = 'role', filterData) {
 		try {
-			// Fetch latest user role information from entityService
-			let userRoleInformation = await entitiesService.userExtensionDocuments(
-				{
-					status: CONSTANTS.common.ACTIVE_STATUS.toUpperCase(),
-				},
-				['title', 'code']
-			)
-
-			if (!userRoleInformation.success) {
-				return resolve(userRoleInformation)
-			}
-
+			let userRoleInformation
 			let roleToAddForFilter = []
-			if (userRoleInformation.result.length > 0) {
-				roleToAddForFilter = userRoleInformation.data.map((eachResult) => {
-					return {
-						label: eachResult.title,
-						value: eachResult.code,
-					}
-				})
-			}
 
-			// Fetch project attributes dynamically based on the key
-			let createProjectAttributes = await projectAttributesQueries.projectAttributesDocument({}, [
-				'name',
-				'code',
-				keyToFilter,
-			])
-			// If current role filter doesn't match with userRole of entityService then updating the existing role filter
-			if (
-				createProjectAttributes[keyToFilter].length > 0 &&
-				createProjectAttributes[keyToFilter].length < roleToAddForFilter.length
-			) {
-				await projectAttributesQueries.findAndUpdate(
-					{ name: name },
-					{ [keyToFilter]: (name = 'role' ? roleToAddForFilter : filterData) }
+			if (code === 'role') {
+				// Fetch latest user role information from entityService
+				userRoleInformation = await entitiesService.getUserRoleExtensionDocuments(
+					{
+						status: CONSTANTS.common.ACTIVE_STATUS.toUpperCase(),
+					},
+					['title', 'code']
 				)
+
+				if (!userRoleInformation.success) {
+					throw {
+						message: CONSTANTS.apiResponses.FAILED_TO_FETCH_USERROLE,
+					}
+				}
+				if (userRoleInformation.data.length > 0) {
+					roleToAddForFilter = userRoleInformation.data.map((eachResult) => {
+						return {
+							label: eachResult.title,
+							value: eachResult.code,
+						}
+					})
+				}
 			}
 
-			return resolve({
+			// If current role filter doesn't match with userRole of entityService then updating the existing role filter
+
+			let updatedEntities = await projectAttributesQueries.findAndUpdate(
+				{ code: code },
+				{ [keyToFilter]: code === 'role' ? roleToAddForFilter : filterData }
+			)
+			return {
 				success: true,
-			})
+			}
 		} catch (error) {
 			// Handle error response
 			return {
@@ -174,9 +184,10 @@ module.exports = class ProjectAttributesHelper {
 	 * find project attributes
 	 * @method
 	 * @name find
+	 * @param {String} language - Language Code of project attributes to get the multilingual response
 	 * @returns {Object} projectAttributesData.
 	 */
-	static async find(languageCode = '') {
+	static async find(language = '') {
 		try {
 			// Get the role updated with the current entityService Roles
 			await this.updateEntities()
@@ -185,13 +196,13 @@ module.exports = class ProjectAttributesHelper {
 				'name',
 				'code',
 				'entities',
-				languageCode != '' ? 'translation' : '',
+				language != '' ? 'translation' : '',
 			])
 			// Get the response object based on languageCode
 			const filterData = createProjectAttributes.map((eachValue) => {
 				return {
-					Name: (languageCode && eachValue.translation?.[languageCode]?.name) || eachValue.name,
-					values: (languageCode && eachValue.translation?.[languageCode]?.data) || eachValue.entities,
+					Name: (language && eachValue.translation?.[language]?.name) || eachValue.name,
+					values: (language && eachValue.translation?.[language]?.data) || eachValue.entities,
 				}
 			})
 			return {

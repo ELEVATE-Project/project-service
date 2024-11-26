@@ -129,8 +129,8 @@ const entityTypeDocuments = function (filterData = 'all', projection = 'all', us
 	})
 }
 
-// Function to find entity type documents based on the given filter, projection, and user token
-const userExtensionDocuments = function (filterData = 'all', projection = 'all', userToken) {
+// Function to find userRoleExtensiopn documents based on the given filter, projection, and user token
+const getUserRoleExtensionDocuments = function (filterData = 'all', projection = 'all', userToken) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			// Construct the URL for the entity management service
@@ -182,5 +182,5 @@ const userExtensionDocuments = function (filterData = 'all', projection = 'all',
 module.exports = {
 	entityDocuments: entityDocuments,
 	entityTypeDocuments: entityTypeDocuments,
-	userExtensionDocuments: userExtensionDocuments,
+	getUserRoleExtensionDocuments: getUserRoleExtensionDocuments,
 }

@@ -74,7 +74,6 @@ module.exports = class ProjectAttributes {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let projectAttributesDocument = await database.models.projectAttributes.create(data)
-				console.log(projectAttributesDocument, 'this is output')
 				return resolve(projectAttributesDocument)
 			} catch (error) {
 				return reject(error)
@@ -102,25 +101,6 @@ module.exports = class ProjectAttributes {
 					.lean()
 
 				return resolve(updatedData)
-			} catch (error) {
-				return reject(error)
-			}
-		})
-	}
-
-	/**
-	 * listIndexes function.
-	 * @method
-	 * @name listIndexes
-	 * @returns {Array} list of indexes.
-	 */
-
-	static listIndexes() {
-		return new Promise(async (resolve, reject) => {
-			try {
-				let indexData = (await database.models.project) - attributes.listIndexes()
-
-				return resolve(indexData)
 			} catch (error) {
 				return reject(error)
 			}

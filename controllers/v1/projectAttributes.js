@@ -13,6 +13,7 @@ let projectAttributesHelper = require(MODULES_BASE_PATH + '/projectAttributes/he
  * @class
  */
 module.exports = class ProjectAttributes extends Abstract {
+	// Adding model schema
 	constructor() {
 		super('project-attributes')
 	}
@@ -28,7 +29,7 @@ module.exports = class ProjectAttributes extends Abstract {
 * {
   "message": "projectAttributes created successfully",
   "status": 200,
-}
+  }
 */
 
 	async create(req) {
@@ -62,30 +63,28 @@ module.exports = class ProjectAttributes extends Abstract {
 * @apiUse errorBody
 * @apiParamExample {json} Response:
 * {
-  "message": "projectAttributes fetched successfully",
-  "status": 200,
-  "result": [
-  {
-  Name:”duration”,
-  Values;[
-   {
-   {
-	 value: '1 week',
-	label: '1 week',
-	},
-	{
-	value: '2 week',
-	label: '2 week',
-	},
-}
-] 
-}
-  ]
-}
+    "message": "Project Attributes Fetched successfully",
+    "status": 200,
+    "result": [
+        {
+            "Name": "Duration",
+            "values": [
+                {
+                    "lable": "1 week",
+                    "value": "1 Week"
+                },
+                {
+                    "lable": "2 week",
+                    "value": "2 Week"
+                }
+            ]
+        },
 */
 	async find(req) {
 		try {
-			const projectAttributesData = await projectAttributesHelper.find(req.query.language)
+			const projectAttributesData = await projectAttributesHelper.find(
+				req.query.language ? req.query.language : ''
+			)
 			return projectAttributesData
 		} catch (error) {
 			// If an error occurs, return an error response with status, message, and the error object
@@ -132,8 +131,8 @@ module.exports = class ProjectAttributes extends Abstract {
 		try {
 			const projectAttributesData = await projectAttributesHelper.update(
 				req.query.code,
-				req.query.language,
-				req.body.translateData
+				req.query.language ? req.query.language : '',
+				req.body
 			)
 
 			return projectAttributesData

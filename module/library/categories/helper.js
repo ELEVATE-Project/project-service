@@ -67,8 +67,8 @@ module.exports = class LibraryCategoriesHelper {
 						matchQuery['$match']['$or'] = [
 							{ [`translation.${userLanguage}.title`]: new RegExp(search, 'i') },
 							{ [`translation.${userLanguage}.description`]: new RegExp(search, 'i') },
-							{ title: new RegExp(search, 'i') }, // Fallback for untranslated fields
-							{ description: new RegExp(search, 'i') }, // Fallback for untranslated fields
+							{ title: new RegExp(search, 'i') },
+							{ description: new RegExp(search, 'i') },
 							{ categories: new RegExp(search, 'i') },
 						]
 					}

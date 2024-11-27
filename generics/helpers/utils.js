@@ -692,6 +692,22 @@ function arrayOfObjectToArrayOfObjectId(ids) {
 	return ids.map((obj) => obj._id)
 }
 
+/**
+ * Handle translation
+ * @function
+ * @name getTranslatedData
+ * @param {String} data - Data to be translate.
+ * @param {String} translateData - translation data
+ * @returns {Object} - Modified data object with translation.
+ */
+function getTranslatedData(data, translateData) {
+	Object.keys(data).forEach((eachValue) => {
+		if (Object.keys(translateData).includes(eachValue)) {
+			data[eachValue] = translateData[eachValue]
+		}
+	})
+	return data
+}
 module.exports = {
 	camelCaseToTitleCase: camelCaseToTitleCase,
 	lowerCase: lowerCase,
@@ -725,4 +741,5 @@ module.exports = {
 	generateChart: generateChart,
 	handleSpecialCharsForCertificate: handleSpecialCharsForCertificate,
 	arrayOfObjectToArrayOfObjectId: arrayOfObjectToArrayOfObjectId,
+	getTranslatedData: getTranslatedData,
 }

@@ -133,8 +133,8 @@ module.exports = class UserExtensioHelper {
 			}
 			aggregateData.push(matchQuery)
 			// projection aggregate for multilingual
-			let titleField = language ? `$translation.${language}.title` : '$title'
-			let descriptionField = language ? `$translation.${language}.description` : '$description'
+			let titleField = language ? `$translations.${language}.title` : '$title'
+			let descriptionField = language ? `$translations.${language}.description` : '$description'
 
 			aggregateData.push(
 				{

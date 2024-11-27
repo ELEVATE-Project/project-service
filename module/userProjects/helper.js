@@ -2386,10 +2386,11 @@ module.exports = class UserProjectsHelper {
 	 * @param {String} userId - Logged in user id.
 	 * @param {String} userToken - User token.
 	 * @param {Boolean} isATargetedSolution - User targeted or not .
+	 * @param {String} language - language code
 	 * @returns {Object} Project created information.
 	 */
 
-	static importFromLibrary(projectTemplateId, requestedData, userToken, userId, isATargetedSolution = '') {
+	static importFromLibrary(projectTemplateId, requestedData, userToken, userId, isATargetedSolution = '', language) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				isATargetedSolution = UTILS.convertStringToBoolean(isATargetedSolution)
@@ -2399,7 +2400,8 @@ module.exports = class UserProjectsHelper {
 				let libraryProjects = await libraryCategoriesHelper.projectDetails(
 					projectTemplateId,
 					'',
-					isATargetedSolution
+					isATargetedSolution,
+					language
 				)
 
 				// If template data is not found throw error

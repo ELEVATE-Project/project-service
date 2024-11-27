@@ -1011,7 +1011,8 @@ module.exports = class UserProjects extends Abstract {
 					req.body,
 					req.userDetails.userToken,
 					req.userDetails.userInformation.userId,
-					req.query.isATargetedSolution ? req.query.isATargetedSolution : ''
+					req.query.isATargetedSolution ? req.query.isATargetedSolution : '',
+					req.query.language ? req.query.language : ''
 				)
 
 				return resolve({

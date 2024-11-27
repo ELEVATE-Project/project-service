@@ -1574,7 +1574,7 @@
 			]
 		},
 		{
-			"sourceRoute": "/project/v1//wishlist/list",
+			"sourceRoute": "/project/v1/wishlist/list",
 			"type": "GET",
 			"priority": "MUST_HAVE",
 			"inSequence": false,
@@ -1587,7 +1587,7 @@
 			]
 		},
 		{
-			"sourceRoute": "/project/v1//wishlist/remove",
+			"sourceRoute": "/project/v1/wishlist/remove",
 			"type": "POST",
 			"priority": "MUST_HAVE",
 			"inSequence": false,
@@ -1600,7 +1600,7 @@
 			]
 		},
 		{
-			"sourceRoute": "/project/v1//wishlist/remove/:id",
+			"sourceRoute": "/project/v1/wishlist/remove/:id",
 			"type": "POST",
 			"priority": "MUST_HAVE",
 			"inSequence": false,
@@ -1613,7 +1613,7 @@
 			]
 		},
 		{
-			"sourceRoute": "/project/v1//wishlist/add/:id",
+			"sourceRoute": "/project/v1/wishlist/add/:id",
 			"type": "POST",
 			"priority": "MUST_HAVE",
 			"inSequence": false,
@@ -1626,7 +1626,7 @@
 			]
 		},
 		{
-			"sourceRoute": "/project/v1//wishlist/add/:id",
+			"sourceRoute": "/project/v1/wishlist/add",
 			"type": "POST",
 			"priority": "MUST_HAVE",
 			"inSequence": false,

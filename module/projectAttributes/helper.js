@@ -207,6 +207,7 @@ module.exports = class ProjectAttributesHelper {
 			const filterData = createProjectAttributes.map((eachValue) => {
 				return {
 					Name: (language && eachValue.translation?.[language]?.name) || eachValue.name,
+					code: eachValue.code,
 					values: (language && eachValue.translation?.[language]?.data) || eachValue.entities,
 				}
 			})

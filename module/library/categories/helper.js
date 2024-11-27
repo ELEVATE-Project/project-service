@@ -5,57 +5,55 @@
  * Description : Project categories helper functionality.
  */
 
-// Dependencies 
+// Dependencies
 // const coreService = require(GENERICS_FILES_PATH + "/services/core");
 // const sessionHelpers = require(GENERIC_HELPERS_PATH+"/sessions");
-const projectCategoriesQueries = require(DB_QUERY_BASE_PATH + "/projectCategories");
-const projectTemplateQueries = require(DB_QUERY_BASE_PATH + "/projectTemplates");
-const projectTemplateTaskQueries = require(DB_QUERY_BASE_PATH + "/projectTemplateTask");
-const moment = require("moment-timezone");
+const projectCategoriesQueries = require(DB_QUERY_BASE_PATH + '/projectCategories')
+const projectTemplateQueries = require(DB_QUERY_BASE_PATH + '/projectTemplates')
+const projectTemplateTaskQueries = require(DB_QUERY_BASE_PATH + '/projectTemplateTask')
+const moment = require('moment-timezone')
 
 /**
-    * LibraryCategoriesHelper
-    * @class
-*/
+ * LibraryCategoriesHelper
+ * @class
+ */
 
 module.exports = class LibraryCategoriesHelper {
+	/**
+	 * List of library projects.
+	 * @method
+	 * @name projects
+	 * @param categoryId - category external id.
+	 * @param pageSize - Size of page.
+	 * @param pageNo - Recent page no.
+	 * @param search - search text.
+	 * @param sortedData - Data to be sorted.
+	 * @returns {Object} List of library projects.
+	 */
 
-      /**
-      * List of library projects.
-      * @method
-      * @name projects
-      * @param categoryId - category external id.
-      * @param pageSize - Size of page.
-      * @param pageNo - Recent page no.
-      * @param search - search text.
-      * @param sortedData - Data to be sorted.
-      * @returns {Object} List of library projects.
-     */
-
-    static projects( categoryId,pageSize,pageNo,search,sortedData,language='en',hasSpotlight=false) {
-        return new Promise(async (resolve, reject) => {
-            try {
-
-                const defaultLanguage = 'en'
+	static projects(categoryId, pageSize, pageNo, search, sortedData, language = 'en', hasSpotlight = false) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				const defaultLanguage = 'en'
 				const userLanguage = language || defaultLanguage
 
-                let matchQuery = {
-                    $match : {
-                        status : CONSTANTS.common.PUBLISHED,
-                        "isReusable" : true
-                    }
-                };
+				let matchQuery = {
+					$match: {
+						status: CONSTANTS.common.PUBLISHED,
+						isReusable: true,
+					},
+				}
 
-                if( categoryId !== "" ) {
-                    matchQuery["$match"]["categories.externalId"] = categoryId;
-                }
+				if (categoryId !== '') {
+					matchQuery['$match']['categories.externalId'] = categoryId
+				}
 
-                if (hasSpotlight) {
+				if (hasSpotlight) {
 					matchQuery['$match']['hasSpotlight'] = true
 				}
 
-                if ( search !== "" ) {
-                    if (userLanguage === defaultLanguage) {
+				if (search !== '') {
+					if (userLanguage === defaultLanguage) {
 						// Search directly in default fields for English
 						matchQuery['$match']['$or'] = [
 							{ title: new RegExp(search, 'i') },
@@ -72,317 +70,289 @@ module.exports = class LibraryCategoriesHelper {
 							{ categories: new RegExp(search, 'i') },
 						]
 					}
-                }
+				}
 
-                let aggregateData = [];
-                aggregateData.push(matchQuery);
+				let aggregateData = []
+				aggregateData.push(matchQuery)
 
-                let sortedQuery = {
-                    "$sort" : {
-                        createdAt : -1
-                    }  
-                }
-                
-                if( sortedData && sortedData === CONSTANTS.common.IMPORTANT_PROJECT ) {
-                    sortedQuery["$sort"] = {};
-                    sortedQuery["$sort"]["noOfRatings"] = -1;
-                }
-                
-                aggregateData.push(sortedQuery);
+				let sortedQuery = {
+					$sort: {
+						createdAt: -1,
+					},
+				}
 
-                aggregateData.push({
-                    $project: {
-                        title: {
-                            $ifNull: [`$translations.${language}.title`, '$title'],
-                        },
-                        description: {
-                            $ifNull: [`$translations.${language}.description`, '$description'],
-                        },
-                        impact: {
-                            $ifNull: [`$translations.${language}.impact`, '$impact'],
-                        },
-                        summary: {
-                            $ifNull: [`$translations.${language}.summary`, '$summary'],
-                        },
-                        story: {
-                            $ifNull: [`$translations.${language}.story`, '$story'],
-                        },
-                        externalId: 1,
-                        noOfRatings: 1,
-                        averageRating: 1,
-                        createdAt: 1,
-                        categories: 1,
-                    },
-                },{
-                    $facet : {
-                        "totalCount" : [
-                            { "$count" : "count" }
-                        ],
-                        "data" : [
-                            { $skip : pageSize * ( pageNo - 1 ) },
-                            { $limit : pageSize }
-                        ],
-                    }
-                },{
-                    $project : {
-                        "data" : 1,
-                        "count" : {
-                            $arrayElemAt : ["$totalCount.count", 0]
-                        }
-                    }
-                });
+				if (sortedData && sortedData === CONSTANTS.common.IMPORTANT_PROJECT) {
+					sortedQuery['$sort'] = {}
+					sortedQuery['$sort']['noOfRatings'] = -1
+				}
 
-                let result = await projectTemplateQueries.getAggregate(aggregateData);
+				aggregateData.push(sortedQuery)
 
-                if( result[0].data.length > 0 ) {
-                    
-                    result[0].data.forEach(resultedData => {
-                        
-                        let timeDifference = 
-                        moment().diff(moment(resultedData.createdAt), 'days');
+				aggregateData.push(
+					{
+						$project: {
+							title: {
+								$ifNull: [`$translations.${language}.title`, '$title'],
+							},
+							description: {
+								$ifNull: [`$translations.${language}.description`, '$description'],
+							},
+							impact: {
+								$ifNull: [`$translations.${language}.impact`, '$impact'],
+							},
+							summary: {
+								$ifNull: [`$translations.${language}.summary`, '$summary'],
+							},
+							story: {
+								$ifNull: [`$translations.${language}.story`, '$story'],
+							},
+							externalId: 1,
+							noOfRatings: 1,
+							averageRating: 1,
+							createdAt: 1,
+							categories: 1,
+							metaInformation: 1,
+						},
+					},
+					{
+						$facet: {
+							totalCount: [{ $count: 'count' }],
+							data: [{ $skip: pageSize * (pageNo - 1) }, { $limit: pageSize }],
+						},
+					},
+					{
+						$project: {
+							data: 1,
+							count: {
+								$arrayElemAt: ['$totalCount.count', 0],
+							},
+						},
+					}
+				)
 
-                        resultedData.new = false;
-                        if( timeDifference <= 7 ) {
-                            resultedData.new = true;
-                        }
-                    })
-                }
+				let result = await projectTemplateQueries.getAggregate(aggregateData)
 
-                return resolve({
-                    success: true,
-                    message : CONSTANTS.apiResponses.PROJECTS_FETCHED,
-                    data : {
-                        data : result[0].data,
-                        count : result[0].count ? result[0].count : 0
-                    }
-                });
+				if (result[0].data.length > 0) {
+					result[0].data.forEach((resultedData) => {
+						let timeDifference = moment().diff(moment(resultedData.createdAt), 'days')
 
-            } catch (error) {
-                return resolve({
-                    success: false,
-                    message: error.message,
-                    data: []
-                });
-            }
-        })
-    }
+						resultedData.new = false
+						if (timeDifference <= 7) {
+							resultedData.new = true
+						}
+					})
+				}
 
-    /**
-      * Update categories
-      * @method
-      * @name update
-      * @param filterQuery - Filter query.
-      * @param updateData - Update data.
-      * @returns {Object} updated data
-     */
+				return resolve({
+					success: true,
+					message: CONSTANTS.apiResponses.PROJECTS_FETCHED,
+					data: {
+						data: result[0].data,
+						count: result[0].count ? result[0].count : 0,
+					},
+				})
+			} catch (error) {
+				return resolve({
+					success: false,
+					message: error.message,
+					data: [],
+				})
+			}
+		})
+	}
 
-    static update(filterQuery,updateData) {    
-        return new Promise(async (resolve, reject) => {
-            try {
+	/**
+	 * Update categories
+	 * @method
+	 * @name update
+	 * @param filterQuery - Filter query.
+	 * @param updateData - Update data.
+	 * @returns {Object} updated data
+	 */
 
-                let categoriesUpdated = await projectCategoriesQueries.updateMany(filterQuery,updateData);
+	static update(filterQuery, updateData) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let categoriesUpdated = await projectCategoriesQueries.updateMany(filterQuery, updateData)
 
-                if( !categoriesUpdated ) {
-                    throw {
-                        status : HTTP_STATUS_CODE.bad_request.status,
-                        message : CONSTANTS.apiResponses.PROJECT_CATEGORIES_NOT_UPDATED
-                    }
-                }
+				if (!categoriesUpdated) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.PROJECT_CATEGORIES_NOT_UPDATED,
+					}
+				}
 
-                return resolve({
-                    success: true,
-                    message : CONSTANTS.apiResponses.PROJECT_CATEGORIES_UPDATED,
-                    data : categoriesUpdated
-                });
+				return resolve({
+					success: true,
+					message: CONSTANTS.apiResponses.PROJECT_CATEGORIES_UPDATED,
+					data: categoriesUpdated,
+				})
+			} catch (error) {
+				return resolve({
+					success: false,
+					message: error.message,
+					data: {},
+				})
+			}
+		})
+	}
 
-            } catch (error) {   
-                return resolve({
-                    success: false,
-                    message: error.message,
-                    data : {}
-                });
-            }
-        })
-    }
+	/**
+	 * Details of library projects.
+	 * @method
+	 * @name projectDetails
+	 * @param projectId - project internal id.
+	 * @returns {Object} Details of library projects.
+	 */
 
-     /**
-      * Details of library projects.
-      * @method
-      * @name projectDetails
-      * @param projectId - project internal id.
-      * @returns {Object} Details of library projects.
-     */
+	static projectDetails(projectId, userToken = '', isATargetedSolution = '') {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let projectsData = await projectTemplateQueries.templateDocument(
+					{
+						_id: projectId,
+						status: CONSTANTS.common.PUBLISHED,
+						isDeleted: false,
+					},
+					'all',
+					['__v']
+				)
 
-    static projectDetails(projectId, userToken = "", isATargetedSolution = "") {    
-        return new Promise(async (resolve, reject) => {
-            try {
+				if (!projectsData.length > 0) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.PROJECT_NOT_FOUND,
+					}
+				}
 
-                let projectsData = await projectTemplateQueries.templateDocument(
-                    {
-                        "_id" : projectId,
-                        status : CONSTANTS.common.PUBLISHED,
-                        "isDeleted" : false,
-                    }, "all", ["__v"]);
+				projectsData[0].showProgramAndEntity = false
 
-                if( !projectsData.length > 0 ) {
-                    throw {
-                        status : HTTP_STATUS_CODE.bad_request.status,
-                        message : CONSTANTS.apiResponses.PROJECT_NOT_FOUND,
-                    };
-                }
-                
-                projectsData[0].showProgramAndEntity = false;
+				if (projectsData[0].tasks && projectsData[0].tasks.length > 0) {
+					let tasks = await projectTemplateTaskQueries.taskDocuments({
+						_id: {
+							$in: projectsData[0].tasks,
+						},
+						isDeleted: false,
+					})
 
-                if( projectsData[0].tasks && projectsData[0].tasks.length > 0 ) {
+					if (tasks && tasks.length > 0) {
+						let taskData = {}
 
-                    let tasks = await projectTemplateTaskQueries.taskDocuments(
-                    {
-                       _id : {
-                            $in : projectsData[0].tasks
-                        },
-                        isDeleted : false
-                    });
+						for (let taskPointer = 0; taskPointer < tasks.length; taskPointer++) {
+							let currentTask = tasks[taskPointer]
 
-                    if( tasks && tasks.length > 0 ) {
+							if (
+								currentTask.type === CONSTANTS.common.ASSESSMENT ||
+								currentTask.type === CONSTANTS.common.OBSERVATION
+							) {
+								projectsData[0].showProgramAndEntity = true
+							}
 
-                        let taskData = {};
+							if (currentTask.parentId && currentTask.parentId !== '') {
+								if (!taskData[currentTask.parentId.toString()]) {
+									taskData[currentTask.parentId.toString()].children = []
+								}
 
-                        for ( 
-                            let taskPointer = 0; 
-                            taskPointer < tasks.length; 
-                            taskPointer ++ 
-                        ) {
+								taskData[currentTask.parentId.toString()].children.push(
+									_.omit(currentTask, ['parentId'])
+								)
+							} else {
+								currentTask.children = []
+								taskData[currentTask._id.toString()] = currentTask
+							}
+						}
 
-                            let currentTask = tasks[taskPointer];
-                            
-                            if( 
-                                currentTask.type === CONSTANTS.common.ASSESSMENT ||
-                                currentTask.type === CONSTANTS.common.OBSERVATION
-                            ) {
-                                projectsData[0].showProgramAndEntity = true;
-                            }
+						projectsData[0].tasks = Object.values(taskData)
+					}
+				}
 
-                            if( currentTask.parentId && currentTask.parentId !== "" ) {
+				return resolve({
+					success: true,
+					message: CONSTANTS.apiResponses.PROJECTS_FETCHED,
+					data: projectsData[0],
+				})
+			} catch (error) {
+				return resolve({
+					status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
+					success: false,
+					message: error.message,
+					data: {},
+				})
+			}
+		})
+	}
 
-                                if( !taskData[currentTask.parentId.toString()] ) {
-                                    taskData[currentTask.parentId.toString()].children = [];
-                                } 
+	/**
+	 * create categories
+	 * @method
+	 * @name create
+	 * @param categoryData - categoryData.
+	 * @returns {Object} category details
+	 */
 
-                                taskData[currentTask.parentId.toString()].children.push(
-                                    _.omit(currentTask,["parentId"])
-                                ); 
+	static create(categoryData) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let projectCategoriesData = await projectCategoriesQueries.create(categoryData)
 
-                            } else {
-                                currentTask.children = [];
-                                taskData[currentTask._id.toString()] = currentTask;
-                            }
+				if (!projectCategoriesData._id) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.PROJECT_CATEGORIES_NOT_ADDED,
+					}
+				}
 
-                            
-                        }
+				return resolve({
+					success: true,
+					message: CONSTANTS.apiResponses.PROJECT_CATEGORIES_ADDED,
+					data: projectCategoriesData._id,
+				})
+			} catch (error) {
+				return resolve({
+					success: false,
+					message: error.message,
+					data: {},
+				})
+			}
+		})
+	}
 
-                        projectsData[0].tasks = Object.values(taskData);
-                        
-                    }
-                }
+	/**
+	 * list categories
+	 * @method
+	 * @name list
+	 * @returns {Object} category details
+	 */
 
-                return resolve({
-                    success: true,
-                    message : CONSTANTS.apiResponses.PROJECTS_FETCHED,
-                    data : projectsData[0]
-                });
+	static list() {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let categoryData = await projectCategoriesQueries.categoryDocuments(
+					{
+						status: CONSTANTS.common.ACTIVE_STATUS,
+					},
+					['externalId', 'name', 'icon', 'updatedAt', 'noOfProjects']
+				)
 
-            } catch (error) {
-                return resolve({
-                    status : error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
-                    success: false,
-                    message: error.message,
-                    data : {}
-                });
-            }
-        })
-    }
+				if (!categoryData.length > 0) {
+					throw {
+						status: HTTP_STATUS_CODE.ok.status,
+						message: CONSTANTS.apiResponses.LIBRARY_CATEGORIES_NOT_FOUND,
+					}
+				}
 
-    /**
-      * create categories
-      * @method
-      * @name create
-      * @param categoryData - categoryData.
-      * @returns {Object} category details
-     */
-
-    static create(categoryData) {    
-        return new Promise(async (resolve, reject) => {
-            try {
-                let projectCategoriesData = 
-                await projectCategoriesQueries.create(categoryData)
-
-                if( !projectCategoriesData._id ) {
-                    throw {
-                        status : HTTP_STATUS_CODE.bad_request.status,
-                        message : CONSTANTS.apiResponses.PROJECT_CATEGORIES_NOT_ADDED
-                    }
-                }
-
-                return resolve({
-                    success: true,
-                    message : CONSTANTS.apiResponses.PROJECT_CATEGORIES_ADDED,
-                    data : projectCategoriesData._id
-                });
-
-            } catch (error) {   
-                return resolve({
-                    success: false,
-                    message: error.message,
-                    data : {}
-                });
-            }
-        })
-    }
-
-    /**
-      * list categories
-      * @method
-      * @name list
-      * @returns {Object} category details
-     */
-
-    static list() {    
-        return new Promise(async (resolve, reject) => {
-            try {
-                let categoryData = await projectCategoriesQueries.categoryDocuments(
-                    {
-                        status : CONSTANTS.common.ACTIVE_STATUS
-                    },
-                    [
-                        "externalId",
-                        "name",
-                        "icon",
-                        "updatedAt",
-                        "noOfProjects"
-                    ]
-                );
-
-                if( !categoryData.length > 0 ) {
-                    throw {
-                        status : HTTP_STATUS_CODE.ok.status,
-                        message : CONSTANTS.apiResponses.LIBRARY_CATEGORIES_NOT_FOUND
-                    };
-                }
-
-                return resolve({
-                    success: true,
-                    message : CONSTANTS.apiResponses.PROJECT_CATEGORIES_FETCHED,
-                    data : categoryData
-                });
-
-            } catch (error) {   
-                return resolve({
-                    success: false,
-                    message: error.message,
-                    data : {}
-                });
-            }
-        })
-    }
-
-};
+				return resolve({
+					success: true,
+					message: CONSTANTS.apiResponses.PROJECT_CATEGORIES_FETCHED,
+					data: categoryData,
+				})
+			} catch (error) {
+				return resolve({
+					success: false,
+					message: error.message,
+					data: {},
+				})
+			}
+		})
+	}
+}

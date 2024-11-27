@@ -130,5 +130,7 @@ module.exports = {
 		},
 		hasStory: Boolean,
 		story: Array,
+		impact: String,
+		summary: String,
 	},
 }

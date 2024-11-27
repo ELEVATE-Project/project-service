@@ -2,8 +2,7 @@ openapi: 3.0.0
 info:
   title: MI-2.0 API
   version: 1.0.0
-  description: API for MI-2.0 (new and upgraded apis)
-
+  description: API for MI-2.0 (new and upgraded APIs). x-auth-token has to be passed in header for every api call
 paths:
   /project/userProjects/add:
     post:
@@ -95,11 +94,16 @@ paths:
                       - endDate
                       - source
                       - tasks
+                      - status
                     properties:
                       title:
                         type: string
                         description: Objective of the problem statement
                         example: Understand Importance of Reading
+                      status:
+                        type: string
+                        description: status of project
+                        example: started
                       description:
                         type: string
                         example: ''
@@ -240,11 +244,49 @@ paths:
                         type: string
                         format: date-time
                         example: '2024-06-24T06:56:58.448Z'
-  /project/userProjects/update:
+  /project/userProjects/update/:projectId:
     put:
       tags:
         - userProjects
       summary: Update an existing project
+      description: Update project details by ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reflectionStatus:
+                  type: string
+                  enum: [started, completed]
+                  example: 'started'
+      responses:
+        '200':
+          description: Project updated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Project updated successfully'
+                  status:
+                    type: integer
+                    example: 200
+                  result:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                        example: '667505a649de1ae76e9e1033'
+  /project/userProjects/addStory/:projectId:
+    post:
+      tags:
+        - userProjects
+      summary: Add a story to a project
+      description: Add a story to an existing project using its ID
       requestBody:
         required: true
         content:
@@ -335,13 +377,9 @@ paths:
                           language:
                             type: string
                             example: 'hindi'
-                reflectionStatus:
-                  type: string
-                  enum: [started, completed]
-                  example: 'started'
       responses:
-        '200':
-          description: Project updated successfully.
+        200:
+          description: Story added successfully.
           content:
             application/json:
               schema:
@@ -349,13 +387,290 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: 'Project updated successfully'
+                    example: 'Story added successfully'
+                  status:
+                    type: integer
+                    example: 200
+  /cloud-service/files/preSignedUrls:
+    post:
+      tags:
+        - cloudService
+      summary: Generate pre-signed URLs for file uploads
+      description: API to generate pre-signed URLs for file uploads to cloud storage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - request
+              properties:
+                request:
+                  type: object
+                  properties:
+                    5f72f9998925ec7c60f79a91:
+                      type: object
+                      properties:
+                        files:
+                          type: array
+                          items:
+                            type: string
+                            example: l1.png
+      responses:
+        200:
+          description: URL generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Url generated successfully'
                   status:
                     type: integer
                     example: 200
                   result:
                     type: object
                     properties:
-                      _id:
+                      cloudStorage:
                         type: string
-                        example: '667505a649de1ae76e9e1033'
+                        example: 'oci'
+                      additionalProp1:
+                        type: object
+                        properties:
+                          files:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                file:
+                                  type: string
+                                  example: 'i1.png'
+                                payload:
+                                  type: object
+                                  properties:
+                                    sourcePath:
+                                      type: string
+                                      example: 'project/5f72f9998925ec7c60f79a91/1/acee9b95-3c5e-4a09-bfb0-993647ab66f0/i1.png'
+                                    url:
+                                      type: string
+                                      example: 'https://***.compat.objectstorage.ap-hyderabad-1.oraclecloud.com/mi/project/5f72f9998925ec7c60f79a91/1/acee9b95-3c5e-4a09-bfb0-993647ab66f0/i1.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=3737771d26e1d8f211a04ec59cfd3037c8d1c6ff%2F20240628%2Fap-hyderabad-1%2Fs3%2Faws4_request&X-Amz-Date=20240628T031041Z&X-Amz-Expires=300&X-Amz-Signature=face99c424124bfc8f3988c2fd80ae0cb06231f3e9989d87fc747e659efaedd7&X-Amz-SignedHeaders=host&x-id=PutObject'
+                      additionalProp2:
+                        type: object
+                        properties:
+                          files:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                file:
+                                  type: string
+                                  example: 'i2.png'
+                                payload:
+                                  type: object
+                                  properties:
+                                    sourcePath:
+                                      type: string
+                                      example: 'project/5f72f9998925ec7c60f79a91/1/acee9b95-3c5e-4a09-bfb0-993647ab66f0/i2.png'
+                                    url:
+                                      type: string
+                                      example: 'https://***.compat.objectstorage.ap-hyderabad-1.oraclecloud.com/mi/project/5f72f9998925ec7c60f79a91/1/acee9b95-3c5e-4a09-bfb0-993647ab66f0/i2.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=3737771d26e1d8f211a04ec59cfd3037c8d1c6ff%2F20240628%2Fap-hyderabad-1%2Fs3%2Faws4_request&X-Amz-Date=20240628T031041Z&X-Amz-Expires=300&X-Amz-Signature=920e8dc3753d16c9932b3b347bc41161fa6d9f4932723a00d6319e4e67a9a682&X-Amz-SignedHeaders=host&x-id=PutObject'
+                      additionalProp3:
+                        type: object
+                        properties:
+                          files:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                file:
+                                  type: string
+                                  example: 'i3.png'
+                                payload:
+                                  type: object
+                                  properties:
+                                    sourcePath:
+                                      type: string
+                                      example: 'project/5f72f9998925ec7c60f79a91/1/acee9b95-3c5e-4a09-bfb0-993647ab66f0/i3.png'
+                                    url:
+                                      type: string
+                                      example: 'https://***.compat.objectstorage.ap-hyderabad-1.oraclecloud.com/mi/project/5f72f9998925ec7c60f79a91/1/acee9b95-3c5e-4a09-bfb0-993647ab66f0/i3.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=3737771d26e1d8f211a04ec59cfd3037c8d1c6ff%2F20240628%2Fap-hyderabad-1%2Fs3%2Faws4_request&X-Amz-Date=20240628T031041Z&X-Amz-Expires=300&X-Amz-Signature=ab12a6c1f00d0c835b405020542bbf7f89b6dfb43e04051606a7a34987b606f&X-Amz-SignedHeaders=host&x-id=PutObject'
+  /v1/profile/read:
+    get:
+      tags:
+        - profile
+      summary: Retrieve user profile information
+      description: Fetches the details of the currently authenticated user profile.
+      responses:
+        200:
+          description: Successfully fetched user profile data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Data fetched successfully'
+                  status:
+                    type: integer
+                    example: 200
+                  result:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 5
+                      email:
+                        type: string
+                        example: 'rahul@gmail.com'
+                      email_verified:
+                        type: string
+                        example: 'false'
+                      name:
+                        type: string
+                        example: 'Rahul'
+                      about:
+                        type: string
+                        example: 'PWA'
+                      share_link:
+                        type: string
+                        nullable: true
+                        example: null
+                      status:
+                        type: string
+                        example: 'ACTIVE'
+                      has_accepted_terms_and_conditions:
+                        type: boolean
+                        example: true
+                      languages:
+                        type: array
+                        items:
+                          type: string
+                        example: []
+                      preferred_language:
+                        type: object
+                        properties:
+                          value:
+                            type: string
+                            example: 'en'
+                          label:
+                            type: string
+                            example: 'English'
+                      organization_id:
+                        type: integer
+                        example: 1
+                      roles:
+                        type: array
+                        items:
+                          type: integer
+                        example: [1, 3, 8, 6]
+                      meta:
+                        type: object
+                        additionalProperties: true
+                      created_at:
+                        type: string
+                        format: date-time
+                        example: '2024-07-19T06:52:35.604Z'
+                      updated_at:
+                        type: string
+                        format: date-time
+                        example: '2024-08-12T09:54:53.619Z'
+                      deleted_at:
+                        type: string
+                        nullable: true
+                        example: null
+                      organization:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                            example: 1
+                          name:
+                            type: string
+                            example: 'Default Organization'
+                          code:
+                            type: string
+                            example: 'default_code'
+                      user_roles:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 8
+                            title:
+                              type: string
+                              example: 'program_desiginer'
+                            label:
+                              type: string
+                              example: 'Program Desiginer'
+                            user_type:
+                              type: integer
+                              example: 0
+                            status:
+                              type: string
+                              example: 'ACTIVE'
+                            organization_id:
+                              type: integer
+                              example: 1
+                            visibility:
+                              type: string
+                              example: 'PUBLIC'
+                      permissions:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            module:
+                              type: string
+                              example: 'user'
+                            request_type:
+                              type: array
+                              items:
+                                type: string
+                              example: ['POST', 'DELETE', 'GET', 'PUT', 'PATCH']
+                            service:
+                              type: string
+                              example: 'user'
+                      block:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            value:
+                              type: string
+                              example: '5fd1b52ab53a6416aaeefb17'
+                            label:
+                              type: string
+                              example: 'PONDURU'
+                            externalId:
+                              type: string
+                              example: '5b6010b6-5394-4704-b05f-0bea83ff1fb7'
+                      state:
+                        type: object
+                        properties:
+                          value:
+                            type: string
+                            example: '5f33c3d85f637784791cd830'
+                          label:
+                            type: string
+                            example: 'Unknown'
+                          externalId:
+                            type: string
+                            example: 'Unknown'
+                      district:
+                        type: object
+                        properties:
+                          value:
+                            type: string
+                            example: '5fd098e2e049735a86b748ad'
+                          label:
+                            type: string
+                            example: 'VIZIANAGARAM'
+                          externalId:
+                            type: string
+                            example: 'b54a5c6d-98be-4313-af1c-33040b1703aa'

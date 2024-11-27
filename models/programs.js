@@ -56,5 +56,6 @@ module.exports = {
 			index: true,
 			require: true,
 		},
+		translations: Object,
 	},
 }

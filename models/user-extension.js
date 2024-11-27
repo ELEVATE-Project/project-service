@@ -11,6 +11,8 @@ module.exports = {
 		userId: {
 			type: String,
 			required: true,
+			index: true,
+			unique: true,
 		},
 		wishlist: {
 			type: Array,

@@ -68,27 +68,27 @@ module.exports = class UserExtensioHelper {
 			// Find the userExtension document for the given userId
 			let userExtensionDocument = await userExtensionQueries.userExtensionDocument({ userId })
 
-			if (userExtensionDocument) {
-				// If the document exists, update the wishlist by removing the specified item
-				let updatedDocument = await userExtensionQueries.findAndUpdate(
-					{ userId, wishlist: { $elemMatch: { _id: projectTempleteId } } },
-					{ $pull: { wishlist: { _id: projectTempleteId } } },
-					{ new: true }
-				)
-				if (updatedDocument) {
-					return {
-						success: true,
-						message: CONSTANTS.apiResponses.WISHLIST_REMOVED,
-					}
-				} else {
-					throw {
-						message: CONSTANTS.apiResponses.PROJECTTEMPLATES_NOTFOUND,
-						status: HTTP_STATUS_CODE.bad_request.status,
-					}
+			if (!userExtensionDocument) {
+				throw {
+					message: CONSTANTS.apiResponses.USEREXTENSION_NOTFOUND,
+					status: HTTP_STATUS_CODE.bad_request.status,
+				}
+			}
+
+			// If the document exists, update the wishlist by removing the specified item
+			let updatedDocument = await userExtensionQueries.findAndUpdate(
+				{ userId, wishlist: { $elemMatch: { _id: projectTempleteId } } },
+				{ $pull: { wishlist: { _id: projectTempleteId } } },
+				{ new: true }
+			)
+			if (updatedDocument) {
+				return {
+					success: true,
+					message: CONSTANTS.apiResponses.WISHLIST_REMOVED,
 				}
 			} else {
 				throw {
-					message: CONSTANTS.apiResponses.USEREXTENSION_NOTFOUND,
+					message: CONSTANTS.apiResponses.PROJECT_TEMPLATE_NOT_FOUND,
 					status: HTTP_STATUS_CODE.bad_request.status,
 				}
 			}
@@ -112,67 +112,64 @@ module.exports = class UserExtensioHelper {
 	 * @returns {Object}          list of wishlist
 	 */
 
-	static async list(language, userId, pageSize = 100, pageNo = 1) {
+	static async list(language, userId, pageSize, pageNo) {
 		try {
 			//Find user's wishlist projectTempleteIds
 			let userExtensionDocument = await userExtensionQueries.userExtensionDocument({ userId })
-
-			if (userExtensionDocument) {
-				//Get the projectTempleteIds
-				let projectTemplateIDs = userExtensionDocument[0].wishlist.map((item) => new ObjectId(item._id))
-				let aggregateData = []
-				//Match Query
-				let matchQuery = {
-					$match: {
-						_id: { $in: projectTemplateIDs },
-					},
-				}
-				aggregateData.push(matchQuery)
-
-				// projection aggregate for multilingual
-				let titleField = language ? `$translation.${language}.title` : '$title'
-				let descriptionField = language ? `$translation.${language}.description` : '$description'
-
-				aggregateData.push(
-					{
-						$project: {
-							_id: 1,
-							title: { $ifNull: [titleField, '$title'] },
-							description: { $ifNull: [descriptionField, '$description'] },
-							externalId: 1,
-							createdAt: 1,
-							categories: 1,
-							'metaInformation.duration': 1,
-						},
-					},
-					{
-						//Pagination
-						$facet: {
-							totalCount: [{ $count: 'count' }],
-							data: [{ $skip: pageSize * (pageNo - 1) }, { $limit: pageSize }],
-						},
-					},
-					{
-						//Count  and project the response data
-						$project: {
-							data: 1,
-							count: {
-								$arrayElemAt: ['$totalCount.count', 0],
-							},
-						},
-					}
-				)
-
-				let projectTempleteDocumetation = await projectTemplateQueries.getAggregate(aggregateData)
-				return {
-					success: true,
-					results: projectTempleteDocumetation,
-				}
-			} else {
+			if (!userExtensionDocument) {
 				throw {
 					message: CONSTANTS.apiResponses.USEREXTENSION_NOTFOUND,
 					status: HTTP_STATUS_CODE.bad_request.status,
 				}
+			}
+			//Get the projectTempleteIds
+			let projectTemplateIDs = userExtensionDocument[0].wishlist.map((item) => new ObjectId(item._id))
+			let aggregateData = []
+			//Match Query
+			let matchQuery = {
+				$match: {
+					_id: { $in: projectTemplateIDs },
+				},
+			}
+			aggregateData.push(matchQuery)
+			// projection aggregate for multilingual
+			let titleField = language ? `$translation.${language}.title` : '$title'
+			let descriptionField = language ? `$translation.${language}.description` : '$description'
+
+			aggregateData.push(
+				{
+					$project: {
+						_id: 1,
+						title: { $ifNull: [titleField, '$title'] },
+						description: { $ifNull: [descriptionField, '$description'] },
+						externalId: 1,
+						createdAt: 1,
+						categories: 1,
+						'metaInformation.duration': 1,
+					},
+				},
+				{
+					//Pagination
+					$facet: {
+						totalCount: [{ $count: 'count' }],
+						data: [{ $skip: pageSize * (pageNo - 1) }, { $limit: pageSize }],
+					},
+				},
+				{
+					//Count  and project the response data
+					$project: {
+						data: 1,
+						count: {
+							$arrayElemAt: ['$totalCount.count', 0],
+						},
+					},
+				}
+			)
+
+			let projectTemplateDocuments = await projectTemplateQueries.getAggregate(aggregateData)
+			return {
+				success: true,
+				results: projectTemplateDocuments,
 			}
 		} catch (error) {
 			return {

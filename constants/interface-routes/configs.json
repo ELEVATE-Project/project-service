@@ -1640,7 +1640,7 @@
 		},
 		{
 			"sourceRoute": "/project/v1/template/list",
-			"type": "POST",
+			"type": "GET",
 			"priority": "MUST_HAVE",
 			"inSequence": false,
 			"orchestrated": false,

@@ -2362,21 +2362,70 @@ module.exports = class UserProjectsHelper {
 	}
 
 	/**
-	 * List of projects.
+	 * List of user projects.
 	 * @method
 	 * @name list
+	 * @param {String} userId -UserID
+	 * @param {Number} pageNo -Page number
+	 * @param {Number} pageSize -Page size
+	 * @param {String} searchText -Search text
+	 * @param {String} language -LanguageCode
 	 * @returns {Array} List of projects.
 	 */
 
-	static list(bodyData, pageNo, pageSize, searchText, filter) {
+	static list(userId, pageNo, pageSize, searchText, language = '') {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let projects = await projectQueries.projectDocument(
-					bodyData.query,
-					bodyData.projection,
-					bodyData.skipFields
+				let aggregateData = []
+				// Match Query
+				let matchQuery = {
+					$match: {
+						userId: userId,
+						status: { $ne: CONSTANTS.common.COMPLETED_STATUS },
+					},
+				}
+				aggregateData.push(matchQuery)
+
+				// Projection aggregate for multilingual
+				let titleField = language ? `$translations.${language}.title` : '$title'
+				let descriptionField = language ? `$translations.${language}.description` : '$description'
+				aggregateData.push({
+					$project: {
+						_id: 1,
+						title: { $ifNull: [titleField, '$title'] },
+						description: { $ifNull: [descriptionField, '$description'] },
+						projectTemplateId: 1,
+						projectTemplateExternalId: 1,
+						status: 1,
+						tasks: 1,
+					},
+				})
+				aggregateData.push(
+					{
+						// Pagination
+						$facet: {
+							totalCount: [{ $count: 'count' }],
+							data: [{ $skip: pageSize * (pageNo - 1) }, { $limit: pageSize }],
+						},
+					},
+					{
+						// Count and project the response data
+						$project: {
+							data: 1,
+							count: {
+								$ifNull: [{ $arrayElemAt: ['$totalCount.count', 0] }, 0],
+							},
+						},
+					}
 				)
 
+				let projects = await projectQueries.getAggregate(aggregateData)
+				//Getting tasks translated if required
+				if (language != '' && projects[0].data.length > 0) {
+					projects[0].data.forEach((eachProject) => {
+						_projectInformation(eachProject, language)
+					})
+				}
 				return resolve({
 					success: true,
 					message: CONSTANTS.apiResponses.PROJECTS_FETCHED,

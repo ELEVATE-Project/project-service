@@ -141,6 +141,8 @@ module.exports = class LibraryCategoriesHelper {
 							createdAt: 1,
 							categories: 1,
 							metaInformation: 1,
+							author: 1,
+							text: 1,
 						},
 					},
 					{

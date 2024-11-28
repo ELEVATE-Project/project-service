@@ -36,7 +36,7 @@ module.exports = class LibraryCategoriesHelper {
         return new Promise(async (resolve, reject) => {
             try {
 
-                const defaultLanguage = 'en';
+                const defaultLanguage = 'en'
 				const userLanguage = language;
 
                 let matchQuery = {

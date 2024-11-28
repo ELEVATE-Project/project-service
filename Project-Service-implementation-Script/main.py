@@ -1349,7 +1349,7 @@ def validateSheets(filePathAddObs, accessToken, parentFolder):
         # sys.exit()
         
         taskUploadCols = ["TaskId", "TaskTitle", "parentTaskId",
-                          "Mandatory task(Yes or No)","observation Name","Number of submissions for observation"]
+                          "Mandatory task(Yes or No)","observation Name","Number of submissions for observation","description"]
         detailsColCheck = wbObservation1.sheet_by_name('Tasks upload')
         keysColCheckDetai = [detailsColCheck.cell(0, col_index_check).value for col_index_check in
                                      range(detailsColCheck.ncols)]

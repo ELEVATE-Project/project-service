@@ -6,14 +6,15 @@
  */
 
 // dependencies
-const libraryCategoriesHelper = require(MODULES_BASE_PATH + '/library/categories/helper')
+const libraryCategoriesHelper = require(MODULES_BASE_PATH + "/library/categories/helper");
 
 /**
  * UserExtension service.
  * @class
  */
 
-module.exports = class Template {
+module.exports = class Template  {
+
 	static get name() {
 		return 'template'
 	}
@@ -33,13 +34,14 @@ module.exports = class Template {
 }
 */
 	async list(req) {
-		return new Promise(async (resolve, reject) => {
-			try {
-				const options = {}
+        return new Promise(async (resolve, reject) => {
+            try {
 
-				if (req.query.duration) options.duration = req.query.duration
-				if (req.query.roles) options.roles = req.query.roles
+                const options = {};
 
+                if (req.query.duration) options.duration = req.query.duration;
+                if (req.query.roles) options.roles = req.query.roles;
+                
 				const libraryProjects = await libraryCategoriesHelper.projects(
 					req.params._id ? req.params._id : '',
 					req.pageSize,
@@ -48,17 +50,19 @@ module.exports = class Template {
 					req.query.sort,
 					req.query.translation,
 					UTILS.convertStringToBoolean(req.query.hasSpotlight),
-					options
+                    options
 				)
+                
+                return resolve({
+                    message : libraryProjects.message,
+                    result : libraryProjects.data
+                });
 
-				return resolve({
-					message: libraryProjects.message,
-					result: libraryProjects.data,
-				})
-			} catch (error) {
-				console.log(error)
-				return reject(error)
-			}
-		})
+            } catch (error) {
+                console.log(error)
+                return reject(error);
+            }
+        })
 	}
+
 }

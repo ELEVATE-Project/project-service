@@ -197,4 +197,5 @@ module.exports = {
 			indexType: { unique: true, partialFilterExpression: { solutionId: { $exists: true } } },
 		},
 	],
+	translations: Object,
 }

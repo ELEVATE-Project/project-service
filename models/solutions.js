@@ -98,5 +98,6 @@ module.exports = {
 			type: String,
 			default: 'USER',
 		},
+		translations: Object,
 	},
 }

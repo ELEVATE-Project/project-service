@@ -663,7 +663,8 @@ module.exports = class ProjectTemplates extends Abstract {
 					req.userDetails && req.userDetails.userInformation && req.userDetails.userInformation.userId
 						? req.userDetails.userInformation.userId
 						: '',
-					req.query.isAPrivateProgram ? req.query.isAPrivateProgram : ''
+					req.query.isAPrivateProgram ? req.query.isAPrivateProgram : '',
+					req.query.language ? req.query.language : ''
 				)
 
 				return resolve(projectTemplatesDetails)

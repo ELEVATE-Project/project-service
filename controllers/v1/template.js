@@ -1,5 +1,5 @@
 /**
- * name : wishlist.js
+ * name : template.js
  * author : Saish Borkar
  * created-date : 28-Nov-2024
  * Description :  template Controller.

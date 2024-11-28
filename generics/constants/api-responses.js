@@ -235,7 +235,7 @@ module.exports = {
 	FAILED_TO_FETCH_USERROLE: 'Failed to fetch userRole information',
 	WISHLIST_ADDED: 'projecttemplates added to wishlist successfully',
 	WISHLIST_REMOVED: 'projecttemplates removed from wishlist successfully',
-	USER_EXTENSION_NOT_FOUND: 'No userExtension document found for the given userId',
+	USER_EXTENSION_NOT_FOUND: 'No userExtension document found for the user',
 	WISHLIST_NOT_ADDED: 'projecttemplates not added to wishlist',
 	WISHLIST_FETCHED: 'Wishlist fetched successfully',
 	WISHLIST_FETCH_FAILED: 'Wishlist fetch failed',

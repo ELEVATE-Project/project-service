@@ -873,10 +873,11 @@ module.exports = class ProjectTemplatesHelper {
 	 * @param {String} templateId - Project template id.
 	 * @param {String} userId - logged in user id.
 	 * @param {String} link - solution link.
+	 * @param {String} language- languageCode
 	 * @returns {Array} Project templates data.
 	 */
 
-	static details(templateId = '', link = '', userId = '', isAPrivateProgram) {
+	static details(templateId = '', link = '', userId = '', isAPrivateProgram, language = '') {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let solutionsResult = {}
@@ -945,6 +946,11 @@ module.exports = class ProjectTemplatesHelper {
 						message: CONSTANTS.apiResponses.PROJECT_TEMPLATE_NOT_FOUND,
 					}
 				}
+
+				if (language !== '' && templateData[0].translations && templateData[0].translations[language]) {
+					templateData[0] = UTILS.getTranslatedData(templateData[0], templateData[0].translations[language])
+				}
+				templateData[0] = _.omit(templateData[0], 'translations')
 				// fetch certificate details using certificateTemplateId saved in projectTemplate
 				if (templateData[0].certificateTemplateId && templateData[0].certificateTemplateId !== '') {
 					let certificateTemplateDetails = await certificateTemplateQueries.certificateTemplateDocument(
@@ -964,7 +970,7 @@ module.exports = class ProjectTemplatesHelper {
 				}
 
 				if (templateData[0].tasks && templateData[0].tasks.length > 0) {
-					templateData[0].tasks = await this.tasksAndSubTasks(templateData[0]._id)
+					templateData[0].tasks = await this.tasksAndSubTasks(templateData[0]._id, language)
 				}
 				let result = await _templateInformation(templateData[0])
 				if (!result.success) {
@@ -1021,10 +1027,11 @@ module.exports = class ProjectTemplatesHelper {
 	 * @method
 	 * @name tasksAndSubTasks
 	 * @param {Array} templateId - Template id.
+	 * @param {String} language - language code
 	 * @returns {Array} Tasks and sub task.
 	 */
 
-	static tasksAndSubTasks(templateId) {
+	static tasksAndSubTasks(templateId, language) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				const templateDocument = await projectTemplateQueries.templateDocument(
@@ -1045,7 +1052,7 @@ module.exports = class ProjectTemplatesHelper {
 						},
 					}
 
-					tasks = await _taskAndSubTaskinSequence(findQuery, projectionKey)
+					tasks = await _taskAndSubTaskinSequence(findQuery, projectionKey, language)
 					// sort the order of the tasks
 					let orderedTasks = templateDocument[0]['taskSequence'].map((id) =>
 						tasks.find((task) => String(task.externalId) === String(id))
@@ -1062,7 +1069,7 @@ module.exports = class ProjectTemplatesHelper {
 								parentId: { $exists: false },
 							}
 
-							tasks = await _taskAndSubTaskinSequence(findQuery, projectionKey)
+							tasks = await _taskAndSubTaskinSequence(findQuery, projectionKey, language)
 							// sort the order of the tasks
 							let orderedTasks = templateDocument[0]['tasks'].map((id) =>
 								tasks.find((task) => String(task._id) === String(id))
@@ -1290,10 +1297,11 @@ function _templateInformation(project) {
  * @name _taskAndSubTaskinSequence
  * @param {Object} query - template Query.
  * @param {String} projectionValue - children or taskSequence.
+ * @param {String} language- languageCode
  * @returns {Object} Task and SubTask information.
  */
 
-function _taskAndSubTaskinSequence(query, projectionValue) {
+function _taskAndSubTaskinSequence(query, projectionValue, language = '') {
 	return new Promise(async (resolve, reject) => {
 		try {
 			let tasks = []
@@ -1304,6 +1312,10 @@ function _taskAndSubTaskinSequence(query, projectionValue) {
 			])
 
 			for (let task = 0; task < tasks.length; task++) {
+				if (language !== '' && tasks[task].translations && tasks[task].translations[language]) {
+					tasks[task] = UTILS.getTranslatedData(tasks[task], tasks[task].translations[language])
+				}
+				tasks[task] = _.omit(tasks[task], 'translations')
 				if (tasks[task][projectionValue] && tasks[task][projectionValue].length > 0) {
 					let subTaskQuery
 					if (projectionValue == CONSTANTS.common.CHILDREN) {
@@ -1325,6 +1337,11 @@ function _taskAndSubTaskinSequence(query, projectionValue) {
 						'__v',
 						'projectTemplateExternalId',
 					])
+
+					if (language !== '' && subTasks[0].translations && subTasks[0].translations[language]) {
+						subTasks[0] = UTILS.getTranslatedData(subTasks[0], subTasks[0].translations[language])
+					}
+					subTasks[0] = _.omit(subTasks[0], 'translations')
 					tasks[task].children = subTasks
 				}
 			}

@@ -1044,10 +1044,11 @@ module.exports = class ProgramsHelper {
 	 * @method
 	 * @name userPrivatePrograms
 	 * @param {String} userId
+	 * @param {String} language -languageCode
 	 * @returns {JSON} - List of programs that user created on app.
 	 */
 
-	static userPrivatePrograms(userId) {
+	static userPrivatePrograms(userId, language = '') {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let programsData = await programsQueries.programsDocument(
@@ -1055,7 +1056,7 @@ module.exports = class ProgramsHelper {
 						createdBy: userId,
 						isAPrivateProgram: true,
 					},
-					['name', 'externalId', 'description', '_id', 'isAPrivateProgram'],
+					['name', 'externalId', 'description', '_id', 'isAPrivateProgram', 'translations'],
 					'none',
 					{ createdAt: -1 } // sort by 'createdAt' in descending order
 				)
@@ -1066,7 +1067,16 @@ module.exports = class ProgramsHelper {
 						result: [],
 					})
 				}
-
+				//handle multiligual responses
+				if (language != '') {
+					programsData = programsData.map((program) => ({
+						name: program.translations?.[language]?.name || program.name,
+						description: program.translations?.[language]?.description || program.description,
+						externalId: program.externalId,
+						_id: program._id,
+						isAPrivateProgram: program.isAPrivateProgram,
+					}))
+				}
 				return resolve(programsData)
 			} catch (error) {
 				return reject(error)

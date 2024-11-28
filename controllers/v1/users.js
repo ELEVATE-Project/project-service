@@ -151,7 +151,10 @@ module.exports = class Users {
 				let isAPrivateProgram = UTILS.convertStringToBoolean(req.query.isAPrivateProgram)
 
 				if (isAPrivateProgram) {
-					let programsData = await usersHelper.privatePrograms(req.userDetails.userInformation.userId)
+					let programsData = await usersHelper.privatePrograms(
+						req.userDetails.userInformation.userId,
+						req.query.language ? req.query.language : ''
+					)
 					return resolve(programsData)
 				} else {
 					let programs = await usersHelper.programs(

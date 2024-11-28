@@ -565,7 +565,7 @@ module.exports = class UserProjectsHelper {
 	 * @returns {Object} projects fetched from DB
 	 */
 
-	static details(projectId, userId, userRoleInformation = {}) {
+	static details(projectId, userId, userRoleInformation = {}, language) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// create query based on submission level
@@ -593,6 +593,15 @@ module.exports = class UserProjectsHelper {
 						message: CONSTANTS.apiResponses.PROJECT_NOT_FOUND,
 					}
 				}
+				// get translation data and modify actual data
+				if (language !== '' && projectDetails[0].translations && projectDetails[0].translations[language]) {
+					projectDetails[0] = UTILS.getTranslatedData(
+						projectDetails[0],
+						projectDetails[0].translations[language]
+					)
+				}
+				//Once modified remove translations from response
+				projectDetails[0] = _.omit(projectDetails[0], 'translations')
 				if (Object.keys(userRoleInformation).length > 0) {
 					if (
 						!projectDetails[0].userRoleInformation ||
@@ -609,7 +618,7 @@ module.exports = class UserProjectsHelper {
 					}
 				}
 
-				let result = await _projectInformation(projectDetails[0])
+				let result = await _projectInformation(projectDetails[0], language)
 
 				if (!result.success) {
 					return resolve(result)
@@ -1119,6 +1128,7 @@ module.exports = class UserProjectsHelper {
 	 * @param {Object} bodyData - Requested body data.
 	 * @param {String} [appName = ""] - App name.
 	 * @param {String} [appVersion = ""] - App version.
+	 * @param {String} [Language = ""] - LanguageCode.
 	 * @returns {Object} Project details.
 	 */
 
@@ -1130,7 +1140,8 @@ module.exports = class UserProjectsHelper {
 		bodyData,
 		appName = '',
 		appVersion = '',
-		templateId = ''
+		templateId = '',
+		language = ''
 	) {
 		return new Promise(async (resolve, reject) => {
 			try {
@@ -1574,7 +1585,7 @@ module.exports = class UserProjectsHelper {
 						projectId = project._id
 					}
 				}
-				let projectDetails = await this.details(projectId, userId, userRoleInformation)
+				let projectDetails = await this.details(projectId, userId, userRoleInformation, language)
 
 				// let revertStatusorNot = UTILS.revertStatusorNot(appVersion);
 				// if ( revertStatusorNot ) {
@@ -2386,10 +2397,11 @@ module.exports = class UserProjectsHelper {
 	 * @param {String} userId - Logged in user id.
 	 * @param {String} userToken - User token.
 	 * @param {Boolean} isATargetedSolution - User targeted or not .
+	 * @param {String} language - language code
 	 * @returns {Object} Project created information.
 	 */
 
-	static importFromLibrary(projectTemplateId, requestedData, userToken, userId, isATargetedSolution = '') {
+	static importFromLibrary(projectTemplateId, requestedData, userToken, userId, isATargetedSolution = '', language) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				isATargetedSolution = UTILS.convertStringToBoolean(isATargetedSolution)
@@ -2399,7 +2411,8 @@ module.exports = class UserProjectsHelper {
 				let libraryProjects = await libraryCategoriesHelper.projectDetails(
 					projectTemplateId,
 					'',
-					isATargetedSolution
+					isATargetedSolution,
+					language
 				)
 
 				// If template data is not found throw error
@@ -2571,8 +2584,20 @@ module.exports = class UserProjectsHelper {
 				if (requestedData.rating && requestedData.rating > 0) {
 					await projectTemplatesHelper.ratings(projectTemplateId, requestedData.rating, userToken)
 				}
-
-				projectCreation = await _projectInformation(_.omit(projectCreation._doc, ['certificate']))
+				// get translation data and modify actual data
+				if (
+					language !== '' &&
+					projectCreation._doc.translations &&
+					projectCreation._doc.translations[language]
+				) {
+					projectCreation._doc = UTILS.getTranslatedData(
+						projectCreation._doc,
+						projectCreation._doc.translations[language]
+					)
+				}
+				//Once modified remove translations from response
+				projectCreation._doc = _.omit(projectCreation._doc, 'translations')
+				projectCreation = await _projectInformation(_.omit(projectCreation._doc, ['certificate']), language)
 
 				return resolve({
 					success: true,
@@ -3488,10 +3513,11 @@ module.exports = class UserProjectsHelper {
  * @method
  * @name _projectInformation
  * @param {Object} project - Project data.
+ * @param {String} language - LanguageCode
  * @returns {Object} Project information.
  */
 
-function _projectInformation(project) {
+function _projectInformation(project, language) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			if (project.entityInformation) {
@@ -3544,6 +3570,19 @@ function _projectInformation(project) {
 				let mapLinkAttachment = {}
 
 				for (let task = 0; task < project.tasks.length; task++) {
+					// get translation data and modify actual data
+					if (
+						language !== '' &&
+						project.tasks[task].translations &&
+						project.tasks[task].translations[language]
+					) {
+						project.tasks[task] = UTILS.getTranslatedData(
+							project.tasks[task],
+							project.tasks[task].translations[language]
+						)
+					}
+					//Once modified remove translations from response
+					project.tasks[task] = _.omit(project.tasks[task], 'translations')
 					let currentTask = project.tasks[task]
 
 					if (currentTask.attachments && currentTask.attachments.length > 0) {
@@ -3570,6 +3609,24 @@ function _projectInformation(project) {
 									taskId: currentTask._id,
 								}
 							}
+						}
+					}
+
+					if (currentTask.children && currentTask.children.length > 0) {
+						for (let childTask = 0; childTask < currentTask.children.length; childTask++) {
+							// get translation data and modify actual data
+							if (
+								language !== '' &&
+								currentTask.children[childTask].translations &&
+								currentTask.children[childTask].translations[language]
+							) {
+								currentTask.children[childTask] = UTILS.getTranslatedData(
+									currentTask.children[childTask],
+									currentTask.children[childTask].translations[language]
+								)
+							}
+							//Once modified remove translations from response
+							currentTask.children[childTask] = _.omit(currentTask.children[childTask], 'translations')
 						}
 					}
 				}

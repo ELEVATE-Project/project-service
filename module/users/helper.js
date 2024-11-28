@@ -161,13 +161,14 @@ module.exports = class UsersHelper {
 	 * @method
 	 * @name privatePrograms
 	 * @param {string} userId - logged in user Id.
+	 * @param {string} language - languageCode.
 	 * @returns {Array} - List of all private programs created by user.
 	 */
 
-	static privatePrograms(userId) {
+	static privatePrograms(userId, language) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let userPrivatePrograms = await programsHelper.userPrivatePrograms(userId)
+				let userPrivatePrograms = await programsHelper.userPrivatePrograms(userId, language)
 
 				return resolve({
 					message: CONSTANTS.apiResponses.PRIVATE_PROGRAMS_LIST,

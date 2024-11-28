@@ -2398,6 +2398,7 @@ module.exports = class UserProjectsHelper {
 						projectTemplateExternalId: 1,
 						status: 1,
 						tasks: 1,
+						taskReport: 1,
 					},
 				})
 				aggregateData.push(

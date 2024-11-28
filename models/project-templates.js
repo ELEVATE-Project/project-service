@@ -129,8 +129,9 @@ module.exports = {
 			index: true,
 		},
 		hasStory: Boolean,
-		story: Array,
+		text: Array,
 		impact: String,
 		summary: String,
+		author: String,
 	},
 }

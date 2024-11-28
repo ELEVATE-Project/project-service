@@ -46,7 +46,7 @@ module.exports = class Template {
 					req.pageNo,
 					req.searchText,
 					req.query.sort,
-					req.query.translation,
+					req.query.language,
 					UTILS.convertStringToBoolean(req.query.hasSpotlight),
 					options
 				)

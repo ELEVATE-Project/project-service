@@ -184,17 +184,10 @@ module.exports = class Wishlist extends Abstract {
 				req.pageSize,
 				req.pageNo
 			)
-			if (userExtensionDocuments.success) {
-				return {
-					success: true,
-					message: CONSTANTS.apiResponses.WISHLIST_FETCHED,
-					result: userExtensionDocuments.results[0],
-				}
-			} else {
-				throw {
-					message: CONSTANTS.apiResponses.WISHLIST_FETCH_FAILED,
-					status: HTTP_STATUS_CODE.bad_request.status,
-				}
+			return {
+				success: true,
+				message: userExtensionDocuments.message,
+				result: userExtensionDocuments.results,
 			}
 		} catch (error) {
 			return {

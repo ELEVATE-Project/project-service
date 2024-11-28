@@ -28,12 +28,27 @@ module.exports = class LibraryCategoriesHelper {
 	 * @param pageNo - Recent page no.
 	 * @param search - search text.
 	 * @param sortedData - Data to be sorted.
+	 * @param language - pass language code for the translation
+	 * @param hasSpotlight - true/false for filtering based on hasSpotlight key
+	 * @param filter - Data to be filtered
 	 * @returns {Object} List of library projects.
 	 */
 
-	static projects(categoryId, pageSize, pageNo, search, sortedData) {
+	static projects(
+		categoryId,
+		pageSize,
+		pageNo,
+		search,
+		sortedData,
+		language = 'en',
+		hasSpotlight = false,
+		filter = {}
+	) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				const defaultLanguage = 'en'
+				const userLanguage = language
+
 				let matchQuery = {
 					$match: {
 						status: CONSTANTS.common.PUBLISHED,
@@ -41,20 +56,53 @@ module.exports = class LibraryCategoriesHelper {
 					},
 				}
 
-				if (categoryId !== '') {
-					matchQuery['$match']['categories.externalId'] = categoryId
+				let aggregateData = []
+				aggregateData.push(matchQuery)
+
+				if (hasSpotlight) {
+					matchQuery['$match']['hasSpotlight'] = true
+				}
+
+				if (Object.keys(filter).length >= 1) {
+					let duration = filter.duration || ''
+					let roles = filter.roles || ''
+
+					// Split duration only if it has a value
+					if (duration) {
+						duration = duration.split(',')
+						if (duration.length > 0) {
+							matchQuery['$match']['metaInformation.duration'] = { $all: duration }
+						}
+					}
+
+					// Split roles only if it has a value
+					if (roles) {
+						roles = roles.split(',')
+						if (roles.length > 0) {
+							matchQuery['$match']['recommendedFor'] = { $all: roles }
+						}
+					}
 				}
 
 				if (search !== '') {
-					matchQuery['$match']['$or'] = [
-						{ title: new RegExp(search, 'i') },
-						{ descripion: new RegExp(search, 'i') },
-						{ categories: new RegExp(search, 'i') },
-					]
+					if (userLanguage === defaultLanguage) {
+						// Search directly in default fields for English
+						matchQuery['$match']['$or'] = [
+							{ title: new RegExp(search, 'i') },
+							{ description: new RegExp(search, 'i') },
+							{ categories: new RegExp(search, 'i') },
+						]
+					} else {
+						// Search in translations for other languages
+						matchQuery['$match']['$or'] = [
+							{ [`translations.${userLanguage}.title`]: new RegExp(search, 'i') },
+							{ [`translations.${userLanguage}.description`]: new RegExp(search, 'i') },
+							{ title: new RegExp(search, 'i') },
+							{ description: new RegExp(search, 'i') },
+							{ categories: new RegExp(search, 'i') },
+						]
+					}
 				}
-
-				let aggregateData = []
-				aggregateData.push(matchQuery)
 
 				let sortedQuery = {
 					$sort: {
@@ -72,13 +120,27 @@ module.exports = class LibraryCategoriesHelper {
 				aggregateData.push(
 					{
 						$project: {
-							title: 1,
+							title: {
+								$ifNull: [`$translations.${language}.title`, '$title'],
+							},
+							description: {
+								$ifNull: [`$translations.${language}.description`, '$description'],
+							},
+							impact: {
+								$ifNull: [`$translations.${language}.impact`, '$impact'],
+							},
+							summary: {
+								$ifNull: [`$translations.${language}.summary`, '$summary'],
+							},
+							story: {
+								$ifNull: [`$translations.${language}.story`, '$story'],
+							},
 							externalId: 1,
 							noOfRatings: 1,
 							averageRating: 1,
 							createdAt: 1,
-							description: 1,
 							categories: 1,
+							metaInformation: 1,
 						},
 					},
 					{

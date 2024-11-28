@@ -192,12 +192,6 @@ module.exports = class LibraryCategoriesHelper {
 						message: CONSTANTS.apiResponses.PROJECT_NOT_FOUND,
 					}
 				}
-				// get translation data and modify actual data
-				if (language !== '' && projectsData[0].translations && projectsData[0].translations[language]) {
-					projectsData[0] = UTILS.getTranslatedData(projectsData[0], projectsData[0].translations[language])
-				}
-				//Once modified remove translations from response
-				projectsData[0] = _.omit(projectsData[0], 'translations')
 
 				projectsData[0].showProgramAndEntity = false
 
@@ -213,17 +207,6 @@ module.exports = class LibraryCategoriesHelper {
 						let taskData = {}
 
 						for (let taskPointer = 0; taskPointer < tasks.length; taskPointer++) {
-							if (
-								language !== '' &&
-								tasks[taskPointer].translations &&
-								tasks[taskPointer].translations[language]
-							) {
-								tasks[taskPointer] = UTILS.getTranslatedData(
-									tasks[taskPointer],
-									tasks[taskPointer].translations[language]
-								)
-							}
-							tasks[taskPointer] = _.omit(tasks[taskPointer], 'translations')
 							let currentTask = tasks[taskPointer]
 
 							if (

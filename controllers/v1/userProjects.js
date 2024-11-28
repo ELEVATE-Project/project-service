@@ -284,7 +284,8 @@ module.exports = class UserProjects extends Abstract {
 						: req.headers.appversion
 						? req.headers.appversion
 						: '',
-					req.query.templateId
+					req.query.templateId,
+					req.query.language ? req.query.language : ''
 				)
 
 				return resolve(projectDetails)

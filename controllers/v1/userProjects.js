@@ -717,114 +717,107 @@ module.exports = class UserProjects extends Abstract {
 	}
 
 	/**
-   * @api {post} /project/v1/userProjects/list?page=1&limit=3&search=&filter=createdByMe
-   * Lists of projects.
+   * @api {post} /project/v1/userProjects/list?page=1&limit=3&search=&language=ka
+   * Lists of users projects.
    * @apiVersion 0.0.1
-   * @apiName Lists of projects.
-   * @apiGroup Entity Types
-   * @apiHeader {String} X-authenticated-user-token Authenticity token
-   * @apiSampleRequest /project/v1/userProjects/list
+   * @apiName list.
+   * @apiGroup userProjects
+   * @apiHeader {String} X-auth-token Authenticity token
+   * @apiSampleRequest /project/v1/userProjects/list?page=1&limit=2&search=&language=ka
    * @apiUse successBody
    * @apiUse errorBody
-   * @apiParamExample {json} Request-Body:
-   * {
-        "query" : {
-            "code" : "HM"
-        },
-        "projection" : ["_id","code"]
-    }
     * @apiParamExample {json} Response: 
-    {
-        "message": "Successfully fetched projects",
-        "status": 200,
-        "result": [
-            {
-                "_id": "64afa1b280f9b952f4914374",
-                "userId": "64b12ef31073b0dd429e19b4",
-                "userRole": "",
-                "status": "started",
-                "isDeleted": false,
-                "categories": [
-                    {
-                        "label": "Infrastructure",
-                        "value": "5fcfa9a2457d6055e33843f1",
-                        "labelTranslations": "{\"en\":\"Infrastructure\"}",
-                        "name": "Infrastructure"
-                    },
-                    {
-                        "label": "Community",
-                        "value": "5fcfa9a2457d6055e33843f2",
-                        "labelTranslations": "{\"en\":\"Community\"}",
-                        "name": "Community"
-                    },
-                    {
-                        "label": "Education Leader",
-                        "value": "5fcfa9a2457d6055e33843f3",
-                        "labelTranslations": "{\"en\":\"Education Leader\"}",
-                        "name": "Education Leader"
-                    }
-                ],
-                "createdBy": "1349b70e-44d2-4723-9f57-caf096ec1f51",
-                "tasks": [],
-                "updatedBy": "1349b70e-44d2-4723-9f57-caf096ec1f51",
-                "learningResources": [
-                    {
-                        "name": "API_Decrication",
-                        "id": "do_113759904287850496114",
-                        "isChecked": true
-                    },
-                    {
-                        "name": "API_Decrication",
-                        "id": "do_113759897196249088113",
-                        "isChecked": true
-                    },
-                    {
-                        "name": "Content - 3",
-                        "id": "do_113762457976889344169",
-                        "isChecked": true
-                    },
-                    {
-                        "name": "Content - 4",
-                        "id": "do_113762458251059200170",
-                        "isChecked": true
-                    },
-                    {
-                        "name": "Content -1",
-                        "id": "do_113762457386450944167",
-                        "isChecked": true
-                    },
-                    {
-                        "name": "Test Content",
-                        "id": "do_11376182093890355216",
-                        "isChecked": true
-                    },
-                    {
-                        "name": "Test Content 2",
-                        "id": "do_11376182438513868818",
-                        "isChecked": true
-                    }
-                ],
-                "hasAcceptedTAndC": false,
-                "taskSequence": [],
-                "recommendedFor": [],
-                "attachments": [],
-                "deleted": false,
-                "title": "Test",
-                "description": "test",
-                "startDate": "2023-05-24T04:21:00.000Z",
-                "endDate": "2023-05-27T04:21:00.000Z",
-                "entityId": "7f6d36cf-3bd6-43fc-ab8e-f9157c9ebec1",
-                "isAPrivateProgram": true,
-                "lastDownloadedAt": "2023-07-13T07:03:14.672Z",
-                "updatedAt": "2023-07-13T07:03:14.688Z",
-                "createdAt": "2023-07-13T07:03:14.688Z",
-                "__v": 0
-            }
-        ]
-    }   
+      * {
+    "message": "Successfully fetched projects",
+    "status": 200,
+    "result": [
+        {
+            "data": [
+                {
+                    "_id": "674757fe3868783fcffabe17",
+                    "status": "started",
+                    "tasks": [
+                        {
+                            "_id": "b253f2e9-a75b-4f07-8577-cd0b75cb7d0c",
+                            "createdBy": "168",
+                            "updatedBy": "168",
+                            "isDeleted": false,
+                            "isDeletable": false,
+                            "taskSequence": [],
+                            "children": [],
+                            "visibleIf": [],
+                            "hasSubTasks": false,
+                            "learningResources": [],
+                            "deleted": false,
+                            "type": "simple",
+                            "projectTemplateId": "66399a3443d18862ed097ff1",
+                            "projectTemplateExternalId": "TSCSLHAR02-1710148664591",
+                            "name": "Address the assembly and share ideas about Smart Learn",
+                            "externalId": "Task1-1710148664591",
+                            "description": "",
+                            "sequenceNumber": "1",
+                            "solutionDetails": {
+                                "solutionId": "",
+                                "solutionSubType": "",
+                                "solutionType": ""
+                            },
+                            "updatedAt": "2024-11-27T17:33:46.744Z",
+                            "createdAt": "2024-05-13T07:20:59.437Z",
+                            "__v": 0,
+                            "status": "notStarted",
+                            "attachments": [],
+                            "referenceId": "6641bf5b7d401713c8a3f7a2",
+                            "isImportedFromLibrary": false,
+                            "syncedAt": "2024-11-27T17:33:46.744Z"
+                        },
+                        {
+                            "_id": "c671393b-c6c0-41ef-a3ec-7ca71d64b014",
+                            "createdBy": "168",
+                            "updatedBy": "168",
+                            "isDeleted": false,
+                            "isDeletable": false,
+                            "taskSequence": [],
+                            "children": [],
+                            "visibleIf": [],
+                            "hasSubTasks": false,
+                            "learningResources": [],
+                            "deleted": false,
+                            "type": "simple",
+                            "projectTemplateId": "66399a3443d18862ed097ff1",
+                            "projectTemplateExternalId": "TSCSLHAR02-1710148664591",
+                            "name": "Online Training",
+                            "externalId": "Task2-1710148664591",
+                            "description": "",
+                            "sequenceNumber": "2",
+                            "solutionDetails": {
+                                "solutionId": "",
+                                "solutionSubType": "",
+                                "solutionType": ""
+                            },
+                            "updatedAt": "2024-11-27T17:33:46.745Z",
+                            "createdAt": "2024-05-13T07:20:59.464Z",
+                            "__v": 0,
+                            "status": "notStarted",
+                            "attachments": [],
+                            "referenceId": "6641bf5b7d401713c8a3f7a5",
+                            "isImportedFromLibrary": false,
+                            "syncedAt": "2024-11-27T17:33:46.745Z"
+                        }
+                    ]
+                    "projectTemplateId": "66399a3443d18862ed097ff1",
+                    "projectTemplateExternalId": "TSCSLHAR02-1710148664591",
+                    "title": "kannda projectss",
+                    "description": "kanndaDescription"
+                }
+            ],
+            "count": 12
+        }
+    ]
+}
     */
 
 	/**
+	 *
 	 * Lists of projects.
 	 * @method
 	 * @name list
@@ -839,7 +832,7 @@ module.exports = class UserProjects extends Abstract {
 					req.pageNo,
 					req.pageSize,
 					req.searchText,
-					req.query.filter
+					req.query.language ? req.query.language : ''
 				)
 				return resolve(projects)
 			} catch (error) {

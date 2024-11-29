@@ -182,7 +182,9 @@ module.exports = class LibraryCategoriesHelper {
 					let categories = project.categories
 					if (categories.length > 0) {
 						let categoryIdArray = categories.map((category) => {
-							return category._id
+							if (category._id) {
+								return category._id
+							}
 						})
 						allCategoryId.push(...categoryIdArray)
 					}

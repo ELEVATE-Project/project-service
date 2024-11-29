@@ -3532,7 +3532,7 @@ def prepareProjectAndTasksSheetsForSpotlight(project_inputFile, projectName_for_
             elif column == "summary":
                 value = str(dictStoryDetails.get("summary", "")).strip()
             elif column == "problemStatement":
-                value = str(dictProgramDetails.get("Description of the Program", "")).strip()
+                value = str(dictProgramDetails.get("Title of the Program", "")).strip()
             else:
                 value = ""
 

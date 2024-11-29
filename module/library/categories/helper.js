@@ -12,7 +12,8 @@ const projectCategoriesQueries = require(DB_QUERY_BASE_PATH + '/projectCategorie
 const projectTemplateQueries = require(DB_QUERY_BASE_PATH + '/projectTemplates')
 const projectTemplateTaskQueries = require(DB_QUERY_BASE_PATH + '/projectTemplateTask')
 const moment = require('moment-timezone')
-
+const filesHelpers = require(MODULES_BASE_PATH + '/cloud-services/files/helper')
+const axios = require('axios')
 /**
  * LibraryCategoriesHelper
  * @class
@@ -173,6 +174,78 @@ module.exports = class LibraryCategoriesHelper {
 					})
 				}
 
+				let projectTemplates = result[0].data
+				let filePathsArray = []
+				for (let project of projectTemplates) {
+					let categories = project.categories
+
+					let categoryIdArray = categories.map((category) => {
+						return category._id
+					})
+
+					let categoryInfoArray = categories.map((category) => {
+						return category
+					})
+
+					let categoryInfo = await projectCategoriesQueries.categoryDocuments({
+						_id: { $in: categoryIdArray },
+					})
+
+					for (let individualCategory of categoryInfoArray) {
+						let id = individualCategory._id
+
+						let filterCategory = categoryInfo.filter((category) => {
+							return category._id.equals(id)
+						})
+
+						individualCategory.evidenceInfo = filterCategory[0].evidences
+					}
+
+					for (let singleCategoryInfo of categoryInfo) {
+						if (singleCategoryInfo.evidences && singleCategoryInfo.evidences.length > 0) {
+							let filePaths = singleCategoryInfo.evidences.map((evidenceInfo) => {
+								return evidenceInfo.filepath
+							})
+
+							filePathsArray.push({
+								projectId: project._id,
+								categoryId: singleCategoryInfo._id,
+								filePaths,
+							})
+						}
+					}
+				}
+
+				let allFilePaths = filePathsArray.map((project) => {
+					return project.filePaths
+				})
+
+				let finalArr = _.flatten(allFilePaths)
+
+				let downloadableUrlsCall = await filesHelpers.getDownloadableUrl(finalArr)
+
+				let downloadableUrls = downloadableUrlsCall.result
+
+				for (let project of projectTemplates) {
+					let categories = project.categories
+
+					for (let category of categories) {
+						let categoryFilePaths = filePathsArray.find(
+							(item) => item.categoryId.toString() === category._id.toString()
+						)
+
+						if (categoryFilePaths) {
+							let categoryUrls = downloadableUrls.filter((url, index) => {
+								return categoryFilePaths.filePaths.includes(finalArr[index])
+							})
+
+							category.evidenceUrls = categoryUrls
+						}
+					}
+				}
+
+				result[0].data = projectTemplates
+
 				return resolve({
 					success: true,
 					message: CONSTANTS.apiResponses.PROJECTS_FETCHED,
@@ -321,9 +394,65 @@ module.exports = class LibraryCategoriesHelper {
 	 * @returns {Object} category details
 	 */
 
-	static create(categoryData) {
+	static create(categoryData, files) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				if (files && files.cover_image) {
+					let coverImages = files.cover_image
+
+					// Generate a unique ID for the file upload
+					let uniqueId = await UTILS.generateUniqueId()
+
+					// Prepare the request data for the file upload
+					let requestData = {
+						[uniqueId]: {
+							files: [],
+						},
+					}
+
+					for (let file of coverImages) {
+						requestData[uniqueId].files.push(file.name)
+					}
+
+					let signedUrl = await filesHelpers.preSignedUrls(requestData, '', false, 'cover_image')
+
+					if (
+						signedUrl.data &&
+						Object.keys(signedUrl.data).length > 0 &&
+						signedUrl.data[uniqueId].files.length > 0 &&
+						signedUrl.data[uniqueId].files[0].url &&
+						signedUrl.data[uniqueId].files[0].url !== ''
+					) {
+						for (let fileFromRequest of coverImages) {
+							let fileUploadUrl = signedUrl.data[uniqueId].files.filter((fileData) => {
+								return fileData.file == fileFromRequest.name
+							})
+
+							const uploadData = await axios.put(fileUploadUrl[0].url, fileFromRequest.data, {
+								headers: {
+									'x-ms-blob-type':
+										process.env.CLOUD_STORAGE_PROVIDER === 'azure' ? 'BlockBlob' : null,
+									'Content-Type': 'multipart/form-data',
+								},
+							})
+
+							if (!(uploadData.status == 200 || uploadData.status == 201)) {
+								throw new Error('File upload failed.')
+							}
+						}
+					}
+
+					let i = 0
+					categoryData.evidences = signedUrl.data[uniqueId].files.map((fileInfo) => {
+						return {
+							title: fileInfo.file,
+							filepath: fileInfo.payload.sourcePath,
+							type: fileInfo.file.split('.').reverse()[0],
+							sequence: ++i,
+						}
+					})
+				}
+
 				let projectCategoriesData = await projectCategoriesQueries.create(categoryData)
 
 				if (!projectCategoriesData._id) {

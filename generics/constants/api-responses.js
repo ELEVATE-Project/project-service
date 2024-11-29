@@ -233,10 +233,10 @@ module.exports = {
 	PROJECT_ATTRIBUTES_NOT_UPDATED: 'Project Attributes Update Failed',
 	PROJECT_ATTRIBUTES_CREATION_FAILED: 'Project Attributes Creation Failed',
 	FAILED_TO_FETCH_USERROLE: 'Failed to fetch userRole information',
-	WISHLIST_ADDED: 'projecttemplates added to wishlist successfully',
-	WISHLIST_REMOVED: 'projecttemplates removed from wishlist successfully',
+	WISHLIST_ADDED: 'Project templates added to wishlist successfully',
+	WISHLIST_REMOVED: 'Project templates removed from wishlist successfully',
 	USER_EXTENSION_NOT_FOUND: 'No userExtension document found for the user',
-	WISHLIST_NOT_ADDED: 'projecttemplates not added to wishlist',
+	WISHLIST_NOT_ADDED: 'Project templates not added to wishlist',
 	WISHLIST_FETCHED: 'Wishlist fetched successfully',
 	WISHLIST_FETCH_FAILED: 'Wishlist fetch failed',
 }

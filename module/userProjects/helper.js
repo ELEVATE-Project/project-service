@@ -2651,7 +2651,9 @@ module.exports = class UserProjectsHelper {
 
 				// increment the importCount field in the projectTemplate once the project is created successfully
 				if (projectCreation.success) {
-					let updateProjectTemplateImportCount = libraryProjects.data.importCount + 1
+					let updateProjectTemplateImportCount = libraryProjects.data.importCount
+						? libraryProjects.data.importCount + 1
+						: 1
 					let updatedProjectTemplate = await projectTemplateQueries.findOneAndUpdate(
 						{
 							_id: projectTemplateId,

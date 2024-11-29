@@ -2381,7 +2381,7 @@ module.exports = class UserProjectsHelper {
 				let matchQuery = {
 					$match: {
 						userId: userId,
-						status: { $ne: CONSTANTS.common.COMPLETED_STATUS },
+						status: { $ne: CONSTANTS.common.SUBMITTED_STATUS },
 					},
 				}
 				aggregateData.push(matchQuery)

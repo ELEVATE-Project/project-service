@@ -56,7 +56,11 @@ module.exports = class Template {
 					result: libraryProjects.data,
 				})
 			} catch (error) {
-				return reject(error)
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
+				})
 			}
 		})
 	}

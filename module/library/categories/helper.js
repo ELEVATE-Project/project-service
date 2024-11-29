@@ -175,43 +175,47 @@ module.exports = class LibraryCategoriesHelper {
 				}
 
 				let projectTemplates = result[0].data
+				let allCategoryId = []
 				let filePathsArray = []
+
+				for (let project of projectTemplates) {
+					let categories = project.categories
+					if (categories.length > 0) {
+						let categoryIdArray = categories.map((category) => {
+							return category._id
+						})
+						allCategoryId.push(...categoryIdArray)
+					}
+				}
+
+				let allCategoryInfo = await projectCategoriesQueries.categoryDocuments({
+					_id: { $in: allCategoryId },
+				})
+
+				for (let singleCategoryInfo of allCategoryInfo) {
+					if (singleCategoryInfo.evidences && singleCategoryInfo.evidences.length > 0) {
+						let filePaths = singleCategoryInfo.evidences.map((evidenceInfo) => {
+							return evidenceInfo.filepath
+						})
+
+						filePathsArray.push({
+							categoryId: singleCategoryInfo._id,
+							filePaths,
+						})
+					}
+				}
+
 				for (let project of projectTemplates) {
 					let categories = project.categories
 
-					let categoryIdArray = categories.map((category) => {
-						return category._id
-					})
-
-					let categoryInfoArray = categories.map((category) => {
-						return category
-					})
-
-					let categoryInfo = await projectCategoriesQueries.categoryDocuments({
-						_id: { $in: categoryIdArray },
-					})
-
-					for (let individualCategory of categoryInfoArray) {
-						let id = individualCategory._id
-
-						let filterCategory = categoryInfo.filter((category) => {
-							return category._id.equals(id)
-						})
-
-						individualCategory.evidenceInfo = filterCategory[0].evidences
-					}
-
-					for (let singleCategoryInfo of categoryInfo) {
-						if (singleCategoryInfo.evidences && singleCategoryInfo.evidences.length > 0) {
-							let filePaths = singleCategoryInfo.evidences.map((evidenceInfo) => {
-								return evidenceInfo.filepath
+					if (categories.length > 0) {
+						for (let projectCategory of categories) {
+							let filteredCategory = allCategoryInfo.filter((category) => {
+								return category._id.toString() == projectCategory._id.toString()
 							})
 
-							filePathsArray.push({
-								projectId: project._id,
-								categoryId: singleCategoryInfo._id,
-								filePaths,
-							})
+							let singleCategoryInfo = filteredCategory[0]
+							projectCategory.evidences = singleCategoryInfo.evidences
 						}
 					}
 				}
@@ -224,22 +228,32 @@ module.exports = class LibraryCategoriesHelper {
 
 				let downloadableUrlsCall = await filesHelpers.getDownloadableUrl(finalArr)
 
+				if (downloadableUrlsCall.message !== CONSTANTS.apiResponses.CLOUD_SERVICE_SUCCESS_MESSAGE) {
+					throw new Error(CONSTANTS.apiResponses.FAILED_PRE_SIGNED_URL)
+				}
+
 				let downloadableUrls = downloadableUrlsCall.result
+
+				let urlDictionary = {}
+				for (let singleURL of downloadableUrls) {
+					let url = singleURL.url
+					let filePath = singleURL.filePath
+					urlDictionary[filePath] = url
+				}
 
 				for (let project of projectTemplates) {
 					let categories = project.categories
 
-					for (let category of categories) {
-						let categoryFilePaths = filePathsArray.find(
-							(item) => item.categoryId.toString() === category._id.toString()
-						)
-
-						if (categoryFilePaths) {
-							let categoryUrls = downloadableUrls.filter((url, index) => {
-								return categoryFilePaths.filePaths.includes(finalArr[index])
-							})
-
-							category.evidenceUrls = categoryUrls
+					if (categories.length > 0) {
+						for (let projectCategory of categories) {
+							let evidences = projectCategory.evidences
+							if (!evidences || evidences.length == 0) {
+								continue
+							}
+							for (let singleEvidence of evidences) {
+								let downloadablePath = urlDictionary[singleEvidence.filepath]
+								singleEvidence.filepath = downloadablePath
+							}
 						}
 					}
 				}
@@ -391,6 +405,7 @@ module.exports = class LibraryCategoriesHelper {
 	 * @method
 	 * @name create
 	 * @param categoryData - categoryData.
+	 * @param categoryData - files.
 	 * @returns {Object} category details
 	 */
 
@@ -437,18 +452,18 @@ module.exports = class LibraryCategoriesHelper {
 							})
 
 							if (!(uploadData.status == 200 || uploadData.status == 201)) {
-								throw new Error('File upload failed.')
+								throw new Error(CONSTANTS.apiResponses.FAILED_TO_UPLOAD)
 							}
 						}
 					}
 
-					let i = 0
+					let sequenceNumber = 0
 					categoryData.evidences = signedUrl.data[uniqueId].files.map((fileInfo) => {
 						return {
 							title: fileInfo.file,
 							filepath: fileInfo.payload.sourcePath,
 							type: fileInfo.file.split('.').reverse()[0],
-							sequence: ++i,
+							sequence: ++sequenceNumber,
 						}
 					})
 				}
@@ -468,7 +483,8 @@ module.exports = class LibraryCategoriesHelper {
 					data: projectCategoriesData._id,
 				})
 			} catch (error) {
-				return resolve({
+				return reject({
+					status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
 					success: false,
 					message: error.message,
 					data: {},

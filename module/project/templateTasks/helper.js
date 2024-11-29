@@ -446,7 +446,7 @@ module.exports = class ProjectTemplateTasksHelper {
 	 * @returns {Object} Bulk create project template tasks.
 	 */
 
-	static bulkCreate(tasks, projectTemplateId, userId, translationFiles) {
+	static bulkCreate(tasks, projectTemplateId, userId, translationFiles = {}) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				const fileName = `create-project-template-tasks`
@@ -467,7 +467,10 @@ module.exports = class ProjectTemplateTasksHelper {
 				}
 
 				// convert the translation files
-				let translationDataObject = JSON.parse(translationFiles.data.toString())
+				let translationDataObject = {}
+				if (Object.keys(translationFiles).length > 0) {
+					translationDataObject = JSON.parse(translationFiles.data.toString())
+				}
 
 				let pendingItems = []
 				let taskSequence =

@@ -304,7 +304,7 @@ module.exports = class ProjectTemplatesHelper {
 	 * @returns {Object} Bulk create project templates.
 	 */
 
-	static bulkCreate(templates, userId, translationFiles) {
+	static bulkCreate(templates, userId, translationFiles = {}) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				if (templates[0].solutionId && templates[0].solutionId !== '') {
@@ -337,14 +337,16 @@ module.exports = class ProjectTemplatesHelper {
 
 				// convert the translation files and store them in array
 				let translationDataObject = {}
-				const translationFilesCount = Array.isArray(translationFiles) ? translationFiles.length : 1
-				let translationFilesInArray = []
+				if (Object.keys(translationFiles).length > 0) {
+					const translationFilesCount = Array.isArray(translationFiles) ? translationFiles.length : 1
+					let translationFilesInArray = []
 
-				if (translationFilesCount <= 1) translationFilesInArray.push(translationFiles)
-				else translationFilesInArray = translationFiles
+					if (translationFilesCount <= 1) translationFilesInArray.push(translationFiles)
+					else translationFilesInArray = translationFiles
 
-				for (let i = 0; i < translationFilesCount; i++) {
-					translationDataObject[`${i}`] = JSON.parse(translationFilesInArray[i].data.toString())
+					for (let i = 0; i < translationFilesCount; i++) {
+						translationDataObject[`${i}`] = JSON.parse(translationFilesInArray[i].data.toString())
+					}
 				}
 
 				for (let template = 0; template < templates.length; template++) {

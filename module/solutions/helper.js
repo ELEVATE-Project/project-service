@@ -1351,7 +1351,7 @@ module.exports = class SolutionsHelper {
 					// Add one year to the current date
 					let endDate = new Date()
 					endDate.setFullYear(endDate.getFullYear() + 1)
-					let programData = await _createProgramData(
+					let programData = await this._createProgramData(
 						data.programName,
 						data.programExternalId ? data.programExternalId : data.programName + '-' + dateFormat,
 						true,

@@ -59,12 +59,12 @@ module.exports = class ProjectTemplates extends Abstract {
 						message: CONSTANTS.apiResponses.PROJECT_TEMPLATES_CSV,
 					})
 				}
-
 				const templatesData = await csv().fromString(req.files.projectTemplates.data.toString())
 
 				const projectTemplates = await projectTemplatesHelper.bulkCreate(
 					templatesData,
-					req.userDetails.userInformation.userId
+					req.userDetails.userInformation.userId,
+					req.files.translationFiles
 				)
 
 				return resolve(projectTemplates)

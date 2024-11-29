@@ -26,6 +26,7 @@ const projectCategoriesQueries = require(DB_QUERY_BASE_PATH + '/projectCategorie
 const solutionsQueries = require(DB_QUERY_BASE_PATH + '/solutions')
 const certificateTemplateQueries = require(DB_QUERY_BASE_PATH + '/certificateTemplates')
 const programQueries = require(DB_QUERY_BASE_PATH + '/programs')
+const evidencesHelper = require(MODULES_BASE_PATH + '/evidences/helper')
 
 module.exports = class ProjectTemplatesHelper {
 	/**
@@ -170,10 +171,12 @@ module.exports = class ProjectTemplatesHelper {
 	 * @name templateData
 	 * @param {Object} data  - csv data.
 	 * @param {Object} csvInformation - csv information.
+	 * @param {String} userId - user id
+	 * @param {Object} translationData - translation data object
 	 * @returns {Object} Template data.
 	 */
 
-	static templateData(data, csvInformation) {
+	static templateData(data, csvInformation, userId, translationData = {}) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let templatesDataModel = Object.keys(schemas['project-templates'].schema)
@@ -211,11 +214,15 @@ module.exports = class ProjectTemplatesHelper {
 				// }
 
 				let learningResources = await learningResourcesHelper.extractLearningResourcesFromCsv(parsedData)
+				let evidences = await evidencesHelper.extractEvidencesFromCsv(parsedData)
 				parsedData.learningResources = learningResources.data
+				parsedData.evidences = evidences.data
 
 				parsedData.metaInformation = {}
 				let booleanData = UTILS.getAllBooleanDataFromModels(schemas['project-templates'].schema)
-
+				parsedData['hasStory'] = parsedData['hasStory'] == 'YES' ? true : false
+				parsedData['hasSpotlight'] = parsedData['hasSpotlight'] == 'YES' ? true : false
+				parsedData['isPrivate'] = parsedData['isPrivate'] == 'YES' ? true : false
 				Object.keys(parsedData).forEach((eachParsedData) => {
 					if (!templatesDataModel.includes(eachParsedData)) {
 						if (!eachParsedData.startsWith('learningResources')) {
@@ -229,6 +236,55 @@ module.exports = class ProjectTemplatesHelper {
 					}
 				})
 
+				// add tranlsation data
+				let translations = {}
+
+				// iterate over each language
+				Object.keys(translationData).forEach((key) => {
+					if (!(key == 'en')) {
+						const data = translationData[key]
+
+						// iterate over the fields in each language
+						Object.keys(data).forEach((item) => {
+							const fieldSegments = item.split('.')
+							// add the translated data to translations
+							if (fieldSegments[0] == 'projectTemplate') {
+								const requiredModelField = fieldSegments[fieldSegments.length - 1]
+								if (fieldSegments.some((segment) => segment.includes('evidence'))) {
+									translations[key]['evidences'] = translations[key]['evidences'] || {}
+									translations[key]['evidences'][requiredModelField] =
+										translations[key]['evidences'][requiredModelField] || []
+									translations[key]['evidences'][requiredModelField].push(data[item])
+								} else if (fieldSegments.some((segment) => segment.includes('learningResources'))) {
+									translations[key]['learningResources'] =
+										translations[key]['learningResources'] || {}
+									translations[key]['learningResources'][requiredModelField] =
+										translations[key]['learningResources'][requiredModelField] || []
+									translations[key]['learningResources'][requiredModelField].push(data[item])
+								} else {
+									translations[key] = translations[key] || {}
+									if (['text', 'recommendedFor', 'categories'].includes(requiredModelField)) {
+										// initialize the field if not already present
+										translations[key][requiredModelField] =
+											translations[key][requiredModelField] ||
+											(requiredModelField === 'categories' ? {} : [])
+
+										if (requiredModelField == 'recommendedFor') {
+											translations[key][requiredModelField] = data[item].split(',')
+										} else if (requiredModelField == 'categories') {
+											translations[key][requiredModelField]['name'] = data[item].split(',')
+										} else {
+											translations[key][requiredModelField].push(data[item])
+										}
+									} else {
+										translations[key][requiredModelField] = data[item]
+									}
+								}
+							}
+						})
+					}
+				})
+				parsedData['translations'] = translations
 				parsedData.isReusable = true
 
 				return resolve(parsedData)
@@ -244,10 +300,11 @@ module.exports = class ProjectTemplatesHelper {
 	 * @name bulkCreate - bulk create project templates.
 	 * @param {Array} templates - csv templates data.
 	 * @param {String} userId - logged in user id.
+	 * @param {Array} translationFiles - translation files
 	 * @returns {Object} Bulk create project templates.
 	 */
 
-	static bulkCreate(templates, userId) {
+	static bulkCreate(templates, userId, translationFiles) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				if (templates[0].solutionId && templates[0].solutionId !== '') {
@@ -278,9 +335,20 @@ module.exports = class ProjectTemplatesHelper {
 					return resolve(csvInformation)
 				}
 
+				// convert the translation files and store them in array
+				let translationDataObject = {}
+				const translationFilesCount = Array.isArray(translationFiles) ? translationFiles.length : 1
+				let translationFilesInArray = []
+
+				if (translationFilesCount <= 1) translationFilesInArray.push(translationFiles)
+				else translationFilesInArray = translationFiles
+
+				for (let i = 0; i < translationFilesCount; i++) {
+					translationDataObject[`${i}`] = JSON.parse(translationFilesInArray[i].data.toString())
+				}
+
 				for (let template = 0; template < templates.length; template++) {
 					let currentData = templates[template]
-
 					let templateData = await projectTemplateQueries.templateDocument(
 						{
 							status: CONSTANTS.common.PUBLISHED,
@@ -293,7 +361,13 @@ module.exports = class ProjectTemplatesHelper {
 					if (templateData.length > 0 && templateData[0]._id) {
 						currentData['_SYSTEM_ID'] = CONSTANTS.apiResponses.PROJECT_TEMPLATE_EXISTS
 					} else {
-						let templateData = await this.templateData(currentData, csvInformation.data, userId)
+						let translationData = translationDataObject[`${template.toString()}`]
+						let templateData = await this.templateData(
+							currentData,
+							csvInformation.data,
+							userId,
+							translationData
+						)
 
 						templateData.status = CONSTANTS.common.PUBLISHED_STATUS
 						templateData.createdBy = templateData.updatedBy = templateData.userId = userId

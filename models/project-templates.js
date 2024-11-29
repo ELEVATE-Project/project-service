@@ -116,22 +116,29 @@ module.exports = {
 			},
 		},
 		certificateTemplateId: 'ObjectId',
-		importCount: Number,
+		importCount: {
+			type: Number,
+			default: 0,
+		},
 		translations: Object,
 		evidences: Array,
 		isPrivate: {
 			type: Boolean,
-			default: true,
+			default: false,
 		},
 		hasSpotlight: {
 			type: Boolean,
-			default: false,
 			index: true,
+			default: false,
 		},
-		hasStory: Boolean,
+		hasStory: {
+			type: Boolean,
+			default: false,
+		},
 		text: Array,
 		impact: String,
 		summary: String,
 		author: String,
+		problemStatement: String,
 	},
 }

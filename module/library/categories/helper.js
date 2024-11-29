@@ -420,6 +420,9 @@ module.exports = class LibraryCategoriesHelper {
 				if (files && files.cover_image) {
 					let coverImages = files.cover_image
 
+					if (!Array.isArray(coverImages)) {
+						coverImages = [coverImages]
+					}
 					// Generate a unique ID for the file upload
 					let uniqueId = await UTILS.generateUniqueId()
 

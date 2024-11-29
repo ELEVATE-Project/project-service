@@ -38,6 +38,7 @@ from openpyxl.styles import Color, PatternFill, Font, Border
 from openpyxl.styles import colors
 from openpyxl.cell import Cell
 import gdown
+from mimetypes import guess_extension
 
 # get current working directory
 currentDirectory = os.getcwd()
@@ -912,7 +913,7 @@ def validateSheets(filePathAddObs, accessToken, parentFolder):
     rubrics_sheet_IMP_names = ['Instructions', 'details', 'framework', 'ECMs or Domains', 'questions','Criteria_Rubric-Scoring', 'Domain(theme)_rubric_scoring', 'Imp mapping']
     observation_sheet_names = ['Instructions', 'details', 'criteria', 'questions']
     survey_sheet_names = ['Instructions', 'details', 'questions']
-    project_sheet_names = [ 'Instructions','Project upload', 'Tasks upload','Certificate details']
+    project_sheet_names = [ 'Instructions','Project upload', 'Tasks upload','Certificate details','Program details','Story details','Language codes','Translation']
 
     # 1-with rubrics , 2 - with out rubrics , 3 - survey , 4 - Project 5 - With rubric and IMP
     typeofSolutin = 0
@@ -1333,7 +1334,7 @@ def validateSheets(filePathAddObs, accessToken, parentFolder):
     elif typeofSolutin == 4:
         criteria_id_arr = list()
         projectDetailsCols = ["title", "projectId", "is a SSO user?", "projectService_loginId", "categories",
-                              "objective","duration","recommendedFor","keywords"]
+                              "objective","duration","recommendedFor","keywords","is_private"]
         detailsColCheck = wbObservation1.sheet_by_name('Project upload')
         keysColCheckDetai = [detailsColCheck.cell(0, col_index_check).value for col_index_check in
                                      range(detailsColCheck.ncols)]
@@ -1347,7 +1348,7 @@ def validateSheets(filePathAddObs, accessToken, parentFolder):
         # sys.exit()
         
         taskUploadCols = ["TaskId", "TaskTitle", "parentTaskId",
-                          "Mandatory task(Yes or No)","observation Name","Number of submissions for observation"]
+                          "Mandatory task(Yes or No)","observation Name","Number of submissions for observation","description"]
         detailsColCheck = wbObservation1.sheet_by_name('Tasks upload')
         keysColCheckDetai = [detailsColCheck.cell(0, col_index_check).value for col_index_check in
                                      range(detailsColCheck.ncols)]
@@ -3304,7 +3305,6 @@ def prepareProjectAndTasksSheets(project_inputFile, projectName_for_folder_path,
                         "categories,primaryAudience,successIndicators,risks,approaches,recommendedFor")
                 else:
                     project_values.append("")
-                
         with open(projectFilePath + 'projectUpload.csv','a',encoding='utf-8') as file:
             writer = csv.writer(file, quoting=csv.QUOTE_NONNUMERIC, delimiter=',',lineterminator='\n')
             writer.writerows([project_values])
@@ -3430,9 +3430,234 @@ def prepareProjectAndTasksSheets(project_inputFile, projectName_for_folder_path,
         with open(taskFilePath + 'taskUpload.csv','a',encoding='utf-8') as file:
             writer = csv.writer(file, quoting=csv.QUOTE_NONNUMERIC, delimiter=',',lineterminator='\n')
             writer.writerows([task_values])
-        #   subtaskname2 = str(dictTasksDetails["Subtask"]).encode('utf-8').decode('utf-8').strip()
 
+# Function to prepare project sheet with spotlight data
+def prepareProjectAndTasksSheetsForSpotlight(project_inputFile, projectName_for_folder_path, accessToken, signedUrl):
+    projectFilePath = projectName_for_folder_path + '/projectUpload/'
+    csv_file_path = projectFilePath + 'projectUpload.csv'
+
+    # Define new columns
+    new_columns = ["hasStory", "hasSpotlight", "isPrivate" ,"author", "impact", "text", "summary", "problemStatement"]
+
+    # Read existing CSV if it exists
+    existing_header = []
+    existing_rows = []
+    if os.path.exists(csv_file_path):
+            with open(csv_file_path, 'r', encoding='utf-8') as file:
+                reader = csv.reader(file, delimiter=',')
+                existing_data = list(reader)
+
+            # Extract header and rows
+            if existing_data:
+                existing_header = existing_data[0]
+                existing_rows = existing_data[1:]
+    # Open the workbook and process "Project upload" sheet
+    wbproject = xlrd.open_workbook(project_inputFile, on_demand=True)
+    projectDetailsSheet = wbproject.sheet_by_name('Project upload')
+    keysProject = [projectDetailsSheet.cell(1, col_index_env).value for col_index_env in range(projectDetailsSheet.ncols)]
+
+    # Identify dynamic columns
+    dynamic_columns = []
+    for key in keysProject:
+        if key.lower().startswith('evidence'):
+            dynamic_columns.append(key.strip())
+
+    # Combine base columns and dynamic columns
+    all_columns = new_columns + dynamic_columns
+
+    # Add new columns to header if they don't exist
+    for column in all_columns:
+        if column not in existing_header:
+            existing_header.append(column)
+            for row in existing_rows:
+                row.append("")
+
+    # Ensure there are enough rows in existing_rows to match the projectDetailsSheet
+    for _ in range(projectDetailsSheet.nrows - 2 - len(existing_rows)):
+        existing_rows.append([""] * len(existing_header))
+
+    # Process each row in the projectDetailsSheet
+    for row_index in range(2, projectDetailsSheet.nrows):
+        dictProjectDetails = {
+            keysProject[col_index_env]: projectDetailsSheet.cell(row_index, col_index_env).value
+            for col_index_env in range(projectDetailsSheet.ncols)
+        }
+
+        hasStory = str(dictProjectDetails.get("has_story", "")).encode('utf-8').decode('utf-8').strip()
+        hasSpotlight = str(dictProjectDetails.get("has_spotlight", "")).encode('utf-8').decode('utf-8').strip()
+
+        # Gather other details from different sheets
+        storyDetailsSheet = wbproject.sheet_by_name('Story details')
+        keysStory = [storyDetailsSheet.cell(1, col_index_env).value for col_index_env in range(storyDetailsSheet.ncols)]
+        dictStoryDetails = {}
+        for row_index_env in range(2, storyDetailsSheet.nrows):
+            dictStoryDetails = {keysStory[col_index_env]: storyDetailsSheet.cell(row_index_env, col_index_env).value
+                                for col_index_env in range(storyDetailsSheet.ncols)}
+
+        programDetailsSheet = wbproject.sheet_by_name('Program details')
+        keysProgram = [programDetailsSheet.cell(1, col_index_env).value for col_index_env in range(programDetailsSheet.ncols)]
+        dictProgramDetails = {}
+        for row_index_env in range(2, programDetailsSheet.nrows):
+            dictProgramDetails = {keysProgram[col_index_env]: programDetailsSheet.cell(row_index_env, col_index_env).value
+                                  for col_index_env in range(programDetailsSheet.ncols)}
+
+        # Create a new row or update an existing row in existing_rows
+        if row_index - 2 < len(existing_rows):
+            row = existing_rows[row_index - 2]
+        else:
+            row = [""] * len(existing_header)
+            existing_rows.append(row)
+
+        # Add new data for each column to the corresponding row
+        for column in new_columns:
+            if column == "hasStory":
+                value = str(dictProjectDetails.get("has_story", "")).strip()
+            elif column == "hasSpotlight":
+                value = str(dictProjectDetails.get("has_spotlight", "")).strip()
+            elif column == "isPrivate":
+                value = str(dictProjectDetails.get("is_private", "")).strip()
+            elif column == "author":
+                value = str(dictStoryDetails.get("author", "")).strip()
+            elif column == "impact":
+                value = str(dictStoryDetails.get("impact", "")).strip()
+            elif column == "text":
+                value = str(dictStoryDetails.get("text", "")).strip()
+            elif column == "summary":
+                value = str(dictStoryDetails.get("summary", "")).strip()
+            elif column == "problemStatement":
+                value = str(dictProgramDetails.get("Title of the Program", "")).strip()
+            else:
+                value = ""
+
+            column_index = existing_header.index(column)
+            row[column_index] = value
+        signedUrl = signedUrl[0]
+        for dynamic_column in dynamic_columns:
+            value = ""
+
+            # Check if the column is for "evidence title"
+            if dynamic_column.lower().startswith("evidence") and dynamic_column.lower().endswith("title"):
+                column_suffix = dynamic_column.split("-")[0].replace("evidence", "").strip()
+                try:
+                    evidence_title = dictProjectDetails.get(f"evidence{column_suffix}-title", "")
+                    value = str(evidence_title).strip()
+                except (IndexError, ValueError):
+                    value = ""
+
+            # Check if the column is for "evidence sequence"
+            elif dynamic_column.lower().startswith("evidence") and dynamic_column.lower().endswith("sequence"):
+                column_suffix = dynamic_column.split("-")[0].replace("evidence", "").strip()
+                try:
+                    evidence_sequence = dictProjectDetails.get(f"evidence{column_suffix}-sequence", "")
+                    value = str(evidence_sequence).strip()
+                except (IndexError, ValueError):
+                    value = ""
+
+            # Check if the column is for "evidence type"
+            elif dynamic_column.lower().startswith("evidence") and dynamic_column.lower().endswith("type"):
+                column_suffix = dynamic_column.split("-")[0].replace("evidence", "").strip()
+                try:
+                    evidence_sequence = dictProjectDetails.get(f"evidence{column_suffix}-type", "")
+                    value = str(evidence_sequence).strip()
+                except (IndexError, ValueError):
+                    value = ""
+
+            
+            # Check if the column is for "evidence link"
+            elif dynamic_column.lower().startswith("evidence") and dynamic_column.lower().endswith("link"):
+                column_suffix = dynamic_column.split("-")[0].replace("evidence", "").strip()
+                try:
+                    index = int(column_suffix) - 1  # Get the index from the column suffix (e.g., '1' from 'evidence link-1')
+                    if index < len(signedUrl):
+                        url = signedUrl[index]
+                        if isinstance(url, list):
+                            url = url[0]
+                        value = url
+                    else:
+                        value = ""
+                except (IndexError, ValueError):
+                    value = ""
+
+            # Update the corresponding cell in the existing row
+            column_index = existing_header.index(dynamic_column)
+            row[column_index] = value
+
+    # Write the updated header and rows back to the CSV file
+    with open(csv_file_path, 'w', encoding='utf-8') as file:
+        writer = csv.writer(file, quoting=csv.QUOTE_NONNUMERIC, delimiter=',', lineterminator='\n')
+        writer.writerow(existing_header)
+        writer.writerows(existing_rows)
+
+# Function to translate project and task data.
+def prepareLanguageSheet(project_inputFile, projectName_for_folder_path, accessToken):
+    # Open the Excel workbook
+    wbproject = xlrd.open_workbook(project_inputFile, on_demand=True)
     
+    # Open the sheet named 'Translation'
+    projectDetailsSheet = wbproject.sheet_by_name('Translation')
+
+    # Extract the column headers (1st row, starting from column A)
+    keysProject = [projectDetailsSheet.cell(0, col_index_env).value for col_index_env in range(projectDetailsSheet.ncols)]
+
+    # Create a dictionary to map the column names to their respective indices
+    column_map = {keysProject[col_index]: col_index for col_index in range(len(keysProject))}
+
+    # Ensure that 'location' exists in the column map
+    if "location" not in column_map:
+        raise ValueError("'location' column not found in the sheet headers.")
+
+    # Get the index of the 'location' column
+    col_index_location = column_map["location"]
+
+    # Create a list to store data where 'location' will be used as a key
+    columns_data = []
+
+    # Loop through all rows (starting from row 1 to skip the header row)
+    for row_index in range(1, projectDetailsSheet.nrows):  # Start from 1 to skip the header row
+        # Get the value from the 'location' column
+        location_value = str(projectDetailsSheet.cell(row_index, col_index_location).value).encode('utf-8').decode('utf-8').strip()
+
+        # Initialize dictionaries for each language
+        row_data = {"location": location_value}
+
+        # Loop through all columns starting from the second column (index 1) onward (i.e., columns after 'location')
+        for col_index in range(col_index_location + 1, projectDetailsSheet.ncols):
+            column_name = keysProject[col_index]  # Get the column name (header)
+            value = projectDetailsSheet.cell(row_index, col_index).value
+            
+            # Assign data for different language columns (text, hi, kn, etc.)
+            if column_name.lower() != "location":
+                row_data[column_name] = value.strip()  # Add column value to row_data
+
+        # Append the row data to the final list
+        columns_data.append(row_data)
+
+    # The final output would be a list of dictionaries, with each entry being a row's data
+    formatted_data = {}
+
+    # For each row in columns_data, map the language columns to the formatted dictionary
+    for row in columns_data:
+        location_key = row["location"]
+        
+        for lang, lang_value in row.items():
+            if lang != "location":
+                if lang not in formatted_data:
+                    formatted_data[lang] = {}
+
+                formatted_data[lang][location_key] = lang_value
+    json_data = json.dumps(formatted_data, indent=4)
+    projectFilePath = projectName_for_folder_path + '/projectUpload/'
+    json_file_path = projectFilePath + f'projectTranslationUpload.json'
+
+    # Create directory if it doesn't exist
+    if not os.path.exists(projectFilePath):
+        os.makedirs(projectFilePath)
+
+    # Write the JSON data to a file
+    with open(json_file_path, 'w', encoding='utf-8') as jsonfile:
+        jsonfile.write(json_data)
+    return formatted_data
+
 # Function to upload sheet
 def projectUpload(projectFile, projectName_for_folder_path, accessToken):
     urlProjectUploadApi = config.get(environment, 'elevateprojecthost') + config.get(environment, 'projectUploadApi')
@@ -3444,7 +3669,8 @@ def projectUpload(projectFile, projectName_for_folder_path, accessToken):
     }
     project_payload = {}
     filesProject = {
-        'projectTemplates': open(projectName_for_folder_path + '/projectUpload/projectUpload.csv', 'rb')
+        'projectTemplates': open(projectName_for_folder_path + '/projectUpload/projectUpload.csv', 'rb'),
+        'translationFiles': open(projectName_for_folder_path + '/projectUpload/projectTranslationUpload.json', 'rb')
     }
     responseProjectUploadApi = requests.post(url=urlProjectUploadApi, headers=headerProjectUploadApi,data=project_payload,files=filesProject)
     messageArr = ["program mapping is success.","File path : " + projectName_for_folder_path + '/projectUpload/projectUpload.csv']
@@ -3510,9 +3736,10 @@ def taskUpload(projectFile, projectName_for_folder_path, accessToken):
         task_payload = {}
         filesTasks = {
             'projectTemplateTasks': open(projectName_for_folder_path + '/taskUpload/taskUpload.csv',
-                                         'rb')
-        }
+                                         'rb'),
+            'translationFiles': open(projectName_for_folder_path + '/projectUpload/projectTranslationUpload.json', 'rb')
 
+        }
         responseTasksUploadApi = requests.post(url=urlTasksUploadApi, headers=headerTasksUploadApi,
                                                data=task_payload,
                                                files=filesTasks)
@@ -4196,6 +4423,153 @@ def solutionCreationAndMapping(projectName_for_folder_path, entityToUpload, list
             print("Project solution creation api failed.")
             sys.exit()
 
+# Function to donwload evidences
+def downloadEvidences(filePathAddProject, projectName_for_folder_path):
+    # Open the workbook and find the sheet
+    wbproject = xlrd.open_workbook(filePathAddProject, on_demand=True)
+    projectSheet = wbproject.sheet_names()
+    
+    for prosheet in projectSheet:
+        if prosheet.strip().lower() == 'Project upload'.lower():
+            print("--->Checking Project details sheet...")
+            detailsEnvSheet = wbproject.sheet_by_name(prosheet)
+            
+            # Read the header row to identify evidence columns
+            keysEnv = [
+                detailsEnvSheet.cell(1, col_index_env).value
+                for col_index_env in range(detailsEnvSheet.ncols)
+            ]
+            
+            # Create a folder to store evidence files
+            evidenceFilepath = os.path.join(projectName_for_folder_path, 'evidenceFile')
+            os.makedirs(evidenceFilepath, exist_ok=True)
+            
+            # Loop through rows starting from the 2nd data row (row index 2)
+            for row_index_env in range(2, detailsEnvSheet.nrows):
+                dictDetailsEnv = {
+                    keysEnv[col_index_env]: detailsEnvSheet.cell(row_index_env, col_index_env).value
+                    for col_index_env in range(detailsEnvSheet.ncols)
+                }
+                
+                # Process only columns that match 'evidenceX-link'
+                for key, value in dictDetailsEnv.items():
+                    if "evidence" in key.lower() and "-link" in key.lower() and value:  # Filter for evidence links
+                        # Find corresponding type key dynamically
+                        link_type_key = key.replace("-link", "-type")
+                        link = value.strip()  # Clean the link value
+                        file_type = dictDetailsEnv.get(link_type_key, "").strip().lower()  # Get the type dynamically
+
+                        try:
+                            # Handle file extension dynamically
+                            file_extension = f".{file_type}" if file_type else os.path.splitext(link.split("?")[0])[1]
+
+                            # If extension is still unknown, try guessing based on the content type
+                            if not file_extension or file_extension == ".":
+                                response = requests.head(link, allow_redirects=True)
+                                content_type = response.headers.get("Content-Type", "")
+                                file_extension = guess_extension(content_type) or ".unknown"
+
+                            # Handle Google Drive links
+                            if "drive.google.com" in link:
+                                try:
+                                    file_id = link.split("/")[5]  # Extract file ID
+                                    link = f"https://drive.google.com/uc?export=download&id={file_id}"
+                                except IndexError:
+                                    print(f"Invalid Google Drive link format for {key}: {link}")
+                                    continue
+
+                            # Prepare the destination file path
+                            dest_file = os.path.join(evidenceFilepath, f'{key.replace(" ", "_")}{file_extension}')
+
+                            print(f"Downloading {key}: {link}")
+
+                            # Download the file
+                            response = requests.get(link, stream=True)
+                            if response.status_code == 200:
+                                with open(dest_file, "wb") as file:
+                                    for chunk in response.iter_content(chunk_size=1024):
+                                        file.write(chunk)
+                                print(f"File saved as {dest_file}")
+                            else:
+                                print(f"Failed to download {key}. HTTP status code: {response.status_code}")
+                                print("Terminating due to download failure.")
+                                exit(1)
+                        except Exception as e:
+                            print(f"Error processing {key}: {link}. Error: {str(e)}")
+                            print("Terminating due to error.")
+                            exit(1)
+
+
+# Function to upload evidence to cloud
+def getPreSignedUrl(projectFile, projectName_for_folder_path, accessToken):
+    preSignedUrlApi = config.get(environment, 'elevateprojecthost') + config.get(environment, 'fetchPreSignedUrl')
+    headerPreSignedUrlApi = {
+        'Authorization': config.get(environment, 'Authorization'),
+        'Content-Type': config.get(environment, 'Content-Type'),
+        'X-auth-token': accessToken,
+        'X-Channel-id': config.get(environment, 'X-Channel-id'),
+        'internal-access-token': config.get(environment, 'internal-access-token')
+    }
+    preSignedUrl_payload = {
+        "request": {
+            "evidenceUpload": {
+                "files": []
+            }
+        }
+    }
+
+    evidence_folder_path = os.path.join(projectName_for_folder_path, 'evidenceFile')
+    if os.path.exists(evidence_folder_path):
+
+        for filename in os.listdir(evidence_folder_path):
+            if os.path.isfile(os.path.join(evidence_folder_path, filename)):
+                preSignedUrl_payload["request"]["fileupload"]["files"].append(filename)
+
+    responsegetPreSignedUrlApi = requests.post(url=preSignedUrlApi, headers=headerPreSignedUrlApi,data=json.dumps(preSignedUrl_payload))
+    if responsegetPreSignedUrlApi.status_code == 200:
+                responsegetPreSignedUrlApi = responsegetPreSignedUrlApi.json()
+    files = responsegetPreSignedUrlApi["result"]["fileupload"]["files"]
+
+    evidence_folder_path = os.path.join(projectName_for_folder_path, 'evidenceFile')
+
+    # Check if the evidence folder exists
+    if os.path.exists(evidence_folder_path):
+            # Map filenames (without extensions) to their file paths
+            filesProject = {}
+            for filename in os.listdir(evidence_folder_path):
+                evidence_key = os.path.splitext(filename)[0]
+                filesProject[evidence_key] = os.path.join(evidence_folder_path, filename)
+    for file_entry in files:
+        url = file_entry["url"]  # Get the dynamic URL from the JSON response
+        file_name = file_entry["file"]  # Optional: file name for logging/debugging
+        local_file_path = filesProject.get(os.path.splitext(file_name)[0])
+        if local_file_path and os.path.exists(local_file_path):
+            with open(local_file_path, 'rb') as binary_file:
+                file_data = binary_file.read()
+        # Define headers and data (if needed)
+        headers = {
+            'Content-Type': 'multipart/form-data',
+            'x-ms-blob-type' : 'BlockBlob'
+        }
+        try:
+            # Send PUT request
+            response = requests.put(url, headers=headers, data=file_data)
+            # Check the response
+            if response.status_code in [200, 201]:
+                print(f"Successfully uploaded: {file_name}")
+            else:
+                print(f"Failed to upload {file_name}. Status code: {response.status_code}, Response: {response.text}")
+        except Exception as e:
+            print(f"Error uploading {file_name}: {e}")
+
+    fetchDownloadableUrl_path = []   
+    filesPath = responsegetPreSignedUrlApi["result"]["fileupload"]["files"]
+    for file_path in filesPath:
+        source_path = file_path["payload"]["sourcePath"]
+        fetchDownloadableUrl_path.append(source_path)
+    fetchDownloadableUrl_path.reverse() 
+    return fetchDownloadableUrl_path,
+
 # This function is used to download the logo's anf sign from project template
 def downloadlogosign(filePathAddProject,projectName_for_folder_path):
 
@@ -4616,6 +4990,12 @@ def mainFunc(MainFilePath, programFile, addObservationSolution, millisecond, isP
                                 if str(dictDetailsEnv['has certificate']).lower() == 'No'.lower():
                                     prepareProjectAndTasksSheets(addObservationSolution, projectName_for_folder_path,
                                                                  accessToken)
+                                    downloadEvidences(filePathAddProject,projectName_for_folder_path)
+                                    signedUrl = getPreSignedUrl(addObservationSolution, projectName_for_folder_path, accessToken)
+                                    prepareProjectAndTasksSheetsForSpotlight(addObservationSolution, projectName_for_folder_path,
+                                                                 accessToken,signedUrl)
+                                    prepareLanguageSheet(addObservationSolution, projectName_for_folder_path, accessToken)
+                                    
                                 #     # sys.exit()
                                     projectUpload(addObservationSolution, projectName_for_folder_path, accessToken)
                                     taskUpload(addObservationSolution, projectName_for_folder_path, accessToken)
@@ -4634,6 +5014,11 @@ def mainFunc(MainFilePath, programFile, addObservationSolution, millisecond, isP
                                     downloadlogosign(filePathAddProject,projectName_for_folder_path)
                                     editsvg(accessToken,filePathAddProject,projectName_for_folder_path,baseTemplate_id)
                                     prepareProjectAndTasksSheets(addObservationSolution, projectName_for_folder_path,accessToken)
+                                    downloadEvidences(filePathAddProject,projectName_for_folder_path)
+                                    signedUrl = getPreSignedUrl(addObservationSolution, projectName_for_folder_path, accessToken)
+                                    prepareProjectAndTasksSheetsForSpotlight(addObservationSolution, projectName_for_folder_path,
+                                                                 accessToken,signedUrl)
+                                    prepareLanguageSheet(addObservationSolution, projectName_for_folder_path, accessToken)
                                     projectUpload(addObservationSolution, projectName_for_folder_path, accessToken)
                                     taskUpload(addObservationSolution, projectName_for_folder_path, accessToken)
                                     ProjectSolutionResp = solutionCreationAndMapping(projectName_for_folder_path,entityToUpload,listOfFoundRoles, accessToken)
@@ -4668,6 +5053,11 @@ def mainFunc(MainFilePath, programFile, addObservationSolution, millisecond, isP
                     dictDetailsEnv = { keysEnv[col_index_env]: detailsEnvSheet.cell(row_index_env, col_index_env).value for col_index_env in range(detailsEnvSheet.ncols)}
                     if str(dictDetailsEnv['has certificate']).lower() == 'No'.lower():
                         prepareProjectAndTasksSheets(addObservationSolution, parentFolder,  accessToken)
+                        downloadEvidences(filePathAddProject,projectName_for_folder_path)
+                        signedUrl = getPreSignedUrl(addObservationSolution, projectName_for_folder_path, accessToken)
+                        prepareProjectAndTasksSheetsForSpotlight(addObservationSolution, projectName_for_folder_path,
+                                                                 accessToken,signedUrl)
+                        prepareLanguageSheet(addObservationSolution, projectName_for_folder_path, accessToken)
                         projectUpload(addObservationSolution, parentFolder, accessToken)
                         taskUpload(addObservationSolution, parentFolder, accessToken)
                     elif str(dictDetailsEnv['has certificate']).lower()== 'Yes'.lower():
@@ -4676,6 +5066,11 @@ def mainFunc(MainFilePath, programFile, addObservationSolution, millisecond, isP
                         downloadlogosign(addObservationSolution,parentFolder)
                         editsvg(accessToken,addObservationSolution,parentFolder,baseTemplate_id)
                         prepareProjectAndTasksSheets(addObservationSolution, parentFolder,accessToken)
+                        downloadEvidences(filePathAddProject,projectName_for_folder_path)
+                        signedUrl = getPreSignedUrl(addObservationSolution, projectName_for_folder_path, accessToken)
+                        prepareProjectAndTasksSheetsForSpotlight(addObservationSolution, projectName_for_folder_path,
+                                                                 accessToken,signedUrl)
+                        prepareLanguageSheet(addObservationSolution, projectName_for_folder_path, accessToken)
                         projectUpload(addObservationSolution, parentFolder, accessToken)
                         taskUpload(addObservationSolution, parentFolder, accessToken)                                                                     
                                                                                            

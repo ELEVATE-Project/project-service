@@ -506,7 +506,7 @@ module.exports = class UserProjectsHelper {
 					}
 				}
 
-				result.solutionInformation = _.pick(solutionAndProgramCreation.data.solution, [
+				result.solutionInformation = _.pick(solutionAndProgramCreation.result.solution, [
 					'name',
 					'externalId',
 					'description',
@@ -520,7 +520,7 @@ module.exports = class UserProjectsHelper {
 				result['solutionId'] = ObjectId(result.solutionInformation._id)
 				result['solutionExternalId'] = result.solutionInformation.externalId
 
-				result.programInformation = _.pick(solutionAndProgramCreation.data.program, [
+				result.programInformation = _.pick(solutionAndProgramCreation.result.program, [
 					'_id',
 					'name',
 					'externalId',
@@ -534,9 +534,9 @@ module.exports = class UserProjectsHelper {
 
 				result.programInformation._id = ObjectId(result.programInformation._id)
 
-				if (solutionAndProgramCreation.data.parentSolutionInformation) {
-					result['link'] = solutionAndProgramCreation.data.parentSolutionInformation.link
-						? solutionAndProgramCreation.data.parentSolutionInformation.link
+				if (solutionAndProgramCreation.result.parentSolutionInformation) {
+					result['link'] = solutionAndProgramCreation.result.parentSolutionInformation.link
+						? solutionAndProgramCreation.result.parentSolutionInformation.link
 						: ''
 				}
 
@@ -2598,6 +2598,19 @@ module.exports = class UserProjectsHelper {
 				//Once modified remove translations from response
 				projectCreation._doc = _.omit(projectCreation._doc, 'translations')
 				projectCreation = await _projectInformation(_.omit(projectCreation._doc, ['certificate']), language)
+
+				// increment the importCount field in the projectTemplate once the project is created successfully
+				if (projectCreation.success) {
+					let updateProjectTemplateImportCount = libraryProjects.data.importCount + 1
+					let updatedProjectTemplate = await projectTemplateQueries.findOneAndUpdate(
+						{
+							_id: projectTemplateId,
+						},
+						{
+							$set: { importCount: updateProjectTemplateImportCount },
+						}
+					)
+				}
 
 				return resolve({
 					success: true,

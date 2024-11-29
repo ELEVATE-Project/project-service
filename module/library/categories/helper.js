@@ -226,9 +226,12 @@ module.exports = class LibraryCategoriesHelper {
 					return project.filePaths
 				})
 
-				let finalArr = _.flatten(allFilePaths)
+				// `allFilePaths` is an array of arrays containing file paths.
+				// Use Lodash's `_.flatten` to convert this into a single, flat array of file paths.
+				// Example: [[path1, path2], [path3]] => [path1, path2, path3]
+				let flattenedFilePathArr = _.flatten(allFilePaths)
 
-				let downloadableUrlsCall = await filesHelpers.getDownloadableUrl(finalArr)
+				let downloadableUrlsCall = await filesHelpers.getDownloadableUrl(flattenedFilePathArr)
 
 				if (downloadableUrlsCall.message !== CONSTANTS.apiResponses.CLOUD_SERVICE_SUCCESS_MESSAGE) {
 					throw new Error(CONSTANTS.apiResponses.FAILED_PRE_SIGNED_URL)

@@ -220,6 +220,9 @@ module.exports = class ProjectTemplatesHelper {
 
 				parsedData.metaInformation = {}
 				let booleanData = UTILS.getAllBooleanDataFromModels(schemas['project-templates'].schema)
+				parsedData['hasStory'] = parsedData['hasStory'] == 'YES' ? true : false
+				parsedData['hasSpotlight'] = parsedData['hasSpotlight'] == 'YES' ? true : false
+				parsedData['isPrivate'] = parsedData['isPrivate'] == 'YES' ? true : false
 				Object.keys(parsedData).forEach((eachParsedData) => {
 					if (!templatesDataModel.includes(eachParsedData)) {
 						if (!eachParsedData.startsWith('learningResources')) {
@@ -281,10 +284,7 @@ module.exports = class ProjectTemplatesHelper {
 						})
 					}
 				})
-
 				parsedData['translations'] = translations
-				parsedData['hasStory'] = parsedData['hasStory'] === 'YES' ? true : false
-				parsedData['hasSpotlight'] = parsedData['hasSpotlight'] === 'YES' ? true : false
 				parsedData.isReusable = true
 
 				return resolve(parsedData)

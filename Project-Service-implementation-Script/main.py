@@ -912,7 +912,7 @@ def validateSheets(filePathAddObs, accessToken, parentFolder):
     rubrics_sheet_IMP_names = ['Instructions', 'details', 'framework', 'ECMs or Domains', 'questions','Criteria_Rubric-Scoring', 'Domain(theme)_rubric_scoring', 'Imp mapping']
     observation_sheet_names = ['Instructions', 'details', 'criteria', 'questions']
     survey_sheet_names = ['Instructions', 'details', 'questions']
-    project_sheet_names = [ 'Instructions','Project upload', 'Tasks upload','Certificate details']
+    project_sheet_names = [ 'Instructions','Project upload', 'Tasks upload','Certificate details','Program details','Story details','Language codes','Translation']
 
     # 1-with rubrics , 2 - with out rubrics , 3 - survey , 4 - Project 5 - With rubric and IMP
     typeofSolutin = 0
@@ -3446,6 +3446,12 @@ def projectUpload(projectFile, projectName_for_folder_path, accessToken):
     filesProject = {
         'projectTemplates': open(projectName_for_folder_path + '/projectUpload/projectUpload.csv', 'rb')
     }
+    # evidence_folder_path = os.path.join(projectName_for_folder_path, 'evidenceFile')
+    # if os.path.exists(evidence_folder_path):
+    #     for filename in os.listdir(evidence_folder_path):
+    #         # Use filename without extension as the key
+    #         evidence_key = os.path.splitext(filename)[0]
+    #         filesProject[evidence_key] = open(os.path.join(evidence_folder_path, filename), 'rb')
     responseProjectUploadApi = requests.post(url=urlProjectUploadApi, headers=headerProjectUploadApi,data=project_payload,files=filesProject)
     messageArr = ["program mapping is success.","File path : " + projectName_for_folder_path + '/projectUpload/projectUpload.csv']
     messageArr.append("Upload status code : " + str(responseProjectUploadApi.status_code))
@@ -4196,6 +4202,121 @@ def solutionCreationAndMapping(projectName_for_folder_path, entityToUpload, list
             print("Project solution creation api failed.")
             sys.exit()
 
+
+# Function to download evidence files dynamically
+def downloadEvidences(filePathAddProject, projectName_for_folder_path):
+    # Open the workbook and find the sheet
+    wbproject = xlrd.open_workbook(filePathAddProject, on_demand=True)
+    projectSheet = wbproject.sheet_names()
+    for prosheet in projectSheet:
+        if prosheet.strip().lower() == 'Project upload'.lower():
+            print("--->Checking Project details sheet...")
+            detailsEnvSheet = wbproject.sheet_by_name(prosheet)
+            # Read the header row to identify evidence columns
+            keysEnv = [detailsEnvSheet.cell(1, col_index_env).value for col_index_env in range(detailsEnvSheet.ncols)]
+            
+            # Create a folder to store evidence files
+            Logofilepath = os.path.join(projectName_for_folder_path, 'evidenceFile')
+            if not os.path.exists(Logofilepath):
+                os.mkdir(Logofilepath)
+            
+            # Loop through rows starting from the 2nd data row (row index 2)
+            for row_index_env in range(2, detailsEnvSheet.nrows):
+                dictDetailsEnv = {
+                    keysEnv[col_index_env]: detailsEnvSheet.cell(row_index_env, col_index_env).value
+                    for col_index_env in range(detailsEnvSheet.ncols)
+                }
+                
+                # Process all columns with "evidence link" in their header
+                for key, value in dictDetailsEnv.items():
+                    if "evidence link" in key.lower() and value:
+                        value = dictDetailsEnv.get(key, "").strip()
+                        link_type_key = key.replace("link", "type")  # Dynamically match the type column
+                        link_type = dictDetailsEnv.get(link_type_key, "").strip().lower()
+                        if value and link_type:
+                            try:
+                                logo_split = str(value).split('/')[5]  # Extract file ID from Google Drive link
+                                file_url = f'https://drive.google.com/uc?export=download&id={logo_split}'
+                                dest_file = os.path.join(Logofilepath, f'{key.replace(" ", "_")}.{link_type}')  # Use dynamic extension
+                                
+                                # Download the file using gdown
+                                print(f"Downloading {key}: {file_url}")
+                                gdown.download(file_url, dest_file, quiet=False)
+                            except IndexError:
+                                print(f"Invalid Google Drive link for {key}: {value}")
+                        elif not value:
+                            terminatingMessage(f"\"{key}\" must not be empty in the \"Project upload\" sheet")
+                        elif not link_type:
+                            terminatingMessage(f"\"{key} type-1\" must not be empty in the \"Project upload\" sheet")
+
+# Function to upload sheet
+def getPreSignedUrl(projectFile, projectName_for_folder_path, accessToken):
+    urlProjectUploadApi = config.get(environment, 'elevateprojecthost') + config.get(environment, 'fetchPreSignedUrl')
+    headerProjectUploadApi = {
+        'Authorization': config.get(environment, 'Authorization'),
+        'Content-Type': config.get(environment, 'Content-Type'),
+        'X-auth-token': accessToken,
+        'X-Channel-id': config.get(environment, 'X-Channel-id'),
+        'internal-access-token': config.get(environment, 'internal-access-token')
+    }
+    preSignedUrl_payload = {
+        "request": {
+            "fileupload": {
+                "files": []
+            }
+        }
+    }
+
+    evidence_folder_path = os.path.join(projectName_for_folder_path, 'evidenceFile')
+    if os.path.exists(evidence_folder_path):
+
+        for filename in os.listdir(evidence_folder_path):
+            if os.path.isfile(os.path.join(evidence_folder_path, filename)):
+                preSignedUrl_payload["request"]["fileupload"]["files"].append(filename)
+
+    responsegetPreSignedUrlApi = requests.post(url=urlProjectUploadApi, headers=headerProjectUploadApi,data=json.dumps(preSignedUrl_payload))
+    if responsegetPreSignedUrlApi.status_code == 200:
+                responsegetPreSignedUrlApi = responsegetPreSignedUrlApi.json()
+    files = responsegetPreSignedUrlApi["result"]["fileupload"]["files"]
+
+# Assuming you have the required variables defined
+    evidence_folder_path = os.path.join(projectName_for_folder_path, 'evidenceFile')
+
+    # Check if the evidence folder exists
+    if os.path.exists(evidence_folder_path):
+            # Map filenames (without extensions) to their file paths
+            filesProject = {}
+            for filename in os.listdir(evidence_folder_path):
+                evidence_key = os.path.splitext(filename)[0]
+                filesProject[evidence_key] = os.path.join(evidence_folder_path, filename)
+    for file_entry in files:
+        url = file_entry["url"]  # Get the dynamic URL from the JSON response
+        file_name = file_entry["file"]  # Optional: file name for logging/debugging
+        local_file_path = filesProject.get(os.path.splitext(file_name)[0])
+        if local_file_path and os.path.exists(local_file_path):
+            with open(local_file_path, 'rb') as binary_file:
+                file_data = binary_file.read()
+        # Define headers and data (if needed)
+        headers = {
+            'Content-Type': 'multipart/form-data',
+            'x-ms-blob-type' : 'BlockBlob'
+        }
+        try:
+            # Send PUT request
+            response = requests.put(url, headers=headers, data=file_data)
+            # Check the response
+            if response.status_code in [200, 201]:
+                print(f"Successfully uploaded: {file_name}")
+            else:
+                print(f"Failed to upload {file_name}. Status code: {response.status_code}, Response: {response.text}")
+
+    fetchDownloadableUrl_path = []    
+    filesPath = responsegetPreSignedUrlApi["result"]["fileupload"]["files"]
+    for file_path in filesPath:
+        source_path = file_path["payload"]["sourcePath"]
+        fetchDownloadableUrl_path.append(source_path)
+    return fetchDownloadableUrl_path,
+
 # This function is used to download the logo's anf sign from project template
 def downloadlogosign(filePathAddProject,projectName_for_folder_path):
 
@@ -4616,6 +4737,8 @@ def mainFunc(MainFilePath, programFile, addObservationSolution, millisecond, isP
                                 if str(dictDetailsEnv['has certificate']).lower() == 'No'.lower():
                                     prepareProjectAndTasksSheets(addObservationSolution, projectName_for_folder_path,
                                                                  accessToken)
+                                    downloadEvidences(filePathAddProject,projectName_for_folder_path)
+                                    getPreSignedUrl(addObservationSolution, projectName_for_folder_path, accessToken)
                                 #     # sys.exit()
                                     projectUpload(addObservationSolution, projectName_for_folder_path, accessToken)
                                     taskUpload(addObservationSolution, projectName_for_folder_path, accessToken)
@@ -4631,6 +4754,8 @@ def mainFunc(MainFilePath, programFile, addObservationSolution, millisecond, isP
                                     print("---->this is certificate with project<---")
                                     baseTemplate_id=fetchCertificateBaseTemplate(filePathAddProject,accessToken,projectName_for_folder_path)
                                 # sys.exit()
+                                    downloadEvidences(filePathAddProject,projectName_for_folder_path)
+                                    getPreSignedUrl(addObservationSolution, projectName_for_folder_path, accessToken)
                                     downloadlogosign(filePathAddProject,projectName_for_folder_path)
                                     editsvg(accessToken,filePathAddProject,projectName_for_folder_path,baseTemplate_id)
                                     prepareProjectAndTasksSheets(addObservationSolution, projectName_for_folder_path,accessToken)

@@ -27,6 +27,7 @@ const solutionsQueries = require(DB_QUERY_BASE_PATH + '/solutions')
 const certificateTemplateQueries = require(DB_QUERY_BASE_PATH + '/certificateTemplates')
 const programQueries = require(DB_QUERY_BASE_PATH + '/programs')
 const evidencesHelper = require(MODULES_BASE_PATH + '/evidences/helper')
+const userExtensionQueries = require(DB_QUERY_BASE_PATH + '/userExtension')
 
 module.exports = class ProjectTemplatesHelper {
 	/**
@@ -1019,6 +1020,18 @@ module.exports = class ProjectTemplatesHelper {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.PROJECT_TEMPLATE_NOT_FOUND,
 					}
+				}
+				templateData[0].wishlist = false
+				let wishlistData
+				if (userId !== '') {
+					// check if template is wishlisted by user
+					wishlistData = await userExtensionQueries.findOne({
+						userId: userId,
+						'wishlist._id': String(templateData[0]._id),
+					})
+				}
+				if (wishlistData !== null) {
+					templateData[0].wishlist = true
 				}
 
 				if (language !== '' && templateData[0].translations && templateData[0].translations[language]) {

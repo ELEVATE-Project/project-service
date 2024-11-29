@@ -104,4 +104,38 @@ module.exports = class UserExtension {
 			}
 		})
 	}
+
+	/**
+	 * find a user extension document.
+	 * @method
+	 * @name findOneForm
+	 * @param {Object} [filterData = "all"] - user extension filter query.
+	 * @param {Array} [fieldsArray = "all"] - projected fields.
+	 * @param {Array} [skipFields = "none"] - field not to include.
+	 * @returns {Object} form details.
+	 */
+	static findOne(filterData = 'all', fieldsArray = 'all', skipFields = 'none') {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let queryObject = filterData != 'all' ? filterData : {}
+
+				let projection = {}
+				if (fieldsArray != 'all') {
+					fieldsArray.map((key) => {
+						projection[key] = 1
+					})
+				}
+				if (skipFields != 'none') {
+					skipFields.map((key) => {
+						projection[key] = 0
+					})
+				}
+				console.log('queryObject : ', queryObject)
+				const userExtensionData = await database.models.userExtension.findOne(queryObject, projection)
+				return resolve(userExtensionData)
+			} catch (error) {
+				return reject(error)
+			}
+		})
+	}
 }

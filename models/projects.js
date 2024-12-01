@@ -97,6 +97,7 @@ module.exports = {
 			type: 'ObjectId',
 			index: true,
 		},
+		translations: Object,
 		programExternalId: {
 			type: String,
 			index: true,
@@ -197,5 +198,4 @@ module.exports = {
 			indexType: { unique: true, partialFilterExpression: { solutionId: { $exists: true } } },
 		},
 	],
-	translations: Object,
 }

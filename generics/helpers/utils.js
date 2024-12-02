@@ -183,7 +183,7 @@ function valueParser(dataToBeParsed) {
 
 	// fetch default category externalId from env file if not present in csv
 	if (!(parsedData.categories.length > 0)) {
-		parsedData.categories = process.env.DEFAULT_CATEGORY_EXTERNAL_ID
+		parsedData.categories = process.env.DEFAULT_PROJECT_CATEGORY
 	}
 
 	if (parsedData._arrayFields && parsedData._arrayFields.split(',').length > 0) {

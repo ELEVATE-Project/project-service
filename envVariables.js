@@ -132,7 +132,7 @@ let enviromentVariables = {
 		optional: false,
 		default: 'USER',
 	},
-	DEFAULT_CATEGORY_EXTERNAL_ID: {
+	DEFAULT_PROJECT_CATEGORY: {
 		message: 'Default category external-id required',
 		optional: false,
 		default: 'MI-2.0-default',

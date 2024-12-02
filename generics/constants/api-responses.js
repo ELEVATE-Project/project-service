@@ -239,4 +239,6 @@ module.exports = {
 	WISHLIST_NOT_ADDED: 'Project templates not added to wishlist',
 	WISHLIST_FETCHED: 'Wishlist fetched successfully',
 	WISHLIST_FETCH_FAILED: 'Wishlist fetch failed',
+	WISHLIST_ALREADY_ADDED: 'This MI is already added to the wishlist.',
+	PROJECT_TEMPLATE_NOT_IN_WISHLIST: 'This MI is not found in the wishlist.',
 }

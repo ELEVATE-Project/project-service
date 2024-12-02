@@ -22,6 +22,17 @@ module.exports = class UserExtensioHelper {
 
 			let updateuserExtensionDocument
 			if (userExtensionDocument && userExtensionDocument.length > 0) {
+				// Check if the wishlist item already exists
+				const wishlistExists = userExtensionDocument[0].wishlist.some(
+					(item) => item._id.toString() === projectTempleteId.toString()
+				)
+
+				if (wishlistExists) {
+					return {
+						success: false,
+						message: CONSTANTS.apiResponses.WISHLIST_ALREADY_ADDED,
+					}
+				}
 				// If the document exists, update the wishlist by appending the new item
 				updateuserExtensionDocument = await userExtensionQueries.findAndUpdate(
 					{ userId },
@@ -71,6 +82,19 @@ module.exports = class UserExtensioHelper {
 			if (!userExtensionDocument || userExtensionDocument.length === 0) {
 				throw {
 					message: CONSTANTS.apiResponses.USER_EXTENSION_NOT_FOUND,
+				}
+			}
+
+			// Check if the projectTemplateId exists in the wishlist
+			const wishlistExists = userExtensionDocument[0].wishlist.some(
+				(item) => item._id.toString() === projectTempleteId.toString()
+			)
+
+			if (!wishlistExists) {
+				// If the item is not in the wishlist, return a specific message
+				throw {
+					message: CONSTANTS.apiResponses.PROJECT_TEMPLATE_NOT_IN_WISHLIST,
+					status: HTTP_STATUS_CODE.bad_request.status,
 				}
 			}
 

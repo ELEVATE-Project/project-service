@@ -14,9 +14,15 @@ module.exports = {
 			index: true,
 			unique: true,
 		},
-		wishlist: {
-			type: Array,
-			default: [],
-		},
+		wishlist: [
+			{
+				_id: {
+					type: String,
+				},
+				createdAt: {
+					type: Date,
+				},
+			},
+		],
 	},
 }

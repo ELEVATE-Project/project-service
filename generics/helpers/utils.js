@@ -180,9 +180,8 @@ function valueParser(dataToBeParsed) {
 	Object.keys(dataToBeParsed).forEach((eachDataToBeParsed) => {
 		parsedData[eachDataToBeParsed] = dataToBeParsed[eachDataToBeParsed].trim()
 	})
-
 	// fetch default category externalId from env file if not present in csv
-	if (!(parsedData.categories.length > 0)) {
+	if (!parsedData.categories || parsedData.categories.trim() === '') {
 		parsedData.categories = process.env.DEFAULT_PROJECT_CATEGORY
 	}
 

@@ -6,19 +6,20 @@
  */
 
 module.exports = (req) => {
+	let projectsValidator = {
+		create: function () {
+			req.checkBody('externalId').exists().withMessage('externalId is required')
+			req.checkBody('name').exists().withMessage('name is required')
+		},
+		update: function () {
+			req.checkParams('_id').exists().withMessage('required category id')
+		},
+		projects: function () {
+			req.checkParams('_id').exists().withMessage('required category external id')
+		},
+	}
 
-    let projectsValidator = {
-        create : function () {
-            req.checkBody("externalId").exists().withMessage("externalId is required");
-            req.checkBody("name").exists().withMessage("name is required");
-        },
-        update : function () {
-            req.checkParams('_id').exists().withMessage("required category id");
-        }
-    }
-
-    if (projectsValidator[req.params.method]) {
-        projectsValidator[req.params.method]();
-    }
-
-};
+	if (projectsValidator[req.params.method]) {
+		projectsValidator[req.params.method]()
+	}
+}

@@ -2,7 +2,9 @@ openapi: 3.0.0
 info:
   title: MI-2.0 API
   version: 1.0.0
-  description: API for MI-2.0 (new and upgraded APIs). x-auth-token has to be passed in header for every api call
+  description: >-
+    API for MI-2.0 (new and upgraded APIs). x-auth-token has to be passed in
+    header for every api call
 paths:
   /project/userProjects/add:
     post:
@@ -16,209 +18,244 @@ paths:
           application/json:
             schema:
               type: object
-              required:
-                - program
-                - projects
               properties:
                 program:
                   type: object
-                  required:
-                    - name
-                    - startDate
-                    - endDate
-                    - source
                   properties:
                     name:
                       type: string
-                      description: Problem statement defined by the user
-                      example: DCPCR School Development Index 2018-19
                     description:
                       type: string
-                      example: ''
                     language:
                       type: array
                       items:
                         type: string
-                      example: ['English']
                     startDate:
                       type: string
-                      format: date-time
-                      description: Date when the user defined the problem statement
-                      example: '2024-04-16T00:00:00.000Z'
                     endDate:
                       type: string
-                      format: date-time
-                      example: '2024-04-16T00:00:00.000Z'
                     source:
                       type: object
-                      description: Information related to AI and reference data used to generate the answer
-                      required:
-                        - model
-                        - provider
-                        - apiVersion
-                        - confidenceScore
                       properties:
                         model:
                           type: string
-                          example: GPT-4
                         provider:
                           type: string
-                          example: OpenAI
                         apiVersion:
                           type: string
-                          example: '4.0'
                         confidenceScore:
                           type: number
-                          format: float
-                          example: 0.98
                         info:
                           type: object
                           properties:
                             url:
                               type: string
-                              example: ''
                             title:
                               type: string
-                              example: ''
                             pageNo:
                               type: string
-                              example: ''
+                    translations:
+                      type: object
+                      properties:
+                        kn:
+                          type: object
+                          properties:
+                            title:
+                              type: string
+                            description:
+                              type: string
+                        hi:
+                          type: object
+                          properties:
+                            title:
+                              type: string
+                            description:
+                              type: string
                 projects:
                   type: array
                   items:
                     type: object
-                    required:
-                      - title
-                      - duration
-                      - startDate
-                      - endDate
-                      - source
-                      - tasks
-                      - status
                     properties:
                       title:
                         type: string
-                        description: Objective of the problem statement
-                        example: Understand Importance of Reading
                       status:
                         type: string
-                        description: status of project
-                        example: started
                       description:
                         type: string
-                        example: ''
                       duration:
                         type: string
-                        description: Duration given by the user
-                        example: 2 weeks
                       recommendedFor:
                         type: array
                         items:
                           type: string
-                        example: ['students', 'teachers']
                       category:
                         type: array
                         items:
                           type: string
-                        example: []
                       startDate:
                         type: string
-                        format: date-time
-                        description: Objective start date
-                        example: '2024-04-16T00:00:00.000Z'
                       endDate:
                         type: string
-                        format: date-time
-                        description: End date of the objective based on duration
-                        example: '2024-04-16T00:00:00.000Z'
                       source:
                         type: object
-                        description: Information related to AI and reference data used to generate the answer
-                        required:
-                          - model
-                          - provider
-                          - apiVersion
-                          - confidenceScore
                         properties:
                           model:
                             type: string
-                            example: GPT-4
                           provider:
                             type: string
-                            example: OpenAI
                           apiVersion:
                             type: string
-                            example: '4.0'
                           confidenceScore:
                             type: number
-                            format: float
-                            example: 0.98
                           info:
                             type: object
                             properties:
                               url:
                                 type: string
-                                example: ''
                               title:
                                 type: string
-                                example: ''
                               pageNo:
                                 type: string
-                                example: ''
                       tasks:
                         type: array
                         items:
                           type: object
-                          required:
-                            - name
-                            - source
                           properties:
                             name:
                               type: string
-                              description: Activity under the objective
-                              example: Task 1
                             isDeletable:
                               type: boolean
-                              example: false
                             sequenceNumber:
                               type: string
-                              example: '1'
                             source:
                               type: object
-                              description: Information related to AI and reference data used to generate the answer
-                              required:
-                                - model
-                                - provider
-                                - apiVersion
-                                - confidenceScore
                               properties:
                                 model:
                                   type: string
-                                  example: GPT-4
                                 provider:
                                   type: string
-                                  example: OpenAI
                                 apiVersion:
                                   type: string
-                                  example: '4.0'
                                 confidenceScore:
                                   type: number
-                                  format: float
-                                  example: 0.98
                                 info:
                                   type: object
                                   properties:
                                     url:
                                       type: string
-                                      example: ''
                                     title:
                                       type: string
-                                      example: ''
                                     pageNo:
                                       type: string
-                                      example: ''
+                            translations:
+                              type: object
+                              properties:
+                                kn:
+                                  type: object
+                                  properties:
+                                    name:
+                                      type: string
+                                    description:
+                                      type: string
+                                kl:
+                                  type: object
+                                  properties:
+                                    name:
+                                      type: string
+                                    description:
+                                      type: string
+                      translations:
+                        type: object
+                        properties:
+                          hi:
+                            type: object
+                            properties:
+                              title:
+                                type: string
+                              description:
+                                type: string
+                          kn:
+                            type: object
+                            properties:
+                              title:
+                                type: string
+                              description:
+                                type: string
+            examples:
+              example1:
+                value:
+                  program:
+                    name: DCPCR School Development Index 2018-19
+                    description: ''
+                    language:
+                      - English
+                    startDate: '2024-04-16T00:00:00.000Z'
+                    endDate: '2024-04-16T00:00:00.000Z'
+                    source:
+                      model: GPT-4
+                      provider: OpenAI
+                      apiVersion: '4.0'
+                      confidenceScore: 0.98
+                      info:
+                        url: ''
+                        title: ''
+                        pageNo: ''
+                    translations:
+                      kn:
+                        title: DCPCR ಶಾಲಾ ಅಭಿವೃದ್ಧಿ ಸೂಚ್ಯಂಕ 2018-19
+                        description: DCPCR ಶಾಲಾ ಅಭಿವೃದ್ಧಿ ಸೂಚ್ಯಂಕ 2018-19
+                      hi:
+                        title: डीसीपीसीआर स्कूल विकास सूचकांक 2018-19
+                        description: DCPCR ಶಾಲಾ ಅಭಿವೃದ್ಧಿ ಸೂಚ್ಯಂಕ 2018-19
+                  projects:
+                    - title: Understand Importance of Reading
+                      status: started
+                      description: ''
+                      duration: 2 weeks
+                      recommendedFor:
+                        - students
+                        - teachers
+                      category: []
+                      startDate: '2024-04-16T00:00:00.000Z'
+                      endDate: '2024-04-16T00:00:00.000Z'
+                      source:
+                        model: GPT-4
+                        provider: OpenAI
+                        apiVersion: '4.0'
+                        confidenceScore: 0.98
+                        info:
+                          url: ''
+                          title: ''
+                          pageNo: ''
+                      tasks:
+                        - name: Task 1
+                          isDeletable: false
+                          sequenceNumber: '1'
+                          source:
+                            model: GPT-4
+                            provider: OpenAI
+                            apiVersion: '4.0'
+                            confidenceScore: 0.98
+                            info:
+                              url: ''
+                              title: ''
+                              pageNo: ''
+                          translations:
+                            kn:
+                              name: Kannada languageChild
+                              description: kannada Descriptiom
+                            kl:
+                              name: Malayalam languageChild
+                              description: Malayalam Descriptiom
+                      translations:
+                        hi:
+                          title: पढ़ने का महत्व समझें
+                          description: पढ़ने का महत्व समझें
+                        kn:
+                          title: ಓದಿನ ಪ್ರಾಮುಖ್ಯತೆಯನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಿ
+                          description: ಓದಿನ ಪ್ರಾಮುಖ್ಯತೆಯನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಿ
       responses:
-        200:
+        '200':
           description: Success
           content:
             application/json:
@@ -259,8 +296,10 @@ paths:
               properties:
                 reflectionStatus:
                   type: string
-                  enum: [started, completed]
-                  example: 'started'
+                  enum:
+                    - started
+                    - completed
+                  example: started
       responses:
         '200':
           description: Project updated successfully.
@@ -271,7 +310,7 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: 'Project updated successfully'
+                    example: Project updated successfully
                   status:
                     type: integer
                     example: 200
@@ -280,7 +319,7 @@ paths:
                     properties:
                       _id:
                         type: string
-                        example: '667505a649de1ae76e9e1033'
+                        example: 667505a649de1ae76e9e1033
   /project/userProjects/addStory/:projectId:
     post:
       tags:
@@ -300,19 +339,19 @@ paths:
                   properties:
                     title:
                       type: string
-                      example: 'DCPCR School Development Index 2018-19'
+                      example: DCPCR School Development Index 2018-19
                       description: Title of the story.
                     problemStatement:
                       type: string
-                      example: 'problemStatement'
+                      example: problemStatement
                       description: Problem statement for the story.
                     objective:
                       type: string
-                      example: 'sample object'
+                      example: sample object
                       description: Objective of the story.
                     timeline:
                       type: string
-                      example: '2 weeks'
+                      example: 2 weeks
                       description: Estimated timeline for the story.
                     actionSteps:
                       type: array
@@ -326,19 +365,19 @@ paths:
                       example: []
                     impact:
                       type: string
-                      example: 'sample impact'
+                      example: sample impact
                       description: Impact of the story.
                     summary:
                       type: string
-                      example: 'sample summary'
+                      example: sample summary
                       description: Summary of the story.
                     authorName:
                       type: string
-                      example: 'jon'
+                      example: jon
                       description: Author's name.
                     location:
                       type: string
-                      example: 'authorLocation'
+                      example: authorLocation
                       description: Author's location.
                     conversation:
                       type: array
@@ -358,13 +397,14 @@ paths:
                         properties:
                           name:
                             type: string
-                            example: '1729251446851.png'
+                            example: 1729251446851.png
                           type:
                             type: string
-                            example: 'image/png'
+                            example: image/png
                           sourcePath:
                             type: string
-                            example: 'project/668e33a24999c205ea017747/3/5cc85295-b244-4139-88c8-4802c2ad41ad/1729251446851.png'
+                            example: >-
+                              project/668e33a24999c205ea017747/3/5cc85295-b244-4139-88c8-4802c2ad41ad/1729251446851.png
                     pdfInformation:
                       type: array
                       description: PDF details associated with the story.
@@ -373,12 +413,12 @@ paths:
                         properties:
                           filePath:
                             type: string
-                            example: 'sampleFilepath'
+                            example: sampleFilepath
                           language:
                             type: string
-                            example: 'hindi'
+                            example: hindi
       responses:
-        200:
+        '200':
           description: Story added successfully.
           content:
             application/json:
@@ -387,7 +427,7 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: 'Story added successfully'
+                    example: Story added successfully
                   status:
                     type: integer
                     example: 200
@@ -418,7 +458,7 @@ paths:
                             type: string
                             example: l1.png
       responses:
-        200:
+        '200':
           description: URL generated successfully
           content:
             application/json:
@@ -427,7 +467,7 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: 'Url generated successfully'
+                    example: Url generated successfully
                   status:
                     type: integer
                     example: 200
@@ -436,7 +476,7 @@ paths:
                     properties:
                       cloudStorage:
                         type: string
-                        example: 'oci'
+                        example: oci
                       additionalProp1:
                         type: object
                         properties:
@@ -447,16 +487,18 @@ paths:
                               properties:
                                 file:
                                   type: string
-                                  example: 'i1.png'
+                                  example: i1.png
                                 payload:
                                   type: object
                                   properties:
                                     sourcePath:
                                       type: string
-                                      example: 'project/5f72f9998925ec7c60f79a91/1/acee9b95-3c5e-4a09-bfb0-993647ab66f0/i1.png'
+                                      example: >-
+                                        project/5f72f9998925ec7c60f79a91/1/acee9b95-3c5e-4a09-bfb0-993647ab66f0/i1.png
                                     url:
                                       type: string
-                                      example: 'https://***.compat.objectstorage.ap-hyderabad-1.oraclecloud.com/mi/project/5f72f9998925ec7c60f79a91/1/acee9b95-3c5e-4a09-bfb0-993647ab66f0/i1.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=3737771d26e1d8f211a04ec59cfd3037c8d1c6ff%2F20240628%2Fap-hyderabad-1%2Fs3%2Faws4_request&X-Amz-Date=20240628T031041Z&X-Amz-Expires=300&X-Amz-Signature=face99c424124bfc8f3988c2fd80ae0cb06231f3e9989d87fc747e659efaedd7&X-Amz-SignedHeaders=host&x-id=PutObject'
+                                      example: >-
+                                        https://***.compat.objectstorage.ap-hyderabad-1.oraclecloud.com/mi/project/5f72f9998925ec7c60f79a91/1/acee9b95-3c5e-4a09-bfb0-993647ab66f0/i1.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=3737771d26e1d8f211a04ec59cfd3037c8d1c6ff%2F20240628%2Fap-hyderabad-1%2Fs3%2Faws4_request&X-Amz-Date=20240628T031041Z&X-Amz-Expires=300&X-Amz-Signature=face99c424124bfc8f3988c2fd80ae0cb06231f3e9989d87fc747e659efaedd7&X-Amz-SignedHeaders=host&x-id=PutObject
                       additionalProp2:
                         type: object
                         properties:
@@ -467,16 +509,18 @@ paths:
                               properties:
                                 file:
                                   type: string
-                                  example: 'i2.png'
+                                  example: i2.png
                                 payload:
                                   type: object
                                   properties:
                                     sourcePath:
                                       type: string
-                                      example: 'project/5f72f9998925ec7c60f79a91/1/acee9b95-3c5e-4a09-bfb0-993647ab66f0/i2.png'
+                                      example: >-
+                                        project/5f72f9998925ec7c60f79a91/1/acee9b95-3c5e-4a09-bfb0-993647ab66f0/i2.png
                                     url:
                                       type: string
-                                      example: 'https://***.compat.objectstorage.ap-hyderabad-1.oraclecloud.com/mi/project/5f72f9998925ec7c60f79a91/1/acee9b95-3c5e-4a09-bfb0-993647ab66f0/i2.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=3737771d26e1d8f211a04ec59cfd3037c8d1c6ff%2F20240628%2Fap-hyderabad-1%2Fs3%2Faws4_request&X-Amz-Date=20240628T031041Z&X-Amz-Expires=300&X-Amz-Signature=920e8dc3753d16c9932b3b347bc41161fa6d9f4932723a00d6319e4e67a9a682&X-Amz-SignedHeaders=host&x-id=PutObject'
+                                      example: >-
+                                        https://***.compat.objectstorage.ap-hyderabad-1.oraclecloud.com/mi/project/5f72f9998925ec7c60f79a91/1/acee9b95-3c5e-4a09-bfb0-993647ab66f0/i2.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=3737771d26e1d8f211a04ec59cfd3037c8d1c6ff%2F20240628%2Fap-hyderabad-1%2Fs3%2Faws4_request&X-Amz-Date=20240628T031041Z&X-Amz-Expires=300&X-Amz-Signature=920e8dc3753d16c9932b3b347bc41161fa6d9f4932723a00d6319e4e67a9a682&X-Amz-SignedHeaders=host&x-id=PutObject
                       additionalProp3:
                         type: object
                         properties:
@@ -487,16 +531,18 @@ paths:
                               properties:
                                 file:
                                   type: string
-                                  example: 'i3.png'
+                                  example: i3.png
                                 payload:
                                   type: object
                                   properties:
                                     sourcePath:
                                       type: string
-                                      example: 'project/5f72f9998925ec7c60f79a91/1/acee9b95-3c5e-4a09-bfb0-993647ab66f0/i3.png'
+                                      example: >-
+                                        project/5f72f9998925ec7c60f79a91/1/acee9b95-3c5e-4a09-bfb0-993647ab66f0/i3.png
                                     url:
                                       type: string
-                                      example: 'https://***.compat.objectstorage.ap-hyderabad-1.oraclecloud.com/mi/project/5f72f9998925ec7c60f79a91/1/acee9b95-3c5e-4a09-bfb0-993647ab66f0/i3.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=3737771d26e1d8f211a04ec59cfd3037c8d1c6ff%2F20240628%2Fap-hyderabad-1%2Fs3%2Faws4_request&X-Amz-Date=20240628T031041Z&X-Amz-Expires=300&X-Amz-Signature=ab12a6c1f00d0c835b405020542bbf7f89b6dfb43e04051606a7a34987b606f&X-Amz-SignedHeaders=host&x-id=PutObject'
+                                      example: >-
+                                        https://***.compat.objectstorage.ap-hyderabad-1.oraclecloud.com/mi/project/5f72f9998925ec7c60f79a91/1/acee9b95-3c5e-4a09-bfb0-993647ab66f0/i3.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=3737771d26e1d8f211a04ec59cfd3037c8d1c6ff%2F20240628%2Fap-hyderabad-1%2Fs3%2Faws4_request&X-Amz-Date=20240628T031041Z&X-Amz-Expires=300&X-Amz-Signature=ab12a6c1f00d0c835b405020542bbf7f89b6dfb43e04051606a7a34987b606f&X-Amz-SignedHeaders=host&x-id=PutObject
   /v1/profile/read:
     get:
       tags:
@@ -504,7 +550,7 @@ paths:
       summary: Retrieve user profile information
       description: Fetches the details of the currently authenticated user profile.
       responses:
-        200:
+        '200':
           description: Successfully fetched user profile data
           content:
             application/json:
@@ -513,7 +559,7 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: 'Data fetched successfully'
+                    example: Data fetched successfully
                   status:
                     type: integer
                     example: 200
@@ -525,23 +571,23 @@ paths:
                         example: 5
                       email:
                         type: string
-                        example: 'rahul@gmail.com'
+                        example: rahul@gmail.com
                       email_verified:
                         type: string
                         example: 'false'
                       name:
                         type: string
-                        example: 'Rahul'
+                        example: Rahul
                       about:
                         type: string
-                        example: 'PWA'
+                        example: PWA
                       share_link:
                         type: string
                         nullable: true
                         example: null
                       status:
                         type: string
-                        example: 'ACTIVE'
+                        example: ACTIVE
                       has_accepted_terms_and_conditions:
                         type: boolean
                         example: true
@@ -555,10 +601,10 @@ paths:
                         properties:
                           value:
                             type: string
-                            example: 'en'
+                            example: en
                           label:
                             type: string
-                            example: 'English'
+                            example: English
                       organization_id:
                         type: integer
                         example: 1
@@ -566,7 +612,11 @@ paths:
                         type: array
                         items:
                           type: integer
-                        example: [1, 3, 8, 6]
+                        example:
+                          - 1
+                          - 3
+                          - 8
+                          - 6
                       meta:
                         type: object
                         additionalProperties: true
@@ -590,10 +640,10 @@ paths:
                             example: 1
                           name:
                             type: string
-                            example: 'Default Organization'
+                            example: Default Organization
                           code:
                             type: string
-                            example: 'default_code'
+                            example: default_code
                       user_roles:
                         type: array
                         items:
@@ -604,22 +654,22 @@ paths:
                               example: 8
                             title:
                               type: string
-                              example: 'program_desiginer'
+                              example: program_desiginer
                             label:
                               type: string
-                              example: 'Program Desiginer'
+                              example: Program Desiginer
                             user_type:
                               type: integer
                               example: 0
                             status:
                               type: string
-                              example: 'ACTIVE'
+                              example: ACTIVE
                             organization_id:
                               type: integer
                               example: 1
                             visibility:
                               type: string
-                              example: 'PUBLIC'
+                              example: PUBLIC
                       permissions:
                         type: array
                         items:
@@ -627,15 +677,20 @@ paths:
                           properties:
                             module:
                               type: string
-                              example: 'user'
+                              example: user
                             request_type:
                               type: array
                               items:
                                 type: string
-                              example: ['POST', 'DELETE', 'GET', 'PUT', 'PATCH']
+                              example:
+                                - POST
+                                - DELETE
+                                - GET
+                                - PUT
+                                - PATCH
                             service:
                               type: string
-                              example: 'user'
+                              example: user
                       block:
                         type: array
                         items:
@@ -643,34 +698,34 @@ paths:
                           properties:
                             value:
                               type: string
-                              example: '5fd1b52ab53a6416aaeefb17'
+                              example: 5fd1b52ab53a6416aaeefb17
                             label:
                               type: string
-                              example: 'PONDURU'
+                              example: PONDURU
                             externalId:
                               type: string
-                              example: '5b6010b6-5394-4704-b05f-0bea83ff1fb7'
+                              example: 5b6010b6-5394-4704-b05f-0bea83ff1fb7
                       state:
                         type: object
                         properties:
                           value:
                             type: string
-                            example: '5f33c3d85f637784791cd830'
+                            example: 5f33c3d85f637784791cd830
                           label:
                             type: string
-                            example: 'Unknown'
+                            example: Unknown
                           externalId:
                             type: string
-                            example: 'Unknown'
+                            example: Unknown
                       district:
                         type: object
                         properties:
                           value:
                             type: string
-                            example: '5fd098e2e049735a86b748ad'
+                            example: 5fd098e2e049735a86b748ad
                           label:
                             type: string
-                            example: 'VIZIANAGARAM'
+                            example: VIZIANAGARAM
                           externalId:
                             type: string
-                            example: 'b54a5c6d-98be-4313-af1c-33040b1703aa'
+                            example: b54a5c6d-98be-4313-af1c-33040b1703aa

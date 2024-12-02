@@ -14,9 +14,6 @@ module.exports = (req) => {
 		update: function () {
 			req.checkParams('_id').exists().withMessage('required category id')
 		},
-		projects: function () {
-			req.checkParams('_id').exists().withMessage('required category external id')
-		},
 	}
 
 	if (projectsValidator[req.params.method]) {

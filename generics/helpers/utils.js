@@ -181,9 +181,11 @@ function valueParser(dataToBeParsed) {
 		parsedData[eachDataToBeParsed] = dataToBeParsed[eachDataToBeParsed].trim()
 	})
 
-	// fetch default category externalId from env file if not present in csv
-	if (!(parsedData.categories.length > 0)) {
-		parsedData.categories = process.env.DEFAULT_PROJECT_CATEGORY
+	// Check if 'categories' field exists in dataToBeParsed before setting a default value
+	if ('categories' in dataToBeParsed) {
+		if (!parsedData.categories || parsedData.categories.trim() === '') {
+			parsedData.categories = process.env.DEFAULT_PROJECT_CATEGORY
+		}
 	}
 
 	if (parsedData._arrayFields && parsedData._arrayFields.split(',').length > 0) {

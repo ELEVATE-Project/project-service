@@ -181,6 +181,10 @@ function valueParser(dataToBeParsed) {
 		parsedData[eachDataToBeParsed] = dataToBeParsed[eachDataToBeParsed].trim()
 	})
 
+	if (!(parsedData.categories.length > 0)) {
+		parsedData.categories = process.env.DEFAULT_CATEGORY_EXTERNAL_ID
+	}
+
 	if (parsedData._arrayFields && parsedData._arrayFields.split(',').length > 0) {
 		parsedData._arrayFields.split(',').forEach((arrayTypeField) => {
 			if (parsedData[arrayTypeField]) {

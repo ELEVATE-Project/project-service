@@ -2430,7 +2430,7 @@ module.exports = class UserProjectsHelper {
 				return resolve({
 					success: true,
 					message: CONSTANTS.apiResponses.PROJECTS_FETCHED,
-					result: projects,
+					result: projects[0],
 				})
 			} catch (error) {
 				return reject(error)

@@ -16,7 +16,9 @@ module.exports = {
 		},
 		wishlist: [
 			{
-				_id: 'ObjectId',
+				_id: {
+					type: String,
+				},
 				createdAt: {
 					type: Date,
 				},

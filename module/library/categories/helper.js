@@ -57,6 +57,10 @@ module.exports = class LibraryCategoriesHelper {
 					},
 				}
 
+				if (categoryId && categoryId !== '') {
+					matchQuery['$match']['categories.externalId'] = categoryId
+				}
+
 				let aggregateData = []
 				aggregateData.push(matchQuery)
 
@@ -136,13 +140,15 @@ module.exports = class LibraryCategoriesHelper {
 							story: {
 								$ifNull: [`$translations.${language}.story`, '$story'],
 							},
+							author: {
+								$ifNull: [`$translations.${language}.author`, '$author'],
+							},
 							externalId: 1,
 							noOfRatings: 1,
 							averageRating: 1,
 							createdAt: 1,
 							categories: 1,
 							metaInformation: 1,
-							author: 1,
 						},
 					},
 					{

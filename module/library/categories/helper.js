@@ -234,7 +234,13 @@ module.exports = class LibraryCategoriesHelper {
 				let downloadableUrlsCall = await filesHelpers.getDownloadableUrl(flattenedFilePathArr)
 
 				if (downloadableUrlsCall.message !== CONSTANTS.apiResponses.CLOUD_SERVICE_SUCCESS_MESSAGE) {
-					throw new Error(CONSTANTS.apiResponses.FAILED_PRE_SIGNED_URL)
+					throw {
+						message: CONSTANTS.apiResponses.PROJECTS_FETCHED,
+						data: {
+							data: [],
+							count: 0,
+						},
+					}
 				}
 
 				let downloadableUrls = downloadableUrlsCall.result
@@ -275,9 +281,12 @@ module.exports = class LibraryCategoriesHelper {
 				})
 			} catch (error) {
 				return resolve({
-					success: false,
-					message: error.message,
-					data: [],
+					success: true,
+					message: CONSTANTS.apiResponses.PROJECTS_FETCHED,
+					data: {
+						data: [],
+						count: 0,
+					},
 				})
 			}
 		})

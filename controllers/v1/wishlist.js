@@ -48,9 +48,11 @@ module.exports = class Wishlist extends Abstract {
 					message: CONSTANTS.apiResponses.WISHLIST_ADDED,
 				}
 			} else {
-				throw {
-					message: CONSTANTS.apiResponses.WISHLIST_NOT_ADDED,
-					status: HTTP_STATUS_CODE.bad_request.status,
+				// If the operation was not successful, return the error response
+				return {
+					success: false,
+					message: addProjectTempleteToWishlist.message,
+					status: addProjectTempleteToWishlist.status || HTTP_STATUS_CODE.bad_request.status,
 				}
 			}
 		} catch (error) {
@@ -88,9 +90,11 @@ module.exports = class Wishlist extends Abstract {
 					message: CONSTANTS.apiResponses.WISHLIST_REMOVED,
 				}
 			} else {
-				throw {
-					message: CONSTANTS.apiResponses.PROJECTTEMPLATES_NOTFOUND,
-					status: HTTP_STATUS_CODE.bad_request.status,
+				// If the operation was not successful, return the error response
+				return {
+					success: false,
+					message: removeProjectTempleteToWishlist.message,
+					status: removeProjectTempleteToWishlist.status || HTTP_STATUS_CODE.bad_request.status,
 				}
 			}
 		} catch (error) {

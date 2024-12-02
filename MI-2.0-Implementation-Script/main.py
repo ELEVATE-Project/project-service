@@ -4523,12 +4523,12 @@ def getPreSignedUrl(projectFile, projectName_for_folder_path, accessToken):
 
         for filename in os.listdir(evidence_folder_path):
             if os.path.isfile(os.path.join(evidence_folder_path, filename)):
-                preSignedUrl_payload["request"]["fileupload"]["files"].append(filename)
+                preSignedUrl_payload["request"]["evidenceUpload"]["files"].append(filename)
 
     responsegetPreSignedUrlApi = requests.post(url=preSignedUrlApi, headers=headerPreSignedUrlApi,data=json.dumps(preSignedUrl_payload))
     if responsegetPreSignedUrlApi.status_code == 200:
                 responsegetPreSignedUrlApi = responsegetPreSignedUrlApi.json()
-    files = responsegetPreSignedUrlApi["result"]["fileupload"]["files"]
+    files = responsegetPreSignedUrlApi["result"]["evidenceUpload"]["files"]
 
     evidence_folder_path = os.path.join(projectName_for_folder_path, 'evidenceFile')
 
@@ -4563,7 +4563,7 @@ def getPreSignedUrl(projectFile, projectName_for_folder_path, accessToken):
             print(f"Error uploading {file_name}: {e}")
 
     fetchDownloadableUrl_path = []   
-    filesPath = responsegetPreSignedUrlApi["result"]["fileupload"]["files"]
+    filesPath = responsegetPreSignedUrlApi["result"]["evidenceUpload"]["files"]
     for file_path in filesPath:
         source_path = file_path["payload"]["sourcePath"]
         fetchDownloadableUrl_path.append(source_path)

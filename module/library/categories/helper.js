@@ -236,8 +236,6 @@ module.exports = class LibraryCategoriesHelper {
 					}
 				}
 
-				console.log(filePathsArray, 'filePathsArray')
-
 				for (let project of projectTemplates) {
 					let categories = project.categories
 

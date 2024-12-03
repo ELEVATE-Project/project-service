@@ -74,9 +74,34 @@ module.exports = class LibraryCategoriesHelper {
 
 					// Split duration only if it has a value
 					if (duration) {
-						duration = duration.split(',')
-						if (duration.length > 0) {
-							matchQuery['$match']['metaInformation.duration'] = { $all: duration }
+						const durationArray = duration.split(',')
+
+						const defaultDurationAttributes = CONSTANTS.common.DEFAULT_ATTRIBUTES.find(
+							(attr) => attr.code === 'duration'
+						)
+						const entities = defaultDurationAttributes?.entities || []
+
+						// Extract values excluding "More than 6 weeks"
+						let notInDurations = entities
+							.map((entity) => entity.value)
+							.filter((value) => value !== CONSTANTS.common.MORE_THAN_SIX_WEEKS)
+
+						if (durationArray.includes(CONSTANTS.common.MORE_THAN_SIX_WEEKS)) {
+							// Exclude "More than 6 weeks" from the current durations
+							const filteredDurations = durationArray.filter(
+								(dur) => dur !== CONSTANTS.common.MORE_THAN_SIX_WEEKS
+							)
+
+							// Exclude already included durations from `notInDurations`
+							notInDurations = notInDurations.filter(
+								(notDuration) => !filteredDurations.includes(notDuration)
+							)
+
+							// Apply the `$nin` filter
+							matchQuery['$match']['metaInformation.duration'] = { $nin: notInDurations }
+						} else if (durationArray.length > 0) {
+							// Apply the `$in` filter
+							matchQuery['$match']['metaInformation.duration'] = { $in: durationArray }
 						}
 					}
 

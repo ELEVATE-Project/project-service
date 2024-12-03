@@ -1024,6 +1024,8 @@ module.exports = class ProjectTemplatesHelper {
 				let flattenedFilePathArr = _.flatten(allFilePaths)
 
 				let downloadableUrlsCall = await filesHelpers.getDownloadableUrl(flattenedFilePathArr)
+
+				// Attach the downloadableUrls for the evidences in the response
 				if (
 					downloadableUrlsCall.message == CONSTANTS.apiResponses.CLOUD_SERVICE_SUCCESS_MESSAGE &&
 					downloadableUrlsCall.result &&

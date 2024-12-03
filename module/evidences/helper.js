@@ -28,7 +28,7 @@ module.exports = class Evidences {
 					let evidence = 'evidence' + evidenceCount + '-'
 					let evidenceTitle = evidence + 'title'
 					let evidenceLink = evidence + 'link'
-					let evidenceSeq = evidence + 'sequence'
+					let evidenceSequence = evidence + 'sequence'
 					let evidenceType = evidence + 'type'
 
 					let evidences = {}
@@ -48,9 +48,9 @@ module.exports = class Evidences {
 						delete parsedCsvData[evidenceType]
 					}
 
-					if (parsedCsvData[evidenceSeq] !== '' && parsedCsvData[evidenceSeq] !== undefined) {
-						evidences['seq'] = parsedCsvData[evidenceSeq]
-						delete parsedCsvData[evidenceSeq]
+					if (parsedCsvData[evidenceSequence] !== '' && parsedCsvData[evidenceSequence] !== undefined) {
+						evidences['sequence'] = parsedCsvData[evidenceSequence]
+						delete parsedCsvData[evidenceSequence]
 					}
 
 					if (Object.keys(evidences).length > 0) {

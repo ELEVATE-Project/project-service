@@ -2399,9 +2399,14 @@ module.exports = class UserProjectsHelper {
 						status: 1,
 						tasks: 1,
 						taskReport: 1,
+						createdAt: 1,
 					},
 				})
+
 				aggregateData.push(
+					{
+						$sort: { createdAt: -1 }, // Descending order (latest first)
+					},
 					{
 						// Pagination
 						$facet: {
@@ -2409,6 +2414,7 @@ module.exports = class UserProjectsHelper {
 							data: [{ $skip: pageSize * (pageNo - 1) }, { $limit: pageSize }],
 						},
 					},
+
 					{
 						// Count and project the response data
 						$project: {

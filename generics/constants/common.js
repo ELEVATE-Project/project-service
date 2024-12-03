@@ -138,4 +138,5 @@ module.exports = {
 			entities: [],
 		},
 	],
+	MORE_THAN_SIX_WEEKS: 'More than 6 weeks',
 }

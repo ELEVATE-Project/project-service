@@ -235,6 +235,9 @@ module.exports = class LibraryCategoriesHelper {
 						})
 					}
 				}
+
+				console.log(filePathsArray, 'filePathsArray')
+
 				for (let project of projectTemplates) {
 					let categories = project.categories
 
@@ -258,46 +261,47 @@ module.exports = class LibraryCategoriesHelper {
 				// Example: [[path1, path2], [path3]] => [path1, path2, path3]
 				let flattenedFilePathArr = _.flatten(allFilePaths)
 
-				let downloadableUrlsCall = await filesHelpers.getDownloadableUrl(flattenedFilePathArr)
-
-				if (downloadableUrlsCall.message !== CONSTANTS.apiResponses.CLOUD_SERVICE_SUCCESS_MESSAGE) {
-					throw {
-						message: CONSTANTS.apiResponses.PROJECTS_FETCHED,
-						data: {
-							data: [],
-							count: 0,
-						},
+				if (flattenedFilePathArr.length > 0) {
+					let downloadableUrlsCall = await filesHelpers.getDownloadableUrl(flattenedFilePathArr)
+					if (downloadableUrlsCall.message !== CONSTANTS.apiResponses.CLOUD_SERVICE_SUCCESS_MESSAGE) {
+						throw {
+							message: CONSTANTS.apiResponses.PROJECTS_FETCHED,
+							data: {
+								data: [],
+								count: 0,
+							},
+						}
 					}
-				}
 
-				let downloadableUrls = downloadableUrlsCall.result
+					let downloadableUrls = downloadableUrlsCall.result
 
-				let urlDictionary = {}
-				for (let singleURL of downloadableUrls) {
-					let url = singleURL.url
-					let filePath = singleURL.filePath
-					urlDictionary[filePath] = url
-				}
+					let urlDictionary = {}
+					for (let singleURL of downloadableUrls) {
+						let url = singleURL.url
+						let filePath = singleURL.filePath
+						urlDictionary[filePath] = url
+					}
 
-				for (const template of projectTemplates) {
-					const { categories } = template
+					for (const template of projectTemplates) {
+						const { categories } = template
 
-					if (categories.length > 0) {
-						for (const category of categories) {
-							const { evidences } = category
-							if (!evidences || evidences.length === 0) {
-								continue
-							}
+						if (categories.length > 0) {
+							for (const category of categories) {
+								const { evidences } = category
+								if (!evidences || evidences.length === 0) {
+									continue
+								}
 
-							for (const [index, singleEvidence] of evidences.entries()) {
-								const downloadablePath = urlDictionary[singleEvidence.filepath]
-								category.evidences[index].downloadableUrl = downloadablePath
+								for (const [index, singleEvidence] of evidences.entries()) {
+									const downloadablePath = urlDictionary[singleEvidence.filepath]
+									category.evidences[index].downloadableUrl = downloadablePath
+								}
 							}
 						}
 					}
-				}
 
-				result[0].data = projectTemplates
+					result[0].data = projectTemplates
+				}
 
 				return resolve({
 					success: true,
@@ -308,6 +312,7 @@ module.exports = class LibraryCategoriesHelper {
 					},
 				})
 			} catch (error) {
+				console.log(error, 'error**')
 				return resolve({
 					success: true,
 					message: CONSTANTS.apiResponses.PROJECTS_FETCHED,

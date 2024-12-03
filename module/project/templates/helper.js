@@ -28,6 +28,7 @@ const certificateTemplateQueries = require(DB_QUERY_BASE_PATH + '/certificateTem
 const programQueries = require(DB_QUERY_BASE_PATH + '/programs')
 const evidencesHelper = require(MODULES_BASE_PATH + '/evidences/helper')
 const userExtensionQueries = require(DB_QUERY_BASE_PATH + '/userExtension')
+const filesHelpers = require(MODULES_BASE_PATH + '/cloud-services/files/helper')
 
 module.exports = class ProjectTemplatesHelper {
 	/**
@@ -1001,7 +1002,6 @@ module.exports = class ProjectTemplatesHelper {
 						findQuery['externalId'] = templateId
 					}
 				}
-
 				//getting template data using templateId
 				let templateData = await projectTemplateQueries.templateDocument(findQuery, 'all', [
 					'ratings',
@@ -1017,6 +1017,27 @@ module.exports = class ProjectTemplatesHelper {
 					'metaInformation',
 				])
 
+				// Fetch downloadable urls for the evidences
+				let allFilePaths = templateData[0].evidences.map((evidence) => {
+					return evidence.link
+				})
+				let flattenedFilePathArr = _.flatten(allFilePaths)
+
+				let downloadableUrlsCall = await filesHelpers.getDownloadableUrl(flattenedFilePathArr)
+				if (
+					downloadableUrlsCall.message == CONSTANTS.apiResponses.CLOUD_SERVICE_SUCCESS_MESSAGE &&
+					downloadableUrlsCall.result &&
+					downloadableUrlsCall.result.length > 0
+				) {
+					const downloadableUrls = downloadableUrlsCall.result
+					for (const item of downloadableUrls) {
+						templateData[0].evidences.map((evidence) => {
+							if (evidence.link == item.filePath) {
+								evidence['downloadableUrl'] = item.url ? item.url : ''
+							}
+						})
+					}
+				}
 				if (!(templateData.length > 0)) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,

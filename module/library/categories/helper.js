@@ -199,20 +199,17 @@ module.exports = class LibraryCategoriesHelper {
 				let allCategoryInfo = await projectCategoriesQueries.categoryDocuments({
 					_id: { $in: allCategoryId },
 				})
-
 				for (let singleCategoryInfo of allCategoryInfo) {
 					if (singleCategoryInfo.evidences && singleCategoryInfo.evidences.length > 0) {
 						let filePaths = singleCategoryInfo.evidences.map((evidenceInfo) => {
 							return evidenceInfo.filepath
 						})
-
 						filePathsArray.push({
 							categoryId: singleCategoryInfo._id,
 							filePaths,
 						})
 					}
 				}
-
 				for (let project of projectTemplates) {
 					let categories = project.categories
 
@@ -231,7 +228,6 @@ module.exports = class LibraryCategoriesHelper {
 				let allFilePaths = filePathsArray.map((project) => {
 					return project.filePaths
 				})
-
 				// `allFilePaths` is an array of arrays containing file paths.
 				// Use Lodash's `_.flatten` to convert this into a single, flat array of file paths.
 				// Example: [[path1, path2], [path3]] => [path1, path2, path3]
@@ -258,18 +254,19 @@ module.exports = class LibraryCategoriesHelper {
 					urlDictionary[filePath] = url
 				}
 
-				for (let project of projectTemplates) {
-					let categories = project.categories
+				for (const template of projectTemplates) {
+					const { categories } = template
 
 					if (categories.length > 0) {
-						for (let projectCategory of categories) {
-							let evidences = projectCategory.evidences
-							if (!evidences || evidences.length == 0) {
+						for (const category of categories) {
+							const { evidences } = category
+							if (!evidences || evidences.length === 0) {
 								continue
 							}
-							for (let singleEvidence of evidences) {
-								let downloadablePath = urlDictionary[singleEvidence.filepath]
-								singleEvidence.filepath = downloadablePath
+
+							for (const [index, singleEvidence] of evidences.entries()) {
+								const downloadablePath = urlDictionary[singleEvidence.filepath]
+								category.evidences[index].downloadableUrl = downloadablePath
 							}
 						}
 					}

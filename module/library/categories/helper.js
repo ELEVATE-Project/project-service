@@ -310,7 +310,6 @@ module.exports = class LibraryCategoriesHelper {
 					},
 				})
 			} catch (error) {
-				console.log(error, 'error**')
 				return resolve({
 					success: true,
 					message: CONSTANTS.apiResponses.PROJECTS_FETCHED,

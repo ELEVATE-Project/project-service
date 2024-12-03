@@ -44,7 +44,7 @@ module.exports = class Template {
 					req.params._id ? req.params._id : '',
 					req.pageSize,
 					req.pageNo,
-					req.searchText,
+					req.query.searchText,
 					req.query.sort,
 					req.query.language,
 					UTILS.convertStringToBoolean(req.query.hasSpotlight),

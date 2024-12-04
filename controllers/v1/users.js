@@ -149,11 +149,13 @@ module.exports = class Users {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let isAPrivateProgram = UTILS.convertStringToBoolean(req.query.isAPrivateProgram)
+				req.query.isProjectsCount = UTILS.convertStringToBoolean(req.query.isProjectsCount)
 
 				if (isAPrivateProgram) {
 					let programsData = await usersHelper.privatePrograms(
 						req.userDetails.userInformation.userId,
-						req.query.language ? req.query.language : ''
+						req.query.language ? req.query.language : '',
+						req.query.isProjectsCount ? req.query.isProjectsCount : false
 					)
 					return resolve(programsData)
 				} else {

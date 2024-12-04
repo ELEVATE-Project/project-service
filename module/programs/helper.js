@@ -9,6 +9,7 @@
 
 const timeZoneDifference = process.env.TIMEZONE_DIFFRENECE_BETWEEN_LOCAL_TIME_AND_UTC
 const programsQueries = require(DB_QUERY_BASE_PATH + '/programs')
+const projectQueries = require(DB_QUERY_BASE_PATH + '/projects')
 const entitiesService = require(GENERICS_FILES_PATH + '/services/entity-management')
 const validateEntity = process.env.VALIDATE_ENTITIES
 
@@ -1045,10 +1046,11 @@ module.exports = class ProgramsHelper {
 	 * @name userPrivatePrograms
 	 * @param {String} userId
 	 * @param {String} language -languageCode
+	 * @param {Boolean} projectsCount - get the projectsCount under that program.
 	 * @returns {JSON} - List of programs that user created on app.
 	 */
 
-	static userPrivatePrograms(userId, language = '') {
+	static userPrivatePrograms(userId, language = '', projectsCount = false) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let programsData = await programsQueries.programsDocument(
@@ -1067,6 +1069,46 @@ module.exports = class ProgramsHelper {
 						result: [],
 					})
 				}
+				if (projectsCount) {
+					//Filtering out all the program IDs
+					let allProjectIds = programsData.flatMap((program) => program._id || [])
+					let projectDocuments = await projectQueries.getAggregate([
+						{
+							$match: {
+								programId: { $in: allProjectIds },
+							},
+						},
+						{
+							$group: {
+								_id: '$programId', // Group by programId
+								ongoingCount: {
+									$sum: { $cond: [{ $ne: ['$status', CONSTANTS.common.SUBMITTED_STATUS] }, 1, 0] },
+								},
+								completedCount: {
+									$sum: { $cond: [{ $eq: ['$status', CONSTANTS.common.SUBMITTED_STATUS] }, 1, 0] },
+								},
+							},
+						},
+					])
+					//Adding count to the programData
+					const projectCountsMap = projectDocuments.reduce((acc, project) => {
+						acc[project._id.toString()] = {
+							ongoingCount: project.ongoingCount || 0,
+							completedCount: project.completedCount || 0,
+						}
+						return acc
+					}, {})
+
+					// Merge counts using the map
+					programsData.forEach((program) => {
+						const counts = projectCountsMap[program._id.toString()] || {
+							ongoingCount: 0,
+							completedCount: 0,
+						}
+						program.ongoingCount = counts.ongoingCount
+						program.completedCount = counts.completedCount
+					})
+				}
 				//handle multiligual responses
 				if (language != '') {
 					programsData = programsData.map((program) => ({
@@ -1075,6 +1117,8 @@ module.exports = class ProgramsHelper {
 						externalId: program.externalId,
 						_id: program._id,
 						isAPrivateProgram: program.isAPrivateProgram,
+						ongoingCount: program.ongoingCount ? program.ongoingCount : 0,
+						completedCount: program.completedCount ? program.completedCount : 0,
 					}))
 				}
 				return resolve(programsData)

@@ -832,7 +832,9 @@ module.exports = class UserProjects extends Abstract {
 					req.pageNo,
 					req.pageSize,
 					req.searchText,
-					req.query.language ? req.query.language : ''
+					req.query.language ? req.query.language : '',
+					req.query.programId ? req.query.programId : '',
+					req.query.status ? req.query.status : ''
 				)
 				return resolve(projects)
 			} catch (error) {

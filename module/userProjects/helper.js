@@ -2370,10 +2370,12 @@ module.exports = class UserProjectsHelper {
 	 * @param {Number} pageSize -Page size
 	 * @param {String} searchText -Search text
 	 * @param {String} language -LanguageCode
+	 * @param {String} programId - ProgramId
+	 * @param {String} status  -status of the project
 	 * @returns {Array} List of projects.
 	 */
 
-	static list(userId, pageNo, pageSize, searchText, language = '') {
+	static list(userId, pageNo, pageSize, searchText, language = '', programId, status) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let aggregateData = []
@@ -2381,8 +2383,15 @@ module.exports = class UserProjectsHelper {
 				let matchQuery = {
 					$match: {
 						userId: userId,
-						status: { $ne: CONSTANTS.common.SUBMITTED_STATUS },
+						status:
+							status === CONSTANTS.common.SUBMITTED_STATUS
+								? { $eq: CONSTANTS.common.SUBMITTED_STATUS }
+								: { $ne: CONSTANTS.common.SUBMITTED_STATUS },
 					},
+				}
+
+				if (programId) {
+					matchQuery.$match.programId = new ObjectId(programId)
 				}
 				aggregateData.push(matchQuery)
 
@@ -2400,6 +2409,11 @@ module.exports = class UserProjectsHelper {
 						tasks: 1,
 						taskReport: 1,
 						createdAt: 1,
+						startDate: 1,
+						endDate: 1,
+						programInformation: {
+							name: 1,
+						},
 					},
 				})
 

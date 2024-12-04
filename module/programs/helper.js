@@ -1046,17 +1046,18 @@ module.exports = class ProgramsHelper {
 	 * @name userPrivatePrograms
 	 * @param {String} userId
 	 * @param {String} language -languageCode
-	 * @param {Boolean} projectsCount - get the projectsCount under that program.
+	 * @param {Boolean} getProjectsCount - get the projectsCount under that program.
 	 * @returns {JSON} - List of programs that user created on app.
 	 */
 
-	static userPrivatePrograms(userId, language = '', projectsCount = false) {
+	static userPrivatePrograms(userId, language = '', getProjectsCount = false) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let programsData = await programsQueries.programsDocument(
 					{
 						createdBy: userId,
 						isAPrivateProgram: true,
+						isDeleted: false,
 					},
 					['name', 'externalId', 'description', '_id', 'isAPrivateProgram', 'translations'],
 					'none',
@@ -1069,22 +1070,22 @@ module.exports = class ProgramsHelper {
 						result: [],
 					})
 				}
-				if (projectsCount) {
+				if (getProjectsCount) {
 					//Filtering out all the program IDs
-					let allProjectIds = programsData.flatMap((program) => program._id || [])
+					let userProgramIds = programsData.flatMap((program) => program._id || [])
 					let projectDocuments = await projectQueries.getAggregate([
 						{
 							$match: {
-								programId: { $in: allProjectIds },
+								programId: { $in: userProgramIds },
 							},
 						},
 						{
 							$group: {
 								_id: '$programId', // Group by programId
-								ongoingCount: {
+								ongoingProjects: {
 									$sum: { $cond: [{ $ne: ['$status', CONSTANTS.common.SUBMITTED_STATUS] }, 1, 0] },
 								},
-								completedCount: {
+								completedProjects: {
 									$sum: { $cond: [{ $eq: ['$status', CONSTANTS.common.SUBMITTED_STATUS] }, 1, 0] },
 								},
 							},
@@ -1093,8 +1094,8 @@ module.exports = class ProgramsHelper {
 					//Adding count to the programData
 					const projectCountsMap = projectDocuments.reduce((acc, project) => {
 						acc[project._id.toString()] = {
-							ongoingCount: project.ongoingCount || 0,
-							completedCount: project.completedCount || 0,
+							ongoingProjects: project.ongoingProjects || 0,
+							completedProjects: project.completedProjects || 0,
 						}
 						return acc
 					}, {})
@@ -1102,11 +1103,11 @@ module.exports = class ProgramsHelper {
 					// Merge counts using the map
 					programsData.forEach((program) => {
 						const counts = projectCountsMap[program._id.toString()] || {
-							ongoingCount: 0,
-							completedCount: 0,
+							ongoingProjects: 0,
+							completedProjects: 0,
 						}
-						program.ongoingCount = counts.ongoingCount
-						program.completedCount = counts.completedCount
+						program.ongoingProjects = counts.ongoingProjects
+						program.completedProjects = counts.completedProjects
 					})
 				}
 				//handle multiligual responses
@@ -1117,7 +1118,7 @@ module.exports = class ProgramsHelper {
 						externalId: program.externalId,
 						_id: program._id,
 						isAPrivateProgram: program.isAPrivateProgram,
-						ongoingCount: program.ongoingCount ? program.ongoingCount : 0,
+						ongoingProjects: program.ongoingProjects ? program.ongoingProjects : 0,
 						completedCount: program.completedCount ? program.completedCount : 0,
 					}))
 				}

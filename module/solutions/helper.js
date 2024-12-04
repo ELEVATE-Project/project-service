@@ -1359,7 +1359,8 @@ module.exports = class SolutionsHelper {
 						data.programDescription ? data.programDescription : data.programName,
 						userId,
 						startDate,
-						endDate
+						endDate,
+						userId
 					)
 
 					if (data.rootOrganisations) {

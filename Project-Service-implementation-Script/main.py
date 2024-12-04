@@ -3412,6 +3412,9 @@ def prepareProjectAndTasksSheets(project_inputFile, projectName_for_folder_path,
         for task_lr in range(0, int(taskLearningResource_count)):
             task_lr_name = str(dictTasksDetails["learningResources" + str(task_lr_value_count) + "-name"]).strip()
             task_lr_link = str(dictTasksDetails["learningResources" + str(task_lr_value_count) + "-link"]).strip()
+            if task_lr_link and not task_lr_name:
+                raise ValueError(
+                    f"Name is required for the learning resource with link: '{task_lr_link }'")
             if task_lr_name == "" and task_lr_link == "":
                 task_values.append("")
                 task_values.append("")

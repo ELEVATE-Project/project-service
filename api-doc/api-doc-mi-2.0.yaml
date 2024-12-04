@@ -213,6 +213,7 @@ paths:
                       - startDate
                       - status
                       - tasks
+                      - title
                   example:
                     - category: []
                       description: ''

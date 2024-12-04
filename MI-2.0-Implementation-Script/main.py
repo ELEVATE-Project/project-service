@@ -3470,6 +3470,9 @@ def prepareProjectAndTasksSheets(project_inputFile, projectName_for_folder_path,
         for task_lr in range(0, int(taskLearningResource_count)):
             task_lr_name = str(dictTasksDetails["learningResources" + str(task_lr_value_count) + "-name"]).strip()
             task_lr_link = str(dictTasksDetails["learningResources" + str(task_lr_value_count) + "-link"]).strip()
+            if task_lr_link and not task_lr_name:
+                raise ValueError(
+                    f"Name is required for the learning resource with link: '{task_lr_link }'")
             if task_lr_name == "" and task_lr_link == "":
                 task_values.append("")
                 task_values.append("")
@@ -3551,7 +3554,7 @@ def prepareProjectAndTasksSheetsForSpotlight(project_inputFile, projectName_for_
         for row_index_env in range(2, storyDetailsSheet.nrows):
             dictStoryDetails = {keysStory[col_index_env]: storyDetailsSheet.cell(row_index_env, col_index_env).value
                                 for col_index_env in range(storyDetailsSheet.ncols)}
-
+        storyDetailsList = []
         programDetailsSheet = wbproject.sheet_by_name('Program details')
         keysProgram = [programDetailsSheet.cell(1, col_index_env).value for col_index_env in range(programDetailsSheet.ncols)]
         dictProgramDetails = {}
@@ -3559,6 +3562,12 @@ def prepareProjectAndTasksSheetsForSpotlight(project_inputFile, projectName_for_
             dictProgramDetails = {keysProgram[col_index_env]: programDetailsSheet.cell(row_index_env, col_index_env).value
                                   for col_index_env in range(programDetailsSheet.ncols)}
 
+        storyDetailsList.append(dictStoryDetails)
+        if hasStory.lower() == "yes":
+            for storyDetail in storyDetailsList:
+                for key, value in storyDetail.items():
+                    if not str(value).strip():  # Check if the value is empty or missing
+                        raise ValueError(f"Missing value for column '{key}' in 'Story details'")
         # Create a new row or update an existing row in existing_rows
         if row_index - 2 < len(existing_rows):
             row = existing_rows[row_index - 2]

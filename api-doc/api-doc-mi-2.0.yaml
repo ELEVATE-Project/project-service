@@ -36,6 +36,65 @@ paths:
                 program:
                   type: object
                   properties:
+                    conversation:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          botResponse:
+                            type: string
+                            example: >-
+                              Sure, let’s start! Could you tell me about the
+                              title and objectives of the story?
+                          timestamp:
+                            type: string
+                            example: '2024-12-04T10:00:00Z'
+                          userMessage:
+                            type: string
+                            example: >-
+                              I want to create a story about the DCPCR School
+                              Development Index.
+                      example:
+                        - botResponse: >-
+                            Sure, let’s start! Could you tell me about the title
+                            and objectives of the story?
+                          timestamp: '2024-12-04T10:00:00Z'
+                          userMessage: >-
+                            I want to create a story about the DCPCR School
+                            Development Index.
+                        - botResponse: >-
+                            Got it. What about the problem statement and impact
+                            you'd like to highlight?
+                          timestamp: '2024-12-04T10:02:00Z'
+                          userMessage: >-
+                            The title will be 'DCPCR School Development Index
+                            2018-19', and the objective is 'To analyze and
+                            showcase school development trends'.
+                        - botResponse: >-
+                            Great! I’ve added that. Do you have a timeline for
+                            this story?
+                          timestamp: '2024-12-04T10:05:00Z'
+                          userMessage: >-
+                            The problem is schools not meeting benchmarks. The
+                            impact is improving education standards.
+                        - botResponse: >-
+                            Understood. I’ve added a 2-week timeline. Anything
+                            else you’d like to add, such as action steps or
+                            resources?
+                          timestamp: '2024-12-04T10:07:00Z'
+                          userMessage: Two weeks should be enough.
+                        - botResponse: >-
+                            Alright. Please upload them when ready, and I’ll
+                            include them in the story.
+                          timestamp: '2024-12-04T10:10:00Z'
+                          userMessage: >-
+                            No action steps for now, but I’ll share attachments
+                            and PDFs.
+                        - botResponse: >-
+                            Got it! I’ve added the attachment and noted the PDF
+                            language as Hindi.
+                          timestamp: '2024-12-04T10:12:00Z'
+                          userMessage: Here’s an image attachment and a PDF in Hindi.
                     description:
                       type: string
                       example: ''
@@ -83,6 +142,7 @@ paths:
                       type: string
                       example: '2024-04-16T00:00:00.000Z'
                   required:
+                    - conversation
                     - endDate
                     - name
                     - source
@@ -134,6 +194,8 @@ paths:
                               url:
                                 type: string
                                 example: ''
+                            required:
+                              - title
                           model:
                             type: string
                             example: GPT-4
@@ -187,8 +249,11 @@ paths:
                                 provider:
                                   type: string
                                   example: OpenAI
+                              required:
+                                - info
                           required:
                             - name
+                            - isDeletable
                         example:
                           - isDeletable: false
                             name: Task 1
@@ -254,6 +319,47 @@ paths:
               Add Project:
                 value:
                   program:
+                    conversation:
+                      - botResponse: >-
+                          Sure, let’s start! Could you tell me about the title
+                          and objectives of the story?
+                        timestamp: '2024-12-04T10:00:00Z'
+                        userMessage: >-
+                          I want to create a story about the DCPCR School
+                          Development Index.
+                      - botResponse: >-
+                          Got it. What about the problem statement and impact
+                          you'd like to highlight?
+                        timestamp: '2024-12-04T10:02:00Z'
+                        userMessage: >-
+                          The title will be 'DCPCR School Development Index
+                          2018-19', and the objective is 'To analyze and
+                          showcase school development trends'.
+                      - botResponse: >-
+                          Great! I’ve added that. Do you have a timeline for
+                          this story?
+                        timestamp: '2024-12-04T10:05:00Z'
+                        userMessage: >-
+                          The problem is schools not meeting benchmarks. The
+                          impact is improving education standards.
+                      - botResponse: >-
+                          Understood. I’ve added a 2-week timeline. Anything
+                          else you’d like to add, such as action steps or
+                          resources?
+                        timestamp: '2024-12-04T10:07:00Z'
+                        userMessage: Two weeks should be enough.
+                      - botResponse: >-
+                          Alright. Please upload them when ready, and I’ll
+                          include them in the story.
+                        timestamp: '2024-12-04T10:10:00Z'
+                        userMessage: >-
+                          No action steps for now, but I’ll share attachments
+                          and PDFs.
+                      - botResponse: >-
+                          Got it! I’ve added the attachment and noted the PDF
+                          language as Hindi.
+                        timestamp: '2024-12-04T10:12:00Z'
+                        userMessage: Here’s an image attachment and a PDF in Hindi.
                     description: ''
                     endDate: '2024-04-16T00:00:00.000Z'
                     language:
@@ -304,6 +410,8 @@ paths:
                       title: Understand Importance of Reading
       responses:
         '200':
+          description: ''
+        '404':
           description: Add Project
           headers:
             Alt-Svc:
@@ -388,6 +496,12 @@ paths:
             type: string
             example: user token
           required: true
+        - name: internal-access-token
+          in: header
+          schema:
+            type: string
+            example: Fqn0m0HQ0gXydRtBCg5l
+          required: true
       requestBody:
         content:
           application/json:
@@ -416,10 +530,6 @@ paths:
                           type:
                             type: string
                             example: image/png
-                        required:
-                          - name
-                          - sourcePath
-                          - type
                       example:
                         - name: 1729251446851.png
                           sourcePath: >-
@@ -574,8 +684,8 @@ paths:
                     - pdfInformation
                     - problemStatement
                     - summary
-                    - title
                     - timeline
+                    - title
               required:
                 - story
             examples:

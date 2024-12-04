@@ -111,41 +111,12 @@ paths:
                     name:
                       type: string
                       example: DCPCR School Development Index 2018-19
-                    source:
-                      type: object
-                      properties:
-                        apiVersion:
-                          type: string
-                          example: '4.0'
-                        confidenceScore:
-                          type: number
-                          example: 0.98
-                        info:
-                          type: object
-                          properties:
-                            pageNo:
-                              type: string
-                              example: ''
-                            title:
-                              type: string
-                              example: ''
-                            url:
-                              type: string
-                              example: ''
-                        model:
-                          type: string
-                          example: GPT-4
-                        provider:
-                          type: string
-                          example: OpenAI
                     startDate:
                       type: string
                       example: '2024-04-16T00:00:00.000Z'
                   required:
                     - conversation
-                    - endDate
                     - name
-                    - source
                     - startDate
                 projects:
                   type: array
@@ -273,7 +244,6 @@ paths:
                     required:
                       - duration
                       - endDate
-                      - recommendedFor
                       - source
                       - startDate
                       - status

@@ -1,19 +1,33 @@
-openapi: 3.0.0
+openapi: 3.0.3
 info:
-  title: MI-2.0 API
+  title: MI-2.0
+  description: 'MI-2.0 : APIs for MI-2.0'
   version: 1.0.0
-  description: >-
-    API for MI-2.0 (new and upgraded APIs). x-auth-token has to be passed in
-    header for every api call
+  contact: {}
+servers:
+  - url: '{{devURL}}project'
 paths:
-  /project/userProjects/add:
+  /v1/userProjects/add/6732f4f1f89b3744c975f5bc:
     post:
       tags:
-        - userProjects
-      summary: Add a user project
-      description: API to create a new user project - call after initial AI flows
+        - User Projects
+      summary: Add Project
+      description: Add Project
+      operationId: addProject
+      parameters:
+        - name: x-auth-token
+          in: header
+          schema:
+            type: string
+            example: user token
+          required: true
+        - name: internal-access-token
+          in: header
+          schema:
+            type: string
+            example: Fqn0m0HQ0gXydRtBCg5l
+          required: true
       requestBody:
-        required: true
         content:
           application/json:
             schema:
@@ -22,241 +36,311 @@ paths:
                 program:
                   type: object
                   properties:
-                    name:
-                      type: string
                     description:
                       type: string
+                      example: ''
+                    endDate:
+                      type: string
+                      example: '2024-04-16T00:00:00.000Z'
                     language:
                       type: array
                       items:
                         type: string
-                    startDate:
+                        example: English
+                      example:
+                        - English
+                    name:
                       type: string
-                    endDate:
-                      type: string
+                      example: DCPCR School Development Index 2018-19
                     source:
                       type: object
                       properties:
-                        model:
-                          type: string
-                        provider:
-                          type: string
                         apiVersion:
                           type: string
+                          example: '4.0'
                         confidenceScore:
                           type: number
+                          example: 0.98
                         info:
                           type: object
                           properties:
-                            url:
-                              type: string
-                            title:
-                              type: string
                             pageNo:
                               type: string
-                    translations:
-                      type: object
-                      properties:
-                        kn:
-                          type: object
-                          properties:
+                              example: ''
                             title:
                               type: string
-                            description:
+                              example: ''
+                            url:
                               type: string
-                        hi:
-                          type: object
-                          properties:
-                            title:
-                              type: string
-                            description:
-                              type: string
+                              example: ''
+                        model:
+                          type: string
+                          example: GPT-4
+                        provider:
+                          type: string
+                          example: OpenAI
+                    startDate:
+                      type: string
+                      example: '2024-04-16T00:00:00.000Z'
+                  required:
+                    - endDate
+                    - name
+                    - source
+                    - startDate
                 projects:
                   type: array
                   items:
                     type: object
                     properties:
-                      title:
-                        type: string
-                      status:
-                        type: string
+                      category:
+                        type: array
+                        items: {}
+                        example: []
                       description:
                         type: string
+                        example: ''
                       duration:
                         type: string
+                        example: 2 weeks
+                      endDate:
+                        type: string
+                        example: '2024-04-16T00:00:00.000Z'
                       recommendedFor:
                         type: array
                         items:
                           type: string
-                      category:
-                        type: array
-                        items:
-                          type: string
-                      startDate:
-                        type: string
-                      endDate:
-                        type: string
+                          example: students
+                        example:
+                          - students
+                          - teachers
                       source:
                         type: object
                         properties:
-                          model:
-                            type: string
-                          provider:
-                            type: string
                           apiVersion:
                             type: string
+                            example: '4.0'
                           confidenceScore:
                             type: number
+                            example: 0.98
                           info:
                             type: object
                             properties:
-                              url:
-                                type: string
-                              title:
-                                type: string
                               pageNo:
                                 type: string
+                                example: ''
+                              title:
+                                type: string
+                                example: ''
+                              url:
+                                type: string
+                                example: ''
+                          model:
+                            type: string
+                            example: GPT-4
+                          provider:
+                            type: string
+                            example: OpenAI
+                      startDate:
+                        type: string
+                        example: '2024-04-16T00:00:00.000Z'
+                      status:
+                        type: string
+                        example: started
                       tasks:
                         type: array
                         items:
                           type: object
                           properties:
-                            name:
-                              type: string
                             isDeletable:
                               type: boolean
+                              example: false
+                            name:
+                              type: string
+                              example: Task 1
                             sequenceNumber:
                               type: string
+                              example: '1'
                             source:
                               type: object
                               properties:
-                                model:
-                                  type: string
-                                provider:
-                                  type: string
                                 apiVersion:
                                   type: string
+                                  example: '4.0'
                                 confidenceScore:
                                   type: number
+                                  example: 0.98
                                 info:
                                   type: object
                                   properties:
-                                    url:
-                                      type: string
-                                    title:
-                                      type: string
                                     pageNo:
                                       type: string
-                            translations:
-                              type: object
-                              properties:
-                                kn:
-                                  type: object
-                                  properties:
-                                    name:
+                                      example: ''
+                                    title:
                                       type: string
-                                    description:
+                                      example: ''
+                                    url:
                                       type: string
-                                kl:
-                                  type: object
-                                  properties:
-                                    name:
-                                      type: string
-                                    description:
-                                      type: string
-                      translations:
-                        type: object
-                        properties:
-                          hi:
-                            type: object
-                            properties:
-                              title:
-                                type: string
-                              description:
-                                type: string
-                          kn:
-                            type: object
-                            properties:
-                              title:
-                                type: string
-                              description:
-                                type: string
-            examples:
-              example1:
-                value:
-                  program:
-                    name: DCPCR School Development Index 2018-19
-                    description: ''
-                    language:
-                      - English
-                    startDate: '2024-04-16T00:00:00.000Z'
-                    endDate: '2024-04-16T00:00:00.000Z'
-                    source:
-                      model: GPT-4
-                      provider: OpenAI
-                      apiVersion: '4.0'
-                      confidenceScore: 0.98
-                      info:
-                        url: ''
-                        title: ''
-                        pageNo: ''
-                    translations:
-                      kn:
-                        title: DCPCR ಶಾಲಾ ಅಭಿವೃದ್ಧಿ ಸೂಚ್ಯಂಕ 2018-19
-                        description: DCPCR ಶಾಲಾ ಅಭಿವೃದ್ಧಿ ಸೂಚ್ಯಂಕ 2018-19
-                      hi:
-                        title: डीसीपीसीआर स्कूल विकास सूचकांक 2018-19
-                        description: DCPCR ಶಾಲಾ ಅಭಿವೃದ್ಧಿ ಸೂಚ್ಯಂಕ 2018-19
-                  projects:
-                    - title: Understand Importance of Reading
-                      status: started
+                                      example: ''
+                                model:
+                                  type: string
+                                  example: GPT-4
+                                provider:
+                                  type: string
+                                  example: OpenAI
+                          required:
+                            - name
+                        example:
+                          - isDeletable: false
+                            name: Task 1
+                            sequenceNumber: '1'
+                            source:
+                              apiVersion: '4.0'
+                              confidenceScore: 0.98
+                              info:
+                                pageNo: ''
+                                title: ''
+                                url: ''
+                              model: GPT-4
+                              provider: OpenAI
+                      title:
+                        type: string
+                        example: Understand Importance of Reading
+                    required:
+                      - duration
+                      - endDate
+                      - recommendedFor
+                      - source
+                      - startDate
+                      - status
+                      - tasks
+                  example:
+                    - category: []
                       description: ''
                       duration: 2 weeks
+                      endDate: '2024-04-16T00:00:00.000Z'
                       recommendedFor:
                         - students
                         - teachers
-                      category: []
-                      startDate: '2024-04-16T00:00:00.000Z'
-                      endDate: '2024-04-16T00:00:00.000Z'
                       source:
-                        model: GPT-4
-                        provider: OpenAI
                         apiVersion: '4.0'
                         confidenceScore: 0.98
                         info:
-                          url: ''
-                          title: ''
                           pageNo: ''
+                          title: ''
+                          url: ''
+                        model: GPT-4
+                        provider: OpenAI
+                      startDate: '2024-04-16T00:00:00.000Z'
+                      status: started
                       tasks:
-                        - name: Task 1
-                          isDeletable: false
+                        - isDeletable: false
+                          name: Task 1
                           sequenceNumber: '1'
                           source:
-                            model: GPT-4
-                            provider: OpenAI
                             apiVersion: '4.0'
                             confidenceScore: 0.98
                             info:
-                              url: ''
-                              title: ''
                               pageNo: ''
-                          translations:
-                            kn:
-                              name: Kannada languageChild
-                              description: kannada Descriptiom
-                            kl:
-                              name: Malayalam languageChild
-                              description: Malayalam Descriptiom
-                      translations:
-                        hi:
-                          title: पढ़ने का महत्व समझें
-                          description: पढ़ने का महत्व समझें
-                        kn:
-                          title: ಓದಿನ ಪ್ರಾಮುಖ್ಯತೆಯನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಿ
-                          description: ಓದಿನ ಪ್ರಾಮುಖ್ಯತೆಯನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಿ
+                              title: ''
+                              url: ''
+                            model: GPT-4
+                            provider: OpenAI
+                      title: Understand Importance of Reading
+              required:
+                - program
+                - projects
+            examples:
+              Add Project:
+                value:
+                  program:
+                    description: ''
+                    endDate: '2024-04-16T00:00:00.000Z'
+                    language:
+                      - English
+                    name: DCPCR School Development Index 2018-19
+                    source:
+                      apiVersion: '4.0'
+                      confidenceScore: 0.98
+                      info:
+                        pageNo: ''
+                        title: ''
+                        url: ''
+                      model: GPT-4
+                      provider: OpenAI
+                    startDate: '2024-04-16T00:00:00.000Z'
+                  projects:
+                    - category: []
+                      description: ''
+                      duration: 2 weeks
+                      endDate: '2024-04-16T00:00:00.000Z'
+                      recommendedFor:
+                        - students
+                        - teachers
+                      source:
+                        apiVersion: '4.0'
+                        confidenceScore: 0.98
+                        info:
+                          pageNo: ''
+                          title: ''
+                          url: ''
+                        model: GPT-4
+                        provider: OpenAI
+                      startDate: '2024-04-16T00:00:00.000Z'
+                      status: started
+                      tasks:
+                        - isDeletable: false
+                          name: Task 1
+                          sequenceNumber: '1'
+                          source:
+                            apiVersion: '4.0'
+                            confidenceScore: 0.98
+                            info:
+                              pageNo: ''
+                              title: ''
+                              url: ''
+                            model: GPT-4
+                            provider: OpenAI
+                      title: Understand Importance of Reading
       responses:
         '200':
-          description: Success
+          description: Add Project
+          headers:
+            Alt-Svc:
+              schema:
+                type: string
+                example: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+            Content-Length:
+              schema:
+                type: string
+                example: '192'
+            access-control-allow-origin:
+              schema:
+                type: string
+                example: '*'
+            content-security-policy:
+              schema:
+                type: string
+                example: default-src 'none'
+            date:
+              schema:
+                type: string
+                example: Wed, 04 Dec 2024 08:00:24 GMT
+            server:
+              schema:
+                type: string
+                example: nginx
+            via:
+              schema:
+                type: string
+                example: 1.1 google
+            x-content-type-options:
+              schema:
+                type: string
+                example: nosniff
+            x-powered-by:
+              schema:
+                type: string
+                example: Express
           content:
             application/json:
               schema:
@@ -265,69 +349,45 @@ paths:
                   message:
                     type: string
                     example: Project created successfully
-                  status:
-                    type: integer
-                    example: 200
                   result:
                     type: object
                     properties:
+                      lastDownloadedAt:
+                        type: string
+                        example: '2024-06-24T06:56:58.448Z'
                       programId:
                         type: string
                         example: 667505a649de1ae76e9e1033
                       projectId:
                         type: string
                         example: 667918baf8063086b629f007
-                      lastDownloadedAt:
-                        type: string
-                        format: date-time
-                        example: '2024-06-24T06:56:58.448Z'
-  /project/userProjects/update/:projectId:
-    put:
-      tags:
-        - userProjects
-      summary: Update an existing project
-      description: Update project details by ID
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                reflectionStatus:
-                  type: string
-                  enum:
-                    - started
-                    - completed
-                  example: started
-      responses:
-        '200':
-          description: Project updated successfully.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: Project updated successfully
                   status:
-                    type: integer
+                    type: number
                     example: 200
-                  result:
-                    type: object
-                    properties:
-                      _id:
-                        type: string
-                        example: 667505a649de1ae76e9e1033
-  /project/userProjects/addStory/:projectId:
+              examples:
+                Add Project:
+                  value:
+                    message: Project created successfully
+                    result:
+                      lastDownloadedAt: '2024-06-24T06:56:58.448Z'
+                      programId: 667505a649de1ae76e9e1033
+                      projectId: 667918baf8063086b629f007
+                    status: 200
+  /v1/userProjects/addStory/6732f4f1f89b3744c975f5bc:
     post:
       tags:
-        - userProjects
-      summary: Add a story to a project
-      description: Add a story to an existing project using its ID
+        - User Projects
+      summary: Add Story
+      description: Add Story
+      operationId: addStory
+      parameters:
+        - name: x-auth-token
+          in: header
+          schema:
+            type: string
+            example: user token
+          required: true
       requestBody:
-        required: true
         content:
           application/json:
             schema:
@@ -335,79 +395,145 @@ paths:
               properties:
                 story:
                   type: object
-                  description: Story details for the project.
                   properties:
-                    title:
-                      type: string
-                      example: DCPCR School Development Index 2018-19
-                      description: Title of the story.
-                    problemStatement:
-                      type: string
-                      example: problemStatement
-                      description: Problem statement for the story.
-                    objective:
-                      type: string
-                      example: sample object
-                      description: Objective of the story.
-                    timeline:
-                      type: string
-                      example: 2 weeks
-                      description: Estimated timeline for the story.
                     actionSteps:
                       type: array
-                      items:
-                        type: string
-                      example: []
-                    resources:
-                      type: array
-                      items:
-                        type: string
-                      example: []
-                    impact:
-                      type: string
-                      example: sample impact
-                      description: Impact of the story.
-                    summary:
-                      type: string
-                      example: sample summary
-                      description: Summary of the story.
-                    authorName:
-                      type: string
-                      example: jon
-                      description: Author's name.
-                    location:
-                      type: string
-                      example: authorLocation
-                      description: Author's location.
-                    conversation:
-                      type: array
-                      items:
-                        type: object
-                      example: []
-                    chatHistory:
-                      type: array
-                      items:
-                        type: object
+                      items: {}
                       example: []
                     attachments:
                       type: array
-                      description: Attachments associated with the story.
                       items:
                         type: object
                         properties:
                           name:
                             type: string
                             example: 1729251446851.png
-                          type:
-                            type: string
-                            example: image/png
                           sourcePath:
                             type: string
                             example: >-
                               project/668e33a24999c205ea017747/3/5cc85295-b244-4139-88c8-4802c2ad41ad/1729251446851.png
+                          type:
+                            type: string
+                            example: image/png
+                        required:
+                          - name
+                          - sourcePath
+                          - type
+                      example:
+                        - name: 1729251446851.png
+                          sourcePath: >-
+                            project/668e33a24999c205ea017747/3/5cc85295-b244-4139-88c8-4802c2ad41ad/1729251446851.png
+                          type: image/png
+                    authorName:
+                      type: string
+                      example: jon
+                    chatHistory:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          details:
+                            type: string
+                            example: >-
+                              User initiated a discussion about creating a story
+                              related to the DCPCR School Development Index.
+                          event:
+                            type: string
+                            example: Chat started
+                          timestamp:
+                            type: string
+                            example: '2024-12-04T09:55:00Z'
+                      example:
+                        - details: >-
+                            User initiated a discussion about creating a story
+                            related to the DCPCR School Development Index.
+                          event: Chat started
+                          timestamp: '2024-12-04T09:55:00Z'
+                        - details: >-
+                            User did not respond for 10 minutes. Bot marked the
+                            chat as paused.
+                          event: Chat paused
+                          timestamp: '2024-12-04T10:05:00Z'
+                        - details: >-
+                            User resumed the chat and provided inputs for
+                            problem statement and impact.
+                          event: Chat resumed
+                          timestamp: '2024-12-04T10:15:00Z'
+                        - details: >-
+                            User completed the story creation process and
+                            uploaded all necessary files.
+                          event: Chat finished
+                          timestamp: '2024-12-04T10:30:00Z'
+                    conversation:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          botResponse:
+                            type: string
+                            example: >-
+                              Sure, let’s start! Could you tell me about the
+                              title and objectives of the story?
+                          timestamp:
+                            type: string
+                            example: '2024-12-04T10:00:00Z'
+                          userMessage:
+                            type: string
+                            example: >-
+                              I want to create a story about the DCPCR School
+                              Development Index.
+                      example:
+                        - botResponse: >-
+                            Sure, let’s start! Could you tell me about the title
+                            and objectives of the story?
+                          timestamp: '2024-12-04T10:00:00Z'
+                          userMessage: >-
+                            I want to create a story about the DCPCR School
+                            Development Index.
+                        - botResponse: >-
+                            Got it. What about the problem statement and impact
+                            you'd like to highlight?
+                          timestamp: '2024-12-04T10:02:00Z'
+                          userMessage: >-
+                            The title will be 'DCPCR School Development Index
+                            2018-19', and the objective is 'To analyze and
+                            showcase school development trends'.
+                        - botResponse: >-
+                            Great! I’ve added that. Do you have a timeline for
+                            this story?
+                          timestamp: '2024-12-04T10:05:00Z'
+                          userMessage: >-
+                            The problem is schools not meeting benchmarks. The
+                            impact is improving education standards.
+                        - botResponse: >-
+                            Understood. I’ve added a 2-week timeline. Anything
+                            else you’d like to add, such as action steps or
+                            resources?
+                          timestamp: '2024-12-04T10:07:00Z'
+                          userMessage: Two weeks should be enough.
+                        - botResponse: >-
+                            Alright. Please upload them when ready, and I’ll
+                            include them in the story.
+                          timestamp: '2024-12-04T10:10:00Z'
+                          userMessage: >-
+                            No action steps for now, but I’ll share attachments
+                            and PDFs.
+                        - botResponse: >-
+                            Got it! I’ve added the attachment and noted the PDF
+                            language as Hindi.
+                          timestamp: '2024-12-04T10:12:00Z'
+                          userMessage: Here’s an image attachment and a PDF in Hindi.
+                    impact:
+                      type: string
+                      example: sample impact
+                    location:
+                      type: string
+                      example: authorLocation
+                    objective:
+                      type: string
+                      example: sample object
                     pdfInformation:
                       type: array
-                      description: PDF details associated with the story.
                       items:
                         type: object
                         properties:
@@ -417,9 +543,164 @@ paths:
                           language:
                             type: string
                             example: hindi
+                      example:
+                        - filePath: sampleFilepath
+                          language: hindi
+                    problemStatement:
+                      type: string
+                      example: problemStatement
+                    resources:
+                      type: array
+                      items: {}
+                      example: []
+                    summary:
+                      type: string
+                      example: sample summary
+                    timeline:
+                      type: string
+                      example: 2 weeks
+                    title:
+                      type: string
+                      example: DCPCR School Development Index 2018-19
+                  required:
+                    - actionSteps
+                    - authorName
+                    - chatHistory
+                    - conversation
+                    - impact
+                    - location
+                    - objective
+                    - pdfInformation
+                    - problemStatement
+                    - summary
+                    - title
+                    - timeline
+              required:
+                - story
+            examples:
+              Add Story:
+                value:
+                  story:
+                    actionSteps: []
+                    attachments:
+                      - name: 1729251446851.png
+                        sourcePath: >-
+                          project/668e33a24999c205ea017747/3/5cc85295-b244-4139-88c8-4802c2ad41ad/1729251446851.png
+                        type: image/png
+                    authorName: jon
+                    chatHistory:
+                      - details: >-
+                          User initiated a discussion about creating a story
+                          related to the DCPCR School Development Index.
+                        event: Chat started
+                        timestamp: '2024-12-04T09:55:00Z'
+                      - details: >-
+                          User did not respond for 10 minutes. Bot marked the
+                          chat as paused.
+                        event: Chat paused
+                        timestamp: '2024-12-04T10:05:00Z'
+                      - details: >-
+                          User resumed the chat and provided inputs for problem
+                          statement and impact.
+                        event: Chat resumed
+                        timestamp: '2024-12-04T10:15:00Z'
+                      - details: >-
+                          User completed the story creation process and uploaded
+                          all necessary files.
+                        event: Chat finished
+                        timestamp: '2024-12-04T10:30:00Z'
+                    conversation:
+                      - botResponse: >-
+                          Sure, let’s start! Could you tell me about the title
+                          and objectives of the story?
+                        timestamp: '2024-12-04T10:00:00Z'
+                        userMessage: >-
+                          I want to create a story about the DCPCR School
+                          Development Index.
+                      - botResponse: >-
+                          Got it. What about the problem statement and impact
+                          you'd like to highlight?
+                        timestamp: '2024-12-04T10:02:00Z'
+                        userMessage: >-
+                          The title will be 'DCPCR School Development Index
+                          2018-19', and the objective is 'To analyze and
+                          showcase school development trends'.
+                      - botResponse: >-
+                          Great! I’ve added that. Do you have a timeline for
+                          this story?
+                        timestamp: '2024-12-04T10:05:00Z'
+                        userMessage: >-
+                          The problem is schools not meeting benchmarks. The
+                          impact is improving education standards.
+                      - botResponse: >-
+                          Understood. I’ve added a 2-week timeline. Anything
+                          else you’d like to add, such as action steps or
+                          resources?
+                        timestamp: '2024-12-04T10:07:00Z'
+                        userMessage: Two weeks should be enough.
+                      - botResponse: >-
+                          Alright. Please upload them when ready, and I’ll
+                          include them in the story.
+                        timestamp: '2024-12-04T10:10:00Z'
+                        userMessage: >-
+                          No action steps for now, but I’ll share attachments
+                          and PDFs.
+                      - botResponse: >-
+                          Got it! I’ve added the attachment and noted the PDF
+                          language as Hindi.
+                        timestamp: '2024-12-04T10:12:00Z'
+                        userMessage: Here’s an image attachment and a PDF in Hindi.
+                    impact: sample impact
+                    location: authorLocation
+                    objective: sample object
+                    pdfInformation:
+                      - filePath: sampleFilepath
+                        language: hindi
+                    problemStatement: problemStatement
+                    resources: []
+                    summary: sample summary
+                    timeline: 2 weeks
+                    title: DCPCR School Development Index 2018-19
       responses:
         '200':
-          description: Story added successfully.
+          description: Add Project Copy
+          headers:
+            Alt-Svc:
+              schema:
+                type: string
+                example: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+            Content-Length:
+              schema:
+                type: string
+                example: '197'
+            access-control-allow-origin:
+              schema:
+                type: string
+                example: '*'
+            content-security-policy:
+              schema:
+                type: string
+                example: default-src 'none'
+            date:
+              schema:
+                type: string
+                example: Wed, 04 Dec 2024 09:37:03 GMT
+            server:
+              schema:
+                type: string
+                example: nginx
+            via:
+              schema:
+                type: string
+                example: 1.1 google
+            x-content-type-options:
+              schema:
+                type: string
+                example: nosniff
+            x-powered-by:
+              schema:
+                type: string
+                example: Express
           content:
             application/json:
               schema:
@@ -429,37 +710,299 @@ paths:
                     type: string
                     example: Story added successfully
                   status:
-                    type: integer
+                    type: number
                     example: 200
-  /cloud-service/files/preSignedUrls:
-    post:
+              examples:
+                Add Project Copy:
+                  value:
+                    message: Story added successfully
+                    status: 200
+  /v1/userProjects/update/6732f4f1f89b3744c975f5bc:
+    put:
       tags:
-        - cloudService
-      summary: Generate pre-signed URLs for file uploads
-      description: API to generate pre-signed URLs for file uploads to cloud storage
+        - User Projects
+      summary: update Project
+      description: update Project
+      operationId: updateProject
+      parameters:
+        - name: x-auth-token
+          in: header
+          schema:
+            type: string
+            example: user token
+          required: true
       requestBody:
-        required: true
         content:
           application/json:
             schema:
               type: object
-              required:
-                - request
               properties:
-                request:
-                  type: object
-                  properties:
-                    5f72f9998925ec7c60f79a91:
-                      type: object
-                      properties:
-                        files:
-                          type: array
-                          items:
+                reflectionStatus:
+                  type: string
+                  example: started
+                taks:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                        example: 60e02ee6-fdc6-4f77-9ae6-ae91080a9acf
+                      children:
+                        type: array
+                        items: {}
+                        example: []
+                      createdAt:
+                        type: string
+                        example: '2024-07-05T09:47:56.088Z'
+                      createdBy:
+                        type: string
+                        example: '1'
+                      deleted:
+                        type: boolean
+                        example: false
+                      description:
+                        type: string
+                        example: ''
+                      externalId:
+                        type: string
+                        example: 1.0-1720172875555
+                      hasSubTasks:
+                        type: boolean
+                        example: false
+                      isDeletable:
+                        type: boolean
+                        example: false
+                      isDeleted:
+                        type: boolean
+                        example: false
+                      isImportedFromLibrary:
+                        type: boolean
+                        example: false
+                      learningResources:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            app:
+                              type: string
+                              example: elevateProject
+                            id:
+                              type: string
+                              example: ATW6RvBbn9o?si=9sTqAGl9AMMwMPka
+                            link:
+                              type: string
+                              example: https://youtu.be/ATW6RvBbn9o?si=9sTqAGl9AMMwMPka
+                            name:
+                              type: string
+                              example: Tom and jerry
+                        example:
+                          - app: elevateProject
+                            id: ATW6RvBbn9o?si=9sTqAGl9AMMwMPka
+                            link: https://youtu.be/ATW6RvBbn9o?si=9sTqAGl9AMMwMPka
+                            name: Tom and jerry
+                      name:
+                        type: string
+                        example: கன்னட ராஜ்யோத்சவா
+                      referenceId:
+                        type: string
+                        example: 6687c14c39646b05e05a273d
+                      sequenceNumber:
+                        type: string
+                        example: '1'
+                      solutionDetails:
+                        type: object
+                        properties:
+                          solutionId:
                             type: string
-                            example: l1.png
+                            example: ''
+                          solutionSubType:
+                            type: string
+                            example: ''
+                          solutionType:
+                            type: string
+                            example: ''
+                      status:
+                        type: string
+                        example: inProgress
+                      syncedAt:
+                        type: string
+                        example: '2024-07-09T07:18:32.848Z'
+                      taskSequence:
+                        type: array
+                        items: {}
+                        example: []
+                      type:
+                        type: string
+                        example: content
+                      updatedAt:
+                        type: string
+                        example: '2024-07-09T07:18:32.848Z'
+                      updatedBy:
+                        type: string
+                        example: '42'
+                      visibleIf:
+                        type: array
+                        items: {}
+                        example: []
+                  example:
+                    - _id: 60e02ee6-fdc6-4f77-9ae6-ae91080a9acf
+                      children: []
+                      createdAt: '2024-07-05T09:47:56.088Z'
+                      createdBy: '1'
+                      deleted: false
+                      description: ''
+                      externalId: 1.0-1720172875555
+                      hasSubTasks: false
+                      isDeletable: false
+                      isDeleted: false
+                      isImportedFromLibrary: false
+                      learningResources:
+                        - app: elevateProject
+                          id: ATW6RvBbn9o?si=9sTqAGl9AMMwMPka
+                          link: https://youtu.be/ATW6RvBbn9o?si=9sTqAGl9AMMwMPka
+                          name: Tom and jerry
+                      name: கன்னட ராஜ்யோத்சவா
+                      referenceId: 6687c14c39646b05e05a273d
+                      sequenceNumber: '1'
+                      solutionDetails:
+                        solutionId: ''
+                        solutionSubType: ''
+                        solutionType: ''
+                      status: inProgress
+                      syncedAt: '2024-07-09T07:18:32.848Z'
+                      taskSequence: []
+                      type: content
+                      updatedAt: '2024-07-09T07:18:32.848Z'
+                      updatedBy: '42'
+                      visibleIf: []
+                    - _id: d972b8ca-8e7f-4862-bcf5-ac53174c9914
+                      children: []
+                      createdAt: '2024-07-05T09:47:56.102Z'
+                      createdBy: '1'
+                      deleted: false
+                      description: ''
+                      externalId: 2.0-1720172875555
+                      hasSubTasks: false
+                      isDeletable: false
+                      isDeleted: false
+                      isImportedFromLibrary: false
+                      learningResources: []
+                      name: ಏಳು ಸುತ್ತಿನ ಕೋಟೆ
+                      referenceId: 6687c14c39646b05e05a2740
+                      sequenceNumber: '2'
+                      solutionDetails:
+                        solutionId: ''
+                        solutionSubType: ''
+                        solutionType: ''
+                      status: notStarted
+                      syncedAt: '2024-07-09T07:17:55.981Z'
+                      taskSequence: []
+                      type: simple
+                      updatedAt: '2024-07-09T07:17:55.981Z'
+                      updatedBy: '1'
+                      visibleIf: []
+            examples:
+              update Project:
+                value:
+                  reflectionStatus: started
+                  taks:
+                    - _id: 60e02ee6-fdc6-4f77-9ae6-ae91080a9acf
+                      children: []
+                      createdAt: '2024-07-05T09:47:56.088Z'
+                      createdBy: '1'
+                      deleted: false
+                      description: ''
+                      externalId: 1.0-1720172875555
+                      hasSubTasks: false
+                      isDeletable: false
+                      isDeleted: false
+                      isImportedFromLibrary: false
+                      learningResources:
+                        - app: elevateProject
+                          id: ATW6RvBbn9o?si=9sTqAGl9AMMwMPka
+                          link: https://youtu.be/ATW6RvBbn9o?si=9sTqAGl9AMMwMPka
+                          name: Tom and jerry
+                      name: கன்னட ராஜ்யோத்சவா
+                      referenceId: 6687c14c39646b05e05a273d
+                      sequenceNumber: '1'
+                      solutionDetails:
+                        solutionId: ''
+                        solutionSubType: ''
+                        solutionType: ''
+                      status: inProgress
+                      syncedAt: '2024-07-09T07:18:32.848Z'
+                      taskSequence: []
+                      type: content
+                      updatedAt: '2024-07-09T07:18:32.848Z'
+                      updatedBy: '42'
+                      visibleIf: []
+                    - _id: d972b8ca-8e7f-4862-bcf5-ac53174c9914
+                      children: []
+                      createdAt: '2024-07-05T09:47:56.102Z'
+                      createdBy: '1'
+                      deleted: false
+                      description: ''
+                      externalId: 2.0-1720172875555
+                      hasSubTasks: false
+                      isDeletable: false
+                      isDeleted: false
+                      isImportedFromLibrary: false
+                      learningResources: []
+                      name: ಏಳು ಸುತ್ತಿನ ಕೋಟೆ
+                      referenceId: 6687c14c39646b05e05a2740
+                      sequenceNumber: '2'
+                      solutionDetails:
+                        solutionId: ''
+                        solutionSubType: ''
+                        solutionType: ''
+                      status: notStarted
+                      syncedAt: '2024-07-09T07:17:55.981Z'
+                      taskSequence: []
+                      type: simple
+                      updatedAt: '2024-07-09T07:17:55.981Z'
+                      updatedBy: '1'
+                      visibleIf: []
       responses:
         '200':
-          description: URL generated successfully
+          description: update Project
+          headers:
+            Alt-Svc:
+              schema:
+                type: string
+                example: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+            Content-Length:
+              schema:
+                type: string
+                example: '194'
+            access-control-allow-origin:
+              schema:
+                type: string
+                example: '*'
+            content-security-policy:
+              schema:
+                type: string
+                example: default-src 'none'
+            date:
+              schema:
+                type: string
+                example: Wed, 04 Dec 2024 08:28:43 GMT
+            server:
+              schema:
+                type: string
+                example: nginx
+            via:
+              schema:
+                type: string
+                example: 1.1 google
+            x-content-type-options:
+              schema:
+                type: string
+                example: nosniff
+            x-powered-by:
+              schema:
+                type: string
+                example: Express
           content:
             application/json:
               schema:
@@ -467,91 +1010,73 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: Url generated successfully
-                  status:
-                    type: integer
-                    example: 200
+                    example: Project updated successfully
                   result:
                     type: object
                     properties:
-                      cloudStorage:
+                      _id:
                         type: string
-                        example: oci
-                      additionalProp1:
-                        type: object
-                        properties:
-                          files:
-                            type: array
-                            items:
-                              type: object
-                              properties:
-                                file:
-                                  type: string
-                                  example: i1.png
-                                payload:
-                                  type: object
-                                  properties:
-                                    sourcePath:
-                                      type: string
-                                      example: >-
-                                        project/5f72f9998925ec7c60f79a91/1/acee9b95-3c5e-4a09-bfb0-993647ab66f0/i1.png
-                                    url:
-                                      type: string
-                                      example: >-
-                                        https://***.compat.objectstorage.ap-hyderabad-1.oraclecloud.com/mi/project/5f72f9998925ec7c60f79a91/1/acee9b95-3c5e-4a09-bfb0-993647ab66f0/i1.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=3737771d26e1d8f211a04ec59cfd3037c8d1c6ff%2F20240628%2Fap-hyderabad-1%2Fs3%2Faws4_request&X-Amz-Date=20240628T031041Z&X-Amz-Expires=300&X-Amz-Signature=face99c424124bfc8f3988c2fd80ae0cb06231f3e9989d87fc747e659efaedd7&X-Amz-SignedHeaders=host&x-id=PutObject
-                      additionalProp2:
-                        type: object
-                        properties:
-                          files:
-                            type: array
-                            items:
-                              type: object
-                              properties:
-                                file:
-                                  type: string
-                                  example: i2.png
-                                payload:
-                                  type: object
-                                  properties:
-                                    sourcePath:
-                                      type: string
-                                      example: >-
-                                        project/5f72f9998925ec7c60f79a91/1/acee9b95-3c5e-4a09-bfb0-993647ab66f0/i2.png
-                                    url:
-                                      type: string
-                                      example: >-
-                                        https://***.compat.objectstorage.ap-hyderabad-1.oraclecloud.com/mi/project/5f72f9998925ec7c60f79a91/1/acee9b95-3c5e-4a09-bfb0-993647ab66f0/i2.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=3737771d26e1d8f211a04ec59cfd3037c8d1c6ff%2F20240628%2Fap-hyderabad-1%2Fs3%2Faws4_request&X-Amz-Date=20240628T031041Z&X-Amz-Expires=300&X-Amz-Signature=920e8dc3753d16c9932b3b347bc41161fa6d9f4932723a00d6319e4e67a9a682&X-Amz-SignedHeaders=host&x-id=PutObject
-                      additionalProp3:
-                        type: object
-                        properties:
-                          files:
-                            type: array
-                            items:
-                              type: object
-                              properties:
-                                file:
-                                  type: string
-                                  example: i3.png
-                                payload:
-                                  type: object
-                                  properties:
-                                    sourcePath:
-                                      type: string
-                                      example: >-
-                                        project/5f72f9998925ec7c60f79a91/1/acee9b95-3c5e-4a09-bfb0-993647ab66f0/i3.png
-                                    url:
-                                      type: string
-                                      example: >-
-                                        https://***.compat.objectstorage.ap-hyderabad-1.oraclecloud.com/mi/project/5f72f9998925ec7c60f79a91/1/acee9b95-3c5e-4a09-bfb0-993647ab66f0/i3.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=3737771d26e1d8f211a04ec59cfd3037c8d1c6ff%2F20240628%2Fap-hyderabad-1%2Fs3%2Faws4_request&X-Amz-Date=20240628T031041Z&X-Amz-Expires=300&X-Amz-Signature=ab12a6c1f00d0c835b405020542bbf7f89b6dfb43e04051606a7a34987b606f&X-Amz-SignedHeaders=host&x-id=PutObject
+                        example: 667505a649de1ae76e9e1033
+                  status:
+                    type: number
+                    example: 200
+              examples:
+                update Project:
+                  value:
+                    message: Project updated successfully
+                    result:
+                      _id: 667505a649de1ae76e9e1033
+                    status: 200
   /v1/profile/read:
     get:
       tags:
-        - profile
-      summary: Retrieve user profile information
-      description: Fetches the details of the currently authenticated user profile.
+        - User
+      summary: profile Read
+      description: profile Read
+      operationId: profileRead
+      parameters:
+        - name: x-auth-token
+          in: header
+          schema:
+            type: string
+            example: '{{token}}'
+          required: true
       responses:
         '200':
-          description: Successfully fetched user profile data
+          description: Read User Copy
+          headers:
+            Alt-Svc:
+              schema:
+                type: string
+                example: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+            Content-Length:
+              schema:
+                type: string
+                example: '1878'
+            access-control-allow-origin:
+              schema:
+                type: string
+                example: '*'
+            date:
+              schema:
+                type: string
+                example: Wed, 04 Dec 2024 10:51:57 GMT
+            etag:
+              schema:
+                type: string
+                example: W/"756-a40EUMuTyrlU8CtH07y0oRKFQVU"
+            server:
+              schema:
+                type: string
+                example: nginx
+            via:
+              schema:
+                type: string
+                example: 1.1 google
+            x-powered-by:
+              schema:
+                type: string
+                example: Express
           content:
             application/json:
               schema:
@@ -560,116 +1085,96 @@ paths:
                   message:
                     type: string
                     example: Data fetched successfully
-                  status:
-                    type: integer
-                    example: 200
                   result:
                     type: object
                     properties:
-                      id:
-                        type: integer
-                        example: 5
-                      email:
-                        type: string
-                        example: rahul@gmail.com
-                      email_verified:
-                        type: string
-                        example: 'false'
-                      name:
-                        type: string
-                        example: Rahul
                       about:
                         type: string
                         example: PWA
-                      share_link:
-                        type: string
-                        nullable: true
-                        example: null
-                      status:
-                        type: string
-                        example: ACTIVE
-                      has_accepted_terms_and_conditions:
-                        type: boolean
-                        example: true
-                      languages:
-                        type: array
-                        items:
-                          type: string
-                        example: []
-                      preferred_language:
+                      block:
                         type: object
                         properties:
-                          value:
+                          externalId:
                             type: string
-                            example: en
+                            example: enkhjg
                           label:
                             type: string
-                            example: English
-                      organization_id:
-                        type: integer
-                        example: 1
-                      roles:
-                        type: array
-                        items:
-                          type: integer
-                        example:
-                          - 1
-                          - 3
-                          - 8
-                          - 6
-                      meta:
+                            example: 'Bangalore South '
+                          value:
+                            type: string
+                            example: 6682771aa845ef3e891db070
+                      cluster:
                         type: object
-                        additionalProperties: true
+                        properties:
+                          externalId:
+                            type: string
+                            example: efflfh3
+                          label:
+                            type: string
+                            example: Indiranagar
+                          value:
+                            type: string
+                            example: 668242835fb8bc3e93ceae44
                       created_at:
                         type: string
-                        format: date-time
-                        example: '2024-07-19T06:52:35.604Z'
-                      updated_at:
-                        type: string
-                        format: date-time
-                        example: '2024-08-12T09:54:53.619Z'
+                        example: '2024-05-28T06:15:26.375Z'
                       deleted_at:
-                        type: string
                         nullable: true
                         example: null
+                      district:
+                        type: object
+                        properties:
+                          externalId:
+                            type: string
+                            example: enff3
+                          label:
+                            type: string
+                            example: Bengaluru
+                          value:
+                            type: string
+                            example: 668240135fb8bc3e93ceae39
+                      email:
+                        type: string
+                        example: farhanpasha@shikshalokam.com
+                      email_verified:
+                        type: string
+                        example: 'false'
+                      has_accepted_terms_and_conditions:
+                        type: boolean
+                        example: false
+                      id:
+                        type: string
+                        example: '215'
+                      image:
+                        nullable: true
+                        example: null
+                      image_cloud_path:
+                        nullable: true
+                        example: null
+                      languages:
+                        nullable: true
+                        example: null
+                      meta:
+                        type: object
+                        properties: {}
+                      name:
+                        type: string
+                        example: Farhanhv gg
                       organization:
                         type: object
                         properties:
-                          id:
-                            type: integer
-                            example: 1
-                          name:
-                            type: string
-                            example: Default Organization
                           code:
                             type: string
                             example: default_code
-                      user_roles:
-                        type: array
-                        items:
-                          type: object
-                          properties:
-                            id:
-                              type: integer
-                              example: 8
-                            title:
-                              type: string
-                              example: program_desiginer
-                            label:
-                              type: string
-                              example: Program Desiginer
-                            user_type:
-                              type: integer
-                              example: 0
-                            status:
-                              type: string
-                              example: ACTIVE
-                            organization_id:
-                              type: integer
-                              example: 1
-                            visibility:
-                              type: string
-                              example: PUBLIC
+                          id:
+                            type: string
+                            example: '1'
+                          name:
+                            type: string
+                            example: Default Organization
+                      organization_id:
+                        type: string
+                        example: '1'
                       permissions:
                         type: array
                         items:
@@ -682,50 +1187,486 @@ paths:
                               type: array
                               items:
                                 type: string
+                                example: POST
                               example:
                                 - POST
+                                - PATCH
                                 - DELETE
                                 - GET
                                 - PUT
-                                - PATCH
                             service:
                               type: string
                               example: user
-                      block:
+                        example:
+                          - module: user
+                            request_type:
+                              - POST
+                              - PATCH
+                              - DELETE
+                              - GET
+                              - PUT
+                            service: user
+                          - module: cloud-services
+                            request_type:
+                              - POST
+                              - PATCH
+                              - DELETE
+                              - GET
+                              - PUT
+                            service: user
+                          - module: account
+                            request_type:
+                              - POST
+                            service: user
+                      preferred_language:
+                        type: object
+                        properties:
+                          label:
+                            type: string
+                            example: English
+                          value:
+                            type: string
+                            example: en
+                      roles:
+                        type: array
+                        items:
+                          type: string
+                          example: '18'
+                        example:
+                          - '18'
+                          - '19'
+                          - '20'
+                          - '21'
+                      share_link:
+                        nullable: true
+                        example: null
+                      state:
+                        type: object
+                        properties:
+                          externalId:
+                            type: string
+                            example: hsjj
+                          label:
+                            type: string
+                            example: Karnataka
+                          value:
+                            type: string
+                            example: 665d8df5c6892808846230e7
+                      status:
+                        type: string
+                        example: ACTIVE
+                      updated_at:
+                        type: string
+                        example: '2024-12-04T09:20:21.170Z'
+                      user_roles:
                         type: array
                         items:
                           type: object
                           properties:
-                            value:
+                            id:
                               type: string
-                              example: 5fd1b52ab53a6416aaeefb17
+                              example: '18'
                             label:
                               type: string
-                              example: PONDURU
-                            externalId:
+                              example: Block Education Officer
+                            organization_id:
                               type: string
-                              example: 5b6010b6-5394-4704-b05f-0bea83ff1fb7
-                      state:
-                        type: object
-                        properties:
-                          value:
-                            type: string
-                            example: 5f33c3d85f637784791cd830
-                          label:
-                            type: string
-                            example: Unknown
-                          externalId:
-                            type: string
-                            example: Unknown
+                              example: '24'
+                            status:
+                              type: string
+                              example: ACTIVE
+                            title:
+                              type: string
+                              example: block_education_officer
+                            user_type:
+                              type: number
+                              example: 0
+                            visibility:
+                              type: string
+                              example: PUBLIC
+                        example:
+                          - id: '18'
+                            label: Block Education Officer
+                            organization_id: '24'
+                            status: ACTIVE
+                            title: block_education_officer
+                            user_type: 0
+                            visibility: PUBLIC
+                          - id: '19'
+                            label: Block Academic Coordinator
+                            organization_id: '24'
+                            status: ACTIVE
+                            title: block_academic_coordinator
+                            user_type: 0
+                            visibility: PUBLIC
+                          - id: '20'
+                            label: District Education Officer
+                            organization_id: '24'
+                            status: ACTIVE
+                            title: district_education_officer
+                            user_type: 0
+                            visibility: PUBLIC
+                          - id: '21'
+                            label: District Resource Person
+                            organization_id: '24'
+                            status: ACTIVE
+                            title: district_resource_person
+                            user_type: 0
+                            visibility: PUBLIC
+                  status:
+                    type: number
+                    example: 200
+              examples:
+                Read User Copy:
+                  value:
+                    message: Data fetched successfully
+                    result:
+                      about: PWA
+                      block:
+                        externalId: enkhjg
+                        label: 'Bangalore South '
+                        value: 6682771aa845ef3e891db070
+                      cluster:
+                        externalId: efflfh3
+                        label: Indiranagar
+                        value: 668242835fb8bc3e93ceae44
+                      created_at: '2024-05-28T06:15:26.375Z'
+                      deleted_at: null
                       district:
+                        externalId: enff3
+                        label: Bengaluru
+                        value: 668240135fb8bc3e93ceae39
+                      email: farhanpasha@shikshalokam.com
+                      email_verified: 'false'
+                      has_accepted_terms_and_conditions: false
+                      id: '215'
+                      image: null
+                      image_cloud_path: null
+                      languages: null
+                      meta: {}
+                      name: Farhanhv gg
+                      organization:
+                        code: default_code
+                        id: '1'
+                        name: Default Organization
+                      organization_id: '1'
+                      permissions:
+                        - module: user
+                          request_type:
+                            - POST
+                            - PATCH
+                            - DELETE
+                            - GET
+                            - PUT
+                          service: user
+                        - module: cloud-services
+                          request_type:
+                            - POST
+                            - PATCH
+                            - DELETE
+                            - GET
+                            - PUT
+                          service: user
+                        - module: account
+                          request_type:
+                            - POST
+                          service: user
+                      preferred_language:
+                        label: English
+                        value: en
+                      roles:
+                        - '18'
+                        - '19'
+                        - '20'
+                        - '21'
+                      share_link: null
+                      state:
+                        externalId: hsjj
+                        label: Karnataka
+                        value: 665d8df5c6892808846230e7
+                      status: ACTIVE
+                      updated_at: '2024-12-04T09:20:21.170Z'
+                      user_roles:
+                        - id: '18'
+                          label: Block Education Officer
+                          organization_id: '24'
+                          status: ACTIVE
+                          title: block_education_officer
+                          user_type: 0
+                          visibility: PUBLIC
+                        - id: '19'
+                          label: Block Academic Coordinator
+                          organization_id: '24'
+                          status: ACTIVE
+                          title: block_academic_coordinator
+                          user_type: 0
+                          visibility: PUBLIC
+                        - id: '20'
+                          label: District Education Officer
+                          organization_id: '24'
+                          status: ACTIVE
+                          title: district_education_officer
+                          user_type: 0
+                          visibility: PUBLIC
+                        - id: '21'
+                          label: District Resource Person
+                          organization_id: '24'
+                          status: ACTIVE
+                          title: district_resource_person
+                          user_type: 0
+                          visibility: PUBLIC
+                    status: 200
+  /v1/cloud-services/files/preSignedUrls:
+    post:
+      tags:
+        - cloudService
+      summary: preSignedUrls
+      description: preSignedUrls
+      operationId: presignedurls
+      parameters:
+        - name: x-auth-token
+          in: header
+          schema:
+            type: string
+            example: '{{token}}'
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                request:
+                  type: object
+                  properties:
+                    5f72f9998925ec7c60f79a91:
+                      type: object
+                      properties:
+                        files:
+                          type: array
+                          items:
+                            type: string
+                            example: Screenshot from 2024-05-01 18-39-23.png
+                          example:
+                            - Screenshot from 2024-05-01 18-39-23.png
+            examples:
+              preSignedUrls:
+                value:
+                  request:
+                    5f72f9998925ec7c60f79a91:
+                      files:
+                        - Screenshot from 2024-05-01 18-39-23.png
+      responses:
+        '200':
+          description: preSignedUrls
+          headers:
+            Alt-Svc:
+              schema:
+                type: string
+                example: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+            Content-Length:
+              schema:
+                type: string
+                example: '975'
+            access-control-allow-origin:
+              schema:
+                type: string
+                example: '*'
+            date:
+              schema:
+                type: string
+                example: Wed, 04 Dec 2024 10:29:36 GMT
+            etag:
+              schema:
+                type: string
+                example: W/"3cf-NpeZmDNd3SPVhM1kq/br7XPSonM"
+            server:
+              schema:
+                type: string
+                example: nginx
+            via:
+              schema:
+                type: string
+                example: 1.1 google
+            x-powered-by:
+              schema:
+                type: string
+                example: Express
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Url generated successfully
+                  result:
+                    type: object
+                    properties:
+                      5f72f9998925ec7c60f79a91:
                         type: object
                         properties:
-                          value:
-                            type: string
-                            example: 5fd098e2e049735a86b748ad
-                          label:
-                            type: string
-                            example: VIZIANAGARAM
-                          externalId:
-                            type: string
-                            example: b54a5c6d-98be-4313-af1c-33040b1703aa
+                          files:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                file:
+                                  type: string
+                                  example: Screenshot from 2024-05-01 18-39-23.png
+                                payload:
+                                  type: object
+                                  properties:
+                                    sourcePath:
+                                      type: string
+                                      example: >-
+                                        project/5f72f9998925ec7c60f79a91/215/6618a097-0ed3-4950-bf59-f5471d2e1f65/Screenshot
+                                        from 2024-05-01 18-39-23.png
+                                url:
+                                  type: string
+                                  example: >-
+                                    https://storage.googleapis.com/mentoring-dev-storage-private/project/5f72f9998925ec7c60f79a91/215/6618a097-0ed3-4950-bf59-f5471d2e1f65/Screenshot%20from%202024-05-01%2018-39-23.png?GoogleAccessId=sl-mentoring-dev-storage%40sl-dev-project.iam.gserviceaccount.com&Expires=1733326176&Signature=qJTyiLscqdR5TalUV8nCONWU9NAV4iCSdHNTDFMQ3HkN6oY0HcSbUJgZUk9ULmgaF3qTJpTGb%2F5irj%2BPy5PrwvaY829iPgHFmBLrHx3Itv4d28c1XfVKIIblOTY7Ikjwx8KOWWD9UIpBzlhuf2Lil61R25H64ZiVyAyFE6K4TmGTIW20abeV%2FOOV0oNvBPWuDeqcAXaec6xLQvtAEJKmw6R40lbqOVa7iWFWFqLbq3rDiJBD2gSCoC3lV1KbT8A4QAcNtYiuh8kE9u79cSyy27Tqmjonh2HD0j5B0iYxlINvJY7lOcQc3tCFj996KrBdGW78BKCQVI1SuLWdnm%2F1tw%3D%3D
+                            example:
+                              - file: Screenshot from 2024-05-01 18-39-23.png
+                                payload:
+                                  sourcePath: >-
+                                    project/5f72f9998925ec7c60f79a91/215/6618a097-0ed3-4950-bf59-f5471d2e1f65/Screenshot
+                                    from 2024-05-01 18-39-23.png
+                                url: >-
+                                  https://storage.googleapis.com/mentoring-dev-storage-private/project/5f72f9998925ec7c60f79a91/215/6618a097-0ed3-4950-bf59-f5471d2e1f65/Screenshot%20from%202024-05-01%2018-39-23.png?GoogleAccessId=sl-mentoring-dev-storage%40sl-dev-project.iam.gserviceaccount.com&Expires=1733326176&Signature=qJTyiLscqdR5TalUV8nCONWU9NAV4iCSdHNTDFMQ3HkN6oY0HcSbUJgZUk9ULmgaF3qTJpTGb%2F5irj%2BPy5PrwvaY829iPgHFmBLrHx3Itv4d28c1XfVKIIblOTY7Ikjwx8KOWWD9UIpBzlhuf2Lil61R25H64ZiVyAyFE6K4TmGTIW20abeV%2FOOV0oNvBPWuDeqcAXaec6xLQvtAEJKmw6R40lbqOVa7iWFWFqLbq3rDiJBD2gSCoC3lV1KbT8A4QAcNtYiuh8kE9u79cSyy27Tqmjonh2HD0j5B0iYxlINvJY7lOcQc3tCFj996KrBdGW78BKCQVI1SuLWdnm%2F1tw%3D%3D
+                      cloudStorage:
+                        type: string
+                        example: gcloud
+                  status:
+                    type: number
+                    example: 200
+              examples:
+                preSignedUrls:
+                  value:
+                    message: Url generated successfully
+                    result:
+                      5f72f9998925ec7c60f79a91:
+                        files:
+                          - file: Screenshot from 2024-05-01 18-39-23.png
+                            payload:
+                              sourcePath: >-
+                                project/5f72f9998925ec7c60f79a91/215/6618a097-0ed3-4950-bf59-f5471d2e1f65/Screenshot
+                                from 2024-05-01 18-39-23.png
+                            url: >-
+                              https://storage.googleapis.com/mentoring-dev-storage-private/project/5f72f9998925ec7c60f79a91/215/6618a097-0ed3-4950-bf59-f5471d2e1f65/Screenshot%20from%202024-05-01%2018-39-23.png?GoogleAccessId=sl-mentoring-dev-storage%40sl-dev-project.iam.gserviceaccount.com&Expires=1733326176&Signature=qJTyiLscqdR5TalUV8nCONWU9NAV4iCSdHNTDFMQ3HkN6oY0HcSbUJgZUk9ULmgaF3qTJpTGb%2F5irj%2BPy5PrwvaY829iPgHFmBLrHx3Itv4d28c1XfVKIIblOTY7Ikjwx8KOWWD9UIpBzlhuf2Lil61R25H64ZiVyAyFE6K4TmGTIW20abeV%2FOOV0oNvBPWuDeqcAXaec6xLQvtAEJKmw6R40lbqOVa7iWFWFqLbq3rDiJBD2gSCoC3lV1KbT8A4QAcNtYiuh8kE9u79cSyy27Tqmjonh2HD0j5B0iYxlINvJY7lOcQc3tCFj996KrBdGW78BKCQVI1SuLWdnm%2F1tw%3D%3D
+                      cloudStorage: gcloud
+                    status: 200
+  /v1/cloud-services/files/getDownloadableUrl:
+    post:
+      tags:
+        - cloudService
+      summary: getDownloadableUrl
+      description: getDownloadableUrl
+      operationId: getdownloadableurl
+      parameters:
+        - name: x-auth-token
+          in: header
+          schema:
+            type: string
+            example: '{{token}}'
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                filePaths:
+                  type: array
+                  items:
+                    type: string
+                    example: >-
+                      project/674051e3cde36f67e4f83efa/2/f0ed822a-e833-4c00-88b9-f633079d6e10/1732268558782.jpeg
+                  example:
+                    - >-
+                      project/674051e3cde36f67e4f83efa/2/f0ed822a-e833-4c00-88b9-f633079d6e10/1732268558782.jpeg
+            examples:
+              getDownloadableUrl:
+                value:
+                  filePaths:
+                    - >-
+                      project/674051e3cde36f67e4f83efa/2/f0ed822a-e833-4c00-88b9-f633079d6e10/1732268558782.jpeg
+      responses:
+        '200':
+          description: getDownloadableUrl Copy
+          headers:
+            Alt-Svc:
+              schema:
+                type: string
+                example: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+            Content-Length:
+              schema:
+                type: string
+                example: '813'
+            access-control-allow-origin:
+              schema:
+                type: string
+                example: '*'
+            date:
+              schema:
+                type: string
+                example: Wed, 04 Dec 2024 10:39:38 GMT
+            etag:
+              schema:
+                type: string
+                example: W/"32d-DOmtuMFsyhUcv8ygBFoPx5b3cpw"
+            server:
+              schema:
+                type: string
+                example: nginx
+            via:
+              schema:
+                type: string
+                example: 1.1 google
+            x-powered-by:
+              schema:
+                type: string
+                example: Express
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Url's generated successfully
+                  result:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        filePath:
+                          type: string
+                          example: >-
+                            project/674051e3cde36f67e4f83efa/2/f0ed822a-e833-4c00-88b9-f633079d6e10/1732268558782.jpeg
+                        url:
+                          type: string
+                          example: >-
+                            https://storage.googleapis.com/mentoring-dev-storage-private/project/674051e3cde36f67e4f83efa/2/f0ed822a-e833-4c00-88b9-f633079d6e10/1732268558782.jpeg?GoogleAccessId=sl-mentoring-dev-storage%40sl-dev-project.iam.gserviceaccount.com&Expires=1733326779&Signature=hw69Y8dE844GtEKU6pUgkJDkQ4cdRexFbajrMLdGc9blHhWkx9CjKIZBTFrV6OdmBoRocpylEDuyYmPZgds0M6orDKGlMypXyRYeI0GVJFnWaNmkIDmRVNBtjM3X%2FeBGZkbBZlEGPgz4s%2Bd4mEjbTCc1DZqagzJQ4oMi%2FnjzVI4bHflwqeg31sLOS%2Fd3IXOTdEjygvYX%2FdZdZAuDdh8DfleE9I5sYf8NJIoNY6ABI%2Fenwq8ub6y7I6czBZah87d7aBt6mPCS3SL%2B0I5qr11lfx5svZ7oaz9yN%2Bje7iF%2FMcX0H2FS8JY9bmn7M6X9sGeaoRfe%2FUYQANyep9%2F4e9rt6A%3D%3D
+                    example:
+                      - filePath: >-
+                          project/674051e3cde36f67e4f83efa/2/f0ed822a-e833-4c00-88b9-f633079d6e10/1732268558782.jpeg
+                        url: >-
+                          https://storage.googleapis.com/mentoring-dev-storage-private/project/674051e3cde36f67e4f83efa/2/f0ed822a-e833-4c00-88b9-f633079d6e10/1732268558782.jpeg?GoogleAccessId=sl-mentoring-dev-storage%40sl-dev-project.iam.gserviceaccount.com&Expires=1733326779&Signature=hw69Y8dE844GtEKU6pUgkJDkQ4cdRexFbajrMLdGc9blHhWkx9CjKIZBTFrV6OdmBoRocpylEDuyYmPZgds0M6orDKGlMypXyRYeI0GVJFnWaNmkIDmRVNBtjM3X%2FeBGZkbBZlEGPgz4s%2Bd4mEjbTCc1DZqagzJQ4oMi%2FnjzVI4bHflwqeg31sLOS%2Fd3IXOTdEjygvYX%2FdZdZAuDdh8DfleE9I5sYf8NJIoNY6ABI%2Fenwq8ub6y7I6czBZah87d7aBt6mPCS3SL%2B0I5qr11lfx5svZ7oaz9yN%2Bje7iF%2FMcX0H2FS8JY9bmn7M6X9sGeaoRfe%2FUYQANyep9%2F4e9rt6A%3D%3D
+                  status:
+                    type: number
+                    example: 200
+              examples:
+                getDownloadableUrl Copy:
+                  value:
+                    message: Url's generated successfully
+                    result:
+                      - filePath: >-
+                          project/674051e3cde36f67e4f83efa/2/f0ed822a-e833-4c00-88b9-f633079d6e10/1732268558782.jpeg
+                        url: >-
+                          https://storage.googleapis.com/mentoring-dev-storage-private/project/674051e3cde36f67e4f83efa/2/f0ed822a-e833-4c00-88b9-f633079d6e10/1732268558782.jpeg?GoogleAccessId=sl-mentoring-dev-storage%40sl-dev-project.iam.gserviceaccount.com&Expires=1733326779&Signature=hw69Y8dE844GtEKU6pUgkJDkQ4cdRexFbajrMLdGc9blHhWkx9CjKIZBTFrV6OdmBoRocpylEDuyYmPZgds0M6orDKGlMypXyRYeI0GVJFnWaNmkIDmRVNBtjM3X%2FeBGZkbBZlEGPgz4s%2Bd4mEjbTCc1DZqagzJQ4oMi%2FnjzVI4bHflwqeg31sLOS%2Fd3IXOTdEjygvYX%2FdZdZAuDdh8DfleE9I5sYf8NJIoNY6ABI%2Fenwq8ub6y7I6czBZah87d7aBt6mPCS3SL%2B0I5qr11lfx5svZ7oaz9yN%2Bje7iF%2FMcX0H2FS8JY9bmn7M6X9sGeaoRfe%2FUYQANyep9%2F4e9rt6A%3D%3D
+                    status: 200
+tags:
+  - name: User Projects
+  - name: User
+  - name: cloudService

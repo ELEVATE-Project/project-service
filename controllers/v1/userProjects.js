@@ -1254,4 +1254,43 @@ module.exports = class UserProjects extends Abstract {
 			}
 		})
 	}
+	/**
+    * @api {post} /project/v1/userProjects/update/:projectId
+    * ReIssue project certificate
+    * @apiVersion 1.0.0
+    * @apiGroup User Projects
+    * @apiSampleRequest /project/v1/userProjects/update/66ac9949227504a96d8dce1c
+    * @apiParamExample {json} Response:
+    {
+        "message": "Project Updated Successfully.",
+        "status": 200,
+        "result": {
+            "_id": "667aabc7b070696248731e8e"
+        }
+    }
+	 * Verify project certificate
+	 * @method
+	 * @name update
+	 * @param {String} projectId - projectId.
+	 * @returns {JSON} certificate details.
+	 */
+	async update(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				const updateData = await userProjectsHelper.update(
+					{ _id: req.params._id },
+					req.body,
+					req.userDetails.userInformation.userId
+				)
+				return resolve(updateData)
+			} catch (error) {
+				console.log(error)
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
+				})
+			}
+		})
+	}
 }

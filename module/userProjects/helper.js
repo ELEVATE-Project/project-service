@@ -3577,6 +3577,116 @@ module.exports = class UserProjectsHelper {
 			}
 		})
 	}
+
+	/**
+	 * update project infromation
+	 * @method
+	 * @name update
+	 * @param {Object} filter - filter to search project to be updated.
+	 * @param {Object} updateTo - data which will be updated.
+	 * @param {String} userId - Logged in user Id.
+	 * @returns {Object} status of update project
+	 */
+
+	static update(filter, updateTo, userId) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let { tasks, reflectionStatus, ...filteredUpdateData } = updateTo
+
+				const userProject = await projectQueries.projectDocument(filter, ['_id', 'reflection', 'tasks'])
+
+				if (!(userProject && userProject[0])) {
+					throw new Error(CONSTANTS.apiResponses.USER_PROJECT_NOT_FOUND)
+				}
+
+				let currentReflection = userProject[0].reflection || {}
+
+				if (reflectionStatus == 'started') {
+					currentReflection.status = 'started'
+					currentReflection.startedAt = new Date()
+					filteredUpdateData.reflection = currentReflection
+				} else if (reflectionStatus == 'completed') {
+					currentReflection.status = 'completed'
+					currentReflection.completedDate = new Date()
+					filteredUpdateData.reflection = currentReflection
+				}
+
+				if (tasks && tasks.length > 0) {
+					let taskReport = {}
+
+					filteredUpdateData.tasks = await _projectTask(tasks)
+					let fetchedProject = userProject[0]
+					if (fetchedProject.tasks && fetchedProject.tasks.length > 0) {
+						filteredUpdateData.tasks.forEach((task) => {
+							task.updatedBy = userId
+							task.updatedAt = new Date()
+
+							let taskIndex = fetchedProject.tasks.findIndex(
+								(projectTask) => projectTask._id === task._id
+							)
+
+							if (taskIndex < 0) {
+								fetchedProject.tasks.push(task)
+							} else {
+								let keepFieldsFromTask = ['observationInformation', 'submissions']
+
+								removeFieldsFromRequest.forEach((removeField) => {
+									delete fetchedProject.tasks[taskIndex][removeField]
+								})
+
+								keepFieldsFromTask.forEach((field) => {
+									if (fetchedProject.tasks[taskIndex][field]) {
+										task[field] = fetchedProject.tasks[taskIndex][field]
+									}
+								})
+
+								fetchedProject.tasks[taskIndex] = task
+							}
+						})
+
+						filteredUpdateData.tasks = fetchedProject.tasks
+					}
+
+					taskReport.total = filteredUpdateData.tasks.length
+
+					filteredUpdateData.tasks.forEach((task) => {
+						//consider tasks where isDeleted is false.
+						if (task.isDeleted == false) {
+							if (!taskReport[task.status]) {
+								taskReport[task.status] = 1
+							} else {
+								taskReport[task.status] += 1
+							}
+						} else {
+							taskReport.total = taskReport.total - 1
+						}
+					})
+
+					filteredUpdateData['taskReport'] = taskReport
+				}
+
+				let updateProject = await projectQueries.findOneAndUpdate(filter, filteredUpdateData)
+
+				if (!updateProject) {
+					throw new Error(CONSTANTS.apiResponses.PROJECT_UPDATED_FAILED)
+				}
+
+				return resolve({
+					message: CONSTANTS.apiResponses.PROJECT_UPDATED_SUCCESSFULLY,
+					success: true,
+					result: { _id: updateProject._id },
+				})
+			} catch (error) {
+				console.log(error)
+				return resolve({
+					message: error.message,
+					status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
+					success: false,
+					data: {},
+				})
+			}
+		})
+	}
 }
 
 /**

@@ -1137,7 +1137,7 @@ module.exports = class ProgramsHelper {
 						_id: program._id,
 						isAPrivateProgram: program.isAPrivateProgram,
 						ongoingProjects: program.ongoingProjects ? program.ongoingProjects : 0,
-						completedCount: program.completedCount ? program.completedCount : 0,
+						completedProjects: program.completedProjects ? program.completedProjects : 0,
 					}))
 				}
 				return resolve(programsData)

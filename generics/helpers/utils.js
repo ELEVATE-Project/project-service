@@ -741,7 +741,6 @@ function getTranslatedData(data, translateData) {
  */
 function calculateEndDate(createdDate, durationString) {
 	const startDate = moment(createdDate) // Parse the start date
-	console.log(`Calculating end date`, startDate)
 	if (!startDate.isValid()) {
 		throw new Error('Invalid start date format')
 	}

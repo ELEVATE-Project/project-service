@@ -240,28 +240,28 @@ module.exports = class UserProjectsHelper {
 				//     }
 				// }
 
-				let addOrUpdateEntityToProject = false
+				// let addOrUpdateEntityToProject = false
 
-				if (data.entityId) {
-					// If entity is not present in project or new entity is updated.
-					if (
-						!userProject[0].entityInformation ||
-						(userProject[0].entityInformation && userProject[0].entityInformation._id !== data.entityId)
-					) {
-						addOrUpdateEntityToProject = true
-					}
-				}
+				// if (data.entityId) {
+				// 	// If entity is not present in project or new entity is updated.
+				// 	if (
+				// 		!userProject[0].entityInformation ||
+				// 		(userProject[0].entityInformation && userProject[0].entityInformation._id !== data.entityId)
+				// 	) {
+				// 		addOrUpdateEntityToProject = true
+				// 	}
+				// }
 
-				if (addOrUpdateEntityToProject) {
-					let entityInformation = await entitiesService.entityDocuments({ _id: entityId }, 'all')
+				// if (addOrUpdateEntityToProject) {
+				// 	let entityInformation = await entitiesService.entityDocuments({ _id: entityId }, 'all')
 
-					if (!entityInformation.success) {
-						return resolve(entityInformation)
-					}
+				// 	if (!entityInformation.success) {
+				// 		return resolve(entityInformation)
+				// 	}
 
-					updateProject['entityInformation'] = entityInformation.data[0]
-					updateProject.entityId = entityInformation.data[0]._id
-				}
+				// 	updateProject['entityInformation'] = entityInformation.data[0]
+				// 	updateProject.entityId = entityInformation.data[0]._id
+				// }
 
 				// if (createNewProgramAndSolution || solutionExists) {
 

@@ -1065,7 +1065,8 @@ module.exports = class ProgramsHelper {
 					'none',
 					{ createdAt: -1 } // sort by 'createdAt' in descending order
 				)
-
+				//getting totalCount of users programs
+				let totaluserProgramCount = programsData.length
 				if (!(programsData.length > 0)) {
 					return resolve({
 						message: CONSTANTS.apiResponses.PROGRAM_NOT_FOUND,
@@ -1140,7 +1141,10 @@ module.exports = class ProgramsHelper {
 						completedProjects: program.completedProjects ? program.completedProjects : 0,
 					}))
 				}
-				return resolve(programsData)
+				return resolve({
+					data: programsData,
+					count: totaluserProgramCount,
+				})
 			} catch (error) {
 				return reject(error)
 			}

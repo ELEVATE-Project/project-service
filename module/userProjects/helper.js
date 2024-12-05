@@ -2395,10 +2395,63 @@ module.exports = class UserProjectsHelper {
 								: { $ne: CONSTANTS.common.COMPLETED_STATUS }
 						matchQuery.$match.programId = new ObjectId(programId)
 					} else {
-						matchQuery.$match.status =
-							status === CONSTANTS.common.COMPLETED_STATUS
-								? { $eq: CONSTANTS.common.SUBMITTED_STATUS } // Completed
-								: { $ne: CONSTANTS.common.SUBMITTED_STATUS }
+						matchQuery.$match = {
+							...matchQuery.$match,
+							...(status === CONSTANTS.common.COMPLETED_STATUS
+								? {
+										$and: [
+											{ status: { $eq: CONSTANTS.common.SUBMITTED_STATUS } },
+											{
+												$or: [
+													{
+														$and: [
+															{ reflection: { $exists: true } }, // reflectionKey exists
+															{
+																'reflection.status': {
+																	$eq: CONSTANTS.common.COMPLETED_STATUS,
+																},
+															}, // reflectionKey.status is COMPLETED
+														],
+													},
+													{
+														reflection: { $exists: false }, // If reflectionKey doesn't exist
+													},
+												],
+											},
+										],
+								  }
+								: {
+										$and: [
+											{
+												$or: [
+													// 1. inProgress status with or without reflection
+													{ status: { $ne: CONSTANTS.common.SUBMITTED_STATUS } },
+
+													// 2. submitted status only if reflection exists and is not COMPLETED
+													{
+														$and: [
+															{ status: { $eq: CONSTANTS.common.SUBMITTED_STATUS } },
+															{ reflection: { $exists: true } },
+														],
+													},
+												],
+											},
+											{
+												$or: [
+													{
+														'reflection.status': {
+															$ne: CONSTANTS.common.COMPLETED_STATUS,
+														},
+														// reflection.status is NOT COMPLETED
+													},
+													{
+														reflection: { $exists: false }, // If reflection doesn't exist
+													},
+												],
+											},
+										],
+								  }),
+						}
 					}
 				}
 				aggregateData.push(matchQuery)

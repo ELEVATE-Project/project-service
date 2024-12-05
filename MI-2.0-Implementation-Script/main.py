@@ -3598,56 +3598,60 @@ def prepareProjectAndTasksSheetsForSpotlight(project_inputFile, projectName_for_
 
             column_index = existing_header.index(column)
             row[column_index] = value
-        signedUrl = signedUrl[0]
-        for dynamic_column in dynamic_columns:
-            value = ""
 
-            # Check if the column is for "evidence title"
-            if dynamic_column.lower().startswith("evidence") and dynamic_column.lower().endswith("title"):
-                column_suffix = dynamic_column.split("-")[0].replace("evidence", "").strip()
-                try:
-                    evidence_title = dictProjectDetails.get(f"evidence{column_suffix}-title", "")
-                    value = str(evidence_title).strip()
-                except (IndexError, ValueError):
-                    value = ""
+        if signedUrl and len(signedUrl[0]) > 0:
+            signedUrl = signedUrl[0]
+            for dynamic_column in dynamic_columns:
+                value = ""
 
-            # Check if the column is for "evidence sequence"
-            elif dynamic_column.lower().startswith("evidence") and dynamic_column.lower().endswith("sequence"):
-                column_suffix = dynamic_column.split("-")[0].replace("evidence", "").strip()
-                try:
-                    evidence_sequence = dictProjectDetails.get(f"evidence{column_suffix}-sequence", "")
-                    value = str(evidence_sequence).strip()
-                except (IndexError, ValueError):
-                    value = ""
-
-            # Check if the column is for "evidence type"
-            elif dynamic_column.lower().startswith("evidence") and dynamic_column.lower().endswith("type"):
-                column_suffix = dynamic_column.split("-")[0].replace("evidence", "").strip()
-                try:
-                    evidence_sequence = dictProjectDetails.get(f"evidence{column_suffix}-type", "")
-                    value = str(evidence_sequence).strip()
-                except (IndexError, ValueError):
-                    value = ""
-
-            
-            # Check if the column is for "evidence link"
-            elif dynamic_column.lower().startswith("evidence") and dynamic_column.lower().endswith("link"):
-                column_suffix = dynamic_column.split("-")[0].replace("evidence", "").strip()
-                try:
-                    index = int(column_suffix) - 1  # Get the index from the column suffix (e.g., '1' from 'evidence link-1')
-                    if index < len(signedUrl):
-                        url = signedUrl[index]
-                        if isinstance(url, list):
-                            url = url[0]
-                        value = url
-                    else:
+                # Check if the column is for "evidence title"
+                if dynamic_column.lower().startswith("evidence") and dynamic_column.lower().endswith("title"):
+                    column_suffix = dynamic_column.split("-")[0].replace("evidence", "").strip()
+                    try:
+                        evidence_title = dictProjectDetails.get(f"evidence{column_suffix}-title", "")
+                        value = str(evidence_title).strip()
+                    except (IndexError, ValueError):
                         value = ""
-                except (IndexError, ValueError):
-                    value = ""
 
-            # Update the corresponding cell in the existing row
-            column_index = existing_header.index(dynamic_column)
-            row[column_index] = value
+                # Check if the column is for "evidence sequence"
+                elif dynamic_column.lower().startswith("evidence") and dynamic_column.lower().endswith("sequence"):
+                    column_suffix = dynamic_column.split("-")[0].replace("evidence", "").strip()
+                    try:
+                        evidence_sequence = dictProjectDetails.get(f"evidence{column_suffix}-sequence", "")
+                        value = str(evidence_sequence).strip()
+                    except (IndexError, ValueError):
+                        value = ""
+
+                # Check if the column is for "evidence type"
+                elif dynamic_column.lower().startswith("evidence") and dynamic_column.lower().endswith("type"):
+                    column_suffix = dynamic_column.split("-")[0].replace("evidence", "").strip()
+                    try:
+                        evidence_sequence = dictProjectDetails.get(f"evidence{column_suffix}-type", "")
+                        value = str(evidence_sequence).strip()
+                    except (IndexError, ValueError):
+                        value = ""
+
+                
+                # Check if the column is for "evidence link"
+                elif dynamic_column.lower().startswith("evidence") and dynamic_column.lower().endswith("link"):
+                    column_suffix = dynamic_column.split("-")[0].replace("evidence", "").strip()
+                    try:
+                        index = int(column_suffix) - 1  # Get the index from the column suffix (e.g., '1' from 'evidence link-1')
+                        if index < len(signedUrl):
+                            url = signedUrl[index]
+                            if isinstance(url, list):
+                                url = url[0]
+                            value = url
+                        else:
+                            value = ""
+                    except (IndexError, ValueError):
+                        value = ""
+
+                # Update the corresponding cell in the existing row
+                column_index = existing_header.index(dynamic_column)
+                row[column_index] = value
+        else:
+            print("No Evidence Attached")
 
     # Write the updated header and rows back to the CSV file
     with open(csv_file_path, 'w', encoding='utf-8') as file:
@@ -4586,56 +4590,55 @@ def getPreSignedUrl(projectFile, projectName_for_folder_path, accessToken):
     }
 
     evidence_folder_path = os.path.join(projectName_for_folder_path, 'evidenceFile')
-    if os.path.exists(evidence_folder_path):
-
+    if os.path.exists(evidence_folder_path) and any(os.path.isfile(os.path.join(evidence_folder_path, f)) for f in os.listdir(evidence_folder_path)):
         for filename in os.listdir(evidence_folder_path):
             if os.path.isfile(os.path.join(evidence_folder_path, filename)):
                 preSignedUrl_payload["request"]["evidenceUpload"]["files"].append(filename)
 
-    responsegetPreSignedUrlApi = requests.post(url=preSignedUrlApi, headers=headerPreSignedUrlApi,data=json.dumps(preSignedUrl_payload))
-    if responsegetPreSignedUrlApi.status_code == 200:
-                responsegetPreSignedUrlApi = responsegetPreSignedUrlApi.json()
-    files = responsegetPreSignedUrlApi["result"]["evidenceUpload"]["files"]
+        responsegetPreSignedUrlApi = requests.post(url=preSignedUrlApi, headers=headerPreSignedUrlApi,data=json.dumps(preSignedUrl_payload))
+        if responsegetPreSignedUrlApi.status_code == 200:
+                    responsegetPreSignedUrlApi = responsegetPreSignedUrlApi.json()
+        files = responsegetPreSignedUrlApi["result"]["evidenceUpload"]["files"]
 
-    evidence_folder_path = os.path.join(projectName_for_folder_path, 'evidenceFile')
+        evidence_folder_path = os.path.join(projectName_for_folder_path, 'evidenceFile')
 
-    # Check if the evidence folder exists
-    if os.path.exists(evidence_folder_path):
-            # Map filenames (without extensions) to their file paths
-            filesProject = {}
-            for filename in os.listdir(evidence_folder_path):
-                evidence_key = os.path.splitext(filename)[0]
-                filesProject[evidence_key] = os.path.join(evidence_folder_path, filename)
-    for file_entry in files:
-        url = file_entry["url"]  # Get the dynamic URL from the JSON response
-        file_name = file_entry["file"]  # Optional: file name for logging/debugging
-        local_file_path = filesProject.get(os.path.splitext(file_name)[0])
-        if local_file_path and os.path.exists(local_file_path):
-            with open(local_file_path, 'rb') as binary_file:
-                file_data = binary_file.read()
-        # Define headers and data (if needed)
-        headers = {
-            'Content-Type': 'multipart/form-data',
-            'x-ms-blob-type' : 'BlockBlob'
-        }
-        try:
-            # Send PUT request
-            response = requests.put(url, headers=headers, data=file_data)
-            # Check the response
-            if response.status_code in [200, 201]:
-                print(f"Successfully uploaded: {file_name}")
-            else:
-                print(f"Failed to upload {file_name}. Status code: {response.status_code}, Response: {response.text}")
-        except Exception as e:
-            print(f"Error uploading {file_name}: {e}")
+        # Check if the evidence folder exists
+        if os.path.exists(evidence_folder_path):
+                # Map filenames (without extensions) to their file paths
+                filesProject = {}
+                for filename in os.listdir(evidence_folder_path):
+                    evidence_key = os.path.splitext(filename)[0]
+                    filesProject[evidence_key] = os.path.join(evidence_folder_path, filename)
+        for file_entry in files:
+            url = file_entry["url"]  # Get the dynamic URL from the JSON response
+            file_name = file_entry["file"]  # Optional: file name for logging/debugging
+            local_file_path = filesProject.get(os.path.splitext(file_name)[0])
+            if local_file_path and os.path.exists(local_file_path):
+                with open(local_file_path, 'rb') as binary_file:
+                    file_data = binary_file.read()
+            # Define headers and data (if needed)
+            headers = {
+                'Content-Type': 'multipart/form-data',
+                'x-ms-blob-type' : 'BlockBlob'
+            }
+            try:
+                # Send PUT request
+                response = requests.put(url, headers=headers, data=file_data)
+                # Check the response
+                if response.status_code in [200, 201]:
+                    print(f"Successfully uploaded: {file_name}")
+                else:
+                    print(f"Failed to upload {file_name}. Status code: {response.status_code}, Response: {response.text}")
+            except Exception as e:
+                print(f"Error uploading {file_name}: {e}")
 
-    fetchDownloadableUrl_path = []   
-    filesPath = responsegetPreSignedUrlApi["result"]["evidenceUpload"]["files"]
-    for file_path in filesPath:
-        source_path = file_path["payload"]["sourcePath"]
-        fetchDownloadableUrl_path.append(source_path)
-    fetchDownloadableUrl_path.reverse() 
-    return fetchDownloadableUrl_path,
+        fetchDownloadableUrl_path = []   
+        filesPath = responsegetPreSignedUrlApi["result"]["evidenceUpload"]["files"]
+        for file_path in filesPath:
+            source_path = file_path["payload"]["sourcePath"]
+            fetchDownloadableUrl_path.append(source_path)
+        fetchDownloadableUrl_path.reverse() 
+        return fetchDownloadableUrl_path,
 
 # This function is used to download the logo's anf sign from project template
 def downloadlogosign(filePathAddProject,projectName_for_folder_path):

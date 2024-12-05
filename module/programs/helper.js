@@ -1047,10 +1047,12 @@ module.exports = class ProgramsHelper {
 	 * @param {String} userId
 	 * @param {String} language -languageCode
 	 * @param {Boolean} getProjectsCount - get the projectsCount under that program.
+	 * @param {Number} pageNo - pageNo
+	 * @param {Number} pageSize - pageSize
 	 * @returns {JSON} - List of programs that user created on app.
 	 */
 
-	static userPrivatePrograms(userId, language = '', getProjectsCount = false) {
+	static userPrivatePrograms(userId, language = '', getProjectsCount = false, pageNo, pageSize) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let programsData = await programsQueries.programsDocument(
@@ -1070,6 +1072,10 @@ module.exports = class ProgramsHelper {
 						result: [],
 					})
 				}
+				//pagination
+				let startIndex = pageSize * (pageNo - 1)
+				let endIndex = startIndex + pageSize
+				programsData = programsData.slice(startIndex, endIndex)
 				if (getProjectsCount) {
 					//Filtering out all the program IDs
 					let userProgramIds = programsData.flatMap((program) => program._id || [])
@@ -1083,15 +1089,27 @@ module.exports = class ProgramsHelper {
 							$group: {
 								_id: '$programId', // Group by programId
 								ongoingProjects: {
-									$sum: { $cond: [{ $ne: ['$status', CONSTANTS.common.SUBMITTED_STATUS] }, 1, 0] },
+									$sum: {
+										$cond: [
+											{ $ne: ['$reflection.status', CONSTANTS.common.COMPLETED_STATUS] },
+											1,
+											0,
+										],
+									},
 								},
 								completedProjects: {
-									$sum: { $cond: [{ $eq: ['$status', CONSTANTS.common.SUBMITTED_STATUS] }, 1, 0] },
+									$sum: {
+										$cond: [
+											{ $eq: ['$reflection.status', CONSTANTS.common.COMPLETED_STATUS] },
+											1,
+											0,
+										],
+									},
 								},
 							},
 						},
 					])
-					//Adding count to the programData
+					//Adding projects count to the programData
 					const projectCountsMap = projectDocuments.reduce((acc, project) => {
 						acc[project._id.toString()] = {
 							ongoingProjects: project.ongoingProjects || 0,

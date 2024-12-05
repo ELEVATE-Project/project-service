@@ -156,7 +156,9 @@ module.exports = class Users {
 					let programsData = await usersHelper.privatePrograms(
 						req.userDetails.userInformation.userId,
 						req.query.language ? req.query.language : '',
-						req.query.getProjectsCount ? req.query.getProjectsCount : false
+						req.query.getProjectsCount ? req.query.getProjectsCount : false,
+						req.pageNo,
+						req.pageSize
 					)
 					return resolve(programsData)
 				} else {

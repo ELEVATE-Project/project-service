@@ -102,7 +102,16 @@ module.exports = class UserProjectsHelper {
 	 * @returns {Object} Project created information.
 	 */
 
-	static sync(projectId, lastDownloadedAt, data, userId, userToken, appName = '', appVersion = '') {
+	static sync(
+		projectId,
+		lastDownloadedAt,
+		data,
+		userId,
+		userToken,
+		appName = '',
+		appVersion = '',
+		invokedViaUpdateApi = false
+	) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				const userProject = await projectQueries.projectDocument(
@@ -122,6 +131,7 @@ module.exports = class UserProjectsHelper {
 						'updateHistory',
 						'acl',
 						'userId',
+						'reflection',
 					]
 				)
 
@@ -174,18 +184,58 @@ module.exports = class UserProjectsHelper {
 					}
 				}
 
-				if (userProject[0].lastDownloadedAt.toISOString() !== lastDownloadedAt) {
+				if (!invokedViaUpdateApi && userProject[0].lastDownloadedAt.toISOString() !== lastDownloadedAt) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.USER_ALREADY_SYNC,
 					}
 				}
 
-				if (userProject[0].status == CONSTANTS.common.SUBMITTED_STATUS) {
+				if (!invokedViaUpdateApi && userProject[0].status == CONSTANTS.common.SUBMITTED_STATUS) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.FAILED_TO_SYNC_PROJECT_ALREADY_SUBMITTED,
 					}
+				}
+
+				let currentReflection = userProject[0].reflection || {}
+
+				if (data.reflectionStatus == 'started') {
+					currentReflection.status = 'started'
+					currentReflection.startedAt = new Date()
+					data.reflection = currentReflection
+				} else if (data.reflectionStatus == 'completed') {
+					currentReflection.status = 'completed'
+					currentReflection.completedDate = new Date()
+					data.reflection = currentReflection
+				}
+
+				if (invokedViaUpdateApi && userProject[0].status == CONSTANTS.common.SUBMITTED_STATUS) {
+					let projectUpdated = await projectQueries.findOneAndUpdate(
+						{
+							_id: userProject[0]._id,
+						},
+						{
+							$set: {
+								reflection: data.reflection,
+							},
+						},
+						{
+							new: true,
+						}
+					)
+
+					if (!projectUpdated._id) {
+						throw {
+							message: CONSTANTS.apiResponses.USER_PROJECT_NOT_UPDATED,
+							status: HTTP_STATUS_CODE.bad_request.status,
+						}
+					}
+
+					return resolve({
+						success: true,
+						message: CONSTANTS.apiResponses.USER_PROJECT_UPDATED,
+					})
 				}
 
 				const projectsModel = Object.keys(schemas['projects'].schema)
@@ -3585,99 +3635,40 @@ module.exports = class UserProjectsHelper {
 	 * @param {Object} filter - filter to search project to be updated.
 	 * @param {Object} updateTo - data which will be updated.
 	 * @param {String} userId - Logged in user Id.
+	 * @param {String} userToken - filter to search project to be updated.
+	 * @param {String} [appName = ""] - App Name.
+	 * @param {String} [appVersion = ""] - App Version.
 	 * @returns {Object} status of update project
 	 */
 
-	static update(filter, updateTo, userId) {
+	static update(filter, updateTo, userId, userToken, appName = '', appVersion = '') {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let { tasks, reflectionStatus, ...filteredUpdateData } = updateTo
-
 				const userProject = await projectQueries.projectDocument(filter, ['_id', 'reflection', 'tasks'])
+				updateTo.tasks = _fillMissingTaskInformation(updateTo.tasks, userProject[0].tasks)
+				let updateResult = await this.sync(
+					filter._id,
+					'',
+					updateTo,
+					userId,
+					userToken,
+					appName,
+					appVersion,
+					true
+				)
 
-				if (!(userProject && userProject[0])) {
-					throw new Error(CONSTANTS.apiResponses.USER_PROJECT_NOT_FOUND)
-				}
-
-				let currentReflection = userProject[0].reflection || {}
-
-				if (reflectionStatus == 'started') {
-					currentReflection.status = 'started'
-					currentReflection.startedAt = new Date()
-					filteredUpdateData.reflection = currentReflection
-				} else if (reflectionStatus == 'completed') {
-					currentReflection.status = 'completed'
-					currentReflection.completedDate = new Date()
-					filteredUpdateData.reflection = currentReflection
-				}
-
-				if (tasks && tasks.length > 0) {
-					let taskReport = {}
-
-					filteredUpdateData.tasks = await _projectTask(tasks)
-					let fetchedProject = userProject[0]
-					if (fetchedProject.tasks && fetchedProject.tasks.length > 0) {
-						filteredUpdateData.tasks.forEach((task) => {
-							task.updatedBy = userId
-							task.updatedAt = new Date()
-
-							let taskIndex = fetchedProject.tasks.findIndex(
-								(projectTask) => projectTask._id === task._id
-							)
-
-							if (taskIndex < 0) {
-								fetchedProject.tasks.push(task)
-							} else {
-								let keepFieldsFromTask = ['observationInformation', 'submissions']
-
-								removeFieldsFromRequest.forEach((removeField) => {
-									delete fetchedProject.tasks[taskIndex][removeField]
-								})
-
-								keepFieldsFromTask.forEach((field) => {
-									if (fetchedProject.tasks[taskIndex][field]) {
-										task[field] = fetchedProject.tasks[taskIndex][field]
-									}
-								})
-
-								fetchedProject.tasks[taskIndex] = task
-							}
-						})
-
-						filteredUpdateData.tasks = fetchedProject.tasks
-					}
-
-					taskReport.total = filteredUpdateData.tasks.length
-
-					filteredUpdateData.tasks.forEach((task) => {
-						//consider tasks where isDeleted is false.
-						if (task.isDeleted == false) {
-							if (!taskReport[task.status]) {
-								taskReport[task.status] = 1
-							} else {
-								taskReport[task.status] += 1
-							}
-						} else {
-							taskReport.total = taskReport.total - 1
-						}
+				if (updateResult.message == CONSTANTS.apiResponses.USER_PROJECT_UPDATED) {
+					return resolve({
+						message: CONSTANTS.apiResponses.USER_PROJECT_UPDATED,
+						success: true,
+						result: {
+							_id: filter._id,
+						},
 					})
-
-					filteredUpdateData['taskReport'] = taskReport
+				} else {
+					throw new Error(CONSTANTS.apiResponses.PROJECT_UPDATE_FAILED)
 				}
-
-				let updateProject = await projectQueries.findOneAndUpdate(filter, filteredUpdateData)
-
-				if (!updateProject) {
-					throw new Error(CONSTANTS.apiResponses.PROJECT_UPDATED_FAILED)
-				}
-
-				return resolve({
-					message: CONSTANTS.apiResponses.PROJECT_UPDATED_SUCCESSFULLY,
-					success: true,
-					result: { _id: updateProject._id },
-				})
 			} catch (error) {
-				console.log(error)
 				return resolve({
 					message: error.message,
 					status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
@@ -4004,6 +3995,21 @@ function _projectTask(tasks, isImportedFromLibrary = false, parentTaskId = '') {
 	return tasks
 }
 
+function _fillMissingTaskInformation(tasks, tasksFromDB) {
+	for (let eachTask of tasks) {
+		let targetTask = tasksFromDB.find((singleTask) => singleTask._id == eachTask._id)
+
+		for (let key in targetTask) {
+			if (!eachTask[key]) {
+				eachTask[key] = targetTask[key]
+			}
+		}
+
+		return tasks
+	}
+
+	return tasks
+}
 /**
  * Project categories information.
  * @method

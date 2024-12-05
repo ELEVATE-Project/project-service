@@ -197,7 +197,11 @@ module.exports = {
 		},
 		reflection: {
 			type: Object,
-			default: {},
+			default: {
+				status: null,
+				startDate: null,
+				endDate: null,
+			},
 		},
 		story: {
 			type: Object,

@@ -30,6 +30,9 @@ module.exports = (req) => {
 		verifyCertificate: function () {
 			req.checkParams('_id').exists().withMessage('required project id')
 		},
+		update: function () {
+			req.checkParams('_id').exists().withMessage('required project id')
+		},
 	}
 
 	if (projectsValidator[req.params.method]) {

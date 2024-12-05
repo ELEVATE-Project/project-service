@@ -1280,7 +1280,14 @@ module.exports = class UserProjects extends Abstract {
 				const updateData = await userProjectsHelper.update(
 					{ _id: req.params._id },
 					req.body,
-					req.userDetails.userInformation.userId
+					req.userDetails.userInformation.userId,
+					req.userDetails.userToken,
+					req.headers['x-app-id'] ? req.headers['x-app-id'] : req.headers.appname ? req.headers.appname : '',
+					req.headers['x-app-ver']
+						? req.headers['x-app-ver']
+						: req.headers.appversion
+						? req.headers.appversion
+						: ''
 				)
 				return resolve(updateData)
 			} catch (error) {

@@ -2370,10 +2370,12 @@ module.exports = class UserProjectsHelper {
 	 * @param {Number} pageSize -Page size
 	 * @param {String} searchText -Search text
 	 * @param {String} language -LanguageCode
+	 * @param {String} programId - ProgramId
+	 * @param {String} status  -status of the project
 	 * @returns {Array} List of projects.
 	 */
 
-	static list(userId, pageNo, pageSize, searchText, language = '') {
+	static list(userId, pageNo, pageSize, searchText, language = '', programId, status) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let aggregateData = []
@@ -2381,11 +2383,25 @@ module.exports = class UserProjectsHelper {
 				let matchQuery = {
 					$match: {
 						userId: userId,
-						status: { $ne: CONSTANTS.common.SUBMITTED_STATUS },
 					},
 				}
+				// pass matchQuery based on status only when status arg has value
+				if (status && status != '') {
+					// When ProgramId passed match based on reflectionStatus
+					if (programId) {
+						matchQuery.$match['reflection.status'] =
+							status === CONSTANTS.common.COMPLETED_STATUS
+								? { $eq: CONSTANTS.common.COMPLETED_STATUS } // Completed
+								: { $ne: CONSTANTS.common.COMPLETED_STATUS }
+						matchQuery.$match.programId = new ObjectId(programId)
+					} else {
+						matchQuery.$match.status =
+							status === CONSTANTS.common.COMPLETED_STATUS
+								? { $eq: CONSTANTS.common.SUBMITTED_STATUS } // Completed
+								: { $ne: CONSTANTS.common.SUBMITTED_STATUS }
+					}
+				}
 				aggregateData.push(matchQuery)
-
 				// Projection aggregate for multilingual
 				let titleField = language ? `$translations.${language}.title` : '$title'
 				let descriptionField = language ? `$translations.${language}.description` : '$description'
@@ -2400,6 +2416,12 @@ module.exports = class UserProjectsHelper {
 						tasks: 1,
 						taskReport: 1,
 						createdAt: 1,
+						startDate: 1,
+						endDate: 1,
+						programInformation: {
+							name: 1,
+						},
+						attachments: 1,
 					},
 				})
 
@@ -2427,12 +2449,13 @@ module.exports = class UserProjectsHelper {
 				)
 
 				let projects = await projectQueries.getAggregate(aggregateData)
-				//Getting tasks translated if required
-				if (language != '' && projects[0].data.length > 0) {
-					projects[0].data.forEach((eachProject) => {
-						_projectInformation(eachProject, language)
-					})
+				//Getting tasks translated if required and downloadUrls
+				if ((language != '' || status === CONSTANTS.common.COMPLETED_STATUS) && projects[0].data.length > 0) {
+					for (const eachProject of projects[0].data) {
+						await _projectInformation(eachProject, language)
+					}
 				}
+
 				return resolve({
 					success: true,
 					message: CONSTANTS.apiResponses.PROJECTS_FETCHED,
@@ -2478,7 +2501,6 @@ module.exports = class UserProjectsHelper {
 						status: HTTP_STATUS_CODE.bad_request.status,
 					}
 				}
-
 				let taskReport = {}
 
 				// If template contains project task process the task data
@@ -2610,6 +2632,18 @@ module.exports = class UserProjectsHelper {
 				libraryProjects.data.userId = libraryProjects.data.updatedBy = libraryProjects.data.createdBy = userId
 				libraryProjects.data.lastDownloadedAt = new Date()
 				libraryProjects.data.status = CONSTANTS.common.STARTED
+				// adding startDate and Endate based on createdAt and duration
+				if (
+					!requestedData.startDate &&
+					!requestedData.endDate &&
+					libraryProjects.data.metaInformation.duration
+				) {
+					libraryProjects.data.startDate = new Date()
+					libraryProjects.data.endDate = UTILS.calculateEndDate(
+						libraryProjects.data.createdAt,
+						libraryProjects.data.metaInformation.duration
+					)
+				}
 
 				if (requestedData.startDate) {
 					libraryProjects.data.startDate = requestedData.startDate

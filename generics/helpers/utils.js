@@ -15,7 +15,7 @@ const ChartDataLabels = require('chartjs-plugin-datalabels')
 const width = 800 // width of the chart
 const height = 500 // height of the chart
 const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height })
-
+const moment = require('moment')
 // const druidQueries = require('./druid_queries.json');
 /**
  * convert camel case to title case.
@@ -732,6 +732,38 @@ function getTranslatedData(data, translateData) {
 	})
 	return data
 }
+
+/**
+ * Function to calculate the end date based on a start date and duration string.
+ * @param {string} createdDate - The start date in ISO format (e.g., '2024-12-05T00:00:00.000Z').
+ * @param {string} durationString - Duration in the format "1 week", "2 weeks", "1 month", "1 year", etc.
+ * @returns {string} - The calculated end date in ISO format
+ */
+function calculateEndDate(createdDate, durationString) {
+	const startDate = moment(createdDate) // Parse the start date
+	if (!startDate.isValid()) {
+		throw new Error('Invalid start date format')
+	}
+
+	// Extract numeric value and unit from the duration string
+	const [value, unit] = durationString.split(' ')
+
+	// Add the duration to the start date based on the unit
+	switch (unit.toLowerCase()) {
+		case 'week':
+		case 'weeks':
+			return startDate.add(parseInt(value), 'weeks').toISOString()
+		case 'month':
+		case 'months':
+			return startDate.add(parseInt(value), 'months').toISOString()
+		case 'year':
+		case 'years':
+			return startDate.add(parseInt(value), 'years').toISOString()
+		default:
+			throw new Error('Unsupported duration unit')
+	}
+}
+
 module.exports = {
 	camelCaseToTitleCase: camelCaseToTitleCase,
 	lowerCase: lowerCase,
@@ -766,4 +798,5 @@ module.exports = {
 	handleSpecialCharsForCertificate: handleSpecialCharsForCertificate,
 	arrayOfObjectToArrayOfObjectId: arrayOfObjectToArrayOfObjectId,
 	getTranslatedData: getTranslatedData,
+	calculateEndDate: calculateEndDate,
 }

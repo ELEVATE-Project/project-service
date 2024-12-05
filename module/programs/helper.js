@@ -9,6 +9,7 @@
 
 const timeZoneDifference = process.env.TIMEZONE_DIFFRENECE_BETWEEN_LOCAL_TIME_AND_UTC
 const programsQueries = require(DB_QUERY_BASE_PATH + '/programs')
+const projectQueries = require(DB_QUERY_BASE_PATH + '/projects')
 const entitiesService = require(GENERICS_FILES_PATH + '/services/entity-management')
 const validateEntity = process.env.VALIDATE_ENTITIES
 
@@ -1045,16 +1046,20 @@ module.exports = class ProgramsHelper {
 	 * @name userPrivatePrograms
 	 * @param {String} userId
 	 * @param {String} language -languageCode
+	 * @param {Boolean} getProjectsCount - get the projectsCount under that program.
+	 * @param {Number} pageNo - pageNo
+	 * @param {Number} pageSize - pageSize
 	 * @returns {JSON} - List of programs that user created on app.
 	 */
 
-	static userPrivatePrograms(userId, language = '') {
+	static userPrivatePrograms(userId, language = '', getProjectsCount = false, pageNo, pageSize) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let programsData = await programsQueries.programsDocument(
 					{
 						createdBy: userId,
 						isAPrivateProgram: true,
+						isDeleted: false,
 					},
 					['name', 'externalId', 'description', '_id', 'isAPrivateProgram', 'translations'],
 					'none',
@@ -1067,6 +1072,62 @@ module.exports = class ProgramsHelper {
 						result: [],
 					})
 				}
+				//pagination
+				let startIndex = pageSize * (pageNo - 1)
+				let endIndex = startIndex + pageSize
+				programsData = programsData.slice(startIndex, endIndex)
+				if (getProjectsCount) {
+					//Filtering out all the program IDs
+					let userProgramIds = programsData.flatMap((program) => program._id || [])
+					let projectDocuments = await projectQueries.getAggregate([
+						{
+							$match: {
+								programId: { $in: userProgramIds },
+							},
+						},
+						{
+							$group: {
+								_id: '$programId', // Group by programId
+								ongoingProjects: {
+									$sum: {
+										$cond: [
+											{ $ne: ['$reflection.status', CONSTANTS.common.COMPLETED_STATUS] },
+											1,
+											0,
+										],
+									},
+								},
+								completedProjects: {
+									$sum: {
+										$cond: [
+											{ $eq: ['$reflection.status', CONSTANTS.common.COMPLETED_STATUS] },
+											1,
+											0,
+										],
+									},
+								},
+							},
+						},
+					])
+					//Adding projects count to the programData
+					const projectCountsMap = projectDocuments.reduce((acc, project) => {
+						acc[project._id.toString()] = {
+							ongoingProjects: project.ongoingProjects || 0,
+							completedProjects: project.completedProjects || 0,
+						}
+						return acc
+					}, {})
+
+					// Merge counts using the map
+					programsData.forEach((program) => {
+						const counts = projectCountsMap[program._id.toString()] || {
+							ongoingProjects: 0,
+							completedProjects: 0,
+						}
+						program.ongoingProjects = counts.ongoingProjects
+						program.completedProjects = counts.completedProjects
+					})
+				}
 				//handle multiligual responses
 				if (language != '') {
 					programsData = programsData.map((program) => ({
@@ -1075,6 +1136,8 @@ module.exports = class ProgramsHelper {
 						externalId: program.externalId,
 						_id: program._id,
 						isAPrivateProgram: program.isAPrivateProgram,
+						ongoingProjects: program.ongoingProjects ? program.ongoingProjects : 0,
+						completedProjects: program.completedProjects ? program.completedProjects : 0,
 					}))
 				}
 				return resolve(programsData)

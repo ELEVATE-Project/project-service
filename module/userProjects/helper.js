@@ -3644,12 +3644,8 @@ module.exports = class UserProjectsHelper {
 	static update(projectId, updateData, userId, userToken, appName = '', appVersion = '') {
 		return new Promise(async (resolve, reject) => {
 			try {
-				const userProject = await projectQueries.projectDocument({ _id: projectId }, [
-					'_id',
-					'reflection',
-					'tasks',
-				])
-
+				const userProject = await projectQueries.projectDocument({_id:projectId}, ['_id', 'reflection', 'tasks'])
+				
 				if (!(userProject.length > 0)) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,

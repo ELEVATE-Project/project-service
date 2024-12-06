@@ -500,18 +500,6 @@ function convertStringToObjectId(id) {
 }
 
 /**
- * check whether the id is mongodbId or not.
- * @function
- * @name isValidMongoId
- * @param {String} id
- * @returns {Boolean} returns whether id is valid mongodb id or not.
- */
-
-function isValidMongoId(id) {
-	return ObjectId.isValid(id) && new ObjectId(id).toString() === id
-}
-
-/**
  * filter out location id and code
  * @function
  * @name filterLocationIdandCode
@@ -785,7 +773,6 @@ module.exports = {
 	getEndDate: getEndDate,
 	getStartDate: getStartDate,
 	convertStringToObjectId: convertStringToObjectId,
-	isValidMongoId: isValidMongoId,
 	filterLocationIdandCode: filterLocationIdandCode,
 	generateTelemetryEventSkeletonStructure: generateTelemetryEventSkeletonStructure,
 	generateTelemetryEvent: generateTelemetryEvent,

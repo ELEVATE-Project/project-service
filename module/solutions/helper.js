@@ -47,7 +47,21 @@ module.exports = class SolutionsHelper {
 	 * Generate solution creation data.
 	 * @method
 	 * @name _createSolutionData
-	 * @returns {Object} - solution creation data
+	 * @param {String} [name=''] - The name of the solution (optional, defaults to an empty string).
+	 * @param {String} [externalId=''] - The external identifier for the solution (optional, defaults to an empty string).
+	 * @param {Boolean} [isAPrivateProgram=''] - Indicates if the solution belongs to a private program (optional, defaults to an empty string).
+	 * @param {String} status - The current status of the solution (mandatory).
+	 * @param {String} [description=''] - A brief description of the solution (optional, defaults to an empty string).
+	 * @param {String} userId - The unique identifier of the user creating the solution (mandatory).
+	 * @param {Boolean} [isReusable=''] - Indicates if the solution can be reused (optional, defaults to an empty string).
+	 * @param {String} [parentSolutionId=''] - The ID of the parent solution, if any (optional, defaults to an empty string).
+	 * @param {String} [type=''] - The type/category of the solution (optional, defaults to an empty string).
+	 * @param {String} [subType=''] - The subtype/category of the solution (optional, defaults to an empty string).
+	 * @param {String} [updatedBy=''] - The identifier of the user who last updated the solution (optional, defaults to an empty string).
+	 * @param {String} [projectTemplateId=''] - The ID of the associated project template, if any (optional, defaults to an empty string).
+	 * @param {String} [startDate=''] - The start date of the solution (in ISO format, optional, defaults to an empty string).
+	 * @param {String} [endDate=''] - The end date of the solution (in ISO format, optional, defaults to an empty string).
+	 * @returns {Object} - An object containing the solution creation data.
 	 */
 
 	static _createSolutionData(
@@ -62,7 +76,9 @@ module.exports = class SolutionsHelper {
 		type = '',
 		subType = '',
 		updatedBy = '',
-		projectTemplateId = ''
+		projectTemplateId = '',
+		startDate = '',
+		endDate = ''
 	) {
 		let solutionData = {}
 		solutionData.name = name
@@ -89,6 +105,12 @@ module.exports = class SolutionsHelper {
 		if (projectTemplateId) {
 			solutionData.projectTemplateId = projectTemplateId
 		}
+		if (startDate) {
+			solutionData.startDate = startDate
+		}
+		if (endDate) {
+			solutionData.endDate = endDate
+		}
 
 		return solutionData
 	}
@@ -97,7 +119,19 @@ module.exports = class SolutionsHelper {
 	 * Generate program creation data.
 	 * @method
 	 * @name _createProgramData
-	 * @returns {Object} - program creation data
+	 * @param {String} name - The name of the program.
+	 * @param {String} externalId - The external id of the program.
+	 * @param {Boolean} isAPrivateProgram - Indicates if the program is private.
+	 * @param {String} status - The current status of the program.
+	 * @param {String} description - A brief description of the program.
+	 * @param {String} userId - The unique identifier of the user creating the program.
+	 * @param {String} startDate - The start date of the program (in ISO format).
+	 * @param {String} endDate - The end date of the program (in ISO format).
+	 * @param {String} [createdBy=''] - The name or identifier of the creator (optional, defaults to an empty string).
+	 * @param {Array<String>} [language=[]] - An array of languages associated with the program (optional, defaults to an empty array).
+	 * @param {Array<Object>} [conversation=[]] - An array representing conversation data related to the program (optional, defaults to an empty array).
+	 * @param {Object} [source={}] - Additional source metadata related to the program (optional, defaults to an empty object).
+	 * @returns {Object} - An object containing the program creation data.
 	 */
 
 	static _createProgramData(
@@ -109,7 +143,10 @@ module.exports = class SolutionsHelper {
 		userId,
 		startDate,
 		endDate,
-		createdBy = ''
+		createdBy = '',
+		language = [],
+		conversation = [],
+		source = {}
 	) {
 		let programData = {}
 		programData.name = name
@@ -121,6 +158,9 @@ module.exports = class SolutionsHelper {
 		programData.createdBy = createdBy
 		programData.startDate = startDate
 		programData.endDate = endDate
+		programData.language = language
+		programData.conversation = conversation
+		programData.source = source
 		return programData
 	}
 

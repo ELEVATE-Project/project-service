@@ -200,13 +200,13 @@ module.exports = class UserProjectsHelper {
 
 				let currentReflection = userProject[0].reflection || {}
 
-				if (data.reflectionStatus == 'started') {
-					currentReflection.status = 'started'
+				if (data.reflectionStatus == CONSTANTS.common.STARTED) {
+					currentReflection.status = CONSTANTS.common.STARTED
 					currentReflection.startedAt = new Date()
 					data.reflection = currentReflection
-				} else if (data.reflectionStatus == 'completed') {
-					currentReflection.status = 'completed'
-					currentReflection.completedDate = new Date()
+				} else if (data.reflectionStatus == CONSTANTS.common.COMPLETED_STATUS) {
+					currentReflection.status = CONSTANTS.common.COMPLETED_STATUS
+					currentReflection.completedAt = new Date()
 					data.reflection = currentReflection
 				}
 
@@ -3641,15 +3641,27 @@ module.exports = class UserProjectsHelper {
 	 * @returns {Object} status of update project
 	 */
 
-	static update(filter, updateTo, userId, userToken, appName = '', appVersion = '') {
+	static update(projectId, updateData, userId, userToken, appName = '', appVersion = '') {
 		return new Promise(async (resolve, reject) => {
 			try {
-				const userProject = await projectQueries.projectDocument(filter, ['_id', 'reflection', 'tasks'])
-				updateTo.tasks = _fillMissingTaskInformation(updateTo.tasks, userProject[0].tasks)
+				const userProject = await projectQueries.projectDocument({ _id: projectId }, [
+					'_id',
+					'reflection',
+					'tasks',
+				])
+
+				if (!(userProject.length > 0)) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.USER_PROJECT_NOT_FOUND,
+					}
+				}
+
+				updateData.tasks = _fillMissingTaskInformation(updateData.tasks, userProject[0].tasks)
 				let updateResult = await this.sync(
-					filter._id,
+					projectId,
 					'',
-					updateTo,
+					updateData,
 					userId,
 					userToken,
 					appName,
@@ -3662,13 +3674,17 @@ module.exports = class UserProjectsHelper {
 						message: CONSTANTS.apiResponses.USER_PROJECT_UPDATED,
 						success: true,
 						result: {
-							_id: filter._id,
+							_id: projectId,
 						},
 					})
 				} else {
-					throw new Error(CONSTANTS.apiResponses.PROJECT_UPDATE_FAILED)
+					throw {
+						status: HTTP_STATUS_CODE.internal_server_error.status,
+						message: CONSTANTS.apiResponses.PROJECT_UPDATE_FAILED,
+					}
 				}
 			} catch (error) {
+				console.log(error)
 				return resolve({
 					message: error.message,
 					status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
@@ -3994,7 +4010,14 @@ function _projectTask(tasks, isImportedFromLibrary = false, parentTaskId = '') {
 
 	return tasks
 }
-
+/**
+ * Fill missing information in tasks from database.
+ * @method
+ * @name _fillMissingTaskInformation
+ * @param {Array} tasks - Tasks with potentially missing information.
+ * @param {Array} tasksFromDB - Tasks data retrieved from the database.
+ * @returns {Array} Updated tasks with missing information filled.
+ */
 function _fillMissingTaskInformation(tasks, tasksFromDB) {
 	for (let eachTask of tasks) {
 		let targetTask = tasksFromDB.find((singleTask) => singleTask._id == eachTask._id)

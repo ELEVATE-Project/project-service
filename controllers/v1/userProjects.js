@@ -1278,7 +1278,7 @@ module.exports = class UserProjects extends Abstract {
 		return new Promise(async (resolve, reject) => {
 			try {
 				const updateData = await userProjectsHelper.update(
-					{ _id: req.params._id },
+					req.params._id,
 					req.body,
 					req.userDetails.userInformation.userId,
 					req.userDetails.userToken,

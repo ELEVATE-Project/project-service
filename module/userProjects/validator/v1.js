@@ -20,13 +20,13 @@ module.exports = (req) => {
 		},
 		add: function () {
 			req.checkBody('program.name').exists().withMessage('required program name')
-			req.checkBody('program.startDate').exists().withMessage('required program start date')
-			req.checkBody('program.conversation').exists().withMessage('required program conversation')
-			req.checkBody('projects')
-				.exists()
-				.withMessage('required projects array')
-				.isArray()
-				.withMessage('projects must be an array')
+			// req.checkBody('program.startDate').exists().withMessage('required program start date')
+			// req.checkBody('program.conversation').exists().withMessage('required program conversation')
+			// req.checkBody('projects')
+			// 	.exists()
+			// 	.withMessage('required projects array')
+			// 	.isArray()
+			// 	.withMessage('projects must be an array')
 		},
 		share: function () {
 			req.checkParams('_id').exists().withMessage('required project id')

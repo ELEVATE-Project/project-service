@@ -87,6 +87,7 @@ module.exports = class SolutionsHelper {
 		solutionData.status = status
 		solutionData.description = description
 		solutionData.author = userId
+		solutionData.reflectionEnabled = UTILS.convertStringToBoolean(process.env.ENABLE_REFLECTION)
 		if (parentSolutionId) {
 			solutionData.parentSolutionId = parentSolutionId
 		}

@@ -650,7 +650,8 @@ module.exports = class UserProjectsHelper {
 						programData.endDate ? programData.endDate : endDate,
 						userId,
 						programData.language ? programData.language : [],
-						programData.conversation ? programData.conversation : [],
+						// programData.conversation ? programData.conversation : [],
+						[],
 						programData.source ? programData.source : {}
 					)
 					userPrivateProgram = await programQueries.createProgram(program)
@@ -668,7 +669,7 @@ module.exports = class UserProjectsHelper {
 						userId,
 						false,
 						'',
-						'improvementProject',
+						CONSTANTS.common.IMPROVEMENT_PROJECT,
 						'',
 						userId,
 						'',
@@ -1944,7 +1945,7 @@ module.exports = class UserProjectsHelper {
 
 				let programAndMultipleSolutionsData
 				const projectManatoryFields = ['duration', 'endDate', 'source', 'startDate', 'status', 'tasks', 'title']
-				const tasksMandatoryFields = ['name', 'isDeletable']
+				const tasksMandatoryFields = ['name']
 				let solutionsData = []
 
 				// Iterate over each project and check for mandatory fields
@@ -2008,6 +2009,7 @@ module.exports = class UserProjectsHelper {
 				for (const project of data.projects) {
 					// Create unique id to each task
 					for (let task of project.tasks) {
+						task['isDeletable'] = task.hasOwnProperty('isDeletable') ? task['isDeletable'] : false
 						task['_id'] = uuidv4()
 					}
 					let taskReport = {}
@@ -2073,6 +2075,7 @@ module.exports = class UserProjectsHelper {
 								_id: solution._id,
 								externalId: solution.externalId,
 								name: solution.name,
+								reflectionEnabled: solution.reflectionEnabled,
 							}
 							project['solutionExternalId'] = solution.externalId
 							project['solutionId'] = solution._id

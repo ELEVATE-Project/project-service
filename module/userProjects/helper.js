@@ -775,7 +775,6 @@ module.exports = class UserProjectsHelper {
 				}
 
 				let result = await _projectInformation(projectDetails[0], language)
-
 				if (!result.success) {
 					return resolve(result)
 				}
@@ -1742,7 +1741,6 @@ module.exports = class UserProjectsHelper {
 					}
 				}
 				let projectDetails = await this.details(projectId, userId, userRoleInformation, language)
-
 				// let revertStatusorNot = UTILS.revertStatusorNot(appVersion);
 				// if ( revertStatusorNot ) {
 				//     projectDetails.data.status = UTILS.revertProjectStatus(projectDetails.data.status);
@@ -4054,10 +4052,21 @@ function _projectInformation(project, language) {
 				})
 			}
 
+			// capture reflectionEnabled info from solution and delete rest of the keys
+			if (!project.solutionInformation) {
+				project['solutionInformation'] = {
+					reflectionEnabled: UTILS.convertStringToBoolean(process.env.ENABLE_REFLECTION),
+				}
+			} else {
+				project['solutionInformation'] = {
+					reflectionEnabled: project.solutionInformation.reflectionEnabled,
+				}
+			}
+
 			delete project.metaInformation
 			delete project.__v
 			delete project.entityInformation
-			delete project.solutionInformation
+			// delete project.solutionInformation
 			delete project.programInformation
 
 			return resolve({

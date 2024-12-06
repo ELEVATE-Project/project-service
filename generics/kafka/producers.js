@@ -15,7 +15,7 @@ const projectSubmissionTopic =
 const userProjectActivityTopic =
 	process.env.USER_ACTIVITY_TOPIC && process.env.USER_ACTIVITY_TOPIC != 'OFF'
 		? process.env.USER_ACTIVITY_TOPIC
-		: 'dev-user-activities'
+		: 'user-activities'
 
 /**
  * Push improvement projects to kafka.

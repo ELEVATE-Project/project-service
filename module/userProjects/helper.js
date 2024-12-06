@@ -483,8 +483,6 @@ module.exports = class UserProjectsHelper {
 				const kafkaPushedProject = await kafkaProducersHelper.pushProjectToKafka(projectUpdated)
 				const kafkaPushedUserProjects = await kafkaProducersHelper.pushUserActivitiesToKafka(kafkaUserProject)
 
-				console.log('<---------data sending to kafka -----------> : ', kafkaPushedProject)
-				console.log('<---------user project data sending to kafka -----------> : ', kafkaPushedUserProjects)
 				return resolve({
 					success: true,
 					message: CONSTANTS.apiResponses.USER_PROJECT_UPDATED,

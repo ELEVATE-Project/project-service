@@ -47,6 +47,9 @@ module.exports = {
 			default: 0,
 		},
 		translations: Object,
-		evidences: Array,
+		evidences: {
+			type: Array,
+			default: [],
+		},
 	},
 }

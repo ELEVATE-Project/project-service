@@ -247,4 +247,5 @@ module.exports = {
 	TASK_MANDATORY_FIELDS_MISSING: 'Task mandatoru fields missing',
 	PROGRAM_NOT_FOUND: 'Program not found',
 	PROJECTS_CREATED: 'Projects created successfully',
+	CATEGORY_ALREADY_EXISTS: 'Category already exists',
 }

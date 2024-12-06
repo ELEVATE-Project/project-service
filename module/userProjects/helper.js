@@ -99,8 +99,8 @@ module.exports = class UserProjectsHelper {
 	 * @param {String} userToken - User token.
 	 * @param {String} [appName = ""] - App Name.
 	 * @param {String} [appVersion = ""] - App Version.
-	 * @param {boolean} invokedViaUpdateApi - Indicates if the function is called via the Update API.
-	 * When true, it bypasses certain restrictions (e.g., submitted status, timestamp mismatch) to allow updates like reflection data.
+ 	 * @param {boolean} invokedViaUpdateApi - Indicates if the function is called via the Update API. 
+ 	 * When true, it bypasses certain restrictions (e.g., submitted status, timestamp mismatch) to allow updates like reflection data. 
 	 * When false, stricter validations are enforced for normal sync operations.
 	 * @returns {Object} Project created information.
 	 */
@@ -3647,12 +3647,8 @@ module.exports = class UserProjectsHelper {
 	static update(projectId, updateData, userId, userToken, appName = '', appVersion = '') {
 		return new Promise(async (resolve, reject) => {
 			try {
-				const userProject = await projectQueries.projectDocument({ _id: projectId }, [
-					'_id',
-					'reflection',
-					'tasks',
-				])
-
+				const userProject = await projectQueries.projectDocument({_id:projectId}, ['_id', 'reflection', 'tasks'])
+				
 				if (!(userProject.length > 0)) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,

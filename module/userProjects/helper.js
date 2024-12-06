@@ -99,8 +99,8 @@ module.exports = class UserProjectsHelper {
 	 * @param {String} userToken - User token.
 	 * @param {String} [appName = ""] - App Name.
 	 * @param {String} [appVersion = ""] - App Version.
- 	 * @param {boolean} invokedViaUpdateApi - Indicates if the function is called via the Update API. 
- 	 * When true, it bypasses certain restrictions (e.g., submitted status, timestamp mismatch) to allow updates like reflection data. 
+	 * @param {boolean} invokedViaUpdateApi - Indicates if the function is called via the Update API.
+	 * When true, it bypasses certain restrictions (e.g., submitted status, timestamp mismatch) to allow updates like reflection data.
 	 * When false, stricter validations are enforced for normal sync operations.
 	 * @returns {Object} Project created information.
 	 */
@@ -3647,8 +3647,12 @@ module.exports = class UserProjectsHelper {
 	static update(projectId, updateData, userId, userToken, appName = '', appVersion = '') {
 		return new Promise(async (resolve, reject) => {
 			try {
-				const userProject = await projectQueries.projectDocument({_id:projectId}, ['_id', 'reflection', 'tasks'])
-				
+				const userProject = await projectQueries.projectDocument({ _id: projectId }, [
+					'_id',
+					'reflection',
+					'tasks',
+				])
+
 				if (!(userProject.length > 0)) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
@@ -4018,19 +4022,51 @@ function _projectTask(tasks, isImportedFromLibrary = false, parentTaskId = '') {
  * @returns {Array} Updated tasks with missing information filled.
  */
 function _fillMissingTaskInformation(tasks, tasksFromDB) {
+	// Main loop to go through all tasks and fill missing properties
 	for (let eachTask of tasks) {
 		let targetTask = tasksFromDB.find((singleTask) => singleTask._id == eachTask._id)
+		if (targetTask) {
+			fillMissingProperties(eachTask, targetTask)
+		}
+	}
 
-		for (let key in targetTask) {
+	return tasks
+}
+
+/**
+ * Recursively fills missing properties in eachTask using the values from targetTask.
+ * @param {Object} eachTask - The task object that may have missing properties.
+ * @param {Object} targetTask - The task object from the database, used to fill missing properties.
+ * @returns {void} This function does not return a value. It modifies eachTask in place.
+ */
+function fillMissingProperties(eachTask, targetTask) {
+	for (let key in targetTask) {
+		if (Array.isArray(targetTask[key])) {
+			// If the property is an array (e.g., children), handle it separately
+			if (!eachTask[key]) {
+				// If the array is missing, copy the entire array
+				eachTask[key] = [...targetTask[key]]
+			} else {
+				// If the array exists, iterate over each element and fill in missing properties
+				eachTask[key] = eachTask[key].map((item, index) => {
+					const targetItem = targetTask[key][index] || {}
+					fillMissingProperties(item, targetItem) // Recursively fill the item
+					return item
+				})
+			}
+		} else if (typeof targetTask[key] === 'object' && targetTask[key] !== null) {
+			// If the property is an object (excluding null), call the function recursively
+			if (!eachTask[key]) {
+				eachTask[key] = {} // Initialize the object if it's missing
+			}
+			fillMissingProperties(eachTask[key], targetTask[key])
+		} else {
+			// If the property is a primitive value, just fill in missing values
 			if (!eachTask[key]) {
 				eachTask[key] = targetTask[key]
 			}
 		}
-
-		return tasks
 	}
-
-	return tasks
 }
 /**
  * Project categories information.

@@ -191,6 +191,22 @@ module.exports = {
 			type: Array,
 			default: [],
 		},
+		source: {
+			type: Object,
+			default: {},
+		},
+		reflection: {
+			type: Object,
+			default: {
+				status: null,
+				startDate: null,
+				endDate: null,
+			},
+		},
+		story: {
+			type: Object,
+			default: {},
+		},
 	},
 	compoundIndex: [
 		{

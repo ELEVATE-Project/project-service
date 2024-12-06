@@ -21,6 +21,9 @@ module.exports = (req) => {
 		add: function () {
 			req.checkBody('title').exists().withMessage('required project title')
 		},
+		addStory: function () {
+			req.checkParams('_id').exists().withMessage('required project id')
+		},
 		share: function () {
 			req.checkParams('_id').exists().withMessage('required project id')
 		},

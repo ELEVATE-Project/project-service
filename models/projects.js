@@ -191,6 +191,10 @@ module.exports = {
 			type: Array,
 			default: [],
 		},
+		story: {
+			type: Object,
+			default: {},
+		},
 	},
 	compoundIndex: [
 		{

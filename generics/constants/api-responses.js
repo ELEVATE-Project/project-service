@@ -241,4 +241,5 @@ module.exports = {
 	WISHLIST_FETCH_FAILED: 'Wishlist fetch failed',
 	WISHLIST_ALREADY_ADDED: 'This MI is already added to the wishlist.',
 	PROJECT_TEMPLATE_NOT_IN_WISHLIST: 'This MI is not found in the wishlist.',
+	PROJECT_UPDATE_FAILED: 'Project Update Failed.',
 }

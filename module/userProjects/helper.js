@@ -99,8 +99,8 @@ module.exports = class UserProjectsHelper {
 	 * @param {String} userToken - User token.
 	 * @param {String} [appName = ""] - App Name.
 	 * @param {String} [appVersion = ""] - App Version.
- 	 * @param {boolean} invokedViaUpdateApi - Indicates if the function is called via the Update API. 
- 	 * When true, it bypasses certain restrictions (e.g., submitted status, timestamp mismatch) to allow updates like reflection data. 
+	 * @param {boolean} invokedViaUpdateApi - Indicates if the function is called via the Update API.
+	 * When true, it bypasses certain restrictions (e.g., submitted status, timestamp mismatch) to allow updates like reflection data.
 	 * When false, stricter validations are enforced for normal sync operations.
 	 * @returns {Object} Project created information.
 	 */
@@ -473,11 +473,16 @@ module.exports = class UserProjectsHelper {
 						status: HTTP_STATUS_CODE.bad_request.status,
 					}
 				}
+				let kafkaUserProject = {
+					userId: userId,
+					projects: projectUpdated,
+				}
 				//  push project details to kafka
 				const kafkaPushedProject = await kafkaProducersHelper.pushProjectToKafka(projectUpdated)
+				const kafkaPushedUserProjects = await kafkaProducersHelper.pushUserActivitiesToKafka(kafkaUserProject)
 
 				console.log('<---------data sending to kafka -----------> : ', kafkaPushedProject)
-
+				console.log('<---------user project data sending to kafka -----------> : ', kafkaPushedUserProjects)
 				return resolve({
 					success: true,
 					message: CONSTANTS.apiResponses.USER_PROJECT_UPDATED,
@@ -1632,8 +1637,12 @@ module.exports = class UserProjectsHelper {
 						//         project.userProfile
 						//     );
 						// }
-
+						let kafkaUserProject = {
+							userId: userId,
+							projects: project,
+						}
 						await kafkaProducersHelper.pushProjectToKafka(project)
+						await kafkaProducersHelper.pushUserActivitiesToKafka(kafkaUserProject)
 
 						projectId = project._id
 					}
@@ -1933,7 +1942,12 @@ module.exports = class UserProjectsHelper {
 				createProject.status = UTILS.convertProjectStatus(data.status)
 				let userProject = await projectQueries.createProject(createProject)
 
+				let kafkaUserProject = {
+					userId: userId,
+					projects: userProject,
+				}
 				await kafkaProducersHelper.pushProjectToKafka(userProject)
+				await kafkaProducersHelper.pushUserActivitiesToKafka(kafkaUserProject)
 
 				if (!userProject._id) {
 					throw {
@@ -2721,8 +2735,12 @@ module.exports = class UserProjectsHelper {
 				// 		projectCreation._doc.userProfile
 				// 	)
 				// }
-
+				let kafkaUserProject = {
+					userId: userId,
+					projects: projectCreation,
+				}
 				await kafkaProducersHelper.pushProjectToKafka(projectCreation)
+				await kafkaProducersHelper.pushUserActivitiesToKafka(kafkaUserProject)
 
 				if (requestedData.rating && requestedData.rating > 0) {
 					await projectTemplatesHelper.ratings(projectTemplateId, requestedData.rating, userToken)
@@ -3218,8 +3236,13 @@ module.exports = class UserProjectsHelper {
 							},
 							updateObject
 						)
+						let kafkaUserProject = {
+							userId: projectDetails[0].userId,
+							projects: updatedProject,
+						}
 						// Push the updated project details to Kafka
 						await kafkaProducersHelper.pushProjectToKafka(updatedProject)
+						await kafkaProducersHelper.pushUserActivitiesToKafka(kafkaUserProject)
 					}
 					// Clean up the temporary folder
 					if (fs.existsSync(certificateTempFolderPath)) {
@@ -3681,8 +3704,12 @@ module.exports = class UserProjectsHelper {
 	static update(projectId, updateData, userId, userToken, appName = '', appVersion = '') {
 		return new Promise(async (resolve, reject) => {
 			try {
-				const userProject = await projectQueries.projectDocument({_id:projectId}, ['_id', 'reflection', 'tasks'])
-				
+				const userProject = await projectQueries.projectDocument({ _id: projectId }, [
+					'_id',
+					'reflection',
+					'tasks',
+				])
+
 				if (!(userProject.length > 0)) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,

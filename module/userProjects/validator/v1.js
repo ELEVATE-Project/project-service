@@ -23,6 +23,15 @@ module.exports = (req) => {
 		},
 		addStory: function () {
 			req.checkParams('_id').exists().withMessage('required project id')
+			req.checkBody('story')
+				.exists()
+				.withMessage('Story key is required')
+				.custom((value) => {
+					if (typeof value !== 'object' || Array.isArray(value) || Object.keys(value).length === 0) {
+						throw new Error('Story key should not be an empty object')
+					}
+					return true
+				})
 		},
 		share: function () {
 			req.checkParams('_id').exists().withMessage('required project id')

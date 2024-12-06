@@ -621,29 +621,32 @@ module.exports = class UserProjectsHelper {
 				let downloadableUrlsCall
 
 				if (projectDetails[0].story?.pdfInformation.length > 0) {
-					const pdfData = projectDetails[0].story
+					const pdfData = projectDetails[0].story.pdfInformation
 
 					// Extract file paths from pdfInformation
-					const filePathUrls = pdfData.pdfInformation.map((path) => path.filePath)
+					const filePaths = pdfData.map((item) => item.filePath)
 
-					// Get downloadable URLs
-					downloadableUrlsCall = await cloudServicesHelper.getDownloadableUrl(filePathUrls)
+					downloadableUrlsCall = await cloudServicesHelper.getDownloadableUrl(filePaths)
+					const downloadableUrlArr = downloadableUrlsCall.result
 
-					// Update the pdfInformation with corresponding URLs
-					if (downloadableUrlsCall?.result?.length > 0) {
-						pdfData.pdfInformation = pdfData.pdfInformation.map((info) => {
-							const matchedUrl = downloadableUrlsCall.result.find(
-								(urlObj) => urlObj.filePath === info.filePath
-							)
-							if (matchedUrl) {
-								return {
-									...info,
-									filePath: matchedUrl.url,
-								}
-							}
-							return info
-						})
-					}
+					// Create a map for faster lookups
+					const urlMap = new Map(downloadableUrlArr.map((item) => [item.filePath, item.url]))
+
+					// Create download URLs
+					const downloadUrls = filePaths.map(
+						(filePath) =>
+							`${process.env.ELEVATE_PROJECT_SERVICE_URL}/${process.env.SERVICE_NAME}${CONSTANTS.endpoints.AUTO_DOWNLOAD}?file=${filePath}`
+					)
+
+					projectDetails[0].story.pdfInformation.forEach((element) => {
+						const targetUrl = urlMap.get(element.filePath)
+
+						if (targetUrl) {
+							element.url = targetUrl
+							element.sharableUrl = `${process.env.ELEVATE_PROJECT_SERVICE_URL}/${process.env.SERVICE_NAME}${CONSTANTS.endpoints.AUTO_DOWNLOAD}?file=${element.filePath}`
+							delete element.filePath
+						}
+					})
 				}
 
 				let result = await _projectInformation(projectDetails[0], language)
@@ -1671,7 +1674,10 @@ module.exports = class UserProjectsHelper {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Fetch project details from the database
-				const projectDeatils = await projectQueries.projectDocument({ _id: ObjectId(projectId) }, ['all'])
+				const projectDeatils = await projectQueries.projectDocument(
+					{ _id: ObjectId(projectId), status: CONSTANTS.common.SUBMITTED_STATUS, isDeleted: false },
+					['all']
+				)
 				// Check if the project exists
 				if (!projectDeatils.length > 0) {
 					throw {
@@ -1685,7 +1691,14 @@ module.exports = class UserProjectsHelper {
 
 				// Append story attachments to the project's attachments array
 				if (projectDeatils[0].attachments && storyData.story.attachments) {
-					projectDeatils[0].attachments.push(...storyData.story.attachments)
+					// Combine existing and new attachments, adding the "page" key to each
+					projectDeatils[0].attachments = [
+						...projectDeatils[0].attachments,
+						...storyData.story.attachments,
+					].map((attachment) => ({
+						...attachment,
+						page: 'story',
+					}))
 				}
 
 				// Update the project in the database with the new attachments and story data

@@ -51,6 +51,7 @@ module.exports = async function (req, res, next, token = '') {
 		'userProjects/certificateCallback',
 		'userProjects/certificateCallbackError',
 		'cloud-services/files/download',
+		'userProjects/addStory',
 	]
 	await Promise.all(
 		guestAccessPaths.map(async function (path) {
@@ -65,7 +66,7 @@ module.exports = async function (req, res, next, token = '') {
 		return
 	}
 
-	let internalAccessApiPaths = ['/templates/bulkCreate', '/projectAttributes/update', '/userProjects/addStory']
+	let internalAccessApiPaths = ['/templates/bulkCreate', '/projectAttributes/update']
 	let performInternalAccessTokenCheck = false
 	await Promise.all(
 		internalAccessApiPaths.map(async function (path) {

@@ -101,6 +101,8 @@ module.exports = class UserProjectsHelper {
 	 * @param {String} [appVersion = ""] - App Version.
 	 * @param {boolean} invokedViaUpdateApi - Indicates if the function is called via the Update API.
 	 * When true, it bypasses certain restrictions (e.g., submitted status, timestamp mismatch) to allow updates like reflection data.
+	 * @param {boolean} invokedViaUpdateApi - Indicates if the function is called via the Update API.
+	 * When true, it bypasses certain restrictions (e.g., submitted status, timestamp mismatch) to allow updates like reflection data.
 	 * When false, stricter validations are enforced for normal sync operations.
 	 * @returns {Object} Project created information.
 	 */
@@ -473,10 +475,13 @@ module.exports = class UserProjectsHelper {
 						status: HTTP_STATUS_CODE.bad_request.status,
 					}
 				}
+				let kafkaUserProject = {
+					userId: userId,
+					projects: projectUpdated,
+				}
 				//  push project details to kafka
 				const kafkaPushedProject = await kafkaProducersHelper.pushProjectToKafka(projectUpdated)
-
-				console.log('<---------data sending to kafka -----------> : ', kafkaPushedProject)
+				const kafkaPushedUserProjects = await kafkaProducersHelper.pushUserActivitiesToKafka(kafkaUserProject)
 
 				return resolve({
 					success: true,
@@ -1765,8 +1770,12 @@ module.exports = class UserProjectsHelper {
 						//         project.userProfile
 						//     );
 						// }
-
+						let kafkaUserProject = {
+							userId: userId,
+							projects: project,
+						}
 						await kafkaProducersHelper.pushProjectToKafka(project)
+						await kafkaProducersHelper.pushUserActivitiesToKafka(kafkaUserProject)
 
 						projectId = project._id
 					}
@@ -2195,8 +2204,13 @@ module.exports = class UserProjectsHelper {
 					let userProject = await projectQueries.createProject(project)
 					userCreatedProjects.push(userProject)
 
+					let kafkaUserProject = {
+						userId: userId,
+						projects: userProject,
+					}
 					// Push the project to kafka
-					// await kafkaProducersHelper.pushProjectToKafka(userProject)
+					await kafkaProducersHelper.pushProjectToKafka(userProject)
+					await kafkaProducersHelper.pushUserActivitiesToKafka(kafkaUserProject)
 				}
 				let allProjectsData = []
 				// Maintain the order of projects
@@ -2989,8 +3003,12 @@ module.exports = class UserProjectsHelper {
 				// 		projectCreation._doc.userProfile
 				// 	)
 				// }
-
+				let kafkaUserProject = {
+					userId: userId,
+					projects: projectCreation,
+				}
 				await kafkaProducersHelper.pushProjectToKafka(projectCreation)
+				await kafkaProducersHelper.pushUserActivitiesToKafka(kafkaUserProject)
 
 				if (requestedData.rating && requestedData.rating > 0) {
 					await projectTemplatesHelper.ratings(projectTemplateId, requestedData.rating, userToken)
@@ -3486,8 +3504,13 @@ module.exports = class UserProjectsHelper {
 							},
 							updateObject
 						)
+						let kafkaUserProject = {
+							userId: projectDetails[0].userId,
+							projects: updatedProject,
+						}
 						// Push the updated project details to Kafka
 						await kafkaProducersHelper.pushProjectToKafka(updatedProject)
+						await kafkaProducersHelper.pushUserActivitiesToKafka(kafkaUserProject)
 					}
 					// Clean up the temporary folder
 					if (fs.existsSync(certificateTempFolderPath)) {

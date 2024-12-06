@@ -250,5 +250,4 @@ module.exports = {
 	PROGRAM_NOT_FOUND: 'Program not found',
 	PROJECTS_CREATED: 'Projects created successfully',
 	CATEGORY_ALREADY_EXISTS: 'Category already exists',
-
 }

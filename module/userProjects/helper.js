@@ -2438,21 +2438,21 @@ module.exports = class UserProjectsHelper {
 						userId: userId,
 					},
 				}
-				// pass matchQuery based on status only when status arg has value
-				if (status && status != '') {
-					// When ProgramId passed match based on reflectionStatus
+				// pass matchQuery based on reflection
+				if (process.env.ENABLE_REFLECTION === 'true') {
+					matchQuery.$match['reflection.status'] =
+						status === CONSTANTS.common.COMPLETED_STATUS
+							? { $eq: CONSTANTS.common.COMPLETED_STATUS } // Completed
+							: { $ne: CONSTANTS.common.COMPLETED_STATUS }
+					// When ProgramId passed match based on that
 					if (programId) {
-						matchQuery.$match['reflection.status'] =
-							status === CONSTANTS.common.COMPLETED_STATUS
-								? { $eq: CONSTANTS.common.COMPLETED_STATUS } // Completed
-								: { $ne: CONSTANTS.common.COMPLETED_STATUS }
 						matchQuery.$match.programId = new ObjectId(programId)
-					} else {
-						matchQuery.$match.status =
-							status === CONSTANTS.common.COMPLETED_STATUS
-								? { $eq: CONSTANTS.common.SUBMITTED_STATUS } // Completed
-								: { $ne: CONSTANTS.common.SUBMITTED_STATUS }
 					}
+				} else {
+					matchQuery.$match.status =
+						status === CONSTANTS.common.COMPLETED_STATUS
+							? { $eq: CONSTANTS.common.SUBMITTED_STATUS } // Completed
+							: { $ne: CONSTANTS.common.SUBMITTED_STATUS }
 				}
 				aggregateData.push(matchQuery)
 				// Projection aggregate for multilingual

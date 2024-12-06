@@ -774,6 +774,37 @@ module.exports = class UserProjectsHelper {
 					}
 				}
 
+				let downloadableUrlsCall
+
+				if (projectDetails[0].story?.pdfInformation.length > 0) {
+					const pdfData = projectDetails[0].story.pdfInformation
+
+					// Extract file paths from pdfInformation
+					const filePaths = pdfData.map((item) => item.filePath)
+
+					downloadableUrlsCall = await cloudServicesHelper.getDownloadableUrl(filePaths)
+					const downloadableUrlArr = downloadableUrlsCall.result
+
+					// Create a map for faster lookups
+					const urlMap = new Map(downloadableUrlArr.map((item) => [item.filePath, item.url]))
+
+					// Create download URLs
+					const downloadUrls = filePaths.map(
+						(filePath) =>
+							`${process.env.ELEVATE_PROJECT_SERVICE_URL}/${process.env.SERVICE_NAME}${CONSTANTS.endpoints.AUTO_DOWNLOAD}?file=${filePath}`
+					)
+
+					projectDetails[0].story.pdfInformation.forEach((element) => {
+						const targetUrl = urlMap.get(element.filePath)
+
+						if (targetUrl) {
+							element.url = targetUrl
+							element.sharableUrl = `${process.env.ELEVATE_PROJECT_SERVICE_URL}/${process.env.SERVICE_NAME}${CONSTANTS.endpoints.AUTO_DOWNLOAD}?file=${element.filePath}`
+							delete element.filePath
+						}
+					})
+				}
+
 				let result = await _projectInformation(projectDetails[0], language)
 				if (!result.success) {
 					return resolve(result)
@@ -1780,6 +1811,67 @@ module.exports = class UserProjectsHelper {
 					success: false,
 					message: error.message,
 					data: [],
+				})
+			}
+		})
+	}
+
+	/**
+	 * Adds a story to a specific project by appending its attachments and other details.
+	 * @method
+	 * @name addStory
+	 * @param {Object} storyData - The data of the story to be added, including its attachments.
+	 * @param {String} projectId - The unique identifier of the project to which the story will be added.
+	 * @returns {Promise<Object>} - A promise resolving to a success or failure response.
+	 */
+	static addStory(storyData, projectId) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				// Fetch project details from the database
+				const projectDeatils = await projectQueries.projectDocument(
+					{ _id: ObjectId(projectId), status: CONSTANTS.common.SUBMITTED_STATUS, isDeleted: false },
+					['all']
+				)
+				// Check if the project exists
+				if (!projectDeatils.length > 0) {
+					throw {
+						message: CONSTANTS.apiResponses.PROJECT_NOT_FOUND,
+						status: HTTP_STATUS_CODE.bad_request.status,
+					}
+				}
+
+				// Initialize the attachments array if it does not exist
+				projectDeatils[0].attachments = projectDeatils[0].attachments || []
+
+				// Append story attachments to the project's attachments array
+				if (projectDeatils[0].attachments && storyData.story.attachments) {
+					// Combine existing and new attachments, adding the "page" key to each
+					projectDeatils[0].attachments = [
+						...projectDeatils[0].attachments,
+						...storyData.story.attachments,
+					].map((attachment) => ({
+						...attachment,
+						page: 'story',
+					}))
+				}
+
+				// Update the project in the database with the new attachments and story data
+				const UpdatedProject = await projectQueries.findOneAndUpdate(
+					{
+						_id: ObjectId(projectId),
+					},
+					{ $set: { attachments: projectDeatils[0].attachments, ...storyData } }
+				)
+
+				return resolve({
+					success: true,
+					message: CONSTANTS.apiResponses.STORY_ADDED_SUCCESSFULLY,
+				})
+			} catch (error) {
+				return resolve({
+					success: false,
+					message: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message,
 				})
 			}
 		})

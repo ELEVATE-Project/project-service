@@ -99,6 +99,9 @@ module.exports = class UserProjectsHelper {
 	 * @param {String} userToken - User token.
 	 * @param {String} [appName = ""] - App Name.
 	 * @param {String} [appVersion = ""] - App Version.
+ 	 * @param {boolean} invokedViaUpdateApi - Indicates if the function is called via the Update API. 
+ 	 * When true, it bypasses certain restrictions (e.g., submitted status, timestamp mismatch) to allow updates like reflection data. 
+	 * When false, stricter validations are enforced for normal sync operations.
 	 * @returns {Object} Project created information.
 	 */
 
@@ -110,7 +113,7 @@ module.exports = class UserProjectsHelper {
 		userToken,
 		appName = '',
 		appVersion = '',
-		invokedViaUpdateApi = false
+		invokedViaUpdateApi = false //
 	) {
 		return new Promise(async (resolve, reject) => {
 			try {

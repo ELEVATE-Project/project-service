@@ -99,10 +99,22 @@ module.exports = class UserProjectsHelper {
 	 * @param {String} userToken - User token.
 	 * @param {String} [appName = ""] - App Name.
 	 * @param {String} [appVersion = ""] - App Version.
+	 * @param {boolean} invokedViaUpdateApi - Indicates if the function is called via the Update API.
+	 * When true, it bypasses certain restrictions (e.g., submitted status, timestamp mismatch) to allow updates like reflection data.
+	 * When false, stricter validations are enforced for normal sync operations.
 	 * @returns {Object} Project created information.
 	 */
 
-	static sync(projectId, lastDownloadedAt, data, userId, userToken, appName = '', appVersion = '') {
+	static sync(
+		projectId,
+		lastDownloadedAt,
+		data,
+		userId,
+		userToken,
+		appName = '',
+		appVersion = '',
+		invokedViaUpdateApi = false //
+	) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				const userProject = await projectQueries.projectDocument(
@@ -122,6 +134,7 @@ module.exports = class UserProjectsHelper {
 						'updateHistory',
 						'acl',
 						'userId',
+						'reflection',
 					]
 				)
 
@@ -174,18 +187,58 @@ module.exports = class UserProjectsHelper {
 					}
 				}
 
-				if (userProject[0].lastDownloadedAt.toISOString() !== lastDownloadedAt) {
+				if (!invokedViaUpdateApi && userProject[0].lastDownloadedAt.toISOString() !== lastDownloadedAt) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.USER_ALREADY_SYNC,
 					}
 				}
 
-				if (userProject[0].status == CONSTANTS.common.SUBMITTED_STATUS) {
+				if (!invokedViaUpdateApi && userProject[0].status == CONSTANTS.common.SUBMITTED_STATUS) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.FAILED_TO_SYNC_PROJECT_ALREADY_SUBMITTED,
 					}
+				}
+
+				let currentReflection = userProject[0].reflection || {}
+
+				if (data.reflectionStatus == CONSTANTS.common.STARTED) {
+					currentReflection.status = CONSTANTS.common.STARTED
+					currentReflection.startedAt = new Date()
+					data.reflection = currentReflection
+				} else if (data.reflectionStatus == CONSTANTS.common.COMPLETED_STATUS) {
+					currentReflection.status = CONSTANTS.common.COMPLETED_STATUS
+					currentReflection.completedAt = new Date()
+					data.reflection = currentReflection
+				}
+
+				if (invokedViaUpdateApi && userProject[0].status == CONSTANTS.common.SUBMITTED_STATUS) {
+					let projectUpdated = await projectQueries.findOneAndUpdate(
+						{
+							_id: userProject[0]._id,
+						},
+						{
+							$set: {
+								reflection: data.reflection,
+							},
+						},
+						{
+							new: true,
+						}
+					)
+
+					if (!projectUpdated._id) {
+						throw {
+							message: CONSTANTS.apiResponses.USER_PROJECT_NOT_UPDATED,
+							status: HTTP_STATUS_CODE.bad_request.status,
+						}
+					}
+
+					return resolve({
+						success: true,
+						message: CONSTANTS.apiResponses.USER_PROJECT_UPDATED,
+					})
 				}
 
 				const projectsModel = Object.keys(schemas['projects'].schema)
@@ -240,28 +293,28 @@ module.exports = class UserProjectsHelper {
 				//     }
 				// }
 
-				let addOrUpdateEntityToProject = false
+				// let addOrUpdateEntityToProject = false
 
-				if (data.entityId) {
-					// If entity is not present in project or new entity is updated.
-					if (
-						!userProject[0].entityInformation ||
-						(userProject[0].entityInformation && userProject[0].entityInformation._id !== data.entityId)
-					) {
-						addOrUpdateEntityToProject = true
-					}
-				}
+				// if (data.entityId) {
+				// 	// If entity is not present in project or new entity is updated.
+				// 	if (
+				// 		!userProject[0].entityInformation ||
+				// 		(userProject[0].entityInformation && userProject[0].entityInformation._id !== data.entityId)
+				// 	) {
+				// 		addOrUpdateEntityToProject = true
+				// 	}
+				// }
 
-				if (addOrUpdateEntityToProject) {
-					let entityInformation = await entitiesService.entityDocuments({ _id: entityId }, 'all')
+				// if (addOrUpdateEntityToProject) {
+				// 	let entityInformation = await entitiesService.entityDocuments({ _id: entityId }, 'all')
 
-					if (!entityInformation.success) {
-						return resolve(entityInformation)
-					}
+				// 	if (!entityInformation.success) {
+				// 		return resolve(entityInformation)
+				// 	}
 
-					updateProject['entityInformation'] = entityInformation.data[0]
-					updateProject.entityId = entityInformation.data[0]._id
-				}
+				// 	updateProject['entityInformation'] = entityInformation.data[0]
+				// 	updateProject.entityId = entityInformation.data[0]._id
+				// }
 
 				// if (createNewProgramAndSolution || solutionExists) {
 
@@ -556,6 +609,109 @@ module.exports = class UserProjectsHelper {
 	}
 
 	/**
+	 * Program and solution information
+	 * @method
+	 * @name createProgramAndMultipleSolutions
+	 * @param {Object} programData - program data
+	 * @param {Array} solutionData - solutions data
+	 * @param {String} userId - user id
+	 * @param {Boolean} isAPrivateProgram - isAPrivateProgram
+	 * @returns {Object} Created program and solution data.
+	 */
+
+	static createProgramAndMultipleSolutions(programData, solutionData, userId, isAPrivateProgram = false) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				const dateFormat = UTILS.epochTime()
+				let startDate = new Date()
+				let endDate = new Date()
+				endDate.setFullYear(endDate.getFullYear() + 1)
+				let userPrivateProgram
+
+				// Fetch programs data
+				if (programData._id && programData._id != '') {
+					userPrivateProgram = await programQueries.programsDocument(
+						{
+							_id: programData._id,
+						},
+						'all'
+					)
+					userPrivateProgram = userPrivateProgram[0]
+				} else {
+					// Create a program if program id is not passed
+					let program = await solutionsHelper._createProgramData(
+						programData.name,
+						programData.externalId ? programData.externalId : programData.name + '-' + dateFormat,
+						isAPrivateProgram,
+						CONSTANTS.common.ACTIVE_STATUS,
+						programData.description ? programData.description : programData.name,
+						userId,
+						programData.startDate ? programData.startDate : startDate,
+						programData.endDate ? programData.endDate : endDate,
+						userId,
+						programData.language ? programData.language : [],
+						// programData.conversation ? programData.conversation : [],
+						[],
+						programData.source ? programData.source : {}
+					)
+					userPrivateProgram = await programQueries.createProgram(program)
+				}
+
+				let solutionsCreated = []
+				for (const item of solutionData) {
+					// Create a solution if solutions
+					let solution = await solutionsHelper._createSolutionData(
+						item.name ? item.name : programData.name,
+						item.externalId ? item.externalId : programData.name + '-' + dateFormat,
+						isAPrivateProgram,
+						CONSTANTS.common.ACTIVE_STATUS,
+						item.description != '' ? item.description : programData.name,
+						userId,
+						false,
+						'',
+						CONSTANTS.common.IMPROVEMENT_PROJECT,
+						'',
+						userId,
+						'',
+						item.startDate ? item.startDate : startDate,
+						item.endDate ? item.endDate : endDate
+					)
+					solution = await solutionsQueries.createSolution(solution)
+					solutionsCreated.push(solution)
+				}
+				const solutionIds = solutionsCreated.map((solution) => {
+					return solution._id
+				})
+
+				// Update the program components
+				const updateProgram = await programsQueries.findAndUpdate(
+					{
+						_id: userPrivateProgram._id,
+					},
+					{
+						$addToSet: { components: solutionIds },
+					}
+				)
+				const solutionsAndProgramData = {}
+				solutionsAndProgramData['program'] = userPrivateProgram
+				solutionsAndProgramData['solutions'] = solutionsCreated
+
+				return resolve({
+					success: true,
+					data: solutionsAndProgramData,
+				})
+			} catch (error) {
+				return resolve({
+					status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
+					success: false,
+					message: error.message,
+					data: {},
+				})
+			}
+		})
+	}
+
+	/**
 	 * Project details.
 	 * @method
 	 * @name details
@@ -650,7 +806,6 @@ module.exports = class UserProjectsHelper {
 				}
 
 				let result = await _projectInformation(projectDetails[0], language)
-
 				if (!result.success) {
 					return resolve(result)
 				}
@@ -1617,7 +1772,6 @@ module.exports = class UserProjectsHelper {
 					}
 				}
 				let projectDetails = await this.details(projectId, userId, userRoleInformation, language)
-
 				// let revertStatusorNot = UTILS.revertStatusorNot(appVersion);
 				// if ( revertStatusorNot ) {
 				//     projectDetails.data.status = UTILS.revertProjectStatus(projectDetails.data.status);
@@ -1834,96 +1988,127 @@ module.exports = class UserProjectsHelper {
 		return new Promise(async (resolve, reject) => {
 			try {
 				const projectsModel = Object.keys(schemas['projects'].schema)
-				let createProject = {}
+				const booleanData = this.booleanData(schemas['projects'].schema)
+				const mongooseIdData = this.mongooseIdData(schemas['projects'].schema)
 
-				createProject['userId'] = createProject['createdBy'] = createProject['updatedBy'] = userId
-
-				//Fetch user profile information by calling sunbird's user read api.
-
+				//Fetch user profile information by calling user service.
 				let userProfile = await projectService.profileRead(userToken)
-				// Check if the user profile fetch was successful
+				// // Check if the user profile fetch was successful
 				if (!userProfile.success) {
 					throw {
 						message: CONSTANTS.apiResponses.USER_DATA_FETCH_UNSUCCESSFUL,
 						status: HTTP_STATUS_CODE.bad_request.status,
 					}
 				}
-				if (userProfile.success && userProfile.data) {
-					createProject.userProfile = userProfile.data
+
+				let createNewProgram = false
+				if (data.program._id && data.program._id !== '') {
+					createNewProgram = false
+				} else if (data.program.name && data.program.name != '') {
+					createNewProgram = true
 				}
 
-				let projectData = await _projectData(data)
-				if (projectData && projectData.success == true) {
-					createProject = _.merge(createProject, projectData.data)
-				} else {
-					return reject(projectData)
-				}
-
-				// let createNewProgramAndSolution = false;
-
-				// if (data.programId && data.programId !== "") {
-				//     createNewProgramAndSolution = false;
-				// }
-				// else if (data.programName) {
-				//     createNewProgramAndSolution = true;
-				// }
-
-				if (data.entityId) {
-					// let entityInformation = await entitiesService.entityDocuments({"_id" : data.entityId},"all",userToken)
-					let entityInformation = await _entitiesInformation([data.entityId])
-
-					if (!entityInformation.success) {
-						return resolve(entityInformation)
-					}
-
-					createProject['entityInformation'] = entityInformation.data[0]
-					createProject.entityId = entityInformation.data[0]._id
-				}
-				// if (createNewProgramAndSolution) {
-
-				//     let programAndSolutionInformation =
-				//         await this.createProgramAndSolution(
-				//             data.programId,
-				//             data.programName,
-				//             createProject.entityId ? [createProject.entityId] : "",
-				//             userToken
-				//         );
-
-				//     if (!programAndSolutionInformation.success) {
-				//         return resolve(programAndSolutionInformation);
-				//     }
-				//     createProject =
-				//         _.merge(createProject, programAndSolutionInformation.data);
-				// }
-
-				if (data.programId && data.programId !== '') {
-					let queryData = {}
-					queryData['_id'] = data.programId
-					let programDetails = await programsQueries.programsDocument(queryData, [
-						'_id',
-						'name',
-						'description',
-						'isAPrivateProgram',
-					])
-					if (!programDetails.length > 0) {
+				// Fetch program details
+				if (!createNewProgram) {
+					const program = await programQueries.programsDocument(
+						{
+							_id: data.program._id,
+						},
+						'all'
+					)
+					if (!program || !(Object.keys(program).length > 0)) {
 						throw {
-							status: HTTP_STATUS_CODE.bad_request.status,
+							success: false,
 							message: CONSTANTS.apiResponses.PROGRAM_NOT_FOUND,
 						}
 					}
-					let programInformationData = {}
-					programInformationData['programInformation'] = programDetails[0]
-					createProject = _.merge(createProject, programInformationData)
 				}
 
-				if (data.tasks) {
+				// Throw error if project array is not present in the req.body
+				if (!data.projects || !(data.projects.length > 0)) {
+					throw {
+						success: false,
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.PROJECT_DATA_NOT_FOUND,
+					}
+				}
+
+				let programAndMultipleSolutionsData
+				const projectManatoryFields = ['duration', 'endDate', 'source', 'startDate', 'status', 'tasks', 'title']
+				const tasksMandatoryFields = ['name']
+				let solutionsData = []
+
+				// Iterate over each project and check for mandatory fields
+				for (const project of data.projects) {
+					// Check mandatory fields in each project
+					for (const field of projectManatoryFields) {
+						if (!(field in project)) {
+							throw {
+								success: false,
+								status: HTTP_STATUS_CODE.bad_request.status,
+								message: CONSTANTS.apiResponses.PROJECT_MANDATORY_FIELDS_MISSING,
+							}
+						}
+					}
+
+					for (const task of project.tasks) {
+						// Check mandatory fields in each task object
+						for (const field of tasksMandatoryFields) {
+							if (!(field in task)) {
+								throw {
+									success: false,
+									status: HTTP_STATUS_CODE.bad_request.status,
+									message: CONSTANTS.apiResponses.TASK_MANDATORY_FIELDS_MISSING,
+								}
+							}
+						}
+					}
+					solutionsData.push({
+						name: project.title ? project.title : '',
+						description: project.description ? project.description : '',
+						startDate: project.startDate ? project.startDate : '',
+						endDate: project.endDate ? project.endDate : '',
+					})
+				}
+				// Create programs & solutions
+				programAndMultipleSolutionsData = await this.createProgramAndMultipleSolutions(
+					data.program,
+					solutionsData,
+					userId,
+					true
+				)
+				if (
+					!programAndMultipleSolutionsData.success ||
+					!programAndMultipleSolutionsData.data ||
+					!(Object.keys(programAndMultipleSolutionsData.data).length > 0)
+				) {
+					throw {
+						success: false,
+						message: CONSTANTS.apiResponses.SOLUTION_PROGRAMS_NOT_CREATED,
+					}
+				}
+
+				// Create programInformation object to store in projects
+				let programInformation = {}
+				programInformation['_id'] = programAndMultipleSolutionsData.data.program._id
+				programInformation['isAPrivateProgram'] = programAndMultipleSolutionsData.data.program.isAPrivateProgram
+				programInformation['externalId'] = programAndMultipleSolutionsData.data.program.externalId
+
+				let userCreatedProjects = []
+
+				for (const project of data.projects) {
+					// Create unique id to each task
+					for (let task of project.tasks) {
+						task['isDeletable'] = task.hasOwnProperty('isDeletable') ? task['isDeletable'] : false
+						task['_id'] = uuidv4()
+					}
 					let taskReport = {}
 
-					createProject.tasks = await _projectTask(data.tasks)
+					// Call _projectTask to create an object with all the other necessary fields
+					project.tasks = await _projectTask(project.tasks)
+					taskReport.total = project.tasks.length
 
-					taskReport.total = createProject.tasks.length
-
-					createProject.tasks.forEach((task) => {
+					project.tasks.forEach((task) => {
 						if (task.isDeleted == false) {
 							if (!taskReport[task.status]) {
 								taskReport[task.status] = 1
@@ -1931,76 +2116,120 @@ module.exports = class UserProjectsHelper {
 								taskReport[task.status] += 1
 							}
 						} else {
-							//if task is deleted it is not counted in total.
 							taskReport.total = taskReport.total - 1
 						}
 					})
+					project['taskReport'] = taskReport
 
-					createProject['taskReport'] = taskReport
-				}
+					// Attach programInformation to each project
+					project['programInformation'] = programInformation
+					project['programId'] = programInformation._id
+					project['programExternalId'] = programInformation.externalId
+					project['isAPrivateProgram'] = programInformation.isAPrivateProgram
 
-				let booleanData = this.booleanData(schemas['projects'].schema)
-				let mongooseIdData = this.mongooseIdData(schemas['projects'].schema)
+					// Attach app information to each project
+					project['appInformation'] = {}
+					if (appName !== '') {
+						project['appInformation']['appName'] = appName
+					}
 
-				Object.keys(data).forEach((updateData) => {
-					if (!createProject[updateData] && projectsModel.includes(updateData)) {
-						if (booleanData.includes(updateData)) {
-							createProject[updateData] = UTILS.convertStringToBoolean(data[updateData])
-						} else if (mongooseIdData.includes(updateData)) {
-							createProject[updateData] = ObjectId(data[updateData])
-						} else {
-							createProject[updateData] = data[updateData]
+					if (appVersion !== '') {
+						project['appInformation']['appVersion'] = appVersion
+					}
+
+					project['lastDownloadedAt'] = new Date()
+
+					if (data.profileInformation) {
+						project.userRoleInformation = project.profileInformation
+					}
+
+					project.status = UTILS.convertProjectStatus(project.status)
+
+					// Fetch and attach category information to each project
+					project['category'] = project['category']
+						? project['category']
+						: [process.env.DEFAULT_PROJECT_CATEGORY]
+					const categories = await projectCategoriesQueries.categoryDocuments(
+						{
+							externalId: { $in: project.category },
+						},
+						['_id', 'name', 'externalId', 'evidences']
+					)
+					project['categories'] = categories
+					project['userId'] = project['createdBy'] = project['updatedBy'] = userId
+
+					// Attach solution information to each project
+					for (const solution of programAndMultipleSolutionsData.data.solutions) {
+						if (solution.name == project.title) {
+							project['solutionInformation'] = {
+								_id: solution._id,
+								externalId: solution.externalId,
+								name: solution.name,
+								reflectionEnabled: solution.reflectionEnabled,
+							}
+							project['solutionExternalId'] = solution.externalId
+							project['solutionId'] = solution._id
+							break
 						}
 					}
-				})
 
-				createProject['appInformation'] = {}
-				if (appName !== '') {
-					createProject['appInformation']['appName'] = appName
+					// Iterate over each key in the current project object
+					Object.keys(project).forEach((updateData) => {
+						// Check if the current field is falsy (null, undefined, etc.) and is part of the project's data model
+						if (!project[updateData] && projectsModel.includes(updateData)) {
+							// If the field is expected to be a boolean, convert its string value to a boolean
+							if (booleanData.includes(updateData)) {
+								project[updateData] = UTILS.convertStringToBoolean(project[updateData])
+							}
+							// If the field is expected to be a MongoDB ObjectId, convert it from string to ObjectId
+							else if (mongooseIdData.includes(updateData)) {
+								project[updateData] = ObjectId(project[updateData])
+							} else {
+								project[updateData] = project[updateData]
+							}
+						}
+					})
+
+					// Attach userProfile to each project
+					project['userProfile'] = userProfile.data
+					let userProject = await projectQueries.createProject(project)
+					userCreatedProjects.push(userProject)
+
+					// Push the project to kafka
+					// await kafkaProducersHelper.pushProjectToKafka(userProject)
 				}
-
-				if (appVersion !== '') {
-					createProject['appInformation']['appVersion'] = appVersion
-				}
-
-				createProject['lastDownloadedAt'] = new Date()
-
-				if (data.profileInformation) {
-					createProject.userRoleInformation = data.profileInformation
-				}
-
-				createProject.status = UTILS.convertProjectStatus(data.status)
-				let userProject = await projectQueries.createProject(createProject)
-
-				await kafkaProducersHelper.pushProjectToKafka(userProject)
-
-				if (!userProject._id) {
-					throw {
-						message: CONSTANTS.apiResponses.USER_PROJECT_NOT_CREATED,
-						status: HTTP_STATUS_CODE.bad_request.status,
+				let allProjectsData = []
+				// Maintain the order of projects
+				for (const project of data.projects) {
+					for (const item of userCreatedProjects) {
+						if (project.title == item.title) {
+							allProjectsData.push({
+								_id: item._id,
+								lastDownloadedAt: item.lastDownloadedAt,
+							})
+							break
+						}
 					}
 				}
 
 				return resolve({
 					success: true,
-					message: CONSTANTS.apiResponses.PROJECT_CREATED,
+					message: CONSTANTS.apiResponses.PROJECTS_CREATED,
 					data: {
 						programId:
-							userProject.programInformation && userProject.programInformation._id
-								? userProject.programInformation._id
-								: data.programId,
-						projectId: userProject._id,
-						lastDownloadedAt: userProject.lastDownloadedAt,
-						hasAcceptedTAndC: userProject.hasAcceptedTAndC ? userProject.hasAcceptedTAndC : false,
+							programAndMultipleSolutionsData.data.program &&
+							programAndMultipleSolutionsData.data.program._id
+								? programAndMultipleSolutionsData.data.program._id
+								: data.program._id,
+						projects: allProjectsData,
 					},
 					result: {
 						programId:
-							userProject.programInformation && userProject.programInformation._id
-								? userProject.programInformation._id
-								: data.programId,
-						projectId: userProject._id,
-						lastDownloadedAt: userProject.lastDownloadedAt,
-						hasAcceptedTAndC: userProject.hasAcceptedTAndC ? userProject.hasAcceptedTAndC : false,
+							programAndMultipleSolutionsData.data.program &&
+							programAndMultipleSolutionsData.data.program._id
+								? programAndMultipleSolutionsData.data.program._id
+								: data.program._id,
+						projects: allProjectsData,
 					},
 				})
 			} catch (error) {
@@ -2462,10 +2691,12 @@ module.exports = class UserProjectsHelper {
 	 * @param {Number} pageSize -Page size
 	 * @param {String} searchText -Search text
 	 * @param {String} language -LanguageCode
+	 * @param {String} programId - ProgramId
+	 * @param {String} status  -status of the project
 	 * @returns {Array} List of projects.
 	 */
 
-	static list(userId, pageNo, pageSize, searchText, language = '') {
+	static list(userId, pageNo, pageSize, searchText, language = '', programId, status) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let aggregateData = []
@@ -2473,11 +2704,25 @@ module.exports = class UserProjectsHelper {
 				let matchQuery = {
 					$match: {
 						userId: userId,
-						status: { $ne: CONSTANTS.common.SUBMITTED_STATUS },
 					},
 				}
+				// pass matchQuery based on reflection
+				if (process.env.ENABLE_REFLECTION === 'true') {
+					matchQuery.$match['reflection.status'] =
+						status === CONSTANTS.common.COMPLETED_STATUS
+							? { $eq: CONSTANTS.common.COMPLETED_STATUS } // Completed
+							: { $ne: CONSTANTS.common.COMPLETED_STATUS }
+					// When ProgramId passed match based on that
+					if (programId) {
+						matchQuery.$match.programId = new ObjectId(programId)
+					}
+				} else {
+					matchQuery.$match.status =
+						status === CONSTANTS.common.COMPLETED_STATUS
+							? { $eq: CONSTANTS.common.SUBMITTED_STATUS } // Completed
+							: { $ne: CONSTANTS.common.SUBMITTED_STATUS }
+				}
 				aggregateData.push(matchQuery)
-
 				// Projection aggregate for multilingual
 				let titleField = language ? `$translations.${language}.title` : '$title'
 				let descriptionField = language ? `$translations.${language}.description` : '$description'
@@ -2491,9 +2736,20 @@ module.exports = class UserProjectsHelper {
 						status: 1,
 						tasks: 1,
 						taskReport: 1,
+						createdAt: 1,
+						startDate: 1,
+						endDate: 1,
+						programInformation: {
+							name: 1,
+						},
+						attachments: 1,
 					},
 				})
+
 				aggregateData.push(
+					{
+						$sort: { createdAt: -1 }, // Descending order (latest first)
+					},
 					{
 						// Pagination
 						$facet: {
@@ -2501,6 +2757,7 @@ module.exports = class UserProjectsHelper {
 							data: [{ $skip: pageSize * (pageNo - 1) }, { $limit: pageSize }],
 						},
 					},
+
 					{
 						// Count and project the response data
 						$project: {
@@ -2513,12 +2770,13 @@ module.exports = class UserProjectsHelper {
 				)
 
 				let projects = await projectQueries.getAggregate(aggregateData)
-				//Getting tasks translated if required
-				if (language != '' && projects[0].data.length > 0) {
-					projects[0].data.forEach((eachProject) => {
-						_projectInformation(eachProject, language)
-					})
+				//Getting tasks translated if required and downloadUrls
+				if ((language != '' || status === CONSTANTS.common.COMPLETED_STATUS) && projects[0].data.length > 0) {
+					for (const eachProject of projects[0].data) {
+						await _projectInformation(eachProject, language)
+					}
 				}
+
 				return resolve({
 					success: true,
 					message: CONSTANTS.apiResponses.PROJECTS_FETCHED,
@@ -2564,7 +2822,6 @@ module.exports = class UserProjectsHelper {
 						status: HTTP_STATUS_CODE.bad_request.status,
 					}
 				}
-
 				let taskReport = {}
 
 				// If template contains project task process the task data
@@ -2696,6 +2953,18 @@ module.exports = class UserProjectsHelper {
 				libraryProjects.data.userId = libraryProjects.data.updatedBy = libraryProjects.data.createdBy = userId
 				libraryProjects.data.lastDownloadedAt = new Date()
 				libraryProjects.data.status = CONSTANTS.common.STARTED
+				// adding startDate and Endate based on createdAt and duration
+				if (
+					!requestedData.startDate &&
+					!requestedData.endDate &&
+					libraryProjects.data.metaInformation.duration
+				) {
+					libraryProjects.data.startDate = new Date()
+					libraryProjects.data.endDate = UTILS.calculateEndDate(
+						libraryProjects.data.createdAt,
+						libraryProjects.data.metaInformation.duration
+					)
+				}
 
 				if (requestedData.startDate) {
 					libraryProjects.data.startDate = requestedData.startDate
@@ -3663,6 +3932,73 @@ module.exports = class UserProjectsHelper {
 			}
 		})
 	}
+
+	/**
+	 * update project infromation
+	 * @method
+	 * @name update
+	 * @param {Object} filter - filter to search project to be updated.
+	 * @param {Object} updateTo - data which will be updated.
+	 * @param {String} userId - Logged in user Id.
+	 * @param {String} userToken - filter to search project to be updated.
+	 * @param {String} [appName = ""] - App Name.
+	 * @param {String} [appVersion = ""] - App Version.
+	 * @returns {Object} status of update project
+	 */
+
+	static update(projectId, updateData, userId, userToken, appName = '', appVersion = '') {
+		return new Promise(async (resolve, reject) => {
+			try {
+				const userProject = await projectQueries.projectDocument({ _id: projectId }, [
+					'_id',
+					'reflection',
+					'tasks',
+				])
+
+				if (!(userProject.length > 0)) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.USER_PROJECT_NOT_FOUND,
+					}
+				}
+
+				updateData.tasks = _fillMissingTaskInformation(updateData.tasks, userProject[0].tasks)
+				let updateResult = await this.sync(
+					projectId,
+					'',
+					updateData,
+					userId,
+					userToken,
+					appName,
+					appVersion,
+					true
+				)
+
+				if (updateResult.message == CONSTANTS.apiResponses.USER_PROJECT_UPDATED) {
+					return resolve({
+						message: CONSTANTS.apiResponses.USER_PROJECT_UPDATED,
+						success: true,
+						result: {
+							_id: projectId,
+						},
+					})
+				} else {
+					throw {
+						status: HTTP_STATUS_CODE.internal_server_error.status,
+						message: CONSTANTS.apiResponses.PROJECT_UPDATE_FAILED,
+					}
+				}
+			} catch (error) {
+				console.log(error)
+				return resolve({
+					message: error.message,
+					status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
+					success: false,
+					data: {},
+				})
+			}
+		})
+	}
 }
 
 /**
@@ -3808,10 +4144,21 @@ function _projectInformation(project, language) {
 				})
 			}
 
+			// capture reflectionEnabled info from solution and delete rest of the keys
+			if (!project.solutionInformation) {
+				project['solutionInformation'] = {
+					reflectionEnabled: UTILS.convertStringToBoolean(process.env.ENABLE_REFLECTION),
+				}
+			} else {
+				project['solutionInformation'] = {
+					reflectionEnabled: project.solutionInformation.reflectionEnabled,
+				}
+			}
+
 			delete project.metaInformation
 			delete project.__v
 			delete project.entityInformation
-			delete project.solutionInformation
+			// delete project.solutionInformation
 			delete project.programInformation
 
 			return resolve({
@@ -3979,7 +4326,61 @@ function _projectTask(tasks, isImportedFromLibrary = false, parentTaskId = '') {
 
 	return tasks
 }
+/**
+ * Fill missing information in tasks from database.
+ * @method
+ * @name _fillMissingTaskInformation
+ * @param {Array} tasks - Tasks with potentially missing information.
+ * @param {Array} tasksFromDB - Tasks data retrieved from the database.
+ * @returns {Array} Updated tasks with missing information filled.
+ */
+function _fillMissingTaskInformation(tasks, tasksFromDB) {
+	// Main loop to go through all tasks and fill missing properties
+	for (let eachTask of tasks) {
+		let targetTask = tasksFromDB.find((singleTask) => singleTask._id == eachTask._id)
+		if (targetTask) {
+			fillMissingProperties(eachTask, targetTask)
+		}
+	}
 
+	return tasks
+}
+
+/**
+ * Recursively fills missing properties in eachTask using the values from targetTask.
+ * @param {Object} eachTask - The task object that may have missing properties.
+ * @param {Object} targetTask - The task object from the database, used to fill missing properties.
+ * @returns {void} This function does not return a value. It modifies eachTask in place.
+ */
+function fillMissingProperties(eachTask, targetTask) {
+	for (let key in targetTask) {
+		if (Array.isArray(targetTask[key])) {
+			// If the property is an array (e.g., children), handle it separately
+			if (!eachTask[key]) {
+				// If the array is missing, copy the entire array
+				eachTask[key] = [...targetTask[key]]
+			} else {
+				// If the array exists, iterate over each element and fill in missing properties
+				eachTask[key] = eachTask[key].map((item, index) => {
+					const targetItem = targetTask[key][index] || {}
+					fillMissingProperties(item, targetItem) // Recursively fill the item
+					return item
+				})
+			}
+		} else if (typeof targetTask[key] === 'object' && targetTask[key] !== null) {
+			// If the property is an object (excluding null), call the function recursively
+			if (!eachTask[key]) {
+				eachTask[key] = {} // Initialize the object if it's missing
+			}
+			fillMissingProperties(eachTask[key], targetTask[key])
+		} else {
+			// If the property is a primitive value, just fill in missing values
+			if (!eachTask[key]) {
+				eachTask[key] = targetTask[key]
+			}
+		}
+	}
+}
 /**
  * Project categories information.
  * @method

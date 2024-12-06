@@ -19,7 +19,14 @@ module.exports = (req) => {
 			req.checkQuery('taskId').exists().withMessage('required task id')
 		},
 		add: function () {
-			req.checkBody('title').exists().withMessage('required project title')
+			req.checkBody('program.name').exists().withMessage('required program name')
+			// req.checkBody('program.startDate').exists().withMessage('required program start date')
+			// req.checkBody('program.conversation').exists().withMessage('required program conversation')
+			// req.checkBody('projects')
+			// 	.exists()
+			// 	.withMessage('required projects array')
+			// 	.isArray()
+			// 	.withMessage('projects must be an array')
 		},
 		addStory: function () {
 			req.checkParams('_id').exists().withMessage('required project id')
@@ -40,6 +47,9 @@ module.exports = (req) => {
 			req.checkParams('_id').exists().withMessage('required project id')
 		},
 		verifyCertificate: function () {
+			req.checkParams('_id').exists().withMessage('required project id')
+		},
+		update: function () {
 			req.checkParams('_id').exists().withMessage('required project id')
 		},
 	}

@@ -162,13 +162,22 @@ module.exports = class UsersHelper {
 	 * @name privatePrograms
 	 * @param {string} userId - logged in user Id.
 	 * @param {string} language - languageCode.
+	 * @param {Boolean} getProjectsCount - get the projectsCount under that program.
+	 * @param {Number} pageNo - pageNo
+	 * @param {Number} pageSize - pageSize
 	 * @returns {Array} - List of all private programs created by user.
 	 */
 
-	static privatePrograms(userId, language) {
+	static privatePrograms(userId, language, getProjectsCount, pageNo, pageSize) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let userPrivatePrograms = await programsHelper.userPrivatePrograms(userId, language)
+				let userPrivatePrograms = await programsHelper.userPrivatePrograms(
+					userId,
+					language,
+					getProjectsCount,
+					pageNo,
+					pageSize
+				)
 
 				return resolve({
 					message: CONSTANTS.apiResponses.PRIVATE_PROGRAMS_LIST,

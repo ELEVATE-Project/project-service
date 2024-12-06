@@ -28,6 +28,7 @@ const certificateTemplateQueries = require(DB_QUERY_BASE_PATH + '/certificateTem
 const programQueries = require(DB_QUERY_BASE_PATH + '/programs')
 const evidencesHelper = require(MODULES_BASE_PATH + '/evidences/helper')
 const userExtensionQueries = require(DB_QUERY_BASE_PATH + '/userExtension')
+const filesHelpers = require(MODULES_BASE_PATH + '/cloud-services/files/helper')
 
 module.exports = class ProjectTemplatesHelper {
 	/**
@@ -1001,7 +1002,6 @@ module.exports = class ProjectTemplatesHelper {
 						findQuery['externalId'] = templateId
 					}
 				}
-
 				//getting template data using templateId
 				let templateData = await projectTemplateQueries.templateDocument(findQuery, 'all', [
 					'ratings',
@@ -1016,6 +1016,87 @@ module.exports = class ProjectTemplatesHelper {
 					'__v',
 					'metaInformation',
 				])
+
+				// Fetch downloadable urls for the category evidences
+				if (templateData[0].categories && templateData[0].categories.length > 0) {
+					// iterate over each category
+					let allFilePaths = []
+					for (let cateogry of templateData[0].categories) {
+						let evidences = cateogry.evidences
+
+						// iterate over each evidence in a category
+						if (evidences && evidences.length > 0) {
+							// iterate over each evidence and fetch the filepaths
+							for (let evidence of evidences) {
+								if (evidence.filepath && evidence.filepath !== '') {
+									allFilePaths.push(evidence.filepath)
+								}
+							}
+						}
+					}
+
+					if (allFilePaths.length > 0) {
+						let flattenedFilePathArr = _.flatten(allFilePaths)
+
+						let downloadableUrlsCall = await filesHelpers.getDownloadableUrl(flattenedFilePathArr)
+						// Attach the downloadableUrls for the evidences in the response
+						if (
+							downloadableUrlsCall.message == CONSTANTS.apiResponses.CLOUD_SERVICE_SUCCESS_MESSAGE &&
+							downloadableUrlsCall.result &&
+							downloadableUrlsCall.result.length > 0
+						) {
+							const downloadableUrls = downloadableUrlsCall.result
+
+							for (let cateogry of templateData[0].categories) {
+								let evidences = cateogry.evidences
+
+								// iterate over each evidence in a category
+								if (evidences && evidences.length > 0) {
+									// iterate over each evidence and fetch the filepaths
+									for (let evidence of evidences) {
+										if (evidence.filepath && evidence.filepath !== '') {
+											// iterate over each downloadbleUrl to handle worst case (in worst case every evidence in every category can have same evidence)
+											for (const item of downloadableUrls) {
+												if (evidence.filepath == item.filePath) {
+													evidence['downloadableUrl'] = item.url ? item.url : ''
+													break
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+
+				// Fetch downloadable urls for the project evidences
+				if (templateData[0].evidences && templateData[0].evidences.length > 0) {
+					let allFilePaths = templateData[0].evidences.map((evidence) => {
+						return evidence.link
+					})
+					let downloadableUrlsCall
+					if (allFilePaths && allFilePaths.length > 0) {
+						let flattenedFilePathArr = _.flatten(allFilePaths)
+
+						downloadableUrlsCall = await filesHelpers.getDownloadableUrl(flattenedFilePathArr)
+					}
+					// Attach the downloadableUrls for the evidences in the response
+					if (
+						downloadableUrlsCall.message == CONSTANTS.apiResponses.CLOUD_SERVICE_SUCCESS_MESSAGE &&
+						downloadableUrlsCall.result &&
+						downloadableUrlsCall.result.length > 0
+					) {
+						const downloadableUrls = downloadableUrlsCall.result
+						for (const item of downloadableUrls) {
+							templateData[0].evidences.map((evidence) => {
+								if (evidence.link == item.filePath) {
+									evidence['downloadableUrl'] = item.url ? item.url : ''
+								}
+							})
+						}
+					}
+				}
 
 				if (!(templateData.length > 0)) {
 					throw {

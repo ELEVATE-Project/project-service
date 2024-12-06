@@ -905,7 +905,9 @@ module.exports = class UserProjects extends Abstract {
 					req.pageNo,
 					req.pageSize,
 					req.searchText,
-					req.query.language ? req.query.language : ''
+					req.query.language ? req.query.language : '',
+					req.query.programId ? req.query.programId : '',
+					req.query.status ? req.query.status : ''
 				)
 				return resolve(projects)
 			} catch (error) {
@@ -1319,6 +1321,52 @@ module.exports = class UserProjects extends Abstract {
 				const verifyCertificateData = await userProjectsHelper.verifyCertificate(projectId)
 				return resolve(verifyCertificateData)
 			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
+				})
+			}
+		})
+	}
+	/**
+    * @api {post} /project/v1/userProjects/update/:projectId
+    * ReIssue project certificate
+    * @apiVersion 1.0.0
+    * @apiGroup User Projects
+    * @apiSampleRequest /project/v1/userProjects/update/66ac9949227504a96d8dce1c
+    * @apiParamExample {json} Response:
+    {
+        "message": "Project Updated Successfully.",
+        "status": 200,
+        "result": {
+            "_id": "667aabc7b070696248731e8e"
+        }
+    }
+	 * Verify project certificate
+	 * @method
+	 * @name update
+	 * @param {String} projectId - projectId.
+	 * @returns {JSON} certificate details.
+	 */
+	async update(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				const updateData = await userProjectsHelper.update(
+					req.params._id,
+					req.body,
+					req.userDetails.userInformation.userId,
+					req.userDetails.userToken,
+					req.headers['x-app-id'] ? req.headers['x-app-id'] : req.headers.appname ? req.headers.appname : '',
+					req.headers['x-app-ver']
+						? req.headers['x-app-ver']
+						: req.headers.appversion
+						? req.headers.appversion
+						: ''
+				)
+				return resolve(updateData)
+			} catch (error) {
+				console.log(error)
 				return reject({
 					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
 					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,

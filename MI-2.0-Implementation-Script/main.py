@@ -354,92 +354,162 @@ def programsFileCheck(filePathAddPgm, accessToken, parentFolder, MainFilePath):
                     dictDetailsEnv = {keysEnv[col_index_env]: detailsEnvSheet.cell(row_index_env, col_index_env).value
                                       for
                                       col_index_env in range(detailsEnvSheet.ncols)}
-                    programNameInp = dictDetailsEnv['Title of the Program'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Title of the Program'] else terminatingMessage("\"Title of the Program\" must not be Empty in \"Program details\" sheet")
-                    extIdPGM = dictDetailsEnv['Program ID'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Program ID'] else terminatingMessage("\"Program ID\" must not be Empty in \"Program details\" sheet")
-                    proDesc = dictDetailsEnv['Description of the Program'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Description of the Program'] else terminatingMessage("\"Program ID\" must not be Empty in \"Program details\" sheet")
-                    roles = dictDetailsEnv['Targeted subrole at program level'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Targeted subrole at program level'] else terminatingMessage("\"Program ID\" must not be Empty in \"Program details\" sheet")
-                    returnvalues = []
-                    global entitiesPGM
-                    entitiesPGM = dictDetailsEnv['Targeted entities at program level'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Targeted entities at program level'] else terminatingMessage("\"Targeted entities at program level\" must not be Empty in \"Program details\" sheet")
-                    global stateEntitiesPGM
-                    stateEntitiesPGM = dictDetailsEnv['Targeted district at program level'].encode('utf-8').decode('utf-8')
-                    global startDateOfProgram, endDateOfProgram
-                    startDateOfProgram = dictDetailsEnv['Start date of program']
-                    endDateOfProgram = dictDetailsEnv['End date of program']
-                    # taking the start date of program from program template and converting YYYY-MM-DD 00:00:00 format
-                    
-                    startDateArr = str(startDateOfProgram).split("-")
-                    startDateOfProgram = startDateArr[2] + "-" + startDateArr[1] + "-" + startDateArr[0] + " 00:00:00"
+                    entitiesToCheck = dictDetailsEnv['Targeted entities at program level'].encode('utf-8').decode('utf-8')
+                    if entitiesToCheck != "":                        
+                        programNameInp = dictDetailsEnv['Title of the Program'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Title of the Program'] else terminatingMessage("\"Title of the Program\" must not be Empty in \"Program details\" sheet")
+                        extIdPGM = dictDetailsEnv['Program ID'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Program ID'] else terminatingMessage("\"Program ID\" must not be Empty in \"Program details\" sheet")
+                        proDesc = dictDetailsEnv['Description of the Program'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Description of the Program'] else terminatingMessage("\"Program ID\" must not be Empty in \"Program details\" sheet")
+                        roles = dictDetailsEnv['Targeted subrole at program level'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Targeted subrole at program level'] else terminatingMessage("\"Program ID\" must not be Empty in \"Program details\" sheet")
+                        returnvalues = []
+                        global entitiesPGM
+                        entitiesPGM = dictDetailsEnv['Targeted entities at program level'].encode('utf-8').decode('utf-8')
+                        global stateEntitiesPGM
+                        stateEntitiesPGM = dictDetailsEnv['Targeted state at program level'].encode('utf-8').decode('utf-8')
+                        global startDateOfProgram, endDateOfProgram
+                        startDateOfProgram = dictDetailsEnv['Start date of program']
+                        endDateOfProgram = dictDetailsEnv['End date of program']
+                        # taking the start date of program from program template and converting YYYY-MM-DD 00:00:00 format
+                        
+                        startDateArr = str(startDateOfProgram).split("-")
+                        startDateOfProgram = startDateArr[2] + "-" + startDateArr[1] + "-" + startDateArr[0] + " 00:00:00"
 
                     # taking the end date of program from program template and converting YYYY-MM-DD 00:00:00 format
 
-                    endDateArr = str(endDateOfProgram).split("-")
-                    endDateOfProgram = endDateArr[2] + "-" + endDateArr[1] + "-" + endDateArr[0] + " 23:59:59"
-                    global mainRole
-                    mainRole = dictDetailsEnv['Targeted role at program level'] if dictDetailsEnv['Targeted role at program level'] else terminatingMessage("\"Targeted role at program level\" must not be Empty in \"Program details\" sheet")
-                    global scopeEntityType
-                    scopeEntityType = "state"
-                    global entitiesType
-                    entitiesType = fetchEntityType(parentFolder, accessToken,
-                                                  entitiesPGM.lstrip().rstrip().split(","), scopeEntityType)
-                    if entitiesPGM:
-                        entitiesPGM = entitiesPGM
-                        scopeEntityType = entitiesType
-                    global entitiesPGMID
-                    entitiesPGMID = fetchEntityId(parentFolder, accessToken,
-                                                  entitiesPGM.lstrip().rstrip().split(","), scopeEntityType)
-                    global orgIds
-                    
-
-                    if not getProgramInfo(accessToken, parentFolder, programNameInp.encode('utf-8').decode('utf-8')):
-                        extIdPGM = dictDetailsEnv['Program ID'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Program ID'] else terminatingMessage("\"Program ID\" must not be Empty in \"Program details\" sheet")
-                        if str(dictDetailsEnv['Program ID']).strip() == "Do not fill this field":
-                            terminatingMessage("change the program id")
-                        descriptionPGM = dictDetailsEnv['Description of the Program'].encode('utf-8').decode('utf-8') if dictDetailsEnv[
-                            'Description of the Program'] else terminatingMessage(
-                            "\"Description of the Program\" must not be Empty in \"Program details\" sheet")
-                        keywordsPGM = dictDetailsEnv['Keywords'].encode('utf-8').decode('utf-8')
-                        entitiesPGM = dictDetailsEnv['Targeted entities at program level'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Targeted entities at program level'] else terminatingMessage("\"Targeted entities at program level\" must not be Empty in \"Program details\" sheet")
-                        stateEntitiesPGM = dictDetailsEnv['Targeted district at program level'].encode('utf-8').decode('utf-8')
+                        endDateArr = str(endDateOfProgram).split("-")
+                        endDateOfProgram = endDateArr[2] + "-" + endDateArr[1] + "-" + endDateArr[0] + " 23:59:59"
+                        global mainRole
+                        mainRole = dictDetailsEnv['Targeted role at program level'] if dictDetailsEnv['Targeted role at program level'] else terminatingMessage("\"Targeted role at program level\" must not be Empty in \"Program details\" sheet")
+                        global scopeEntityType
+                        scopeEntityType = "state"
+                        global entitiesType
                         entitiesType = fetchEntityType(parentFolder, accessToken,
-                                                  entitiesPGM.lstrip().rstrip().split(","), scopeEntityType)
-                        # selecting entity type based on the users input 
+                                                    entitiesPGM.lstrip().rstrip().split(","), scopeEntityType)
                         if entitiesPGM:
                             entitiesPGM = entitiesPGM
                             scopeEntityType = entitiesType
-
-                        global rolesPGM
-                        rolesPGM = dictDetailsEnv['Targeted subrole at program level'] if dictDetailsEnv['Targeted subrole at program level'] else terminatingMessage("\"Targeted subrole at program level\" must not be Empty in \"Program details\" sheet")
-                        if "teacher" in mainRole.strip().lower():
-                            rolesPGM = str(rolesPGM).strip() + ",TEACHER"
-                        userDetails = fetchUserDetails(environment, accessToken, dictDetailsEnv['projectService username/user id/email id/phone no. of Program Designer'])
-                        userId = userDetails[0]
-                        messageArr = []
-
-                        scopeEntityType = entitiesType
-                        # fetch entity details 
-                        entitiesPGMID = fetchEntityId(parentFolder, accessToken,entitiesPGM.lstrip().rstrip().split(","), scopeEntityType)
+                        global entitiesPGMID
+                        entitiesPGMID = fetchEntityId(parentFolder, accessToken,
+                                                    entitiesPGM.lstrip().rstrip().split(","), scopeEntityType)
+                        global orgIds
                         
-                        # sys.exit()
-                        # fetch sub-role details 
-                        # rolesPGMID = fetchScopeRole(parentFolder, accessToken, rolesPGM.lstrip().rstrip().split(","))
+
+                        if not getProgramInfo(accessToken, parentFolder, programNameInp.encode('utf-8').decode('utf-8')):
+                            extIdPGM = dictDetailsEnv['Program ID'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Program ID'] else terminatingMessage("\"Program ID\" must not be Empty in \"Program details\" sheet")
+                            if str(dictDetailsEnv['Program ID']).strip() == "Do not fill this field":
+                                terminatingMessage("change the program id")
+                            descriptionPGM = dictDetailsEnv['Description of the Program'].encode('utf-8').decode('utf-8') if dictDetailsEnv[
+                                'Description of the Program'] else terminatingMessage(
+                                "\"Description of the Program\" must not be Empty in \"Program details\" sheet")
+                            keywordsPGM = dictDetailsEnv['Keywords'].encode('utf-8').decode('utf-8')
+                            entitiesPGM = dictDetailsEnv['Targeted entities at program level'].encode('utf-8').decode('utf-8')
+                            stateEntitiesPGM = dictDetailsEnv['Targeted state at program level'].encode('utf-8').decode('utf-8')
+                            entitiesType = fetchEntityType(parentFolder, accessToken,
+                                                    entitiesPGM.lstrip().rstrip().split(","), scopeEntityType)
+                            # selecting entity type based on the users input 
+                            if entitiesPGM:
+                                entitiesPGM = entitiesPGM
+                                scopeEntityType = entitiesType
+
+                            global rolesPGM
+                            rolesPGM = dictDetailsEnv['Targeted subrole at program level'] if dictDetailsEnv['Targeted subrole at program level'] else terminatingMessage("\"Targeted subrole at program level\" must not be Empty in \"Program details\" sheet")
+                            if "teacher" in mainRole.strip().lower():
+                                rolesPGM = str(rolesPGM).strip() + ",TEACHER"
+                            userDetails = fetchUserDetails(environment, accessToken, dictDetailsEnv['projectService username/user id/email id/phone no. of Program Designer'])
+                            userId = userDetails[0]
+                            messageArr = []
+
+                            scopeEntityType = entitiesType
+                            # fetch entity details 
+                            entitiesPGMID = fetchEntityId(parentFolder, accessToken,entitiesPGM.lstrip().rstrip().split(","), scopeEntityType)
+                            
+                            # sys.exit()
+                            # fetch sub-role details 
+                            # rolesPGMID = fetchScopeRole(parentFolder, accessToken, rolesPGM.lstrip().rstrip().split(","))
+                            
+                            # sys.exit()
+
+                            # call function to create program 
+                            programCreation(accessToken,parentFolder,extIdPGM,programNameInp,proDesc,roles,userId)
+                            # accessToken, parentFolder, extIdPGM, programNameInp, descriptionPGM,keywordsPGM.lstrip().rstrip().split(","),mainRole,rolesPGM
+                            # sys.exit()
+                            programmappingpdpmsheetcreation(MainFilePath, accessToken, program_file, extIdPGM,parentFolder)
+
+                            # map PM / PD to the program 
+                            # Programmappingapicall(MainFilePath, accessToken, program_file,parentFolder)
+
+                            # check if program is created or not 
+                            if getProgramInfo(accessToken, parentFolder, extIdPGM):
+                                print("Program Created SuccessFully.")
+                            else :
+                                terminatingMessage("Program creation failed! Please check logs.")
+                    else:
+                        programNameInp = dictDetailsEnv['Title of the Program'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Title of the Program'] else terminatingMessage("\"Title of the Program\" must not be Empty in \"Program details\" sheet")
+                        extIdPGM = dictDetailsEnv['Program ID'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Program ID'] else terminatingMessage("\"Program ID\" must not be Empty in \"Program details\" sheet")
+                        proDesc = dictDetailsEnv['Description of the Program'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Description of the Program'] else terminatingMessage("\"Program ID\" must not be Empty in \"Program details\" sheet")
+                        roles = dictDetailsEnv['Targeted subrole at program level'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Targeted subrole at program level'] else terminatingMessage("\"Program ID\" must not be Empty in \"Program details\" sheet")
+                        returnvalues = []
+                        entitiesType = dictDetailsEnv['Targeted entities at program level'].encode('utf-8').decode('utf-8')
+                        stateEntitiesPGM = dictDetailsEnv['Targeted state at program level'].encode('utf-8').decode('utf-8')
+                        startDateOfProgram = dictDetailsEnv['Start date of program']
+                        endDateOfProgram = dictDetailsEnv['End date of program']
+                        # taking the start date of program from program template and converting YYYY-MM-DD 00:00:00 format
+                        startDateArr = str(startDateOfProgram).split("-")
+                        startDateOfProgram = startDateArr[2] + "-" + startDateArr[1] + "-" + startDateArr[0] + " 00:00:00"
+
+                        # taking the end date of program from program template and converting YYYY-MM-DD 00:00:00 format
+
+                        endDateArr = str(endDateOfProgram).split("-")
+                        endDateOfProgram = endDateArr[2] + "-" + endDateArr[1] + "-" + endDateArr[0] + " 23:59:59"
+                        mainRole = dictDetailsEnv['Targeted role at program level'] if dictDetailsEnv['Targeted role at program level'] else terminatingMessage("\"Targeted role at program level\" must not be Empty in \"Program details\" sheet")
+                    
                         
-                        # sys.exit()
 
-                        # call function to create program 
-                        programCreation(accessToken,parentFolder,extIdPGM,programNameInp,proDesc,roles,userId)
-                        # accessToken, parentFolder, extIdPGM, programNameInp, descriptionPGM,keywordsPGM.lstrip().rstrip().split(","),mainRole,rolesPGM
-                        # sys.exit()
-                        programmappingpdpmsheetcreation(MainFilePath, accessToken, program_file, extIdPGM,parentFolder)
+                        if not getProgramInfo(accessToken, parentFolder, programNameInp.encode('utf-8').decode('utf-8')):
+                            extIdPGM = dictDetailsEnv['Program ID'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Program ID'] else terminatingMessage("\"Program ID\" must not be Empty in \"Program details\" sheet")
+                            if str(dictDetailsEnv['Program ID']).strip() == "Do not fill this field":
+                                terminatingMessage("change the program id")
+                            descriptionPGM = dictDetailsEnv['Description of the Program'].encode('utf-8').decode('utf-8') if dictDetailsEnv[
+                                'Description of the Program'] else terminatingMessage(
+                                "\"Description of the Program\" must not be Empty in \"Program details\" sheet")
+                            keywordsPGM = dictDetailsEnv['Keywords'].encode('utf-8').decode('utf-8')
+                            entitiesPGM = dictDetailsEnv['Targeted entities at program level'].encode('utf-8').decode('utf-8')
+                            stateEntitiesPGM = dictDetailsEnv['Targeted state at program level'].encode('utf-8').decode('utf-8')
+                            entitiesType = fetchEntityType(parentFolder, accessToken,
+                                                    entitiesPGM.lstrip().rstrip().split(","), scopeEntityType)
+                            # selecting entity type based on the users input 
+                            if entitiesPGM:
+                                entitiesPGM = entitiesPGM
+                                scopeEntityType = entitiesType
 
-                        # map PM / PD to the program 
-                        # Programmappingapicall(MainFilePath, accessToken, program_file,parentFolder)
+                            rolesPGM = dictDetailsEnv['Targeted subrole at program level'] if dictDetailsEnv['Targeted subrole at program level'] else terminatingMessage("\"Targeted subrole at program level\" must not be Empty in \"Program details\" sheet")
+                            if "teacher" in mainRole.strip().lower():
+                                rolesPGM = str(rolesPGM).strip() + ",TEACHER"
+                            userDetails = fetchUserDetails(environment, accessToken, dictDetailsEnv['projectService username/user id/email id/phone no. of Program Designer'])
+                            userId = userDetails[0]
+                            messageArr = []
 
-                        # check if program is created or not 
-                        if getProgramInfo(accessToken, parentFolder, extIdPGM):
-                            print("Program Created SuccessFully.")
-                        else :
-                            terminatingMessage("Program creation failed! Please check logs.")
+                            scopeEntityType = entitiesType
+                            # fetch entity details 
+                            entitiesPGMID = fetchEntityId(parentFolder, accessToken,entitiesPGM.lstrip().rstrip().split(","), scopeEntityType)
+                            
+                            # sys.exit()
+                            # fetch sub-role details 
+                            # rolesPGMID = fetchScopeRole(parentFolder, accessToken, rolesPGM.lstrip().rstrip().split(","))
+                            
+                            # sys.exit()
+
+                            # call function to create program 
+                            programCreation(accessToken,parentFolder,extIdPGM,programNameInp,proDesc,roles,userId)
+                            # accessToken, parentFolder, extIdPGM, programNameInp, descriptionPGM,keywordsPGM.lstrip().rstrip().split(","),mainRole,rolesPGM
+                            # sys.exit()
+                            programmappingpdpmsheetcreation(MainFilePath, accessToken, program_file, extIdPGM,parentFolder)
+
+
+                            # check if program is created or not 
+                            if getProgramInfo(accessToken, parentFolder, extIdPGM):
+                                print("Program Created SuccessFully.")
+                            else :
+                                terminatingMessage("Program creation failed! Please check logs.")
 
             elif sheetEnv.strip().lower() == 'resource details':
                 # checking Resource details sheet 
@@ -1383,10 +1453,7 @@ def validateSheets(filePathAddObs, accessToken, parentFolder):
                         "\"title\" must not be Empty in \"Project Upload\" sheet")
                     projectId = dictDetailsEnv['projectId'] if dictDetailsEnv['projectId'] else terminatingMessage(
                         "\"projectId\" must not be Empty in \"Project Upload\" sheet")
-                    projectCategories = dictDetailsEnv['categories'].encode('utf-8').decode('utf-8') if dictDetailsEnv[
-                        'categories'] else terminatingMessage(
-                        "\"categories\" must not be Empty in \"Project Upload\" sheet")
-                    
+                    projectCategories = dictDetailsEnv['categories'].encode('utf-8').decode('utf-8')
                     projectDescription = dictDetailsEnv["objective"].encode('utf-8').decode('utf-8') if dictDetailsEnv[
                         "objective"] else terminatingMessage(
                         "\"objective\" must not be Empty in \"Project Upload\" sheet")
@@ -3259,24 +3326,15 @@ def prepareProjectAndTasksSheets(project_inputFile, projectName_for_folder_path,
                               for col_index_env in range(projectDetailsSheet.ncols)}
         title = str(dictProjectDetails["title"]).encode('utf-8').decode('utf-8').strip()
         externalId = str(dictProjectDetails["projectId"]).strip()  + "-" + str(millisecond)
-        categories_list = ["teachers", "students", "infrastructure", "community", "educationLeader", "schoolProcess"]
-        categories = str(dictProjectDetails["categories"]).encode('utf-8').decode('utf-8').split(",")
-        categories_final = ""
+        categories = str(dictProjectDetails["categories"]).encode('utf-8').decode('utf-8').strip()
         projectGoal = "TEMP"
-        for cat in categories:
-            if categories_final == "":
-                categories_final = categories_final + str(
-                    (get_close_matches(cat.strip().lower().replace(" ", ""), categories_list)[0]))
-            else:
-                categories_final = categories_final + "," + str(
-                    (get_close_matches(cat.strip().lower().replace(" ", ""), categories_list)[0]))
         global projectCreator, projectAuthor
 
         projectAuthor = str(dictProjectDetails["projectService_loginId"]).encode('utf-8').decode('utf-8').strip()
         recommendedFor = str(dictProjectDetails["recommendedFor"]).encode('utf-8').decode('utf-8').strip()
         objective = str(dictProjectDetails["objective"]).encode('utf-8').decode('utf-8').strip()
         entityType = None
-        project_values = [title, externalId, categories_final, recommendedFor,objective, entityType,projectGoal]
+        project_values = [title, externalId, categories, recommendedFor,objective, entityType,projectGoal]
         lr_value_count = 1
         for lr in range(0, int(learningResource_count)):
             lr_name = str(dictProjectDetails["learningResources" + str(lr_value_count) + "-name"]).strip()
@@ -3412,6 +3470,9 @@ def prepareProjectAndTasksSheets(project_inputFile, projectName_for_folder_path,
         for task_lr in range(0, int(taskLearningResource_count)):
             task_lr_name = str(dictTasksDetails["learningResources" + str(task_lr_value_count) + "-name"]).strip()
             task_lr_link = str(dictTasksDetails["learningResources" + str(task_lr_value_count) + "-link"]).strip()
+            if task_lr_link and not task_lr_name:
+                raise ValueError(
+                    f"Name is required for the learning resource with link: '{task_lr_link }'")
             if task_lr_name == "" and task_lr_link == "":
                 task_values.append("")
                 task_values.append("")
@@ -3493,7 +3554,7 @@ def prepareProjectAndTasksSheetsForSpotlight(project_inputFile, projectName_for_
         for row_index_env in range(2, storyDetailsSheet.nrows):
             dictStoryDetails = {keysStory[col_index_env]: storyDetailsSheet.cell(row_index_env, col_index_env).value
                                 for col_index_env in range(storyDetailsSheet.ncols)}
-
+        storyDetailsList = []
         programDetailsSheet = wbproject.sheet_by_name('Program details')
         keysProgram = [programDetailsSheet.cell(1, col_index_env).value for col_index_env in range(programDetailsSheet.ncols)]
         dictProgramDetails = {}
@@ -3501,6 +3562,12 @@ def prepareProjectAndTasksSheetsForSpotlight(project_inputFile, projectName_for_
             dictProgramDetails = {keysProgram[col_index_env]: programDetailsSheet.cell(row_index_env, col_index_env).value
                                   for col_index_env in range(programDetailsSheet.ncols)}
 
+        storyDetailsList.append(dictStoryDetails)
+        if hasStory.lower() == "yes":
+            for storyDetail in storyDetailsList:
+                for key, value in storyDetail.items():
+                    if not str(value).strip():  # Check if the value is empty or missing
+                        raise ValueError(f"Missing value for column '{key}' in 'Story details'")
         # Create a new row or update an existing row in existing_rows
         if row_index - 2 < len(existing_rows):
             row = existing_rows[row_index - 2]
@@ -3531,56 +3598,60 @@ def prepareProjectAndTasksSheetsForSpotlight(project_inputFile, projectName_for_
 
             column_index = existing_header.index(column)
             row[column_index] = value
-        signedUrl = signedUrl[0]
-        for dynamic_column in dynamic_columns:
-            value = ""
 
-            # Check if the column is for "evidence title"
-            if dynamic_column.lower().startswith("evidence") and dynamic_column.lower().endswith("title"):
-                column_suffix = dynamic_column.split("-")[0].replace("evidence", "").strip()
-                try:
-                    evidence_title = dictProjectDetails.get(f"evidence{column_suffix}-title", "")
-                    value = str(evidence_title).strip()
-                except (IndexError, ValueError):
-                    value = ""
+        if signedUrl and len(signedUrl[0]) > 0:
+            signedUrl = signedUrl[0]
+            for dynamic_column in dynamic_columns:
+                value = ""
 
-            # Check if the column is for "evidence sequence"
-            elif dynamic_column.lower().startswith("evidence") and dynamic_column.lower().endswith("sequence"):
-                column_suffix = dynamic_column.split("-")[0].replace("evidence", "").strip()
-                try:
-                    evidence_sequence = dictProjectDetails.get(f"evidence{column_suffix}-sequence", "")
-                    value = str(evidence_sequence).strip()
-                except (IndexError, ValueError):
-                    value = ""
-
-            # Check if the column is for "evidence type"
-            elif dynamic_column.lower().startswith("evidence") and dynamic_column.lower().endswith("type"):
-                column_suffix = dynamic_column.split("-")[0].replace("evidence", "").strip()
-                try:
-                    evidence_sequence = dictProjectDetails.get(f"evidence{column_suffix}-type", "")
-                    value = str(evidence_sequence).strip()
-                except (IndexError, ValueError):
-                    value = ""
-
-            
-            # Check if the column is for "evidence link"
-            elif dynamic_column.lower().startswith("evidence") and dynamic_column.lower().endswith("link"):
-                column_suffix = dynamic_column.split("-")[0].replace("evidence", "").strip()
-                try:
-                    index = int(column_suffix) - 1  # Get the index from the column suffix (e.g., '1' from 'evidence link-1')
-                    if index < len(signedUrl):
-                        url = signedUrl[index]
-                        if isinstance(url, list):
-                            url = url[0]
-                        value = url
-                    else:
+                # Check if the column is for "evidence title"
+                if dynamic_column.lower().startswith("evidence") and dynamic_column.lower().endswith("title"):
+                    column_suffix = dynamic_column.split("-")[0].replace("evidence", "").strip()
+                    try:
+                        evidence_title = dictProjectDetails.get(f"evidence{column_suffix}-title", "")
+                        value = str(evidence_title).strip()
+                    except (IndexError, ValueError):
                         value = ""
-                except (IndexError, ValueError):
-                    value = ""
 
-            # Update the corresponding cell in the existing row
-            column_index = existing_header.index(dynamic_column)
-            row[column_index] = value
+                # Check if the column is for "evidence sequence"
+                elif dynamic_column.lower().startswith("evidence") and dynamic_column.lower().endswith("sequence"):
+                    column_suffix = dynamic_column.split("-")[0].replace("evidence", "").strip()
+                    try:
+                        evidence_sequence = dictProjectDetails.get(f"evidence{column_suffix}-sequence", "")
+                        value = str(evidence_sequence).strip()
+                    except (IndexError, ValueError):
+                        value = ""
+
+                # Check if the column is for "evidence type"
+                elif dynamic_column.lower().startswith("evidence") and dynamic_column.lower().endswith("type"):
+                    column_suffix = dynamic_column.split("-")[0].replace("evidence", "").strip()
+                    try:
+                        evidence_sequence = dictProjectDetails.get(f"evidence{column_suffix}-type", "")
+                        value = str(evidence_sequence).strip()
+                    except (IndexError, ValueError):
+                        value = ""
+
+                
+                # Check if the column is for "evidence link"
+                elif dynamic_column.lower().startswith("evidence") and dynamic_column.lower().endswith("link"):
+                    column_suffix = dynamic_column.split("-")[0].replace("evidence", "").strip()
+                    try:
+                        index = int(column_suffix) - 1  # Get the index from the column suffix (e.g., '1' from 'evidence link-1')
+                        if index < len(signedUrl):
+                            url = signedUrl[index]
+                            if isinstance(url, list):
+                                url = url[0]
+                            value = url
+                        else:
+                            value = ""
+                    except (IndexError, ValueError):
+                        value = ""
+
+                # Update the corresponding cell in the existing row
+                column_index = existing_header.index(dynamic_column)
+                row[column_index] = value
+        else:
+            print("No Evidence Attached")
 
     # Write the updated header and rows back to the CSV file
     with open(csv_file_path, 'w', encoding='utf-8') as file:
@@ -4519,56 +4590,55 @@ def getPreSignedUrl(projectFile, projectName_for_folder_path, accessToken):
     }
 
     evidence_folder_path = os.path.join(projectName_for_folder_path, 'evidenceFile')
-    if os.path.exists(evidence_folder_path):
-
+    if os.path.exists(evidence_folder_path) and any(os.path.isfile(os.path.join(evidence_folder_path, f)) for f in os.listdir(evidence_folder_path)):
         for filename in os.listdir(evidence_folder_path):
             if os.path.isfile(os.path.join(evidence_folder_path, filename)):
                 preSignedUrl_payload["request"]["evidenceUpload"]["files"].append(filename)
 
-    responsegetPreSignedUrlApi = requests.post(url=preSignedUrlApi, headers=headerPreSignedUrlApi,data=json.dumps(preSignedUrl_payload))
-    if responsegetPreSignedUrlApi.status_code == 200:
-                responsegetPreSignedUrlApi = responsegetPreSignedUrlApi.json()
-    files = responsegetPreSignedUrlApi["result"]["evidenceUpload"]["files"]
+        responsegetPreSignedUrlApi = requests.post(url=preSignedUrlApi, headers=headerPreSignedUrlApi,data=json.dumps(preSignedUrl_payload))
+        if responsegetPreSignedUrlApi.status_code == 200:
+                    responsegetPreSignedUrlApi = responsegetPreSignedUrlApi.json()
+        files = responsegetPreSignedUrlApi["result"]["evidenceUpload"]["files"]
 
-    evidence_folder_path = os.path.join(projectName_for_folder_path, 'evidenceFile')
+        evidence_folder_path = os.path.join(projectName_for_folder_path, 'evidenceFile')
 
-    # Check if the evidence folder exists
-    if os.path.exists(evidence_folder_path):
-            # Map filenames (without extensions) to their file paths
-            filesProject = {}
-            for filename in os.listdir(evidence_folder_path):
-                evidence_key = os.path.splitext(filename)[0]
-                filesProject[evidence_key] = os.path.join(evidence_folder_path, filename)
-    for file_entry in files:
-        url = file_entry["url"]  # Get the dynamic URL from the JSON response
-        file_name = file_entry["file"]  # Optional: file name for logging/debugging
-        local_file_path = filesProject.get(os.path.splitext(file_name)[0])
-        if local_file_path and os.path.exists(local_file_path):
-            with open(local_file_path, 'rb') as binary_file:
-                file_data = binary_file.read()
-        # Define headers and data (if needed)
-        headers = {
-            'Content-Type': 'multipart/form-data',
-            'x-ms-blob-type' : 'BlockBlob'
-        }
-        try:
-            # Send PUT request
-            response = requests.put(url, headers=headers, data=file_data)
-            # Check the response
-            if response.status_code in [200, 201]:
-                print(f"Successfully uploaded: {file_name}")
-            else:
-                print(f"Failed to upload {file_name}. Status code: {response.status_code}, Response: {response.text}")
-        except Exception as e:
-            print(f"Error uploading {file_name}: {e}")
+        # Check if the evidence folder exists
+        if os.path.exists(evidence_folder_path):
+                # Map filenames (without extensions) to their file paths
+                filesProject = {}
+                for filename in os.listdir(evidence_folder_path):
+                    evidence_key = os.path.splitext(filename)[0]
+                    filesProject[evidence_key] = os.path.join(evidence_folder_path, filename)
+        for file_entry in files:
+            url = file_entry["url"]  # Get the dynamic URL from the JSON response
+            file_name = file_entry["file"]  # Optional: file name for logging/debugging
+            local_file_path = filesProject.get(os.path.splitext(file_name)[0])
+            if local_file_path and os.path.exists(local_file_path):
+                with open(local_file_path, 'rb') as binary_file:
+                    file_data = binary_file.read()
+            # Define headers and data (if needed)
+            headers = {
+                'Content-Type': 'multipart/form-data',
+                'x-ms-blob-type' : 'BlockBlob'
+            }
+            try:
+                # Send PUT request
+                response = requests.put(url, headers=headers, data=file_data)
+                # Check the response
+                if response.status_code in [200, 201]:
+                    print(f"Successfully uploaded: {file_name}")
+                else:
+                    print(f"Failed to upload {file_name}. Status code: {response.status_code}, Response: {response.text}")
+            except Exception as e:
+                print(f"Error uploading {file_name}: {e}")
 
-    fetchDownloadableUrl_path = []   
-    filesPath = responsegetPreSignedUrlApi["result"]["evidenceUpload"]["files"]
-    for file_path in filesPath:
-        source_path = file_path["payload"]["sourcePath"]
-        fetchDownloadableUrl_path.append(source_path)
-    fetchDownloadableUrl_path.reverse() 
-    return fetchDownloadableUrl_path,
+        fetchDownloadableUrl_path = []   
+        filesPath = responsegetPreSignedUrlApi["result"]["evidenceUpload"]["files"]
+        for file_path in filesPath:
+            source_path = file_path["payload"]["sourcePath"]
+            fetchDownloadableUrl_path.append(source_path)
+        fetchDownloadableUrl_path.reverse() 
+        return fetchDownloadableUrl_path,
 
 # This function is used to download the logo's anf sign from project template
 def downloadlogosign(filePathAddProject,projectName_for_folder_path):
@@ -4928,7 +4998,7 @@ def mainFunc(MainFilePath, programFile, addObservationSolution, millisecond, isP
                         else:
                             isProgramnamePresent = True
                         scopeEntityType = scopeEntityType
-                        userEntity = dictProgramDetails['Targeted entities at program level'].encode('utf-8').decode('utf-8').lstrip().rstrip().split(",") if dictProgramDetails['Targeted entities at program level'] else terminatingMessage("\"scope_entity\" must not be Empty in \"details\" sheet")
+                        userEntity = dictProgramDetails['Targeted entities at program level'].encode('utf-8').decode('utf-8').lstrip().rstrip().split(",")
                         
             for sheets in projectSheetNames:
                 if sheets.strip().lower() == 'Project upload'.lower():
@@ -5117,8 +5187,7 @@ if len(sheetNames) == len(pgmSheets) and sheetNames == pgmSheets:
                     isProgramnamePresent = True
                 scopeEntityType = scopeEntityType
                 userEntity = dictProgramDetails['Targeted entities at program level'].encode('utf-8').decode('utf-8').lstrip().rstrip().split(
-                    ",") if \
-                    dictProgramDetails['Targeted entities at program level'] else terminatingMessage("\"scope_entity\" must not be Empty in \"details\" sheet")
+                    ",")
         if sheetEnv.strip().lower() == 'resource details':
             print("--->Checking Resource Details sheet...")
             messageArr = []

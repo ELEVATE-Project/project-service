@@ -156,7 +156,7 @@ module.exports = class LibraryCategories extends Abstract {
 				const findQuery = {
 					_id: req.params._id,
 				}
-				const libraryProjectcategory = await libraryCategoriesHelper.update(findQuery, req.body)
+				const libraryProjectcategory = await libraryCategoriesHelper.update(findQuery, req.body, req.files)
 
 				return resolve({
 					message: libraryProjectcategory.message,

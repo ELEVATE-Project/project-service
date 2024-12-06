@@ -57,5 +57,9 @@ module.exports = {
 			require: true,
 		},
 		translations: Object,
+		source: {
+			type: Object,
+			default: {},
+		},
 	},
 }

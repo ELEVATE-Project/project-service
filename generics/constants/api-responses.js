@@ -242,4 +242,9 @@ module.exports = {
 	WISHLIST_ALREADY_ADDED: 'This MI is already added to the wishlist.',
 	PROJECT_TEMPLATE_NOT_IN_WISHLIST: 'This MI is not found in the wishlist.',
 	PROJECT_UPDATE_FAILED: 'Project Update Failed.',
+	PROJECT_DATA_NOT_FOUND: 'Project data not found',
+	PROJECT_MANDATORY_FIELDS_MISSING: 'Projects mandatory fields missing',
+	TASK_MANDATORY_FIELDS_MISSING: 'Task mandatoru fields missing',
+	PROGRAM_NOT_FOUND: 'Program not found',
+	PROJECTS_CREATED: 'Projects created successfully',
 }

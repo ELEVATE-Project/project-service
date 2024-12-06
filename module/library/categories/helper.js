@@ -328,12 +328,50 @@ module.exports = class LibraryCategoriesHelper {
 	 * @name update
 	 * @param filterQuery - Filter query.
 	 * @param updateData - Update data.
+	 * @param files - files
 	 * @returns {Object} updated data
 	 */
 
-	static update(filterQuery, updateData) {
+	static update(filterQuery, updateData, files) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				let categoryData = await projectCategoriesQueries.categoryDocuments(
+					{
+						_id: filterQuery._id,
+					},
+					'all'
+				)
+
+				// Throw error if category is not found
+				if (
+					!categoryData ||
+					!(categoryData.length > 0) ||
+					!(Object.keys(categoryData[0]).length > 0) ||
+					categoryData[0]._id == ''
+				) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.CATEGORY_NOT_FOUND,
+					}
+				}
+
+				let evidenceUploadData = await handleEvidenceUpload(files)
+				evidenceUploadData = evidenceUploadData.data
+
+				// Update the sequence numbers
+				updateData['evidences'] = []
+
+				if (categoryData[0].evidences.length > 0) {
+					for (const evidence of evidenceUploadData) {
+						evidence.sequence += categoryData[0].evidences.length
+						categoryData[0].evidences.push(evidence)
+					}
+					updateData['evidences'] = categoryData[0].evidences
+				} else {
+					updateData['evidences'] = evidenceUploadData
+				}
+
+				// Update the category
 				let categoriesUpdated = await projectCategoriesQueries.updateMany(filterQuery, updateData)
 
 				if (!categoriesUpdated) {
@@ -346,7 +384,6 @@ module.exports = class LibraryCategoriesHelper {
 				return resolve({
 					success: true,
 					message: CONSTANTS.apiResponses.PROJECT_CATEGORIES_UPDATED,
-					data: categoriesUpdated,
 				})
 			} catch (error) {
 				return resolve({
@@ -449,71 +486,37 @@ module.exports = class LibraryCategoriesHelper {
 	 * @method
 	 * @name create
 	 * @param categoryData - categoryData.
-	 * @param categoryData - files.
+	 * @param files - files.
 	 * @returns {Object} category details
 	 */
 
 	static create(categoryData, files) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				if (files && files.cover_image) {
-					let coverImages = files.cover_image
+				// Check if the category already exists
+				const checkIfCategoryExist = await projectCategoriesQueries.categoryDocuments(
+					{
+						externalId: categoryData.externalId.toString(),
+					},
+					['_id', 'externalId']
+				)
 
-					if (!Array.isArray(coverImages)) {
-						coverImages = [coverImages]
+				// Throw error if the category already exists
+				if (
+					checkIfCategoryExist.length > 0 &&
+					Object.keys(checkIfCategoryExist[0]).length > 0 &&
+					checkIfCategoryExist[0]._id != ''
+				) {
+					throw {
+						success: false,
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.CATEGORY_ALREADY_EXISTS,
 					}
-					// Generate a unique ID for the file upload
-					let uniqueId = await UTILS.generateUniqueId()
-
-					// Prepare the request data for the file upload
-					let requestData = {
-						[uniqueId]: {
-							files: [],
-						},
-					}
-
-					for (let file of coverImages) {
-						requestData[uniqueId].files.push(file.name)
-					}
-
-					let signedUrl = await filesHelpers.preSignedUrls(requestData, '', false, 'cover_image')
-
-					if (
-						signedUrl.data &&
-						Object.keys(signedUrl.data).length > 0 &&
-						signedUrl.data[uniqueId].files.length > 0 &&
-						signedUrl.data[uniqueId].files[0].url &&
-						signedUrl.data[uniqueId].files[0].url !== ''
-					) {
-						for (let fileFromRequest of coverImages) {
-							let fileUploadUrl = signedUrl.data[uniqueId].files.filter((fileData) => {
-								return fileData.file == fileFromRequest.name
-							})
-
-							const uploadData = await axios.put(fileUploadUrl[0].url, fileFromRequest.data, {
-								headers: {
-									'x-ms-blob-type':
-										process.env.CLOUD_STORAGE_PROVIDER === 'azure' ? 'BlockBlob' : null,
-									'Content-Type': 'multipart/form-data',
-								},
-							})
-
-							if (!(uploadData.status == 200 || uploadData.status == 201)) {
-								throw new Error(CONSTANTS.apiResponses.FAILED_TO_UPLOAD)
-							}
-						}
-					}
-
-					let sequenceNumber = 0
-					categoryData.evidences = signedUrl.data[uniqueId].files.map((fileInfo) => {
-						return {
-							title: fileInfo.file,
-							filepath: fileInfo.payload.sourcePath,
-							type: fileInfo.file.split('.').reverse()[0],
-							sequence: ++sequenceNumber,
-						}
-					})
 				}
+
+				// Fetch the signed urls from handleEvidenceUpload function
+				const evidences = await handleEvidenceUpload(files)
+				categoryData['evidences'] = evidences.data
 
 				let projectCategoriesData = await projectCategoriesQueries.create(categoryData)
 
@@ -578,4 +581,94 @@ module.exports = class LibraryCategoriesHelper {
 			}
 		})
 	}
+}
+
+/**
+ * Handle evidence upload
+ * @name handleEvidenceUpload
+ * @param {Array} files - files
+ * @returns {Array} returns evidences array
+ */
+
+function handleEvidenceUpload(files) {
+	return new Promise(async (resolve, reject) => {
+		try {
+			let evidences = []
+			if (files && files.cover_image) {
+				let coverImages = files.cover_image
+
+				if (!Array.isArray(coverImages)) {
+					coverImages = [coverImages]
+				}
+				// Generate a unique ID for the file upload
+				let uniqueId = await UTILS.generateUniqueId()
+
+				// Prepare the request data for the file upload
+				let requestData = {
+					[uniqueId]: {
+						files: [],
+					},
+				}
+
+				for (let file of coverImages) {
+					requestData[uniqueId].files.push(file.name)
+				}
+
+				let signedUrl = await filesHelpers.preSignedUrls(requestData, '', false, 'cover_image')
+
+				if (
+					signedUrl.data &&
+					Object.keys(signedUrl.data).length > 0 &&
+					signedUrl.data[uniqueId].files.length > 0 &&
+					signedUrl.data[uniqueId].files[0].url &&
+					signedUrl.data[uniqueId].files[0].url !== ''
+				) {
+					for (let fileFromRequest of coverImages) {
+						let fileUploadUrl = signedUrl.data[uniqueId].files.filter((fileData) => {
+							return fileData.file == fileFromRequest.name
+						})
+
+						// Upload evidences to cloud
+						const uploadData = await axios.put(fileUploadUrl[0].url, fileFromRequest.data, {
+							headers: {
+								'x-ms-blob-type': process.env.CLOUD_STORAGE_PROVIDER === 'azure' ? 'BlockBlob' : null,
+								'Content-Type': 'multipart/form-data',
+							},
+						})
+
+						// Throw error if evidence upload fails
+						if (!(uploadData.status == 200 || uploadData.status == 201)) {
+							throw {
+								success: false,
+								message: CONSTANTS.apiResponses.FAILED_TO_UPLOAD,
+							}
+						}
+					}
+				}
+
+				// Attach sequence number to each evidence.
+				let sequenceNumber = 0
+				evidences = signedUrl.data[uniqueId].files.map((fileInfo) => {
+					return {
+						title: fileInfo.file,
+						filepath: fileInfo.payload.sourcePath,
+						type: fileInfo.file.split('.').reverse()[0],
+						sequence: ++sequenceNumber,
+					}
+				})
+			}
+
+			return resolve({
+				success: true,
+				data: evidences,
+			})
+		} catch (error) {
+			return reject({
+				status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
+				success: false,
+				message: error.message,
+				data: {},
+			})
+		}
+	})
 }

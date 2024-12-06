@@ -300,6 +300,79 @@ module.exports = class UserProjects extends Abstract {
 	}
 
 	/**
+    * @api {post} /project/v1/userProjects/addStory/:projectId
+    * User Project tasks status
+    * @apiVersion 1.0.0
+    * @apiGroup User Projects
+    * @apiSampleRequest /project/v1/userProjects/addStory/667e858d82673a24d71d8c38
+    * @apiParamExample {json} Request:
+    * {
+        "story": {
+        "title": "DCPCR School Development Index 2018-19",
+        "problemStatement": "problemStatement",
+        "objective": "sample object",
+        "timeline": "2 weeks",
+        "actionSteps": [],
+        "resources": [],
+        "impact": "sample impact",
+        "summary": "sample summary",
+        "authorName": "jon",
+        "location": "authorLocation",
+        "conversation": [],
+        "chatHistory": [],
+        "attachments": [
+        {
+            "name": "1729251446851.png",
+            "type": "image/png",
+            "sourcePath": "project/668e33a24999c205ea017747/3/5cc85295-b244-4139-88c8-4802c2ad41ad/1729251446851.png",
+            "page": "story"
+        }
+        ],
+        "pdfInformation": [
+        {
+            "filePath": "sampleFilepath",
+            "language": "hindi"
+        }
+        ]
+        }
+    }
+
+    * @apiParamExample {json} Response:
+    {
+        "message": "Story Added Successfully",
+        "status": 200
+    }
+    * @apiUse successBody
+    * @apiUse errorBody
+    */
+	/**
+	 * Handles the addition of a story to a project.
+	 * @method
+	 * @name addStory
+	 * @param {Object} req - The request object containing:
+	 *   - `req.body`: The body of the request with the story data.
+	 *   - `req.params._id`: The project ID to which the story should be added.
+	 * @returns {Promise<Object>} - A promise that resolves to the details of the added story or rejects with an error.
+	 */
+	async addStory(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				// Call helper function to add the story to the specified project
+				let userStoryDetails = await userProjectsHelper.addStory(req.body, req.params._id)
+
+				// Resolve with the result from the helper function
+				return resolve(userStoryDetails)
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
+				})
+			}
+		})
+	}
+
+	/**
     * @api {post} /project/v1/userProjects/tasksStatus/:projectId
     * User Project tasks status
     * @apiVersion 1.0.0

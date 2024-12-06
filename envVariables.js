@@ -137,6 +137,11 @@ let enviromentVariables = {
 		optional: false,
 		default: 'MI-2.0-default',
 	},
+	ENABLE_REFLECTION: {
+		message: 'Enable reflection required',
+		optional: false,
+		default: 'false',
+	},
 }
 
 let success = true

@@ -207,6 +207,7 @@ module.exports = {
 			type: Object,
 			default: {},
 		},
+		duration: String,
 	},
 	compoundIndex: [
 		{

@@ -99,5 +99,6 @@ module.exports = {
 			default: 'USER',
 		},
 		translations: Object,
+		reflectionEnabled: Boolean,
 	},
 }

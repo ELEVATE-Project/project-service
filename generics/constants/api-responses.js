@@ -250,5 +250,6 @@ module.exports = {
 	PROGRAM_NOT_FOUND: 'Program not found',
 	PROJECTS_CREATED: 'Projects created successfully',
 	CATEGORY_ALREADY_EXISTS: 'Category already exists',
-	REQUIRED_FIELDS_NOT_PRESENT_FOR_THE_TASK_UPDATE:'Required minimum fields are not present for the task.'
+	REQUIRED_FIELDS_NOT_PRESENT_FOR_THE_TASK_UPDATE:
+		'Required minimum fields _id or name are not present for the task creation.',
 }

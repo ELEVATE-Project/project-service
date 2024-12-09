@@ -215,6 +215,18 @@ module.exports = class UserProjectsHelper {
 					data.reflection = currentReflection
 				}
 
+				if(data.status && ![
+					CONSTANTS.common.COMPLETED_STATUS,
+					CONSTANTS.common.INPROGRESS_STATUS,
+					CONSTANTS.common.SUBMITTED_STATUS,
+					CONSTANTS.common.STARTED,
+				].includes(data.status)){
+					throw {
+						message: CONSTANTS.apiResponses.INVALID_PROJECT_STATUS,
+						status: HTTP_STATUS_CODE.bad_request.status,
+					}
+				}
+
 				if (invokedViaUpdateApi && userProject[0].status == CONSTANTS.common.SUBMITTED_STATUS) {
 					let projectUpdated = await projectQueries.findOneAndUpdate(
 						{
@@ -502,6 +514,7 @@ module.exports = class UserProjectsHelper {
 					},
 				})
 			} catch (error) {
+				console.log(error,'error')
 				return resolve({
 					status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
 					success: false,
@@ -4012,6 +4025,8 @@ module.exports = class UserProjectsHelper {
 					true
 				)
 
+				console.log(updateResult,'updateResult')
+
 				if (updateResult.message == CONSTANTS.apiResponses.USER_PROJECT_UPDATED) {
 					return resolve({
 						message: CONSTANTS.apiResponses.USER_PROJECT_UPDATED,
@@ -4023,7 +4038,7 @@ module.exports = class UserProjectsHelper {
 				} else {
 					throw {
 						status: HTTP_STATUS_CODE.internal_server_error.status,
-						message: CONSTANTS.apiResponses.PROJECT_UPDATE_FAILED,
+						message:  updateResult.message || CONSTANTS.apiResponses.PROJECT_UPDATE_FAILED,
 					}
 				}
 			} catch (error) {
@@ -4375,8 +4390,19 @@ function _projectTask(tasks, isImportedFromLibrary = false, parentTaskId = '') {
 function validateAllTasks(tasks) {
 	for (let eachTask of tasks) {
 		if (!eachTask._id || !eachTask.name) {
-
 			throw new Error(CONSTANTS.apiResponses.REQUIRED_FIELDS_NOT_PRESENT_FOR_THE_TASK_UPDATE)
+		}
+
+		if (
+			eachTask.status &&
+			![
+				CONSTANTS.common.COMPLETED_STATUS,
+				CONSTANTS.common.INPROGRESS_STATUS,
+				CONSTANTS.common.NOT_STARTED_STATUS,
+				CONSTANTS.common.STARTED,
+			].includes(eachTask.status)
+		) {
+			throw new Error(CONSTANTS.apiResponses.INVALID_TASK_STATUS)
 		}
 	}
 }

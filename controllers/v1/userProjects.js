@@ -300,7 +300,7 @@ module.exports = class UserProjects extends Abstract {
 	}
 
 	/**
-    * @api {post} /project/v1/userProjects/addStory/:projectId
+    * @api {put} /project/v1/userProjects/addStory/:projectId
     * User Project tasks status
     * @apiVersion 1.0.0
     * @apiGroup User Projects
@@ -330,8 +330,8 @@ module.exports = class UserProjects extends Abstract {
         ],
         "pdfInformation": [
         {
-            "filePath": "sampleFilepath",
-            "language": "hindi"
+            "filePath": "project/happy/263/51807846-4c20-428a-b999-8af96a5f1b27/evidence_link-151.jpg",
+            "language": "hi"
         }
         ]
         }

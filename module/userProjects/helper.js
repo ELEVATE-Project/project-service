@@ -3984,8 +3984,23 @@ module.exports = class UserProjectsHelper {
 						message: CONSTANTS.apiResponses.USER_PROJECT_NOT_FOUND,
 					}
 				}
+				if (updateData.tasks && updateData.tasks.length > 0) {
+					updateData.tasks = _fillMissingTaskInformation(updateData.tasks, userProject[0].tasks)
 
-				updateData.tasks = _fillMissingTaskInformation(updateData.tasks, userProject[0].tasks)
+					let allTasksFalttened = []
+					for (let eachTask of updateData.tasks) {
+						allTasksFalttened.push(eachTask)
+
+						if (eachTask.children && eachTask.children.length > 0) {
+							for (let eachChildTasks of eachTask.children) {
+								allTasksFalttened.push(eachChildTasks)
+							}
+						}
+					}
+
+					validateAllTasks(allTasksFalttened)
+				}
+
 				let updateResult = await this.sync(
 					projectId,
 					'',
@@ -4012,7 +4027,6 @@ module.exports = class UserProjectsHelper {
 					}
 				}
 			} catch (error) {
-				console.log(error)
 				return resolve({
 					message: error.message,
 					status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
@@ -4350,6 +4364,23 @@ function _projectTask(tasks, isImportedFromLibrary = false, parentTaskId = '') {
 	return tasks
 }
 /**
+ * Validates that all tasks in the provided array contain required fields.
+ * @function
+ * @name validateAllTasks
+ * @param {Array} tasks - Array of task objects to be validated.
+ * @throws {Error} If any task is missing the required `_id` or `name` fields.
+ * @returns {void} - This function does not return a value; it throws an error if validation fails.
+ */
+
+function validateAllTasks(tasks) {
+	for (let eachTask of tasks) {
+		if (!eachTask._id || !eachTask.name) {
+			throw new Error('Required fields are not present')
+		}
+	}
+}
+
+/**
  * Fill missing information in tasks from database.
  * @method
  * @name _fillMissingTaskInformation
@@ -4378,17 +4409,27 @@ function _fillMissingTaskInformation(tasks, tasksFromDB) {
 function fillMissingProperties(eachTask, targetTask) {
 	for (let key in targetTask) {
 		if (Array.isArray(targetTask[key])) {
-			// If the property is an array (e.g., children), handle it separately
-			if (!eachTask[key]) {
-				// If the array is missing, copy the entire array
+			if (!eachTask[key] || eachTask[key].length === 0) {
+				// If the array is missing or empty, copy the entire array from the targetTask
 				eachTask[key] = [...targetTask[key]]
 			} else {
-				// If the array exists, iterate over each element and fill in missing properties
-				eachTask[key] = eachTask[key].map((item, index) => {
-					const targetItem = targetTask[key][index] || {}
-					fillMissingProperties(item, targetItem) // Recursively fill the item
-					return item
+				// Merge the two arrays: existing data from DB and incoming updates
+				const updatedArray = []
+
+				// Map over the incoming array (eachTask[key]) to fill missing properties
+				eachTask[key].forEach((item) => {
+					const targetItem = targetTask[key].find((dbItem) => dbItem._id === item._id) || {}
+					const updatedItem = { ...targetItem, ...item } // Merge incoming and existing data
+					fillMissingProperties(updatedItem, targetItem)
+					updatedArray.push(updatedItem)
 				})
+
+				// Add remaining items from the DB that are not in the incoming array
+				const remainingItems = targetTask[key].filter(
+					(dbItem) => !eachTask[key].some((item) => item._id === dbItem._id)
+				)
+
+				eachTask[key] = [...updatedArray, ...remainingItems]
 			}
 		} else if (typeof targetTask[key] === 'object' && targetTask[key] !== null) {
 			// If the property is an object (excluding null), call the function recursively

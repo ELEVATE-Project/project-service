@@ -207,11 +207,11 @@ module.exports = class UserProjectsHelper {
 
 				if (data.reflectionStatus == CONSTANTS.common.STARTED) {
 					currentReflection.status = CONSTANTS.common.STARTED
-					currentReflection.startedAt = new Date()
+					currentReflection.startDate = new Date()
 					data.reflection = currentReflection
 				} else if (data.reflectionStatus == CONSTANTS.common.COMPLETED_STATUS) {
 					currentReflection.status = CONSTANTS.common.COMPLETED_STATUS
-					currentReflection.completedAt = new Date()
+					currentReflection.endDate = new Date()
 					data.reflection = currentReflection
 				}
 

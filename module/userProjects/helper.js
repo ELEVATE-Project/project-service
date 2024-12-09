@@ -1833,12 +1833,17 @@ module.exports = class UserProjectsHelper {
 	 * @param {String} projectId - The unique identifier of the project to which the story will be added.
 	 * @returns {Promise<Object>} - A promise resolving to a success or failure response.
 	 */
-	static addStory(storyData, projectId) {
+	static addStory(storyData, projectId, userId) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Fetch project details from the database
 				const projectDeatils = await projectQueries.projectDocument(
-					{ _id: ObjectId(projectId), status: CONSTANTS.common.SUBMITTED_STATUS, isDeleted: false },
+					{
+						_id: ObjectId(projectId),
+						status: CONSTANTS.common.SUBMITTED_STATUS,
+						isDeleted: false,
+						userId: userId,
+					},
 					['all']
 				)
 				// Check if the project exists

@@ -250,4 +250,8 @@ module.exports = {
 	PROGRAM_NOT_FOUND: 'Program not found',
 	PROJECTS_CREATED: 'Projects created successfully',
 	CATEGORY_ALREADY_EXISTS: 'Category already exists',
+	REQUIRED_FIELDS_NOT_PRESENT_FOR_THE_TASK_UPDATE:'Required minimum fields _id or name are not present for the task creation.',
+	INVALID_TASK_STATUS: 'A task can only have one of the following statuses: completed, inProgress, notStarted, or started.',
+	INVALID_PROJECT_STATUS: 'A project can only have one of the following statuses: completed, inProgress, submitted, or started.'
+	
 }

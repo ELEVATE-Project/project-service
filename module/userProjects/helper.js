@@ -207,12 +207,24 @@ module.exports = class UserProjectsHelper {
 
 				if (data.reflectionStatus == CONSTANTS.common.STARTED) {
 					currentReflection.status = CONSTANTS.common.STARTED
-					currentReflection.startedAt = new Date()
+					currentReflection.startDate = new Date()
 					data.reflection = currentReflection
 				} else if (data.reflectionStatus == CONSTANTS.common.COMPLETED_STATUS) {
 					currentReflection.status = CONSTANTS.common.COMPLETED_STATUS
-					currentReflection.completedAt = new Date()
+					currentReflection.endDate = new Date()
 					data.reflection = currentReflection
+				}
+
+				if(data.status && ![
+					CONSTANTS.common.COMPLETED_STATUS,
+					CONSTANTS.common.INPROGRESS_STATUS,
+					CONSTANTS.common.SUBMITTED_STATUS,
+					CONSTANTS.common.STARTED,
+				].includes(data.status)){
+					throw {
+						message: CONSTANTS.apiResponses.INVALID_PROJECT_STATUS,
+						status: HTTP_STATUS_CODE.bad_request.status,
+					}
 				}
 
 				if (invokedViaUpdateApi && userProject[0].status == CONSTANTS.common.SUBMITTED_STATUS) {
@@ -3989,8 +4001,23 @@ module.exports = class UserProjectsHelper {
 						message: CONSTANTS.apiResponses.USER_PROJECT_NOT_FOUND,
 					}
 				}
+				if (updateData.tasks && updateData.tasks.length > 0) {
+					updateData.tasks = _fillMissingTaskInformation(updateData.tasks, userProject[0].tasks)
 
-				updateData.tasks = _fillMissingTaskInformation(updateData.tasks, userProject[0].tasks)
+					let allTasksFalttened = []
+					for (let eachTask of updateData.tasks) {
+						allTasksFalttened.push(eachTask)
+
+						if (eachTask.children && eachTask.children.length > 0) {
+							for (let eachChildTasks of eachTask.children) {
+								allTasksFalttened.push(eachChildTasks)
+							}
+						}
+					}
+
+					validateAllTasks(allTasksFalttened)
+				}
+
 				let updateResult = await this.sync(
 					projectId,
 					'',
@@ -4001,6 +4028,7 @@ module.exports = class UserProjectsHelper {
 					appVersion,
 					true
 				)
+
 
 				if (updateResult.message == CONSTANTS.apiResponses.USER_PROJECT_UPDATED) {
 					return resolve({
@@ -4013,11 +4041,10 @@ module.exports = class UserProjectsHelper {
 				} else {
 					throw {
 						status: HTTP_STATUS_CODE.internal_server_error.status,
-						message: CONSTANTS.apiResponses.PROJECT_UPDATE_FAILED,
+						message:  updateResult.message || CONSTANTS.apiResponses.PROJECT_UPDATE_FAILED,
 					}
 				}
 			} catch (error) {
-				console.log(error)
 				return resolve({
 					message: error.message,
 					status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
@@ -4355,6 +4382,35 @@ function _projectTask(tasks, isImportedFromLibrary = false, parentTaskId = '') {
 	return tasks
 }
 /**
+ * Validates that all tasks in the provided array contain required fields.
+ * @function
+ * @name validateAllTasks
+ * @param {Array} tasks - Array of task objects to be validated.
+ * @throws {Error} If any task is missing the required `_id` or `name` fields.
+ * @returns {void} - This function does not return a value; it throws an error if validation fails.
+ */
+
+function validateAllTasks(tasks) {
+	for (let eachTask of tasks) {
+		if (!eachTask._id || !eachTask.name) {
+			throw new Error(CONSTANTS.apiResponses.REQUIRED_FIELDS_NOT_PRESENT_FOR_THE_TASK_UPDATE)
+		}
+
+		if (
+			eachTask.status &&
+			![
+				CONSTANTS.common.COMPLETED_STATUS,
+				CONSTANTS.common.INPROGRESS_STATUS,
+				CONSTANTS.common.NOT_STARTED_STATUS,
+				CONSTANTS.common.STARTED,
+			].includes(eachTask.status)
+		) {
+			throw new Error(CONSTANTS.apiResponses.INVALID_TASK_STATUS)
+		}
+	}
+}
+
+/**
  * Fill missing information in tasks from database.
  * @method
  * @name _fillMissingTaskInformation
@@ -4383,17 +4439,27 @@ function _fillMissingTaskInformation(tasks, tasksFromDB) {
 function fillMissingProperties(eachTask, targetTask) {
 	for (let key in targetTask) {
 		if (Array.isArray(targetTask[key])) {
-			// If the property is an array (e.g., children), handle it separately
-			if (!eachTask[key]) {
-				// If the array is missing, copy the entire array
+			if (!eachTask[key] || eachTask[key].length === 0) {
+				// If the array is missing or empty, copy the entire array from the targetTask
 				eachTask[key] = [...targetTask[key]]
 			} else {
-				// If the array exists, iterate over each element and fill in missing properties
-				eachTask[key] = eachTask[key].map((item, index) => {
-					const targetItem = targetTask[key][index] || {}
-					fillMissingProperties(item, targetItem) // Recursively fill the item
-					return item
+				// Merge the two arrays: existing data from DB and incoming updates
+				const updatedArray = []
+
+				// Map over the incoming array (eachTask[key]) to fill missing properties
+				eachTask[key].forEach((item) => {
+					const targetItem = targetTask[key].find((dbItem) => dbItem._id === item._id) || {}
+					const updatedItem = { ...targetItem, ...item } // Merge incoming and existing data
+					fillMissingProperties(updatedItem, targetItem)
+					updatedArray.push(updatedItem)
 				})
+
+				// Add remaining items from the DB that are not in the incoming array
+				const remainingItems = targetTask[key].filter(
+					(dbItem) => !eachTask[key].some((item) => item._id === dbItem._id)
+				)
+
+				eachTask[key] = [...updatedArray, ...remainingItems]
 			}
 		} else if (typeof targetTask[key] === 'object' && targetTask[key] !== null) {
 			// If the property is an object (excluding null), call the function recursively

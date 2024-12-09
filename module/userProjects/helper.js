@@ -4375,6 +4375,7 @@ function _projectTask(tasks, isImportedFromLibrary = false, parentTaskId = '') {
 function validateAllTasks(tasks) {
 	for (let eachTask of tasks) {
 		if (!eachTask._id || !eachTask.name) {
+
 			throw new Error(CONSTANTS.apiResponses.REQUIRED_FIELDS_NOT_PRESENT_FOR_THE_TASK_UPDATE)
 		}
 	}

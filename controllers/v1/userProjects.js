@@ -358,7 +358,11 @@ module.exports = class UserProjects extends Abstract {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Call helper function to add the story to the specified project
-				let userStoryDetails = await userProjectsHelper.addStory(req.body, req.params._id)
+				let userStoryDetails = await userProjectsHelper.addStory(
+					req.body,
+					req.params._id,
+					req.userDetails.userInformation.userId
+				)
 
 				// Resolve with the result from the helper function
 				return resolve(userStoryDetails)

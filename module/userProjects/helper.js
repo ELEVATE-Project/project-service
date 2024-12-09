@@ -514,7 +514,6 @@ module.exports = class UserProjectsHelper {
 					},
 				})
 			} catch (error) {
-				console.log(error,'error')
 				return resolve({
 					status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
 					success: false,
@@ -4025,7 +4024,6 @@ module.exports = class UserProjectsHelper {
 					true
 				)
 
-				console.log(updateResult,'updateResult')
 
 				if (updateResult.message == CONSTANTS.apiResponses.USER_PROJECT_UPDATED) {
 					return resolve({

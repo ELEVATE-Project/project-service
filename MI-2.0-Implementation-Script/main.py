@@ -5123,11 +5123,11 @@ def mainFunc(MainFilePath, programFile, addObservationSolution, millisecond, isP
                     dictDetailsEnv = { keysEnv[col_index_env]: detailsEnvSheet.cell(row_index_env, col_index_env).value for col_index_env in range(detailsEnvSheet.ncols)}
                     if str(dictDetailsEnv['has certificate']).lower() == 'No'.lower():
                         prepareProjectAndTasksSheets(addObservationSolution, parentFolder,  accessToken)
-                        downloadEvidences(filePathAddProject,projectName_for_folder_path)
-                        signedUrl = getPreSignedUrl(addObservationSolution, projectName_for_folder_path, accessToken)
-                        prepareProjectAndTasksSheetsForSpotlight(addObservationSolution, projectName_for_folder_path,
+                        downloadEvidences(addObservationSolution,parentFolder)
+                        signedUrl = getPreSignedUrl(addObservationSolution, parentFolder, accessToken)
+                        prepareProjectAndTasksSheetsForSpotlight(addObservationSolution, parentFolder,
                                                                  accessToken,signedUrl)
-                        prepareLanguageSheet(addObservationSolution, projectName_for_folder_path, accessToken)
+                        prepareLanguageSheet(addObservationSolution, parentFolder, accessToken)
                         projectUpload(addObservationSolution, parentFolder, accessToken)
                         taskUpload(addObservationSolution, parentFolder, accessToken)
                     elif str(dictDetailsEnv['has certificate']).lower()== 'Yes'.lower():
@@ -5136,11 +5136,11 @@ def mainFunc(MainFilePath, programFile, addObservationSolution, millisecond, isP
                         downloadlogosign(addObservationSolution,parentFolder)
                         editsvg(accessToken,addObservationSolution,parentFolder,baseTemplate_id)
                         prepareProjectAndTasksSheets(addObservationSolution, parentFolder,accessToken)
-                        downloadEvidences(filePathAddProject,projectName_for_folder_path)
-                        signedUrl = getPreSignedUrl(addObservationSolution, projectName_for_folder_path, accessToken)
-                        prepareProjectAndTasksSheetsForSpotlight(addObservationSolution, projectName_for_folder_path,
+                        downloadEvidences(addObservationSolution,parentFolder)
+                        signedUrl = getPreSignedUrl(addObservationSolution, parentFolder, accessToken)
+                        prepareProjectAndTasksSheetsForSpotlight(addObservationSolution, parentFolder,
                                                                  accessToken,signedUrl)
-                        prepareLanguageSheet(addObservationSolution, projectName_for_folder_path, accessToken)
+                        prepareLanguageSheet(addObservationSolution, parentFolder, accessToken)
                         projectUpload(addObservationSolution, parentFolder, accessToken)
                         taskUpload(addObservationSolution, parentFolder, accessToken)                                                                     
                                                                                            

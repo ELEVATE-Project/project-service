@@ -1884,6 +1884,9 @@ module.exports = class UserProjectsHelper {
 					}))
 				}
 
+				// Remove attachments from storyData
+				delete storyData.story.attachments
+
 				// Update the project in the database with the new attachments and story data
 				const UpdatedProject = await projectQueries.findOneAndUpdate(
 					{

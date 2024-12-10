@@ -215,12 +215,15 @@ module.exports = class UserProjectsHelper {
 					data.reflection = currentReflection
 				}
 
-				if(data.status && ![
-					CONSTANTS.common.COMPLETED_STATUS,
-					CONSTANTS.common.INPROGRESS_STATUS,
-					CONSTANTS.common.SUBMITTED_STATUS,
-					CONSTANTS.common.STARTED,
-				].includes(data.status)){
+				if (
+					data.status &&
+					![
+						CONSTANTS.common.COMPLETED_STATUS,
+						CONSTANTS.common.INPROGRESS_STATUS,
+						CONSTANTS.common.SUBMITTED_STATUS,
+						CONSTANTS.common.STARTED,
+					].includes(data.status)
+				) {
 					throw {
 						message: CONSTANTS.apiResponses.INVALID_PROJECT_STATUS,
 						status: HTTP_STATUS_CODE.bad_request.status,
@@ -2774,6 +2777,8 @@ module.exports = class UserProjectsHelper {
 							name: 1,
 						},
 						attachments: 1,
+						reflection: 1,
+						completedDate: 1,
 					},
 				})
 
@@ -4029,7 +4034,6 @@ module.exports = class UserProjectsHelper {
 					true
 				)
 
-
 				if (updateResult.message == CONSTANTS.apiResponses.USER_PROJECT_UPDATED) {
 					return resolve({
 						message: CONSTANTS.apiResponses.USER_PROJECT_UPDATED,
@@ -4041,7 +4045,7 @@ module.exports = class UserProjectsHelper {
 				} else {
 					throw {
 						status: HTTP_STATUS_CODE.internal_server_error.status,
-						message:  updateResult.message || CONSTANTS.apiResponses.PROJECT_UPDATE_FAILED,
+						message: updateResult.message || CONSTANTS.apiResponses.PROJECT_UPDATE_FAILED,
 					}
 				}
 			} catch (error) {

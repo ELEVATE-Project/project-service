@@ -26,6 +26,9 @@ const projectCategoriesQueries = require(DB_QUERY_BASE_PATH + '/projectCategorie
 const solutionsQueries = require(DB_QUERY_BASE_PATH + '/solutions')
 const certificateTemplateQueries = require(DB_QUERY_BASE_PATH + '/certificateTemplates')
 const programQueries = require(DB_QUERY_BASE_PATH + '/programs')
+const evidencesHelper = require(MODULES_BASE_PATH + '/evidences/helper')
+const userExtensionQueries = require(DB_QUERY_BASE_PATH + '/userExtension')
+const filesHelpers = require(MODULES_BASE_PATH + '/cloud-services/files/helper')
 
 module.exports = class ProjectTemplatesHelper {
 	/**
@@ -170,10 +173,12 @@ module.exports = class ProjectTemplatesHelper {
 	 * @name templateData
 	 * @param {Object} data  - csv data.
 	 * @param {Object} csvInformation - csv information.
+	 * @param {String} userId - user id
+	 * @param {Object} translationData - translation data object
 	 * @returns {Object} Template data.
 	 */
 
-	static templateData(data, csvInformation) {
+	static templateData(data, csvInformation, userId, translationData = {}) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let templatesDataModel = Object.keys(schemas['project-templates'].schema)
@@ -211,11 +216,15 @@ module.exports = class ProjectTemplatesHelper {
 				// }
 
 				let learningResources = await learningResourcesHelper.extractLearningResourcesFromCsv(parsedData)
+				let evidences = await evidencesHelper.extractEvidencesFromCsv(parsedData)
 				parsedData.learningResources = learningResources.data
+				parsedData.evidences = evidences.data
 
 				parsedData.metaInformation = {}
 				let booleanData = UTILS.getAllBooleanDataFromModels(schemas['project-templates'].schema)
-
+				parsedData['hasStory'] = parsedData['hasStory'] == 'YES' ? true : false
+				parsedData['hasSpotlight'] = parsedData['hasSpotlight'] == 'YES' ? true : false
+				parsedData['isPrivate'] = parsedData['isPrivate'] == 'YES' ? true : false
 				Object.keys(parsedData).forEach((eachParsedData) => {
 					if (!templatesDataModel.includes(eachParsedData)) {
 						if (!eachParsedData.startsWith('learningResources')) {
@@ -229,6 +238,55 @@ module.exports = class ProjectTemplatesHelper {
 					}
 				})
 
+				// add tranlsation data
+				let translations = {}
+
+				// iterate over each language
+				Object.keys(translationData).forEach((key) => {
+					if (!(key == 'en')) {
+						const data = translationData[key]
+
+						// iterate over the fields in each language
+						Object.keys(data).forEach((item) => {
+							const fieldSegments = item.split('.')
+							// add the translated data to translations
+							if (fieldSegments[0] == 'projectTemplate') {
+								const requiredModelField = fieldSegments[fieldSegments.length - 1]
+								if (fieldSegments.some((segment) => segment.includes('evidence'))) {
+									translations[key]['evidences'] = translations[key]['evidences'] || {}
+									translations[key]['evidences'][requiredModelField] =
+										translations[key]['evidences'][requiredModelField] || []
+									translations[key]['evidences'][requiredModelField].push(data[item])
+								} else if (fieldSegments.some((segment) => segment.includes('learningResources'))) {
+									translations[key]['learningResources'] =
+										translations[key]['learningResources'] || {}
+									translations[key]['learningResources'][requiredModelField] =
+										translations[key]['learningResources'][requiredModelField] || []
+									translations[key]['learningResources'][requiredModelField].push(data[item])
+								} else {
+									translations[key] = translations[key] || {}
+									if (['text', 'recommendedFor', 'categories'].includes(requiredModelField)) {
+										// initialize the field if not already present
+										translations[key][requiredModelField] =
+											translations[key][requiredModelField] ||
+											(requiredModelField === 'categories' ? {} : [])
+
+										if (requiredModelField == 'recommendedFor') {
+											translations[key][requiredModelField] = data[item].split(',')
+										} else if (requiredModelField == 'categories') {
+											translations[key][requiredModelField]['name'] = data[item].split(',')
+										} else {
+											translations[key][requiredModelField].push(data[item])
+										}
+									} else {
+										translations[key][requiredModelField] = data[item]
+									}
+								}
+							}
+						})
+					}
+				})
+				parsedData['translations'] = translations
 				parsedData.isReusable = true
 
 				return resolve(parsedData)
@@ -244,10 +302,11 @@ module.exports = class ProjectTemplatesHelper {
 	 * @name bulkCreate - bulk create project templates.
 	 * @param {Array} templates - csv templates data.
 	 * @param {String} userId - logged in user id.
+	 * @param {Array} translationFiles - translation files
 	 * @returns {Object} Bulk create project templates.
 	 */
 
-	static bulkCreate(templates, userId) {
+	static bulkCreate(templates, userId, translationFiles = {}) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				if (templates[0].solutionId && templates[0].solutionId !== '') {
@@ -278,9 +337,22 @@ module.exports = class ProjectTemplatesHelper {
 					return resolve(csvInformation)
 				}
 
+				// convert the translation files and store them in array
+				let translationDataObject = {}
+				if (Object.keys(translationFiles).length > 0) {
+					const translationFilesCount = Array.isArray(translationFiles) ? translationFiles.length : 1
+					let translationFilesInArray = []
+
+					if (translationFilesCount <= 1) translationFilesInArray.push(translationFiles)
+					else translationFilesInArray = translationFiles
+
+					for (let i = 0; i < translationFilesCount; i++) {
+						translationDataObject[`${i}`] = JSON.parse(translationFilesInArray[i].data.toString())
+					}
+				}
+
 				for (let template = 0; template < templates.length; template++) {
 					let currentData = templates[template]
-
 					let templateData = await projectTemplateQueries.templateDocument(
 						{
 							status: CONSTANTS.common.PUBLISHED,
@@ -293,7 +365,13 @@ module.exports = class ProjectTemplatesHelper {
 					if (templateData.length > 0 && templateData[0]._id) {
 						currentData['_SYSTEM_ID'] = CONSTANTS.apiResponses.PROJECT_TEMPLATE_EXISTS
 					} else {
-						let templateData = await this.templateData(currentData, csvInformation.data, userId)
+						let translationData = translationDataObject[`${template.toString()}`]
+						let templateData = await this.templateData(
+							currentData,
+							csvInformation.data,
+							userId,
+							translationData
+						)
 
 						templateData.status = CONSTANTS.common.PUBLISHED_STATUS
 						templateData.createdBy = templateData.updatedBy = templateData.userId = userId
@@ -873,10 +951,11 @@ module.exports = class ProjectTemplatesHelper {
 	 * @param {String} templateId - Project template id.
 	 * @param {String} userId - logged in user id.
 	 * @param {String} link - solution link.
+	 * @param {String} language- languageCode
 	 * @returns {Array} Project templates data.
 	 */
 
-	static details(templateId = '', link = '', userId = '', isAPrivateProgram) {
+	static details(templateId = '', link = '', userId = '', isAPrivateProgram, language = '') {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let solutionsResult = {}
@@ -923,7 +1002,6 @@ module.exports = class ProjectTemplatesHelper {
 						findQuery['externalId'] = templateId
 					}
 				}
-
 				//getting template data using templateId
 				let templateData = await projectTemplateQueries.templateDocument(findQuery, 'all', [
 					'ratings',
@@ -939,12 +1017,110 @@ module.exports = class ProjectTemplatesHelper {
 					'metaInformation',
 				])
 
+				// Fetch downloadable urls for the category evidences
+				if (templateData[0].categories && templateData[0].categories.length > 0) {
+					// iterate over each category
+					let allFilePaths = []
+					for (let cateogry of templateData[0].categories) {
+						let evidences = cateogry.evidences
+
+						// iterate over each evidence in a category
+						if (evidences && evidences.length > 0) {
+							// iterate over each evidence and fetch the filepaths
+							for (let evidence of evidences) {
+								if (evidence.filepath && evidence.filepath !== '') {
+									allFilePaths.push(evidence.filepath)
+								}
+							}
+						}
+					}
+
+					if (allFilePaths.length > 0) {
+						let flattenedFilePathArr = _.flatten(allFilePaths)
+
+						let downloadableUrlsCall = await filesHelpers.getDownloadableUrl(flattenedFilePathArr)
+						// Attach the downloadableUrls for the evidences in the response
+						if (
+							downloadableUrlsCall.message == CONSTANTS.apiResponses.CLOUD_SERVICE_SUCCESS_MESSAGE &&
+							downloadableUrlsCall.result &&
+							downloadableUrlsCall.result.length > 0
+						) {
+							const downloadableUrls = downloadableUrlsCall.result
+
+							for (let cateogry of templateData[0].categories) {
+								let evidences = cateogry.evidences
+
+								// iterate over each evidence in a category
+								if (evidences && evidences.length > 0) {
+									// iterate over each evidence and fetch the filepaths
+									for (let evidence of evidences) {
+										if (evidence.filepath && evidence.filepath !== '') {
+											// iterate over each downloadbleUrl to handle worst case (in worst case every evidence in every category can have same evidence)
+											for (const item of downloadableUrls) {
+												if (evidence.filepath == item.filePath) {
+													evidence['downloadableUrl'] = item.url ? item.url : ''
+													break
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+
+				// Fetch downloadable urls for the project evidences
+				if (templateData[0].evidences && templateData[0].evidences.length > 0) {
+					let allFilePaths = templateData[0].evidences.map((evidence) => {
+						return evidence.link
+					})
+					let downloadableUrlsCall
+					if (allFilePaths && allFilePaths.length > 0) {
+						let flattenedFilePathArr = _.flatten(allFilePaths)
+
+						downloadableUrlsCall = await filesHelpers.getDownloadableUrl(flattenedFilePathArr)
+					}
+					// Attach the downloadableUrls for the evidences in the response
+					if (
+						downloadableUrlsCall.message == CONSTANTS.apiResponses.CLOUD_SERVICE_SUCCESS_MESSAGE &&
+						downloadableUrlsCall.result &&
+						downloadableUrlsCall.result.length > 0
+					) {
+						const downloadableUrls = downloadableUrlsCall.result
+						for (const item of downloadableUrls) {
+							templateData[0].evidences.map((evidence) => {
+								if (evidence.link == item.filePath) {
+									evidence['downloadableUrl'] = item.url ? item.url : ''
+								}
+							})
+						}
+					}
+				}
+
 				if (!(templateData.length > 0)) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.PROJECT_TEMPLATE_NOT_FOUND,
 					}
 				}
+				templateData[0].wishlist = false
+				let wishlistData
+				if (userId !== '') {
+					// check if template is wishlisted by user
+					wishlistData = await userExtensionQueries.findOne({
+						userId: userId,
+						'wishlist._id': String(templateData[0]._id),
+					})
+				}
+				if (wishlistData !== null) {
+					templateData[0].wishlist = true
+				}
+
+				if (language !== '' && templateData[0].translations && templateData[0].translations[language]) {
+					templateData[0] = UTILS.getTranslatedData(templateData[0], templateData[0].translations[language])
+				}
+				templateData[0] = _.omit(templateData[0], 'translations')
 				// fetch certificate details using certificateTemplateId saved in projectTemplate
 				if (templateData[0].certificateTemplateId && templateData[0].certificateTemplateId !== '') {
 					let certificateTemplateDetails = await certificateTemplateQueries.certificateTemplateDocument(
@@ -964,7 +1140,7 @@ module.exports = class ProjectTemplatesHelper {
 				}
 
 				if (templateData[0].tasks && templateData[0].tasks.length > 0) {
-					templateData[0].tasks = await this.tasksAndSubTasks(templateData[0]._id)
+					templateData[0].tasks = await this.tasksAndSubTasks(templateData[0]._id, language)
 				}
 				let result = await _templateInformation(templateData[0])
 				if (!result.success) {
@@ -1021,10 +1197,11 @@ module.exports = class ProjectTemplatesHelper {
 	 * @method
 	 * @name tasksAndSubTasks
 	 * @param {Array} templateId - Template id.
+	 * @param {String} language - language code
 	 * @returns {Array} Tasks and sub task.
 	 */
 
-	static tasksAndSubTasks(templateId) {
+	static tasksAndSubTasks(templateId, language) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				const templateDocument = await projectTemplateQueries.templateDocument(
@@ -1045,7 +1222,7 @@ module.exports = class ProjectTemplatesHelper {
 						},
 					}
 
-					tasks = await _taskAndSubTaskinSequence(findQuery, projectionKey)
+					tasks = await _taskAndSubTaskinSequence(findQuery, projectionKey, language)
 					// sort the order of the tasks
 					let orderedTasks = templateDocument[0]['taskSequence'].map((id) =>
 						tasks.find((task) => String(task.externalId) === String(id))
@@ -1062,7 +1239,7 @@ module.exports = class ProjectTemplatesHelper {
 								parentId: { $exists: false },
 							}
 
-							tasks = await _taskAndSubTaskinSequence(findQuery, projectionKey)
+							tasks = await _taskAndSubTaskinSequence(findQuery, projectionKey, language)
 							// sort the order of the tasks
 							let orderedTasks = templateDocument[0]['tasks'].map((id) =>
 								tasks.find((task) => String(task._id) === String(id))
@@ -1290,10 +1467,11 @@ function _templateInformation(project) {
  * @name _taskAndSubTaskinSequence
  * @param {Object} query - template Query.
  * @param {String} projectionValue - children or taskSequence.
+ * @param {String} language- languageCode
  * @returns {Object} Task and SubTask information.
  */
 
-function _taskAndSubTaskinSequence(query, projectionValue) {
+function _taskAndSubTaskinSequence(query, projectionValue, language = '') {
 	return new Promise(async (resolve, reject) => {
 		try {
 			let tasks = []
@@ -1304,6 +1482,10 @@ function _taskAndSubTaskinSequence(query, projectionValue) {
 			])
 
 			for (let task = 0; task < tasks.length; task++) {
+				if (language !== '' && tasks[task].translations && tasks[task].translations[language]) {
+					tasks[task] = UTILS.getTranslatedData(tasks[task], tasks[task].translations[language])
+				}
+				tasks[task] = _.omit(tasks[task], 'translations')
 				if (tasks[task][projectionValue] && tasks[task][projectionValue].length > 0) {
 					let subTaskQuery
 					if (projectionValue == CONSTANTS.common.CHILDREN) {
@@ -1325,6 +1507,11 @@ function _taskAndSubTaskinSequence(query, projectionValue) {
 						'__v',
 						'projectTemplateExternalId',
 					])
+
+					if (language !== '' && subTasks[0].translations && subTasks[0].translations[language]) {
+						subTasks[0] = UTILS.getTranslatedData(subTasks[0], subTasks[0].translations[language])
+					}
+					subTasks[0] = _.omit(subTasks[0], 'translations')
 					tasks[task].children = subTasks
 				}
 			}

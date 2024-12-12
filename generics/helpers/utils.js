@@ -15,7 +15,7 @@ const ChartDataLabels = require('chartjs-plugin-datalabels')
 const width = 800 // width of the chart
 const height = 500 // height of the chart
 const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height })
-
+const moment = require('moment')
 // const druidQueries = require('./druid_queries.json');
 /**
  * convert camel case to title case.
@@ -180,6 +180,13 @@ function valueParser(dataToBeParsed) {
 	Object.keys(dataToBeParsed).forEach((eachDataToBeParsed) => {
 		parsedData[eachDataToBeParsed] = dataToBeParsed[eachDataToBeParsed].trim()
 	})
+
+	// Check if 'categories' field exists in dataToBeParsed before setting a default value
+	if ('categories' in dataToBeParsed) {
+		if (!parsedData.categories || parsedData.categories.trim() === '') {
+			parsedData.categories = process.env.DEFAULT_PROJECT_CATEGORY
+		}
+	}
 
 	if (parsedData._arrayFields && parsedData._arrayFields.split(',').length > 0) {
 		parsedData._arrayFields.split(',').forEach((arrayTypeField) => {
@@ -493,18 +500,6 @@ function convertStringToObjectId(id) {
 }
 
 /**
- * check whether the id is mongodbId or not.
- * @function
- * @name isValidMongoId
- * @param {String} id
- * @returns {Boolean} returns whether id is valid mongodb id or not.
- */
-
-function isValidMongoId(id) {
-	return ObjectId.isValid(id) && new ObjectId(id).toString() === id
-}
-
-/**
  * filter out location id and code
  * @function
  * @name filterLocationIdandCode
@@ -692,6 +687,71 @@ function arrayOfObjectToArrayOfObjectId(ids) {
 	return ids.map((obj) => obj._id)
 }
 
+/**
+ * Handle translation
+ * @function
+ * @name getTranslatedData
+ * @param {String} data - Data to be translate.
+ * @param {String} translateData - translation data
+ * @returns {Object} - Modified data object with translation.
+ */
+function getTranslatedData(data, translateData) {
+	// Object Keys Which not to be replaces Completely
+	const customTranslationKeys = ['evidences', 'categories', 'learningResources']
+
+	Object.keys(data).forEach((eachValue) => {
+		if (customTranslationKeys.includes(eachValue) && Array.isArray(data[eachValue])) {
+			data[eachValue].forEach((item, index) => {
+				Object.keys(item).forEach((fieldKey) => {
+					if (
+						translateData[eachValue] &&
+						translateData[eachValue][fieldKey] &&
+						translateData[eachValue][fieldKey][index]
+					) {
+						item[fieldKey] = translateData[eachValue][fieldKey][index]
+					}
+				})
+			})
+		} else {
+			if (Object.keys(translateData).includes(eachValue)) {
+				data[eachValue] = translateData[eachValue]
+			}
+		}
+	})
+	return data
+}
+
+/**
+ * Function to calculate the end date based on a start date and duration string.
+ * @param {string} createdDate - The start date in ISO format (e.g., '2024-12-05T00:00:00.000Z').
+ * @param {string} durationString - Duration in the format "1 week", "2 weeks", "1 month", "1 year", etc.
+ * @returns {string} - The calculated end date in ISO format
+ */
+function calculateEndDate(createdDate, durationString) {
+	const startDate = moment(createdDate) // Parse the start date
+	if (!startDate.isValid()) {
+		throw new Error('Invalid start date format')
+	}
+
+	// Extract numeric value and unit from the duration string
+	const [value, unit] = durationString.split(' ')
+
+	// Add the duration to the start date based on the unit
+	switch (unit.toLowerCase()) {
+		case 'week':
+		case 'weeks':
+			return startDate.add(parseInt(value), 'weeks').toISOString()
+		case 'month':
+		case 'months':
+			return startDate.add(parseInt(value), 'months').toISOString()
+		case 'year':
+		case 'years':
+			return startDate.add(parseInt(value), 'years').toISOString()
+		default:
+			throw new Error('Unsupported duration unit')
+	}
+}
+
 module.exports = {
 	camelCaseToTitleCase: camelCaseToTitleCase,
 	lowerCase: lowerCase,
@@ -713,7 +773,6 @@ module.exports = {
 	getEndDate: getEndDate,
 	getStartDate: getStartDate,
 	convertStringToObjectId: convertStringToObjectId,
-	isValidMongoId: isValidMongoId,
 	filterLocationIdandCode: filterLocationIdandCode,
 	generateTelemetryEventSkeletonStructure: generateTelemetryEventSkeletonStructure,
 	generateTelemetryEvent: generateTelemetryEvent,
@@ -725,4 +784,6 @@ module.exports = {
 	generateChart: generateChart,
 	handleSpecialCharsForCertificate: handleSpecialCharsForCertificate,
 	arrayOfObjectToArrayOfObjectId: arrayOfObjectToArrayOfObjectId,
+	getTranslatedData: getTranslatedData,
+	calculateEndDate: calculateEndDate,
 }

@@ -132,6 +132,11 @@ let enviromentVariables = {
 		optional: false,
 		default: 'USER',
 	},
+	IS_AUTH_TOKEN_BEARER: {
+		message: 'Required specification: If auth token is bearer or not',
+		optional: true,
+		default: false,
+	},
 }
 
 let success = true
@@ -206,6 +211,16 @@ module.exports = function () {
 					].possibleValues.join(', ')}`
 				}
 			}
+		}
+
+		if (
+			(!process.env[eachEnvironmentVariable] || process.env[eachEnvironmentVariable].trim() === '') &&
+			enviromentVariables[eachEnvironmentVariable]?.optional === true &&
+			enviromentVariables[eachEnvironmentVariable]?.default !== undefined
+		) {
+			process.env[eachEnvironmentVariable] = enviromentVariables[eachEnvironmentVariable].default
+			keyCheckPass = true
+			success = true
 		}
 
 		if (!keyCheckPass) {

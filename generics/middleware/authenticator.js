@@ -45,7 +45,6 @@ module.exports = async function (req, res, next, token = '') {
 
 	// Check if a Bearer token is required for authentication
 	let authHeader = req.headers['x-auth-token']
-	console.log(authHeader, isBearerRequired, 'authHeader,isBearerRequired')
 	if (isBearerRequired) {
 		const [authType, extractedToken] = authHeader.split(' ')
 		if (authType.toLowerCase() !== 'bearer') {

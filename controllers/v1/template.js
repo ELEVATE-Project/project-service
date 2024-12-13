@@ -38,7 +38,7 @@ module.exports = class Template {
 				const options = {}
 
 				if (req.query.duration) options.duration = req.query.duration
-				if (req.query.roles) options.roles = req.query.roles
+				if (req.query.role) options.roles = req.query.role
 
 				const libraryProjects = await libraryCategoriesHelper.projects(
 					req.params._id ? req.params._id : '',

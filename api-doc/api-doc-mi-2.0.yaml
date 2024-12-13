@@ -20,13 +20,11 @@ paths:
           schema:
             type: string
             example: user token
-          required: true
         - name: internal-access-token
           in: header
           schema:
             type: string
             example: Fqn0m0HQ0gXydRtBCg5l
-          required: true
       requestBody:
         content:
           application/json:
@@ -111,13 +109,36 @@ paths:
                     name:
                       type: string
                       example: DCPCR School Development Index 2018-19
+                    source:
+                      type: object
+                      properties:
+                        apiVersion:
+                          type: string
+                          example: '4.0'
+                        confidenceScore:
+                          type: number
+                          example: 0.98
+                        info:
+                          type: object
+                          properties:
+                            pageNo:
+                              type: string
+                              example: ''
+                            title:
+                              type: string
+                              example: ''
+                            url:
+                              type: string
+                              example: ''
+                        model:
+                          type: string
+                          example: GPT-4
+                        provider:
+                          type: string
+                          example: OpenAI
                     startDate:
                       type: string
                       example: '2024-04-16T00:00:00.000Z'
-                  required:
-                    - conversation
-                    - name
-                    - startDate
                 projects:
                   type: array
                   items:
@@ -165,8 +186,6 @@ paths:
                               url:
                                 type: string
                                 example: ''
-                            required:
-                              - title
                           model:
                             type: string
                             example: GPT-4
@@ -220,11 +239,6 @@ paths:
                                 provider:
                                   type: string
                                   example: OpenAI
-                              required:
-                                - info
-                          required:
-                            - name
-                            - isDeletable
                         example:
                           - isDeletable: false
                             name: Task 1
@@ -241,14 +255,6 @@ paths:
                       title:
                         type: string
                         example: Understand Importance of Reading
-                    required:
-                      - duration
-                      - endDate
-                      - source
-                      - startDate
-                      - status
-                      - tasks
-                      - title
                   example:
                     - category: []
                       description: ''
@@ -282,9 +288,6 @@ paths:
                             model: GPT-4
                             provider: OpenAI
                       title: Understand Importance of Reading
-              required:
-                - program
-                - projects
             examples:
               Add Project:
                 value:
@@ -465,13 +468,11 @@ paths:
           schema:
             type: string
             example: user token
-          required: true
         - name: internal-access-token
           in: header
           schema:
             type: string
             example: Fqn0m0HQ0gXydRtBCg5l
-          required: true
       requestBody:
         content:
           application/json:
@@ -623,7 +624,7 @@ paths:
                             example: sampleFilepath
                           language:
                             type: string
-                            example: en
+                            example: hindi
                       example:
                         - filePath: sampleFilepath
                           language: hindi
@@ -643,21 +644,6 @@ paths:
                     title:
                       type: string
                       example: DCPCR School Development Index 2018-19
-                  required:
-                    - actionSteps
-                    - authorName
-                    - chatHistory
-                    - conversation
-                    - impact
-                    - location
-                    - objective
-                    - pdfInformation
-                    - problemStatement
-                    - summary
-                    - timeline
-                    - title
-              required:
-                - story
             examples:
               Add Story:
                 value:
@@ -811,7 +797,11 @@ paths:
           schema:
             type: string
             example: user token
-          required: true
+        - name: internal-access-token
+          in: header
+          schema:
+            type: string
+            example: Fqn0m0HQ0gXydRtBCg5l
       requestBody:
         content:
           application/json:
@@ -1108,6 +1098,1545 @@ paths:
                     result:
                       _id: 667505a649de1ae76e9e1033
                     status: 200
+  /v1/userProjects/importFromLibrary/6732f4f1f89b3744c975f5bc:
+    post:
+      tags:
+        - User Projects
+      summary: importFromLibrary
+      description: 'importFromLibrary, require projectTemplateId '
+      operationId: importfromlibrary
+      parameters:
+        - name: x-auth-token
+          in: header
+          schema:
+            type: string
+            example: '{{token}}'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                programName:
+                  type: string
+                  example: importing test project
+            examples:
+              importFromLibrary:
+                value:
+                  programName: importing test project
+      responses:
+        '200':
+          description: importFromLibrary Copy
+          headers:
+            Alt-Svc:
+              schema:
+                type: string
+                example: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+            Content-Length:
+              schema:
+                type: string
+                example: '11730'
+            access-control-allow-origin:
+              schema:
+                type: string
+                example: '*'
+            date:
+              schema:
+                type: string
+                example: Fri, 13 Dec 2024 07:23:32 GMT
+            etag:
+              schema:
+                type: string
+                example: W/"2dd2-RwMj5lL0VoU8fEPDQu5UYkiz/zc"
+            server:
+              schema:
+                type: string
+                example: nginx
+            via:
+              schema:
+                type: string
+                example: 1.1 google
+            x-powered-by:
+              schema:
+                type: string
+                example: Express
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Successfully fetched projects
+                  result:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                        example: 675be02cdec1b3de5ae76083
+                      acl:
+                        type: object
+                        properties:
+                          scope:
+                            type: object
+                            properties: {}
+                          users:
+                            type: array
+                            items: {}
+                            example: []
+                          visibility:
+                            type: string
+                            example: SELF
+                      approaches:
+                        type: string
+                        example: ''
+                      attachments:
+                        type: array
+                        items: {}
+                        example: []
+                      categories:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            _id:
+                              type: string
+                              example: 66a09c299f47311f189783b6
+                            externalId:
+                              type: string
+                              example: teachers
+                            name:
+                              type: string
+                              example: teachers
+                        example:
+                          - _id: 66a09c299f47311f189783b6
+                            externalId: teachers
+                            name: teachers
+                      createdAt:
+                        type: string
+                        example: '2024-12-04T12:16:12.440Z'
+                      createdBy:
+                        type: string
+                        example: '262'
+                      deleted:
+                        type: boolean
+                        example: false
+                      description:
+                        type: string
+                        example: >-
+                          To foster a culture of appreciation and gratitude
+                          among the teachers by consistently acknowledging their
+                          efforts and contributions, thus improving teacher
+                          engagement and well-being.
+                      duration:
+                        type: string
+                        example: 6 week
+                      endDate:
+                        type: string
+                        example: '2025-01-15T12:16:12.440Z'
+                      goal:
+                        type: string
+                        example: TEMP
+                      hasAcceptedTAndC:
+                        type: boolean
+                        example: false
+                      isAPrivateProgram:
+                        type: boolean
+                        example: true
+                      isDeleted:
+                        type: boolean
+                        example: false
+                      lastDownloadedAt:
+                        type: string
+                        example: '2024-12-13T07:20:12.288Z'
+                      learningResources:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            app:
+                              type: string
+                              example: projectService
+                            id:
+                              type: string
+                              example: libKVRa01L8?feature=shared
+                            link:
+                              type: string
+                              example: https://youtu.be/libKVRa01L8?feature=shared
+                            name:
+                              type: string
+                              example: Name1
+                        example:
+                          - app: projectService
+                            id: libKVRa01L8?feature=shared
+                            link: https://youtu.be/libKVRa01L8?feature=shared
+                            name: Name1
+                          - app: projectService
+                            name: Name2
+                          - app: projectService
+                            name: Name3
+                          - app: projectService
+                            name: Name4
+                          - app: projectService
+                            name: Name5
+                      link:
+                        type: string
+                        example: ''
+                      primaryAudience:
+                        type: string
+                        example: ''
+                      programExternalId:
+                        type: string
+                        example: cool-1734074412012
+                      programId:
+                        type: string
+                        example: 675be02cdec1b3de5ae7607e
+                      programName:
+                        type: string
+                        example: cool
+                      projectTemplateExternalId:
+                        type: string
+                        example: IDE-1733314564449
+                      projectTemplateId:
+                        type: string
+                        example: 6750480c312b29ebbce4ae7e
+                      rationale:
+                        type: string
+                        example: ''
+                      recommendedFor:
+                        type: array
+                        items:
+                          type: string
+                          example: District Education Officer
+                        example:
+                          - District Education Officer
+                      reflection:
+                        type: object
+                        properties:
+                          endDate:
+                            nullable: true
+                            example: null
+                          startDate:
+                            nullable: true
+                            example: null
+                          status:
+                            nullable: true
+                            example: null
+                      risks:
+                        type: string
+                        example: ''
+                      solutionExternalId:
+                        type: string
+                        example: 262-1734074412012
+                      solutionId:
+                        type: string
+                        example: 675be02cdec1b3de5ae76080
+                      solutionInformation:
+                        type: object
+                        properties: {}
+                      source:
+                        type: object
+                        properties: {}
+                      startDate:
+                        type: string
+                        example: '2024-12-13T07:20:12.288Z'
+                      status:
+                        type: string
+                        example: started
+                      story:
+                        type: object
+                        properties: {}
+                      successIndicators:
+                        type: string
+                        example: ''
+                      taskReport:
+                        type: object
+                        properties:
+                          notStarted:
+                            type: number
+                            example: 7
+                          total:
+                            type: number
+                            example: 7
+                      taskSequence:
+                        type: array
+                        items:
+                          type: string
+                          example: 1.0-1733314564449
+                        example:
+                          - 1.0-1733314564449
+                          - 2.0-1733314564449
+                          - 3.0-1733314564449
+                          - 4.0-1733314564449
+                          - 5.0-1733314564449
+                          - 6.0-1733314564449
+                          - 7.0-1733314564449
+                      tasks:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            __v:
+                              type: number
+                              example: 0
+                            _id:
+                              type: string
+                              example: a9bbc2c1-e31c-46c0-8286-cee6431d558c
+                            attachments:
+                              type: array
+                              items: {}
+                              example: []
+                            children:
+                              type: array
+                              items: {}
+                              example: []
+                            createdAt:
+                              type: string
+                              example: '2024-12-04T12:16:12.931Z'
+                            createdBy:
+                              type: string
+                              example: '162'
+                            deleted:
+                              type: boolean
+                              example: false
+                            description:
+                              type: string
+                              example: NA
+                            externalId:
+                              type: string
+                              example: 1.0-1733314564449
+                            hasSubTasks:
+                              type: boolean
+                              example: false
+                            isDeletable:
+                              type: boolean
+                              example: false
+                            isDeleted:
+                              type: boolean
+                              example: false
+                            isImportedFromLibrary:
+                              type: boolean
+                              example: false
+                            learningResources:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  app:
+                                    type: string
+                                    example: projectService
+                                  id:
+                                    type: string
+                                    example: watch?v=PXcYBhvYc30
+                                  link:
+                                    type: string
+                                    example: >-
+                                      https://www.youtube.com/watch?v=PXcYBhvYc30
+                                  name:
+                                    type: string
+                                    example: Name
+                              example:
+                                - app: projectService
+                                  id: watch?v=PXcYBhvYc30
+                                  link: https://www.youtube.com/watch?v=PXcYBhvYc30
+                                  name: Name
+                            metaInformation:
+                              type: object
+                              properties:
+                                endDate:
+                                  type: string
+                                  example: 20/12/2025
+                                hasAParentTask:
+                                  type: string
+                                  example: 'NO'
+                                minNoOfSubmissionsRequired:
+                                  type: string
+                                  example: ''
+                                parentTaskId:
+                                  type: string
+                                  example: ''
+                                parentTaskOperator:
+                                  type: string
+                                  example: ''
+                                parentTaskValue:
+                                  type: string
+                                  example: ''
+                                startDate:
+                                  type: string
+                                  example: 16/12/2025
+                            name:
+                              type: string
+                              example: >-
+                                Principal identifies the root of the problem
+                                with the help of the Simple Education Foundation
+                                member
+                            projectTemplateExternalId:
+                              type: string
+                              example: IDE-1733314564449
+                            projectTemplateId:
+                              type: string
+                              example: 6750480c312b29ebbce4ae7e
+                            referenceId:
+                              type: string
+                              example: 6750480c6ba0a7ebb269d5a1
+                            sequenceNumber:
+                              type: string
+                              example: '1'
+                            solutionDetails:
+                              type: object
+                              properties:
+                                solutionId:
+                                  type: string
+                                  example: ''
+                                solutionSubType:
+                                  type: string
+                                  example: ''
+                                solutionType:
+                                  type: string
+                                  example: ''
+                            status:
+                              type: string
+                              example: notStarted
+                            syncedAt:
+                              type: string
+                              example: '2024-12-13T07:20:12.010Z'
+                            taskSequence:
+                              type: array
+                              items: {}
+                              example: []
+                            type:
+                              type: string
+                              example: content
+                            updatedAt:
+                              type: string
+                              example: '2024-12-13T07:20:12.009Z'
+                            updatedBy:
+                              type: string
+                              example: '162'
+                            visibleIf:
+                              type: array
+                              items: {}
+                              example: []
+                        example:
+                          - __v: 0
+                            _id: a9bbc2c1-e31c-46c0-8286-cee6431d558c
+                            attachments: []
+                            children: []
+                            createdAt: '2024-12-04T12:16:12.931Z'
+                            createdBy: '162'
+                            deleted: false
+                            description: NA
+                            externalId: 1.0-1733314564449
+                            hasSubTasks: false
+                            isDeletable: false
+                            isDeleted: false
+                            isImportedFromLibrary: false
+                            learningResources:
+                              - app: projectService
+                                id: watch?v=PXcYBhvYc30
+                                link: https://www.youtube.com/watch?v=PXcYBhvYc30
+                                name: Name
+                            metaInformation:
+                              endDate: 20/12/2025
+                              hasAParentTask: 'NO'
+                              minNoOfSubmissionsRequired: ''
+                              parentTaskId: ''
+                              parentTaskOperator: ''
+                              parentTaskValue: ''
+                              startDate: 16/12/2025
+                            name: >-
+                              Principal identifies the root of the problem with
+                              the help of the Simple Education Foundation member
+                            projectTemplateExternalId: IDE-1733314564449
+                            projectTemplateId: 6750480c312b29ebbce4ae7e
+                            referenceId: 6750480c6ba0a7ebb269d5a1
+                            sequenceNumber: '1'
+                            solutionDetails:
+                              solutionId: ''
+                              solutionSubType: ''
+                              solutionType: ''
+                            status: notStarted
+                            syncedAt: '2024-12-13T07:20:12.010Z'
+                            taskSequence: []
+                            type: content
+                            updatedAt: '2024-12-13T07:20:12.009Z'
+                            updatedBy: '162'
+                            visibleIf: []
+                          - __v: 0
+                            _id: b5a4b850-aabb-418d-85e7-6c593e9ea8c8
+                            attachments: []
+                            children: []
+                            createdAt: '2024-12-04T12:16:12.942Z'
+                            createdBy: '162'
+                            deleted: false
+                            description: NA
+                            externalId: 2.0-1733314564449
+                            hasSubTasks: false
+                            isDeletable: false
+                            isDeleted: false
+                            isImportedFromLibrary: false
+                            learningResources:
+                              - app: projectService
+                                id: watch?v=FtDv-L1stdo
+                                link: https://www.youtube.com/watch?v=FtDv-L1stdo
+                                name: Name
+                            metaInformation:
+                              endDate: 20/12/2026
+                              hasAParentTask: 'NO'
+                              minNoOfSubmissionsRequired: subTask1
+                              parentTaskId: ''
+                              parentTaskOperator: ''
+                              parentTaskValue: ''
+                              startDate: 16/12/2026
+                            name: Principal creates a Gratitude Jar
+                            projectTemplateExternalId: IDE-1733314564449
+                            projectTemplateId: 6750480c312b29ebbce4ae7e
+                            referenceId: 6750480c6ba0a7ebb269d5a4
+                            sequenceNumber: '2'
+                            solutionDetails:
+                              solutionId: ''
+                              solutionSubType: ''
+                              solutionType: ''
+                            status: notStarted
+                            syncedAt: '2024-12-13T07:20:12.010Z'
+                            taskSequence: []
+                            type: content
+                            updatedAt: '2024-12-13T07:20:12.010Z'
+                            updatedBy: '162'
+                            visibleIf: []
+                          - __v: 0
+                            _id: 0b8f4120-3a5d-4f67-8815-a9305f3b9922
+                            attachments: []
+                            children: []
+                            createdAt: '2024-12-04T12:16:12.951Z'
+                            createdBy: '162'
+                            deleted: false
+                            description: NA
+                            externalId: 3.0-1733314564449
+                            hasSubTasks: false
+                            isDeletable: false
+                            isDeleted: false
+                            isImportedFromLibrary: false
+                            learningResources:
+                              - app: projectService
+                                id: watch?v=7xNHz6lwxYs
+                                link: https://www.youtube.com/watch?v=7xNHz6lwxYs
+                                name: Name
+                            metaInformation:
+                              endDate: 20/12/2027
+                              hasAParentTask: 'NO'
+                              minNoOfSubmissionsRequired: subTask1
+                              parentTaskId: ''
+                              parentTaskOperator: ''
+                              parentTaskValue: ''
+                              startDate: 16/12/2027
+                            name: >-
+                              Principal spends time inside classrooms and spaces
+                              where the teachers were working with the children,
+                              to capture evidences real time
+                            projectTemplateExternalId: IDE-1733314564449
+                            projectTemplateId: 6750480c312b29ebbce4ae7e
+                            referenceId: 6750480c6ba0a7ebb269d5a7
+                            sequenceNumber: '3'
+                            solutionDetails:
+                              solutionId: ''
+                              solutionSubType: ''
+                              solutionType: ''
+                            status: notStarted
+                            syncedAt: '2024-12-13T07:20:12.010Z'
+                            taskSequence: []
+                            type: content
+                            updatedAt: '2024-12-13T07:20:12.010Z'
+                            updatedBy: '162'
+                            visibleIf: []
+                          - __v: 0
+                            _id: 2d5790be-e3c9-44fe-abda-087a5ceef9db
+                            attachments: []
+                            children: []
+                            createdAt: '2024-12-04T12:16:12.960Z'
+                            createdBy: '162'
+                            deleted: false
+                            description: NA
+                            externalId: 4.0-1733314564449
+                            hasSubTasks: false
+                            isDeletable: false
+                            isDeleted: false
+                            isImportedFromLibrary: false
+                            learningResources:
+                              - app: projectService
+                                id: watch?v=7xNHz6lwxYs
+                                link: https://www.youtube.com/watch?v=7xNHz6lwxYs
+                                name: Name
+                            metaInformation:
+                              endDate: 20/12/2028
+                              hasAParentTask: 'NO'
+                              minNoOfSubmissionsRequired: subTask1
+                              parentTaskId: ''
+                              parentTaskOperator: ''
+                              parentTaskValue: ''
+                              startDate: 16/12/2028
+                            name: >-
+                              Principal creates personalised appreciation notes
+                              with authentic feedback
+                            projectTemplateExternalId: IDE-1733314564449
+                            projectTemplateId: 6750480c312b29ebbce4ae7e
+                            referenceId: 6750480c6ba0a7ebb269d5aa
+                            sequenceNumber: '4'
+                            solutionDetails:
+                              solutionId: ''
+                              solutionSubType: ''
+                              solutionType: ''
+                            status: notStarted
+                            syncedAt: '2024-12-13T07:20:12.010Z'
+                            taskSequence: []
+                            type: content
+                            updatedAt: '2024-12-13T07:20:12.010Z'
+                            updatedBy: '162'
+                            visibleIf: []
+                          - __v: 0
+                            _id: 11646dee-d918-4ebb-ab56-60e6a4a309e0
+                            attachments: []
+                            children: []
+                            createdAt: '2024-12-04T12:16:12.969Z'
+                            createdBy: '162'
+                            deleted: false
+                            description: NA
+                            externalId: 5.0-1733314564449
+                            hasSubTasks: false
+                            isDeletable: false
+                            isDeleted: false
+                            isImportedFromLibrary: false
+                            learningResources:
+                              - app: projectService
+                                id: watch?v=7xNHz6lwxYs
+                                link: https://www.youtube.com/watch?v=7xNHz6lwxYs
+                                name: Name
+                            metaInformation:
+                              endDate: 20/12/2029
+                              hasAParentTask: 'NO'
+                              minNoOfSubmissionsRequired: subTask1
+                              parentTaskId: ''
+                              parentTaskOperator: ''
+                              parentTaskValue: ''
+                              startDate: 16/12/2029
+                            name: Principal puts in a touch of her own - short poems
+                            projectTemplateExternalId: IDE-1733314564449
+                            projectTemplateId: 6750480c312b29ebbce4ae7e
+                            referenceId: 6750480c6ba0a7ebb269d5ad
+                            sequenceNumber: '5'
+                            solutionDetails:
+                              solutionId: ''
+                              solutionSubType: ''
+                              solutionType: ''
+                            status: notStarted
+                            syncedAt: '2024-12-13T07:20:12.010Z'
+                            taskSequence: []
+                            type: content
+                            updatedAt: '2024-12-13T07:20:12.010Z'
+                            updatedBy: '162'
+                            visibleIf: []
+                          - __v: 0
+                            _id: f3d96a59-738f-4634-a8b2-fab69b49fa17
+                            attachments: []
+                            children: []
+                            createdAt: '2024-12-04T12:16:12.977Z'
+                            createdBy: '162'
+                            deleted: false
+                            description: NA
+                            externalId: 6.0-1733314564449
+                            hasSubTasks: false
+                            isDeletable: false
+                            isDeleted: false
+                            isImportedFromLibrary: false
+                            learningResources:
+                              - app: projectService
+                                id: watch?v=7xNHz6lwxYs
+                                link: https://www.youtube.com/watch?v=7xNHz6lwxYs
+                                name: Name
+                            metaInformation:
+                              endDate: 20/12/2030
+                              hasAParentTask: 'NO'
+                              minNoOfSubmissionsRequired: subTask2
+                              parentTaskId: ''
+                              parentTaskOperator: ''
+                              parentTaskValue: ''
+                              startDate: 16/12/2030
+                            name: Principal does this consistently
+                            projectTemplateExternalId: IDE-1733314564449
+                            projectTemplateId: 6750480c312b29ebbce4ae7e
+                            referenceId: 6750480c6ba0a7ebb269d5b0
+                            sequenceNumber: '6'
+                            solutionDetails:
+                              solutionId: ''
+                              solutionSubType: ''
+                              solutionType: ''
+                            status: notStarted
+                            syncedAt: '2024-12-13T07:20:12.010Z'
+                            taskSequence: []
+                            type: content
+                            updatedAt: '2024-12-13T07:20:12.010Z'
+                            updatedBy: '162'
+                            visibleIf: []
+                          - __v: 0
+                            _id: 72c59f61-82ab-4b4d-bc46-edc6db11baef
+                            attachments: []
+                            children: []
+                            createdAt: '2024-12-04T12:16:12.984Z'
+                            createdBy: '162'
+                            deleted: false
+                            description: NA
+                            externalId: 7.0-1733314564449
+                            hasSubTasks: false
+                            isDeletable: false
+                            isDeleted: false
+                            isImportedFromLibrary: false
+                            learningResources:
+                              - app: projectService
+                                id: ff
+                                link: ff
+                                name: Name
+                            metaInformation:
+                              endDate: 20/12/2031
+                              hasAParentTask: 'NO'
+                              minNoOfSubmissionsRequired: subTask3
+                              parentTaskId: ''
+                              parentTaskOperator: ''
+                              parentTaskValue: ''
+                              startDate: 16/12/2031
+                            name: >-
+                              Teachers open the jar during their fortnightly or
+                              monthly meetings, find these notes and feel seen
+                              and appreciated
+                            projectTemplateExternalId: IDE-1733314564449
+                            projectTemplateId: 6750480c312b29ebbce4ae7e
+                            referenceId: 6750480c6ba0a7ebb269d5b3
+                            sequenceNumber: '7'
+                            solutionDetails:
+                              solutionId: ''
+                              solutionSubType: ''
+                              solutionType: ''
+                            status: notStarted
+                            syncedAt: '2024-12-13T07:20:12.010Z'
+                            taskSequence: []
+                            type: content
+                            updatedAt: '2024-12-13T07:20:12.010Z'
+                            updatedBy: '162'
+                            visibleIf: []
+                      title:
+                        type: string
+                        example: WithEvidence
+                      updateHistory:
+                        type: array
+                        items: {}
+                        example: []
+                      updatedAt:
+                        type: string
+                        example: '2024-12-13T07:20:12.297Z'
+                      updatedBy:
+                        type: string
+                        example: '262'
+                      userId:
+                        type: string
+                        example: '262'
+                      userProfile:
+                        type: object
+                        properties:
+                          about:
+                            type: string
+                            example: PWA
+                          block:
+                            type: object
+                            properties:
+                              externalId:
+                                type: string
+                                example: enkhjg
+                              label:
+                                type: string
+                                example: 'Bangalore South '
+                              value:
+                                type: string
+                                example: 6682771aa845ef3e891db070
+                          cluster:
+                            type: object
+                            properties:
+                              externalId:
+                                type: string
+                                example: enfflfh3
+                              label:
+                                type: string
+                                example: JP nagar
+                              value:
+                                type: string
+                                example: 6682426ba845ef3e891daee4
+                          created_at:
+                            type: string
+                            example: '2024-07-25T10:43:09.857Z'
+                          deleted_at:
+                            nullable: true
+                            example: null
+                          district:
+                            type: object
+                            properties:
+                              externalId:
+                                type: string
+                                example: enff3
+                              label:
+                                type: string
+                                example: Bengaluru
+                              value:
+                                type: string
+                                example: 668240135fb8bc3e93ceae39
+                          email:
+                            type: string
+                            example: tekditestuser@yopmail.com
+                          email_verified:
+                            type: string
+                            example: 'false'
+                          has_accepted_terms_and_conditions:
+                            type: boolean
+                            example: false
+                          id:
+                            type: string
+                            example: '262'
+                          image:
+                            nullable: true
+                            example: null
+                          image_cloud_path:
+                            nullable: true
+                            example: null
+                          languages:
+                            nullable: true
+                            example: null
+                          meta:
+                            type: object
+                            properties: {}
+                          name:
+                            type: string
+                            example: tekdiTestUser
+                          organization:
+                            type: object
+                            properties:
+                              code:
+                                type: string
+                                example: default_code
+                              id:
+                                type: string
+                                example: '1'
+                              name:
+                                type: string
+                                example: Default Organization
+                          organization_id:
+                            type: string
+                            example: '1'
+                          permissions:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                module:
+                                  type: string
+                                  example: user
+                                request_type:
+                                  type: array
+                                  items:
+                                    type: string
+                                    example: POST
+                                  example:
+                                    - POST
+                                    - PATCH
+                                    - DELETE
+                                    - GET
+                                    - PUT
+                                service:
+                                  type: string
+                                  example: user
+                            example:
+                              - module: user
+                                request_type:
+                                  - POST
+                                  - PATCH
+                                  - DELETE
+                                  - GET
+                                  - PUT
+                                service: user
+                              - module: cloud-services
+                                request_type:
+                                  - POST
+                                  - PATCH
+                                  - DELETE
+                                  - GET
+                                  - PUT
+                                service: user
+                              - module: account
+                                request_type:
+                                  - POST
+                                service: user
+                          preferred_language:
+                            type: object
+                            properties:
+                              label:
+                                type: string
+                                example: English
+                              value:
+                                type: string
+                                example: en
+                          roles:
+                            type: array
+                            items:
+                              type: string
+                              example: '10'
+                            example:
+                              - '10'
+                              - '12'
+                              - '16'
+                              - '15'
+                              - '19'
+                              - '20'
+                              - '21'
+                              - '23'
+                              - '24'
+                          share_link:
+                            nullable: true
+                            example: null
+                          state:
+                            type: object
+                            properties:
+                              externalId:
+                                type: string
+                                example: hsjj
+                              label:
+                                type: string
+                                example: Karnataka
+                              value:
+                                type: string
+                                example: 665d8df5c6892808846230e7
+                          status:
+                            type: string
+                            example: ACTIVE
+                          updated_at:
+                            type: string
+                            example: '2024-12-09T10:35:12.214Z'
+                          user_roles:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                  example: '10'
+                                label:
+                                  type: string
+                                  example: Reviewer
+                                organization_id:
+                                  type: string
+                                  example: '1'
+                                status:
+                                  type: string
+                                  example: ACTIVE
+                                title:
+                                  type: string
+                                  example: reviewer
+                                user_type:
+                                  type: number
+                                  example: 0
+                                visibility:
+                                  type: string
+                                  example: PUBLIC
+                            example:
+                              - id: '10'
+                                label: Reviewer
+                                organization_id: '1'
+                                status: ACTIVE
+                                title: reviewer
+                                user_type: 0
+                                visibility: PUBLIC
+                              - id: '12'
+                                label: Program Designer
+                                organization_id: '1'
+                                status: ACTIVE
+                                title: program_designer
+                                user_type: 0
+                                visibility: PUBLIC
+                              - id: '16'
+                                label: Head Master
+                                organization_id: '24'
+                                status: ACTIVE
+                                title: head_master
+                                user_type: 0
+                                visibility: PUBLIC
+                              - id: '15'
+                                label: Cluster Academic Coordinator
+                                organization_id: '24'
+                                status: ACTIVE
+                                title: cluster_academic_coordinator
+                                user_type: 0
+                                visibility: PUBLIC
+                              - id: '19'
+                                label: Block Academic Coordinator
+                                organization_id: '24'
+                                status: ACTIVE
+                                title: block_academic_coordinator
+                                user_type: 0
+                                visibility: PUBLIC
+                              - id: '20'
+                                label: District Education Officer
+                                organization_id: '24'
+                                status: ACTIVE
+                                title: district_education_officer
+                                user_type: 0
+                                visibility: PUBLIC
+                              - id: '21'
+                                label: District Resource Person
+                                organization_id: '24'
+                                status: ACTIVE
+                                title: district_resource_person
+                                user_type: 0
+                                visibility: PUBLIC
+                              - id: '23'
+                                label: State Project Director
+                                organization_id: '24'
+                                status: ACTIVE
+                                title: state_project_director
+                                user_type: 0
+                                visibility: PUBLIC
+                              - id: '24'
+                                label: State Level Campaign Coordinator
+                                organization_id: '24'
+                                status: ACTIVE
+                                title: state_level_campaign_coordinator
+                                user_type: 0
+                                visibility: PUBLIC
+                      userRole:
+                        type: string
+                        example: ''
+                  status:
+                    type: number
+                    example: 200
+              examples:
+                importFromLibrary Copy:
+                  value:
+                    message: Successfully fetched projects
+                    result:
+                      _id: 675be02cdec1b3de5ae76083
+                      acl:
+                        scope: {}
+                        users: []
+                        visibility: SELF
+                      approaches: ''
+                      attachments: []
+                      categories:
+                        - _id: 66a09c299f47311f189783b6
+                          externalId: teachers
+                          name: teachers
+                      createdAt: '2024-12-04T12:16:12.440Z'
+                      createdBy: '262'
+                      deleted: false
+                      description: >-
+                        To foster a culture of appreciation and gratitude among
+                        the teachers by consistently acknowledging their efforts
+                        and contributions, thus improving teacher engagement and
+                        well-being.
+                      duration: 6 week
+                      endDate: '2025-01-15T12:16:12.440Z'
+                      goal: TEMP
+                      hasAcceptedTAndC: false
+                      isAPrivateProgram: true
+                      isDeleted: false
+                      lastDownloadedAt: '2024-12-13T07:20:12.288Z'
+                      learningResources:
+                        - app: projectService
+                          id: libKVRa01L8?feature=shared
+                          link: https://youtu.be/libKVRa01L8?feature=shared
+                          name: Name1
+                        - app: projectService
+                          name: Name2
+                        - app: projectService
+                          name: Name3
+                        - app: projectService
+                          name: Name4
+                        - app: projectService
+                          name: Name5
+                      link: ''
+                      primaryAudience: ''
+                      programExternalId: cool-1734074412012
+                      programId: 675be02cdec1b3de5ae7607e
+                      programName: cool
+                      projectTemplateExternalId: IDE-1733314564449
+                      projectTemplateId: 6750480c312b29ebbce4ae7e
+                      rationale: ''
+                      recommendedFor:
+                        - District Education Officer
+                      reflection:
+                        endDate: null
+                        startDate: null
+                        status: null
+                      risks: ''
+                      solutionExternalId: 262-1734074412012
+                      solutionId: 675be02cdec1b3de5ae76080
+                      solutionInformation: {}
+                      source: {}
+                      startDate: '2024-12-13T07:20:12.288Z'
+                      status: started
+                      story: {}
+                      successIndicators: ''
+                      taskReport:
+                        notStarted: 7
+                        total: 7
+                      taskSequence:
+                        - 1.0-1733314564449
+                        - 2.0-1733314564449
+                        - 3.0-1733314564449
+                        - 4.0-1733314564449
+                        - 5.0-1733314564449
+                        - 6.0-1733314564449
+                        - 7.0-1733314564449
+                      tasks:
+                        - __v: 0
+                          _id: a9bbc2c1-e31c-46c0-8286-cee6431d558c
+                          attachments: []
+                          children: []
+                          createdAt: '2024-12-04T12:16:12.931Z'
+                          createdBy: '162'
+                          deleted: false
+                          description: NA
+                          externalId: 1.0-1733314564449
+                          hasSubTasks: false
+                          isDeletable: false
+                          isDeleted: false
+                          isImportedFromLibrary: false
+                          learningResources:
+                            - app: projectService
+                              id: watch?v=PXcYBhvYc30
+                              link: https://www.youtube.com/watch?v=PXcYBhvYc30
+                              name: Name
+                          metaInformation:
+                            endDate: 20/12/2025
+                            hasAParentTask: 'NO'
+                            minNoOfSubmissionsRequired: ''
+                            parentTaskId: ''
+                            parentTaskOperator: ''
+                            parentTaskValue: ''
+                            startDate: 16/12/2025
+                          name: >-
+                            Principal identifies the root of the problem with
+                            the help of the Simple Education Foundation member
+                          projectTemplateExternalId: IDE-1733314564449
+                          projectTemplateId: 6750480c312b29ebbce4ae7e
+                          referenceId: 6750480c6ba0a7ebb269d5a1
+                          sequenceNumber: '1'
+                          solutionDetails:
+                            solutionId: ''
+                            solutionSubType: ''
+                            solutionType: ''
+                          status: notStarted
+                          syncedAt: '2024-12-13T07:20:12.010Z'
+                          taskSequence: []
+                          type: content
+                          updatedAt: '2024-12-13T07:20:12.009Z'
+                          updatedBy: '162'
+                          visibleIf: []
+                        - __v: 0
+                          _id: b5a4b850-aabb-418d-85e7-6c593e9ea8c8
+                          attachments: []
+                          children: []
+                          createdAt: '2024-12-04T12:16:12.942Z'
+                          createdBy: '162'
+                          deleted: false
+                          description: NA
+                          externalId: 2.0-1733314564449
+                          hasSubTasks: false
+                          isDeletable: false
+                          isDeleted: false
+                          isImportedFromLibrary: false
+                          learningResources:
+                            - app: projectService
+                              id: watch?v=FtDv-L1stdo
+                              link: https://www.youtube.com/watch?v=FtDv-L1stdo
+                              name: Name
+                          metaInformation:
+                            endDate: 20/12/2026
+                            hasAParentTask: 'NO'
+                            minNoOfSubmissionsRequired: subTask1
+                            parentTaskId: ''
+                            parentTaskOperator: ''
+                            parentTaskValue: ''
+                            startDate: 16/12/2026
+                          name: Principal creates a Gratitude Jar
+                          projectTemplateExternalId: IDE-1733314564449
+                          projectTemplateId: 6750480c312b29ebbce4ae7e
+                          referenceId: 6750480c6ba0a7ebb269d5a4
+                          sequenceNumber: '2'
+                          solutionDetails:
+                            solutionId: ''
+                            solutionSubType: ''
+                            solutionType: ''
+                          status: notStarted
+                          syncedAt: '2024-12-13T07:20:12.010Z'
+                          taskSequence: []
+                          type: content
+                          updatedAt: '2024-12-13T07:20:12.010Z'
+                          updatedBy: '162'
+                          visibleIf: []
+                        - __v: 0
+                          _id: 0b8f4120-3a5d-4f67-8815-a9305f3b9922
+                          attachments: []
+                          children: []
+                          createdAt: '2024-12-04T12:16:12.951Z'
+                          createdBy: '162'
+                          deleted: false
+                          description: NA
+                          externalId: 3.0-1733314564449
+                          hasSubTasks: false
+                          isDeletable: false
+                          isDeleted: false
+                          isImportedFromLibrary: false
+                          learningResources:
+                            - app: projectService
+                              id: watch?v=7xNHz6lwxYs
+                              link: https://www.youtube.com/watch?v=7xNHz6lwxYs
+                              name: Name
+                          metaInformation:
+                            endDate: 20/12/2027
+                            hasAParentTask: 'NO'
+                            minNoOfSubmissionsRequired: subTask1
+                            parentTaskId: ''
+                            parentTaskOperator: ''
+                            parentTaskValue: ''
+                            startDate: 16/12/2027
+                          name: >-
+                            Principal spends time inside classrooms and spaces
+                            where the teachers were working with the children,
+                            to capture evidences real time
+                          projectTemplateExternalId: IDE-1733314564449
+                          projectTemplateId: 6750480c312b29ebbce4ae7e
+                          referenceId: 6750480c6ba0a7ebb269d5a7
+                          sequenceNumber: '3'
+                          solutionDetails:
+                            solutionId: ''
+                            solutionSubType: ''
+                            solutionType: ''
+                          status: notStarted
+                          syncedAt: '2024-12-13T07:20:12.010Z'
+                          taskSequence: []
+                          type: content
+                          updatedAt: '2024-12-13T07:20:12.010Z'
+                          updatedBy: '162'
+                          visibleIf: []
+                        - __v: 0
+                          _id: 2d5790be-e3c9-44fe-abda-087a5ceef9db
+                          attachments: []
+                          children: []
+                          createdAt: '2024-12-04T12:16:12.960Z'
+                          createdBy: '162'
+                          deleted: false
+                          description: NA
+                          externalId: 4.0-1733314564449
+                          hasSubTasks: false
+                          isDeletable: false
+                          isDeleted: false
+                          isImportedFromLibrary: false
+                          learningResources:
+                            - app: projectService
+                              id: watch?v=7xNHz6lwxYs
+                              link: https://www.youtube.com/watch?v=7xNHz6lwxYs
+                              name: Name
+                          metaInformation:
+                            endDate: 20/12/2028
+                            hasAParentTask: 'NO'
+                            minNoOfSubmissionsRequired: subTask1
+                            parentTaskId: ''
+                            parentTaskOperator: ''
+                            parentTaskValue: ''
+                            startDate: 16/12/2028
+                          name: >-
+                            Principal creates personalised appreciation notes
+                            with authentic feedback
+                          projectTemplateExternalId: IDE-1733314564449
+                          projectTemplateId: 6750480c312b29ebbce4ae7e
+                          referenceId: 6750480c6ba0a7ebb269d5aa
+                          sequenceNumber: '4'
+                          solutionDetails:
+                            solutionId: ''
+                            solutionSubType: ''
+                            solutionType: ''
+                          status: notStarted
+                          syncedAt: '2024-12-13T07:20:12.010Z'
+                          taskSequence: []
+                          type: content
+                          updatedAt: '2024-12-13T07:20:12.010Z'
+                          updatedBy: '162'
+                          visibleIf: []
+                        - __v: 0
+                          _id: 11646dee-d918-4ebb-ab56-60e6a4a309e0
+                          attachments: []
+                          children: []
+                          createdAt: '2024-12-04T12:16:12.969Z'
+                          createdBy: '162'
+                          deleted: false
+                          description: NA
+                          externalId: 5.0-1733314564449
+                          hasSubTasks: false
+                          isDeletable: false
+                          isDeleted: false
+                          isImportedFromLibrary: false
+                          learningResources:
+                            - app: projectService
+                              id: watch?v=7xNHz6lwxYs
+                              link: https://www.youtube.com/watch?v=7xNHz6lwxYs
+                              name: Name
+                          metaInformation:
+                            endDate: 20/12/2029
+                            hasAParentTask: 'NO'
+                            minNoOfSubmissionsRequired: subTask1
+                            parentTaskId: ''
+                            parentTaskOperator: ''
+                            parentTaskValue: ''
+                            startDate: 16/12/2029
+                          name: Principal puts in a touch of her own - short poems
+                          projectTemplateExternalId: IDE-1733314564449
+                          projectTemplateId: 6750480c312b29ebbce4ae7e
+                          referenceId: 6750480c6ba0a7ebb269d5ad
+                          sequenceNumber: '5'
+                          solutionDetails:
+                            solutionId: ''
+                            solutionSubType: ''
+                            solutionType: ''
+                          status: notStarted
+                          syncedAt: '2024-12-13T07:20:12.010Z'
+                          taskSequence: []
+                          type: content
+                          updatedAt: '2024-12-13T07:20:12.010Z'
+                          updatedBy: '162'
+                          visibleIf: []
+                        - __v: 0
+                          _id: f3d96a59-738f-4634-a8b2-fab69b49fa17
+                          attachments: []
+                          children: []
+                          createdAt: '2024-12-04T12:16:12.977Z'
+                          createdBy: '162'
+                          deleted: false
+                          description: NA
+                          externalId: 6.0-1733314564449
+                          hasSubTasks: false
+                          isDeletable: false
+                          isDeleted: false
+                          isImportedFromLibrary: false
+                          learningResources:
+                            - app: projectService
+                              id: watch?v=7xNHz6lwxYs
+                              link: https://www.youtube.com/watch?v=7xNHz6lwxYs
+                              name: Name
+                          metaInformation:
+                            endDate: 20/12/2030
+                            hasAParentTask: 'NO'
+                            minNoOfSubmissionsRequired: subTask2
+                            parentTaskId: ''
+                            parentTaskOperator: ''
+                            parentTaskValue: ''
+                            startDate: 16/12/2030
+                          name: Principal does this consistently
+                          projectTemplateExternalId: IDE-1733314564449
+                          projectTemplateId: 6750480c312b29ebbce4ae7e
+                          referenceId: 6750480c6ba0a7ebb269d5b0
+                          sequenceNumber: '6'
+                          solutionDetails:
+                            solutionId: ''
+                            solutionSubType: ''
+                            solutionType: ''
+                          status: notStarted
+                          syncedAt: '2024-12-13T07:20:12.010Z'
+                          taskSequence: []
+                          type: content
+                          updatedAt: '2024-12-13T07:20:12.010Z'
+                          updatedBy: '162'
+                          visibleIf: []
+                        - __v: 0
+                          _id: 72c59f61-82ab-4b4d-bc46-edc6db11baef
+                          attachments: []
+                          children: []
+                          createdAt: '2024-12-04T12:16:12.984Z'
+                          createdBy: '162'
+                          deleted: false
+                          description: NA
+                          externalId: 7.0-1733314564449
+                          hasSubTasks: false
+                          isDeletable: false
+                          isDeleted: false
+                          isImportedFromLibrary: false
+                          learningResources:
+                            - app: projectService
+                              id: ff
+                              link: ff
+                              name: Name
+                          metaInformation:
+                            endDate: 20/12/2031
+                            hasAParentTask: 'NO'
+                            minNoOfSubmissionsRequired: subTask3
+                            parentTaskId: ''
+                            parentTaskOperator: ''
+                            parentTaskValue: ''
+                            startDate: 16/12/2031
+                          name: >-
+                            Teachers open the jar during their fortnightly or
+                            monthly meetings, find these notes and feel seen and
+                            appreciated
+                          projectTemplateExternalId: IDE-1733314564449
+                          projectTemplateId: 6750480c312b29ebbce4ae7e
+                          referenceId: 6750480c6ba0a7ebb269d5b3
+                          sequenceNumber: '7'
+                          solutionDetails:
+                            solutionId: ''
+                            solutionSubType: ''
+                            solutionType: ''
+                          status: notStarted
+                          syncedAt: '2024-12-13T07:20:12.010Z'
+                          taskSequence: []
+                          type: content
+                          updatedAt: '2024-12-13T07:20:12.010Z'
+                          updatedBy: '162'
+                          visibleIf: []
+                      title: WithEvidence
+                      updateHistory: []
+                      updatedAt: '2024-12-13T07:20:12.297Z'
+                      updatedBy: '262'
+                      userId: '262'
+                      userProfile:
+                        about: PWA
+                        block:
+                          externalId: enkhjg
+                          label: 'Bangalore South '
+                          value: 6682771aa845ef3e891db070
+                        cluster:
+                          externalId: enfflfh3
+                          label: JP nagar
+                          value: 6682426ba845ef3e891daee4
+                        created_at: '2024-07-25T10:43:09.857Z'
+                        deleted_at: null
+                        district:
+                          externalId: enff3
+                          label: Bengaluru
+                          value: 668240135fb8bc3e93ceae39
+                        email: tekditestuser@yopmail.com
+                        email_verified: 'false'
+                        has_accepted_terms_and_conditions: false
+                        id: '262'
+                        image: null
+                        image_cloud_path: null
+                        languages: null
+                        meta: {}
+                        name: tekdiTestUser
+                        organization:
+                          code: default_code
+                          id: '1'
+                          name: Default Organization
+                        organization_id: '1'
+                        permissions:
+                          - module: user
+                            request_type:
+                              - POST
+                              - PATCH
+                              - DELETE
+                              - GET
+                              - PUT
+                            service: user
+                          - module: cloud-services
+                            request_type:
+                              - POST
+                              - PATCH
+                              - DELETE
+                              - GET
+                              - PUT
+                            service: user
+                          - module: account
+                            request_type:
+                              - POST
+                            service: user
+                        preferred_language:
+                          label: English
+                          value: en
+                        roles:
+                          - '10'
+                          - '12'
+                          - '16'
+                          - '15'
+                          - '19'
+                          - '20'
+                          - '21'
+                          - '23'
+                          - '24'
+                        share_link: null
+                        state:
+                          externalId: hsjj
+                          label: Karnataka
+                          value: 665d8df5c6892808846230e7
+                        status: ACTIVE
+                        updated_at: '2024-12-09T10:35:12.214Z'
+                        user_roles:
+                          - id: '10'
+                            label: Reviewer
+                            organization_id: '1'
+                            status: ACTIVE
+                            title: reviewer
+                            user_type: 0
+                            visibility: PUBLIC
+                          - id: '12'
+                            label: Program Designer
+                            organization_id: '1'
+                            status: ACTIVE
+                            title: program_designer
+                            user_type: 0
+                            visibility: PUBLIC
+                          - id: '16'
+                            label: Head Master
+                            organization_id: '24'
+                            status: ACTIVE
+                            title: head_master
+                            user_type: 0
+                            visibility: PUBLIC
+                          - id: '15'
+                            label: Cluster Academic Coordinator
+                            organization_id: '24'
+                            status: ACTIVE
+                            title: cluster_academic_coordinator
+                            user_type: 0
+                            visibility: PUBLIC
+                          - id: '19'
+                            label: Block Academic Coordinator
+                            organization_id: '24'
+                            status: ACTIVE
+                            title: block_academic_coordinator
+                            user_type: 0
+                            visibility: PUBLIC
+                          - id: '20'
+                            label: District Education Officer
+                            organization_id: '24'
+                            status: ACTIVE
+                            title: district_education_officer
+                            user_type: 0
+                            visibility: PUBLIC
+                          - id: '21'
+                            label: District Resource Person
+                            organization_id: '24'
+                            status: ACTIVE
+                            title: district_resource_person
+                            user_type: 0
+                            visibility: PUBLIC
+                          - id: '23'
+                            label: State Project Director
+                            organization_id: '24'
+                            status: ACTIVE
+                            title: state_project_director
+                            user_type: 0
+                            visibility: PUBLIC
+                          - id: '24'
+                            label: State Level Campaign Coordinator
+                            organization_id: '24'
+                            status: ACTIVE
+                            title: state_level_campaign_coordinator
+                            user_type: 0
+                            visibility: PUBLIC
+                      userRole: ''
+                    status: 200
   /v1/profile/read:
     get:
       tags:
@@ -1121,7 +2650,17 @@ paths:
           schema:
             type: string
             example: '{{token}}'
-          required: true
+        - name: internal_access_token
+          in: header
+          schema:
+            type: string
+            example: Fqn0m0HQ0gXydRtBCg5l
+      requestBody:
+        content:
+          text/plain:
+            examples:
+              profile Read:
+                value: ''
       responses:
         '200':
           description: Read User Copy
@@ -1510,7 +3049,11 @@ paths:
           schema:
             type: string
             example: '{{token}}'
-          required: true
+        - name: internal-access-token
+          in: header
+          schema:
+            type: string
+            example: '{{internal_access_token}}'
       requestBody:
         content:
           application/json:
@@ -1650,7 +3193,11 @@ paths:
           schema:
             type: string
             example: '{{token}}'
-          required: true
+        - name: internal-access-token
+          in: header
+          schema:
+            type: string
+            example: '{{internal_access_token}}'
       requestBody:
         content:
           application/json:

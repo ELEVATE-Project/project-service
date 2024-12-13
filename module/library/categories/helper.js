@@ -14,6 +14,8 @@ const projectTemplateTaskQueries = require(DB_QUERY_BASE_PATH + '/projectTemplat
 const moment = require('moment-timezone')
 const filesHelpers = require(MODULES_BASE_PATH + '/cloud-services/files/helper')
 const axios = require('axios')
+const entitiesService = require(GENERICS_FILES_PATH + '/services/entity-management')
+
 /**
  * LibraryCategoriesHelper
  * @class
@@ -109,7 +111,22 @@ module.exports = class LibraryCategoriesHelper {
 					if (roles) {
 						roles = roles.split(',')
 						if (roles.length > 0) {
-							matchQuery['$match']['recommendedFor'] = { $all: roles }
+							//Getting roles from the entity service
+							let userRoleInformation = await entitiesService.getUserRoleExtensionDocuments(
+								{
+									code: { $in: roles },
+								},
+								['title']
+							)
+							if (!userRoleInformation.success) {
+								throw {
+									message: CONSTANTS.apiResponses.FAILED_TO_FETCH_USERROLE,
+									status: HTTP_STATUS_CODE.bad_request.status,
+								}
+							}
+							// Extract titles
+							let userRoles = await userRoleInformation.data.map((eachRole) => eachRole.title)
+							matchQuery['$match']['recommendedFor'] = { $in: userRoles }
 						}
 					}
 				}
@@ -174,6 +191,7 @@ module.exports = class LibraryCategoriesHelper {
 							createdAt: 1,
 							categories: 1,
 							metaInformation: 1,
+							recommendedFor: 1,
 						},
 					},
 					{

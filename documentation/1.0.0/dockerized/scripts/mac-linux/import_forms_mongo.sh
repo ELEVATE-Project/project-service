@@ -50,7 +50,7 @@ const modifiedData = data.map(form => ({
 }));
 
 // Write the modified data to a new JSON file
-sudo fs.writeFileSync('/tmp/forms_with_orgId.json', JSON.stringify(modifiedData, null, 2));
+fs.writeFileSync('/tmp/forms_with_orgId.json', JSON.stringify(modifiedData, null, 2));
 console.log('Modified forms.json with organizationId, deleted, and version fields.');
 EOF
 

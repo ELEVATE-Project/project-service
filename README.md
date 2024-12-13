@@ -41,7 +41,7 @@ Expectation: By diligently following the outlined steps, you will successfully e
 
 ## Prerequisites
 
-To set up the Project application, ensure you have Docker and Docker Compose installed on your system. For Ubuntu users, detailed installation instructions for both can be found in the documentation here: [How To Install and Use Docker Compose on Ubuntu](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-compose-on-ubuntu-20-04). For Windows and MacOS users, you can refer to the Docker documentation for installation instructions: [Docker Compose Installation Guide](https://docs.docker.com/compose/install/). Once these prerequisites are in place, you're all set to get started with setting up the Project application.
+To set up the Project application, ensure you have Docker and Docker Compose installed on your system. For Ubuntu users, detailed installation instructions for both can be found in the documentation here: [How To Install and Use Docker Compose on Ubuntu](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-compose-on-ubuntu-20-04). To install and use Nodejs in Ubuntu machine, you can follow instructions here: [How To Install Nodejs in Ubuntu](https://nodejs.org/en/download/package-manager). For Windows and MacOS users, you can refer to the Docker documentation for installation instructions: [Docker Compose Installation Guide](https://docs.docker.com/compose/install/). Once these prerequisites are in place, you're all set to get started with setting up the Project application.
 
 ## Installation
 
@@ -66,7 +66,7 @@ done
 
 1.  **Download and execute main setup script:** Execute the following command in your terminal from the project directory.
     ```
-    curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/mac-linux/setup_project.sh && chmod +x setup_project.sh && ./setup_project.sh
+    curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/mac-linux/setup_project.sh && chmod +x setup_project.sh && sudo ./setup_project.sh
     ```
 
     > Note : The script will download all the essential files and launch the services in Docker. Once all services are successfully up and running, you can proceed to the next steps.
@@ -77,11 +77,11 @@ done
 
     2. All docker containers can be stopped and removed by using below command.
         ```
-        ./docker-compose-down.sh
+        sudo ./docker-compose-down.sh
         ```
     3. All services and dependencies can be started using below command.
         ```
-        ./docker-compose-up.sh
+        sudo ./docker-compose-up.sh
         ```
 **Keep the current terminal session active, and kindly open a new terminal window within the project directory.**
 
@@ -193,7 +193,7 @@ To enable the Citus extension for user services, follow these steps.
 
         1. Enable Citus and set distribution columns for `user` database by running the `citus_setup.sh`with the following arguments.
             ```
-            ./citus_setup.sh user postgres://postgres:postgres@citus_master:5432/user
+            sudo ./citus_setup.sh user postgres://postgres:postgres@citus_master:5432/user
             ```
 
     - **Windows**
@@ -263,7 +263,7 @@ In such cases, you can generate sample user accounts using the steps below. This
 - **Ubuntu/Linux/Mac**
 
     ```
-    ./insert_sample_data.sh user postgres://postgres:postgres@citus_master:5432/user
+    sudo ./insert_sample_data.sh user postgres://postgres:postgres@citus_master:5432/user
     ```
 - **Windows**
     1. **Download The `sampleData.sql` Files:**
@@ -304,7 +304,7 @@ This step will guide us in implementing a sample project solution following the 
         1. Insert sample data by running the following command.
 
             ```
-            ./add_sample_project_entity_data.sh
+            sudo ./add_sample_project_entity_data.sh
             ```
 
     - **Windows**
@@ -329,7 +329,7 @@ This step inserts configuration forms into MongoDB, enabling or disabling featur
 
 - **Ubuntu/Linux/Mac**:
     ```
-    curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/mac-linux/import_forms_mongo.sh && chmod +x import_forms_mongo.sh && ./import_forms_mongo.sh mongodb://mongo:27017/elevate-project
+    curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/mac-linux/import_forms_mongo.sh && chmod +x import_forms_mongo.sh && sudo ./import_forms_mongo.sh mongodb://mongo:27017/elevate-project
     ```
 
 - **Windows**:

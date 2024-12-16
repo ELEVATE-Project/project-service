@@ -4453,6 +4453,7 @@ function _fillMissingTaskInformation(tasks, tasksFromDB) {
  * @returns {void} This function does not return a value. It modifies eachTask in place.
  */
 function fillMissingProperties(eachTask, targetTask) {
+	const dateSpecificFields = ['createdAt', 'updatedAt', 'syncedAt']
 	for (let key in targetTask) {
 		if (Array.isArray(targetTask[key])) {
 			if (!eachTask[key] || eachTask[key].length === 0) {
@@ -4482,6 +4483,12 @@ function fillMissingProperties(eachTask, targetTask) {
 			if (!eachTask[key]) {
 				eachTask[key] = {} // Initialize the object if it's missing
 			}
+
+			// Update the date specific fields
+			if (dateSpecificFields.includes(key)) {
+				eachTask[key] = targetTask[key] ? targetTask[key] : new Date()
+			}
+
 			fillMissingProperties(eachTask[key], targetTask[key])
 		} else {
 			// If the property is a primitive value, just fill in missing values

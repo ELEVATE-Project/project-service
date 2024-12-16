@@ -2816,6 +2816,15 @@ module.exports = class UserProjectsHelper {
 					}
 				}
 
+				// Add programName to the response
+				let programData
+				if (programId != '' && UTILS.isValidMongoId(programId)) {
+					programData = await programQueries.programsDocument({
+						_id: ObjectId(programId),
+					})
+					projects[0]['programName'] = programData[0].name
+				}
+
 				return resolve({
 					success: true,
 					message: CONSTANTS.apiResponses.PROJECTS_FETCHED,

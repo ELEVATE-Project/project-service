@@ -456,7 +456,7 @@ paths:
                       projectId: 667918baf8063086b629f007
                     status: 200
   /v1/userProjects/addStory/6732f4f1f89b3744c975f5bc:
-    post:
+    put:
       tags:
         - User Projects
       summary: Add Story
@@ -785,7 +785,7 @@ paths:
                     message: Story added successfully
                     status: 200
   /v1/userProjects/update/6732f4f1f89b3744c975f5bc:
-    put:
+    post:
       tags:
         - User Projects
       summary: update Project

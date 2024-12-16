@@ -27,6 +27,32 @@
 			]
 		},
 		{
+			"sourceRoute": "/project/v1/userProjects/addStory/:id",
+			"type": "PUT",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "elevate-project"
+				}
+			]
+		},
+		{
+			"sourceRoute": "/project/v1/userProjects/addStory",
+			"type": "PUT",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "elevate-project"
+				}
+			]
+		},
+		{
 			"sourceRoute": "/project/v1/userProjects/certificates",
 			"type": "GET",
 			"priority": "MUST_HAVE",
@@ -1250,6 +1276,32 @@
 		},
 		{
 			"sourceRoute": "/project/v1/userProjects/importFromLibrary/:id",
+			"type": "POST",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "elevate-project"
+				}
+			]
+		},
+		{
+			"sourceRoute": "/project/v1/userProjects/update",
+			"type": "POST",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "elevate-project"
+				}
+			]
+		},
+		{
+			"sourceRoute": "/project/v1/userProjects/update/:id",
 			"type": "POST",
 			"priority": "MUST_HAVE",
 			"inSequence": false,

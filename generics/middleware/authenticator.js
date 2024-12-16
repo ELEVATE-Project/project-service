@@ -9,6 +9,7 @@
 const jwt = require('jsonwebtoken')
 const fs = require('fs')
 const path = require('path')
+const isBearerRequired = process.env.IS_AUTH_TOKEN_BEARER === 'true'
 
 var respUtil = function (resp) {
 	return {
@@ -39,9 +40,10 @@ module.exports = async function (req, res, next, token = '') {
 		delete req.headers[e]
 	})
 
-	var token = req.headers['x-auth-token']
 	if (!req.rspObj) req.rspObj = {}
 	var rspObj = req.rspObj
+
+	token = req.headers['x-auth-token']
 
 	// Allow search endpoints for non-logged in users.
 	let guestAccess = false
@@ -93,6 +95,20 @@ module.exports = async function (req, res, next, token = '') {
 		rspObj.errMsg = CONSTANTS.apiResponses.TOKEN_MISSING_MESSAGE
 		rspObj.responseCode = HTTP_STATUS_CODE['unauthorized'].status
 		return res.status(HTTP_STATUS_CODE['unauthorized'].status).send(respUtil(rspObj))
+	}
+
+	// Check if a Bearer token is required for authentication
+	if (isBearerRequired) {
+		const [authType, extractedToken] = token.split(' ')
+		if (authType.toLowerCase() !== 'bearer') {
+			rspObj.errCode = CONSTANTS.apiResponses.TOKEN_INVALID_CODE
+			rspObj.errMsg = CONSTANTS.apiResponses.TOKEN_INVALID_MESSAGE
+			rspObj.responseCode = HTTP_STATUS_CODE['unauthorized'].status
+			return res.status(HTTP_STATUS_CODE['unauthorized'].status).send(respUtil(rspObj))
+		}
+		token = extractedToken?.trim()
+	} else {
+		token = token?.trim()
 	}
 
 	rspObj.errCode = CONSTANTS.apiResponses.TOKEN_INVALID_CODE

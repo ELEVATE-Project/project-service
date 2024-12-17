@@ -295,7 +295,7 @@ module.exports = class ProjectTemplateTasksHelper {
 							if (fieldSegments[0].includes(`projectTemplateTask${taskNo}`)) {
 								const requiredModelField = fieldSegments[fieldSegments.length - 1]
 								translations[key] = translations[key] || {}
-								if (['title', 'description'].includes(requiredModelField)) {
+								if (['name', 'description'].includes(requiredModelField)) {
 									translations[key][requiredModelField] =
 										translations[key][requiredModelField] || data[item]
 								} else if (fieldSegments.some((segement) => segement.includes('learningResources'))) {

@@ -4637,7 +4637,7 @@ def getPreSignedUrl(projectFile, projectName_for_folder_path, accessToken):
         for file_path in filesPath:
             source_path = file_path["payload"]["sourcePath"]
             fetchDownloadableUrl_path.append(source_path)
-        fetchDownloadableUrl_path.reverse() 
+            fetchDownloadableUrl_path.sort(key=lambda x: x.split('/')[-1])
         return fetchDownloadableUrl_path,
 
 # This function is used to download the logo's anf sign from project template

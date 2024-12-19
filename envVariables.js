@@ -137,6 +137,16 @@ let enviromentVariables = {
 		optional: true,
 		default: false,
 	},
+	DEFAULT_PROJECT_CATEGORY: {
+		message: 'Default category external-id required',
+		optional: false,
+		default: 'MI-2.0-default',
+	},
+	ENABLE_REFLECTION: {
+		message: 'Enable reflection required',
+		optional: false,
+		default: 'false',
+	},
 }
 
 let success = true

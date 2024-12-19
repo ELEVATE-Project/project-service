@@ -129,7 +129,58 @@ const entityTypeDocuments = function (filterData = 'all', projection = 'all', us
 	})
 }
 
+// Function to find userRoleExtensiopn documents based on the given filter, projection, and user token
+const getUserRoleExtensionDocuments = function (filterData = 'all', projection = 'all', userToken) {
+	return new Promise(async (resolve, reject) => {
+		try {
+			// Construct the URL for the entity management service
+			const url =
+				interfaceServiceUrl +
+				process.env.ENTITY_MANAGEMENT_SERVICE_BASE_URL +
+				CONSTANTS.endpoints.FIND_USER_ROLE_EXTENSION_DOCUMENTS
+			// Set the options for the HTTP POST request
+			const options = {
+				headers: {
+					'content-type': 'application/json',
+					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
+				},
+				json: {
+					query: filterData,
+					projection: projection,
+				},
+			}
+
+			// Make the HTTP POST request to the entity management service
+			request.post(url, options, requestCallBack)
+
+			// Callback function to handle the response from the HTTP POST request
+			function requestCallBack(err, data) {
+				let result = {
+					success: true,
+				}
+
+				if (err) {
+					result.success = false
+				} else {
+					let response = data.body
+					// Check if the response status is OK (HTTP 200)
+					if (response.status === HTTP_STATUS_CODE.ok.status) {
+						result['data'] = response.result
+					} else {
+						result.success = false
+					}
+				}
+
+				return resolve(result)
+			}
+		} catch (error) {
+			return reject(error)
+		}
+	})
+}
+
 module.exports = {
 	entityDocuments: entityDocuments,
 	entityTypeDocuments: entityTypeDocuments,
+	getUserRoleExtensionDocuments: getUserRoleExtensionDocuments,
 }

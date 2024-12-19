@@ -152,10 +152,12 @@ module.exports = class ProjectTemplateTasksHelper {
 	 * @param {String} templateId - template task id
 	 * @param {Object} solutionData - solution data
 	 * @param {String} [update = false]
+	 * @param {Object} translationData - translation data object
+	 * @param {Number} taskNo - task number
 	 * @returns {Array} Create or update a task.
 	 */
 
-	static createOrUpdateTask(data, template, solutionData, update = false) {
+	static createOrUpdateTask(data, template, solutionData, update = false, translationData = {}, taskNo) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let parsedData = UTILS.valueParser(data)
@@ -277,6 +279,40 @@ module.exports = class ProjectTemplateTasksHelper {
 					solutionType: parsedData.solutionType,
 				}
 				allValues.solutionDetails = solutionDetails
+
+				// add tranlsation data
+				let translations = {}
+
+				// iterate over each language
+				Object.keys(translationData).forEach((key) => {
+					if (!(key == 'en')) {
+						const data = translationData[key]
+
+						// iterate over the fields in each language
+						Object.keys(data).forEach((item) => {
+							const fieldSegments = item.split('.')
+							// add the translated data to translations
+							if (fieldSegments[0].includes(`projectTemplateTask${taskNo}`)) {
+								const requiredModelField = fieldSegments[fieldSegments.length - 1]
+								translations[key] = translations[key] || {}
+								if (['name', 'description'].includes(requiredModelField)) {
+									translations[key][requiredModelField] =
+										translations[key][requiredModelField] || data[item]
+								} else if (fieldSegments.some((segement) => segement.includes('learningResources'))) {
+									if (fieldSegments[1].includes(`T${taskNo}R`)) {
+										translations[key]['learningResources'] =
+											translations[key]['learningResources'] || {}
+										translations[key]['learningResources'][requiredModelField] =
+											translations[key]['learningResources'][requiredModelField] || []
+										translations[key]['learningResources'][requiredModelField].push(data[item])
+									}
+								}
+							}
+						})
+					}
+				})
+
+				allValues.translations = translations
 
 				if (!parsedData.STATUS) {
 					let taskData = {}
@@ -406,10 +442,11 @@ module.exports = class ProjectTemplateTasksHelper {
 	 * @param {Array} tasks - csv tasks data.
 	 * @param {String} projectTemplateId - project template id.
 	 * @param {String} userId - user logged in id.
+	 * @param {Object} translationFile - translation files
 	 * @returns {Object} Bulk create project template tasks.
 	 */
 
-	static bulkCreate(tasks, projectTemplateId, userId) {
+	static bulkCreate(tasks, projectTemplateId, userId, translationFiles = {}) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				const fileName = `create-project-template-tasks`
@@ -429,6 +466,12 @@ module.exports = class ProjectTemplateTasksHelper {
 					return resolve(csvData)
 				}
 
+				// convert the translation files
+				let translationDataObject = {}
+				if (Object.keys(translationFiles).length > 0) {
+					translationDataObject = JSON.parse(translationFiles.data.toString())
+				}
+
 				let pendingItems = []
 				let taskSequence =
 					csvData.data.template.taskSequence && csvData.data.template.taskSequence.length > 0
@@ -436,6 +479,7 @@ module.exports = class ProjectTemplateTasksHelper {
 						: []
 
 				let checkMandatoryTask = []
+				let subTaskIds = []
 
 				for (let task = 0; task < tasks.length; task++) {
 					let currentData = UTILS.valueParser(tasks[task])
@@ -447,6 +491,7 @@ module.exports = class ProjectTemplateTasksHelper {
 
 					if (currentData['hasAParentTask'] === 'YES' && !csvData.data.tasks[currentData.parentTaskId]) {
 						pendingItems.push(currentData)
+						subTaskIds.push(task + 1)
 					} else {
 						if (csvData.data.tasks[currentData.externalId]) {
 							currentData._SYSTEM_ID = CONSTANTS.apiResponses.PROJECT_TEMPLATE_TASK_EXISTS
@@ -455,7 +500,10 @@ module.exports = class ProjectTemplateTasksHelper {
 							let createdTask = await this.createOrUpdateTask(
 								currentData,
 								csvData.data.template,
-								csvData.data.solutionData
+								csvData.data.solutionData,
+								false,
+								translationDataObject,
+								task + 1
 							)
 
 							if (createdTask._SYSTEM_ID != '') {
@@ -481,7 +529,10 @@ module.exports = class ProjectTemplateTasksHelper {
 							let createdTask = await this.createOrUpdateTask(
 								currentData,
 								csvData.data.template,
-								csvData.data.solutionData
+								csvData.data.solutionData,
+								false,
+								translationDataObject,
+								subTaskIds[item]
 							)
 
 							if (createdTask._SYSTEM_ID != '') {

@@ -85,5 +85,6 @@ module.exports = {
 			type: String,
 		},
 		metaInformation: Object,
+		translations: Object,
 	},
 }

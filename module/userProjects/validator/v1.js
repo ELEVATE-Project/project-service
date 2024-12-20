@@ -20,6 +20,39 @@ module.exports = (req) => {
 		},
 		add: function () {
 			req.checkBody('program.name').exists().withMessage('required program name')
+			req.checkBody('program.source').exists().withMessage('required program source')
+			req.checkBody('projects')
+				.isArray()
+				.withMessage('projects must be an array')
+				.custom((projects) => {
+					if (!projects || !Array.isArray(projects)) {
+						return false // 'projects' is not an array
+					}
+
+					// Validate each project
+					return projects.every((project) => {
+						// Validate that the project has a 'source'
+						if (!project.hasOwnProperty('source')) {
+							return false
+						}
+
+						// Validate 'tasks' if it exists
+						if (project.tasks) {
+							// Ensure 'tasks' is an array
+							if (!Array.isArray(project.tasks)) {
+								return false // 'tasks' exists but is not an array
+							}
+
+							// Ensure each task has a 'source'
+							return project.tasks.every((task) => task.hasOwnProperty('source'))
+						}
+
+						// No 'tasks', just validate 'source'
+						return true
+					})
+				})
+				.withMessage('each project and each task in the project must have a source, and tasks must be an array')
+
 			// req.checkBody('program.startDate').exists().withMessage('required program start date')
 			// req.checkBody('program.conversation').exists().withMessage('required program conversation')
 			// req.checkBody('projects')

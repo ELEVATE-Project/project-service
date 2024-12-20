@@ -57,7 +57,7 @@ module.exports = class ProjectAttributes extends Abstract {
 	}
 
 	/**
-* @api {post} /project/v1/projectAttributes/find
+* @api {get} /project/v1/projectAttributes/find
 * @apiVersion 1.0.0
 * @apiName Find
 * @apiGroup projectAttributes

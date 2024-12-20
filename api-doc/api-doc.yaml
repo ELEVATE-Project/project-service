@@ -1640,6 +1640,7 @@ paths:
             examples:
               sampleBodyData:
                 value:
+                  hasAcceptedTAndC: true
                   programId: 6752aee1c1438653af10d613
       parameters:
         - name: X-auth-token
@@ -10244,7 +10245,7 @@ paths:
 
         * This is a mandatory parameter and cannot be empty or null.
   /v1/userProjects/update/{_id}:
-    put:
+    post:
       tags: *ref_43
       summary: Updates the user project.
       requestBody:

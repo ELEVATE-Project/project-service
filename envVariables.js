@@ -137,6 +137,10 @@ let enviromentVariables = {
 		optional: true,
 		default: false,
 	},
+	SCP_SERVICE_BASE_URL: {
+		message: 'SCP service url required',
+		optional: false,
+	}
 }
 
 let success = true

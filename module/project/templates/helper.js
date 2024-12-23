@@ -26,7 +26,7 @@ const projectCategoriesQueries = require(DB_QUERY_BASE_PATH + '/projectCategorie
 const solutionsQueries = require(DB_QUERY_BASE_PATH + '/solutions')
 const certificateTemplateQueries = require(DB_QUERY_BASE_PATH + '/certificateTemplates')
 const programQueries = require(DB_QUERY_BASE_PATH + '/programs')
-
+const scpService = require(GENERICS_FILES_PATH + '/services/scp')
 module.exports = class ProjectTemplatesHelper {
 	/**
 	 * Extract csv information.
@@ -1200,6 +1200,113 @@ module.exports = class ProjectTemplatesHelper {
 			}
 		})
 	}
+
+	/**
+	 * Publish Template and Task 
+	 * @method
+	 * @name                        			- publishTemplateAndTask
+	 * @param {Object} templateAndTaskData		- templateAndTaskData
+	 * @param {String} callBackUrl     			- callBackUrl
+	 * @returns {Object}            			- template data
+	 */
+
+	static publishTemplateAndTask(templateAndTaskData, callBackUrl) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				
+				// Format the template
+				const formattedTemplate = _formatTemplate(templateAndTaskData)
+				if (!formattedTemplate.success) {
+					throw {
+						message: CONSTANTS.apiResponses.FAILED_TO_FORMAT_TEMPLATE,
+						status: HTTP_STATUS_CODE.bad_request.status,
+					}
+				}
+
+				const template = formattedTemplate.template
+
+				// Process Categories
+				if (templateAndTaskData.categories?.length > 0) {
+					const categoriesResponse = await _getOrCreateCategories(templateAndTaskData.categories)
+					if (!categoriesResponse.success) {
+						throw {
+							message: CONSTANTS.apiResponses.FAILED_TO_FETCH_OR_CREATE_CATEGORIES,
+							status: HTTP_STATUS_CODE.bad_request.status,
+						}
+					}
+					template.categories = categoriesResponse.categories
+				}
+
+				// Save the template
+				const createTemplate = await projectTemplateQueries.createTemplate(template)
+				if (!createTemplate.success) {
+					throw {
+						message: CONSTANTS.apiResponses.FAILED_TO_CREATE_TEMPLATE,
+						status: HTTP_STATUS_CODE.bad_request.status,
+					}
+				}
+
+				const { _id: templateId, externalId: templateExternalId } = createTemplate;
+
+				// Assign Sequence Numbers and Save Tasks
+				const processedTasks = assignSequenceNumbers(templateAndTaskData.tasks || [])
+				const taskCreationResponse = await createTasks(processedTasks, templateId, templateExternalId)
+				if (!taskCreationResponse.success) {
+					throw {
+						message: CONSTANTS.apiResponses.FAILED_TO_CREATE_TASKS,
+						status: HTTP_STATUS_CODE.bad_request.status,
+					}
+				}
+
+				// Update Template with Tasks and Sequence
+				const updateResponse = await projectTemplateQueries.findOneAndUpdate(
+					{ _id: templateId },
+					{
+						$set: {
+							tasks: taskCreationResponse.taskIds,
+							taskSequence: taskCreationResponse.externalIds,
+						},
+					}
+				)
+
+				if (!updateResponse._id) {
+					throw {
+						message: CONSTANTS.apiResponses.FAILED_TO_UPDATE_TEMPLATE,
+						status: HTTP_STATUS_CODE.bad_request.status,
+					}
+				}
+	
+				// Trigger callback url for updating the template id in scp
+				if (callBackUrl) {
+					let callBackResponse = await scpService.resourcePublishCallBack(callBackUrl, templateAndTaskData.id, templateId)
+					if (!callBackResponse.success){
+						throw {
+							message: CONSTANTS.apiResponses.SCP_CALLBACK_FAILED,
+							status: HTTP_STATUS_CODE.bad_request.status,
+						}
+					}
+				}
+
+				// Resolve the promise with success, message, and paginated data.
+				return resolve({
+					success: true,
+					message: CONSTANTS.apiResponses.PROJECT_TEMPLATES_CREATED,
+					data: {
+						_id: templateId
+					},
+				})
+			} catch (error) {
+				// If an error occurs, resolve the promise with failure and error data.
+				return resolve({
+					success: false,
+					message: error.message,
+					data: [],
+				})
+			}
+		})
+	}
+
+	
 }
 
 /**
@@ -1339,3 +1446,290 @@ function _taskAndSubTaskinSequence(query, projectionValue) {
 		}
 	})
 }
+
+/**
+ * Convert Learning Resource
+ * @name convertResources
+ * @param {Array} resources - learning resource data
+ * @returns {Object} - Response contains formatted learning resource
+ */
+const convertResources = (resources) =>
+	resources
+		.filter((resource) => resource.url) // Ensure `url` exists
+		.map((resource) => ({
+			name: resource.name || 'resource',
+			link: resource.url,
+			app: CONSTANTS.common.APP_ELEVATE_PROJECT,
+			id: resource.url.split('/').pop(), // Extract the last part of the URL
+		}))
+
+/**
+ * Generate externalId from title
+ * @name generateExternalId
+ * @param {String} title - title
+ * @returns {String} - ExternalId
+ */
+
+function generateExternalId(title) {
+	console.log(title, 'title')
+	const words = title.split(/[\s-]+/)
+	const abbreviation = words.map((word) => (word[0] || '').toUpperCase()).join('')
+	const uniqueSuffix = Date.now()
+	return `${abbreviation}-${uniqueSuffix}`
+}
+
+/**
+ * Assign sequence number for task
+ * @name assignSequenceNumbers
+ * @returns {Object} - Response contains task object
+ */
+const assignSequenceNumbers = (tasks) => {
+	/* Temporory fix start, because elevate-project doent have the observation capability in tasks now */
+	// Filter out 'observation' type tasks
+	const filteredTasks = tasks.filter((task) => task.type !== 'observation')
+	// Sort tasks based on their current sequence number (ascending order)
+	filteredTasks.sort((a, b) => a.sequence_no - b.sequence_no)
+	let sequenceCounter = 1
+	return filteredTasks.map((task) => {
+		task.sequence_no = sequenceCounter++ // Reassign sequence number
+		return task
+	})
+	/* Temporory fix end */
+
+	// let sequenceCounter = 1
+	// return tasks.map((task) => {
+	// 	if (!task.sequence_no) {
+	// 		task.sequence_no = sequenceCounter++
+	// 	}
+	// 	return task
+	// })
+}
+
+/**
+ * Format category Name
+ * @name formatCategoriesName
+ * @param {String} value - category
+ * @returns {String} - Category
+ */
+function formatCategoriesName(value) {
+	return value
+		.replace(/_/g, ' ') // Replace underscores with spaces
+		.replace(/\b\w/g, (char) => char.toUpperCase()) // Capitalize the first letter of each word
+		.trim() // Ensure no leading or trailing spaces
+}
+
+const _formatTemplate = (templateData) => {
+	try {
+		let template = {
+			title: templateData.title,
+			description: templateData.objective || '',
+			keywords: Array.isArray(templateData.keywords)
+				? templateData.keywords.map((k) => k.trim()) // If it's an array, trim each keyword
+				: templateData.keywords
+					? templateData.keywords.split(',').map((k) => k.trim()) // If it's a string, split and trim
+					: [],
+			isDeleted: false,
+			recommendedFor: templateData.recommended_for?.length
+				? templateData.recommended_for.map((item) => item.label)
+				: [],
+			createdBy: templateData.user_id,
+			updatedBy: templateData.user_id,
+			learningResources: templateData.learning_resources ? convertResources(templateData.learning_resources) : [],
+			isReusable: true,
+			taskSequence: [], // Initially empty
+			deleted: false,
+			status: CONSTANTS.common.PUBLISHED_STATUS,
+			externalId: generateExternalId(templateData.title),
+			entityType: '',
+			metaInformation: {
+				goal: '',
+				rationale: '',
+				primaryAudience: '',
+				duration: `${templateData.recommended_duration.number} ${templateData.recommended_duration.duration}`,
+				successIndicators: '',
+				risks: '',
+				approaches: '',
+			},
+			tasks: [], // Initially empty
+		}
+
+		return { success: true, template }
+	} catch (error) {
+		console.error('Error in formatTemplate:', error.message)
+		return { success: false, error: error.message }
+	}
+}
+
+/**
+ * Create and Find Categories
+ * @name _getOrCreateCategories
+ * @param {Object} categories - Categories Data
+ * @returns {Object} - Response contains categories data
+ */
+function _getOrCreateCategories(categories) {
+	return new Promise(async (resolve, reject) => {
+		try {
+
+			// Format categories
+			const formattedCategories = categories.map((category) => {
+				if (!category.label || !category.value) {
+					throw {
+						message: CONSTANTS.apiResponses.CATEGORY_SHOULD_HAVE_LABEL_AND_VALUE,
+						status: HTTP_STATUS_CODE.bad_request.status,
+					}
+					
+				}
+				return {
+					label: category.label,
+					value: category.value,
+					formattedName: formatCategoriesName(category.value),
+					externalId: category.value.replace(/_/g, '').toLowerCase(),
+				}
+			})
+
+			// Fetch existing categories by externalId
+			let existingCategories = await projectCategoriesQueries.categoryDocuments(
+				{
+					externalId: { $in: formattedCategories.map((cat) => cat.externalId) },
+				}
+			)
+			const existingExternalIds = existingCategories.map((cat) => cat.externalId)
+
+			// Filter out categories that already exist
+			const newCategories = formattedCategories
+				.filter((cat) => !existingExternalIds.includes(cat.externalId))
+				.map(({ formattedName, externalId, label }) => ({
+					createdBy: CONSTANTS.common.SYSTEM,
+					updatedBy: CONSTANTS.common.SYSTEM,
+					isDeleted: false,
+					isVisible: true,
+					status: CONSTANTS.common.ACTIVE_STATUS,
+					icon: '',
+					noOfProjects: 0,
+					name: formattedName,
+					externalId: externalId,
+					label: label,
+					createdAt: new Date(),
+					updatedAt: new Date(),
+				}))
+
+			// Insert only new categories
+			if (newCategories.length > 0) {
+				const result = await projectCategoriesQueries.insertMany(newCategories)
+				newCategories.forEach((category, index) => {
+					category._id = result.insertedIds[index]
+					existingExternalIds.push(category.externalId)
+				})
+			}
+
+			// Map all categories to the response format
+			const processedCategories = formattedCategories.map((category) => {
+				const existing = existingCategories.find((cat) => cat.externalId === category.externalId)
+				if (existing) {
+					return {
+						_id: existing._id,
+						externalId: existing.externalId,
+						name: existing.name,
+					}
+				} else {
+					const newCategory = newCategories.find((cat) => cat.externalId === category.externalId)
+					return {
+						_id: newCategory._id,
+						externalId: newCategory.externalId,
+						name: newCategory.name,
+					}
+				}
+			})
+
+			return resolve({ success: true, categories: processedCategories })
+		} catch (error) {
+			return resolve({
+				success: false,
+				error: error.message || error,
+			})
+		}
+	})
+}
+
+/**
+ * Create Task
+ * @name createTasks
+ * @param {Object} tasks - task data
+ * @param {String} templateId - template Id
+ * @param {String} templateExternalId - template externaldId
+ * @param {String} parentId - parentId
+ * @returns {Object} - Response contains task data
+ */
+async function createTasks(tasks, templateId, templateExternalId, parentId = null) {
+	const result = { success: false, taskIds: [], externalIds: [], error: null }
+	try {
+		const taskIds = []
+		const externalIds = []
+
+		for (const task of tasks) {
+			// Format the task data
+			const taskData = {
+				name: task.name,
+				description: task.name,
+				externalId: generateExternalId(task.name),
+				type: task.type,
+				isDeleted: !task.is_mandatory,
+				isDeletable: !task.is_mandatory,
+				sequenceNumber: task.sequence_no,
+				projectTemplateId: templateId,
+				projectTemplateExternalId: templateExternalId,
+				hasSubTasks: task.children?.length > 0,
+				learningResources: convertResources(task.learning_resources || []),
+				parentId,
+				deleted: false,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			}
+
+			// Create the task
+			const taskCreationRes = await projectTemplateTaskQueries.createTemplateTask(taskData)
+			// Validate the insertion result
+			if (!taskCreationRes || !taskCreationRes.insertedId) {
+				result.error = `Failed to create task: ${task.name}`
+				return result
+			}
+
+			const taskId = taskCreationRes.insertedId
+			taskIds.push(taskId)
+			externalIds.push(taskData.externalId)
+
+			// Recursively handle child tasks
+			if (task.children?.length) {
+				const childTaskResult = await createTasks(task.children, templateId, templateExternalId, taskId)
+
+				// Validate the child task creation
+				if (!childTaskResult.success) {
+					result.error = `Failed to create child tasks for task: ${task.name}. Error: ${childTaskResult.error}`
+					return result
+				}
+
+				// Update task with child task sequence and children
+				await projectTemplateTaskQueries.updateTaskDocument(
+					{
+						_id: taskId,
+					},
+					{
+						$set: { children: childTaskResult.taskIds, taskSequence: childTaskResult.externalIds },
+					}
+				)
+			}
+		}
+
+		result.success = true
+		result.taskIds = taskIds
+		result.externalIds = externalIds
+		return result
+	} catch (error) {
+		console.error('Error in createTasks:', error.message)
+		result.error = `Failed to create tasks: ${error.message}`
+		return result
+	}
+}
+
+
+

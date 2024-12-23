@@ -227,4 +227,12 @@ module.exports = {
 		'View and participate in educational programs active in your location and designed for the role you selected',
 	USER_NOT_ALLOWED_TO_EDIT_PROJECT: 'User is not allowed to edit the project',
 	PROJECT_NOT_FOUND_OR_NOT_A_TARGETED: 'Project not targeted to the role',
+	FAILED_TO_FORMAT_TEMPLATE: 'Failed to format the data',
+	FAILED_TO_FETCH_OR_CREATE_CATEGORIES: 'Failed to create or find the categories',
+	FAILED_TO_CREATE_TEMPLATE: 'Failed to create the template',
+	FAILED_TO_CREATE_TASKS: 'Failed to create the tasks',
+	SCP_CALLBACK_FAILED: 'Callback failed',
+	PROJECT_TEMPLATES_CREATED: 'Template and Tasks Created Successfully',
+	FAILED_TO_UPDATE_TEMPLATE: 'Failed to update the template',
+	CATEGORY_SHOULD_HAVE_LABEL_AND_VALUE: 'Each category must have a label and a value.'
 }

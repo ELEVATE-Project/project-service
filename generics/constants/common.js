@@ -95,4 +95,6 @@ module.exports = {
 		users: [],
 		scope: {},
 	},
+	APP_ELEVATE_PROJECT:'elevate-project',
+	SYSTEM: 'SYSTEM'
 }

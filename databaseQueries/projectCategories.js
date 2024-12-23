@@ -121,4 +121,23 @@ module.exports = class ProjectCategories {
     });
   }
 
+   /**
+   * create project categories documents.
+   * @method
+   * @name insertMany
+   * @returns {Object} - Library project categories data.
+   */
+  static insertMany(dataArray) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            // Insert multiple documents into the collection
+            let insertedDocuments = await database.models.projectCategories.insertMany(dataArray);
+            return resolve(insertedDocuments);
+        } catch (error) {
+            return reject(error);
+        }
+    });
+}
+
+
 };

@@ -61,6 +61,5 @@ module.exports = {
 			type: Object,
 			default: {},
 		},
-		conversations: Array,
 	},
 }

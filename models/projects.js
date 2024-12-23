@@ -208,6 +208,7 @@ module.exports = {
 			default: {},
 		},
 		duration: String,
+		conversations: Array,
 	},
 	compoundIndex: [
 		{

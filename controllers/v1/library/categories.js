@@ -117,7 +117,11 @@ module.exports = class LibraryCategories extends Abstract {
 	async create(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				const libraryProjectcategory = await libraryCategoriesHelper.create(req.body, req.files)
+				const libraryProjectcategory = await libraryCategoriesHelper.create(
+					req.body,
+					req.files,
+					req.userDetails.userInformation.userId
+				)
 
 				return resolve({
 					message: libraryProjectcategory.message,
@@ -156,7 +160,12 @@ module.exports = class LibraryCategories extends Abstract {
 				const findQuery = {
 					_id: req.params._id,
 				}
-				const libraryProjectcategory = await libraryCategoriesHelper.update(findQuery, req.body, req.files)
+				const libraryProjectcategory = await libraryCategoriesHelper.update(
+					findQuery,
+					req.body,
+					req.files,
+					req.userDetails.userInformation.userId
+				)
 
 				return resolve({
 					message: libraryProjectcategory.message,

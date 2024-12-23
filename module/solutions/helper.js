@@ -130,7 +130,7 @@ module.exports = class SolutionsHelper {
 	 * @param {String} endDate - The end date of the program (in ISO format).
 	 * @param {String} [createdBy=''] - The name or identifier of the creator (optional, defaults to an empty string).
 	 * @param {Array<String>} [language=[]] - An array of languages associated with the program (optional, defaults to an empty array).
-	 * @param {Array<Object>} [conversation=[]] - An array representing conversation data related to the program (optional, defaults to an empty array).
+	 * @param {Array<Object>} [conversations=[]] - An array representing conversation data related to the program (optional, defaults to an empty array).
 	 * @param {Object} [source={}] - Additional source metadata related to the program (optional, defaults to an empty object).
 	 * @returns {Object} - An object containing the program creation data.
 	 */
@@ -146,7 +146,7 @@ module.exports = class SolutionsHelper {
 		endDate,
 		createdBy = '',
 		language = [],
-		conversation = [],
+		conversations = [],
 		source = {}
 	) {
 		let programData = {}
@@ -160,7 +160,7 @@ module.exports = class SolutionsHelper {
 		programData.startDate = startDate
 		programData.endDate = endDate
 		programData.language = language
-		programData.conversation = conversation
+		programData.conversations = conversations
 		programData.source = source
 		return programData
 	}

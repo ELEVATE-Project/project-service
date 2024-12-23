@@ -347,10 +347,11 @@ module.exports = class LibraryCategoriesHelper {
 	 * @param filterQuery - Filter query.
 	 * @param updateData - Update data.
 	 * @param files - files
+	 * @param userId - user id
 	 * @returns {Object} updated data
 	 */
 
-	static update(filterQuery, updateData, files) {
+	static update(filterQuery, updateData, files, userId) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let categoryData = await projectCategoriesQueries.categoryDocuments(
@@ -373,7 +374,7 @@ module.exports = class LibraryCategoriesHelper {
 					}
 				}
 
-				let evidenceUploadData = await handleEvidenceUpload(files)
+				let evidenceUploadData = await handleEvidenceUpload(files, userId)
 				evidenceUploadData = evidenceUploadData.data
 
 				// Update the sequence numbers
@@ -505,10 +506,11 @@ module.exports = class LibraryCategoriesHelper {
 	 * @name create
 	 * @param categoryData - categoryData.
 	 * @param files - files.
+	 * @param userId - user id.
 	 * @returns {Object} category details
 	 */
 
-	static create(categoryData, files) {
+	static create(categoryData, files, userId) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Check if the category already exists
@@ -533,7 +535,7 @@ module.exports = class LibraryCategoriesHelper {
 				}
 
 				// Fetch the signed urls from handleEvidenceUpload function
-				const evidences = await handleEvidenceUpload(files)
+				const evidences = await handleEvidenceUpload(files, userId)
 				categoryData['evidences'] = evidences.data
 
 				let projectCategoriesData = await projectCategoriesQueries.create(categoryData)
@@ -608,7 +610,7 @@ module.exports = class LibraryCategoriesHelper {
  * @returns {Array} returns evidences array
  */
 
-function handleEvidenceUpload(files) {
+function handleEvidenceUpload(files, userId) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			let evidences = []
@@ -632,7 +634,7 @@ function handleEvidenceUpload(files) {
 					requestData[uniqueId].files.push(file.name)
 				}
 
-				let signedUrl = await filesHelpers.preSignedUrls(requestData, '', false, 'cover_image')
+				let signedUrl = await filesHelpers.preSignedUrls(requestData, userId, false)
 
 				if (
 					signedUrl.data &&

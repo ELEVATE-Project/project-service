@@ -3009,11 +3009,10 @@ module.exports = class UserProjectsHelper {
 				) {
 					libraryProjects.data.startDate = new Date()
 					libraryProjects.data.endDate = UTILS.calculateEndDate(
-						libraryProjects.data.createdAt,
+						new Date(),
 						libraryProjects.data.metaInformation.duration
 					)
 				}
-
 				if (requestedData.startDate) {
 					libraryProjects.data.startDate = requestedData.startDate
 				}

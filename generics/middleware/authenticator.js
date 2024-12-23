@@ -124,6 +124,9 @@ module.exports = async function (req, res, next, token = '') {
 				decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
 			} catch (err) {
 				// If verification fails, send an unauthorized response
+				rspObj.errCode = CONSTANTS.apiResponses.TOKEN_MISSING_CODE
+				rspObj.errMsg = CONSTANTS.apiResponses.TOKEN_MISSING_MESSAGE
+				rspObj.responseCode = HTTP_STATUS_CODE['unauthorized'].status
 				return res.status(HTTP_STATUS_CODE['unauthorized'].status).send(respUtil(rspObj))
 			}
 		} else if (process.env.AUTH_METHOD === CONSTANTS.common.AUTH_METHOD.KEYCLOAK_PUBLIC_KEY) {
@@ -137,6 +140,9 @@ module.exports = async function (req, res, next, token = '') {
 
 			if (!tokenClaims || !tokenClaims.header) {
 				// If the token does not contain valid claims or header, send an unauthorized response
+				rspObj.errCode = CONSTANTS.apiResponses.TOKEN_MISSING_CODE
+				rspObj.errMsg = CONSTANTS.apiResponses.TOKEN_MISSING_MESSAGE
+				rspObj.responseCode = HTTP_STATUS_CODE['unauthorized'].status
 				return res.status(HTTP_STATUS_CODE['unauthorized'].status).send(respUtil(rspObj))
 			}
 
@@ -160,7 +166,9 @@ module.exports = async function (req, res, next, token = '') {
 			} catch (err) {
 				// If the token is expired or any other error occurs during verification
 				if (err.name === 'TokenExpiredError') {
-					console.error(err)
+					rspObj.errCode = CONSTANTS.apiResponses.TOKEN_INVALID_CODE
+					rspObj.errMsg = CONSTANTS.apiResponses.TOKEN_INVALID_MESSAGE
+					rspObj.responseCode = HTTP_STATUS_CODE['unauthorized'].status
 					return res.status(HTTP_STATUS_CODE['unauthorized'].status).send(respUtil(rspObj))
 				}
 			}
@@ -180,9 +188,15 @@ module.exports = async function (req, res, next, token = '') {
 			decodedToken['data'] = data
 		}
 	} catch (err) {
+		rspObj.errCode = CONSTANTS.apiResponses.TOKEN_MISSING_CODE
+		rspObj.errMsg = CONSTANTS.apiResponses.TOKEN_MISSING_MESSAGE
+		rspObj.responseCode = HTTP_STATUS_CODE['unauthorized'].status
 		return res.status(HTTP_STATUS_CODE['unauthorized'].status).send(respUtil(rspObj))
 	}
 	if (!decodedToken) {
+		rspObj.errCode = CONSTANTS.apiResponses.TOKEN_MISSING_CODE
+		rspObj.errMsg = CONSTANTS.apiResponses.TOKEN_MISSING_MESSAGE
+		rspObj.responseCode = HTTP_STATUS_CODE['unauthorized'].status
 		return res.status(HTTP_STATUS_CODE['unauthorized'].status).send(respUtil(rspObj))
 	}
 
@@ -220,7 +234,7 @@ module.exports = async function (req, res, next, token = '') {
 	// performing default token data extraction
 	if (defaultTokenExtraction) {
 		userInformation = {
-			userId: decodedToken.data.id.toString(),
+			userId: typeof decodedToken.data.id == 'string' ? decodedToken.data.id : decodedToken.data.id.toString(),
 			userName: decodedToken.data.name,
 			organizationId: decodedToken.data.organization_id,
 			firstName: decodedToken.data.name,

@@ -670,7 +670,6 @@ module.exports = class UserProjectsHelper {
 						programData.endDate ? programData.endDate : endDate,
 						userId,
 						programData.language ? programData.language : [],
-						programData.conversations ? programData.conversations : [],
 						[],
 						programData.source ? programData.source : {}
 					)

@@ -9,10 +9,20 @@
 const request = require('request')
 
 // Function to callback to SCP service
+/**
+ *
+ * @function
+ * @name resourcePublishCallBack
+ * @param {String} callBackUrl -  Call back url
+ * @param {String} resourceId -  resource id
+ * @param {String} templateId -  template id
+ * @returns {Promise} returns a promise.
+ */
 const resourcePublishCallBack = function (callBackUrl, resourceId, templateId) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			// Construct the URL for the user service
+			//sample url http://localhost:6001/scp/v1/resource/publishCallback
 			const url = `${callBackUrl}?resource_id=${resourceId}&published_id=${templateId.toString()}`
 
 			// Set the options for the HTTP POST request

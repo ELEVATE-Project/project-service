@@ -1650,21 +1650,6 @@ const convertResources = (resources) =>
 		}))
 
 /**
- * Generate externalId from title
- * @name generateExternalId
- * @param {String} title - title
- * @returns {String} - ExternalId
- */
-
-function generateExternalId(title) {
-	console.log(title, 'title')
-	const words = title.split(/[\s-]+/)
-	const abbreviation = words.map((word) => (word[0] || '').toUpperCase()).join('')
-	const uniqueSuffix = Date.now()
-	return `${abbreviation}-${uniqueSuffix}`
-}
-
-/**
  * Assign sequence number for task
  * @name assignSequenceNumbers
  * @returns {Object} - Response contains task object
@@ -1691,19 +1676,6 @@ const assignSequenceNumbers = (tasks) => {
 	// })
 }
 
-/**
- * Format category Name
- * @name formatCategoriesName
- * @param {String} value - category
- * @returns {String} - Category
- */
-function formatCategoriesName(value) {
-	return value
-		.replace(/_/g, ' ') // Replace underscores with spaces
-		.replace(/\b\w/g, (char) => char.toUpperCase()) // Capitalize the first letter of each word
-		.trim() // Ensure no leading or trailing spaces
-}
-
 const _formatTemplate = (templateData) => {
 	try {
 		let template = {
@@ -1725,7 +1697,7 @@ const _formatTemplate = (templateData) => {
 			taskSequence: [], // Initially empty
 			deleted: false,
 			status: CONSTANTS.common.PUBLISHED_STATUS,
-			externalId: generateExternalId(templateData.title),
+			externalId: UTILS.generateExternalId(templateData.title),
 			entityType: '',
 			metaInformation: {
 				goal: '',
@@ -1765,7 +1737,7 @@ function _getOrCreateCategories(categories) {
 				return {
 					label: category.label,
 					value: category.value,
-					formattedName: formatCategoriesName(category.value),
+					formattedName: UTILS.formatToTitleCase(category.value),
 					externalId: category.value.replace(/_/g, '').toLowerCase(),
 				}
 			})
@@ -1852,7 +1824,7 @@ async function createTasks(tasks, templateId, templateExternalId, parentId = nul
 			const taskData = {
 				name: task.name,
 				description: task.name,
-				externalId: generateExternalId(task.name),
+				externalId: UTILS.generateExternalId(task.name),
 				type: task.type,
 				isDeleted: !task.is_mandatory,
 				isDeletable: !task.is_mandatory,

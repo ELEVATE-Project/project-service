@@ -752,6 +752,33 @@ function calculateEndDate(createdDate, durationString) {
 	}
 }
 
+/**
+ * Generate externalId from title
+ * @name generateExternalId
+ * @param {String} title - title
+ * @returns {String} - ExternalId
+ */
+
+function generateExternalId(title) {
+	const words = title.split(/[\s-]+/)
+	const abbreviation = words.map((word) => (word[0] || '').toUpperCase()).join('')
+	const uniqueSuffix = Date.now()
+	return `${abbreviation}-${uniqueSuffix}`
+}
+
+/**
+ * Format category Name
+ * @name formatToTitleCase
+ * @param {String} value - category
+ * @returns {String} - Category
+ */
+function formatToTitleCase(value) {
+	return value
+		.replace(/_/g, ' ') // Replace underscores with spaces
+		.replace(/\b\w/g, (char) => char.toUpperCase()) // Capitalize the first letter of each word
+		.trim() // Ensure no leading or trailing spaces
+}
+
 module.exports = {
 	camelCaseToTitleCase: camelCaseToTitleCase,
 	lowerCase: lowerCase,
@@ -786,4 +813,6 @@ module.exports = {
 	arrayOfObjectToArrayOfObjectId: arrayOfObjectToArrayOfObjectId,
 	getTranslatedData: getTranslatedData,
 	calculateEndDate: calculateEndDate,
+	generateExternalId,
+	formatToTitleCase,
 }

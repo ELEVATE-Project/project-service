@@ -1237,7 +1237,7 @@ module.exports = class ProjectTemplatesHelper {
 					template.categories = categoriesResponse.categories
 				}
 
-				// Save the template
+				// Create the template
 				const createTemplate = await projectTemplateQueries.createTemplate(template)
 				if (!createTemplate._id) {
 					throw {
@@ -1248,7 +1248,7 @@ module.exports = class ProjectTemplatesHelper {
 
 				const { _id: templateId, externalId: templateExternalId } = createTemplate;
 
-				// Assign Sequence Numbers and Save Tasks
+				// Assign Sequence Numbers and Create Tasks
 				const processedTasks = assignSequenceNumbers(templateAndTaskData.tasks || [])
 				const taskCreationResponse = await createTasks(processedTasks, templateId, templateExternalId)
 				if (!taskCreationResponse.success) {
@@ -1277,13 +1277,11 @@ module.exports = class ProjectTemplatesHelper {
 				}
 	
 				// Trigger callback url for updating the template id in scp
-				if (callBackUrl) {
-					let callBackResponse = await scpService.resourcePublishCallBack(callBackUrl, templateAndTaskData.id, templateId)
-					if (!callBackResponse.success){
-						throw {
-							message: CONSTANTS.apiResponses.SCP_CALLBACK_FAILED,
-							status: HTTP_STATUS_CODE.bad_request.status,
-						}
+				let callBackResponse = await scpService.resourcePublishCallBack(callBackUrl, templateAndTaskData.id, templateId)
+				if (!callBackResponse.success){
+					throw {
+						message: CONSTANTS.apiResponses.SCP_CALLBACK_FAILED,
+						status: HTTP_STATUS_CODE.bad_request.status,
 					}
 				}
 

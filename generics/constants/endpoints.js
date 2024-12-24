@@ -60,5 +60,4 @@ module.exports = {
 	FIND_ENTITY_TYPE_DOCUMENTS: '/v1/entityTypes/find',
 	ORGANIZATION_READ: '/v1/organization/read',
 	AUTO_DOWNLOAD: '/v1/cloud-services/files/download',
-	SCP_RESOURCE_PUBLISH_CALLBACK_URL: '/v1/resoource/publishCallback',
 }

@@ -8,7 +8,7 @@
 //dependencies
 const request = require('request')
 
-// Function to read the user profile based on the given userId
+// Function to callback to SCP service
 const resourcePublishCallBack = function (callBackUrl, resourceId, templateId) {
 	return new Promise(async (resolve, reject) => {
 		try {

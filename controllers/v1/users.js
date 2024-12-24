@@ -142,6 +142,7 @@ module.exports = class Users {
 	 * @param {String} req.pageSize - pageSize
 	 * @param {String} req.searchText - searchText
 	 * @param {String} req.query.isAPrivateProgram - isAPrivateProgram
+	 * @param {String} req.query.getProjectsCount - getProjectsCount under the program
 	 * @returns {Object} list of targeted user programs.
 	 */
 
@@ -149,9 +150,16 @@ module.exports = class Users {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let isAPrivateProgram = UTILS.convertStringToBoolean(req.query.isAPrivateProgram)
+				req.query.getProjectsCount = UTILS.convertStringToBoolean(req.query.getProjectsCount)
 
 				if (isAPrivateProgram) {
-					let programsData = await usersHelper.privatePrograms(req.userDetails.userInformation.userId)
+					let programsData = await usersHelper.privatePrograms(
+						req.userDetails.userInformation.userId,
+						req.query.language ? req.query.language : '',
+						req.query.getProjectsCount ? req.query.getProjectsCount : false,
+						req.pageNo,
+						req.pageSize
+					)
 					return resolve(programsData)
 				} else {
 					let programs = await usersHelper.programs(

@@ -58,6 +58,7 @@ module.exports = {
 	IS_TARGETED_BASED_ON_USER_PROFILE: '/v1/solutions/isTargetedBasedOnUserProfile',
 	FIND_ENTITY_DOCUMENTS: '/v1/entities/find',
 	FIND_ENTITY_TYPE_DOCUMENTS: '/v1/entityTypes/find',
+	FIND_USER_ROLE_EXTENSION_DOCUMENTS: '/v1/userRoleExtension/find',
 	ORGANIZATION_READ: '/v1/organization/read',
 	AUTO_DOWNLOAD: '/v1/cloud-services/files/download',
 }

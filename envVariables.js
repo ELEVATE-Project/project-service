@@ -136,10 +136,6 @@ let enviromentVariables = {
 		message: 'Required specification: If auth token is bearer or not',
 		optional: true,
 		default: false,
-	},
-	SCP_SERVICE_BASE_URL: {
-		message: 'SCP service url required',
-		optional: false,
 	}
 }
 

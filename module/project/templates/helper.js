@@ -1239,7 +1239,7 @@ module.exports = class ProjectTemplatesHelper {
 
 				// Save the template
 				const createTemplate = await projectTemplateQueries.createTemplate(template)
-				if (!createTemplate.success) {
+				if (!createTemplate._id) {
 					throw {
 						message: CONSTANTS.apiResponses.FAILED_TO_CREATE_TEMPLATE,
 						status: HTTP_STATUS_CODE.bad_request.status,
@@ -1291,7 +1291,7 @@ module.exports = class ProjectTemplatesHelper {
 				return resolve({
 					success: true,
 					message: CONSTANTS.apiResponses.PROJECT_TEMPLATES_CREATED,
-					data: {
+					result: {
 						_id: templateId
 					},
 				})
@@ -1555,7 +1555,6 @@ const _formatTemplate = (templateData) => {
 
 		return { success: true, template }
 	} catch (error) {
-		console.error('Error in formatTemplate:', error.message)
 		return { success: false, error: error.message }
 	}
 }
@@ -1569,7 +1568,6 @@ const _formatTemplate = (templateData) => {
 function _getOrCreateCategories(categories) {
 	return new Promise(async (resolve, reject) => {
 		try {
-
 			// Format categories
 			const formattedCategories = categories.map((category) => {
 				if (!category.label || !category.value) {
@@ -1689,12 +1687,12 @@ async function createTasks(tasks, templateId, templateExternalId, parentId = nul
 			// Create the task
 			const taskCreationRes = await projectTemplateTaskQueries.createTemplateTask(taskData)
 			// Validate the insertion result
-			if (!taskCreationRes || !taskCreationRes.insertedId) {
+			if (!taskCreationRes._id) {
 				result.error = `Failed to create task: ${task.name}`
 				return result
 			}
 
-			const taskId = taskCreationRes.insertedId
+			const taskId = taskCreationRes._id
 			taskIds.push(taskId)
 			externalIds.push(taskData.externalId)
 
@@ -1725,7 +1723,6 @@ async function createTasks(tasks, templateId, templateExternalId, parentId = nul
 		result.externalIds = externalIds
 		return result
 	} catch (error) {
-		console.error('Error in createTasks:', error.message)
 		result.error = `Failed to create tasks: ${error.message}`
 		return result
 	}

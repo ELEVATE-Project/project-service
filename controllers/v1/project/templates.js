@@ -853,8 +853,8 @@ module.exports = class ProjectTemplates extends Abstract {
 			try {
 
 				const response = await projectTemplatesHelper.publishTemplateAndTask(
-					req.body,
-					req.query.callBackUrl
+					req.body.data,
+					req.body.callBackUrl
 				)
 
 				return resolve(response)

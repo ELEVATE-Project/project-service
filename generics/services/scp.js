@@ -7,20 +7,19 @@
 
 //dependencies
 const request = require('request')
-const interfaceServiceUrl = process.env.INTERFACE_SERVICE_URL
 
 // Function to read the user profile based on the given userId
 const resourcePublishCallBack = function (callBackUrl, resourceId, templateId) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			// Construct the URL for the user service
-			const url = `${callBackUrl}?resource_id=${resourceId}&published_id=${templateId}`;
+			const url = `${callBackUrl}?resource_id=${resourceId}&published_id=${templateId.toString()}`;
 	
 			// Set the options for the HTTP POST request
 			const options = {
 				headers : {
 					"content-type": "application/json",
-					"internal-access-token": process.env.INTERNAL_ACCESS_TOKEN,
+					"internal_access_token": process.env.INTERNAL_ACCESS_TOKEN,
 				},
 			}
 

@@ -143,4 +143,6 @@ module.exports = {
 		NATIVE: 'native',
 		KEYCLOAK_PUBLIC_KEY: 'keycloak_public_key',
 	},
+	APP_ELEVATE_PROJECT: 'elevate-project',
+	SYSTEM: 'SYSTEM',
 }

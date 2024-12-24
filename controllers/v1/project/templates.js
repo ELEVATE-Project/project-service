@@ -830,4 +830,41 @@ module.exports = class ProjectTemplates extends Abstract {
 			}
 		})
 	}
+
+	/**
+    * @description          - Publish the Template and Task from SCP
+    * @method
+    * @name                 - publishTemplateAndTask
+    * @param {Object} req   - request data.
+    * @returns {Object}      - Template data.
+    * @apiParamExample {json} Response:
+    * {
+            "message": "Template and Tasks Created Successfully",
+            "status": 200,
+            "result": [
+                {
+                    "_id": "64b529375bfa678a0f257936"
+                }
+            ]
+        }
+    */
+
+	async publishTemplateAndTask(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				const response = await projectTemplatesHelper.publishTemplateAndTask(
+					req.body.data,
+					req.body.callBackUrl
+				)
+
+				return resolve(response)
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
+				})
+			}
+		})
+	}
 }

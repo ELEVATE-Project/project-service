@@ -5,120 +5,112 @@
  * Description : Project categories helper for DB interactions.
  */
 
-// Dependencies 
+// Dependencies
 
 /**
-    * ProjectCategories
-    * @class
-*/
+ * ProjectCategories
+ * @class
+ */
 
 module.exports = class ProjectCategories {
+	/**
+	 * Library project categories documents.
+	 * @method
+	 * @name categoryDocuments
+	 * @param {Object} [findQuery = "all"] - filtered data.
+	 * @param {Array} [fields = "all"] - projected data.
+	 * @param {Array} [skipFields = "none"] - fields to skip.
+	 * @returns {Array} - Library project categories data.
+	 */
 
-      /**
-   * Library project categories documents.
-   * @method
-   * @name categoryDocuments
-   * @param {Object} [findQuery = "all"] - filtered data.
-   * @param {Array} [fields = "all"] - projected data.
-   * @param {Array} [skipFields = "none"] - fields to skip.
-   * @returns {Array} - Library project categories data.
-   */
+	static categoryDocuments(findQuery = 'all', fields = 'all', skipFields = 'none') {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let queryObject = {}
 
-  static categoryDocuments(
-    findQuery = "all", 
-    fields = "all",
-    skipFields = "none"
-  ) {
-      return new Promise(async (resolve, reject) => {
-        
-        try {
-          
-          let queryObject = {};
+				if (findQuery != 'all') {
+					queryObject = findQuery
+				}
 
-          if (findQuery != "all") {
-              queryObject = findQuery;
-          }
+				let projection = {}
 
-          let projection = {};
+				if (fields != 'all') {
+					fields.forEach((element) => {
+						projection[element] = 1
+					})
+				}
 
-          if (fields != "all") {
-              fields.forEach(element => {
-                  projection[element] = 1;
-              });
-          }
+				if (skipFields != 'none') {
+					skipFields.forEach((element) => {
+						projection[element] = 0
+					})
+				}
 
-          if (skipFields != "none") {
-              skipFields.forEach(element => {
-                  projection[element] = 0;
-              });
-          }
+				let projectCategoriesData = await database.models.projectCategories.find(queryObject, projection).lean()
 
-          let projectCategoriesData = 
-          await database.models.projectCategories.find(
-            queryObject, 
-            projection
-          ).lean();
-          
-          return resolve(projectCategoriesData);
+				return resolve(projectCategoriesData)
+			} catch (error) {
+				return reject(error)
+			}
+		})
+	}
 
-      } catch (error) {
-          return reject(error);
-        }
-      });
-    }
+	/**
+	 * update Many project categories documents.
+	 * @method
+	 * @name updateMany
+	 * @param {Object} [filterQuery] - filtered Query.
+	 * @param {Object} [updateData] - update data.
+	 * @returns {Array} - Library project categories data.
+	 */
 
-      /**
-   * update Many project categories documents.
-   * @method
-   * @name updateMany
-   * @param {Object} [filterQuery] - filtered Query.
-   * @param {Object} [updateData] - update data.
-   * @returns {Array} - Library project categories data.
-   */
+	static updateMany(filterQuery, updateData) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let updatedCategories = await database.models.projectCategories.updateMany(filterQuery, updateData)
 
-  static updateMany(filterQuery, updateData) {
-      return new Promise(async (resolve, reject) => {
-        
-        try {
-          
-          let updatedCategories = 
-                await database.models.projectCategories.updateMany(
-                    filterQuery,
-                    updateData
-                );
-          
-          return resolve(updatedCategories);
+				return resolve(updatedCategories)
+			} catch (error) {
+				return reject(error)
+			}
+		})
+	}
 
-      } catch (error) {
-          return reject(error);
-        }
-      });
-    }
+	/**
+	 * create project categories documents.
+	 * @method
+	 * @name create
+	 * @param {Object} [filterQuery] - filtered Query.
+	 * @returns {Object} - Library project categories data.
+	 */
 
-    /**
-   * create project categories documents.
-   * @method
-   * @name create
-   * @param {Object} [filterQuery] - filtered Query.
-   * @returns {Object} - Library project categories data.
-   */
+	static create(filterQuery) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let createdProjectCategory = await database.models.projectCategories.create(filterQuery)
 
-  static create(filterQuery) {
-    return new Promise(async (resolve, reject) => {
-      
-      try {
-        
-        let createdProjectCategory = 
-              await database.models.projectCategories.create(
-                  filterQuery
-              );
-        
-        return resolve(createdProjectCategory);
+				return resolve(createdProjectCategory)
+			} catch (error) {
+				return reject(error)
+			}
+		})
+	}
 
-    } catch (error) {
-        return reject(error);
-      }
-    });
-  }
-
-};
+	/**
+	 * create project categories documents.
+	 * @method
+	 * @name insertMany
+	 * @returns {Object} - Library project categories data.
+	 */
+	static insertMany(dataArray) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				// Insert multiple documents into the collection
+				let insertedDocuments = await database.models.projectCategories.insertMany(dataArray)
+				return resolve(insertedDocuments)
+			} catch (error) {
+				return reject(error)
+			}
+		})
+	}
+}

@@ -779,6 +779,50 @@ function formatToTitleCase(value) {
 		.trim() // Ensure no leading or trailing spaces
 }
 
+/**
+ * Format keywords
+ * @param {Array|String} keywords - Keywords
+ * @returns {Array} - Formatted keywords
+ */
+function formatKeywords(keywords) {
+	if (Array.isArray(keywords)) return keywords.map((k) => k.trim())
+	if (typeof keywords === 'string') return keywords.split(',').map((k) => k.trim())
+	return []
+}
+
+/**
+ * Format meta-information
+ * @param {Object} templateData - Template data
+ * @returns {Object} - Meta-information
+ */
+function formatMetaInformation(templateData) {
+	return {
+		duration: `${templateData.recommended_duration.number} ${templateData.recommended_duration.duration}`,
+		goal: '',
+		rationale: '',
+		primaryAudience: '',
+		successIndicators: '',
+		risks: '',
+		approaches: '',
+	}
+}
+
+/**
+ * Convert Learning Resource
+ * @name convertResources
+ * @param {Array} resources - learning resource data
+ * @returns {Object} - Response contains formatted learning resource
+ */
+const convertResources = (resources) =>
+	resources
+		.filter((resource) => resource.url) // Ensure `url` exists
+		.map((resource) => ({
+			name: resource.name || 'resource',
+			link: resource.url,
+			app: CONSTANTS.common.APP_ELEVATE_PROJECT,
+			id: resource.url.split('/').pop(), // Extract the last part of the URL
+		}))
+
 module.exports = {
 	camelCaseToTitleCase: camelCaseToTitleCase,
 	lowerCase: lowerCase,
@@ -815,4 +859,7 @@ module.exports = {
 	calculateEndDate: calculateEndDate,
 	generateExternalId,
 	formatToTitleCase,
+	formatKeywords,
+	formatMetaInformation,
+	convertResources,
 }

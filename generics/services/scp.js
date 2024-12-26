@@ -19,7 +19,7 @@ const request = require('request')
  * @returns {Promise} returns a promise.
  */
 const resourcePublishCallBack = function (callBackUrl, resourceId, templateId) {
-	// Construct the URL for the user service
+	// Construct the URL for the scp service
 	const url = `${callBackUrl}?resource_id=${resourceId}&published_id=${templateId.toString()}`
 
 	return new Promise((resolve, reject) => {
@@ -40,7 +40,7 @@ const resourcePublishCallBack = function (callBackUrl, resourceId, templateId) {
 					result.success = false
 				} else {
 					let response = JSON.parse(data.body)
-					if (response.status === HTTP_STATUS_CODE['ok'].status) {
+					if (response.responseCode === HTTP_STATUS_CODE['ok'].code) {
 						result['data'] = response.result
 					} else {
 						result.success = false

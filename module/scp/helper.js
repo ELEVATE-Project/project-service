@@ -112,7 +112,6 @@ module.exports = class ScpHelper {
 					},
 				})
 			} catch (error) {
-				console.log(error, 'errrrrrrrrrr')
 				// If an error occurs, resolve the promise with failure and error data.
 				return resolve({
 					success: false,

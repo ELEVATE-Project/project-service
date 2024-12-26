@@ -16,7 +16,7 @@ const scpService = require(GENERICS_FILES_PATH + '/services/scp')
  * @class
  */
 
-module.exports = class ReportsHelper {
+module.exports = class ScpHelper {
 	/**
 	 * Publish Template and Task
 	 * @name publishTemplateAndTasks
@@ -112,11 +112,12 @@ module.exports = class ReportsHelper {
 					},
 				})
 			} catch (error) {
+				console.log(error, 'errrrrrrrrrr')
 				// If an error occurs, resolve the promise with failure and error data.
 				return resolve({
 					success: false,
 					message: error.message,
-					data: [],
+					result: [],
 				})
 			}
 		})
@@ -291,7 +292,7 @@ function _getOrCreateCategories(categories) {
  * @returns {Object} - Response contains task data
  */
 async function createTasks(tasks, templateId, templateExternalId, parentId = null) {
-	const result = { success: false, taskIds: [], externalIds: [], error: null }
+	let result = { success: false, taskIds: [], externalIds: [], error: null }
 	try {
 		const taskIds = []
 		const externalIds = []

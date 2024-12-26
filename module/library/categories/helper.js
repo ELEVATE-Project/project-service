@@ -192,6 +192,7 @@ module.exports = class LibraryCategoriesHelper {
 							categories: 1,
 							metaInformation: 1,
 							recommendedFor: 1,
+							evidences: 1,
 						},
 					},
 					{
@@ -213,14 +214,25 @@ module.exports = class LibraryCategoriesHelper {
 				let result = await projectTemplateQueries.getAggregate(aggregateData)
 
 				if (result[0].data.length > 0) {
-					result[0].data.forEach((resultedData) => {
+					for (const resultedData of result[0].data) {
+						// add as new if its created within 7 days
 						let timeDifference = moment().diff(moment(resultedData.createdAt), 'days')
-
 						resultedData.new = false
 						if (timeDifference <= 7) {
 							resultedData.new = true
 						}
-					})
+						// Process evidences
+						if (resultedData.evidences && resultedData.evidences.length > 0) {
+							for (const eachEvidence of resultedData.evidences) {
+								try {
+									const downloadableUrl = await filesHelpers.getDownloadableUrl([eachEvidence.link])
+									eachEvidence.link = downloadableUrl.result[0].url
+								} catch (error) {
+									console.error('Error fetching downloadable URL:', error)
+								}
+							}
+						}
+					}
 				}
 
 				let projectTemplates = result[0].data

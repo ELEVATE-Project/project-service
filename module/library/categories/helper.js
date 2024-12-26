@@ -226,7 +226,7 @@ module.exports = class LibraryCategoriesHelper {
 							for (const eachEvidence of resultedData.evidences) {
 								try {
 									const downloadableUrl = await filesHelpers.getDownloadableUrl([eachEvidence.link])
-									eachEvidence.link = downloadableUrl.result[0].url
+									eachEvidence.downloadableUrl = downloadableUrl.result[0].url
 								} catch (error) {
 									console.error('Error fetching downloadable URL:', error)
 								}

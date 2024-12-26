@@ -752,6 +752,77 @@ function calculateEndDate(createdDate, durationString) {
 	}
 }
 
+/**
+ * Generate externalId from title
+ * @name generateExternalId
+ * @param {String} title - title
+ * @returns {String} - ExternalId
+ */
+
+function generateExternalId(title) {
+	const words = title.split(/[\s-]+/)
+	const abbreviation = words.map((word) => (word[0] || '').toUpperCase()).join('')
+	const uniqueSuffix = Date.now()
+	return `${abbreviation}-${uniqueSuffix}`
+}
+
+/**
+ * Format category Name
+ * @name formatToTitleCase
+ * @param {String} value - category
+ * @returns {String} - Category
+ */
+function formatToTitleCase(value) {
+	return value
+		.replace(/_/g, ' ') // Replace underscores with spaces
+		.replace(/\b\w/g, (char) => char.toUpperCase()) // Capitalize the first letter of each word
+		.trim() // Ensure no leading or trailing spaces
+}
+
+/**
+ * Format keywords
+ * @param {Array|String} keywords - Keywords
+ * @returns {Array} - Formatted keywords
+ */
+function formatKeywords(keywords) {
+	if (Array.isArray(keywords)) return keywords.map((k) => k.trim())
+	if (typeof keywords === 'string') return keywords.split(',').map((k) => k.trim())
+	return []
+}
+
+/**
+ * Format meta-information
+ * @param {Object} templateData - Template data
+ * @returns {Object} - Meta-information
+ */
+function formatMetaInformation(templateData) {
+	return {
+		duration: `${templateData.recommended_duration.number} ${templateData.recommended_duration.duration}`,
+		goal: '',
+		rationale: '',
+		primaryAudience: '',
+		successIndicators: '',
+		risks: '',
+		approaches: '',
+	}
+}
+
+/**
+ * Convert Learning Resource
+ * @name convertResources
+ * @param {Array} resources - learning resource data
+ * @returns {Object} - Response contains formatted learning resource
+ */
+const convertResources = (resources) =>
+	resources
+		.filter((resource) => resource.url) // Ensure `url` exists
+		.map((resource) => ({
+			name: resource.name || 'resource',
+			link: resource.url,
+			app: CONSTANTS.common.APP_ELEVATE_PROJECT,
+			id: resource.url.split('/').pop(), // Extract the last part of the URL
+		}))
+
 module.exports = {
 	camelCaseToTitleCase: camelCaseToTitleCase,
 	lowerCase: lowerCase,
@@ -786,4 +857,9 @@ module.exports = {
 	arrayOfObjectToArrayOfObjectId: arrayOfObjectToArrayOfObjectId,
 	getTranslatedData: getTranslatedData,
 	calculateEndDate: calculateEndDate,
+	generateExternalId,
+	formatToTitleCase,
+	formatKeywords,
+	formatMetaInformation,
+	convertResources,
 }

@@ -29,7 +29,6 @@ const programQueries = require(DB_QUERY_BASE_PATH + '/programs')
 const evidencesHelper = require(MODULES_BASE_PATH + '/evidences/helper')
 const userExtensionQueries = require(DB_QUERY_BASE_PATH + '/userExtension')
 const filesHelpers = require(MODULES_BASE_PATH + '/cloud-services/files/helper')
-
 module.exports = class ProjectTemplatesHelper {
 	/**
 	 * Extract csv information.

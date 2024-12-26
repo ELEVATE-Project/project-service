@@ -19,13 +19,11 @@ const request = require('request')
  * @returns {Promise} returns a promise.
  */
 const resourcePublishCallBack = function (callBackUrl, resourceId, templateId) {
-	return new Promise(async (resolve, reject) => {
-		try {
-			// Construct the URL for the user service
-			//sample url http://localhost:6001/scp/v1/resource/publishCallback
-			const url = `${callBackUrl}?resource_id=${resourceId}&published_id=${templateId.toString()}`
+	// Construct the URL for the user service
+	const url = `${callBackUrl}?resource_id=${resourceId}&published_id=${templateId.toString()}`
 
-			// Set the options for the HTTP POST request
+	return new Promise((resolve, reject) => {
+		try {
 			const options = {
 				headers: {
 					'content-type': 'application/json',
@@ -33,16 +31,16 @@ const resourcePublishCallBack = function (callBackUrl, resourceId, templateId) {
 				},
 			}
 
-			request.post(url, options, scpPublishCallback)
-			let result = {
-				success: true,
-			}
-			function scpPublishCallback(err, data) {
+			const scpCallBack = function (err, data) {
+				let result = {
+					success: true,
+				}
+
 				if (err) {
 					result.success = false
 				} else {
 					let response = JSON.parse(data.body)
-					if (response.responseCode === HTTP_STATUS_CODE['ok'].code) {
+					if (response.status === HTTP_STATUS_CODE['ok'].status) {
 						result['data'] = response.result
 					} else {
 						result.success = false
@@ -50,13 +48,8 @@ const resourcePublishCallBack = function (callBackUrl, resourceId, templateId) {
 				}
 				return resolve(result)
 			}
-			setTimeout(function () {
-				return resolve(
-					(result = {
-						success: false,
-					})
-				)
-			}, CONSTANTS.common.SERVER_TIME_OUT)
+
+			request.get(url, options, scpCallBack)
 		} catch (error) {
 			return reject(error)
 		}

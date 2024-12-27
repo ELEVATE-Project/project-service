@@ -10462,7 +10462,7 @@ paths:
         * This is a mandatory parameter and cannot be empty or null.
   /v1/projectAttributes/create:
     post:
-      summary: To create project attributes
+      summary: To create project attributes(Filters)
       description: >-
         This endpoint allows the user to create project attributes.The request
         requires authentication tokens in the headers.
@@ -10528,10 +10528,10 @@ paths:
                     message: Bad request
   /v1/projectAttributes/update?code={duration}&language={code}:
     post:
-      summary: To update project attributes
+      summary: To update project attributes(Filters)
       description: >-
-        This endpoint allows the user to update project attributes.The request
-        requires authentication tokens in the headers and code in the query
+        This endpoint allows the user to update project attributes(filters).The request
+        requires authentication tokens in the headers and code in the query and you are updating `translation data` then `languagecode` also requried
         params.
 
 
@@ -10541,6 +10541,14 @@ paths:
         `required`
 
         * This is a mandatory parameter and cannot be empty or null.
+
+        * This API have `two` types of `request body`(added in sample)-one for `translating data` and another for updating the `content configuration`—it's important to clearly define their structure, validation, and processing.
+
+
+
+        * NOTE:
+          `When updating translations data, make sure to provide translations for all the data fields in all supported languages. If any translations are missing, the API will only return the fields you have provided, which may result in incomplete data.`
+
       operationId: ''
       tags:
         - projectAttributes
@@ -10625,28 +10633,46 @@ paths:
                           - lable
                           - value
             examples:
-              sampleBodyData:
+              sampleBodyData(For Translation data):
                 value:
                   translateData:
                     name: अवधि
                     data:
                       - label: 1 सप्ताह
-                        value: 1 Week
+                        value: 1 week
                       - label: 2 सप्ताह
-                        value: 2 Week
+                        value: 2 week
                       - label: 3 सप्ताह
-                        value: 3 Week
+                        value: 3 week
                       - label: 4 सप्ताह
-                        value: 4 Week
+                        value: 4 week
                       - label: 5 सप्ताह
-                        value: 5 Week
+                        value: 5 week
                       - label: 6 सप्ताह
-                        value: 6 Week
+                        value: 6 week
                       - label: 6 सप्ताह से अधिक
                         value: More than 6 weeks
+              sampleBodyData(For Config data):
+                value:
+                  data:
+                    - label: 1 week
+                      value: 1 week
+                    - label: 2 week
+                      value: 2 week
+                    - label: 3 week
+                      value: 3 week
+                    - label: 4 week
+                      value: 4 week
+                    - label: 5 week
+                      value: 5 week
+                    - label: 6 week
+                      value: 6 week
+                    - label: 6 More thann 6 weeks
+                      value: More than 6 weeks
+
   /v1/projectAttributes/find?language={code}:
     get:
-      summary: To find project attributes
+      summary: To find project attributes(Filters)
       description: >-
         This endpoint allows the user to find project attributes.The request
         requires authentication tokens in the headers and language in the query

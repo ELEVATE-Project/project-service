@@ -20,7 +20,17 @@ module.exports = (req) => {
 		},
 		add: function () {
 			req.checkBody('program.name').exists().withMessage('required program name')
-			req.checkBody('program.source').exists().withMessage('required program source')
+			req.checkBody('program.source')
+				.exists()
+				.withMessage('required program source')
+				.custom((source) => {
+					// Check if 'source' exists and is a non-empty object
+					if (typeof source !== 'object' || source === null || !(Object.keys(source).length > 0)) {
+						return false
+					}
+					return true
+				})
+				.withMessage('program source cannot be null or empty')
 			req.checkBody('projects')
 				.isArray()
 				.withMessage('projects must be an array')
@@ -33,6 +43,10 @@ module.exports = (req) => {
 					return projects.every((project) => {
 						// Validate that the project has a 'source'
 						if (!project.hasOwnProperty('source')) {
+							return false
+						}
+
+						if (!(Object.keys(project['source']).length > 0)) {
 							return false
 						}
 

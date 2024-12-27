@@ -132,6 +132,31 @@ let enviromentVariables = {
 		optional: false,
 		default: 'USER',
 	},
+	IS_AUTH_TOKEN_BEARER: {
+		message: 'Required specification: If auth token is bearer or not',
+		optional: true,
+		default: false,
+	},
+	DEFAULT_PROJECT_CATEGORY: {
+		message: 'Default category external-id required',
+		optional: false,
+		default: 'MI-2.0-default',
+	},
+	ENABLE_REFLECTION: {
+		message: 'Enable reflection required',
+		optional: false,
+		default: 'false',
+	},
+	AUTH_METHOD: {
+		message: 'Required authentication method',
+		optional: true,
+		default: CONSTANTS.common.AUTH_METHOD.NATIVE,
+	},
+	KEYCLOAK_PUBLIC_KEY_PATH: {
+		message: 'Required Keycloak Public Key Path',
+		optional: true,
+		default: '../keycloakPublicKeys',
+	},
 }
 
 let success = true
@@ -206,6 +231,16 @@ module.exports = function () {
 					].possibleValues.join(', ')}`
 				}
 			}
+		}
+
+		if (
+			(!process.env[eachEnvironmentVariable] || process.env[eachEnvironmentVariable].trim() === '') &&
+			enviromentVariables[eachEnvironmentVariable]?.optional === true &&
+			enviromentVariables[eachEnvironmentVariable]?.default !== undefined
+		) {
+			process.env[eachEnvironmentVariable] = enviromentVariables[eachEnvironmentVariable].default
+			keyCheckPass = true
+			success = true
 		}
 
 		if (!keyCheckPass) {

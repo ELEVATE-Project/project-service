@@ -97,6 +97,7 @@ module.exports = {
 			type: 'ObjectId',
 			index: true,
 		},
+		translations: Object,
 		programExternalId: {
 			type: String,
 			index: true,
@@ -190,6 +191,24 @@ module.exports = {
 			type: Array,
 			default: [],
 		},
+		source: {
+			type: Object,
+			default: {},
+		},
+		reflection: {
+			type: Object,
+			default: {
+				status: null,
+				startDate: null,
+				endDate: null,
+			},
+		},
+		story: {
+			type: Object,
+			default: {},
+		},
+		duration: String,
+		conversation: Array,
 	},
 	compoundIndex: [
 		{

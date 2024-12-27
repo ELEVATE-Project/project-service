@@ -2124,6 +2124,7 @@ module.exports = class UserProjectsHelper {
 				programInformation['_id'] = programAndMultipleSolutionsData.data.program._id
 				programInformation['isAPrivateProgram'] = programAndMultipleSolutionsData.data.program.isAPrivateProgram
 				programInformation['externalId'] = programAndMultipleSolutionsData.data.program.externalId
+				programInformation['name'] = programAndMultipleSolutionsData.data.program.name
 
 				let userCreatedProjects = []
 

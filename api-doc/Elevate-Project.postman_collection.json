@@ -30,6 +30,11 @@
 									"key": "projectTemplates",
 									"type": "file",
 									"src": "/home/user3/Videos/project and task upload - projectUpload.csv"
+								},
+								{
+									"key": "translationFiles",
+									"type": "file",
+									"src": "/home/user4/Downloads/projectTranslationUpload.json"
 								}
 							]
 						},
@@ -275,8 +280,24 @@
 							}
 						],
 						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\" : \"educationLeader\",\n    \"externalId\" : \"educationLeader\",\n    \"icon\" : \"static/projectCategories/teacher.png\"\n}"
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "cover_image",
+									"type": "file",
+									"src": "/home/user4/Pictures/Screenshots/Screenshot from 2024-12-13 13-25-07.png"
+								},
+								{
+									"key": "externalId",
+									"value": "externalID",
+									"type": "text"
+								},
+								{
+									"key": "name",
+									"value": "name",
+									"type": "text"
+								}
+							]
 						},
 						"url": {
 							"raw": "{{baseUrl}}project/v1/library/categories/create",
@@ -311,8 +332,24 @@
 							}
 						],
 						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\" : \"Teachers\",\n    \"externalId\" : \"teachers\",\n    \"icon\" : \"static/projectCategories/teacher.png\"\n}"
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "cover_image",
+									"type": "file",
+									"src": "/home/user4/Pictures/Screenshots/Screenshot from 2024-12-13 13-25-07.png"
+								},
+								{
+									"key": "externalId",
+									"value": "externalId",
+									"type": "text"
+								},
+								{
+									"key": "name",
+									"value": "name",
+									"type": "text"
+								}
+							]
 						},
 						"url": {
 							"raw": "{{baseUrl}}project/v1/library/categories/update/665ea7cccbf5d12ba8827223",
@@ -409,6 +446,11 @@
 									"key": "projectTemplateTasks",
 									"type": "file",
 									"src": "/home/user3/workspace/sl-sunbird-implementation-utils/sunbird/programFiles/ProgramTemplate-1716794188_5101194/SolutionFiles/NEW (1)-1716794189_7917657/taskUpload/taskUpload.csv"
+								},
+								{
+									"key": "translationFiles",
+									"type": "file",
+									"src": "/home/user4/Downloads/projectTranslationUpload.json"
 								}
 							]
 						},
@@ -496,7 +538,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"hasAcceptedTAndC\": true\n}"
+							"raw": "{\n \"programId\" : \"6752aee1c1438653af10d613\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}project/v1/userProjects/importFromLibrary/5fcf9954546a92494f2e587c?isATargetedSolution=false",
@@ -588,107 +630,24 @@
 								},
 								{
 									"key": "limit",
-									"value": "2"
+									"value": "10"
 								},
 								{
 									"key": "search",
 									"value": ""
 								},
 								{
-									"key": "filter",
-									"value": ""
+									"key": "language",
+									"value": "hi"
+								},
+								{
+									"key": "status",
+									"value": "completed"
 								}
 							]
 						}
 					},
-					"response": [
-						{
-							"name": "list",
-							"originalRequest": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "X-auth-token",
-										"value": "{{userToken}}"
-									},
-									{
-										"key": "internal-access-token",
-										"value": "{{internal_access_token}}"
-									},
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": ""
-								},
-								"url": {
-									"raw": "{{baseUrl}}project/v1/userProjects/list?page=1&limit=2&search=&filter=",
-									"host": ["{{baseUrl}}"],
-									"path": ["project", "v1", "userProjects", "list"],
-									"query": [
-										{
-											"key": "page",
-											"value": "1"
-										},
-										{
-											"key": "limit",
-											"value": "2"
-										},
-										{
-											"key": "search",
-											"value": ""
-										},
-										{
-											"key": "filter",
-											"value": ""
-										}
-									]
-								}
-							},
-							"status": "OK",
-							"code": 200,
-							"_postman_previewlanguage": null,
-							"header": [
-								{
-									"key": "X-Powered-By",
-									"value": "Express"
-								},
-								{
-									"key": "Access-Control-Allow-Origin",
-									"value": "*"
-								},
-								{
-									"key": "Content-Type",
-									"value": "application/json; charset=utf-8"
-								},
-								{
-									"key": "Content-Length",
-									"value": "53737385"
-								},
-								{
-									"key": "ETag",
-									"value": "W/\"333f7a9-dbb+8A8BO9GXm1JTSSehAbVIqdk\""
-								},
-								{
-									"key": "Date",
-									"value": "Tue, 18 Jun 2024 07:21:25 GMT"
-								},
-								{
-									"key": "Connection",
-									"value": "keep-alive"
-								},
-								{
-									"key": "Keep-Alive",
-									"value": "timeout=5"
-								}
-							],
-							"cookie": [],
-							"body": null
-						}
-					]
+					"response": []
 				},
 				{
 					"name": "sync",
@@ -797,7 +756,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"userRole\": \"BEO\",\n\t\"createdFor\": [\n\t\t\"0126796199493140480\"\n\t],\n\t\"status\": \"completed\",\n\n\t\"description\": \"Come See Our School!- Parent Mela vishwa\",\n\t\"title\": \"Come See Our School!- Parent Mela\",\n\t\"metaInformation\": {\n\t\t\"rationale\": \"\",\n\t\t\"primaryAudience\": [\n\t\t\t\"Community\"\n\t\t],\n\t\t\"goal\": \"Organizing the Parent Mela in the school in order to make better community reach\",\n\t\t\"duration\": \"At the end of every quarter\",\n\t\t\"successIndicators\": \"\",\n\t\t\"risks\": \"\",\n\t\t\"approaches\": \"\"\n\t},\n\t\"hasAcceptedTAndC\": false,\n    // \"entityId\":\"db331a8c-b9e2-45f8-b3c0-7ec1e826b6df\",\n    \"categories\" : [\"educationLeader\"],\n    \"programId\" : \"5f3ff17c19377eecddb06975\",\n    \"solutionId\" : \"5f3ff17c19377eecddb06975\",\n    \"tasks\" : [\n        {\n        \"externalId\" : \"Task1-1710148664591\",\n        \"name\" : \"Address the assembly and share ideas about Smart Learn\",\n        \"_id\" : \"1234\",\n        \"type\" : \"observation\"\n        }\n    ]\n    \n}",
+							"raw": "{\n  \"program\": {\n    \"description\": \"\",\n    \"endDate\": \"2024-04-16T00:00:00.000Z\",\n    \"language\": [\n      \"English\"\n    ],\n    \"name\": \"DCPCR School Development Index 2018-19\",\n    \"source\": {\n      \"apiVersion\": \"4.0\",\n      \"confidenceScore\": 0.98,\n      \"info\": {\n        \"pageNo\": \"\",\n        \"title\": \"\",\n        \"url\": \"\"\n      },\n      \"model\": \"GPT-4\",\n      \"provider\": \"OpenAI\"\n    },\n    \"startDate\": \"2024-04-16T00:00:00.000Z\"\n  },\n  \"projects\": [\n    {\n      \"title\": \"Understand Importance of Reading\",\n      \"description\": \"\",\n      \"status\": \"started\",\n      \"duration\": \"2 weeks\",\n      \"recommendedFor\": [\n        \"students\",\n        \"teachers\"\n      ],\n      \"category\": [\n        \"educationLeader\",\n        \"MI-2.0-default\"\n      ],\n      \"startDate\": \"2024-04-16T00:00:00.000Z\",\n      \"endDate\": \"2024-04-16T00:00:00.000Z\",\n      \"source\": {\n        \"model\": \"GPT-4\",\n        \"provider\": \"OpenAI\",\n        \"apiVersion\": \"4.0\",\n        \"confidenceScore\": 0.98,\n        \"info\": {\n          \"url\": \"\",\n          \"title\": \"\",\n          \"pageNo\": \"\"\n        }\n      },\n      \"tasks\": [\n        {\n          \"name\": \"Task 1\",\n          \"isDeletable\": false,\n          \"sequenceNumber\": \"1\",\n          \"source\": {\n            \"model\": \"GPT-4\",\n            \"provider\": \"OpenAI\",\n            \"apiVersion\": \"4.0\",\n            \"confidenceScore\": 0.98,\n            \"info\": {\n              \"url\": \"\",\n              \"title\": \"\",\n              \"pageNo\": \"\"\n            }\n          }\n        },\n        {\n          \"name\": \"Task 1\",\n          \"isDeletable\": false,\n          \"sequenceNumber\": \"1\",\n          \"source\": {\n            \"model\": \"GPT-4\",\n            \"provider\": \"OpenAI\",\n            \"apiVersion\": \"4.0\",\n            \"confidenceScore\": 0.98,\n            \"info\": {\n              \"url\": \"\",\n              \"title\": \"\",\n              \"pageNo\": \"\"\n            }\n          }\n        }\n      ]\n    },\n    {\n      \"title\": \"Importance of Reading\",\n      \"description\": \"\",\n      \"status\": \"started\",\n      \"duration\": \"2 weeks\",\n      \"recommendedFor\": [\n        \"students\",\n        \"teachers\"\n      ],\n      \"category\": [],\n      \"startDate\": \"2024-04-16T00:00:00.000Z\",\n      \"endDate\": \"2024-04-16T00:00:00.000Z\",\n      \"source\": {\n        \"model\": \"GPT-4\",\n        \"provider\": \"OpenAI\",\n        \"apiVersion\": \"4.0\",\n        \"confidenceScore\": 0.98,\n        \"info\": {\n          \"url\": \"\",\n          \"title\": \"\",\n          \"pageNo\": \"\"\n        }\n      },\n      \"tasks\": [\n        {\n          \"name\": \"Task 1\",\n          \"isDeletable\": false,\n          \"sequenceNumber\": \"1\",\n          \"source\": {\n            \"model\": \"GPT-4\",\n            \"provider\": \"OpenAI\",\n            \"apiVersion\": \"4.0\",\n            \"confidenceScore\": 0.98,\n            \"info\": {\n              \"url\": \"\",\n              \"title\": \"\",\n              \"pageNo\": \"\"\n            }\n          }\n        }\n      ]\n    }\n  ]\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -808,6 +767,68 @@
 							"raw": "{{baseUrl}}project/v1/userProjects/add",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "userProjects", "add"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{userToken}}"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"reflectionStatus\":\"completed\",\n    \"tasks\": [\n   {\n        \"_id\": \"b19d532c-5000-4d3b-bf72-7d77bc373b15\",\n        \"status\": \"notStarted\",\n        \"name\": \"task_9\"\n    }\n]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}project/v1/userProjects/update/66ceec390c9cad9f3e066de7",
+							"host": ["{{baseUrl}}"],
+							"path": ["project", "v1", "userProjects", "update", "66ceec390c9cad9f3e066de7"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "add Copy",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{userToken}}"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"story\": {\n        \"actionSteps\": [],\n        \"attachments\": [\n            {\n                \"name\": \"1729251446851.png\",\n                \"sourcePath\": \"project/happy/263/51807846-4c20-428a-b999-8af96a5f1b27/evidence_link-151.jpg\",\n                \"type\": \"image/png\"\n            }\n        ],\n        \"authorName\": \"jon\",\n        \"chatHistory\": [\n            {\n                \"details\": \"User initiated a discussion about creating a story related to the DCPCR School Development Index.\",\n                \"event\": \"Chat started\",\n                \"timestamp\": \"2024-12-04T09:55:00Z\"\n            },\n            {\n                \"details\": \"User did not respond for 10 minutes. Bot marked the chat as paused.\",\n                \"event\": \"Chat paused\",\n                \"timestamp\": \"2024-12-04T10:05:00Z\"\n            },\n            {\n                \"details\": \"User resumed the chat and provided inputs for problem statement and impact.\",\n                \"event\": \"Chat resumed\",\n                \"timestamp\": \"2024-12-04T10:15:00Z\"\n            },\n            {\n                \"details\": \"User completed the story creation process and uploaded all necessary files.\",\n                \"event\": \"Chat finished\",\n                \"timestamp\": \"2024-12-04T10:30:00Z\"\n            }\n        ],\n        \"conversation\": [\n            {\n                \"botResponse\": \"Sure, let’s start! Could you tell me about the title and objectives of the story?\",\n                \"timestamp\": \"2024-12-04T10:00:00Z\",\n                \"userMessage\": \"I want to create a story about the DCPCR School Development Index.\"\n            },\n            {\n                \"botResponse\": \"Got it. What about the problem statement and impact you'd like to highlight?\",\n                \"timestamp\": \"2024-12-04T10:02:00Z\",\n                \"userMessage\": \"The title will be 'DCPCR School Development Index 2018-19', and the objective is 'To analyze and showcase school development trends'.\"\n            },\n            {\n                \"botResponse\": \"Great! I’ve added that. Do you have a timeline for this story?\",\n                \"timestamp\": \"2024-12-04T10:05:00Z\",\n                \"userMessage\": \"The problem is schools not meeting benchmarks. The impact is improving education standards.\"\n            },\n            {\n                \"botResponse\": \"Understood. I’ve added a 2-week timeline. Anything else you’d like to add, such as action steps or resources?\",\n                \"timestamp\": \"2024-12-04T10:07:00Z\",\n                \"userMessage\": \"Two weeks should be enough.\"\n            },\n            {\n                \"botResponse\": \"Alright. Please upload them when ready, and I’ll include them in the story.\",\n                \"timestamp\": \"2024-12-04T10:10:00Z\",\n                \"userMessage\": \"No action steps for now, but I’ll share attachments and PDFs.\"\n            },\n            {\n                \"botResponse\": \"Got it! I’ve added the attachment and noted the PDF language as Hindi.\",\n                \"timestamp\": \"2024-12-04T10:12:00Z\",\n                \"userMessage\": \"Here’s an image attachment and a PDF in Hindi.\"\n            }\n        ],\n        \"impact\": \"sample impact\",\n        \"location\": \"authorLocation\",\n        \"objective\": \"sample object\",\n        \"pdfInformation\": [\n            {\n                \"filePath\": \"project/happy/263/51807846-4c20-428a-b999-8af96a5f1b27/evidence_link-151.jpg\",\n                \"language\": \"hi\"\n            }\n        ],\n        \"problemStatement\": \"problemStatement\",\n        \"resources\": [],\n        \"summary\": \"sample summary\",\n        \"timeline\": \"2 weeks\",\n        \"title\": \"DCPCR School Development Index 2018-19\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}project/v1/userProjects/addStory/665ea7cccbf5d12ba8827223",
+							"host": ["{{baseUrl}}"],
+							"path": ["project", "v1", "userProjects", "addStory", "665ea7cccbf5d12ba8827223"]
 						}
 					},
 					"response": []
@@ -2497,7 +2518,7 @@
 							"query": [
 								{
 									"key": "isAPrivateProgram",
-									"value": "false"
+									"value": "true"
 								},
 								{
 									"key": "page",
@@ -2505,11 +2526,19 @@
 								},
 								{
 									"key": "limit",
-									"value": ""
+									"value": "100"
 								},
 								{
 									"key": "search",
 									"value": ""
+								},
+								{
+									"key": "language",
+									"value": ""
+								},
+								{
+									"key": "getProjectsCount",
+									"value": "true"
 								}
 							]
 						}
@@ -2540,6 +2569,226 @@
 							"raw": "{{baseUrl}}project/v1/users/solutions/66bb85bebf682a1f367c55b9",
 							"host": ["{{baseUrl}}project"],
 							"path": ["v1", "users", "solutions", "66bb85bebf682a1f367c55b9"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "wishlist",
+			"item": [
+				{
+					"name": "add",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{devToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}project/v1/wishlist/add/66399e6304785762f7e8e4cb",
+							"host": ["{{baseUrl}}project"],
+							"path": ["v1", "wishlist", "add", "66399e6304785762f7e8e4cb"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "list",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{devToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}project/v1/wishlist/list?page=1&language=ka&limit=10",
+							"host": ["{{baseUrl}}project"],
+							"path": ["v1", "wishlist", "list"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "language",
+									"value": "ka"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "remove",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{devToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}project/v1/wishlist/remove/66399e6304785762f7e8e4cb",
+							"host": ["{{baseUrl}}project"],
+							"path": ["v1", "wishlist", "remove", "66399e6304785762f7e8e4cb"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "projectAttributes",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{devToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}project/v1/projectAttributes/create",
+							"host": ["{{baseUrl}}project"],
+							"path": ["v1", "projectAttributes", "create"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{devToken}}",
+								"type": "text"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"translateData\": {\n    \"name\": \"अवधि\",\n    \"data\": [\n      {\n        \"label\": \"1 सप्ताह\",\n        \"value\": \"1 Week\"\n      },\n      {\n        \"label\": \"2 सप्ताह\",\n        \"value\": \"2 Week\"\n      },\n      {\n        \"label\": \"3 सप्ताह\",\n        \"value\": \"3 Week\"\n      },\n      {\n        \"label\": \"4 सप्ताह\",\n        \"value\": \"4 Week\"\n      },\n      {\n        \"label\": \"5 सप्ताह\",\n        \"value\": \"5 Week\"\n      },\n      {\n        \"label\": \"6 सप्ताह\",\n        \"value\": \"6 Week\"\n      },\n      {\n        \"label\": \"6 सप्ताह से अधिक\",\n        \"value\": \"More than 6 weeks\"\n      }\n    ]\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}project/v1/projectAttributes/update?code=duration&language=hi",
+							"host": ["{{baseUrl}}project"],
+							"path": ["v1", "projectAttributes", "update"],
+							"query": [
+								{
+									"key": "code",
+									"value": "duration"
+								},
+								{
+									"key": "language",
+									"value": "hi"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "find",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{devToken}}",
+								"type": "text"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}project/v1/projectAttributes/find?language=en",
+							"host": ["{{baseUrl}}project"],
+							"path": ["v1", "projectAttributes", "find"],
+							"query": [
+								{
+									"key": "language",
+									"value": "en"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "template",
+			"item": [
+				{
+					"name": "list",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{devToken}}",
+								"type": "text"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}project/v1/template/list?language=ka&hasSpotlight=false&duration=1week&roles=DistrictsEducationOfficer",
+							"host": ["{{baseUrl}}project"],
+							"path": ["v1", "template", "list"],
+							"query": [
+								{
+									"key": "language",
+									"value": "ka"
+								},
+								{
+									"key": "hasSpotlight",
+									"value": "false"
+								},
+								{
+									"key": "duration",
+									"value": "1week"
+								},
+								{
+									"key": "roles",
+									"value": "DistrictsEducationOfficer"
+								}
+							]
 						}
 					},
 					"response": []

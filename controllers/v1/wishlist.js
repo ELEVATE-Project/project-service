@@ -106,7 +106,7 @@ module.exports = class Wishlist extends Abstract {
 		}
 	}
 	/**
-* @api {post} /project/v1/wishlist/list?language=ka&page=1&limit=10
+* @api {get} /project/v1/wishlist/list?language=ka&page=1&limit=10
 * @apiVersion 1.0.0
 * @apiName list
 * @apiGroup wishlist

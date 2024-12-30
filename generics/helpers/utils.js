@@ -747,6 +747,9 @@ function calculateEndDate(createdDate, durationString) {
 		case 'year':
 		case 'years':
 			return startDate.add(parseInt(value), 'years').toISOString()
+		case 'day':
+		case 'days':
+			return startDate.add(parseInt(value), 'days').toISOString()
 		default:
 			throw new Error('Unsupported duration unit')
 	}

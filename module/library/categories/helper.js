@@ -274,9 +274,10 @@ module.exports = class LibraryCategoriesHelper {
 							let filteredCategory = allCategoryInfo.filter((category) => {
 								return category._id.toString() == projectCategory._id.toString()
 							})
-
-							let singleCategoryInfo = filteredCategory[0]
-							projectCategory.evidences = singleCategoryInfo.evidences
+							if (filteredCategory.length > 0) {
+								let singleCategoryInfo = filteredCategory[0]
+								projectCategory.evidences = singleCategoryInfo.evidences
+							}
 						}
 					}
 				}

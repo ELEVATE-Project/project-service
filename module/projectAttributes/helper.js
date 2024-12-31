@@ -172,6 +172,11 @@ module.exports = class ProjectAttributesHelper {
 				{ code: code },
 				{ [keyToFilter]: code === 'role' ? roleToAddForFilter : filterData }
 			)
+			if (!updatedEntities) {
+				return {
+					success: false,
+				}
+			}
 			return {
 				success: true,
 			}

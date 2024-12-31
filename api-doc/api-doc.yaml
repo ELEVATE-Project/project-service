@@ -10547,7 +10547,7 @@ paths:
 
 
         * NOTE:
-          `When updating translations data, make sure to provide translations for all the data fields in all supported languages. If any translations are missing, the API will only return the fields you have provided, which may result in incomplete data.`
+          `When updating translations data, make sure to provide translations for all the data fields in all supported languages. If any translations are missing, the API will only return the fields you have provided, which may result in incomplete data. When updating the  values for duration please maintain lowercase.`
 
       operationId: ''
       tags:

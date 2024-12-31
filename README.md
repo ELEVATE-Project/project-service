@@ -291,7 +291,7 @@ In such cases, you can generate sample user accounts using the steps below. This
     | ------------------------ | ---------- | ----------------------- |
     | aaravpatel@example.com   | Password1@ | State Education Officer |
     | arunimareddy@example.com | Password1@ | State Education Officer |
-    | aaravpatel@example.com   | Password1@ | State Education Officer |
+    | devikasingh@example.com  | Password1@ | State Education Officer |
 
 ## Sample Data Creation For Projects
 

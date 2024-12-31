@@ -19,16 +19,36 @@ module.exports = (req) => {
 						return true
 					})
 					.withMessage('Request body cannot be empty.'),
-				//  both translateData and data are not present together
+				// Validate name
 				req
-					.checkBody()
-					.custom(() => {
-						if (req.body.translateData && req.body.data) {
-							throw new Error('Both translateData and data cannot be present at the same time.')
-						}
-						return true
-					})
-					.withMessage('Both translateData and data cannot be present at the same time.')
+					.checkBody('name')
+					.exists()
+					.withMessage('Name is required.')
+					.notEmpty()
+					.withMessage('Name cannot be an empty string.')
+
+			// Validate 'data'
+			req.checkBody('data')
+				.exists()
+				.withMessage('Data is required.')
+				.isArray()
+				.withMessage('Data must be an array.')
+				.custom((data) => {
+					if (!data.length) {
+						throw new Error('Data array cannot be empty.')
+					}
+					return true
+				})
+
+			//  both translateData and data are not present together
+			req.checkBody()
+				.custom(() => {
+					if (req.body.translateData && req.body.data) {
+						throw new Error('Both translateData and data cannot be present at the same time.')
+					}
+					return true
+				})
+				.withMessage('Both translateData and data cannot be present at the same time.')
 			// Check validation for translateData
 			req
 				.checkBody('translateData')

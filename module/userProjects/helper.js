@@ -32,7 +32,6 @@ const axios = require('axios')
 const fs = require('fs')
 const QRCode = require('qrcode')
 const path = require('path')
-const { ObjectID } = require('mongodb')
 const gotenbergService = require(SERVICES_BASE_PATH + '/gotenberg')
 const projectService = require(SERVICES_BASE_PATH + '/projects')
 /**
@@ -1351,7 +1350,6 @@ module.exports = class UserProjectsHelper {
 	) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				solutionId = ObjectID(solutionId)
 				let solutionExternalId = ''
 				let templateDocuments
 				let defaultACL = CONSTANTS.common.DEFAULT_ACL

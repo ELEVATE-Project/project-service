@@ -164,9 +164,8 @@ module.exports = class UserExtensioHelper {
 				}
 				recommendedProjects.push(item)
 			})
-
 			// If projectTemplateIDs is empty
-			if (!projectTemplateIDs.length) {
+			if (!(projectTemplateIDs.length > 0) && !(recommendedProjects.length > 0)) {
 				return {
 					success: true,
 					message: CONSTANTS.apiResponses.PROJECT_TEMPLATE_ID_NOT_FOUND,
@@ -204,7 +203,10 @@ module.exports = class UserExtensioHelper {
 
 			let projectTemplateDocuments = await projectTemplateQueries.getAggregate(aggregateData)
 			// Return success response with data and count or "Not found" message if no data is returned
-			if (!projectTemplateDocuments || projectTemplateDocuments.length === 0) {
+			if (
+				(!projectTemplateDocuments || projectTemplateDocuments.length === 0) &&
+				!(recommendedProjects.length > 0)
+			) {
 				return {
 					success: true,
 					message: CONSTANTS.apiResponses.PROJECT_TEMPLATE_NOT_FOUND,

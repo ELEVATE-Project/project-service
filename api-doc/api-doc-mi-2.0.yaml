@@ -3294,7 +3294,110 @@ paths:
                         url: >-
                           https://storage.googleapis.com/mentoring-dev-storage-private/project/674051e3cde36f67e4f83efa/2/f0ed822a-e833-4c00-88b9-f633079d6e10/1732268558782.jpeg?GoogleAccessId=sl-mentoring-dev-storage%40sl-dev-project.iam.gserviceaccount.com&Expires=1733326779&Signature=hw69Y8dE844GtEKU6pUgkJDkQ4cdRexFbajrMLdGc9blHhWkx9CjKIZBTFrV6OdmBoRocpylEDuyYmPZgds0M6orDKGlMypXyRYeI0GVJFnWaNmkIDmRVNBtjM3X%2FeBGZkbBZlEGPgz4s%2Bd4mEjbTCc1DZqagzJQ4oMi%2FnjzVI4bHflwqeg31sLOS%2Fd3IXOTdEjygvYX%2FdZdZAuDdh8DfleE9I5sYf8NJIoNY6ABI%2Fenwq8ub6y7I6czBZah87d7aBt6mPCS3SL%2B0I5qr11lfx5svZ7oaz9yN%2Bje7iF%2FMcX0H2FS8JY9bmn7M6X9sGeaoRfe%2FUYQANyep9%2F4e9rt6A%3D%3D
                     status: 200
+  /project/v1/wishlist/add/{projectId}:
+    post:
+      summary: this endpoint helps in adding a project to user's wishlist
+      description: ''
+      operationId: ''
+      tags:
+        - wishlist
+      parameters: &ref_0 []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: number
+              examples:
+                example1:
+                  value:
+                    message: Project templates added to wishlist successfully
+                    status: 200
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                referenceFrom:
+                  type: string
+                description:
+                  type: string
+                metaInformation:
+                  type: object
+                  properties:
+                    duration:
+                      type: string
+            examples:
+              example1:
+                value:
+                  title: title of the project
+                  referenceFrom: ai_generated
+                  description: description of the project
+                  metaInformation:
+                    duration: 1 week
+    parameters:
+      - in: path
+        name: _id
+        description: project id
+        schema: &ref_1
+          type: string
+        required: true
+      - in: header
+        name: x-auth-token
+        description: token
+        schema:
+          type: string
+          example: '{{token}}'
+        required: true
+  /project/v1/wishlist/remove/{projectId}:
+    post:
+      summary: this endpoint helps in removing a project from user's wishlist
+      description: ''
+      operationId: ''
+      tags:
+        - wishlist
+      parameters: *ref_0
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: number
+              examples:
+                example1:
+                  value:
+                    message: Project templates removed from wishlist successfully
+                    status: 200
+    parameters:
+      - in: path
+        name: _id
+        description: project id
+        schema: *ref_1
+        required: true
+      - in: header
+        name: x-auth-token
+        description: token
+        schema:
+          type: string
+          example: '{{token}}'
+        required: true
 tags:
   - name: User Projects
   - name: User
   - name: cloudService
+  - name: wishlist

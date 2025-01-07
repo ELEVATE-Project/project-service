@@ -40,7 +40,8 @@ module.exports = class Wishlist extends Abstract {
 		try {
 			let addProjectTempleteToWishlist = await wishlistHelper.add(
 				req.params._id,
-				req.userDetails ? req.userDetails.userInformation.userId : ''
+				req.userDetails ? req.userDetails.userInformation.userId : '',
+				req.body
 			)
 			if (addProjectTempleteToWishlist.success) {
 				return {

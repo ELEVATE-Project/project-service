@@ -8,18 +8,10 @@
 module.exports = (req) => {
 	let wishlistValidator = {
 		add: function () {
-			req.checkParams('_id')
-				.exists()
-				.withMessage('required projectTemplete Id')
-				.isMongoId()
-				.withMessage('Invalid projectTemplete ID')
+			req.checkParams('_id').exists().withMessage('required projectTemplete Id')
 		},
 		remove: function () {
-			req.checkParams('_id')
-				.exists()
-				.withMessage('required projectTemplete Id')
-				.isMongoId()
-				.withMessage('Invalid projectTemplete ID')
+			req.checkParams('_id').exists().withMessage('required projectTemplete Id')
 		},
 	}
 

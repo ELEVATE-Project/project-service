@@ -19,6 +19,9 @@ module.exports = {
 				_id: {
 					type: String,
 				},
+				title: String,
+				description: String,
+				referenceFrom: String,
 				createdAt: {
 					type: Date,
 				},

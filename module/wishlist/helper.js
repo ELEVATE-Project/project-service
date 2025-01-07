@@ -8,13 +8,19 @@ module.exports = class UserExtensioHelper {
 	 * @name add
 	 * @param {projectTempleteId} - projectTempleteId
 	 * @param {userId} -            userId
+	 * @param {bodyData} - 			request body data
 	 * @returns {Object} .
 	 */
-	static async add(projectTempleteId, userId) {
+	static async add(projectTempleteId, userId, bodyData) {
 		try {
 			let wishlistItem = {
 				_id: projectTempleteId,
 				createdAt: new Date(),
+				...Object.fromEntries(
+					Object.entries(bodyData)
+						.filter(([key, value]) => value) // Keep only non-empty values
+						.map(([key, value]) => (key === 'referenceFrom' ? [key, value.toUpperCase()] : [key, value])) // Transform 'referenceFrom' to uppercase
+				),
 			}
 
 			// Find the userExtension document for the given userId
@@ -151,12 +157,16 @@ module.exports = class UserExtensioHelper {
 					},
 				}
 			}
-
 			// Get the projectTemplateIds
-			let projectTemplateIDs = userExtensionDocument[0].wishlist.map((item) => new ObjectId(item._id))
-
+			let recommendedProjects = []
+			let projectTemplateIDs = userExtensionDocument[0].wishlist.map((item) => {
+				if (!item.referenceFrom || item.referenceFrom.toUpperCase() !== CONSTANTS.common.AI_GENERATED) {
+					return new ObjectId(item._id)
+				}
+				recommendedProjects.push(item)
+			})
 			// If projectTemplateIDs is empty
-			if (!projectTemplateIDs.length) {
+			if (!(projectTemplateIDs.length > 0) && !(recommendedProjects.length > 0)) {
 				return {
 					success: true,
 					message: CONSTANTS.apiResponses.PROJECT_TEMPLATE_ID_NOT_FOUND,
@@ -180,40 +190,24 @@ module.exports = class UserExtensioHelper {
 			let titleField = language ? `$translations.${language}.title` : '$title'
 			let descriptionField = language ? `$translations.${language}.description` : '$description'
 
-			aggregateData.push(
-				{
-					$project: {
-						_id: 1,
-						title: { $ifNull: [titleField, '$title'] },
-						description: { $ifNull: [descriptionField, '$description'] },
-						externalId: 1,
-						createdAt: 1,
-						categories: 1,
-						'metaInformation.duration': 1,
-					},
+			aggregateData.push({
+				$project: {
+					_id: 1,
+					title: { $ifNull: [titleField, '$title'] },
+					description: { $ifNull: [descriptionField, '$description'] },
+					externalId: 1,
+					createdAt: 1,
+					categories: 1,
+					'metaInformation.duration': 1,
 				},
-				{
-					// Pagination
-					$facet: {
-						totalCount: [{ $count: 'count' }],
-						data: [{ $skip: pageSize * (pageNo - 1) }, { $limit: pageSize }],
-					},
-				},
-				{
-					// Count and project the response data
-					$project: {
-						data: 1,
-						count: {
-							$ifNull: [{ $arrayElemAt: ['$totalCount.count', 0] }, 0],
-						},
-					},
-				}
-			)
+			})
 
 			let projectTemplateDocuments = await projectTemplateQueries.getAggregate(aggregateData)
-
 			// Return success response with data and count or "Not found" message if no data is returned
-			if (!projectTemplateDocuments[0] || projectTemplateDocuments[0].data.length === 0) {
+			if (
+				(!projectTemplateDocuments || projectTemplateDocuments.length === 0) &&
+				!(recommendedProjects.length > 0)
+			) {
 				return {
 					success: true,
 					message: CONSTANTS.apiResponses.PROJECT_TEMPLATE_NOT_FOUND,
@@ -223,11 +217,20 @@ module.exports = class UserExtensioHelper {
 					},
 				}
 			}
+			projectTemplateDocuments.push(...recommendedProjects)
+			if (projectTemplateDocuments.length > 0) {
+				let startIndex = pageSize * (pageNo - 1)
+				let endIndex = startIndex + pageSize
+				projectTemplateDocuments = projectTemplateDocuments.slice(startIndex, endIndex)
+			}
 
 			return {
 				success: true,
 				message: CONSTANTS.apiResponses.WISHLIST_FETCHED,
-				results: projectTemplateDocuments[0],
+				results: {
+					data: projectTemplateDocuments,
+					count: projectTemplateDocuments.length,
+				},
 			}
 		} catch (error) {
 			return {

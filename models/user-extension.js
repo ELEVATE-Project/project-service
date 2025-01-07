@@ -5,6 +5,8 @@
  * Description : Schema for userExtension.
  */
 
+const { duration } = require('moment-timezone')
+
 module.exports = {
 	name: 'userExtension',
 	schema: {
@@ -22,6 +24,7 @@ module.exports = {
 				title: String,
 				description: String,
 				referenceFrom: String,
+				metaInformation: Object,
 				createdAt: {
 					type: Date,
 				},

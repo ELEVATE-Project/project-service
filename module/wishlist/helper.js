@@ -18,7 +18,7 @@ module.exports = class UserExtensioHelper {
 				createdAt: new Date(),
 				title: bodyData.title || '',
 				description: bodyData.description || '',
-				duration: bodyData.duration || '',
+				metaInformation: bodyData.metaInformation || {},
 				referenceFrom: bodyData.referenceFrom ? bodyData.referenceFrom.toUpperCase() : '',
 			}
 

@@ -16,10 +16,11 @@ module.exports = class UserExtensioHelper {
 			let wishlistItem = {
 				_id: projectTempleteId,
 				createdAt: new Date(),
-				title: bodyData.title || '',
-				description: bodyData.description || '',
-				metaInformation: bodyData.metaInformation || {},
-				referenceFrom: bodyData.referenceFrom ? bodyData.referenceFrom.toUpperCase() : '',
+				...Object.fromEntries(
+					Object.entries(bodyData)
+						.filter(([key, value]) => value) // Keep only non-empty values
+						.map(([key, value]) => (key === 'referenceFrom' ? [key, value.toUpperCase()] : [key, value])) // Transform 'referenceFrom' to uppercase
+				),
 			}
 
 			// Find the userExtension document for the given userId

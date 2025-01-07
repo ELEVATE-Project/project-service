@@ -5,8 +5,6 @@
  * Description : Schema for userExtension.
  */
 
-const { duration } = require('moment-timezone')
-
 module.exports = {
 	name: 'userExtension',
 	schema: {

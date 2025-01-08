@@ -393,7 +393,7 @@ module.exports = class LibraryCategoriesHelper {
 				// Update the sequence numbers
 				updateData['evidences'] = []
 
-				if (categoryData[0].evidences.length > 0) {
+				if (categoryData[0].evidences && categoryData[0].evidences.length > 0) {
 					for (const evidence of evidenceUploadData) {
 						evidence.sequence += categoryData[0].evidences.length
 						categoryData[0].evidences.push(evidence)

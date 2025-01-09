@@ -130,7 +130,6 @@ module.exports = class UserExtension {
 						projection[key] = 0
 					})
 				}
-				console.log('queryObject : ', queryObject)
 				const userExtensionData = await database.models.userExtension.findOne(queryObject, projection)
 				return resolve(userExtensionData)
 			} catch (error) {

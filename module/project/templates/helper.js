@@ -1021,7 +1021,6 @@ module.exports = class ProjectTemplatesHelper {
 					'createdAt',
 					'updatedAt',
 					'__v',
-					'metaInformation',
 				])
 
 				// Fetch downloadable urls for the category evidences

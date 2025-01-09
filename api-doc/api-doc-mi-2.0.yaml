@@ -3336,12 +3336,19 @@ paths:
                   properties:
                     duration:
                       type: string
+                  required:
+                    - duration
+              required:
+                - title
+                - referenceFrom
+                - description
+                - metaInformation
             examples:
               example1:
                 value:
                   title: title of the project
                   referenceFrom: ai_generated
-                  description: description of the project
+                  description: objective of the project
                   metaInformation:
                     duration: 1 week
     parameters:

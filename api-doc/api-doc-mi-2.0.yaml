@@ -3347,7 +3347,7 @@ paths:
               example1:
                 value:
                   title: title of the project
-                  referenceFrom: ai_generated
+                  referenceFrom: AI_GENERATED
                   description: objective of the project
                   metaInformation:
                     duration: 1 week

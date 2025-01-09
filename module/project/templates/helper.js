@@ -29,6 +29,7 @@ const programQueries = require(DB_QUERY_BASE_PATH + '/programs')
 const evidencesHelper = require(MODULES_BASE_PATH + '/evidences/helper')
 const userExtensionQueries = require(DB_QUERY_BASE_PATH + '/userExtension')
 const filesHelpers = require(MODULES_BASE_PATH + '/cloud-services/files/helper')
+const testimonialsHelper = require(MODULES_BASE_PATH + '/testimonials/helper')
 module.exports = class ProjectTemplatesHelper {
 	/**
 	 * Extract csv information.
@@ -216,8 +217,10 @@ module.exports = class ProjectTemplatesHelper {
 
 				let learningResources = await learningResourcesHelper.extractLearningResourcesFromCsv(parsedData)
 				let evidences = await evidencesHelper.extractEvidencesFromCsv(parsedData)
+				let testimonials = await testimonialsHelper.extractTestimonialsFromCsv(parsedData)
 				parsedData.learningResources = learningResources.data
 				parsedData.evidences = evidences.data
+				parsedData.testimonials = testimonials.data
 
 				parsedData.metaInformation = {}
 				let booleanData = UTILS.getAllBooleanDataFromModels(schemas['project-templates'].schema)
@@ -262,6 +265,11 @@ module.exports = class ProjectTemplatesHelper {
 									translations[key]['learningResources'][requiredModelField] =
 										translations[key]['learningResources'][requiredModelField] || []
 									translations[key]['learningResources'][requiredModelField].push(data[item])
+								} else if (fieldSegments.some((segment) => segment.includes('testimonial'))) {
+									translations[key]['testimonials'] = translations[key]['testimonials'] || {}
+									translations[key]['testimonials'][requiredModelField] =
+										translations[key]['testimonials'][requiredModelField] || []
+									translations[key]['testimonials'][requiredModelField].push(data[item])
 								} else {
 									translations[key] = translations[key] || {}
 									if (['text', 'recommendedFor', 'categories'].includes(requiredModelField)) {

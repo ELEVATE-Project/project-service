@@ -344,8 +344,8 @@ module.exports = class LibraryCategoriesHelper {
 							projectTemplate[key] = metaInformation[key]
 						})
 						delete projectTemplate.metaInformation
-						delete projectTemplate.translations
 					}
+					delete projectTemplate.translations
 				})
 				return resolve({
 					success: true,

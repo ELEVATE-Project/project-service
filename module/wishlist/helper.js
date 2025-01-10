@@ -218,6 +218,7 @@ module.exports = class UserExtensioHelper {
 				}
 			}
 			projectTemplateDocuments.push(...recommendedProjects)
+			let count = projectTemplateDocuments.length
 			if (projectTemplateDocuments.length > 0) {
 				let startIndex = pageSize * (pageNo - 1)
 				let endIndex = startIndex + pageSize
@@ -229,7 +230,7 @@ module.exports = class UserExtensioHelper {
 				message: CONSTANTS.apiResponses.WISHLIST_FETCHED,
 				results: {
 					data: projectTemplateDocuments,
-					count: projectTemplateDocuments.length,
+					count: count,
 				},
 			}
 		} catch (error) {

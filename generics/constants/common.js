@@ -145,5 +145,4 @@ module.exports = {
 	},
 	APP_ELEVATE_PROJECT: 'elevate-project',
 	SYSTEM: 'SYSTEM',
-	AI_GENERATED: 'AI_GENERATED',
 }

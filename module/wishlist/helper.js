@@ -159,12 +159,22 @@ module.exports = class UserExtensioHelper {
 			}
 			// Get the projectTemplateIds
 			let recommendedProjects = []
-			let projectTemplateIDs = userExtensionDocument[0].wishlist.map((item) => {
-				if (!item.referenceFrom || item.referenceFrom.toUpperCase() !== CONSTANTS.common.AI_GENERATED) {
-					return new ObjectId(item._id)
-				}
-				recommendedProjects.push(item)
-			})
+			let projectTemplateIDs = userExtensionDocument[0].wishlist
+				.map((item) => {
+					if (!item.referenceFrom || item.referenceFrom.toUpperCase() !== CONSTANTS.common.AI_GENERATED) {
+						try {
+							return new ObjectId(item._id) // Attempt to create ObjectId
+						} catch (err) {
+							recommendedProjects.push(item)
+							return null // Filter out invalid IDs
+						}
+					} else {
+						recommendedProjects.push(item)
+						return null // Skip adding to projectTemplateIDs
+					}
+				})
+				.filter((id) => id !== null) // Remove null values
+
 			// If projectTemplateIDs is empty
 			if (!(projectTemplateIDs.length > 0) && !(recommendedProjects.length > 0)) {
 				return {

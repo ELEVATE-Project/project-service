@@ -1124,11 +1124,11 @@ module.exports = class ProjectTemplatesHelper {
 				if (wishlistData !== null) {
 					templateData[0].wishlist = true
 				}
-				if (templateData[0].metaInformation.testimonials) {
-					templateData[0]['testimonials'] = templateData[0].metaInformation['testimonials']
-				}
-				if (templateData[0].metaInformation.duration) {
-					templateData[0]['duration'] = templateData[0].metaInformation['duration']
+
+				if (templateData[0].metaInformation) {
+					Object.keys(templateData[0].metaInformation).forEach((projectMetaKey) => {
+						templateData[0][projectMetaKey] = templateData[0].metaInformation[projectMetaKey]
+					})
 				}
 				if (language !== '' && templateData[0].translations && templateData[0].translations[language]) {
 					templateData[0] = UTILS.getTranslatedData(templateData[0], templateData[0].translations[language])
@@ -1448,13 +1448,6 @@ function _templateInformation(project) {
 
 				delete project.programId
 				delete project.programExternalId
-			}
-
-			if (project.metaInformation) {
-				Object.keys(project.metaInformation).forEach((projectMetaKey) => {
-					if (!['duration', 'testimonials'].includes(projectMetaKey))
-						project[projectMetaKey] = project.metaInformation[projectMetaKey]
-				})
 			}
 			delete project.metaInformation
 			delete project.__v

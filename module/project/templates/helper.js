@@ -220,7 +220,6 @@ module.exports = class ProjectTemplatesHelper {
 				let testimonials = await testimonialsHelper.extractTestimonialsFromCsv(parsedData)
 				parsedData.learningResources = learningResources.data
 				parsedData.evidences = evidences.data
-
 				parsedData.metaInformation = {}
 				parsedData.metaInformation['testimonials'] = testimonials.data
 				let booleanData = UTILS.getAllBooleanDataFromModels(schemas['project-templates'].schema)
@@ -1126,6 +1125,11 @@ module.exports = class ProjectTemplatesHelper {
 					templateData[0].wishlist = true
 				}
 
+				if (templateData[0].metaInformation) {
+					Object.keys(templateData[0].metaInformation).forEach((projectMetaKey) => {
+						templateData[0][projectMetaKey] = templateData[0].metaInformation[projectMetaKey]
+					})
+				}
 				if (language !== '' && templateData[0].translations && templateData[0].translations[language]) {
 					templateData[0] = UTILS.getTranslatedData(templateData[0], templateData[0].translations[language])
 				}
@@ -1444,12 +1448,6 @@ function _templateInformation(project) {
 
 				delete project.programId
 				delete project.programExternalId
-			}
-
-			if (project.metaInformation) {
-				Object.keys(project.metaInformation).forEach((projectMetaKey) => {
-					project[projectMetaKey] = project.metaInformation[projectMetaKey]
-				})
 			}
 			delete project.metaInformation
 			delete project.__v

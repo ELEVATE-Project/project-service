@@ -220,16 +220,19 @@ module.exports = class ProjectTemplatesHelper {
 				let testimonials = await testimonialsHelper.extractTestimonialsFromCsv(parsedData)
 				parsedData.learningResources = learningResources.data
 				parsedData.evidences = evidences.data
-				parsedData.testimonials = testimonials.data
 
 				parsedData.metaInformation = {}
+				parsedData.metaInformation['testimonials'] = testimonials.data
 				let booleanData = UTILS.getAllBooleanDataFromModels(schemas['project-templates'].schema)
 				parsedData['hasStory'] = parsedData['hasStory'] == 'YES' ? true : false
 				parsedData['hasSpotlight'] = parsedData['hasSpotlight'] == 'YES' ? true : false
 				parsedData['isPrivate'] = parsedData['isPrivate'] == 'YES' ? true : false
 				Object.keys(parsedData).forEach((eachParsedData) => {
 					if (!templatesDataModel.includes(eachParsedData)) {
-						if (!eachParsedData.startsWith('learningResources')) {
+						if (
+							!eachParsedData.startsWith('testimonial') &&
+							!eachParsedData.startsWith('learningResources')
+						) {
 							parsedData.metaInformation[eachParsedData] = parsedData[eachParsedData]
 							delete parsedData[eachParsedData]
 						}

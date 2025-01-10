@@ -697,7 +697,12 @@ function arrayOfObjectToArrayOfObjectId(ids) {
  */
 function getTranslatedData(data, translateData) {
 	// Object Keys Which not to be replaces Completely
-	const customTranslationKeys = ['evidences', 'categories', 'learningResources', 'testimonials']
+	let customTranslationKeys = []
+	Object.keys(data).forEach((item) => {
+		if (Array.isArray(data[item]) && data[item].every((ele) => typeof ele === 'object' && ele != null)) {
+			customTranslationKeys.push(item)
+		}
+	})
 	Object.keys(data).forEach((eachValue) => {
 		if (customTranslationKeys.includes(eachValue) && Array.isArray(data[eachValue])) {
 			data[eachValue].forEach((item, index) => {

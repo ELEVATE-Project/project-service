@@ -140,6 +140,5 @@ module.exports = {
 		summary: String,
 		author: String,
 		problemStatement: String,
-		testimonials: Array,
 	},
 }

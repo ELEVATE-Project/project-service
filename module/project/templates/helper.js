@@ -29,6 +29,7 @@ const programQueries = require(DB_QUERY_BASE_PATH + '/programs')
 const evidencesHelper = require(MODULES_BASE_PATH + '/evidences/helper')
 const userExtensionQueries = require(DB_QUERY_BASE_PATH + '/userExtension')
 const filesHelpers = require(MODULES_BASE_PATH + '/cloud-services/files/helper')
+const testimonialsHelper = require(MODULES_BASE_PATH + '/testimonials/helper')
 module.exports = class ProjectTemplatesHelper {
 	/**
 	 * Extract csv information.
@@ -216,17 +217,21 @@ module.exports = class ProjectTemplatesHelper {
 
 				let learningResources = await learningResourcesHelper.extractLearningResourcesFromCsv(parsedData)
 				let evidences = await evidencesHelper.extractEvidencesFromCsv(parsedData)
+				let testimonials = await testimonialsHelper.extractTestimonialsFromCsv(parsedData)
 				parsedData.learningResources = learningResources.data
 				parsedData.evidences = evidences.data
-
 				parsedData.metaInformation = {}
+				parsedData.metaInformation['testimonials'] = testimonials.data
 				let booleanData = UTILS.getAllBooleanDataFromModels(schemas['project-templates'].schema)
 				parsedData['hasStory'] = parsedData['hasStory'] == 'YES' ? true : false
 				parsedData['hasSpotlight'] = parsedData['hasSpotlight'] == 'YES' ? true : false
 				parsedData['isPrivate'] = parsedData['isPrivate'] == 'YES' ? true : false
 				Object.keys(parsedData).forEach((eachParsedData) => {
 					if (!templatesDataModel.includes(eachParsedData)) {
-						if (!eachParsedData.startsWith('learningResources')) {
+						if (
+							!eachParsedData.startsWith('testimonial') &&
+							!eachParsedData.startsWith('learningResources')
+						) {
 							parsedData.metaInformation[eachParsedData] = parsedData[eachParsedData]
 							delete parsedData[eachParsedData]
 						}
@@ -262,6 +267,11 @@ module.exports = class ProjectTemplatesHelper {
 									translations[key]['learningResources'][requiredModelField] =
 										translations[key]['learningResources'][requiredModelField] || []
 									translations[key]['learningResources'][requiredModelField].push(data[item])
+								} else if (fieldSegments.some((segment) => segment.includes('testimonial'))) {
+									translations[key]['testimonials'] = translations[key]['testimonials'] || {}
+									translations[key]['testimonials'][requiredModelField] =
+										translations[key]['testimonials'][requiredModelField] || []
+									translations[key]['testimonials'][requiredModelField].push(data[item])
 								} else {
 									translations[key] = translations[key] || {}
 									if (['text', 'recommendedFor', 'categories'].includes(requiredModelField)) {
@@ -1013,7 +1023,6 @@ module.exports = class ProjectTemplatesHelper {
 					'createdAt',
 					'updatedAt',
 					'__v',
-					'metaInformation',
 				])
 
 				// Fetch downloadable urls for the category evidences
@@ -1116,6 +1125,11 @@ module.exports = class ProjectTemplatesHelper {
 					templateData[0].wishlist = true
 				}
 
+				if (templateData[0].metaInformation) {
+					Object.keys(templateData[0].metaInformation).forEach((projectMetaKey) => {
+						templateData[0][projectMetaKey] = templateData[0].metaInformation[projectMetaKey]
+					})
+				}
 				if (language !== '' && templateData[0].translations && templateData[0].translations[language]) {
 					templateData[0] = UTILS.getTranslatedData(templateData[0], templateData[0].translations[language])
 				}
@@ -1434,12 +1448,6 @@ function _templateInformation(project) {
 
 				delete project.programId
 				delete project.programExternalId
-			}
-
-			if (project.metaInformation) {
-				Object.keys(project.metaInformation).forEach((projectMetaKey) => {
-					project[projectMetaKey] = project.metaInformation[projectMetaKey]
-				})
 			}
 			delete project.metaInformation
 			delete project.__v

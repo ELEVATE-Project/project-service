@@ -193,6 +193,7 @@ module.exports = class LibraryCategoriesHelper {
 							metaInformation: 1,
 							recommendedFor: 1,
 							evidences: 1,
+							translations: 1,
 						},
 					},
 					{
@@ -331,7 +332,21 @@ module.exports = class LibraryCategoriesHelper {
 
 					result[0].data = projectTemplates
 				}
-
+				result[0].data.map(async (projectTemplate) => {
+					if (projectTemplate.metaInformation) {
+						const metaInformation = projectTemplate.metaInformation
+						// get the translated data if language is other than 'en'
+						if (language != 'en') {
+							await UTILS.getTranslatedData(metaInformation, projectTemplate.translations[language])
+						}
+						// add metaInformation keys to the root of the project
+						Object.keys(metaInformation).map((key) => {
+							projectTemplate[key] = metaInformation[key]
+						})
+						delete projectTemplate.metaInformation
+					}
+					delete projectTemplate.translations
+				})
 				return resolve({
 					success: true,
 					message: CONSTANTS.apiResponses.PROJECTS_FETCHED,
@@ -393,7 +408,7 @@ module.exports = class LibraryCategoriesHelper {
 				// Update the sequence numbers
 				updateData['evidences'] = []
 
-				if (categoryData[0].evidences.length > 0) {
+				if (categoryData[0].evidences && categoryData[0].evidences.length > 0) {
 					for (const evidence of evidenceUploadData) {
 						evidence.sequence += categoryData[0].evidences.length
 						categoryData[0].evidences.push(evidence)

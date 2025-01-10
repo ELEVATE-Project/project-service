@@ -335,9 +335,11 @@ module.exports = class LibraryCategoriesHelper {
 				result[0].data.map(async (projectTemplate) => {
 					if (projectTemplate.metaInformation) {
 						const metaInformation = projectTemplate.metaInformation
+						// get the translated data if language is other than 'en'
 						if (language != 'en') {
 							await UTILS.getTranslatedData(metaInformation, projectTemplate.translations[language])
 						}
+						// add metaInformation keys to the root of the project
 						Object.keys(metaInformation).map((key) => {
 							projectTemplate[key] = metaInformation[key]
 						})

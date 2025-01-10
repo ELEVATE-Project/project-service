@@ -161,7 +161,7 @@ module.exports = class UserExtensioHelper {
 			let recommendedProjects = []
 			let projectTemplateIDs = userExtensionDocument[0].wishlist
 				.map((item) => {
-					if (!item.referenceFrom || item.referenceFrom.toUpperCase() !== CONSTANTS.common.AI_GENERATED) {
+					if (!item.referenceFrom) {
 						try {
 							return new ObjectId(item._id) // Attempt to create ObjectId
 						} catch (err) {

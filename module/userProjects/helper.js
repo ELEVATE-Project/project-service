@@ -3536,7 +3536,8 @@ module.exports = class UserProjectsHelper {
 							{
 								'certificate.transactionId': transactionId,
 							},
-							updateObject
+							updateObject,
+							{ returnDocument: 'after' }
 						)
 						let kafkaUserProject = {
 							userId: projectDetails[0].userId,

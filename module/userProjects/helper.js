@@ -2785,25 +2785,43 @@ module.exports = class UserProjectsHelper {
 						completedDate: 1,
 					},
 				})
-
 				aggregateData.push(
 					{
 						$sort: { createdAt: -1 }, // Descending order (latest first)
 					},
 					{
-						// Pagination
+						// Pagination and counts
 						$facet: {
 							totalCount: [{ $count: 'count' }],
 							data: [{ $skip: pageSize * (pageNo - 1) }, { $limit: pageSize }],
+							inProgressCount: [
+								{
+									$match: {
+										status: { $in: [CONSTANTS.common.STARTED, CONSTANTS.common.INPROGRESS_STATUS] },
+									},
+								},
+								{ $count: 'count' },
+							],
+							submittedCount: [
+								{
+									$match: { status: CONSTANTS.common.SUBMITTED_STATUS },
+								},
+								{ $count: 'count' },
+							],
 						},
 					},
-
 					{
-						// Count and project the response data
+						// Project the response data
 						$project: {
 							data: 1,
 							count: {
 								$ifNull: [{ $arrayElemAt: ['$totalCount.count', 0] }, 0],
+							},
+							inProgressCount: {
+								$ifNull: [{ $arrayElemAt: ['$inProgressCount.count', 0] }, 0],
+							},
+							submittedCount: {
+								$ifNull: [{ $arrayElemAt: ['$submittedCount.count', 0] }, 0],
 							},
 						},
 					}

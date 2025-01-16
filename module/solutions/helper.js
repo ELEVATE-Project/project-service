@@ -806,7 +806,7 @@ module.exports = class SolutionsHelper {
 					matchQuery['programId'] = ObjectId(programId)
 				}
 
-				// matchQuery["startDate"] = { $lte: new Date() };
+				matchQuery['startDate'] = { $lte: new Date() }
 				// for survey type solutions even after expiry it should be visible to user for 15 days
 				let targetedSolutions = await this.list(type, subType, matchQuery, pageNo, pageSize, searchText, [
 					'name',

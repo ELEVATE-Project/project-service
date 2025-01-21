@@ -378,15 +378,40 @@
 			]
 		},
 		{
-			"sourceRoute": "/project/v1/userProjects/list",
+			"sourceRoute": "/interface/v1/userProjects/list",
 			"type": "POST",
 			"priority": "MUST_HAVE",
-			"inSequence": false,
-			"orchestrated": false,
+			"inSequence": true,
+			"orchestrated": true,
+			"responseMessage": "Successfully fetched projects",
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "elevate-project",
+					"targetBody": [
+						{
+							"sourceField": "completed",
+							"targetField": "completedCount"
+						}
+					],
+					"responseBody": [
+						{
+							"sourceField": "count",
+							"targetField": "submittedCount"
+						}
+					],
+					"service": "project",
+					"merge": true,
+					"mergeKey": "first"
+				},
+				{
+					"basePackageName": "project",
+					"packageName": "elevate-project",
+					"targetBody": [],
+					"responseBody": [],
+					"service": "project",
+					"merge": true,
+					"mergeKey": "second"
 				}
 			]
 		},

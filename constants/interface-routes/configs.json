@@ -388,12 +388,7 @@
 				{
 					"basePackageName": "project",
 					"packageName": "elevate-project",
-					"targetBody": [
-						{
-							"sourceField": "completed",
-							"targetField": "completedCount"
-						}
-					],
+					"targetBody": [],
 					"responseBody": [
 						{
 							"sourceField": "count",

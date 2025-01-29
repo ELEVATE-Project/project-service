@@ -2863,7 +2863,7 @@ module.exports = class UserProjectsHelper {
 					isATargetedSolution,
 					language
 				)
-
+				console.log('inside the helper function')
 				// If template data is not found throw error
 				if (libraryProjects.data && !Object.keys(libraryProjects.data).length > 0) {
 					throw {
@@ -3003,16 +3003,14 @@ module.exports = class UserProjectsHelper {
 				libraryProjects.data.lastDownloadedAt = new Date()
 				libraryProjects.data.status = CONSTANTS.common.STARTED
 				// adding startDate and Endate based on createdAt and duration
-				if (
-					!requestedData.startDate &&
-					!requestedData.endDate &&
-					libraryProjects.data.metaInformation.duration
-				) {
+				if (!requestedData.startDate && !requestedData.endDate && libraryProjects.data.durationInDays) {
+					console.log('inside enddate calculation string', libraryProjects.data.durationInDays)
 					libraryProjects.data.startDate = new Date()
 					libraryProjects.data.endDate = UTILS.calculateEndDate(
 						new Date(),
-						libraryProjects.data.metaInformation.duration
+						libraryProjects.data.durationInDays
 					)
+					console.log('libraryProjects.data.endDate : ', libraryProjects.data.endDate)
 				}
 				if (requestedData.startDate) {
 					libraryProjects.data.startDate = requestedData.startDate

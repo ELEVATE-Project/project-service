@@ -728,35 +728,20 @@ function getTranslatedData(data, translateData) {
 /**
  * Function to calculate the end date based on a start date and duration string.
  * @param {string} createdDate - The start date in ISO format (e.g., '2024-12-05T00:00:00.000Z').
- * @param {string} durationString - Duration in the format "1 week", "2 weeks", "1 month", "1 year", etc.
+ * @param {string} durationInDays - Number of days.
  * @returns {string} - The calculated end date in ISO format
  */
-function calculateEndDate(createdDate, durationString) {
+function calculateEndDate(createdDate, durationInDays) {
 	const startDate = moment(createdDate) // Parse the start date
 	if (!startDate.isValid()) {
 		throw new Error('Invalid start date format')
 	}
 
-	// Extract numeric value and unit from the duration string
-	const [value, unit] = durationString.split(' ')
-
-	// Add the duration to the start date based on the unit
-	switch (unit.toLowerCase()) {
-		case 'week':
-		case 'weeks':
-			return startDate.add(parseInt(value), 'weeks').toISOString()
-		case 'month':
-		case 'months':
-			return startDate.add(parseInt(value), 'months').toISOString()
-		case 'year':
-		case 'years':
-			return startDate.add(parseInt(value), 'years').toISOString()
-		case 'day':
-		case 'days':
-			return startDate.add(parseInt(value), 'days').toISOString()
-		default:
-			throw new Error('Unsupported duration unit')
+	if (typeof durationInDays !== 'number' || durationInDays < 0) {
+		throw new Error('Duration must be a valid non-negative number')
 	}
+
+	return startDate.add(durationInDays, 'days').toISOString()
 }
 
 /**
@@ -815,6 +800,33 @@ function formatMetaInformation(templateData) {
 }
 
 /**
+ * Function to convert duration in various units (week, month, year) to days.
+ * @param {string} duration - Duration string, e.g., "1 week", "2 months".
+ * @returns {number} - Duration in days.
+ */
+function convertDurationToDays(duration) {
+	const [value, unit] = duration.split(' ')
+	const numericValue = parseInt(value, 10)
+
+	switch (unit.toLowerCase()) {
+		case 'day':
+		case 'days':
+			return numericValue
+		case 'week':
+		case 'weeks':
+			return numericValue * 7
+		case 'month':
+		case 'months':
+			return numericValue * 30 // Approximation
+		case 'year':
+		case 'years':
+			return numericValue * 365 // Approximation
+		default:
+			throw new Error(`Unsupported duration unit: ${unit}`)
+	}
+}
+
+/**
  * Convert Learning Resource
  * @name convertResources
  * @param {Array} resources - learning resource data
@@ -869,4 +881,5 @@ module.exports = {
 	formatKeywords,
 	formatMetaInformation,
 	convertResources,
+	convertDurationToDays,
 }

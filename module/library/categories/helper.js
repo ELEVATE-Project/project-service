@@ -81,29 +81,55 @@ module.exports = class LibraryCategoriesHelper {
 						const defaultDurationAttributes = CONSTANTS.common.DEFAULT_ATTRIBUTES.find(
 							(attr) => attr.code === 'duration'
 						)
+
 						const entities = defaultDurationAttributes?.entities || []
 
-						// Extract values excluding "More than 6 weeks"
-						let notInDurations = entities
+						const matchingDurations = entities
 							.map((entity) => entity.value)
-							.filter((value) => value !== CONSTANTS.common.MORE_THAN_SIX_WEEKS)
+							.filter((value) => durationArray.includes(value))
 
-						if (durationArray.includes(CONSTANTS.common.MORE_THAN_SIX_WEEKS)) {
-							// Exclude "More than 6 weeks" from the current durations
-							const filteredDurations = durationArray.filter(
-								(dur) => dur !== CONSTANTS.common.MORE_THAN_SIX_WEEKS
+						let upperBoundDurationFilter = []
+						let exactDurationFilters = []
+						// Separate values that start with "More than" into `upperBoundDurationFilter`, others into `exactDurationFilters`
+						matchingDurations.forEach((value) => {
+							if (value.startsWith('More than')) {
+								upperBoundDurationFilter.push(value.replace('More than ', '').trim())
+							} else {
+								exactDurationFilters.push(value)
+							}
+						})
+
+						let minDays = Infinity
+						let exactDurationFiltersInDays = []
+						if (upperBoundDurationFilter.length > 0) {
+							// Initialize with a large number
+
+							// Convert to days and find the lowest duration
+							if (upperBoundDurationFilter.length > 0) {
+								upperBoundDurationFilter.forEach((item) => {
+									const days = UTILS.convertDurationToDays(item) // Convert duration to days
+									minDays = Math.min(minDays, days) // Keep track of the minimum days
+								})
+							}
+						}
+
+						// Convert exact duration filters to days
+						if (exactDurationFilters.length > 0) {
+							exactDurationFiltersInDays = exactDurationFilters.map((item) =>
+								UTILS.convertDurationToDays(item)
 							)
+						}
 
-							// Exclude already included durations from `notInDurations`
-							notInDurations = notInDurations.filter(
-								(notDuration) => !filteredDurations.includes(notDuration)
-							)
-
-							// Apply the `$nin` filter
-							matchQuery['$match']['metaInformation.duration'] = { $nin: notInDurations }
-						} else if (durationArray.length > 0) {
-							// Apply the `$in` filter
-							matchQuery['$match']['metaInformation.duration'] = { $in: durationArray }
+						// construct the match query for filters
+						if (minDays !== Infinity && exactDurationFiltqersInDays.length > 0) {
+							matchQuery['$match']['$or'] = [
+								{ durationInDays: { $gt: minDays } }, // Use $gt for greater than
+								{ durationInDays: { $in: exactDurationFiltersInDays } }, // For exact durations
+							]
+						} else if (minDays !== Infinity) {
+							matchQuery['$match']['durationInDays'] = { $gt: minDays } // Use $gt for greater than
+						} else if (exactDurationFiltersInDays.length > 0) {
+							matchQuery['$match']['durationInDays'] = { $in: exactDurationFiltersInDays } // Handle $in independently
 						}
 					}
 
@@ -211,7 +237,6 @@ module.exports = class LibraryCategoriesHelper {
 						},
 					}
 				)
-
 				let result = await projectTemplateQueries.getAggregate(aggregateData)
 
 				if (result[0].data.length > 0) {

@@ -214,11 +214,12 @@ module.exports = class ProjectTemplatesHelper {
 				// if( parsedData.entityType && parsedData.entityType !== "" ) {
 				//     parsedData.entityType = csvInformation.entityTypes[parsedData.entityType].name;
 				// }
+
 				// duration has sent as a string we have to convert it into days
 				if (parsedData.duration && parsedData.duration !== '') {
 					parsedData.durationInDays = UTILS.convertDurationToDays(parsedData.duration)
-					console.log('parsedData.durationInDays : ', parsedData.durationInDays)
 				}
+
 				let learningResources = await learningResourcesHelper.extractLearningResourcesFromCsv(parsedData)
 				let evidences = await evidencesHelper.extractEvidencesFromCsv(parsedData)
 				let testimonials = await testimonialsHelper.extractTestimonialsFromCsv(parsedData)
@@ -1297,7 +1298,7 @@ module.exports = class ProjectTemplatesHelper {
 				}
 
 				let templateDocument = await projectTemplateQueries.templateDocument(findQuery, ['_id'])
-				console.log('templateDocument :', templateDocument)
+
 				if (!templateDocument.length > 0) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
@@ -1308,15 +1309,13 @@ module.exports = class ProjectTemplatesHelper {
 				let updateObject = {
 					$set: {},
 				}
-				console.log('incoming  data : ', templateData, templateData.metaInformation)
+
 				if (
 					templateData.metaInformation &&
 					templateData.metaInformation.duration &&
 					templateData.metaInformation.duration !== ''
 				) {
-					console.log('inside if condition')
 					templateData.durationInDays = UTILS.convertDurationToDays(templateData.metaInformation.duration)
-					console.log('templateData.durationInDays : ', templateData.durationInDays)
 				}
 				let templateUpdateData = templateData
 

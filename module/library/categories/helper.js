@@ -15,6 +15,7 @@ const moment = require('moment-timezone')
 const filesHelpers = require(MODULES_BASE_PATH + '/cloud-services/files/helper')
 const axios = require('axios')
 const entitiesService = require(GENERICS_FILES_PATH + '/services/entity-management')
+const projectAttributesQueries = require(DB_QUERY_BASE_PATH + '/projectAttributes')
 
 /**
  * LibraryCategoriesHelper
@@ -77,10 +78,21 @@ module.exports = class LibraryCategoriesHelper {
 					// Split duration only if it has a value
 					if (duration) {
 						const durationArray = duration.split(',')
+						let defaultDurationAttributes
 
-						const defaultDurationAttributes = CONSTANTS.common.DEFAULT_ATTRIBUTES.find(
-							(attr) => attr.code === 'duration'
-						)
+						// Fetch the project attributes document for the duration
+						const projectAttributesDocument = await projectAttributesQueries.projectAttributesDocument({
+							code: 'duration',
+							deleted: false,
+						})
+
+						if (projectAttributesDocument && projectAttributesDocument.length > 0) {
+							defaultDurationAttributes = projectAttributesDocument[0]
+						} else {
+							defaultDurationAttributes = CONSTANTS.common.DEFAULT_ATTRIBUTES.find(
+								(attr) => attr.code === 'duration'
+							)
+						}
 
 						const entities = defaultDurationAttributes?.entities || []
 

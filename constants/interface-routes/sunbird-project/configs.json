@@ -1994,6 +1994,7 @@
 			"priority": "MUST_HAVE",
 			"inSequence": false,
 			"orchestrated": false,
+			"requiresCustomHandling": true,
 			"targetPackages": [
 				{
 					"basePackageName": "project",
@@ -2008,6 +2009,7 @@
 			"priority": "MUST_HAVE",
 			"inSequence": false,
 			"orchestrated": false,
+			"requiresCustomHandling": true,
 			"targetPackages": [
 				{
 					"basePackageName": "project",
@@ -2022,6 +2024,7 @@
 			"priority": "MUST_HAVE",
 			"inSequence": false,
 			"orchestrated": false,
+			"requiresCustomHandling": true,
 			"targetPackages": [
 				{
 					"basePackageName": "project",

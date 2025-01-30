@@ -138,7 +138,6 @@ module.exports = {
 			entities: [],
 		},
 	],
-	MORE_THAN_SIX_WEEKS: 'More than 6 weeks',
 	AUTH_METHOD: {
 		NATIVE: 'native',
 		KEYCLOAK_PUBLIC_KEY: 'keycloak_public_key',

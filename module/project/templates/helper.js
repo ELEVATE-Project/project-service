@@ -215,6 +215,11 @@ module.exports = class ProjectTemplatesHelper {
 				//     parsedData.entityType = csvInformation.entityTypes[parsedData.entityType].name;
 				// }
 
+				// duration has sent as a string we have to convert it into days
+				if (parsedData.duration && parsedData.duration !== '') {
+					parsedData.durationInDays = UTILS.convertDurationToDays(parsedData.duration)
+				}
+
 				let learningResources = await learningResourcesHelper.extractLearningResourcesFromCsv(parsedData)
 				let evidences = await evidencesHelper.extractEvidencesFromCsv(parsedData)
 				let testimonials = await testimonialsHelper.extractTestimonialsFromCsv(parsedData)
@@ -1305,6 +1310,13 @@ module.exports = class ProjectTemplatesHelper {
 					$set: {},
 				}
 
+				if (
+					templateData.metaInformation &&
+					templateData.metaInformation.duration &&
+					templateData.metaInformation.duration !== ''
+				) {
+					templateData.durationInDays = UTILS.convertDurationToDays(templateData.metaInformation.duration)
+				}
 				let templateUpdateData = templateData
 
 				Object.keys(templateUpdateData).forEach((updationData) => {

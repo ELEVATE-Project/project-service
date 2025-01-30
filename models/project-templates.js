@@ -140,5 +140,8 @@ module.exports = {
 		summary: String,
 		author: String,
 		problemStatement: String,
+		durationInDays: {
+			type: Number,
+		},
 	},
 }

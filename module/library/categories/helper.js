@@ -83,14 +83,11 @@ module.exports = class LibraryCategoriesHelper {
 						)
 
 						const entities = defaultDurationAttributes?.entities || []
-						console.log('entities : ', entities)
-						console.log('Duration Array : ', durationArray)
 
 						const matchingDurations = entities
 							.map((entity) => entity.value)
 							.filter((value) => durationArray.includes(value))
 
-						console.log('Matching Durations:', matchingDurations)
 						let upperBoundDurationFilter = []
 						let exactDurationFilters = []
 						// Separate values that start with "More than" into `upperBoundDurationFilter`, others into `exactDurationFilters`
@@ -101,7 +98,7 @@ module.exports = class LibraryCategoriesHelper {
 								exactDurationFilters.push(value)
 							}
 						})
-						console.log('++upperBoundDurationFilter :', upperBoundDurationFilter)
+
 						let minDays = Infinity
 						let exactDurationFiltersInDays = []
 						if (upperBoundDurationFilter.length > 0) {
@@ -113,21 +110,16 @@ module.exports = class LibraryCategoriesHelper {
 									const days = UTILS.convertDurationToDays(item) // Convert duration to days
 									minDays = Math.min(minDays, days) // Keep track of the minimum days
 								})
-
-								console.log('Minimum Upper Bound Duration in Days:', minDays)
 							}
 						}
-						console.log('---------------------controll reached here --------------')
+
 						// Convert exact duration filters to days
 						if (exactDurationFilters.length > 0) {
 							exactDurationFiltersInDays = exactDurationFilters.map((item) =>
 								UTILS.convertDurationToDays(item)
 							)
-							// matchQuery['$match']['durationInDays'] = {
-							// 	$in: exactDurationFiltersInDays
-							// };
 						}
-						console.log('Exact Duration Filters:', exactDurationFilters)
+
 						// construct the match query for filters
 						if (minDays !== Infinity && exactDurationFiltersInDays.length > 0) {
 							matchQuery['$match']['$or'] = [
@@ -135,14 +127,10 @@ module.exports = class LibraryCategoriesHelper {
 								{ durationInDays: { $in: exactDurationFiltersInDays } }, // For exact durations
 							]
 						} else if (minDays !== Infinity) {
-							console.log('line 139')
 							matchQuery['$match']['durationInDays'] = { $gt: minDays } // Use $gt for greater than
 						} else if (exactDurationFiltersInDays.length > 0) {
 							matchQuery['$match']['durationInDays'] = { $in: exactDurationFiltersInDays } // Handle $in independently
 						}
-
-						console.log('Exact Duration Filters:', exactDurationFilters)
-						console.log('Upper Bound Duration Filter:', upperBoundDurationFilter)
 					}
 
 					// Split roles only if it has a value
@@ -168,7 +156,7 @@ module.exports = class LibraryCategoriesHelper {
 						}
 					}
 				}
-				console.log('matchQuery : ', JSON.stringify(matchQuery))
+
 				if (search !== '') {
 					if (userLanguage === defaultLanguage) {
 						// Search directly in default fields for English
@@ -249,7 +237,6 @@ module.exports = class LibraryCategoriesHelper {
 						},
 					}
 				)
-				console.log('aggregateData :::', JSON.stringify(aggregateData))
 				let result = await projectTemplateQueries.getAggregate(aggregateData)
 
 				if (result[0].data.length > 0) {
@@ -394,7 +381,6 @@ module.exports = class LibraryCategoriesHelper {
 					},
 				})
 			} catch (error) {
-				console.log('error : ', error)
 				return resolve({
 					success: true,
 					message: CONSTANTS.apiResponses.PROJECTS_FETCHED,

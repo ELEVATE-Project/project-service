@@ -127,6 +127,11 @@ let enviromentVariables = {
 		message: 'Entity management service name required',
 		optional: false,
 	},
+	SUBMISSION_LEVEL: {
+		message: 'Project submission level required',
+		optional: false,
+		default: 'USER',
+	},
 }
 
 let success = true

@@ -20,10 +20,11 @@ module.exports = class Programs {
 	 * @param {Array} [filterData = "all"] - programs filter query.
 	 * @param {Array} [fieldsArray = "all"] - projected fields.
 	 * @param {Array} [skipFields = "none"] - field not to include
+	 * @param {Object} [sort = {}] - object to sort in descending/ascending order
 	 * @returns {Array} program details.
 	 */
 
-	static programsDocument(filterData = 'all', fieldsArray = 'all', skipFields = 'none') {
+	static programsDocument(filterData = 'all', fieldsArray = 'all', skipFields = 'none', sort = {}) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let queryObject = filterData != 'all' ? filterData : {}
@@ -40,7 +41,10 @@ module.exports = class Programs {
 						projection[field] = 0
 					})
 				}
-				let programsDoc = await database.models.programs.find(queryObject, projection).lean()
+				let programsDoc = await database.models.programs
+					.find(queryObject, projection)
+					.sort(sort) // Use the `sort` parameter for sorting
+					.lean()
 				return resolve(programsDoc)
 			} catch (error) {
 				return reject(error)

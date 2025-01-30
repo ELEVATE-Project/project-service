@@ -688,6 +688,10 @@ function handleSpecialCharsForCertificate(projectTitle) {
 	return modifiedProjectTitle
 }
 
+function arrayOfObjectToArrayOfObjectId(ids) {
+	return ids.map((obj) => obj._id)
+}
+
 module.exports = {
 	camelCaseToTitleCase: camelCaseToTitleCase,
 	lowerCase: lowerCase,
@@ -720,4 +724,5 @@ module.exports = {
 	formatISODateToReadableDate: formatISODateToReadableDate,
 	generateChart: generateChart,
 	handleSpecialCharsForCertificate: handleSpecialCharsForCertificate,
+	arrayOfObjectToArrayOfObjectId: arrayOfObjectToArrayOfObjectId,
 }

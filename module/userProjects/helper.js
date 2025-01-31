@@ -2429,7 +2429,7 @@ module.exports = class UserProjectsHelper {
 						}
 					})
 				}
-				console.log(imageLink)
+
 				projectDocument.evidenceLink = evidenceLink
 				projectDocument.imageLink = imageLink
 
@@ -3003,15 +3003,11 @@ module.exports = class UserProjectsHelper {
 				libraryProjects.data.lastDownloadedAt = new Date()
 				libraryProjects.data.status = CONSTANTS.common.STARTED
 				// adding startDate and Endate based on createdAt and duration
-				if (
-					!requestedData.startDate &&
-					!requestedData.endDate &&
-					libraryProjects.data.metaInformation.duration
-				) {
+				if (!requestedData.startDate && !requestedData.endDate && libraryProjects.data.durationInDays) {
 					libraryProjects.data.startDate = new Date()
 					libraryProjects.data.endDate = UTILS.calculateEndDate(
 						new Date(),
-						libraryProjects.data.metaInformation.duration
+						libraryProjects.data.durationInDays
 					)
 				}
 				if (requestedData.startDate) {

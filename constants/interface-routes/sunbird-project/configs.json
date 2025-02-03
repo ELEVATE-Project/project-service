@@ -1986,7 +1986,6 @@
 			"orchestrated": true,
 			"service": "user",
 			"responseMessage": "Data fetched successfully",
-			"requiresCustomHandling": true,
 			"targetPackages": [
 				{
 					"basePackageName": "project",

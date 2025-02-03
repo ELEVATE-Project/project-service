@@ -1954,16 +1954,24 @@
 			"service": "scheduler"
 		},
 		{
-			"sourceRoute": "/user/v1/user/read",
+			"sourceRoute": "/interface/v1/user/read",
 			"type": "GET",
 			"priority": "MUST_HAVE",
 			"inSequence": false,
-			"orchestrated": false,
+			"orchestrated": true,
 			"service": "user",
+			"responseMessage": "Data fetched successfully",
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "sunbird-project"
+					"packageName": "sunbird-project",
+					"targetBody": [],
+					"responseBody": [
+						{
+							"sourceField": "response.userName",
+							"targetField": "response.name"
+						}
+					]
 				}
 			],
 			"rateLimit": {
@@ -1971,17 +1979,25 @@
 			}
 		},
 		{
-			"sourceRoute": "/user/v1/user/read/:id",
+			"sourceRoute": "/interface/v1/user/read/:id",
 			"type": "GET",
 			"priority": "MUST_HAVE",
 			"inSequence": false,
-			"orchestrated": false,
+			"orchestrated": true,
 			"service": "user",
+			"responseMessage": "Data fetched successfully",
 			"requiresCustomHandling": true,
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "sunbird-project"
+					"packageName": "sunbird-project",
+					"targetBody": [],
+					"responseBody": [
+						{
+							"sourceField": "response.userName",
+							"targetField": "response.name"
+						}
+					]
 				}
 			],
 			"rateLimit": {

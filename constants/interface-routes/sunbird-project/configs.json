@@ -1954,7 +1954,7 @@
 			"service": "scheduler"
 		},
 		{
-			"sourceRoute": "/interface/v1/user/read",
+			"sourceRoute": "/user/v1/user/read",
 			"type": "GET",
 			"priority": "MUST_HAVE",
 			"inSequence": false,
@@ -1968,8 +1968,8 @@
 					"targetBody": [],
 					"responseBody": [
 						{
-							"sourceField": "response.userName",
-							"targetField": "response.name"
+							"sourceField": "userName",
+							"targetField": "name"
 						}
 					]
 				}
@@ -1979,7 +1979,7 @@
 			}
 		},
 		{
-			"sourceRoute": "/interface/v1/user/read/:id",
+			"sourceRoute": "/user/v1/user/read/:id",
 			"type": "GET",
 			"priority": "MUST_HAVE",
 			"inSequence": false,
@@ -1993,8 +1993,8 @@
 					"targetBody": [],
 					"responseBody": [
 						{
-							"sourceField": "response.userName",
-							"targetField": "response.name"
+							"sourceField": "userName",
+							"targetField": "name"
 						}
 					]
 				}

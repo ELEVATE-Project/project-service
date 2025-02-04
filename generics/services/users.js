@@ -10,7 +10,7 @@ const request = require('request')
 const interfaceServiceUrl = process.env.INTERFACE_SERVICE_URL
 
 // Function to read the user profile based on the given userId
-const profile = function (userId = '') {
+const profile = function (userId = '', req) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			// Construct the URL for the user service
@@ -25,6 +25,7 @@ const profile = function (userId = '') {
 				headers: {
 					'content-type': 'application/json',
 					internal_access_token: process.env.INTERNAL_ACCESS_TOKEN,
+					'x-auth-token': req.userDetails.userToken,
 				},
 			}
 			request.get(url, options, userReadCallback)

@@ -254,7 +254,7 @@ module.exports = async function (req, res, next, token = '') {
 	}
 	// Update user details object
 	req.userDetails.userInformation = userInformation
-
+	console.log(req.userDetails.userInformation)
 	// Helper function to access nested properties
 	function getNestedValue(obj, path) {
 		return path.split('.').reduce((acc, part) => acc && acc[part], obj)

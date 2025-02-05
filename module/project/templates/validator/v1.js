@@ -12,11 +12,14 @@ module.exports = (req) => {
 			// req.checkQuery('solutionId').exists().withMessage("required solution id");
 		},
 		update: function () {
-			req.checkBody('metaInformation.duration')
-				.exists()
-				.withMessage('Duration is required')
-				.custom((value) => isValidDurationFormat(value))
-				.withMessage('Invalid duration format. Expected format: {number} {unit} (e.g., "2 weeks", "1 month")')
+			// Check if metaInformation exists before validating duration
+			if (req.body.metaInformation && req.body.metaInformation.duration) {
+				req.checkBody('metaInformation.duration')
+					.custom((value) => isValidDurationFormat(value))
+					.withMessage(
+						'Invalid duration format. Expected format: {number} {unit} (e.g., "2 weeks", "1 month")'
+					)
+			}
 		},
 	}
 

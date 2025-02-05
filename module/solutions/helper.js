@@ -1416,6 +1416,7 @@ module.exports = class SolutionsHelper {
 				}
 
 				//entities
+				console.log('create program and solution --- line 1419 : ', data)
 				if (Array.isArray(data.entities) && data.entities && data.entities.length > 0) {
 					let entitiesData = []
 					let bodyData = {}
@@ -1427,7 +1428,7 @@ module.exports = class SolutionsHelper {
 							id: locationData.ids,
 						}
 						let entityData = await entitiesService.entityDocuments(bodyData, 'all')
-
+						console.log('entityData 1431 : ', entityData)
 						if (!entityData.success) {
 							return resolve({
 								status: HTTP_STATUS_CODE.bad_request.status,

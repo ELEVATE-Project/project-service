@@ -1970,6 +1970,10 @@
 						{
 							"sourceField": "userName",
 							"targetField": "name"
+						},
+						{
+							"sourceField": "profileLocation",
+							"targetField": "meta"
 						}
 					]
 				}
@@ -1995,6 +1999,10 @@
 						{
 							"sourceField": "userName",
 							"targetField": "name"
+						},
+						{
+							"sourceField": "profileLocation",
+							"targetField": "meta"
 						}
 					]
 				}

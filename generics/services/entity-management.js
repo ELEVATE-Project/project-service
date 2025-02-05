@@ -162,6 +162,7 @@ const getUserRoleExtensionDocuments = function (filterData = 'all', projection =
 				if (err) {
 					result.success = false
 				} else {
+					console.log('data coming  from entitymanagement service : ', JSON.stringify(data))
 					let response = data.body
 					// Check if the response status is OK (HTTP 200)
 					if (response.status === HTTP_STATUS_CODE.ok.status) {

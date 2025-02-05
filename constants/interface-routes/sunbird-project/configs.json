@@ -1958,12 +1958,24 @@
 			"type": "GET",
 			"priority": "MUST_HAVE",
 			"inSequence": false,
-			"orchestrated": false,
+			"orchestrated": true,
 			"service": "user",
+			"responseMessage": "Data fetched successfully",
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "sunbird-project"
+					"packageName": "sunbird-project",
+					"targetBody": [],
+					"responseBody": [
+						{
+							"sourceField": "userName",
+							"targetField": "name"
+						},
+						{
+							"sourceField": "profileLocation",
+							"targetField": "meta"
+						}
+					]
 				}
 			],
 			"rateLimit": {
@@ -1975,13 +1987,24 @@
 			"type": "GET",
 			"priority": "MUST_HAVE",
 			"inSequence": false,
-			"orchestrated": false,
+			"orchestrated": true,
 			"service": "user",
-			"requiresCustomHandling": true,
+			"responseMessage": "Data fetched successfully",
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "sunbird-project"
+					"packageName": "sunbird-project",
+					"targetBody": [],
+					"responseBody": [
+						{
+							"sourceField": "userName",
+							"targetField": "name"
+						},
+						{
+							"sourceField": "profileLocation",
+							"targetField": "meta"
+						}
+					]
 				}
 			],
 			"rateLimit": {
@@ -1994,6 +2017,7 @@
 			"priority": "MUST_HAVE",
 			"inSequence": false,
 			"orchestrated": false,
+			"requiresCustomHandling": true,
 			"targetPackages": [
 				{
 					"basePackageName": "project",
@@ -2008,6 +2032,7 @@
 			"priority": "MUST_HAVE",
 			"inSequence": false,
 			"orchestrated": false,
+			"requiresCustomHandling": true,
 			"targetPackages": [
 				{
 					"basePackageName": "project",
@@ -2022,6 +2047,7 @@
 			"priority": "MUST_HAVE",
 			"inSequence": false,
 			"orchestrated": false,
+			"requiresCustomHandling": true,
 			"targetPackages": [
 				{
 					"basePackageName": "project",

@@ -27,9 +27,9 @@ const profile = function (userId = '', userToken = '') {
 					internal_access_token: process.env.INTERNAL_ACCESS_TOKEN,
 				},
 			}
-			// if (userToken !== '') {
-			// 	options.headers['x-auth-token'] = userToken
-			// }
+			if (userToken !== '') {
+				options.headers['x-auth-token'] = userToken
+			}
 			request.get(url, options, userReadCallback)
 			let result = {
 				success: true,

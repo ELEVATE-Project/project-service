@@ -1416,7 +1416,6 @@ module.exports = class SolutionsHelper {
 				}
 
 				//entities
-				console.log('create program and solution --- line 1419 : ', data)
 				if (Array.isArray(data.entities) && data.entities && data.entities.length > 0) {
 					let entitiesData = []
 					let bodyData = {}

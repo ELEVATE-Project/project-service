@@ -16,6 +16,7 @@ module.exports = class ProfileHelper {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Fetch user profile details using userService.profile function
+				// Passing userToken as well
 				const userResponse = await userService.profile(userId, userToken)
 
 				// Check if the user profile fetch was successful

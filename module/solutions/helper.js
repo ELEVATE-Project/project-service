@@ -1427,7 +1427,6 @@ module.exports = class SolutionsHelper {
 							id: locationData.ids,
 						}
 						let entityData = await entitiesService.entityDocuments(bodyData, 'all')
-
 						if (!entityData.success) {
 							return resolve({
 								status: HTTP_STATUS_CODE.bad_request.status,

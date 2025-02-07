@@ -1954,12 +1954,46 @@
 			"service": "scheduler"
 		},
 		{
+			"sourceRoute": "/user/v1/user/read",
+			"type": "GET",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"service": "user",
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "sunbird-project"
+				}
+			],
+			"rateLimit": {
+				"type": "internal"
+			}
+		},
+		{
+			"sourceRoute": "/user/v1/user/read/:id",
+			"type": "GET",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"service": "user",
+			"requiresCustomHandling": true,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "sunbird-project"
+				}
+			],
+			"rateLimit": {
+				"type": "internal"
+			}
+		},
+		{
 			"sourceRoute": "/entity-management/v1/userRoleExtension/find",
 			"type": "POST",
 			"priority": "MUST_HAVE",
 			"inSequence": false,
 			"orchestrated": false,
-			"requiresCustomHandling": true,
 			"targetPackages": [
 				{
 					"basePackageName": "project",
@@ -1974,7 +2008,6 @@
 			"priority": "MUST_HAVE",
 			"inSequence": false,
 			"orchestrated": false,
-			"requiresCustomHandling": true,
 			"targetPackages": [
 				{
 					"basePackageName": "project",
@@ -1989,7 +2022,6 @@
 			"priority": "MUST_HAVE",
 			"inSequence": false,
 			"orchestrated": false,
-			"requiresCustomHandling": true,
 			"targetPackages": [
 				{
 					"basePackageName": "project",
@@ -1997,36 +2029,6 @@
 				}
 			],
 			"service": "entity"
-		},
-		{
-			"sourceRoute": "/user/v1/user/read",
-			"type": "GET",
-			"priority": "MUST_HAVE",
-			"inSequence": false,
-			"orchestrated": false,
-			"requiresCustomHandling": true,
-			"targetPackages": [
-				{
-					"basePackageName": "project",
-					"packageName": "sunbird-project"
-				}
-			],
-			"service": "user"
-		},
-		{
-			"sourceRoute": "/user/v1/user/read/:id",
-			"type": "GET",
-			"priority": "MUST_HAVE",
-			"inSequence": false,
-			"orchestrated": false,
-			"requiresCustomHandling": true,
-			"targetPackages": [
-				{
-					"basePackageName": "project",
-					"packageName": "sunbird-project"
-				}
-			],
-			"service": "user"
 		}
 	]
 }

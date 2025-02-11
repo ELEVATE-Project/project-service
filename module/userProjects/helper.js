@@ -1387,6 +1387,13 @@ module.exports = class UserProjectsHelper {
 						userRoleInformation
 					)
 
+					if (!targetedSolutionId.success) {
+						throw {
+							success: false,
+							message: targetedSolutionId.message,
+						}
+					}
+
 					//based on above api will check for projects wether its is private project or public project
 					const projectDetails = await projectQueries.projectDocument(
 						{

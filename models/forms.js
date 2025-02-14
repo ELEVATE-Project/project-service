@@ -11,7 +11,6 @@ const formSchema = new Schema({
 	type: {
 		type: String,
 		required: true,
-		index: true,
 	},
 	subType: {
 		type: String,
@@ -25,7 +24,7 @@ const formSchema = new Schema({
 		type: Schema.Types.Mixed,
 	},
 	organizationId: {
-		type: Number,
+		type: String,
 		required: true,
 	},
 })

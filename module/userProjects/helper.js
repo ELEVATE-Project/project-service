@@ -1662,31 +1662,31 @@ module.exports = class UserProjectsHelper {
 								projectCreation.data['userRole'] = bodyData.role
 							}
 
-							if (solutionDetails.entityType && bodyData[solutionDetails.entityType]) {
-								let entityInformation = await entitiesService.entityTypeDocuments(
-									{ name: bodyData[solutionDetails.entityType] },
-									'all'
-								)
+							// if (solutionDetails.entityType && bodyData[solutionDetails.entityType]) {
+							// 	let entityInformation = await entitiesService.entityTypeDocuments(
+							// 		{ name: bodyData[solutionDetails.entityType] },
+							// 		'all'
+							// 	)
 
-								// if( !entityInformation.success ) {
-								//     throw {
-								//         message : CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
-								//         status : HTTP_STATUS_CODE.bad_request.status
-								//     }
-								// }
+							// 	// if( !entityInformation.success ) {
+							// 	//     throw {
+							// 	//         message : CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
+							// 	//         status : HTTP_STATUS_CODE.bad_request.status
+							// 	//     }
+							// 	// }
 
-								// let entityDetails = await entitiesService.entityDocuments(
-								//     entityInformation.data
-								// );
+							// 	// let entityDetails = await entitiesService.entityDocuments(
+							// 	//     entityInformation.data
+							// 	// );
 
-								// if ( entityDetails && entityDetails.length > 0 ) {
-								//     projectCreation.data["entityInformation"] = entityDetails[0];
-								// }
+							// 	// if ( entityDetails && entityDetails.length > 0 ) {
+							// 	//     projectCreation.data["entityInformation"] = entityDetails[0];
+							// 	// }
 
-								if (entityInformation.success && entityInformation.data.length > 0) {
-									projectCreation.data.entityType = entityInformation.data[0]._id
-								}
-							}
+							// 	if (entityInformation.success && entityInformation.data.length > 0) {
+							// 		projectCreation.data.entityType = entityInformation.data[0]._id
+							// 	}
+							// }
 						}
 
 						projectCreation.data.status = CONSTANTS.common.STARTED
@@ -2908,19 +2908,19 @@ module.exports = class UserProjectsHelper {
 				// If an entityId is passed in body data. we need to varify if it is a valid entity
 				// If not a valid entity throw error
 				// If it is valid make sure we add those data to newly creating projects
-				if (requestedData.entityId && requestedData.entityId !== '') {
-					let entityInformation = await entitiesService.entityDocuments(
-						{ _id: requestedData.entityId },
-						'all'
-					)
+				// if (requestedData.entityId && requestedData.entityId !== '') {
+				// 	let entityInformation = await entitiesService.entityDocuments(
+				// 		{ _id: requestedData.entityId },
+				// 		'all'
+				// 	)
 
-					if (!entityInformation.success) {
-						return resolve(entityInformation)
-					}
+				// 	if (!entityInformation.success) {
+				// 		return resolve(entityInformation)
+				// 	}
 
-					libraryProjects.data['entityInformation'] = entityInformation.data[0]
-					libraryProjects.data.entityId = entityInformation.data[0]._id
-				}
+				// 	libraryProjects.data['entityInformation'] = entityInformation.data[0]
+				// 	libraryProjects.data.entityId = entityInformation.data[0]._id
+				// }
 
 				if (requestedData.solutionId && requestedData.solutionId !== '' && isATargetedSolution === false) {
 					let programAndSolutionInformation = await this.createProgramAndSolution(
@@ -4588,70 +4588,72 @@ function _projectCategories(categories) {
  * @returns {Object} Project entity information.
  */
 
-function _entitiesInformation(entityIds) {
-	return new Promise(async (resolve, reject) => {
-		try {
-			let locationIds = []
-			let locationCodes = []
-			let entityInformations = []
-			entityIds.forEach((entity) => {
-				if (UTILS.checkValidUUID(entity)) {
-					locationIds.push(entity)
-				} else {
-					locationCodes.push(entity)
-				}
-			})
+// This function is currently not being used in EP
 
-			if (locationIds.length > 0) {
-				let queryData = {
-					'registryDetails.locationId': { $in: locationIds },
-					_id: { $in: locationIds },
-				}
-				let entityData = await entitiesService.entityDocuments(queryData, 'all')
-				if (entityData.success) {
-					entityInformations = entityData.data
-				}
-			}
+// function _entitiesInformation(entityIds) {
+// 	return new Promise(async (resolve, reject) => {
+// 		try {
+// 			let locationIds = []
+// 			let locationCodes = []
+// 			let entityInformations = []
+// 			entityIds.forEach((entity) => {
+// 				if (UTILS.checkValidUUID(entity)) {
+// 					locationIds.push(entity)
+// 				} else {
+// 					locationCodes.push(entity)
+// 				}
+// 			})
 
-			// if ( locationCodes.length > 0 ) {
-			//     let bodyData = {
-			//         "code" : locationCodes
-			//     }
-			//     let entityData = await userService.locationSearch( bodyData , formatResult = true );
-			//     if ( entityData.success ) {
-			//         entityInformations =  entityInformations.concat(entityData.data);
-			//     }
-			// }
+// 			if (locationIds.length > 0) {
+// 				let queryData = {
+// 					'registryDetails.locationId': { $in: locationIds },
+// 					_id: { $in: locationIds },
+// 				}
+// 				let entityData = await entitiesService.entityDocuments(queryData, 'all')
+// 				if (entityData.success) {
+// 					entityInformations = entityData.data
+// 				}
+// 			}
 
-			// above code is commented as we are already fetching entity related info from entitiesService
+// 			// if ( locationCodes.length > 0 ) {
+// 			//     let bodyData = {
+// 			//         "code" : locationCodes
+// 			//     }
+// 			//     let entityData = await userService.locationSearch( bodyData , formatResult = true );
+// 			//     if ( entityData.success ) {
+// 			//         entityInformations =  entityInformations.concat(entityData.data);
+// 			//     }
+// 			// }
 
-			if (!entityInformations.length > 0) {
-				throw {
-					status: HTTP_STATUS_CODE.bad_request.status,
-					message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
-				}
-			}
+// 			// above code is commented as we are already fetching entity related info from entitiesService
 
-			// below code is commented as we are already fetching entity related info from entitiesService
-			// let entitiesData = [];
-			// if ( entityInformations.length > 0 ) {
-			//     entitiesData = await _entitiesMetaInformation(entityInformations);
-			// }
+// 			if (!entityInformations.length > 0) {
+// 				throw {
+// 					status: HTTP_STATUS_CODE.bad_request.status,
+// 					message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
+// 				}
+// 			}
 
-			return resolve({
-				success: true,
-				data: entityInformations,
-			})
-		} catch (error) {
-			return resolve({
-				status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
-				success: false,
-				message: error.message,
-				data: [],
-			})
-		}
-	})
-}
+// 			// below code is commented as we are already fetching entity related info from entitiesService
+// 			// let entitiesData = [];
+// 			// if ( entityInformations.length > 0 ) {
+// 			//     entitiesData = await _entitiesMetaInformation(entityInformations);
+// 			// }
+
+// 			return resolve({
+// 				success: true,
+// 				data: entityInformations,
+// 			})
+// 		} catch (error) {
+// 			return resolve({
+// 				status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
+// 				success: false,
+// 				message: error.message,
+// 				data: [],
+// 			})
+// 		}
+// 	})
+// }
 
 /**
  * Assessment details

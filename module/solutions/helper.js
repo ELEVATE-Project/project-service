@@ -1416,58 +1416,58 @@ module.exports = class SolutionsHelper {
 				}
 
 				//entities
-				if (Array.isArray(data.entities) && data.entities && data.entities.length > 0) {
-					let entitiesData = []
-					let bodyData = {}
+				// if (Array.isArray(data.entities) && data.entities && data.entities.length > 0) {
+				// 	let entitiesData = []
+				// 	let bodyData = {}
 
-					let locationData = UTILS.filterLocationIdandCode(data.entities)
+				// 	let locationData = UTILS.filterLocationIdandCode(data.entities)
 
-					if (locationData.ids.length > 0) {
-						bodyData = {
-							id: locationData.ids,
-						}
-						let entityData = await entitiesService.entityDocuments(bodyData, 'all')
+				// 	if (locationData.ids.length > 0) {
+				// 		bodyData = {
+				// 			id: locationData.ids,
+				// 		}
+				// 		let entityData = await entitiesService.entityDocuments(bodyData, 'all')
 
-						if (!entityData.success) {
-							return resolve({
-								status: HTTP_STATUS_CODE.bad_request.status,
-								message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
-								result: {},
-							})
-						}
+				// 		if (!entityData.success) {
+				// 			return resolve({
+				// 				status: HTTP_STATUS_CODE.bad_request.status,
+				// 				message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
+				// 				result: {},
+				// 			})
+				// 		}
 
-						entityData.data.forEach((entity) => {
-							entitiesData.push(entity._id)
-						})
+				// 		entityData.data.forEach((entity) => {
+				// 			entitiesData.push(entity._id)
+				// 		})
 
-						solutionDataToBeUpdated['entityType'] = entityData.data[0].type
-					}
+				// 		solutionDataToBeUpdated['entityType'] = entityData.data[0].type
+				// 	}
 
-					if (locationData.codes.length > 0) {
-						let filterData = {
-							'registryDetails.code': { $in: locationData.codes },
-						}
-						let entityDetails = await entitiesService.entityDocuments(filterData, 'all')
-						if (!entityDetails.success || !entityDetails.data || !entityDetails.data.length > 0) {
-							return resolve({
-								status: HTTP_STATUS_CODE.bad_request.status,
-								message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
-								result: {},
-							})
-						}
-						let entityDocuments = entityDetails.data
+				// 	if (locationData.codes.length > 0) {
+				// 		let filterData = {
+				// 			'registryDetails.code': { $in: locationData.codes },
+				// 		}
+				// 		let entityDetails = await entitiesService.entityDocuments(filterData, 'all')
+				// 		if (!entityDetails.success || !entityDetails.data || !entityDetails.data.length > 0) {
+				// 			return resolve({
+				// 				status: HTTP_STATUS_CODE.bad_request.status,
+				// 				message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
+				// 				result: {},
+				// 			})
+				// 		}
+				// 		let entityDocuments = entityDetails.data
 
-						entityDocuments.forEach((entity) => {
-							entitiesData.push(entity._id)
-						})
+				// 		entityDocuments.forEach((entity) => {
+				// 			entitiesData.push(entity._id)
+				// 		})
 
-						solutionDataToBeUpdated['entityType'] = CONSTANTS.common.SCHOOL
-					}
+				// 		solutionDataToBeUpdated['entityType'] = CONSTANTS.common.SCHOOL
+				// 	}
 
-					if (data.type && data.type !== CONSTANTS.common.IMPROVEMENT_PROJECT) {
-						solutionDataToBeUpdated['entities'] = entitiesData
-					}
-				}
+				// 	if (data.type && data.type !== CONSTANTS.common.IMPROVEMENT_PROJECT) {
+				// 		solutionDataToBeUpdated['entities'] = entitiesData
+				// 	}
+				// }
 
 				//solution part
 				let solution = ''

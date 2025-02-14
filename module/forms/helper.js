@@ -27,7 +27,7 @@ module.exports = class FormsHelper {
 				)
 				if (defaultOrgDetails.success && defaultOrgDetails.data) {
 					return resolve(defaultOrgDetails.data.id)
-				} else return null
+				} else return resolve(null)
 			} catch (error) {
 				throw error
 			}
@@ -153,6 +153,7 @@ module.exports = class FormsHelper {
 					const defaultOrgId = await this.getDefaultOrgId(userToken)
 					if (!defaultOrgId) {
 						return resolve({
+							status: HTTP_STATUS_CODE.bad_request.status,
 							success: false,
 							message: CONSTANTS.apiResponses.DEFAULT_ORG_ID_NOT_SET,
 						})

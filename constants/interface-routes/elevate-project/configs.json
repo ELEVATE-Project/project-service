@@ -452,7 +452,10 @@
 					"packageName": "elevate-project"
 				}
 			],
-			"service": "project"
+			"service": "project",
+			"rateLimit": {
+				"type": "public-low"
+			}
 		},
 		{
 			"sourceRoute": "/project/v1/cloud-services/files/preSignedUrls",

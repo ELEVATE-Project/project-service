@@ -233,10 +233,16 @@ module.exports = async function (req, res, next, token = '') {
 
 	// performing default token data extraction
 	if (defaultTokenExtraction) {
+		if (!decodedToken.data.organization_id) {
+			const orgId = req.get(process.env.ORG_ID_HEADER_NAME)
+			if (orgId && orgId != '') {
+				decodedToken.data.organization_id = orgId.toString()
+			} else decodedToken.data.organization_id = null
+		}
 		userInformation = {
 			userId: typeof decodedToken.data.id == 'string' ? decodedToken.data.id : decodedToken.data.id.toString(),
 			userName: decodedToken.data.name,
-			organizationId: decodedToken.data.organization_id,
+			organizationId: decodedToken.data.organization_id ? decodedToken.data.organization_id : null,
 			firstName: decodedToken.data.name,
 		}
 	} else {

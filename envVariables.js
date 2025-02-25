@@ -157,6 +157,10 @@ let enviromentVariables = {
 		optional: true,
 		default: '../keycloakPublicKeys',
 	},
+	ORG_ID_HEADER_NAME: {
+		message: 'Required OrgId header name',
+		optional: true,
+	},
 }
 
 let success = true

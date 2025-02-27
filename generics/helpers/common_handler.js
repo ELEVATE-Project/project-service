@@ -32,7 +32,7 @@ const improvementProjectPdfGeneration = async function (responseData, userId) {
 			if (!fs.existsSync(imgPath)) {
 				fs.mkdirSync(imgPath)
 			}
-
+			console.log('ImagePath : ', imgPath)
 			let bootstrapStream = await copyBootStrapFile(
 				path.resolve(__dirname + '/../../public/css/bootstrap.min.css'),
 				imgPath + '/style.css'
@@ -70,14 +70,15 @@ const improvementProjectPdfGeneration = async function (responseData, userId) {
 			if (!fs.existsSync(dir)) {
 				fs.mkdirSync(dir)
 			}
-
+			console.log('make directory : ', dir)
 			fs.writeFile(dir + '/index.html', dataEjsRender, async function (errWriteFile) {
 				if (errWriteFile) {
+					console.log('error in writing filr......')
 					return reject(errWriteFile) // Reject the promise on error
 				} else {
 					// generate pdf from html
 					let optionsHtmlToPdf = GotenbergConnection.getGotenbergConnection()
-
+					console.log('optionsHtmlToPdf : ', optionsHtmlToPdf)
 					optionsHtmlToPdf.formData = {
 						files: [],
 					}
@@ -106,7 +107,7 @@ const improvementProjectPdfGeneration = async function (responseData, userId) {
 
 						if (responseHtmlToPdf.statusCode == 200) {
 							let pdfFile = uuidv4() + '.pdf'
-
+							console.log('PDF file directory :  ', pdfFile)
 							fs.writeFile(dir + '/' + pdfFile, pdfBuffer, 'binary', async function (err) {
 								if (err) {
 									console.log('errorqqq')
@@ -116,7 +117,7 @@ const improvementProjectPdfGeneration = async function (responseData, userId) {
 									//userId : used to create directory to store the file
 									//dir : local file path to fetch the file
 									let uploadFileResponse = await uploadPdfToCloud(pdfFile, userId, dir)
-
+									console.log('uploadFileResponse : ', uploadFileResponse)
 									if (
 										uploadFileResponse.success &&
 										uploadFileResponse.data &&

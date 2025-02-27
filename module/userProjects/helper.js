@@ -2483,6 +2483,7 @@ module.exports = class UserProjectsHelper {
 				if (UTILS.revertStatusorNot(appVersion)) {
 					projectDocument.status = UTILS.revertProjectStatus(projectDocument.status)
 				}
+				console.log('final project details being passed : ', projectDocument)
 				let response
 				// if projectpdf is requested generate that else project task pdf can be called
 				if (projectPdf) {

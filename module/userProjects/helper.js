@@ -3803,21 +3803,21 @@ module.exports = class UserProjectsHelper {
 				}
 
 				// Fetch user data using userId from the project and call the profile API
-				let userProfileData = await userService.profile(userProject[0].userId)
-				if (
-					userProfileData.success &&
-					userProfileData.data &&
-					userProfileData.data.name &&
-					userProfileData.data.name !== ''
-				) {
-					userProject[0].userProfile.name = userProfileData.data.name
-				} else {
-					// Throw an error if user profile data is not found
-					throw {
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: CONSTANTS.apiResponses.USER_PROFILE_NOT_FOUND,
-					}
-				}
+				// let userProfileData = await userService.profile(userProject[0].userId)
+				// if (
+				// 	userProfileData.success &&
+				// 	userProfileData.data &&
+				// 	userProfileData.data.name &&
+				// 	userProfileData.data.name !== ''
+				// ) {
+				// 	userProject[0].userProfile.name = userProfileData.data.name
+				// } else {
+				// 	// Throw an error if user profile data is not found
+				// 	throw {
+				// 		status: HTTP_STATUS_CODE.bad_request.status,
+				// 		message: CONSTANTS.apiResponses.USER_PROFILE_NOT_FOUND,
+				// 	}
+				// }
 
 				// Create payload for certificate generation
 				const certificateData = await this.createCertificatePayload(userProject[0])

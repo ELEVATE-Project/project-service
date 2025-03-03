@@ -496,6 +496,7 @@ module.exports = class UserProjectsHelper {
 				}
 				//  push project details to kafka
 				const kafkaPushedProject = await kafkaProducersHelper.pushProjectToKafka(projectUpdated)
+				console.log('kafkaPushedProject : ', kafkaPushedProject)
 				const kafkaPushedUserProjects = await kafkaProducersHelper.pushUserActivitiesToKafka(kafkaUserProject)
 
 				return resolve({
@@ -3147,6 +3148,7 @@ module.exports = class UserProjectsHelper {
 	static generateCertificate(data) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				console.log('Reached functional call for generating  the certificate')
 				// check eligibility of project for certificate creation
 				let eligibility = await this.checkCertificateEligibility(data)
 				if (!eligibility) {

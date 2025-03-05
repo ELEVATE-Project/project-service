@@ -3522,6 +3522,8 @@ def prepareProjectAndTasksSheetsForSpotlight(project_inputFile, projectName_for_
     for key in keysProject:
         if key.lower().startswith('evidence'):
             dynamic_columns.append(key.strip())
+        elif key.lower().startswith('testimonial'):
+            dynamic_columns.append(key.strip())
 
     # Combine base columns and dynamic columns
     all_columns = new_columns + dynamic_columns
@@ -3631,6 +3633,22 @@ def prepareProjectAndTasksSheetsForSpotlight(project_inputFile, projectName_for_
                     except (IndexError, ValueError):
                         value = ""
 
+                elif dynamic_column.lower().startswith("testimonial") and dynamic_column.lower().endswith("text"):
+                    column_suffix = dynamic_column.split("-")[0].replace("testimonial", "").strip()
+                    try:
+                        evidence_sequence = dictProjectDetails.get(f"testimonial{column_suffix}-text", "")
+                        value = str(evidence_sequence).strip()
+                    except (IndexError, ValueError):
+                        value = ""
+
+
+                elif dynamic_column.lower().startswith("testimonial") and dynamic_column.lower().endswith("author"):
+                    column_suffix = dynamic_column.split("-")[0].replace("testimonial", "").strip()
+                    try:
+                        evidence_sequence = dictProjectDetails.get(f"testimonial{column_suffix}-author", "")
+                        value = str(evidence_sequence).strip()
+                    except (IndexError, ValueError):
+                        value = ""
                 
                 # Check if the column is for "evidence link"
                 elif dynamic_column.lower().startswith("evidence") and dynamic_column.lower().endswith("link"):

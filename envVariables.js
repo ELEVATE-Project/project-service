@@ -162,6 +162,11 @@ let enviromentVariables = {
 		optional: false,
 		default: 'org-id',
 	},
+	MIGRATION_BATCH_SIZE: {
+		message: 'Required migration batch size',
+		optional: false,
+		default: 100,
+	},
 }
 
 let success = true

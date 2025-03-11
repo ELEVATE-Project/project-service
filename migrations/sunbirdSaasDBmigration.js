@@ -14,6 +14,34 @@ async function fetchCollectionNamesFromSourceDB() {
 	})
 }
 
+// async function migrateCollection(collectionName, transformFunc) {
+// 	const sourceDB = sourceClient.db()
+// 	const destDB = destClient.db()
+
+// 	const sourceCollection = sourceDB.collection(collectionName)
+// 	const destCollection = destDB.collection(collectionName)
+
+// 	const cursor = sourceCollection.find({})
+// 	while (await cursor.hasNext()) {
+// 		const doc = await cursor.next()
+// 		const transformedDoc = await transformFunc(doc)
+// 		// Check if document with the same _id already exists
+// 		const existingDoc = await destCollection.findOne({ _id: transformedDoc._id })
+
+// 		try {
+// 			await destCollection.insertOne(transformedDoc)
+// 		} catch (error) {
+// 			if (error.code === 11000) {
+// 				console.log(`Skipping duplicate document: ${JSON.stringify(error.keyValue)}`)
+// 			} else {
+// 				console.error(`Error inserting document: ${error.message}`)
+// 			}
+// 		}
+// 	}
+// }
+
+const BATCH_SIZE = process.env.MIGRATION_BATCH_SIZE
+
 async function migrateCollection(collectionName, transformFunc) {
 	const sourceDB = sourceClient.db()
 	const destDB = destClient.db()
@@ -21,22 +49,23 @@ async function migrateCollection(collectionName, transformFunc) {
 	const sourceCollection = sourceDB.collection(collectionName)
 	const destCollection = destDB.collection(collectionName)
 
-	const cursor = sourceCollection.find({})
-	while (await cursor.hasNext()) {
-		const doc = await cursor.next()
-		const transformedDoc = await transformFunc(doc)
-		// Check if document with the same _id already exists
-		const existingDoc = await destCollection.findOne({ _id: transformedDoc._id })
+	let offset = 0
+	let batch
+
+	while (true) {
+		batch = await sourceCollection.find({}).skip(offset).limit(BATCH_SIZE).toArray()
+		if (batch.length === 0) break
+
+		const transformedBatch = await Promise.all(batch.map(transformFunc))
 
 		try {
-			await destCollection.insertOne(transformedDoc)
+			await destCollection.insertMany(transformedBatch, { ordered: false })
+			console.log(`Migrated ${batch.length} documents from ${collectionName}`)
 		} catch (error) {
-			if (error.code === 11000) {
-				console.log(`Skipping duplicate document: ${JSON.stringify(error.keyValue)}`)
-			} else {
-				console.error(`Error inserting document: ${error.message}`)
-			}
+			console.error(`Error inserting batch in ${collectionName}: ${error.message}`)
 		}
+
+		offset += BATCH_SIZE
 	}
 }
 
@@ -150,6 +179,7 @@ async function runMigration() {
 	}
 	await sourceClient.close()
 	await destClient.close()
+	console.log('Migration Completed!')
 }
 
 runMigration()

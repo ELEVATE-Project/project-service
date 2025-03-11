@@ -1,7 +1,7 @@
 require('dotenv').config({ path: '../.env' })
 const { MongoClient } = require('mongodb')
-const sourceClient = new MongoClient(process.env.SOURCE_MONGODB_URL)
-const destClient = new MongoClient(process.env.DEST_MONGODB_URL)
+const sourceClient = new MongoClient(process.env.SOURCE_MONGODB_URL, { useUnifiedTopology: true })
+const destClient = new MongoClient(process.env.DEST_MONGODB_URL, { useUnifiedTopology: true })
 let allCollectionsFromSourceDB = []
 
 async function fetchCollectionNamesFromSourceDB() {
@@ -28,10 +28,14 @@ async function migrateCollection(collectionName, transformFunc) {
 		// Check if document with the same _id already exists
 		const existingDoc = await destCollection.findOne({ _id: transformedDoc._id })
 
-		if (!existingDoc) {
+		try {
 			await destCollection.insertOne(transformedDoc)
-		} else {
-			console.log(`Skipping duplicate _id: ${transformedDoc._id}`)
+		} catch (error) {
+			if (error.code === 11000) {
+				console.log(`Skipping duplicate document: ${JSON.stringify(error.keyValue)}`)
+			} else {
+				console.error(`Error inserting document: ${error.message}`)
+			}
 		}
 	}
 }
@@ -46,7 +50,7 @@ const transformSolutions = async (doc) => {
 			if ('entities' in doc.scope && doc.scope.entities.length > 0) {
 				doc.scope[`${doc.scope.entityType}`] = []
 				doc.scope.entities.map((entity) => {
-					doc.scope[`${doc.scope.entityType}`].push(entity)
+					doc.scope[`${doc.scope.entityType}`].push(entity.toString())
 				})
 				delete doc.scope.entities
 			}

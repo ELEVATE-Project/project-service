@@ -2,6 +2,7 @@ require('dotenv').config({ path: '../.env' })
 const { MongoClient } = require('mongodb')
 const sourceClient = new MongoClient(process.env.SOURCE_MONGODB_URL, { useUnifiedTopology: true })
 const destClient = new MongoClient(process.env.DEST_MONGODB_URL, { useUnifiedTopology: true })
+const BATCH_SIZE = 500
 let allCollectionsFromSourceDB = []
 
 async function fetchCollectionNamesFromSourceDB() {
@@ -13,8 +14,6 @@ async function fetchCollectionNamesFromSourceDB() {
 		return collection.name
 	})
 }
-
-const BATCH_SIZE = process.env.MIGRATION_BATCH_SIZE
 
 async function migrateCollection(collectionName, transformFunc) {
 	const sourceDB = sourceClient.db()

@@ -159,7 +159,8 @@ let enviromentVariables = {
 	},
 	ORG_ID_HEADER_NAME: {
 		message: 'Required OrgId header name',
-		optional: true,
+		optional: false,
+		default: 'org-id',
 	},
 }
 

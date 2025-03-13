@@ -1273,7 +1273,10 @@ module.exports = class UserProjects extends Abstract {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// ReIssue certificate of given project : projectId is passed as param
-				let projectDetails = await userProjectsHelper.certificateReIssue(req.params._id)
+				let projectDetails = await userProjectsHelper.certificateReIssue(
+					req.params._id,
+					req.userDetails.userToken
+				)
 				return resolve({
 					message: projectDetails.message,
 					result: projectDetails.data,

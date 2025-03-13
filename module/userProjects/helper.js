@@ -1965,8 +1965,10 @@ module.exports = class UserProjectsHelper {
 						result.tasks = _projectTask(tasksAndSubTasks)
 						result.tasks.forEach((task) => {
 							if (
-								task.type === CONSTANTS.common.ASSESSMENT ||
-								task.type === CONSTANTS.common.OBSERVATION
+								task &&
+								task.type &&
+								(task.type === CONSTANTS.common.ASSESSMENT ||
+									task.type === CONSTANTS.common.OBSERVATION)
 							) {
 								result.assesmentOrObservationTask = true
 							}
@@ -1977,7 +1979,7 @@ module.exports = class UserProjectsHelper {
 						}
 
 						result.tasks.forEach((task) => {
-							if (task.isDeleted == false) {
+							if (task && task.isDeleted == false) {
 								if (!taskReport[task.status]) {
 									taskReport[task.status] = 1
 								} else {
@@ -3778,7 +3780,7 @@ module.exports = class UserProjectsHelper {
 	 * @returns {JSON} certificate re-issued details.
 	 */
 
-	static certificateReIssue(projectId) {
+	static certificateReIssue(projectId, userToken) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Get project details for the project that requires certificate re-issue
@@ -3800,7 +3802,7 @@ module.exports = class UserProjectsHelper {
 				}
 
 				// Fetch user data using userId from the project and call the profile API
-				let userProfileData = await userService.profile(userProject[0].userId)
+				let userProfileData = await userService.profile(userProject[0].userId, userToken)
 				if (
 					userProfileData.success &&
 					userProfileData.data &&
@@ -4355,47 +4357,49 @@ function _attachmentInformation(
 
 function _projectTask(tasks, isImportedFromLibrary = false, parentTaskId = '') {
 	tasks.forEach((singleTask) => {
-		singleTask.externalId = singleTask.externalId ? singleTask.externalId : singleTask.name.toLowerCase()
-		singleTask.type = singleTask.type ? singleTask.type : CONSTANTS.common.SIMPLE_TASK_TYPE
-		singleTask.status = singleTask.status ? singleTask.status : CONSTANTS.common.NOT_STARTED_STATUS
-		singleTask.isDeleted = singleTask.isDeleted ? singleTask.isDeleted : false
-		singleTask.attachments = singleTask.attachments ? singleTask.attachments : []
-		if (!singleTask.hasOwnProperty('isDeletable')) {
-			singleTask.isDeletable = true
-		}
-		if (UTILS.isValidMongoId(singleTask._id.toString())) {
-			singleTask.referenceId = singleTask._id.toString()
-		}
-		singleTask.createdAt = singleTask.createdAt ? singleTask.createdAt : new Date()
-		singleTask.updatedAt = new Date()
-		singleTask._id = UTILS.isValidMongoId(singleTask._id.toString()) ? uuidv4() : singleTask._id
-		singleTask.isImportedFromLibrary = isImportedFromLibrary
-		singleTask.syncedAt = new Date()
-
-		if (singleTask.startDate) {
-			singleTask.startDate = singleTask.startDate
-		}
-
-		if (singleTask.endDate) {
-			singleTask.endDate = singleTask.endDate
-		}
-
-		if (singleTask.visibleIf && singleTask.visibleIf.length > 0) {
-			if (parentTaskId !== '') {
-				singleTask.visibleIf.forEach((task) => {
-					task._id = parentTaskId
-				})
+		if (singleTask) {
+			singleTask.externalId = singleTask.externalId ? singleTask.externalId : singleTask.name.toLowerCase()
+			singleTask.type = singleTask.type ? singleTask.type : CONSTANTS.common.SIMPLE_TASK_TYPE
+			singleTask.status = singleTask.status ? singleTask.status : CONSTANTS.common.NOT_STARTED_STATUS
+			singleTask.isDeleted = singleTask.isDeleted ? singleTask.isDeleted : false
+			singleTask.attachments = singleTask.attachments ? singleTask.attachments : []
+			if (!singleTask.hasOwnProperty('isDeletable')) {
+				singleTask.isDeletable = true
 			}
-		}
+			if (UTILS.isValidMongoId(singleTask._id.toString())) {
+				singleTask.referenceId = singleTask._id.toString()
+			}
+			singleTask.createdAt = singleTask.createdAt ? singleTask.createdAt : new Date()
+			singleTask.updatedAt = new Date()
+			singleTask._id = UTILS.isValidMongoId(singleTask._id.toString()) ? uuidv4() : singleTask._id
+			singleTask.isImportedFromLibrary = isImportedFromLibrary
+			singleTask.syncedAt = new Date()
 
-		removeFieldsFromRequest.forEach((removeField) => {
-			delete singleTask[removeField]
-		})
+			if (singleTask.startDate) {
+				singleTask.startDate = singleTask.startDate
+			}
 
-		if (singleTask.children) {
-			_projectTask(singleTask.children, isImportedFromLibrary, singleTask._id)
-		} else {
-			singleTask.children = []
+			if (singleTask.endDate) {
+				singleTask.endDate = singleTask.endDate
+			}
+
+			if (singleTask.visibleIf && singleTask.visibleIf.length > 0) {
+				if (parentTaskId !== '') {
+					singleTask.visibleIf.forEach((task) => {
+						task._id = parentTaskId
+					})
+				}
+			}
+
+			removeFieldsFromRequest.forEach((removeField) => {
+				delete singleTask[removeField]
+			})
+
+			if (singleTask.children) {
+				_projectTask(singleTask.children, isImportedFromLibrary, singleTask._id)
+			} else {
+				singleTask.children = []
+			}
 		}
 	})
 

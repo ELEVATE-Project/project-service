@@ -135,5 +135,5 @@ check_pm2
 check_postgres
 check_citus
 check_mongo
-check_bullmq
+# check_bullmq
 check_gotenberg

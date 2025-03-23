@@ -47,7 +47,21 @@ module.exports = class SolutionsHelper {
 	 * Generate solution creation data.
 	 * @method
 	 * @name _createSolutionData
-	 * @returns {Object} - solution creation data
+	 * @param {String} [name=''] - The name of the solution (optional, defaults to an empty string).
+	 * @param {String} [externalId=''] - The external identifier for the solution (optional, defaults to an empty string).
+	 * @param {Boolean} [isAPrivateProgram=''] - Indicates if the solution belongs to a private program (optional, defaults to an empty string).
+	 * @param {String} status - The current status of the solution (mandatory).
+	 * @param {String} [description=''] - A brief description of the solution (optional, defaults to an empty string).
+	 * @param {String} userId - The unique identifier of the user creating the solution (mandatory).
+	 * @param {Boolean} [isReusable=''] - Indicates if the solution can be reused (optional, defaults to an empty string).
+	 * @param {String} [parentSolutionId=''] - The ID of the parent solution, if any (optional, defaults to an empty string).
+	 * @param {String} [type=''] - The type/category of the solution (optional, defaults to an empty string).
+	 * @param {String} [subType=''] - The subtype/category of the solution (optional, defaults to an empty string).
+	 * @param {String} [updatedBy=''] - The identifier of the user who last updated the solution (optional, defaults to an empty string).
+	 * @param {String} [projectTemplateId=''] - The ID of the associated project template, if any (optional, defaults to an empty string).
+	 * @param {String} [startDate=''] - The start date of the solution (in ISO format, optional, defaults to an empty string).
+	 * @param {String} [endDate=''] - The end date of the solution (in ISO format, optional, defaults to an empty string).
+	 * @returns {Object} - An object containing the solution creation data.
 	 */
 
 	static _createSolutionData(
@@ -62,7 +76,9 @@ module.exports = class SolutionsHelper {
 		type = '',
 		subType = '',
 		updatedBy = '',
-		projectTemplateId = ''
+		projectTemplateId = '',
+		startDate = '',
+		endDate = ''
 	) {
 		let solutionData = {}
 		solutionData.name = name
@@ -71,6 +87,7 @@ module.exports = class SolutionsHelper {
 		solutionData.status = status
 		solutionData.description = description
 		solutionData.author = userId
+		solutionData.reflectionEnabled = UTILS.convertStringToBoolean(process.env.ENABLE_REFLECTION)
 		if (parentSolutionId) {
 			solutionData.parentSolutionId = parentSolutionId
 		}
@@ -89,6 +106,12 @@ module.exports = class SolutionsHelper {
 		if (projectTemplateId) {
 			solutionData.projectTemplateId = projectTemplateId
 		}
+		if (startDate) {
+			solutionData.startDate = startDate
+		}
+		if (endDate) {
+			solutionData.endDate = endDate
+		}
 
 		return solutionData
 	}
@@ -97,7 +120,18 @@ module.exports = class SolutionsHelper {
 	 * Generate program creation data.
 	 * @method
 	 * @name _createProgramData
-	 * @returns {Object} - program creation data
+	 * @param {String} name - The name of the program.
+	 * @param {String} externalId - The external id of the program.
+	 * @param {Boolean} isAPrivateProgram - Indicates if the program is private.
+	 * @param {String} status - The current status of the program.
+	 * @param {String} description - A brief description of the program.
+	 * @param {String} userId - The unique identifier of the user creating the program.
+	 * @param {String} startDate - The start date of the program (in ISO format).
+	 * @param {String} endDate - The end date of the program (in ISO format).
+	 * @param {String} [createdBy=''] - The name or identifier of the creator (optional, defaults to an empty string).
+	 * @param {Array<String>} [language=[]] - An array of languages associated with the program (optional, defaults to an empty array).
+	 * @param {Object} [source={}] - Additional source metadata related to the program (optional, defaults to an empty object).
+	 * @returns {Object} - An object containing the program creation data.
 	 */
 
 	static _createProgramData(
@@ -109,7 +143,9 @@ module.exports = class SolutionsHelper {
 		userId,
 		startDate,
 		endDate,
-		createdBy = ''
+		createdBy = '',
+		language = [],
+		source = {}
 	) {
 		let programData = {}
 		programData.name = name
@@ -121,6 +157,8 @@ module.exports = class SolutionsHelper {
 		programData.createdBy = createdBy
 		programData.startDate = startDate
 		programData.endDate = endDate
+		programData.language = language
+		programData.source = source
 		return programData
 	}
 
@@ -768,7 +806,7 @@ module.exports = class SolutionsHelper {
 					matchQuery['programId'] = ObjectId(programId)
 				}
 
-				// matchQuery["startDate"] = { $lte: new Date() };
+				matchQuery['startDate'] = { $lte: new Date() }
 				// for survey type solutions even after expiry it should be visible to user for 15 days
 				let targetedSolutions = await this.list(type, subType, matchQuery, pageNo, pageSize, searchText, [
 					'name',
@@ -1351,7 +1389,7 @@ module.exports = class SolutionsHelper {
 					// Add one year to the current date
 					let endDate = new Date()
 					endDate.setFullYear(endDate.getFullYear() + 1)
-					let programData = await _createProgramData(
+					let programData = await this._createProgramData(
 						data.programName,
 						data.programExternalId ? data.programExternalId : data.programName + '-' + dateFormat,
 						true,
@@ -1359,7 +1397,8 @@ module.exports = class SolutionsHelper {
 						data.programDescription ? data.programDescription : data.programName,
 						userId,
 						startDate,
-						endDate
+						endDate,
+						userId
 					)
 
 					if (data.rootOrganisations) {
@@ -1377,58 +1416,58 @@ module.exports = class SolutionsHelper {
 				}
 
 				//entities
-				if (Array.isArray(data.entities) && data.entities && data.entities.length > 0) {
-					let entitiesData = []
-					let bodyData = {}
+				// if (Array.isArray(data.entities) && data.entities && data.entities.length > 0) {
+				// 	let entitiesData = []
+				// 	let bodyData = {}
 
-					let locationData = UTILS.filterLocationIdandCode(data.entities)
+				// 	let locationData = UTILS.filterLocationIdandCode(data.entities)
 
-					if (locationData.ids.length > 0) {
-						bodyData = {
-							id: locationData.ids,
-						}
-						let entityData = await entitiesService.entityDocuments(bodyData, 'all')
+				// 	if (locationData.ids.length > 0) {
+				// 		bodyData = {
+				// 			id: locationData.ids,
+				// 		}
+				// 		let entityData = await entitiesService.entityDocuments(bodyData, 'all')
 
-						if (!entityData.success) {
-							return resolve({
-								status: HTTP_STATUS_CODE.bad_request.status,
-								message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
-								result: {},
-							})
-						}
+				// 		if (!entityData.success) {
+				// 			return resolve({
+				// 				status: HTTP_STATUS_CODE.bad_request.status,
+				// 				message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
+				// 				result: {},
+				// 			})
+				// 		}
 
-						entityData.data.forEach((entity) => {
-							entitiesData.push(entity._id)
-						})
+				// 		entityData.data.forEach((entity) => {
+				// 			entitiesData.push(entity._id)
+				// 		})
 
-						solutionDataToBeUpdated['entityType'] = entityData.data[0].type
-					}
+				// 		solutionDataToBeUpdated['entityType'] = entityData.data[0].type
+				// 	}
 
-					if (locationData.codes.length > 0) {
-						let filterData = {
-							'registryDetails.code': { $in: locationData.codes },
-						}
-						let entityDetails = await entitiesService.entityDocuments(filterData, 'all')
-						if (!entityDetails.success || !entityDetails.data || !entityDetails.data.length > 0) {
-							return resolve({
-								status: HTTP_STATUS_CODE.bad_request.status,
-								message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
-								result: {},
-							})
-						}
-						let entityDocuments = entityDetails.data
+				// 	if (locationData.codes.length > 0) {
+				// 		let filterData = {
+				// 			'registryDetails.code': { $in: locationData.codes },
+				// 		}
+				// 		let entityDetails = await entitiesService.entityDocuments(filterData, 'all')
+				// 		if (!entityDetails.success || !entityDetails.data || !entityDetails.data.length > 0) {
+				// 			return resolve({
+				// 				status: HTTP_STATUS_CODE.bad_request.status,
+				// 				message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
+				// 				result: {},
+				// 			})
+				// 		}
+				// 		let entityDocuments = entityDetails.data
 
-						entityDocuments.forEach((entity) => {
-							entitiesData.push(entity._id)
-						})
+				// 		entityDocuments.forEach((entity) => {
+				// 			entitiesData.push(entity._id)
+				// 		})
 
-						solutionDataToBeUpdated['entityType'] = CONSTANTS.common.SCHOOL
-					}
+				// 		solutionDataToBeUpdated['entityType'] = CONSTANTS.common.SCHOOL
+				// 	}
 
-					if (data.type && data.type !== CONSTANTS.common.IMPROVEMENT_PROJECT) {
-						solutionDataToBeUpdated['entities'] = entitiesData
-					}
-				}
+				// 	if (data.type && data.type !== CONSTANTS.common.IMPROVEMENT_PROJECT) {
+				// 		solutionDataToBeUpdated['entities'] = entitiesData
+				// 	}
+				// }
 
 				//solution part
 				let solution = ''

@@ -56,5 +56,10 @@ module.exports = {
 			index: true,
 			require: true,
 		},
+		translations: Object,
+		source: {
+			type: Object,
+			default: {},
+		},
 	},
 }

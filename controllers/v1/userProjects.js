@@ -284,10 +284,88 @@ module.exports = class UserProjects extends Abstract {
 						: req.headers.appversion
 						? req.headers.appversion
 						: '',
-					req.query.templateId
+					req.query.templateId,
+					req.query.language ? req.query.language : ''
 				)
 
 				return resolve(projectDetails)
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
+				})
+			}
+		})
+	}
+
+	/**
+    * @api {put} /project/v1/userProjects/addStory/:projectId
+    * User Project tasks status
+    * @apiVersion 1.0.0
+    * @apiGroup User Projects
+    * @apiSampleRequest /project/v1/userProjects/addStory/667e858d82673a24d71d8c38
+    * @apiParamExample {json} Request:
+    * {
+        "story": {
+        "title": "DCPCR School Development Index 2018-19",
+        "problemStatement": "problemStatement",
+        "objective": "sample object",
+        "timeline": "2 weeks",
+        "actionSteps": [],
+        "resources": [],
+        "impact": "sample impact",
+        "summary": "sample summary",
+        "authorName": "jon",
+        "location": "authorLocation",
+        "conversation": [],
+        "chatHistory": [],
+        "attachments": [
+        {
+            "name": "1729251446851.png",
+            "type": "image/png",
+            "sourcePath": "project/668e33a24999c205ea017747/3/5cc85295-b244-4139-88c8-4802c2ad41ad/1729251446851.png",
+            "page": "story"
+        }
+        ],
+        "pdfInformation": [
+        {
+            "filePath": "project/happy/263/51807846-4c20-428a-b999-8af96a5f1b27/evidence_link-151.jpg",
+            "language": "hi"
+        }
+        ]
+        }
+    }
+
+    * @apiParamExample {json} Response:
+    {
+        "message": "Story Added Successfully",
+        "status": 200
+    }
+    * @apiUse successBody
+    * @apiUse errorBody
+    */
+	/**
+	 * Handles the addition of a story to a project.
+	 * @method
+	 * @name addStory
+	 * @param {Object} req - The request object containing:
+	 *   - `req.body`: The body of the request with the story data.
+	 *   - `req.params._id`: The project ID to which the story should be added.
+	 * @returns {Promise<Object>} - A promise that resolves to the details of the added story or rejects with an error.
+	 */
+	async addStory(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				// Call helper function to add the story to the specified project
+				let userStoryDetails = await userProjectsHelper.addStory(
+					req.body,
+					req.params._id,
+					req.userDetails.userInformation.userId
+				)
+
+				// Resolve with the result from the helper function
+				return resolve(userStoryDetails)
 			} catch (error) {
 				return reject({
 					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
@@ -716,114 +794,107 @@ module.exports = class UserProjects extends Abstract {
 	}
 
 	/**
-   * @api {post} /project/v1/userProjects/list?page=1&limit=3&search=&filter=createdByMe
-   * Lists of projects.
+   * @api {post} /project/v1/userProjects/list?page=1&limit=3&search=&language=ka
+   * Lists of users projects.
    * @apiVersion 0.0.1
-   * @apiName Lists of projects.
-   * @apiGroup Entity Types
-   * @apiHeader {String} X-authenticated-user-token Authenticity token
-   * @apiSampleRequest /project/v1/userProjects/list
+   * @apiName list.
+   * @apiGroup userProjects
+   * @apiHeader {String} X-auth-token Authenticity token
+   * @apiSampleRequest /project/v1/userProjects/list?page=1&limit=2&search=&language=ka
    * @apiUse successBody
    * @apiUse errorBody
-   * @apiParamExample {json} Request-Body:
-   * {
-        "query" : {
-            "code" : "HM"
-        },
-        "projection" : ["_id","code"]
-    }
     * @apiParamExample {json} Response: 
-    {
-        "message": "Successfully fetched projects",
-        "status": 200,
-        "result": [
-            {
-                "_id": "64afa1b280f9b952f4914374",
-                "userId": "64b12ef31073b0dd429e19b4",
-                "userRole": "",
-                "status": "started",
-                "isDeleted": false,
-                "categories": [
-                    {
-                        "label": "Infrastructure",
-                        "value": "5fcfa9a2457d6055e33843f1",
-                        "labelTranslations": "{\"en\":\"Infrastructure\"}",
-                        "name": "Infrastructure"
-                    },
-                    {
-                        "label": "Community",
-                        "value": "5fcfa9a2457d6055e33843f2",
-                        "labelTranslations": "{\"en\":\"Community\"}",
-                        "name": "Community"
-                    },
-                    {
-                        "label": "Education Leader",
-                        "value": "5fcfa9a2457d6055e33843f3",
-                        "labelTranslations": "{\"en\":\"Education Leader\"}",
-                        "name": "Education Leader"
-                    }
-                ],
-                "createdBy": "1349b70e-44d2-4723-9f57-caf096ec1f51",
-                "tasks": [],
-                "updatedBy": "1349b70e-44d2-4723-9f57-caf096ec1f51",
-                "learningResources": [
-                    {
-                        "name": "API_Decrication",
-                        "id": "do_113759904287850496114",
-                        "isChecked": true
-                    },
-                    {
-                        "name": "API_Decrication",
-                        "id": "do_113759897196249088113",
-                        "isChecked": true
-                    },
-                    {
-                        "name": "Content - 3",
-                        "id": "do_113762457976889344169",
-                        "isChecked": true
-                    },
-                    {
-                        "name": "Content - 4",
-                        "id": "do_113762458251059200170",
-                        "isChecked": true
-                    },
-                    {
-                        "name": "Content -1",
-                        "id": "do_113762457386450944167",
-                        "isChecked": true
-                    },
-                    {
-                        "name": "Test Content",
-                        "id": "do_11376182093890355216",
-                        "isChecked": true
-                    },
-                    {
-                        "name": "Test Content 2",
-                        "id": "do_11376182438513868818",
-                        "isChecked": true
-                    }
-                ],
-                "hasAcceptedTAndC": false,
-                "taskSequence": [],
-                "recommendedFor": [],
-                "attachments": [],
-                "deleted": false,
-                "title": "Test",
-                "description": "test",
-                "startDate": "2023-05-24T04:21:00.000Z",
-                "endDate": "2023-05-27T04:21:00.000Z",
-                "entityId": "7f6d36cf-3bd6-43fc-ab8e-f9157c9ebec1",
-                "isAPrivateProgram": true,
-                "lastDownloadedAt": "2023-07-13T07:03:14.672Z",
-                "updatedAt": "2023-07-13T07:03:14.688Z",
-                "createdAt": "2023-07-13T07:03:14.688Z",
-                "__v": 0
-            }
-        ]
-    }   
+      * {
+    "message": "Successfully fetched projects",
+    "status": 200,
+    "result": [
+        {
+            "data": [
+                {
+                    "_id": "674757fe3868783fcffabe17",
+                    "status": "started",
+                    "tasks": [
+                        {
+                            "_id": "b253f2e9-a75b-4f07-8577-cd0b75cb7d0c",
+                            "createdBy": "168",
+                            "updatedBy": "168",
+                            "isDeleted": false,
+                            "isDeletable": false,
+                            "taskSequence": [],
+                            "children": [],
+                            "visibleIf": [],
+                            "hasSubTasks": false,
+                            "learningResources": [],
+                            "deleted": false,
+                            "type": "simple",
+                            "projectTemplateId": "66399a3443d18862ed097ff1",
+                            "projectTemplateExternalId": "TSCSLHAR02-1710148664591",
+                            "name": "Address the assembly and share ideas about Smart Learn",
+                            "externalId": "Task1-1710148664591",
+                            "description": "",
+                            "sequenceNumber": "1",
+                            "solutionDetails": {
+                                "solutionId": "",
+                                "solutionSubType": "",
+                                "solutionType": ""
+                            },
+                            "updatedAt": "2024-11-27T17:33:46.744Z",
+                            "createdAt": "2024-05-13T07:20:59.437Z",
+                            "__v": 0,
+                            "status": "notStarted",
+                            "attachments": [],
+                            "referenceId": "6641bf5b7d401713c8a3f7a2",
+                            "isImportedFromLibrary": false,
+                            "syncedAt": "2024-11-27T17:33:46.744Z"
+                        },
+                        {
+                            "_id": "c671393b-c6c0-41ef-a3ec-7ca71d64b014",
+                            "createdBy": "168",
+                            "updatedBy": "168",
+                            "isDeleted": false,
+                            "isDeletable": false,
+                            "taskSequence": [],
+                            "children": [],
+                            "visibleIf": [],
+                            "hasSubTasks": false,
+                            "learningResources": [],
+                            "deleted": false,
+                            "type": "simple",
+                            "projectTemplateId": "66399a3443d18862ed097ff1",
+                            "projectTemplateExternalId": "TSCSLHAR02-1710148664591",
+                            "name": "Online Training",
+                            "externalId": "Task2-1710148664591",
+                            "description": "",
+                            "sequenceNumber": "2",
+                            "solutionDetails": {
+                                "solutionId": "",
+                                "solutionSubType": "",
+                                "solutionType": ""
+                            },
+                            "updatedAt": "2024-11-27T17:33:46.745Z",
+                            "createdAt": "2024-05-13T07:20:59.464Z",
+                            "__v": 0,
+                            "status": "notStarted",
+                            "attachments": [],
+                            "referenceId": "6641bf5b7d401713c8a3f7a5",
+                            "isImportedFromLibrary": false,
+                            "syncedAt": "2024-11-27T17:33:46.745Z"
+                        }
+                    ]
+                    "projectTemplateId": "66399a3443d18862ed097ff1",
+                    "projectTemplateExternalId": "TSCSLHAR02-1710148664591",
+                    "title": "kannda projectss",
+                    "description": "kanndaDescription"
+                }
+            ],
+            "count": 12
+        }
+    ]
+}
     */
 
 	/**
+	 *
 	 * Lists of projects.
 	 * @method
 	 * @name list
@@ -838,7 +909,9 @@ module.exports = class UserProjects extends Abstract {
 					req.pageNo,
 					req.pageSize,
 					req.searchText,
-					req.query.filter
+					req.query.language ? req.query.language : '',
+					req.query.programId ? req.query.programId : '',
+					req.query.status ? req.query.status : ''
 				)
 				return resolve(projects)
 			} catch (error) {
@@ -1011,7 +1084,8 @@ module.exports = class UserProjects extends Abstract {
 					req.body,
 					req.userDetails.userToken,
 					req.userDetails.userInformation.userId,
-					req.query.isATargetedSolution ? req.query.isATargetedSolution : ''
+					req.query.isATargetedSolution ? req.query.isATargetedSolution : '',
+					req.query.language ? req.query.language : ''
 				)
 
 				return resolve({
@@ -1199,7 +1273,10 @@ module.exports = class UserProjects extends Abstract {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// ReIssue certificate of given project : projectId is passed as param
-				let projectDetails = await userProjectsHelper.certificateReIssue(req.params._id)
+				let projectDetails = await userProjectsHelper.certificateReIssue(
+					req.params._id,
+					req.userDetails.userToken
+				)
 				return resolve({
 					message: projectDetails.message,
 					result: projectDetails.data,
@@ -1251,6 +1328,52 @@ module.exports = class UserProjects extends Abstract {
 				const verifyCertificateData = await userProjectsHelper.verifyCertificate(projectId)
 				return resolve(verifyCertificateData)
 			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
+				})
+			}
+		})
+	}
+	/**
+    * @api {post} /project/v1/userProjects/update/:projectId
+    * ReIssue project certificate
+    * @apiVersion 1.0.0
+    * @apiGroup User Projects
+    * @apiSampleRequest /project/v1/userProjects/update/66ac9949227504a96d8dce1c
+    * @apiParamExample {json} Response:
+    {
+        "message": "Project Updated Successfully.",
+        "status": 200,
+        "result": {
+            "_id": "667aabc7b070696248731e8e"
+        }
+    }
+	 * Verify project certificate
+	 * @method
+	 * @name update
+	 * @param {String} projectId - projectId.
+	 * @returns {JSON} certificate details.
+	 */
+	async update(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				const updateData = await userProjectsHelper.update(
+					req.params._id,
+					req.body,
+					req.userDetails.userInformation.userId,
+					req.userDetails.userToken,
+					req.headers['x-app-id'] ? req.headers['x-app-id'] : req.headers.appname ? req.headers.appname : '',
+					req.headers['x-app-ver']
+						? req.headers['x-app-ver']
+						: req.headers.appversion
+						? req.headers.appversion
+						: ''
+				)
+				return resolve(updateData)
+			} catch (error) {
+				console.log(error)
 				return reject({
 					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
 					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,

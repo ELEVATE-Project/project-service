@@ -15,7 +15,7 @@ const ChartDataLabels = require('chartjs-plugin-datalabels')
 const width = 800 // width of the chart
 const height = 500 // height of the chart
 const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height })
-
+const moment = require('moment')
 // const druidQueries = require('./druid_queries.json');
 /**
  * convert camel case to title case.
@@ -180,6 +180,13 @@ function valueParser(dataToBeParsed) {
 	Object.keys(dataToBeParsed).forEach((eachDataToBeParsed) => {
 		parsedData[eachDataToBeParsed] = dataToBeParsed[eachDataToBeParsed].trim()
 	})
+
+	// Check if 'categories' field exists in dataToBeParsed before setting a default value
+	if ('categories' in dataToBeParsed) {
+		if (!parsedData.categories || parsedData.categories.trim() === '') {
+			parsedData.categories = process.env.DEFAULT_PROJECT_CATEGORY
+		}
+	}
 
 	if (parsedData._arrayFields && parsedData._arrayFields.split(',').length > 0) {
 		parsedData._arrayFields.split(',').forEach((arrayTypeField) => {
@@ -493,18 +500,6 @@ function convertStringToObjectId(id) {
 }
 
 /**
- * check whether the id is mongodbId or not.
- * @function
- * @name isValidMongoId
- * @param {String} id
- * @returns {Boolean} returns whether id is valid mongodb id or not.
- */
-
-function isValidMongoId(id) {
-	return ObjectId.isValid(id) && new ObjectId(id).toString() === id
-}
-
-/**
  * filter out location id and code
  * @function
  * @name filterLocationIdandCode
@@ -692,6 +687,161 @@ function arrayOfObjectToArrayOfObjectId(ids) {
 	return ids.map((obj) => obj._id)
 }
 
+/**
+ * Handle translation
+ * @function
+ * @name getTranslatedData
+ * @param {String} data - Data to be translate.
+ * @param {String} translateData - translation data
+ * @returns {Object} - Modified data object with translation.
+ */
+function getTranslatedData(data, translateData) {
+	// Object Keys Which not to be replaces Completely
+	let customTranslationKeys = []
+	Object.keys(data).forEach((item) => {
+		if (Array.isArray(data[item]) && data[item].every((ele) => typeof ele === 'object' && ele != null)) {
+			customTranslationKeys.push(item)
+		}
+	})
+	Object.keys(data).forEach((eachValue) => {
+		if (customTranslationKeys.includes(eachValue) && Array.isArray(data[eachValue])) {
+			data[eachValue].forEach((item, index) => {
+				Object.keys(item).forEach((fieldKey) => {
+					if (
+						translateData[eachValue] &&
+						translateData[eachValue][fieldKey] &&
+						translateData[eachValue][fieldKey][index]
+					) {
+						item[fieldKey] = translateData[eachValue][fieldKey][index]
+					}
+				})
+			})
+		} else {
+			if (Object.keys(translateData).includes(eachValue)) {
+				data[eachValue] = translateData[eachValue]
+			}
+		}
+	})
+	return data
+}
+
+/**
+ * Function to calculate the end date based on a start date and duration string.
+ * @param {string} createdDate - The start date in ISO format (e.g., '2024-12-05T00:00:00.000Z').
+ * @param {string} durationInDays - Number of days.
+ * @returns {string} - The calculated end date in ISO format
+ */
+function calculateEndDate(createdDate, durationInDays) {
+	const startDate = moment(createdDate) // Parse the start date
+	if (!startDate.isValid()) {
+		throw new Error('Invalid start date format')
+	}
+
+	if (typeof durationInDays !== 'number' || durationInDays < 0) {
+		throw new Error('Duration must be a valid non-negative number')
+	}
+
+	return startDate.add(durationInDays, 'days').toISOString()
+}
+
+/**
+ * Generate externalId from title
+ * @name generateExternalId
+ * @param {String} title - title
+ * @returns {String} - ExternalId
+ */
+
+function generateExternalId(title) {
+	const words = title.split(/[\s-]+/)
+	const abbreviation = words.map((word) => (word[0] || '').toUpperCase()).join('')
+	const uniqueSuffix = Date.now()
+	return `${abbreviation}-${uniqueSuffix}`
+}
+
+/**
+ * Format category Name
+ * @name formatToTitleCase
+ * @param {String} value - category
+ * @returns {String} - Category
+ */
+function formatToTitleCase(value) {
+	return value
+		.replace(/_/g, ' ') // Replace underscores with spaces
+		.replace(/\b\w/g, (char) => char.toUpperCase()) // Capitalize the first letter of each word
+		.trim() // Ensure no leading or trailing spaces
+}
+
+/**
+ * Format keywords
+ * @param {Array|String} keywords - Keywords
+ * @returns {Array} - Formatted keywords
+ */
+function formatKeywords(keywords) {
+	if (Array.isArray(keywords)) return keywords.map((k) => k.trim())
+	if (typeof keywords === 'string') return keywords.split(',').map((k) => k.trim())
+	return []
+}
+
+/**
+ * Format meta-information
+ * @param {Object} templateData - Template data
+ * @returns {Object} - Meta-information
+ */
+function formatMetaInformation(templateData) {
+	return {
+		duration: `${templateData.recommended_duration.number} ${templateData.recommended_duration.duration}`,
+		goal: '',
+		rationale: '',
+		primaryAudience: '',
+		successIndicators: '',
+		risks: '',
+		approaches: '',
+	}
+}
+
+/**
+ * Function to convert duration in various units (week, month, year) to days.
+ * @param {string} duration - Duration string, e.g., "1 week", "2 months".
+ * @returns {number} - Duration in days.
+ */
+function convertDurationToDays(duration) {
+	const [value, unit] = duration.split(' ')
+	const numericValue = parseInt(value, 10)
+
+	switch (unit.toLowerCase()) {
+		case 'day':
+		case 'days':
+			return numericValue
+		case 'week':
+		case 'weeks':
+			return numericValue * 7
+		case 'month':
+		case 'months':
+			return numericValue * 30 // Approximation
+		case 'year':
+		case 'years':
+			return numericValue * 365 // Approximation
+		default:
+			throw new Error(`Unsupported duration unit: ${unit}`)
+	}
+}
+
+/**
+ * Convert Learning Resource
+ * @name convertResources
+ * @param {Array} resources - learning resource data
+ * @returns {Object} - Response contains formatted learning resource
+ */
+const convertResources = (resources) =>
+	resources
+		.filter((resource) => resource.url) // Ensure `url` exists
+		.map((resource) => ({
+			name: resource.name || 'resource',
+			link: resource.url,
+			app: CONSTANTS.common.APP_ELEVATE_PROJECT,
+			id: resource.url.split('/').pop(), // Extract the last part of the URL
+		}))
+
 module.exports = {
 	camelCaseToTitleCase: camelCaseToTitleCase,
 	lowerCase: lowerCase,
@@ -713,7 +863,6 @@ module.exports = {
 	getEndDate: getEndDate,
 	getStartDate: getStartDate,
 	convertStringToObjectId: convertStringToObjectId,
-	isValidMongoId: isValidMongoId,
 	filterLocationIdandCode: filterLocationIdandCode,
 	generateTelemetryEventSkeletonStructure: generateTelemetryEventSkeletonStructure,
 	generateTelemetryEvent: generateTelemetryEvent,
@@ -725,4 +874,12 @@ module.exports = {
 	generateChart: generateChart,
 	handleSpecialCharsForCertificate: handleSpecialCharsForCertificate,
 	arrayOfObjectToArrayOfObjectId: arrayOfObjectToArrayOfObjectId,
+	getTranslatedData: getTranslatedData,
+	calculateEndDate: calculateEndDate,
+	generateExternalId,
+	formatToTitleCase,
+	formatKeywords,
+	formatMetaInformation,
+	convertResources,
+	convertDurationToDays,
 }

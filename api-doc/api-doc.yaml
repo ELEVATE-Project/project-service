@@ -34,6 +34,21 @@ tags:
     externalDocs:
       description: ''
       url: ''
+  - name: template
+    description: ''
+    externalDocs:
+      description: ''
+      url: ''
+  - name: projectAttributes
+    description: ''
+    externalDocs:
+      description: ''
+      url: ''
+  - name: wishlist
+    description: ''
+    externalDocs:
+      description: ''
+      url: ''
 paths:
   /v1/project/templates/bulkCreate:
     post:
@@ -47,10 +62,17 @@ paths:
             schema:
               type: object
               properties:
-                file:
+                projectTemplates:
                   type: string
                   format: binary
                   description: The CSV file to upload
+                translationFiles:
+                  type: string
+                  format: binary
+                  description: The JSON file to upload
+              required:
+                - translationFiles
+                - projectTemplates
       parameters:
         - name: X-auth-token
           in: header
@@ -338,7 +360,8 @@ paths:
                     status: 400
       description: >-
         This endpoint allows for the bulk creation of project templates by
-        uploading a csv file containing multiple templates.
+        uploading a csv file containing multiple templates and a json file for
+        multiple languages.
 
         * The API Endpoint for the bulk creation of project templates is `/v1/project/templates/bulkCreate`
 
@@ -465,7 +488,7 @@ paths:
           schema:
             type: string
           example: '123'
-          description: 'To update the data we need to match its id'
+          description: To update the data we need to match its id
           required: true
       responses:
         '200':
@@ -679,13 +702,13 @@ paths:
         - projectTemplates
       summary: Fetches details of a specific project template
       parameters:
-        - &ref_21
+        - &ref_26
           name: Content-Type
           in: header
           schema:
             type: string
           example: application/json
-        - &ref_22
+        - &ref_27
           in: header
           name: X-auth-token
           schema: &ref_0
@@ -1062,7 +1085,7 @@ paths:
                       projectId: ''
         '400':
           description: 'Bad response '
-          headers: &ref_23 {}
+          headers: {}
           content:
             application/json:
               schema:
@@ -1107,24 +1130,26 @@ paths:
         - projectCategories
       summary: Creates a new project category in the library.
       requestBody:
+        required: true
         content:
-          '*/*':
+          multipart/form-data:
             schema:
               $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
-                name:
-                  type: string
+                cover_image:
+                  type: file
+                  description: png file to upload
                 externalId:
                   type: string
-                icon:
+                  description: externalID
+                name:
                   type: string
-            examples:
-              sampleBodyData:
-                value:
-                  name: Teachers
-                  externalId: teachers
-                  icon: static/projectCategories/teacher.png
+                  description: name of the caregories
+              required:
+                - cover_image
+                - externalId
+                - name
       parameters:
         - &ref_18
           name: X-auth-token
@@ -1213,24 +1238,26 @@ paths:
         - projectCategories
       summary: Update an existing project category.
       requestBody:
+        required: true
         content:
-          '*/*':
+          multipart/form-data:
             schema:
               $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
-                name:
-                  type: string
+                cover_image:
+                  type: file
+                  description: png file to upload
                 externalId:
                   type: string
-                icon:
+                  description: externalID
+                name:
                   type: string
-            examples:
-              sampleBodyData:
-                value:
-                  name: Teachers
-                  externalId: teachers
-                  icon: static/projectCategories/teacher.png
+                  description: name of the caregories
+              required:
+                - cover_image
+                - externalId
+                - name
       parameters:
         - name: X-auth-token
           in: header
@@ -1424,10 +1451,17 @@ paths:
             schema:
               type: object
               properties:
-                file:
+                projectTemplateTasks:
                   type: string
                   format: binary
                   description: The CSV file to upload
+                translationFiles:
+                  type: string
+                  format: binary
+                  description: The JSON file to upload
+              required:
+                - translationFiles
+                - projectTemplateTasks
       parameters:
         - name: X-auth-token
           in: header
@@ -1523,7 +1557,7 @@ paths:
                   format: binary
                   description: The CSV file to upload
       parameters:
-        - &ref_24
+        - &ref_21
           name: X-auth-token
           in: header
           schema:
@@ -1533,7 +1567,7 @@ paths:
             To use this API, you require an X-auth-token. This token is
             available in the login API Response.
           required: true
-        - &ref_25
+        - &ref_22
           name: internal-access-token
           in: header
           schema:
@@ -1561,7 +1595,7 @@ paths:
                     infrastructure","Infrastructure-Management-Task1","","simple","NO","","","","","","","FALSE","","","","","","","","","","1","667e79b467803932055a0ecb","Success"
         '400':
           description: 'Bad response '
-          headers: &ref_26 {}
+          headers: &ref_23 {}
           content:
             application/json:
               schema:
@@ -1599,15 +1633,15 @@ paths:
         content:
           '*/*':
             schema:
-              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
-                hasAcceptedTAndC:
-                  type: boolean
+                programId:
+                  type: string
             examples:
               sampleBodyData:
                 value:
                   hasAcceptedTAndC: true
+                  programId: 6752aee1c1438653af10d613
       parameters:
         - name: X-auth-token
           in: header
@@ -1997,7 +2031,7 @@ paths:
         `required`
 
         * This is a mandatory parameter and cannot be empty or null.
-  /v1/userProjects/sync/{_id}:
+  /v1/userProjects/sync/{_id}?lastDownloadedAt=:
     post:
       tags:
         - userProjects
@@ -2006,393 +2040,42 @@ paths:
         content:
           '*/*':
             schema:
-              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
-                _id:
-                  type: string
-                userId:
-                  type: string
-                userRole:
-                  type: string
-                status:
-                  type: string
-                isDeleted:
-                  type: boolean
-                categories:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      externalId:
-                        type: string
-                      _id:
-                        type: string
-                createdBy:
-                  type: string
-                tasks:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      externalId:
-                        type: string
-                      name:
-                        type: string
-                      _id:
-                        type: string
-                      type:
-                        type: string
-                      status:
-                        type: string
-                      isDeleted:
-                        type: boolean
-                      isDeletable:
-                        type: boolean
-                      createdAt:
-                        type: string
-                      updatedAt:
-                        type: string
-                      isImportedFromLibrary:
-                        type: boolean
-                      syncedAt:
-                        type: string
-                      children:
-                        type: array
-                        items:
-                          type: string
-                updatedBy:
-                  type: string
-                learningResources:
-                  type: array
-                  items:
-                    type: string
-                hasAcceptedTAndC:
-                  type: boolean
-                taskSequence:
-                  type: array
-                  items:
-                    type: string
-                recommendedFor:
-                  type: array
-                  items:
-                    type: string
                 attachments:
                   type: array
                   items:
-                    type: string
-                deleted:
-                  type: boolean
-                userProfile:
-                  type: object
-                  properties:
-                    id:
-                      type: number
-                    email:
-                      type: string
-                    email_verified:
-                      type: string
-                    name:
-                      type: string
-                    gender:
-                      type: 'null'
-                    location:
-                      type: 'null'
-                    about:
-                      type: 'null'
-                    share_link:
-                      type: 'null'
-                    status:
-                      type: string
-                    image:
-                      type: 'null'
-                    last_logged_in_at:
-                      type: string
-                    has_accepted_terms_and_conditions:
-                      type: boolean
-                    languages:
-                      type: 'null'
-                    preferred_language:
-                      type: string
-                    organization_id:
-                      type: number
-                    roles:
-                      type: array
-                      items:
-                        type: number
-                    meta:
-                      type: 'null'
-                    created_at:
-                      type: string
-                    updated_at:
-                      type: string
-                    deleted_at:
-                      type: 'null'
-                    organization:
-                      type: object
-                      properties:
-                        id:
-                          type: number
-                        name:
-                          type: string
-                        code:
-                          type: string
-                    user_roles:
-                      type: array
-                      items:
-                        type: object
-                        properties:
-                          id:
-                            type: number
-                          title:
-                            type: string
-                          user_type:
-                            type: number
-                          status:
-                            type: string
-                syncedAt:
-                  type: string
-                entityInformation:
-                  type: object
-                  properties:
-                    _id:
-                      type: string
-                    childHierarchyPath:
-                      type: array
-                      items:
+                    type: object
+                    properties:
+                      name:
                         type: string
-                    deleted:
-                      type: boolean
-                    entityTypeId:
-                      type: string
-                    entityType:
-                      type: string
-                    metaInformation:
-                      type: object
-                      properties:
-                        externalId:
-                          type: string
-                        name:
-                          type: string
-                        region:
-                          type: string
-                        capital:
-                          type: string
-                    updatedBy:
-                      type: string
-                    createdBy:
-                      type: string
-                    updatedAt:
-                      type: string
-                    createdAt:
-                      type: string
-                    __v:
-                      type: number
-                    groups:
-                      type: object
-                      properties:
-                        district:
-                          type: array
-                          items:
-                            type: string
-                        beat:
-                          type: array
-                          items:
-                            type: string
-                        cluster:
-                          type: array
-                          items:
-                            type: string
-                        school:
-                          type: array
-                          items:
-                            type: string
-                    registryDetails:
-                      type: object
-                      properties:
-                        locationId:
-                          type: string
-                        code:
-                          type: string
-                entityId:
-                  type: string
-                programInformation:
-                  type: object
-                  properties:
-                    _id:
-                      type: string
-                    name:
-                      type: string
-                    description:
-                      type: string
-                    isAPrivateProgram:
-                      type: boolean
-                taskReport:
-                  type: object
-                  properties:
-                    total:
-                      type: number
-                    notStarted:
-                      type: number
-                description:
-                  type: string
-                title:
-                  type: string
-                metaInformation:
-                  type: object
-                  properties:
-                    rationale:
-                      type: string
-                    primaryAudience:
-                      type: array
-                      items:
+                      type:
                         type: string
-                    goal:
-                      type: string
-                    duration:
-                      type: string
-                    successIndicators:
-                      type: string
-                    risks:
-                      type: string
-                    approaches:
-                      type: string
-                programId:
-                  type: string
-                lastDownloadedAt:
-                  type: string
-                updatedAt:
-                  type: string
-                createdAt:
-                  type: string
-                __v:
-                  type: number
+                      sourcePath:
+                        type: string
+                userProfileInformation:
+                  type: object
+                  properties:
+                    scope:
+                      type: object
+                      properties:
+                        state:
+                          type: string
+                        role:
+                          type: string
             examples:
               sampleBodyData:
                 value:
-                  _id: 6624ff5124fc48e1fcdbec29
-                  userId: '2'
-                  userRole: BEO
-                  status: started
-                  isDeleted: false
-                  categories:
-                    - externalId: ''
-                      _id: ''
-                  createdBy: '2'
-                  tasks:
-                    - externalId: Task1-1710148664591
-                      name: Address the assembly and share ideas about Smart Learn
-                      _id: '1234'
-                      type: observation
-                      status: notStarted
-                      isDeleted: false
-                      isDeletable: true
-                      createdAt: 2024-04-21T11:58:09.204+0000
-                      updatedAt: 2024-04-21T11:58:09.204+0000
-                      isImportedFromLibrary: false
-                      syncedAt: 2024-04-21T11:58:09.204+0000
-                      children: []
-                  updatedBy: '2'
-                  learningResources: []
-                  hasAcceptedTAndC: false
-                  taskSequence: []
-                  recommendedFor: []
-                  attachments: []
-                  deleted: false
-                  userProfile:
-                    id: 2
-                    email: prajwal@tunerlabs.com
-                    email_verified: 'false'
-                    name: prajwal
-                    gender: null
-                    location: null
-                    about: null
-                    share_link: null
-                    status: ACTIVE
-                    image: null
-                    last_logged_in_at: '2024-04-21T07:44:54.239Z'
-                    has_accepted_terms_and_conditions: true
-                    languages: null
-                    preferred_language: en
-                    organization_id: 1
-                    roles:
-                      - 3
-                    meta: null
-                    created_at: '2024-03-22T07:11:10.925Z'
-                    updated_at: '2024-04-21T07:44:54.240Z'
-                    deleted_at: null
-                    organization:
-                      id: 1
-                      name: Default Organization
-                      code: default_code
-                    user_roles:
-                      - id: 3
-                        title: mentee
-                        user_type: 0
-                        status: ACTIVE
-                  syncedAt: 2024-04-21T11:58:09.183+0000
-                  entityInformation:
-                    _id: 5f33c3d85f637784791cd830
-                    childHierarchyPath:
-                      - district
-                      - beat
-                      - cluster
-                      - school
-                    deleted: false
-                    entityTypeId: 5f32d8228e0dc8312404056e
-                    entityType: state
-                    metaInformation:
-                      externalId: MH
-                      name: Maharashtra
-                      region: West
-                      capital: Mumbai
-                    updatedBy: 124fdade-aaa2-4587-9dcd-3c7cf15c7147
-                    createdBy: 2b655fd1-201d-4d2a-a1b7-9048a25c0afa
-                    updatedAt: '2021-01-18T06:51:31.086Z'
-                    createdAt: '2020-08-12T10:26:32.038Z'
-                    __v: 0
-                    groups:
-                      district:
-                        - 5f33c56fb451f58478b36996
-                      beat:
-                        - 5f33cb24c1352f84a29f547c
-                        - 5f33cb24c1352f84a29f547d
-                      cluster:
-                        - 5f33cb07ce438a849b4a17f6
-                        - 5f33cb07ce438a849b4a17f7
-                      school:
-                        - 5f33caebb451f58478b36998
-                        - 5f33caebb451f58478b36999
-                    registryDetails:
-                      locationId: db331a8c-b9e2-45f8-b3c0-7ec1e826b6df
-                      code: db331a8c-b9e2-45f8-b3c0-7ec1e826b6df
-                  entityId: 5f33c3d85f637784791cd830
-                  programInformation:
-                    _id: 5f5f6f66f69c8a0fd28a8aba
-                    name: My Program
-                    description: Unnati-Default-Program
-                    isAPrivateProgram: true
-                  taskReport:
-                    total: 1
-                    notStarted: 1
-                  description: Come See Our School!- Parent Mela vishwa
-                  title: Come See Our School!- Parent Mela
-                  metaInformation:
-                    rationale: ''
-                    primaryAudience:
-                      - Community
-                    goal: >-
-                      Organizing the Parent Mela in the school in order to make
-                      better community reach
-                    duration: At the end of every quarter
-                    successIndicators: ''
-                    risks: ''
-                    approaches: ''
-                  programId: 5f5f6f66f69c8a0fd28a8aba
-                  lastDownloadedAt: 2024-04-21T11:58:09.204+0000
-                  updatedAt: 2024-04-21T11:58:09.213+0000
-                  createdAt: 2024-04-21T11:58:09.213+0000
-                  __v: 0
+                  attachments:
+                    - name: prajwal.jpeg
+                      type: image/jpeg
+                      sourcePath: >-
+                        project/5f72f9998925ec7c60f79a91/168/4b4a01c7-cc3e-41cd-9313-776d3a36c5fc/i2.png
+                  userProfileInformation:
+                    scope:
+                      state: 665d8df5c6892808846230e7
+                      role: >-
+                        mentee,admin,org_admin,session_manager,public,cluster_academic_coordinator,block_education_officer,district_education_officer,head_master
       parameters:
         - name: X-auth-token
           in: header
@@ -2418,7 +2101,8 @@ paths:
           schema:
             type: string
           example: '2024-04-21T11:58:09.204Z'
-          required: true
+          required: false
+          description: The user need to provide downloaded at
         - in: query
           name: Id
           description: 'The user need to provided project id.'
@@ -2611,201 +2295,410 @@ paths:
                     message: Successfully fetched project details
                     status: 200
                     result:
-                      _id: 667918baf8063086b629f007
-                      userRole: BEO
+                      _id: 66ceec390c9cad9f3e066de7
+                      certificate:
+                        templateUrl: >-
+                          certificate/b5e8d24a-b582-43c6-b4c1-b953c8bc03b3/162/3a75e1ac-66fe-4c1e-a7bb-d3c10c9fd9a6/66cdcd52f8615012ea3363f5/27-7-2024-1724763475074_Dowloaded.svg
+                        status: active
+                        criteria:
+                          validationText: Complete validation message
+                          expression: C1&&C2&&C3
+                          conditions:
+                            C1:
+                              validationText: Submit your project.
+                              expression: C1
+                              conditions:
+                                C1:
+                                  scope: project
+                                  key: status
+                                  operator: '=='
+                                  value: submitted
+                            C2:
+                              validationText:
+                                - Add 1 evidence at the project level
+                              expression: C1
+                              conditions:
+                                C1:
+                                  scope: project
+                                  key: attachments
+                                  function: count
+                                  filter:
+                                    key: type
+                                    value: all
+                                  operator: '>='
+                                  value: 1
+                            C3:
+                              validationText: >-
+                                Add 1 evidence for the task Todays welcome paret
+                                teckde
+                              expression: C1
+                              conditions:
+                                C1:
+                                  scope: task
+                                  key: attachments
+                                  function: count
+                                  filter:
+                                    key: type
+                                    value: all
+                                  operator: '>='
+                                  value: 1
+                                  taskDetails:
+                                    - 66cdcd4350326112e09407c3
+                        templateId: 66cdcd52f8615012ea3363f5
+                        eligible: true
+                        svgPath: >-
+                          project/dd5e5e97-6ab1-4013-8800-c8fac6b3bbb3/277/86d43e0f-0234-4b5e-8a31-4a9b58ceba30/3422e7b7-e28c-46c2-8bd6-79fcae44a472_template.svg
+                        transactionId: a0a801d9-469c-46a2-94c6-041518b5f38a
+                        transactionIdCreatedAt: '2024-08-28T09:22:53.988Z'
+                        issuedOn: '2024-08-28T09:22:56.072Z'
+                        pdfPath: >-
+                          project/6552e49c-28e0-4572-91d8-d66e2a427f8a/277/6e647bcb-7cb7-42e0-bfdb-cd33be769936/380d1b75-e0e8-4b02-82a4-796c82ec7004.pdf
+                        pdfUrl: >-
+                          https://storage.googleapis.com/mentoring-dev-storage-private/project/6552e49c-28e0-4572-91d8-d66e2a427f8a/277/6e647bcb-7cb7-42e0-bfdb-cd33be769936/380d1b75-e0e8-4b02-82a4-796c82ec7004.pdf?GoogleAccessId=sl-mentoring-dev-storage%40sl-dev-project.iam.gserviceaccount.com&Expires=1734085188&Signature=EOb8MaGFAqPGkvK3ATSk%2B26F43xjfgSZOSty03HWdWyk35rPHtphIEC%2BbRlU8Ts9p8lefHv7A%2FJKecGhFYXoPLIyoqLKEBKcpzdXVuVvoVqUxx4IYDdDFUeJGTpF4z1ugp74bkCUBSFSe7sm2DQ3iWlj5kkPswH9gCI%2BHHWTpnGouy8RB9gveUt%2FpwK0AGF4mgRhOwHXAV6IdGdtfIwkorX333A9EYCFese7k%2BeLDiCb3KdeEw4Ie%2FrSrFtKnoWEh7fM%2BcYed7MSzgTRiedBSPVAbA6k%2FI87l%2Fkm6hrxF9JSQgv7MmMC%2Bwv%2BpTzSzMp1vdPelba3ont1OQlZ4ewE6g%3D%3D
+                        svgUrl: >-
+                          https://storage.googleapis.com/mentoring-dev-storage-private/project/dd5e5e97-6ab1-4013-8800-c8fac6b3bbb3/277/86d43e0f-0234-4b5e-8a31-4a9b58ceba30/3422e7b7-e28c-46c2-8bd6-79fcae44a472_template.svg?GoogleAccessId=sl-mentoring-dev-storage%40sl-dev-project.iam.gserviceaccount.com&Expires=1734085188&Signature=EKmo0zp7xuVVQ951f%2FuFi1eQA6sHHivWQCmcBCoF4Lj%2FJIeiSLy5kBA8hkzI46FsLRb9KtOH2ar4E9%2FV7c9DlYwSk3RHdnI%2FSAEi3a2SSA5zWZkOhk7EI3dJlM5NmTWJFD9tZ2%2BP2a6qpXFLVH0Jnz5qfmPEQWIf6KAi%2FBeOa01ZcoP0VB2omSsBj8%2FE%2FCMqnodV5%2F72u0uXc%2BrgoSJU1oarck262nV8EHXUdtaVF0GZ9fI%2B44%2F5kWOU9K%2FWuwmkvXLlDUvONcO5fvAyax%2BTOoYJxx6s87As1OxvC1pu2QIxYcq%2BJWfHt2%2BM5ffs8K1xjVUx1z61UuTWtLwJ04FTSQ%3D%3D
+                      userRole: block_education_officer,district_education_officer
                       status: submitted
                       isDeleted: false
                       categories:
-                        - externalId: ''
+                        - name: null
+                          externalId: ''
+                          _id: ''
+                        - name: null
+                          externalId: ''
+                          _id: ''
+                        - name: null
+                          externalId: ''
                           _id: ''
                       tasks:
-                        - externalId: Task1-1710148664591
-                          name: >-
-                            Address the assembly and share ideas about Smart
-                            Learn
-                          _id: '1234'
-                          type: observation
-                          status: notStarted
+                        - _id: 032ed973-e6cf-4c2a-b6c8-d748be01b257
+                          createdBy: '162'
+                          updatedBy: '277'
                           isDeleted: false
-                          isDeletable: true
-                          createdAt: '2024-06-24T06:56:58.447Z'
-                          updatedAt: '2024-06-24T06:56:58.447Z'
+                          isDeletable: false
+                          taskSequence:
+                            - 3.0-1724763459321
+                            - 4.0-1724763459321
+                          children:
+                            - _id: 5a99de80-02e0-47ac-b0d4-8a6c103c2b94
+                              createdBy: '162'
+                              updatedBy: '162'
+                              isDeleted: false
+                              isDeletable: false
+                              taskSequence: []
+                              children: []
+                              visibleIf:
+                                - operator: '==='
+                                  _id: 032ed973-e6cf-4c2a-b6c8-d748be01b257
+                                  value: started
+                              hasSubTasks: false
+                              learningResources:
+                                - name: Link-TEst
+                                  link: https://www.youtube.com/watch?v=FtDv-L1stdo
+                                  app: projectService
+                                  id: watch?v=FtDv-L1stdo
+                              deleted: false
+                              type: content
+                              name: subtask to welcome parent teckde
+                              externalId: 3.0-1724763459321
+                              description: ''
+                              sequenceNumber: '2'
+                              metaInformation:
+                                hasAParentTask: 'YES'
+                                parentTaskOperator: EQUALS
+                                parentTaskValue: started
+                                parentTaskId: 2.0-1724763459321
+                                startDate: 16/12/2026
+                                endDate: 20/12/2026
+                                minNoOfSubmissionsRequired: subTask1
+                              solutionDetails:
+                                solutionType: ''
+                                solutionId: ''
+                                solutionSubType: ''
+                              updatedAt: '2024-08-28T09:22:53.597Z'
+                              createdAt: '2024-08-27T12:57:39.834Z'
+                              parentId: 66cdcd4350326112e09407c3
+                              status: completed
+                              referenceId: 66cdcd4350326112e09407c6
+                              isImportedFromLibrary: false
+                              syncedAt: '2024-08-28T09:22:53.597Z'
+                            - _id: 5ee70bc3-1bae-492f-a7f6-58044317419b
+                              createdBy: '162'
+                              updatedBy: '162'
+                              isDeleted: false
+                              isDeletable: false
+                              taskSequence: []
+                              children: []
+                              visibleIf:
+                                - operator: '==='
+                                  _id: 032ed973-e6cf-4c2a-b6c8-d748be01b257
+                                  value: started
+                              hasSubTasks: false
+                              learningResources:
+                                - name: Link-TEst-2
+                                  link: https://www.youtube.com/watch?v=7xNHz6lwxYs
+                                  app: projectService
+                                  id: watch?v=7xNHz6lwxYs
+                              deleted: false
+                              type: content
+                              name: subtask to welcome parent teckde-2
+                              externalId: 4.0-1724763459321
+                              description: ''
+                              sequenceNumber: '3'
+                              metaInformation:
+                                hasAParentTask: 'YES'
+                                parentTaskOperator: EQUALS
+                                parentTaskValue: started
+                                parentTaskId: 2.0-1724763459321
+                                startDate: 16/12/2027
+                                endDate: 20/12/2027
+                                minNoOfSubmissionsRequired: subTask1
+                              solutionDetails:
+                                solutionType: ''
+                                solutionId: ''
+                                solutionSubType: ''
+                              updatedAt: '2024-08-28T09:22:53.597Z'
+                              createdAt: '2024-08-27T12:57:39.849Z'
+                              parentId: 66cdcd4350326112e09407c3
+                              status: completed
+                              referenceId: 66cdcd4350326112e09407cb
+                              isImportedFromLibrary: false
+                              syncedAt: '2024-08-28T09:22:53.597Z'
+                          visibleIf: []
+                          hasSubTasks: true
+                          learningResources:
+                            - name: Test-3-link
+                              link: https://www.youtube.com/watch?v=PXcYBhvYc30
+                              app: projectService
+                              id: watch?v=PXcYBhvYc30
+                          deleted: false
+                          type: content
+                          name: Todays welcome paret teckde
+                          externalId: 2.0-1724763459321
+                          description: ''
+                          sequenceNumber: '1'
+                          metaInformation:
+                            hasAParentTask: 'NO'
+                            parentTaskOperator: ''
+                            parentTaskValue: ''
+                            parentTaskId: ''
+                            startDate: 16/12/2025
+                            endDate: 20/12/2025
+                            minNoOfSubmissionsRequired: ''
+                          solutionDetails:
+                            solutionType: ''
+                            solutionId: ''
+                            solutionSubType: ''
+                          updatedAt: '2024-08-28T09:22:53.598Z'
+                          createdAt: '2024-08-27T12:57:39.825Z'
+                          status: completed
+                          referenceId: 66cdcd4350326112e09407c3
                           isImportedFromLibrary: false
-                          syncedAt: '2024-06-24T06:56:58.447Z'
-                          children: []
-                      learningResources: []
+                          syncedAt: '2024-08-28T09:22:53.597Z'
+                          attachments:
+                            - name: 1724836952409.png
+                              type: image/png
+                              url: >-
+                                https://storage.googleapis.com/mentoring-dev-storage-private/project/66ceec390c9cad9f3e066de7/277/9a59d5a4-213f-4260-841a-45602900d1e6/1724836952409.png?GoogleAccessId=sl-mentoring-dev-storage%40sl-dev-project.iam.gserviceaccount.com&Expires=1734085188&Signature=jKGYXplYhFmZBajl3fNT5mTtnHUMc5ZLms8E%2BJeSn5Z6qbPSvdtosh7Dag61t9r3jQCSwZ7iHjAM%2BMubJ0J6ruYTzpzdQI7FOM90HcqXq7KZHb1UvozdzTCleuRyjjjriCvGbmD600adeFZIal3kvQ1X79i%2Bjt3uTwm392OdcRul%2BUqFQh9bG4vqVCvYiqzpQRSBa2%2Bey9NoAPSIEQjbQuQGnfRUnC%2FPVtU6S06x1ezoQ09xUn7US%2FolDfNzaMhvosCVbiuQYp4lcc8qv%2BnNv%2BZxr%2BhBrBjw3YYVMJAee2t%2F%2Fwtm3nONC7d79%2Fsn7X0Yx%2BHUdiyuFQS8GuQGDorqBg%3D%3D
+                              sourcePath: >-
+                                project/66ceec390c9cad9f3e066de7/277/9a59d5a4-213f-4260-841a-45602900d1e6/1724836952409.png
+                      learningResources:
+                        - link: https://youtu.be/libKVRa01L8?feature=shared
+                          app: projectService
+                          id: libKVRa01L8?feature=shared
                       hasAcceptedTAndC: false
-                      taskSequence: []
+                      taskSequence:
+                        - 2.0-1724763459321
                       recommendedFor: []
-                      attachments: []
+                      attachments:
+                        - name: 1724836968796.png
+                          type: image/png
+                          url: >-
+                            https://storage.googleapis.com/mentoring-dev-storage-private/project/66ceec390c9cad9f3e066de7/277/9a59d5a4-213f-4260-841a-45602900d1e6/1724836968796.png?GoogleAccessId=sl-mentoring-dev-storage%40sl-dev-project.iam.gserviceaccount.com&Expires=1734085187&Signature=T%2F1h9d4X0nLJJfDRoIJtpP4Y9Ykt8C%2FG3kDtPSW9uPOIzVfkbyxfVlzg0MI7xrAUBNL%2FYfqfHBL5qVOsOwK6tHlnAR7tINv0kJ04U3rWjH%2F0mSFMXZgXBFDkokjOT4DLY0h%2BMV7102sZTrF5AeBOScbO5iL3KSaFKFzTSb1uiK%2Fn4PqvDbx%2FGYAFgzsT9Uzqarv5PkW9IWF26ZrAp4e40uWuB0QxjK1TOVtPUmbLaZzLoEKDmzBrSQPdpcQGyFs4RGMEyMV9y5hkrrL0iOZgoZuDev1TAzhPIGH2yluoSku8eFqXwH1z1auNP14uxq8qkaaTMNZLI3bQsf6qT9WHKA%3D%3D
+                          sourcePath: >-
+                            project/66ceec390c9cad9f3e066de7/277/9a59d5a4-213f-4260-841a-45602900d1e6/1724836968796.png
+                          page: story
+                        - name: 1729251446851.png
+                          sourcePath: >-
+                            project/happy/263/51807846-4c20-428a-b999-8af96a5f1b27/evidence_link-151.jpg
+                          type: image/png
+                          page: story
+                          url: >-
+                            https://storage.googleapis.com/mentoring-dev-storage-private/project/happy/263/51807846-4c20-428a-b999-8af96a5f1b27/evidence_link-151.jpg?GoogleAccessId=sl-mentoring-dev-storage%40sl-dev-project.iam.gserviceaccount.com&Expires=1734085187&Signature=SyOGh7I3l11rP5q0w5dn%2B9xp7%2F7UWczTJFg3I08NMLGGxDqAwJM2EvzdMX%2B%2FbDNAwnLagerTZeZf8kTWPo7ZS7C2Vw5%2BN4aS8M8077cPZWiuWc%2BTW7t3CtZSf6E4syz6Qa9uuo2Y2gACb0n%2BGxMSFJP6X6oqiYSj8mcN73ArZ30DEBmeAG387vv%2BEIX2GGekBAOXbTZfLNwx0fiB8dc2Ydz1R1m6NAyLjej3B8jJQLsn%2F2sYzk2p8Wl1nx2tiEJrMGOiF04hTXvXAtVIWwu14L67cEH3%2FQxCzmCJzw2pf%2B4KlSUX%2BvvTC84xqj%2FWS5T%2F4RG5FRwiyB0GSbrbIOnRdg%3D%3D
+                        - name: 1729251446851.png
+                          sourcePath: >-
+                            project/happy/263/51807846-4c20-428a-b999-8af96a5f1b27/evidence_link-151.jpg
+                          type: image/png
+                          page: story
                       deleted: false
+                      description: >-
+                        Send an invitation to parents with the PTM date and
+                        time, and prepare the agenda with teachers. During the
+                        meeting, welcome parents, conduct an ice breaker,
+                        discuss the 'Parents as Partners' initiative, and have
+                        one-on-one conversations. Collect feedback and encourage
+                        sharing photos of learning spaces. After the meeting,
+                        record attendance, review feedback, and upload data to
+                        the app.
+                      title: SixPlus
+                      solutionId: 66cdcd44f8615012ea3363e6
+                      solutionExternalId: IDE-1724763459321-PROJECT-SOLUTION
+                      programId: 66cdcca550326112e094079d
+                      programExternalId: vgbhjkl
+                      isAPrivateProgram: false
+                      solutionInformation: {}
+                      lastDownloadedAt: '2024-08-28T09:22:00.972Z'
                       userProfile:
-                        id: 162
-                        email: priyanka@tunerlabs.com
+                        id: 277
+                        email: v6@yopmail.com
                         email_verified: 'false'
-                        name: Priyanka
-                        gender: null
-                        location:
-                          value: ap
-                          label: Andhra Pradesh
-                        about: This is teswts
+                        name: VinodSix
+                        location: bangalore
+                        about: PWA
                         share_link: null
                         status: ACTIVE
-                        image: null
-                        has_accepted_terms_and_conditions: true
-                        languages:
-                          - value: en_in
-                            label: English
+                        image: ''
+                        has_accepted_terms_and_conditions: false
+                        languages: null
                         preferred_language:
                           value: en
                           label: English
-                        organization_id: 24
+                        organization_id: 1
                         roles:
-                          - 3
-                          - 5
-                          - 6
-                          - 10
-                          - 11
-                          - 12
+                          - 18
+                          - 20
                         meta:
-                          block:
-                            - 663364443c990eaa179e289e
-                          state: 66790a8cba9a0b5bd7d6aba0
-                        location_ids: null
-                        created_at: '2024-01-11T11:44:44.632Z'
-                        updated_at: '2024-06-24T06:01:44.440Z'
+                          state: 665d8df5c6892808846230e7
+                        created_at: '2024-08-14T09:11:29.210Z'
+                        updated_at: '2024-08-28T08:22:06.827Z'
                         deleted_at: null
                         organization:
-                          id: 24
-                          name: Tunerlabs
-                          code: tl
+                          id: 1
+                          name: Default Organization
+                          code: default_code
                         user_roles:
-                          - id: 3
-                            title: mentee
+                          - id: 18
+                            title: block_education_officer
+                            label: Block Education Officer
                             user_type: 0
                             status: ACTIVE
-                            organization_id: 1
+                            organization_id: 24
                             visibility: PUBLIC
-                          - id: 5
-                            title: org_admin
-                            user_type: 1
-                            status: ACTIVE
-                            organization_id: 1
-                            visibility: PUBLIC
-                          - id: 6
-                            title: session_manager
+                          - id: 20
+                            title: district_education_officer
+                            label: District Education Officer
                             user_type: 0
                             status: ACTIVE
-                            organization_id: 1
-                            visibility: PUBLIC
-                          - id: 10
-                            title: reviewer
-                            user_type: 0
-                            status: ACTIVE
-                            organization_id: 1
-                            visibility: PUBLIC
-                          - id: 11
-                            title: program_creator
-                            user_type: 0
-                            status: ACTIVE
-                            organization_id: 1
-                            visibility: PUBLIC
-                          - id: 12
-                            title: program_designer
-                            user_type: 0
-                            status: ACTIVE
-                            organization_id: 1
+                            organization_id: 24
                             visibility: PUBLIC
                         permissions:
                           - module: user
                             request_type:
                               - POST
+                              - PATCH
                               - DELETE
                               - GET
                               - PUT
-                              - PATCH
-                            service: user
-                          - module: form
-                            request_type:
-                              - POST
-                              - DELETE
-                              - GET
-                              - PUT
-                              - PATCH
                             service: user
                           - module: cloud-services
                             request_type:
                               - POST
+                              - PATCH
                               - DELETE
                               - GET
                               - PUT
-                              - PATCH
-                            service: user
-                          - module: organization
-                            request_type:
-                              - POST
-                              - GET
-                            service: user
-                          - module: entity-type
-                            request_type:
-                              - POST
-                              - DELETE
-                              - GET
-                              - PUT
-                              - PATCH
-                            service: user
-                          - module: entity
-                            request_type:
-                              - POST
-                              - DELETE
-                              - PUT
-                              - PATCH
-                              - GET
-                            service: user
-                          - module: org-admin
-                            request_type:
-                              - POST
-                              - DELETE
-                              - GET
-                              - PUT
-                              - PATCH
-                            service: user
-                          - module: notification
-                            request_type:
-                              - POST
-                              - DELETE
-                              - GET
-                              - PUT
-                              - PATCH
                             service: user
                           - module: account
                             request_type:
-                              - GET
                               - POST
                             service: user
-                          - module: user-role
-                            request_type:
-                              - GET
-                              - POST
-                              - DELETE
-                              - PUT
-                              - PATCH
-                            service: user
-                      syncedAt: '2024-06-24T06:56:58.443Z'
-                      solutionId: 666ac34abf416e267619bb8d
-                      isAPrivateProgram: false
-                      description: Come See Our School!- Parent Mela vishwa
-                      title: Come See Our School!- Parent Mela
-                      programId: 667505a649de1ae76e9e1033
-                      lastDownloadedAt: '2024-06-24T06:56:58.448Z'
-                      programName: school
+                      appInformation: {}
+                      completedDate: '2024-08-28T09:22:53.598Z'
+                      syncedAt: '2024-08-28T09:22:53.596Z'
+                      story:
+                        actionSteps: []
+                        authorName: jon
+                        chatHistory:
+                          - details: >-
+                              User initiated a discussion about creating a story
+                              related to the DCPCR School Development Index.
+                            event: Chat started
+                            timestamp: '2024-12-04T09:55:00Z'
+                          - details: >-
+                              User did not respond for 10 minutes. Bot marked
+                              the chat as paused.
+                            event: Chat paused
+                            timestamp: '2024-12-04T10:05:00Z'
+                          - details: >-
+                              User resumed the chat and provided inputs for
+                              problem statement and impact.
+                            event: Chat resumed
+                            timestamp: '2024-12-04T10:15:00Z'
+                          - details: >-
+                              User completed the story creation process and
+                              uploaded all necessary files.
+                            event: Chat finished
+                            timestamp: '2024-12-04T10:30:00Z'
+                        conversation:
+                          - botResponse: >-
+                              Sure, let’s start! Could you tell me about the
+                              title and objectives of the story?
+                            timestamp: '2024-12-04T10:00:00Z'
+                            userMessage: >-
+                              I want to create a story about the DCPCR School
+                              Development Index.
+                          - botResponse: >-
+                              Got it. What about the problem statement and
+                              impact you'd like to highlight?
+                            timestamp: '2024-12-04T10:02:00Z'
+                            userMessage: >-
+                              The title will be 'DCPCR School Development Index
+                              2018-19', and the objective is 'To analyze and
+                              showcase school development trends'.
+                          - botResponse: >-
+                              Great! I’ve added that. Do you have a timeline for
+                              this story?
+                            timestamp: '2024-12-04T10:05:00Z'
+                            userMessage: >-
+                              The problem is schools not meeting benchmarks. The
+                              impact is improving education standards.
+                          - botResponse: >-
+                              Understood. I’ve added a 2-week timeline. Anything
+                              else you’d like to add, such as action steps or
+                              resources?
+                            timestamp: '2024-12-04T10:07:00Z'
+                            userMessage: Two weeks should be enough.
+                          - botResponse: >-
+                              Alright. Please upload them when ready, and I’ll
+                              include them in the story.
+                            timestamp: '2024-12-04T10:10:00Z'
+                            userMessage: >-
+                              No action steps for now, but I’ll share
+                              attachments and PDFs.
+                          - botResponse: >-
+                              Got it! I’ve added the attachment and noted the
+                              PDF language as Hindi.
+                            timestamp: '2024-12-04T10:12:00Z'
+                            userMessage: Here’s an image attachment and a PDF in Hindi.
+                        impact: sample impact
+                        location: authorLocation
+                        objective: sample object
+                        pdfInformation:
+                          - language: hi
+                            url: >-
+                              https://storage.googleapis.com/mentoring-dev-storage-private/project/happy/263/51807846-4c20-428a-b999-8af96a5f1b27/evidence_link-151.jpg?GoogleAccessId=sl-mentoring-dev-storage%40sl-dev-project.iam.gserviceaccount.com&Expires=1734085187&Signature=SyOGh7I3l11rP5q0w5dn%2B9xp7%2F7UWczTJFg3I08NMLGGxDqAwJM2EvzdMX%2B%2FbDNAwnLagerTZeZf8kTWPo7ZS7C2Vw5%2BN4aS8M8077cPZWiuWc%2BTW7t3CtZSf6E4syz6Qa9uuo2Y2gACb0n%2BGxMSFJP6X6oqiYSj8mcN73ArZ30DEBmeAG387vv%2BEIX2GGekBAOXbTZfLNwx0fiB8dc2Ydz1R1m6NAyLjej3B8jJQLsn%2F2sYzk2p8Wl1nx2tiEJrMGOiF04hTXvXAtVIWwu14L67cEH3%2FQxCzmCJzw2pf%2B4KlSUX%2BvvTC84xqj%2FWS5T%2F4RG5FRwiyB0GSbrbIOnRdg%3D%3D
+                            sharableUrl: >-
+                              https://project-dev.elevate-apis.shikshalokam.org/project/v1/cloud-services/files/download?file=project/happy/263/51807846-4c20-428a-b999-8af96a5f1b27/evidence_link-151.jpg
+                        problemStatement: problemStatement
+                        resources: []
+                        summary: sample summary
+                        timeline: 2 weeks
+                        title: DCPCR School Development Index 2018-19
+                      programName: Test elevate_shiksha
+                      goal: TEMP
                       rationale: ''
-                      primaryAudience:
-                        - Community
-                      goal: >-
-                        Organizing the Parent Mela in the school in order to
-                        make better community reach
-                      duration: At the end of every quarter
+                      primaryAudience: ''
+                      duration: 2 months
                       successIndicators: ''
                       risks: ''
                       approaches: ''
@@ -2842,101 +2735,241 @@ paths:
         * This is a mandatory parameter and cannot be empty or null.
   /v1/userProjects/add:
     post:
-      tags:
+      tags: &ref_43
         - userProjects
       summary: Add a new user project.
       requestBody:
         content:
           application/json:
             schema:
-              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
-                userRole:
-                  type: string
-                createdFor:
-                  type: array
-                  items:
-                    type: string
-                status:
-                  type: string
-                description:
-                  type: string
-                title:
-                  type: string
-                metaInformation:
+                program:
                   type: object
                   properties:
-                    rationale:
+                    description:
                       type: string
-                    primaryAudience:
+                    endDate:
+                      type: string
+                    language:
                       type: array
                       items:
                         type: string
-                    goal:
+                    name:
                       type: string
-                    duration:
+                    source:
+                      type: object
+                      properties:
+                        apiVersion:
+                          type: string
+                        confidenceScore:
+                          type: number
+                        info:
+                          type: object
+                          properties:
+                            pageNo:
+                              type: string
+                            title:
+                              type: string
+                            url:
+                              type: string
+                        model:
+                          type: string
+                        provider:
+                          type: string
+                    startDate:
                       type: string
-                    successIndicators:
-                      type: string
-                    risks:
-                      type: string
-                    approaches:
-                      type: string
-                hasAcceptedTAndC:
-                  type: boolean
-                entityId:
-                  type: string
-                categories:
-                  type: array
-                  items:
-                    type: string
-                programId:
-                  type: string
-                tasks:
+                projects:
                   type: array
                   items:
                     type: object
                     properties:
-                      externalId:
+                      title:
                         type: string
-                      name:
+                      description:
                         type: string
-                      _id:
+                      status:
                         type: string
-                      type:
+                      duration:
                         type: string
+                      recommendedFor:
+                        type: array
+                        items:
+                          type: string
+                      category:
+                        type: array
+                        items:
+                          type: string
+                      startDate:
+                        type: string
+                      endDate:
+                        type: string
+                      source:
+                        type: object
+                        properties:
+                          model:
+                            type: string
+                          provider:
+                            type: string
+                          apiVersion:
+                            type: string
+                          confidenceScore:
+                            type: number
+                          info:
+                            type: object
+                            properties:
+                              url:
+                                type: string
+                              title:
+                                type: string
+                              pageNo:
+                                type: string
+                      tasks:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                            isDeletable:
+                              type: boolean
+                            sequenceNumber:
+                              type: string
+                            source:
+                              type: object
+                              properties:
+                                model:
+                                  type: string
+                                provider:
+                                  type: string
+                                apiVersion:
+                                  type: string
+                                confidenceScore:
+                                  type: number
+                                info:
+                                  type: object
+                                  properties:
+                                    url:
+                                      type: string
+                                    title:
+                                      type: string
+                                    pageNo:
+                                      type: string
+                          required:
+                            - name
+                            - isDeletable
+                            - sequenceNumber
+                            - source
+                    required:
+                      - title
+                      - description
+                      - status
+                      - duration
+                      - recommendedFor
+                      - category
+                      - startDate
+                      - endDate
+                      - source
+                      - tasks
             examples:
               sampleBodyData:
                 value:
-                  userRole: BEO
-                  createdFor:
-                    - '0126796199493140480'
-                  status: completed
-                  description: Come See Our School!- Parent Mela vishwa
-                  title: Come See Our School!- Parent Mela
-                  metaInformation:
-                    rationale: ''
-                    primaryAudience:
-                      - Community
-                    goal: >-
-                      Organizing the Parent Mela in the school in order to make
-                      better community reach
-                    duration: At the end of every quarter
-                    successIndicators: ''
-                    risks: ''
-                    approaches: ''
-                  hasAcceptedTAndC: false
-                  entityId: db331a8c-b9e2-45f8-b3c0-7ec1e826b6df
-                  categories:
-                    - educationLeader
-                  programId: 5f5f6f66f69c8a0fd28a8aba
-                  tasks:
-                    - externalId: Task1-1710148664591
-                      name: Address the assembly and share ideas about Smart Learn
-                      _id: '1234'
-                      type: observation
-      parameters:
+                  program:
+                    description: ''
+                    endDate: '2024-04-16T00:00:00.000Z'
+                    language:
+                      - English
+                    name: DCPCR School Development Index 2018-19
+                    source:
+                      apiVersion: '4.0'
+                      confidenceScore: 0.98
+                      info:
+                        pageNo: ''
+                        title: ''
+                        url: ''
+                      model: GPT-4
+                      provider: OpenAI
+                    startDate: '2024-04-16T00:00:00.000Z'
+                  projects:
+                    - title: Understand Importance of Reading
+                      description: ''
+                      status: started
+                      duration: 2 weeks
+                      recommendedFor:
+                        - students
+                        - teachers
+                      category:
+                        - educationLeader
+                        - MI-2.0-default
+                      startDate: '2024-04-16T00:00:00.000Z'
+                      endDate: '2024-04-16T00:00:00.000Z'
+                      source:
+                        model: GPT-4
+                        provider: OpenAI
+                        apiVersion: '4.0'
+                        confidenceScore: 0.98
+                        info:
+                          url: ''
+                          title: ''
+                          pageNo: ''
+                      tasks:
+                        - name: Task 1
+                          isDeletable: false
+                          sequenceNumber: '1'
+                          source:
+                            model: GPT-4
+                            provider: OpenAI
+                            apiVersion: '4.0'
+                            confidenceScore: 0.98
+                            info:
+                              url: ''
+                              title: ''
+                              pageNo: ''
+                        - name: Task 1
+                          isDeletable: false
+                          sequenceNumber: '1'
+                          source:
+                            model: GPT-4
+                            provider: OpenAI
+                            apiVersion: '4.0'
+                            confidenceScore: 0.98
+                            info:
+                              url: ''
+                              title: ''
+                              pageNo: ''
+                    - title: Importance of Reading
+                      description: ''
+                      status: started
+                      duration: 2 weeks
+                      recommendedFor:
+                        - students
+                        - teachers
+                      category: []
+                      startDate: '2024-04-16T00:00:00.000Z'
+                      endDate: '2024-04-16T00:00:00.000Z'
+                      source:
+                        model: GPT-4
+                        provider: OpenAI
+                        apiVersion: '4.0'
+                        confidenceScore: 0.98
+                        info:
+                          url: ''
+                          title: ''
+                          pageNo: ''
+                      tasks:
+                        - name: Task 1
+                          isDeletable: false
+                          sequenceNumber: '1'
+                          source:
+                            model: GPT-4
+                            provider: OpenAI
+                            apiVersion: '4.0'
+                            confidenceScore: 0.98
+                            info:
+                              url: ''
+                              title: ''
+                              pageNo: ''
+      parameters: &ref_44
         - name: X-auth-token
           in: header
           schema:
@@ -2969,10 +3002,10 @@ paths:
                       hasAcceptedTAndC: false
         '400':
           description: Bad response
-          headers: {}
+          headers: &ref_45 {}
           content:
             application/json:
-              schema:
+              schema: &ref_46
                 $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
@@ -3089,7 +3122,7 @@ paths:
         * This is a mandatory parameter and cannot be empty or null.
   /v1/userProjects/tasksStatus/{_id}:
     post:
-      tags: &ref_37
+      tags: &ref_34
         - userProjects
       summary: Retrieve the status of specific tasks for a user project.
       requestBody:
@@ -3108,7 +3141,7 @@ paths:
                 value:
                   taskIds: []
       parameters:
-        - &ref_38
+        - &ref_35
           name: X-auth-token
           in: header
           schema:
@@ -3118,7 +3151,7 @@ paths:
             To use this API, you require an X-auth-token. This token is
             available in the login API Response.
           required: true
-        - &ref_39
+        - &ref_36
           name: internal-access-token
           in: header
           schema:
@@ -3149,7 +3182,7 @@ paths:
                         submissionId: 5fbaa71d97ccef111cbb4ee0
         '400':
           description: 'Bad response '
-          headers: &ref_40 {}
+          headers: &ref_37 {}
           content:
             application/json:
               schema:
@@ -5848,7 +5881,7 @@ paths:
         * This is a mandatory parameter and cannot be empty or null.
   /v1/solutions/verifySolution/{solutionId}:
     post:
-      tags: &ref_34
+      tags: &ref_31
         - solutions
       summary: Verify solution by id.
       requestBody:
@@ -5874,7 +5907,7 @@ paths:
                     - 5fd1b52ab53a6416aaeefc80
                     - 5fd098e2e049735a86b748ac
                   role: BEO
-      parameters: &ref_35
+      parameters: &ref_32
         - name: X-auth-token
           in: header
           schema:
@@ -5911,7 +5944,7 @@ paths:
                       _id: 5f6853f293734140ccce90cf
         '400':
           description: Bad response
-          headers: &ref_36 {}
+          headers: &ref_33 {}
           content:
             application/json:
               schema:
@@ -6092,8 +6125,7 @@ paths:
         - solutions
       summary: Fetch Solution Details
       parameters:
-        - &ref_31
-          name: X-auth-token
+        - name: X-auth-token
           in: header
           schema:
             type: string
@@ -6170,7 +6202,7 @@ paths:
                           - BEO
         '400':
           description: Bad response
-          headers: &ref_33 {}
+          headers: &ref_30 {}
           content:
             application/json:
               schema:
@@ -6528,7 +6560,7 @@ paths:
           example: '{{internal_access_token}}'
         - in: query
           name: Id
-          description: 'To read the data we need to match its id'
+          description: To read the data we need to match its id
           schema: &ref_1
             type: string
           required: true
@@ -6771,7 +6803,7 @@ paths:
           example: '{{internal_access_token}}'
         - in: query
           name: Id
-          description: 'To update the data we need to match its id'
+          description: To update the data we need to match its id
           schema: *ref_1
           required: true
       responses:
@@ -6989,13 +7021,13 @@ paths:
             type: string
           example: '{{internal_access_token}}'
         - name: _id
-          description: 'To update the data we need to match its id'
+          description: To update the data we need to match its id
           schema: *ref_1
           required: true
         - in: path
           name: _id
           description: To update the data we need to match its id
-          schema: &ref_43
+          schema: &ref_40
             type: string
           required: true
       responses:
@@ -7290,7 +7322,7 @@ paths:
         - in: path
           name: categoryExternalId
           description: To list the data we need to match its id
-          schema: &ref_42
+          schema: &ref_39
             type: string
           required: true
       responses:
@@ -7348,9 +7380,9 @@ paths:
       tags:
         - projectTemplates
       summary: Lists all the project template
-      parameters: &ref_29
+      parameters: &ref_28
+        - *ref_20
         - *ref_21
-        - *ref_22
       responses:
         '200':
           description: Successful response
@@ -8482,9 +8514,9 @@ paths:
                         updatedAt: '2020-12-10T12:36:36.482Z'
                         createdAt: '2020-12-10T12:36:36.482Z'
                         __v: 0
-        '400': &ref_30
+        '400': &ref_29
           description: 'Bad response '
-          headers: *ref_23
+          headers: *ref_22
           content:
             application/json:
               schema:
@@ -8687,8 +8719,8 @@ paths:
                   programId: 66c7f75f18bff742198c4f24
                   baseTemplateId: 66bb5c3e196c83581cc26aa8
       parameters:
-        - *ref_24
-        - *ref_25
+        - *ref_21
+        - *ref_22
       responses:
         '200':
           description: Successful response
@@ -8703,7 +8735,7 @@ paths:
                       id": 6011136a2d25b926974d9ec9
         '400':
           description: 'Bad response '
-          headers: *ref_26
+          headers: *ref_23
           content:
             application/json:
               schema:
@@ -8766,7 +8798,7 @@ paths:
         * This is a mandatory parameter and cannot be empty or null.
   /v1/certificateTemplates/uploadTemplate:
     post:
-      tags: &ref_27
+      tags: &ref_24
         - certificateTemplates
       summary: Helps to upload certificate template file
       requestBody:
@@ -8784,12 +8816,12 @@ paths:
               SampleRequestBody:
                 value: ''
       parameters:
-        - *ref_24
-        - *ref_25
+        - *ref_21
+        - *ref_22
         - in: path
           name: _id
           description: ''
-          schema: &ref_28
+          schema: &ref_25
             type: number
           required: true
         - in: path
@@ -8814,7 +8846,7 @@ paths:
                           certificate/b84ac8b2-2ca9-4132-9805-f11ca474aecc/168/516a3180-a52e-44f8-bcc8-055b335715e0/22-4-2024-1716363621461_3562.svg
         '400':
           description: 'Bad response '
-          headers: *ref_26
+          headers: *ref_23
           content:
             application/json:
               schema:
@@ -8854,7 +8886,7 @@ paths:
 
   /v1/project/certificateTemplates/createSvg?{baseTemplateId}:
     post:
-      tags: *ref_27
+      tags: *ref_24
       summary: helps to edit Svg files
       requestBody:
         content:
@@ -8891,12 +8923,12 @@ paths:
                   format: text
                   description: Name2, Designation2
       parameters:
-        - *ref_24
-        - *ref_25
+        - *ref_21
+        - *ref_22
         - in: path
           name: baseTemplateId
           description: ''
-          schema: *ref_28
+          schema: *ref_25
           required: true
       responses:
         '200':
@@ -8913,7 +8945,7 @@ paths:
                         https://sunbirdstagingpublic.blob.core.windows.net/samiksha/certificateTemplates/BASE_TEMPLATE/_22-10-2022-1669120782574.svg?sv=2020-10-02&st=2022-11-22T12%3A39%3A42Z&se=2023-11-22T12%3A49%3A42Z&sr=b&sp=rw&sig=gLnKb1T32swAQQ%2Bgtaaa967d6c0GIL%2FGRcGCwjvpI30%3D
         '400':
           description: 'Bad response '
-          headers: *ref_26
+          headers: *ref_23
           content:
             application/json:
               schema:
@@ -8953,7 +8985,9 @@ paths:
       tags:
         - configurations
       summary: Fetchs all the configurations meta
-      parameters: *ref_29
+      parameters:
+        - *ref_26
+        - *ref_27
       responses:
         '200':
           description: Successful response
@@ -8973,7 +9007,23 @@ paths:
                           - district
                           - block
                           - roles
-        '400': *ref_30
+        '400':
+          description: 'Bad response '
+          headers: *ref_28
+          content: &ref_48
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  message:
+                    type: string
+              examples:
+                FailureResponse:
+                  value:
+                    status: 400
+                    message: Bad request
       description: >-
         This endpoint retrieves all the configurations meta.The request requires
         authentication tokens in the headers.
@@ -8991,7 +9041,7 @@ paths:
         - profile
       summary: Fetch user profile details
       parameters:
-        - *ref_31
+        - *ref_29
       responses:
         '200':
           description: Successful response
@@ -9144,7 +9194,7 @@ paths:
                         externalId: b54a5c6d-98be-4313-af1c-33040b1703aa
         '400':
           description: Bad response
-          headers: *ref_33
+          headers: *ref_30
           content:
             application/json:
               schema:
@@ -9172,7 +9222,7 @@ paths:
         * This is a mandatory parameter and cannot be empty or null.
   /v1/solutions/details/:{solutionId}:
     post:
-      tags: *ref_34
+      tags: *ref_31
       summary: To fetch solution details
       requestBody:
         content:
@@ -9189,7 +9239,7 @@ paths:
                 value:
                   role: district_education_officer
                   state: 66bc5afebb293e9d6930ad7a
-      parameters: *ref_35
+      parameters: *ref_32
       responses:
         '200':
           description: Successful response
@@ -9256,7 +9306,7 @@ paths:
                       description: Project 1 description
         '400':
           description: Bad response
-          headers: *ref_36
+          headers: *ref_33
           content:
             application/json:
               schema:
@@ -9305,12 +9355,12 @@ paths:
         * This is a mandatory parameter and cannot be empty or null.
   /v1/userProjects/certificateReIssue/:{projectId}:
     post:
-      tags: *ref_37
+      tags: *ref_34
       summary: Reissue the certificate for a specified project.
-      requestBody: &ref_41 {}
+      requestBody: &ref_38 {}
       parameters:
-        - *ref_38
-        - *ref_39
+        - *ref_35
+        - *ref_36
         - in: path
           name: projectId
           description: To fetch the data we need to match its id
@@ -9331,7 +9381,7 @@ paths:
                       _id: 66ac9949227504a96d8dce1c
         '400':
           description: 'Bad response '
-          headers: *ref_40
+          headers: *ref_37
           content:
             application/json:
               schema:
@@ -9373,12 +9423,12 @@ paths:
         * This is a mandatory parameter and cannot be empty or null.
   /v1/userProjects/verifyCertificate/:{projectId}:
     post:
-      tags: *ref_37
+      tags: *ref_34
       summary: Verifies the project certificate.
-      requestBody: *ref_41
+      requestBody: *ref_38
       parameters:
-        - *ref_38
-        - *ref_39
+        - *ref_35
+        - *ref_36
         - in: path
           name: projectId
           description: ''
@@ -9410,7 +9460,7 @@ paths:
                         https://storage.googleapis.com/mentoring-dev-storage-private/project/25291645-6583-46ac-becb-35ce2ac1064c/1/d664feff-1d12-4877-be46-6fac41172852/template.svg?GoogleAccessId=sl-mentoring-dev-storage%40sl-dev-project.iam.gserviceaccount.com&Expires=1722956711&Signature=gUGRNgykUz3Jp%2FiNC82UkSkJhOXR3E8qY58UhkvCSGmJ%2FD34AdkR8HYropHfNeX191CwV%2F7%2FNR0bvgHubCg3a2v9qDelYK5tvAwZ%2FC9pUoaIyYTdmq6yqq9m%2FbdjC%2BmBERpLT8IDVfHl7nttw%2FiIhP%2BVj8NnejVbS%2FgFa7jOe7iFwNVjxXiBspfjnq1Dh9v%2FN9d6NibyTljQx%2FLDUpJ6DfwoAwmnytZUg94%2FwuwGpgCK0FbR78UlJGSanDtJvyZ%2FGh3pkV4ulr%2BLqLfSIMjLI3yjxBVNmkLv0f%2FXP3cH8ULvRT%2BzYtWXU0yRUK%2ByJaCgF%2BIzTCXtzXLZuCLhxxnOeA%3D%3D
         '400':
           description: 'Bad response '
-          headers: *ref_40
+          headers: *ref_37
           content:
             application/json:
               schema:
@@ -9472,19 +9522,19 @@ paths:
         - in: path
           name: _id
           description: To update the data we need to match its id
-          schema: *ref_42
+          schema: *ref_39
           required: true
         - in: header
           name: X-auth-token
           description: >-
             To use this API, you require an X-auth-token. This token is
             available in the login API Response.
-          schema: *ref_43
+          schema: *ref_40
           required: true
         - in: header
           name: internal-access-token
           description: ''
-          schema: *ref_43
+          schema: *ref_40
       requestBody:
         content:
           application/json:
@@ -9695,36 +9745,47 @@ paths:
                       - location: params
                         param: _id
                         msg: required certificate templateId
-  /v1/users/programs:
+  /v1/users/programs/isAPrivateProgram=&page=&limit=0&search=&language=&getProjectsCount=:
     post:
       tags:
         - users
       summary: Fetch user programs details.
       parameters:
-        - *ref_31
         - in: query
           name: isAPrivateProgram
           description: >-
             isAPrivateProgram is a boolean variable, which fetches different
             response on different value.
-          schema: &ref_44
-            type: string
+          schema: &ref_42
+            type: boolean
           required: true
         - in: query
           name: page
           description: this query param suggests which page we need to fetch
-          schema: &ref_43
+          schema: &ref_41
             type: number
         - in: query
           name: limit
           description: limit suggests the number of entries in each page
-          schema: *ref_43
+          schema: *ref_41
         - in: query
           name: search
           description: >-
             the search text is used to fetch documents whose name, description
             matches.
-          schema: *ref_44
+          schema:
+            type: string
+        - in: query
+          name: getProjectsCount
+          description: >-
+            getProjectsCount is a boolean variable, which fetches different
+            response on different value.
+          schema: *ref_42
+        - in: query
+          name: language
+          description: valid language code to be passed.
+          schema:
+            type: string
       responses:
         '200':
           description: Successful response
@@ -9801,7 +9862,12 @@ paths:
           content:
             application/json:
               schema:
-                type: string
+                type: object
+                properties:
+                  status:
+                    type: number
+                  message:
+                    type: string
               examples:
                 FailureResponse:
                   value:
@@ -9819,29 +9885,13 @@ paths:
         `required`
 
         * This is a mandatory parameter and cannot be empty or null.
-      requestBody:
-        description: ''
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                state:
-                  type: string
-                role:
-                  type: string
-            examples:
-              sampleBodyData:
-                value:
-                  state: 665d8df5c6892808846230e7
-                  role: block_education_officer,district_education_officer
   /v1/users/solutions/{_id}:
     post:
       tags:
         - users
       summary: Fetch user solutions details.
       parameters:
-        - *ref_31
+        - *ref_29
         - in: path
           name: _id
           description: This is a program id.
@@ -9989,3 +10039,1078 @@ paths:
                   cluster: 668242835fb8bc3e93ceae44
                   role: >-
                     mentee,program_creator,block_education_officer,principle,district_education_officer
+  /v1/userProjects/addStory/{_id}:
+    put:
+      tags: *ref_43
+      summary: Add a new user story
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                story:
+                  type: object
+                  properties:
+                    actionSteps:
+                      type: array
+                      items:
+                        type: string
+                    attachments:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                          sourcePath:
+                            type: string
+                          type:
+                            type: string
+                    authorName:
+                      type: string
+                    chatHistory:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          details:
+                            type: string
+                          event:
+                            type: string
+                          timestamp:
+                            type: string
+                        required:
+                          - details
+                          - event
+                          - timestamp
+                    conversation:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          botResponse:
+                            type: string
+                          timestamp:
+                            type: string
+                          userMessage:
+                            type: string
+                        required:
+                          - botResponse
+                          - timestamp
+                          - userMessage
+                    impact:
+                      type: string
+                    location:
+                      type: string
+                    objective:
+                      type: string
+                    pdfInformation:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          filePath:
+                            type: string
+                          language:
+                            type: string
+                    problemStatement:
+                      type: string
+                    resources:
+                      type: array
+                      items:
+                        type: string
+                    summary:
+                      type: string
+                    timeline:
+                      type: string
+                    title:
+                      type: string
+            examples:
+              sampleBodyData:
+                value:
+                  story:
+                    actionSteps: []
+                    attachments:
+                      - name: 1729251446851.png
+                        sourcePath: >-
+                          project/happy/263/51807846-4c20-428a-b999-8af96a5f1b27/evidence_link-151.jpg
+                        type: image/png
+                    authorName: jon
+                    chatHistory:
+                      - details: >-
+                          User initiated a discussion about creating a story
+                          related to the DCPCR School Development Index.
+                        event: Chat started
+                        timestamp: '2024-12-04T09:55:00Z'
+                      - details: >-
+                          User did not respond for 10 minutes. Bot marked the
+                          chat as paused.
+                        event: Chat paused
+                        timestamp: '2024-12-04T10:05:00Z'
+                      - details: >-
+                          User resumed the chat and provided inputs for problem
+                          statement and impact.
+                        event: Chat resumed
+                        timestamp: '2024-12-04T10:15:00Z'
+                      - details: >-
+                          User completed the story creation process and uploaded
+                          all necessary files.
+                        event: Chat finished
+                        timestamp: '2024-12-04T10:30:00Z'
+                    conversation:
+                      - botResponse: >-
+                          Sure, let’s start! Could you tell me about the title
+                          and objectives of the story?
+                        timestamp: '2024-12-04T10:00:00Z'
+                        userMessage: >-
+                          I want to create a story about the DCPCR School
+                          Development Index.
+                      - botResponse: >-
+                          Got it. What about the problem statement and impact
+                          you'd like to highlight?
+                        timestamp: '2024-12-04T10:02:00Z'
+                        userMessage: >-
+                          The title will be 'DCPCR School Development Index
+                          2018-19', and the objective is 'To analyze and
+                          showcase school development trends'.
+                      - botResponse: >-
+                          Great! I’ve added that. Do you have a timeline for
+                          this story?
+                        timestamp: '2024-12-04T10:05:00Z'
+                        userMessage: >-
+                          The problem is schools not meeting benchmarks. The
+                          impact is improving education standards.
+                      - botResponse: >-
+                          Understood. I’ve added a 2-week timeline. Anything
+                          else you’d like to add, such as action steps or
+                          resources?
+                        timestamp: '2024-12-04T10:07:00Z'
+                        userMessage: Two weeks should be enough.
+                      - botResponse: >-
+                          Alright. Please upload them when ready, and I’ll
+                          include them in the story.
+                        timestamp: '2024-12-04T10:10:00Z'
+                        userMessage: >-
+                          No action steps for now, but I’ll share attachments
+                          and PDFs.
+                      - botResponse: >-
+                          Got it! I’ve added the attachment and noted the PDF
+                          language as Hindi.
+                        timestamp: '2024-12-04T10:12:00Z'
+                        userMessage: Here’s an image attachment and a PDF in Hindi.
+                    impact: sample impact
+                    location: authorLocation
+                    objective: sample object
+                    pdfInformation:
+                      - filePath: >-
+                          project/happy/263/51807846-4c20-428a-b999-8af96a5f1b27/evidence_link-151.jpg
+                        language: hi
+                    problemStatement: problemStatement
+                    resources: []
+                    summary: sample summary
+                    timeline: 2 weeks
+                    title: DCPCR School Development Index 2018-19
+      parameters: *ref_44
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              examples:
+                SuccessResponse:
+                  value:
+                    message: Story Added Successfully
+                    status: 200
+        '400':
+          description: Bad response
+          headers: *ref_45
+          content:
+            application/json:
+              schema: *ref_46
+              examples:
+                FailureResponse:
+                  value:
+                    message: Project Not Found
+                    status: 200
+      description: >-
+        This endpoint allows for the creation of a new user story, including
+        attachments , pdfInformation.
+
+        * The API allows for the creation of a new user project is
+        `/v1/userProjects/addStory`.
+
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
+  /v1/userProjects/update/{_id}:
+    post:
+      tags: *ref_43
+      summary: Updates the user project.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reflectionStatus:
+                  type: string
+                tasks:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                      status:
+                        type: string
+                      name:
+                        type: string
+            examples:
+              sampleBodyData:
+                value:
+                  reflectionStatus: completed
+                  tasks:
+                    - _id: b19d532c-5000-4d3b-bf72-7d77bc373b15
+                      status: notStarted
+                      name: task_9
+      parameters: *ref_44
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              examples:
+                SuccessResponse:
+                  value:
+                    message: Updated user project successfully
+                    status: 200
+                    result:
+                      _id: 66ceec390c9cad9f3e066de7
+        '400':
+          description: Bad response
+          headers: *ref_45
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: number
+              examples:
+                FailureResponse:
+                  value:
+                    message: Could not found user project
+                    status: 500
+      description: >-
+        This endpoint allows updating specific keys within a project. Users can
+        send only the keys that need to be updated, ensuring precise and
+        efficient modifications.
+
+        * The API allows for the creation of a new user project is
+        `/v1/userProjects/update`.
+
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
+  /v1/template/list?language=ka&hasSpotlight=false&duration=1 week&roles=:
+    get:
+      tags:
+        - template
+      summary: Lists all the templates
+      parameters:
+        - *ref_26
+        - *ref_27
+        - in: query
+          name: language
+          description: ''
+          schema: &ref_47
+            type: string
+        - in: query
+          name: hasSpotlight
+          description: ''
+          schema:
+            type: boolean
+        - in: query
+          name: duration
+          description: ''
+          schema: *ref_47
+        - in: query
+          name: roles
+          description: ''
+          schema: *ref_47
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              examples:
+                SuccessResponse:
+                  value:
+                    message: Successfully fetched projects
+                    status: 200
+                    result:
+                      data:
+                        - _id: 675682e4492237eeac2ecc52
+                          averageRating: 0
+                          noOfRatings: 0
+                          externalId: IDE-1733722847675
+                          categories:
+                            - _id: 674d510795664306ac81cc3f
+                              externalId: MI-2.0-default
+                              name: MI-2.0
+                              evidences:
+                                - title: "sample_640Ã\x97426.jpeg"
+                                  filepath: "project/d5b7c323-55fc-4626-b9c2-5020e71afdcf//3bee213c-92ec-4666-a81a-7d43314555bd/sample_640Ã\x97426.jpeg"
+                                  type: jpeg
+                                  sequence: 1
+                                  downloadableUrl: >-
+                                    https://storage.googleapis.com/mentoring-dev-storage-private/project/d5b7c323-55fc-4626-b9c2-5020e71afdcf//3bee213c-92ec-4666-a81a-7d43314555bd/sample_640%C3%83%C2%97426.jpeg?GoogleAccessId=sl-mentoring-dev-storage%40sl-dev-project.iam.gserviceaccount.com&Expires=1734087044&Signature=t%2BLinO2XI%2FVJ3prqxXKAEZRyfvf0TNdXTwQx08VSL2qo763dN2OMKOfTWI2QuMaQ7R13%2Bh3hjrwxnDYEm%2BChSoCgW1LKPehoWtTZeWXeeDnE8%2FhtG3g6OBPpMfdZuYbliFzf7Y3XkinGgiYodOGs8GaPY%2B6Kri8tEpAPXoa1D1qnL7i4TE89mcBYo%2BBstCj5HsII4fLF8x1ZTFBsLz37ERdhjHvP1pJQmfDTLsfEvoqtzv%2B0YpzheqQhq7firmB8rYnLYL5PnNvtPc6P9q2hHXhyjIcgyLxp2lm5cOnDdyiRpm%2Fli%2FhC2mcQ7GJJ7ERJtAXTVMSu6s0JWEHtlRgu1g%3D%3D
+                          metaInformation:
+                            goal: TEMP
+                            rationale: ''
+                            primaryAudience: ''
+                            duration: 1 week
+                            successIndicators: ''
+                            risks: ''
+                            approaches: ''
+                          createdAt: '2024-12-09T05:40:52.887Z'
+                          title: noEntities586
+                          description: >-
+                            This program focuses on developing an efficient and
+                            technology-driven solution for managing and
+                            analyzing student attendance. By integrating modern
+                            methods like QR codes, biometrics, and real-time
+                            dashboards, the project aims to enhance accuracy,
+                            accountability, and ease of use for educators and
+                            administrators.
+                          impact: >-
+                            Improved attendance tracking efficiency, accuracy,
+                            and accountability for students and institutions.
+                          summary: >-
+                            This program delivers a comprehensive solution to
+                            manage and analyze student attendance efficiently.
+                            It leverages technology to ensure accuracy, provide
+                            insights, and reduce manual errors, empowering
+                            educators and administrators with actionable data to
+                            improve student engagement.
+                          author: Mallanagouda, Delhi
+                          new: true
+                        - _id: 675682841cb6bfeeb6a4f504
+                          averageRating: 0
+                          noOfRatings: 0
+                          externalId: IDE-1733722752025
+                          categories:
+                            - _id: 674d510795664306ac81cc3f
+                              externalId: MI-2.0-default
+                              name: MI-2.0
+                              evidences:
+                                - title: "sample_640Ã\x97426.jpeg"
+                                  filepath: "project/d5b7c323-55fc-4626-b9c2-5020e71afdcf//3bee213c-92ec-4666-a81a-7d43314555bd/sample_640Ã\x97426.jpeg"
+                                  type: jpeg
+                                  sequence: 1
+                                  downloadableUrl: >-
+                                    https://storage.googleapis.com/mentoring-dev-storage-private/project/d5b7c323-55fc-4626-b9c2-5020e71afdcf//3bee213c-92ec-4666-a81a-7d43314555bd/sample_640%C3%83%C2%97426.jpeg?GoogleAccessId=sl-mentoring-dev-storage%40sl-dev-project.iam.gserviceaccount.com&Expires=1734087044&Signature=t%2BLinO2XI%2FVJ3prqxXKAEZRyfvf0TNdXTwQx08VSL2qo763dN2OMKOfTWI2QuMaQ7R13%2Bh3hjrwxnDYEm%2BChSoCgW1LKPehoWtTZeWXeeDnE8%2FhtG3g6OBPpMfdZuYbliFzf7Y3XkinGgiYodOGs8GaPY%2B6Kri8tEpAPXoa1D1qnL7i4TE89mcBYo%2BBstCj5HsII4fLF8x1ZTFBsLz37ERdhjHvP1pJQmfDTLsfEvoqtzv%2B0YpzheqQhq7firmB8rYnLYL5PnNvtPc6P9q2hHXhyjIcgyLxp2lm5cOnDdyiRpm%2Fli%2FhC2mcQ7GJJ7ERJtAXTVMSu6s0JWEHtlRgu1g%3D%3D
+                          metaInformation:
+                            goal: TEMP
+                            rationale: ''
+                            primaryAudience: ''
+                            duration: 1 week
+                            successIndicators: ''
+                            risks: ''
+                            approaches: ''
+                          createdAt: '2024-12-09T05:39:16.852Z'
+                          title: noEntities888
+                          description: >-
+                            This program focuses on developing an efficient and
+                            technology-driven solution for managing and
+                            analyzing student attendance. By integrating modern
+                            methods like QR codes, biometrics, and real-time
+                            dashboards, the project aims to enhance accuracy,
+                            accountability, and ease of use for educators and
+                            administrators.
+                          impact: >-
+                            Improved attendance tracking efficiency, accuracy,
+                            and accountability for students and institutions.
+                          summary: >-
+                            This program delivers a comprehensive solution to
+                            manage and analyze student attendance efficiently.
+                            It leverages technology to ensure accuracy, provide
+                            insights, and reduce manual errors, empowering
+                            educators and administrators with actionable data to
+                            improve student engagement.
+                          author: Mallanagouda, Delhi
+                          new: true
+                      count: 16
+        '400':
+          description: 'Bad response '
+          headers: {}
+          content: *ref_48
+      description: >-
+        This endpoint retrieves all the template.The request requires
+        authentication tokens in the headers.
+
+        * The API to retrieves all the project template `/v1/templates/list`
+
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
+  /v1/projectAttributes/create:
+    post:
+      summary: To create project attributes(Filters)
+      description: >-
+        This endpoint allows the user to create project attributes.The request
+        requires authentication tokens in the headers.
+
+
+        * The API allows the user to edit Svg files`v1/projectAttributes/create`
+
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
+      operationId: ''
+      tags:
+        - projectAttributes
+      parameters:
+        - &ref_50
+          in: header
+          name: X-auth-token
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
+          schema: &ref_49
+            type: string
+          required: true
+        - &ref_54
+          in: header
+          name: internal-access-token
+          description: ''
+          schema: *ref_49
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: &ref_52
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: number
+              examples:
+                SuccessResponse:
+                  value:
+                    message: Project Attributes Created successfully
+                    status: 200
+        '400':
+          description: 'Bad response '
+          headers: &ref_53 {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  message:
+                    type: string
+              examples:
+                FailureResponse:
+                  value:
+                    status: 400
+                    message: Bad request
+  /v1/projectAttributes/update?code={duration}&language={code}:
+    post:
+      summary: To update project attributes(Filters)
+      description: >-
+        This endpoint allows the user to update project attributes(filters).The request
+        requires authentication tokens in the headers and code in the query and you are updating `translation data` then `languagecode` also requried
+        params.
+
+
+        * The API allows the user to edit Svg files`v1/projectAttributes/update`
+
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
+
+        * This API have `two` types of `request body`(added in sample)-one for `translating data` and another for updating the `content configuration`—it's important to clearly define their structure, validation, and processing.
+
+
+
+        * NOTE:
+          `When updating translations data, make sure to provide translations for all the data fields in all supported languages. If any translations are missing, the API will only return the fields you have provided, which may result in incomplete data. When updating the  values for duration please maintain lowercase. If you are updating roles filter the value to be added in the request body should be the code of the user role fetched from userRoleExtension.`
+
+      operationId: ''
+      tags:
+        - projectAttributes
+      parameters:
+        - *ref_50
+        - in: header
+          name: internal-access-token
+          description: ''
+          schema: *ref_49
+          required: true
+        - in: query
+          name: code
+          description: ''
+          schema: &ref_51
+            type: string
+          required: true
+        - in: query
+          name: language
+          description: Valid language code to be passed
+          schema: *ref_51
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: *ref_52
+              examples:
+                SuccessResponse:
+                  value:
+                    message: Successfully updated the project attributes
+                    status: 200
+        '400':
+          description: 'Bad response '
+          headers: *ref_53
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  message:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        location:
+                          type: string
+                        param:
+                          type: string
+                        msg:
+                          type: string
+              examples:
+                FailureResponse:
+                  value:
+                    status: 400
+                    message:
+                      - location: query
+                        param: code
+                        msg: required code
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                translateData:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    data:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          lable:
+                            type: string
+                          value:
+                            type: string
+                        required:
+                          - lable
+                          - value
+            examples:
+              sampleBodyData(For Translation data):
+                value:
+                  translateData:
+                    name: अवधि
+                    data:
+                      - label: 1 सप्ताह
+                        value: 1 week
+                      - label: 2 सप्ताह
+                        value: 2 week
+                      - label: 3 सप्ताह
+                        value: 3 week
+                      - label: 4 सप्ताह
+                        value: 4 week
+                      - label: 5 सप्ताह
+                        value: 5 week
+                      - label: 6 सप्ताह
+                        value: 6 week
+                      - label: 6 सप्ताह से अधिक
+                        value: More than 6 weeks
+              sampleBodyData(For Config data):
+                value:
+                  data:
+                    - label: 1 week
+                      value: 1 week
+                    - label: 2 week
+                      value: 2 week
+                    - label: 3 week
+                      value: 3 week
+                    - label: 4 week
+                      value: 4 week
+                    - label: 5 week
+                      value: 5 week
+                    - label: 6 week
+                      value: 6 week
+                    - label: 6 More thann 6 weeks
+                      value: More than 6 weeks
+
+  /v1/projectAttributes/find?language={code}:
+    get:
+      summary: To find project attributes(Filters)
+      description: >-
+        This endpoint allows the user to find project attributes.The request
+        requires authentication tokens in the headers and language in the query
+        params.
+
+
+        * The API allows the user to edit Svg files`v1/projectAttributes/find`
+
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
+      operationId: ''
+      tags:
+        - projectAttributes
+      parameters:
+        - *ref_50
+        - *ref_54
+        - in: query
+          name: language
+          description: Valid language code to be passed
+          schema: *ref_51
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: number
+                  result:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        Name:
+                          type: string
+                        code:
+                          type: string
+                        values:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              value:
+                                type: string
+                              label:
+                                type: string
+                            required:
+                              - value
+                              - label
+                      required:
+                        - Name
+                        - code
+                        - values
+              examples:
+                SuccessResponse:
+                  value:
+                    message: Project Attributes Fetched successfully
+                    status: 200
+                    result:
+                      - Name: Duration
+                        code: duration
+                        values:
+                          - value: 1 week
+                            label: 1 week
+                          - value: 2 week
+                            label: 2 week
+                          - value: 3 week
+                            label: 3 week
+                          - value: 4 week
+                            label: 4 week
+                          - value: 5 week
+                            label: 5 week
+                          - value: 6 week
+                            label: 6 week
+                          - value: More than 6 weeks
+                            label: More than 6 weeks
+                      - Name: Role
+                        code: role
+                        values:
+                          - label: Mentee
+                            value: mentee
+                          - label: Public
+                            value: public
+                          - label: User
+                            value: user
+                      - Name: Duration
+                        code: duration
+                        values:
+                          - value: 1 week
+                            label: 1 week
+                          - value: 2 week
+                            label: 2 week
+                          - value: 3 week
+                            label: 3 week
+                          - value: 4 week
+                            label: 4 week
+                          - value: 5 week
+                            label: 5 week
+                          - value: 6 week
+                            label: 6 week
+                          - value: More than 6 weeks
+                            label: More than 6 weeks
+                      - Name: Role
+                        code: role
+                        values:
+                          - label: Mentee
+                            value: mentee
+                          - label: Public
+                            value: public
+                          - label: User
+                            value: user
+                          - label: Session Manager
+                            value: session_manager
+        '400':
+          description: 'Bad response '
+          headers: *ref_53
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: number
+              examples:
+                FailureResponse:
+                  value:
+                    message: FieldPath cannot be constructed with empty string
+                    status: 500
+  /v1/wishlist/add/{_id}:
+    post:
+      summary: To create wishlist
+      description: >-
+        This endpoint allows the user to add wishlist.The request requires
+        authentication tokens in the headers and projectTemplateId in the path
+        params.
+
+
+        * The API allows the user to edit Svg files`v1/wishlist/add`
+
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
+      operationId: ''
+      tags: &ref_55
+        - wishlist
+      parameters: &ref_56
+        - *ref_50
+        - *ref_54
+        - in: query
+          name: _id
+          description: valid projectTemplateId to be passed.
+          schema: *ref_51
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: &ref_57
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: number
+              examples:
+                SuccessResponse:
+                  value:
+                    message: projecttemplates added to wishlist successfully
+                    status: 200
+        '400':
+          description: 'Bad response '
+          headers: *ref_53
+          content:
+            application/json:
+              schema: &ref_58
+                type: object
+                properties:
+                  status:
+                    type: number
+                  message:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        location:
+                          type: string
+                        param:
+                          type: string
+                        msg:
+                          type: string
+                      required:
+                        - location
+                        - param
+                        - msg
+              examples:
+                FailureResponse:
+                  value:
+                    status: 400
+                    message:
+                      - location: params
+                        param: _id
+                        msg: required projectTemplete Id
+                      - location: params
+                        param: _id
+                        msg: Invalid projectTemplete ID
+  /v1/wishlist/list?language={code}&page=&limit=:
+    get:
+      summary: To list washlist
+      description: >-
+        This endpoint allows the user to list all wishlist.The request requires
+        authentication tokens in the headers and language code in the query
+        params.
+
+
+        * The API allows the user to edit Svg files`v1/wishlist/list`
+
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
+      operationId: ''
+      tags: *ref_55
+      parameters:
+        - *ref_50
+        - *ref_54
+        - in: query
+          name: language
+          description: valid language code to be passed.
+          schema: *ref_51
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: number
+                  result:
+                    type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            _id:
+                              type: string
+                            externalId:
+                              type: string
+                            categories:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  _id:
+                                    type: string
+                                  externalId:
+                                    type: string
+                                  name:
+                                    type: string
+                                required:
+                                  - _id
+                                  - externalId
+                                  - name
+                            metaInformation:
+                              type: object
+                              properties:
+                                duration:
+                                  type: string
+                            createdAt:
+                              type: string
+                            title:
+                              type: string
+                            description:
+                              type: string
+                          required:
+                            - _id
+                            - externalId
+                            - categories
+                            - metaInformation
+                            - createdAt
+                            - title
+                            - description
+                      count:
+                        type: number
+              examples:
+                SuccessResponse:
+                  value:
+                    message: Wishlist fetched successfully
+                    status: 200
+                    result:
+                      data:
+                        - _id: 66b9c0c10eedeb14e9aaffc0
+                          externalId: ENGCAR-1
+                          categories:
+                            - _id: 66399a1204785762f7e8e4c1
+                              externalId: educationLeader
+                              name: Education Leader
+                          metaInformation:
+                            duration: 4 week
+                          createdAt: '2024-08-12T07:58:57.032Z'
+                          title: English for career Devlopment
+                          description: Encourage students to take english as a career
+                        - _id: 66bb81d32b937d163294a21e
+                          externalId: CERTVVP2
+                          categories:
+                            - _id: 66399a1204785762f7e8e4c1
+                              externalId: educationLeader
+                              name: Education Leader
+                          metaInformation:
+                            duration: 4 week
+                          createdAt: '2024-08-13T15:54:59.495Z'
+                          title: Certificate_Testing_VVP2
+                          description: >-
+                            Encourage school leaders to learn about various
+                            digital initiatives and share ideas that would be
+                            implemented in their schools.
+                        - _id: 674448cb12c4567553382d19
+                          externalId: IDE-1732528331136
+                          categories:
+                            - _id: 67496ed39c9e198ae2aebb7d
+                              externalId: community
+                              name: community
+                            - _id: 674d8b766ef9f4118cddba99
+                              externalId: students
+                              name: students
+                            - _id: 66a09c299f47311f189783b6
+                              externalId: teachers
+                              name: teachers
+                          metaInformation:
+                            duration: 2 months
+                          createdAt: '2024-11-25T09:52:11.361Z'
+                          title: TestFlow999
+                          description: >-
+                            Send an invitation to parents with the PTM date and
+                            time, and prepare the agenda with teachers. During
+                            the meeting, welcome parents, conduct an ice
+                            breaker, discuss the 'Parents as Partners'
+                            initiative, and have one-on-one conversations.
+                            Collect feedback and encourage sharing photos of
+                            learning spaces. After the meeting, record
+                            attendance, review feedback, and upload data to the
+                            app.
+                        - _id: 674eb9850a68fb67f106f8f1
+                          externalId: IDE2
+                          categories:
+                            - _id: 66399a1204785762f7e8e4c1
+                              externalId: educationLeader
+                              name: Education Leader
+                          metaInformation:
+                            duration: 1 week
+                          createdAt: '2024-12-03T07:55:49.560Z'
+                          title: Windows
+                          description: >-
+                            Send an invitation to parents with the PTM date and
+                            time, and prepare the agenda with teachers. During
+                            the meeting, welcome parents, conduct an ice
+                            breaker, discuss the 'Parents as Partners'
+                            initiative, and have one-on-one conversations.
+                            Collect feedback and encourage sharing photos of
+                            learning spaces. After the meeting, record
+                            attendance, review feedback, and upload data to the
+                            app.
+                      count: 4
+        '400':
+          description: 'Bad response '
+          headers: *ref_53
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  message:
+                    type: string
+              examples:
+                FailureResponse:
+                  value:
+                    status: 400
+                    message: Bad request
+  /v1/wishlist/remove/{_id}:
+    post:
+      summary: To remove wishlist
+      description: >-
+        This endpoint allows the user to remove wishlist.The request requires
+        authentication tokens in the headers and projectTemplateId in the path
+        params.
+
+
+        * The API allows the user to edit Svg files`v1/wishlist/remove`
+
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
+      operationId: ''
+      tags: *ref_55
+      parameters: *ref_56
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema: *ref_57
+              examples:
+                SuccessResponse:
+                  value:
+                    message: projecttemplates removed from wishlist successfully
+                    status: 200
+        '400':
+          description: 'Bad response '
+          headers: *ref_53
+          content:
+            application/json:
+              schema: *ref_58
+              examples:
+                FailureResponse:
+                  value:
+                    status: 400
+                    message:
+                      - location: params
+                        param: _id
+                        msg: required projectTemplete Id
+                      - location: params
+                        param: _id
+                        msg: Invalid projectTemplete ID

@@ -24,13 +24,14 @@ The Project building block facilitates the creation and engagement with micro-im
 
 # Supported Operating Systems
 
--   **Ubuntu (Recommended: Version 20 and above)** 
--   **Windows (Recommended: Version 11 and above)** 
+-   **Ubuntu (Recommended: Version 20 and above)**
+-   **Windows (Recommended: Version 11 and above)**
 -   **macOs (Recommended: Version 12 and above)**
 
 # Setup Options
 
 **Project services can be setup using two methods:**
+
 > Note : This guide outlines two setup methods, detailed below. For a quick, beginner-friendly setup and walkthrough of services, it is recommended to use the Dockerized Services & Dependencies setup with the Docker-Compose file.
 
 <details><summary>Dockerized Services & Dependencies Using Docker-Compose File</summary>
@@ -50,6 +51,7 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
 > Example Command: `mkdir project && cd project/`
 
 > Note: All commands are run from the project directory.
+
 ## Operating Systems: Linux / macOS
 
 > **Caution:** Before proceeding, please ensure that the ports given here are available and open. It is essential to verify their availability prior to moving forward. You can run below command in your terminal to check this
@@ -65,25 +67,25 @@ done
 ```
 
 1.  **Download and execute main setup script:** Execute the following command in your terminal from the project directory.
-    ```
-    curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/mac-linux/setup_project.sh && chmod +x setup_project.sh && sudo ./setup_project.sh
-    ```
+    `    curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/mac-linux/setup_project.sh && chmod +x setup_project.sh && sudo ./setup_project.sh
+   `
 
-    > Note : The script will download all the essential files and launch the services in Docker. Once all services are successfully up and running, you can proceed to the next steps.
+        > Note : The script will download all the essential files and launch the services in Docker. Once all services are successfully up and running, you can proceed to the next steps.
 
-    **General Instructions :**
+        **General Instructions :**
 
-    1. All containers which are part of the docker-compose can be gracefully stopped by pressing Ctrl + c in the same terminal where the services are running.
+        1. All containers which are part of the docker-compose can be gracefully stopped by pressing Ctrl + c in the same terminal where the services are running.
 
-    2. All docker containers can be stopped and removed by using below command.
-        ```
-        sudo ./docker-compose-down.sh
-        ```
-    3. All services and dependencies can be started using below command.
-        ```
-        sudo ./docker-compose-up.sh
-        ```
-**Keep the current terminal session active, and kindly open a new terminal window within the project directory.**
+        2. All docker containers can be stopped and removed by using below command.
+            ```
+            sudo ./docker-compose-down.sh
+            ```
+        3. All services and dependencies can be started using below command.
+            ```
+            sudo ./docker-compose-up.sh
+            ```
+
+    **Keep the current terminal session active, and kindly open a new terminal window within the project directory.**
 
 **After successfully completing this, please move to the next section: [Enable Citus Extension](#enable-citus-extension-optional)**
 
@@ -164,7 +166,7 @@ done
 
         > **Note**: During the first Docker Compose run, the database, migration seeder files, and the script to set the default organization will be executed automatically.
 
-7. **Remove All Service & Dependency Containers**:
+7.  **Remove All Service & Dependency Containers**:
     All docker containers can be stopped and removed by using the `docker-compose-down` file.
 
     -   **Windows**
@@ -260,12 +262,15 @@ During the initial setup of Project services with the default configuration, you
 In such cases, you can generate sample user accounts using the steps below. This allows you to explore the Project services and portal immediately after setup.
 
 > **Warning:** Use this generator only immediately after the initial system setup and before any normal user accounts are created through the portal. It should not be used under any circumstances thereafter.
-- **Ubuntu/Linux/Mac**
+
+-   **Ubuntu/Linux/Mac**
 
     ```
     sudo ./insert_sample_data.sh user postgres://postgres:postgres@citus_master:5432/user
     ```
-- **Windows**
+
+-   **Windows**
+
     1. **Download The `sampleData.sql` Files:**
 
         ```
@@ -313,7 +318,7 @@ This step will guide us in implementing a sample project solution following the 
 
             ```
             curl -L ^
-            -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/windows/entity-project-sample-data.bat ^            
+            -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/windows/entity-project-sample-data.bat ^
             ```
 
         2. Make the setup file executable by running the following command.
@@ -321,32 +326,34 @@ This step will guide us in implementing a sample project solution following the 
             ```
             entity-project-sample-data.bat
             ```
+
 ## Default Forms Creation for Portal Configuration
 
 This step inserts configuration forms into MongoDB, enabling or disabling features and fields on portal pages.
 
 #### Insert Forms Data into Database
 
-- **Ubuntu/Linux/Mac**:
+-   **Ubuntu/Linux/Mac**:
+
     ```
     curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/mac-linux/import_forms_mongo.sh && chmod +x import_forms_mongo.sh && sudo ./import_forms_mongo.sh mongodb://mongo:27017/elevate-project
     ```
 
-- **Windows**:
+-   **Windows**:
     1. Download the `import_forms_mongo.bat` file:
-       ```cmd
-       curl -L -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/windows/import_forms_mongo.bat
-       ```
+        ```cmd
+        curl -L -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/windows/import_forms_mongo.bat
+        ```
     2. Run the script:
-       ```cmd
-       import_forms_mongo.bat mongodb://localhost:27017/elevate-project
-       ```
-       
+        ```cmd
+        import_forms_mongo.bat mongodb://localhost:27017/elevate-project
+        ```
+
 ## Explore the Portal
+
 Once the services are up and the front-end app bundle is built successfully, navigate to **[localhost:7007](http://localhost:7007/)** to access the Project app.
 
 > **Warning:** In this setup, features such as **Sign-Up, Project Certificate, Project Sharing, and Project PDF Report** will not be available because cloud storage credentials have been masked in the environment files for security reasons.
-
 
 </details>
 
@@ -356,6 +363,7 @@ Once the services are up and the front-end app bundle is built successfully, nav
 ## PM2 Managed Services & Natively Installed Dependencies
 
 ### System Requirements
+
 -   **Node.js®:** v20
 -   **PostgreSQL:** 16
 -   **Apache Kafka®:** 3.5.0
@@ -363,7 +371,6 @@ Once the services are up and the front-end app bundle is built successfully, nav
 -   **Gotenberg:** 8.5.0
 
 Expectation: Upon following the prescribed steps, you will achieve a fully operational ELEVATE-Project application setup. Both the portal and backend services are managed using PM2, with all dependencies installed natively on the host system.
-
 
 ## Prerequisites
 
@@ -564,11 +571,13 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         4. Open a terminal (e.g., Command Prompt).
 
         5. Pull the Gotenberg image:
+
             ```
             docker pull gotenberg/gotenberg:latest
             ```
-        
+
         6. Run the Gotenberg container with the following command:
+
             ```
             docker run -d --name gotenberg -p 3000:3000 gotenberg/gotenberg:latest
             ```
@@ -577,7 +586,6 @@ Before setting up the following ELEVATE-Project application, dependencies given 
             ```
             docker ps
             ```
-
 
 ## Installation
 

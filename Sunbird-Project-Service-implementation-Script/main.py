@@ -728,19 +728,21 @@ def terminatingMessage(msg):
 def fetchEntityId(solutionName_for_folder_path, accessToken, entitiesNameList, scopeEntityType):
     urlFetchEntityListApi = config.get(environment, 'elevateentityhost')+config.get(environment, 'searchForLocation')
     headerFetchEntityListApi = {
-       'Content-Type': config.get(environment, 'Content-Type'),
-        'Authorization': config.get(environment, 'authorization') 
+        'Content-Type': config.get(environment, 'Content-Type'),
+        'internal-access-token': config.get(environment, 'internal-access-token'),
     }
-
     payload = {
-        "request": {
-        "filters": {
-            "type" : scopeEntityType
-        },
-	   "query": "",
-        "limit" : 10000
+
+    "query" : {
+          "entityType": {
+            "$in": scopeEntityType
         }
-        }
+    },
+
+    "projection": [
+        "_id","metaInformation.name"
+    ]
+    }
     data=json.dumps(payload)
     responseFetchEntityListApi = requests.post(url=urlFetchEntityListApi, headers=headerFetchEntityListApi,data=json.dumps(payload))
     messageArr = ["Entities List Fetch API executed.", "URL  : " + str(urlFetchEntityListApi),
@@ -750,10 +752,10 @@ def fetchEntityId(solutionName_for_folder_path, accessToken, entitiesNameList, s
         responseFetchEntityListApi = responseFetchEntityListApi.json()
         entitiesLookup = dict()
         entityToUpload = []
-        for listEntities in responseFetchEntityListApi['result']['response']:
+        for listEntities in responseFetchEntityListApi['result']:
             # entitiesLookup[listEntities['metaInformation']['name'].lower().lstrip().rstrip()] = listEntities['_id'].lstrip().rstrip()
-            name_key = listEntities['name'].lower().strip()
-            entity_id = listEntities['id'].strip()
+            name_key = listEntities['metaInformation']['name'].lower().strip()
+            entity_id = listEntities['_id'].strip()
             if name_key in entitiesLookup:
                 entitiesLookup[name_key].append(entity_id)
             else:
@@ -761,7 +763,7 @@ def fetchEntityId(solutionName_for_folder_path, accessToken, entitiesNameList, s
         entitiesFlag = False
         for eachUserEntity in entitiesNameList:
             try:
-                entityId = entitiesLookup.get(eachUserEntity.lower().lstrip().rstrip())
+                entityId = entitiesLookup[eachUserEntity.lower().lstrip().rstrip()]
                 entitiesFlag = True
             except:
                 entitiesFlag = False
@@ -787,27 +789,32 @@ def fetchEntityType(solutionName_for_folder_path, accessToken, entitiesPGM, scop
     # Define the API URL and headers
     urlFetchEntityListApi = config.get(environment, 'elevateentityhost') + config.get(environment, 'searchForLocation')
     headerFetchEntityListApi = {
-       'Content-Type': config.get(environment, 'Content-Type'),
-        'Authorization': config.get(environment, 'authorization') 
+        'Content-Type': config.get(environment, 'Content-Type'),
+        'internal-access-token': config.get(environment, 'internal-access-token'),
     }
+
     # Initialize a dictionary to store entity types for each entity
     entityTypes = []
+
     # Loop through each entity name in the entitiesPGM list
     for entityName in entitiesPGM:
-        entityName = entityName.strip() 
+        entityName = entityName.strip()  # Remove any extra spaces
+        print(entityName, "Processing entity...")  # Log the entity being processed
+
+        # Prepare the payload for the API request
         payload = {
-        "request": {
-        "filters": {
-            "name" : entityName
-        },
-	   "query": "",
-        "limit" : 1000
-        }
+            "query": {
+                "metaInformation.name": entityName  # Use the current entity name
+            },
+            "projection": [
+                "entityType"
+            ]
         }
         data = json.dumps(payload)
 
         # Make the API call inside the loop to send one request per entity
         responseFetchEntityListApi = requests.post(url=urlFetchEntityListApi, headers=headerFetchEntityListApi, data=data)
+        
         # Log API call details
         messageArr = ["Entities List Fetch API executed for entity: " + entityName, 
                       "URL  : " + str(urlFetchEntityListApi),
@@ -820,8 +827,8 @@ def fetchEntityType(solutionName_for_folder_path, accessToken, entitiesPGM, scop
 
             # Loop through the result to find the entityType
             # entityToUpload = None  # Initialize for each entity
-            for listEntities in responseFetchEntityListApi['result']['response']:
-                entityToUpload = listEntities.get('type')
+            for listEntities in responseFetchEntityListApi['result']:
+                entityToUpload = listEntities.get('entityType')
                 # entityToUpload = listEntities.get('entityType', '').lower().strip()
 
                 # If a valid entityType is found, store it in the dictionary and break out of the loop

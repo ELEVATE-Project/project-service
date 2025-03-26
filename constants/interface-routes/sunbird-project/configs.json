@@ -1959,7 +1959,7 @@
 			"priority": "MUST_HAVE",
 			"inSequence": false,
 			"orchestrated": false,
-			"requiresCustomHandling": true,
+			"requiresCustomHandling": false,
 			"targetPackages": [
 				{
 					"basePackageName": "project",
@@ -1974,7 +1974,7 @@
 			"priority": "MUST_HAVE",
 			"inSequence": false,
 			"orchestrated": false,
-			"requiresCustomHandling": true,
+			"requiresCustomHandling": false,
 			"targetPackages": [
 				{
 					"basePackageName": "project",

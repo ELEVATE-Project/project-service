@@ -27,6 +27,7 @@ const profile = function (userId = '', userToken = '') {
 					internal_access_token: process.env.INTERNAL_ACCESS_TOKEN,
 				},
 			}
+			// if  token is available pass that as well
 			if (userToken !== '') {
 				options.headers['x-auth-token'] = userToken
 			}

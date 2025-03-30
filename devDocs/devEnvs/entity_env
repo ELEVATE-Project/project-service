@@ -1,0 +1,12 @@
+ACCESS_TOKEN_EXPIRY=1440m
+ACCESS_TOKEN_SECRET=mnbvcxzbvcxzlkjhgfdsapoiuytrewq
+API_DOC_URL=/entity-management/api-doc
+APPLICATION_BASE_URL=/entity-management/
+APPLICATION_ENV=development
+APPLICATION_HOST=elevate_entity
+APPLICATION_PORT=6005
+AUTH_METHOD=native
+INTERNAL_ACCESS_TOKEN=lkjhgfdsa
+IS_AUTH_TOKEN_BEARER=false
+KEYCLOAK_PUBLIC_KEY_PATH=../keycloakPublicKeys
+MONGODB_URL=mongodb://mongo:27017/elevate-entity

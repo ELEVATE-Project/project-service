@@ -3721,6 +3721,20 @@
 				}
 			],
 			"service": "entity"
+		},
+		{
+			"sourceRoute": "/user/v1/org-admin/createUsers",
+			"type": "POST",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "elevate-project"
+				}
+			],
+			"service": "user"
 		}
 	]
 }

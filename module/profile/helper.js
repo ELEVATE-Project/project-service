@@ -16,7 +16,7 @@ module.exports = class ProfileHelper {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Fetch user profile details using userService.profile function
-				const userResponse = await userService.profile(userId, userToken)
+				const userResponse = await userService.profile(userId, userToken, language)
 
 				// Check if the user profile fetch was successful
 				if (!userResponse.success) {
@@ -71,21 +71,6 @@ module.exports = class ProfileHelper {
 						}
 					}
 
-					if (language && language !== CONSTANTS.common.ENGLISH_LANGUGE_CODE) {
-						userDetails.user_roles.map((roles) => {
-							if (roles.translations) {
-								const roleTranslation = roles.translations[language] || roles.translations['en']
-								roles.title = roleTranslation?.title || roles.title
-							}
-							delete roles.translations
-							return roles
-						})
-					} else {
-						userDetails.user_roles.map((roles) => {
-							delete roles.translations
-							return roles
-						})
-					}
 					// Process the user details to replace meta data with entity details
 					const processedResponse = await this.processUserDetailsResponse(userDetails, entityDetails)
 

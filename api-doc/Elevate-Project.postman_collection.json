@@ -2479,7 +2479,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}project/v1/profile/read",
+							"raw": "{{baseUrl}}project/v1/profile/read?language=en",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "profile", "read"]
 						}

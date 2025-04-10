@@ -8,10 +8,11 @@ module.exports = class ProfileHelper {
 	 * @function read
 	 * @description Fetches and processes user profile data, including location details.
 	 * @param {Object} userId - The userId ccontaining the userId.
+	 * @param {Object} language - Language code.
 	 * @returns {Promise<Object>} - A promise that resolves with the processed user profile data or an error object.
 	 * @throws {Error} - Throws an error if the user details cannot be fetched or processed.
 	 **/
-	static read(userId, userToken) {
+	static read(userId, userToken, language) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Fetch user profile details using userService.profile function
@@ -43,10 +44,23 @@ module.exports = class ProfileHelper {
 							$in: locationIds,
 						},
 					}
-					// Define the fields to be projected in the entity documents
-					const projection = ['_id', 'metaInformation.name', 'metaInformation.externalId']
+					let projection
+					if (language && language !== CONSTANTS.common.ENGLISH_LANGUGE_CODE) {
+						projection = ['_id', 'metaInformation.name', 'metaInformation.externalId', 'translations']
+					} else {
+						projection = ['_id', 'metaInformation.name', 'metaInformation.externalId']
+					}
+
 					// Use the entityDocuments function to fetch entity details
 					const response = await entityManagementService.entityDocuments(filterData, projection)
+					if (language && language !== CONSTANTS.common.ENGLISH_LANGUGE_CODE) {
+						response.result = response.data.map((entities) => {
+							if (language && entities.translations[language] && entities.translations[language].name) {
+								entities.metaInformation.name = entities.translations[language].name
+							}
+							return entities
+						})
+					}
 
 					// Check if the response is successful and has data
 					const entityDetails = response.data

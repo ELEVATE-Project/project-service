@@ -9035,7 +9035,7 @@ paths:
         `required`
 
         * This is a mandatory parameter and cannot be empty or null.
-  /v1/profle/read:
+  /v1/profle/read?language=en:
     get:
       tags:
         - profile

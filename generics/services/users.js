@@ -10,7 +10,7 @@ const request = require('request')
 const interfaceServiceUrl = process.env.INTERFACE_SERVICE_URL
 
 // Function to read the user profile based on the given userId
-const profile = function (userId = '', userToken = '') {
+const profile = function (userId = '', userToken = '', language) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			// Construct the URL for the user service
@@ -20,6 +20,9 @@ const profile = function (userId = '', userToken = '') {
 				url = url + '/' + userId
 			}
 
+			if (language !== '') {
+				url = url + '?language=' + language
+			}
 			// Set the options for the HTTP GET request
 			const options = {
 				headers: {

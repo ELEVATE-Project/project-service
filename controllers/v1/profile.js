@@ -181,7 +181,7 @@ module.exports = class profile {
 	 * @function read
 	 * @description This function handles the read operation for user profiles.
 	 * It returns a Promise that resolves with user profile data or rejects with an error.
-	 *
+	 * @query {String} req.query.language - language code.
 	 * @param {Object} req - The request object containing user details.
 	 * @returns {Promise<Object>} - A Promise that resolves with the user profile data or an error response.
 	 */
@@ -191,7 +191,11 @@ module.exports = class profile {
 			try {
 				// Call the read function from profileHelper with the user's details
 				const userId = req.userDetails.userInformation.userId
-				const profileData = await profileHelper.read(userId, req.userDetails.userToken)
+				const profileData = await profileHelper.read(
+					userId,
+					req.userDetails.userToken,
+					req.query.language ? req.query.language : ''
+				)
 
 				// If successful, resolve the Promise with a success message and the fetched data
 				return resolve({

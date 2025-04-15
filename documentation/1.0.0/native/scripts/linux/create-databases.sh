@@ -13,4 +13,9 @@ sudo -u postgres psql -p 9700 -c "CREATE DATABASE notification;"
 sudo -u postgres psql -p 9700 -d notification -c "GRANT ALL PRIVILEGES ON DATABASE notification TO postgres;"
 sudo -u postgres psql -p 9700 -d notification -c "GRANT ALL ON SCHEMA public TO postgres;"
 
+# Create the scp database and assign privileges
+sudo -u postgres psql -p 9700 -c "CREATE DATABASE scp;"
+sudo -u postgres psql -p 9700 -d scp -c "GRANT ALL PRIVILEGES ON DATABASE scp TO postgres;"
+sudo -u postgres psql -p 9700 -d scp -c "GRANT ALL ON SCHEMA public TO postgres;"
+
 echo "Database setup complete."

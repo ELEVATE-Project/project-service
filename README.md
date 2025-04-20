@@ -869,6 +869,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         1.  Download `import_forms.js` Script File And Make the setup file executable by running the following command:
 
             ```
+            npm install mongoose axios &&
             curl -s https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/scripts/linux/import_forms.js | node
             ```
 
@@ -896,7 +897,8 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         (cd user/src && pm2 start app.js --name user && cd -) && \
         (cd notification/src && pm2 start app.js --name notification && cd -) && \
         (cd interface-service/src && pm2 start app.js --name interface && cd -) && \
-        (cd scheduler/src && pm2 start app.js --name scheduler && cd -)
+        (cd scheduler/src && pm2 start app.js --name scheduler && cd -) && \
+        (cd survey-project-creation-service/src && pm2 start app.js --name survey-project-creation-service && cd -)
         ```
 
     -   **MacOs**
@@ -933,13 +935,13 @@ Before setting up the following ELEVATE-Project application, dependencies given 
 
         2. Run entity creation script for education sector of survey-project-creation-service
             ```
-            cd survey-project-creation-service/src/script && node addDefaultEntitiesForEducationSector.js && cd ../../..
+            cd survey-project-creation-service/src/scripts && node addDefaultEntitiesForEducationSector.js && cd ../../..
             ```
         3. Update the cloud env in survey-project-creation-service/src/.env with valid credentials and run the
            script for upload certificate
 
             ```
-            cd survey-project-creation-service/src/script && node -r module-alias/register uploadCertificateBaseTemplate.js && cd ../../..
+            cd survey-project-creation-service/src/scripts && node -r module-alias/register uploadCertificateBaseTemplate.js && cd ../../..
             ```
 
     -   **Windows**

@@ -400,7 +400,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         ```
         ./install-dependencies.sh
         ```
-        > Note: Install all missing dependencies and use check-dependencies script to ensure everything is installed and running.
+        > Note: Install all missing dependencies and use check-dependencies script to ensure everything is installed and running. Additionally, if PostgreSQL is already installed on your system, it may be running on the default port 5432. Make sure to verify the active port and update the env configurations for user, SCP, and notification services accordingly.
     4. Uninstall dependencies by running `uninstall-dependencies.sh`:
 
         ```
@@ -631,8 +631,8 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         cd notification/src && npm install && cd ../.. && \
         cd interface-service/src && npm install && cd ../.. && \
         cd scheduler/src && npm install && cd ../.. && \
-        ca survey-project-creation-service/src && npm install && cd ../.. && \
-        cd observation-survey-projects-pwa && npm install --force && cd ../.. && \
+        cd survey-project-creation-service/src && npm install && cd ../.. && \
+        cd observation-survey-projects-pwa && npm install --force && cd .. && \
         cd self-creation-portal && npm install --force && cd ..
         ```
 
@@ -671,7 +671,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         curl -L -o interface-service/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/interface_env && \
         curl -L -o scheduler/src/.env https://github.com/ELEVATE-Project/project-service/raw/refs/heads/main/documentation/1.0.0/native/envs/scheduler_env && \
         curl -L -o observation-survey-projects-pwa/src/environments/environment.ts https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/enviroment.ts && \
-        curl -L -o project-service/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/scpDoc/documentation/1.0.0/native/envs/scp_env
+        curl -L -o survey-project-creation-service/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/scpDoc/documentation/1.0.0/native/envs/scp_env
         ```
 
     -   **MacOs**

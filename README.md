@@ -1047,11 +1047,15 @@ In such cases, you can generate sample user accounts using the steps below. This
 
 After successfully running the script mentioned above, the following user accounts will be created and available for login:
 
-| Email ID                 | Password   | Role                      |
-| ------------------------ | ---------- | ------------------------- |
-| aaravpatel@example.com   | Password1@ | State Educational Officer |
-| arunimareddy@example.com | Password1@ | State Educational Officer |
-| devikasingh@example.com  | Password1@ | State Educational Officer |
+| Email ID                 | Password   | Role                             |
+| ------------------------ | ---------- | -------------------------------- |
+| aaravpatel@example.com   | Password1@ | State Educational Officer        |
+| arunimareddy@example.com | Password1@ | State Educational Officer        |
+| devikasingh@example.com  | Password1@ | State Educational Officer        |
+| deepakjoshi@example.com  | Password1@ | Content Creator, Program Manager |
+| ankittiwari@example.com  | Password1@ | Reviewer                         |
+| amitverma@example.com    | Password1@ | Program Designer, Org Admin      |
+| poojaagarwal@example.com | Password1@ | Rollout Manager                  |
 
 </details>
 

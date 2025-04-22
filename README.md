@@ -877,7 +877,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         1.  Download `import_forms.js` Script File And Make the setup file executable by running the following command:
 
             ```
-            npm install mongoose axios &&
+            npm install mongoose axios pg &&
             curl -s https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/scripts/linux/import_forms.js | node
             ```
 

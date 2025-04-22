@@ -345,6 +345,10 @@ This step inserts configuration forms into MongoDB, enabling or disabling featur
     curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/mac-linux/import_forms_mongo.sh && chmod +x import_forms_mongo.sh && sudo ./import_forms_mongo.sh mongodb://mongo:27017/elevate-project
     ```
 
+    ```
+    curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/mac-linux/import_forms_postgres.sh && chmod +x import_forms_postgres.sh && sudo ./import_forms_postgres.sh postgres://postgres:postgres@citus_master:5432/scp
+    ```
+
 -   **Windows**:
     1. Download the `import_forms_mongo.bat` file:
         ```cmd

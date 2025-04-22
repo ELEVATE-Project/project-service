@@ -57,7 +57,7 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
 > **Caution:** Before proceeding, please ensure that the ports given here are available and open. It is essential to verify their availability prior to moving forward. You can run below command in your terminal to check this
 
 ```
-for port in 3000 3001 3002 6000 5001 4000 9092 5432 7007 2181 2707 3569; do
+for port in 3000 3001 3002 6000 5001 4000 9092 5432 7007 2181 2707 3569 6001; do
     if lsof -iTCP:$port -sTCP:LISTEN &>/dev/null; then
         echo "Port $port is in use"
     else
@@ -188,13 +188,20 @@ To enable the Citus extension for user services, follow these steps.
     ```
     mkdir user && curl -o ./user/distributionColumns.sql -JL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/distribution-columns/user/distributionColumns.sql
     ```
-2. Set up the citus_setup file by following the steps given below.
+2. Create a sub-directory named `scp` and download `distributionColumns.sql` into it. (Skip this for linux/macOs)
+    ```
+    mkdir scp && curl -o ./scp/distributionColumns.sql -JL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/distribution-columns/scp/distributionColumns.sql
+    ```
+3. Set up the citus_setup file by following the steps given below.
 
     - **Ubuntu/Linux/Mac**
 
-        1. Enable Citus and set distribution columns for `user` database by running the `citus_setup.sh`with the following arguments.
+        1. Enable Citus and set distribution columns for `user and scp` database by running the `citus_setup.sh`with the following arguments.
             ```
             sudo ./citus_setup.sh user postgres://postgres:postgres@citus_master:5432/user
+            ```
+            ```
+            sudo ./citus_setup.sh scp postgres://postgres:postgres@citus_master:5432/scp
             ```
 
     - **Windows**
@@ -683,6 +690,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         curl -L -o notification/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/non-citus/notification_env && \
         curl -L -o interface-service/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/interface_env && \
         curl -L -o scheduler/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/scheduler_env && \
+        curl -L -o survey-project-creation-service/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/scp_env && \
         curl -L -o observation-survey-projects-pwa/src/environments/environment.ts https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/enviroment.ts
         ```
 
@@ -909,7 +917,8 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         cd user/src && npx pm2 start app.js -i 2 --name user && cd ../.. && \
         cd notification/src && npx pm2 start app.js -i 2 --name notification && cd ../.. && \
         cd interface-service/src && npx pm2 start app.js -i 2 --name interface && cd ../.. && \
-        cd scheduler/src && npx pm2 start app.js -i 2 --name scheduler && cd ../..
+        cd scheduler/src && npx pm2 start app.js -i 2 --name scheduler && cd ../.. && \
+        cd survey-project-creation-service/src && npx pm2 start app.js -i 2 --name survey-project-creation-service && cd ../..
         ```
 
     -   **Windows**
@@ -1062,6 +1071,7 @@ After successfully running the script mentioned above, the following user accoun
 ## Postman Collections
 
 -   [Projects Service](https://github.com/ELEVATE-Project/project-service/tree/main/api-doc)
+-   [SCP](https://github.com/ELEVATE-Project/survey-project-creation-service/tree/staging/src/api-doc)
 
 ## Adding New Projects to the System
 

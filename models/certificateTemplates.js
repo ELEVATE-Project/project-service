@@ -24,5 +24,11 @@ module.exports = {
 			required: true,
 		},
 		baseTemplateId: 'ObjectId',
+		tenantId: {
+			type: String,
+		},
+		orgId: {
+			type: Array,
+		},
 	},
 }

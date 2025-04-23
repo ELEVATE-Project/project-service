@@ -32,6 +32,9 @@ module.exports = class LibraryCategoriesHelper {
 	 * @param pageNo - Recent page no.
 	 * @param search - search text.
 	 * @param sortedData - Data to be sorted.
+	 * @param userDetails - user related info
+	 * @param tenantId - tenant id info
+	 * @param orgId - org id info
 	 * @param language - pass language code for the translation
 	 * @param hasSpotlight - true/false for filtering based on hasSpotlight key
 	 * @param filter - Data to be filtered
@@ -44,6 +47,9 @@ module.exports = class LibraryCategoriesHelper {
 		pageNo,
 		search,
 		sortedData,
+		userDetails,
+		tenantId = null,
+		orgId = null,
 		language = 'en',
 		hasSpotlight = false,
 		filter = {}
@@ -58,6 +64,14 @@ module.exports = class LibraryCategoriesHelper {
 						status: CONSTANTS.common.PUBLISHED,
 						isReusable: true,
 					},
+				}
+
+				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
+					matchQuery['$match']['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+					matchQuery['$match']['orgId'] = { $in: userDetails.tenantAndOrgInfo.orgId }
+				} else {
+					matchQuery['$match']['tenantId'] = userDetails.userInformation.tenantId
+					matchQuery['$match']['orgId'] = { $in: [userDetails.userInformation.organizationId] }
 				}
 
 				if (categoryId && categoryId !== '') {
@@ -412,20 +426,20 @@ module.exports = class LibraryCategoriesHelper {
 	 * @param filterQuery - Filter query.
 	 * @param updateData - Update data.
 	 * @param files - files
-	 * @param userId - user id
+	 * @param userDetails - user related information
 	 * @returns {Object} updated data
 	 */
 
-	static update(filterQuery, updateData, files, userId) {
+	static update(filterQuery, updateData, files, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let categoryData = await projectCategoriesQueries.categoryDocuments(
-					{
-						_id: filterQuery._id,
-					},
-					'all'
-				)
-
+				let matchQuery = { _id: filterQuery._id }
+				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
+					matchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+				} else {
+					matchQuery['tenantId'] = userDetails.userInformation.tenantId
+				}
+				let categoryData = await projectCategoriesQueries.categoryDocuments(matchQuery, 'all')
 				// Throw error if category is not found
 				if (
 					!categoryData ||
@@ -439,7 +453,7 @@ module.exports = class LibraryCategoriesHelper {
 					}
 				}
 
-				let evidenceUploadData = await handleEvidenceUpload(files, userId)
+				let evidenceUploadData = await handleEvidenceUpload(files, userDetails.userInformation.userId)
 				evidenceUploadData = evidenceUploadData.data
 
 				// Update the sequence numbers
@@ -454,6 +468,10 @@ module.exports = class LibraryCategoriesHelper {
 				} else {
 					updateData['evidences'] = evidenceUploadData
 				}
+
+				// delete tenantId & orgId attached in req.body to avoid adding manupulative data
+				delete updateData.tenantId
+				delete updateData.orgId
 
 				// Update the category
 				let categoriesUpdated = await projectCategoriesQueries.updateMany(filterQuery, updateData)
@@ -571,20 +589,25 @@ module.exports = class LibraryCategoriesHelper {
 	 * @name create
 	 * @param categoryData - categoryData.
 	 * @param files - files.
-	 * @param userId - user id.
+	 * @param userDetails - user decoded token details.
 	 * @returns {Object} category details
 	 */
 
-	static create(categoryData, files, userId) {
+	static create(categoryData, files, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Check if the category already exists
-				const checkIfCategoryExist = await projectCategoriesQueries.categoryDocuments(
-					{
-						externalId: categoryData.externalId.toString(),
-					},
-					['_id', 'externalId']
-				)
+				let filterQuery = {}
+				filterQuery['externalId'] = categoryData.externalId.toString()
+				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
+					filterQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+				} else {
+					filterQuery['tenantId'] = userDetails.userInformation.tenantId
+				}
+				const checkIfCategoryExist = await projectCategoriesQueries.categoryDocuments(filterQuery, [
+					'_id',
+					'externalId',
+				])
 
 				// Throw error if the category already exists
 				if (
@@ -600,8 +623,17 @@ module.exports = class LibraryCategoriesHelper {
 				}
 
 				// Fetch the signed urls from handleEvidenceUpload function
-				const evidences = await handleEvidenceUpload(files, userId)
+				const evidences = await handleEvidenceUpload(files, userDetails.userInformation.userId)
 				categoryData['evidences'] = evidences.data
+
+				// add tenantId and orgId
+				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
+					categoryData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+					categoryData['orgId'] = userDetails.tenantAndOrgInfo.orgId
+				} else {
+					categoryData['tenantId'] = userDetails.userInformation.tenantId
+					categoryData['orgId'] = [userDetails.userInformation.organizationId]
+				}
 
 				let projectCategoriesData = await projectCategoriesQueries.create(categoryData)
 
@@ -632,18 +664,42 @@ module.exports = class LibraryCategoriesHelper {
 	 * list categories
 	 * @method
 	 * @name list
+	 * @param {Object} req - user decoded token details
 	 * @returns {Object} category details
 	 */
 
-	static list() {
+	static list(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let categoryData = await projectCategoriesQueries.categoryDocuments(
-					{
-						status: CONSTANTS.common.ACTIVE_STATUS,
-					},
-					['externalId', 'name', 'icon', 'updatedAt', 'noOfProjects']
-				)
+				let tenantId
+				let organizationId
+				let query = {}
+				let userRoles = req.userDetails.userInformation.roles ? req.userDetails.userInformation.roles : []
+
+				// create query to fetch assets as a SUPER_ADMIN
+				if (userRoles.includes(CONSTANTS.common.ADMIN_ROLE)) {
+					tenantId = req.userDetails.tenantAndOrgInfo.tenantId
+					query['orgId'] = { $in: req.userDetails.tenantAndOrgInfo.orgId }
+				}
+				// create query to fetch assets as a normal user
+				else {
+					tenantId = req.userDetails.userInformation.tenantId
+				}
+				query['tenantId'] = tenantId
+
+				// handle currentOrgOnly filter
+				if (req.query['currentOrgOnly'] && req.query['currentOrgOnly'] == 'true') {
+					organizationId = req.userDetails.userInformation.organizationId
+					query['orgId'] = { $in: [organizationId] }
+				}
+				query['status'] = CONSTANTS.common.ACTIVE_STATUS
+				let categoryData = await projectCategoriesQueries.categoryDocuments(query, [
+					'externalId',
+					'name',
+					'icon',
+					'updatedAt',
+					'noOfProjects',
+				])
 
 				if (!categoryData.length > 0) {
 					throw {

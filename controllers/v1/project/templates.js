@@ -63,7 +63,7 @@ module.exports = class ProjectTemplates extends Abstract {
 
 				const projectTemplates = await projectTemplatesHelper.bulkCreate(
 					templatesData,
-					req.userDetails.userInformation.userId,
+					req.userDetails,
 					req.files.translationFiles
 				)
 
@@ -815,7 +815,13 @@ module.exports = class ProjectTemplates extends Abstract {
 			try {
 				// Call the 'list' method from the 'projectTemplatesHelper' object,
 				// passing in the required parameters.
-				let projectTemplates = await projectTemplatesHelper.list(req.pageNo, req.pageSize, req.searchText)
+				let projectTemplates = await projectTemplatesHelper.list(
+					req.pageNo,
+					req.pageSize,
+					req.searchText,
+					req.query.currentOrgOnly ? req.query.currentOrgOnly : false,
+					req.userDetails
+				)
 
 				// Assign the 'data' property of 'projectTemplates' to 'result'.
 				projectTemplates.result = projectTemplates.data

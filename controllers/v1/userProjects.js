@@ -285,7 +285,8 @@ module.exports = class UserProjects extends Abstract {
 						? req.headers.appversion
 						: '',
 					req.query.templateId,
-					req.query.language ? req.query.language : ''
+					req.query.language ? req.query.language : '',
+					req.userDetails
 				)
 
 				return resolve(projectDetails)
@@ -911,7 +912,8 @@ module.exports = class UserProjects extends Abstract {
 					req.searchText,
 					req.query.language ? req.query.language : '',
 					req.query.programId ? req.query.programId : '',
-					req.query.status ? req.query.status : ''
+					req.query.status ? req.query.status : '',
+					req.userDetails
 				)
 				return resolve(projects)
 			} catch (error) {

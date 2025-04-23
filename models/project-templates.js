@@ -15,8 +15,6 @@ module.exports = {
 		externalId: {
 			type: String,
 			required: true,
-			index: true,
-			unique: true,
 		},
 		categories: [
 			{
@@ -143,5 +141,17 @@ module.exports = {
 		durationInDays: {
 			type: Number,
 		},
+		tenantId: {
+			type: String,
+		},
+		orgId: {
+			type: Array,
+		},
 	},
+	compoundIndex: [
+		{
+			name: { externalId: 1, tenantId: 1 },
+			indexType: { unique: true },
+		},
+	],
 }

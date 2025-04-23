@@ -1346,7 +1346,8 @@ module.exports = class UserProjectsHelper {
 		appName = '',
 		appVersion = '',
 		templateId = '',
-		language = ''
+		language = '',
+		userDetails
 	) {
 		return new Promise(async (resolve, reject) => {
 			try {
@@ -1783,6 +1784,8 @@ module.exports = class UserProjectsHelper {
 						if (bodyData.entityId !== '') {
 							projectCreation.data['entityId'] = bodyData.entityId
 						}
+						projectCreation.data['tenantId'] = userDetails.userInformation.tenantId
+						projectCreation.data['orgId'] = [userDetails.userInformation.organizationId]
 						let project = await projectQueries.createProject(projectCreation.data)
 
 						// if ( addReportInfoToSolution && project.solutionId ) {
@@ -2739,11 +2742,12 @@ module.exports = class UserProjectsHelper {
 	 * @param {String} searchText -Search text
 	 * @param {String} language -LanguageCode
 	 * @param {String} programId - ProgramId
-	 * @param {String} status  -status of the project
+	 * @param {String} status  -status of the project,
+	 * @param {Object} userDetails - user related info
 	 * @returns {Array} List of projects.
 	 */
 
-	static list(userId, pageNo, pageSize, searchText, language = '', programId, status) {
+	static list(userId, pageNo, pageSize, searchText, language = '', programId, status, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let aggregateData = []
@@ -2753,6 +2757,15 @@ module.exports = class UserProjectsHelper {
 						userId: userId,
 					},
 				}
+
+				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
+					matchQuery['$match']['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+					matchQuery['$match']['orgId'] = { $in: userDetails.tenantAndOrgInfo.orgId }
+				} else {
+					matchQuery['$match']['tenantId'] = userDetails.userInformation.tenantId
+					matchQuery['$match']['orgId'] = { $in: [userDetails.userInformation.organizationId] }
+				}
+
 				// pass matchQuery based on reflection
 				if (process.env.ENABLE_REFLECTION === 'true') {
 					matchQuery.$match['reflection.status'] =

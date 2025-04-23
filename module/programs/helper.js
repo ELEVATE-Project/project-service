@@ -210,11 +210,13 @@ module.exports = class ProgramsHelper {
 	 * @method
 	 * @name create
 	 * @param {Array} data
+	 * @param {String} user user id
 	 * @param {Boolean} checkDate this is true for when its called via API calls
+	 * @param {Object} userDetails user related info
 	 * @returns {JSON} - create program.
 	 */
 
-	static create(data, userId = '', checkDate = false) {
+	static create(data, userId = '', checkDate = false, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let programData = {
@@ -226,6 +228,10 @@ module.exports = class ProgramsHelper {
 					createdBy: userId == '' ? data.userId : userId,
 					updatedBy: userId == '' ? data.userId : userId,
 				}
+
+				// avoid adding manupulative data
+				delete data.tenantId
+				delete data.orgId
 
 				if (checkDate) {
 					if (data.hasOwnProperty(CONSTANTS.common.END_DATE)) {
@@ -239,6 +245,18 @@ module.exports = class ProgramsHelper {
 				_.assign(programData, {
 					...data,
 				})
+
+				// add tenantId and orgId
+				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
+					programData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+					programData['orgId'] = userDetails.tenantAndOrgInfo.orgId
+				} else {
+					let orgIds = []
+					programData['tenantId'] = userDetails.userInformation.tenantId
+					orgIds.push(userDetails.userInformation.organizationId)
+					programData['orgId'] = orgIds
+				}
+
 				programData = _.omit(programData, ['scope', 'userId'])
 				let program = await programsQueries.createProgram(programData)
 
@@ -281,10 +299,10 @@ module.exports = class ProgramsHelper {
 	 * @returns {JSON} - update program.
 	 */
 
-	static update(programId, data, userId, checkDate = false) {
+	static update(programId, data, userDetails, checkDate = false) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				data.updatedBy = userId
+				data.updatedBy = userDetails.userInformation.userId
 				data.updatedAt = new Date()
 				//convert components to objectedIds
 				if (data.components && data.components.length > 0) {
@@ -300,16 +318,26 @@ module.exports = class ProgramsHelper {
 					}
 				}
 
+				// delete tenantId & orgId attached in req.body to avoid adding manupulative data
+				delete data.tenantId
+				delete data.orgId
+
+				let programMatchQuery = {}
+				programMatchQuery['_id'] = programId
+				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
+					programMatchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+				} else {
+					programMatchQuery['tenantId'] = userDetails.userInformation.tenantId
+				}
 				let program = await programsQueries.findAndUpdate(
-					{
-						_id: programId,
-					},
+					programMatchQuery,
 					{ $set: _.omit(data, ['scope']) },
 					{ new: true }
 				)
 
 				if (!program || !program._id) {
 					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.PROGRAM_NOT_UPDATED,
 					}
 				}
@@ -336,6 +364,7 @@ module.exports = class ProgramsHelper {
 				})
 			} catch (error) {
 				return resolve({
+					status: error.status || 400,
 					success: false,
 					message: error.message,
 					data: {},
@@ -899,16 +928,17 @@ module.exports = class ProgramsHelper {
 	 * @param {Number} pageNo - page no.
 	 * @param {Number} pageSize - page size.
 	 * @param {String} searchText - text to search.
-	 *  @param {Object} filter - filter.
-	 *  @param {Array} projection - projection.
+	 * @param {Object} userDetails - user related info
+	 * @param {Object} filter - filter.
+	 * @param {Array} projection - projection.
 	 * @returns {Object} - Programs list.
 	 */
 
-	static list(pageNo = '', pageSize = '', searchText, filter = {}, projection) {
+	static list(pageNo = '', pageSize = '', searchText, userDetails, currentOrgOnly = false, filter = {}, projection) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let programDocument = []
-
+				currentOrgOnly = UTILS.convertStringToBoolean(currentOrgOnly)
 				let matchQuery = { status: CONSTANTS.common.ACTIVE_STATUS }
 				if (Object.keys(filter).length > 0) {
 					matchQuery = _.merge(matchQuery, filter)
@@ -927,6 +957,20 @@ module.exports = class ProgramsHelper {
 							description: new RegExp(searchText, 'i'),
 						}
 					)
+				}
+
+				// modify query to fetch documents based on tenantId and orgId
+				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
+					matchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+					matchQuery['orgId'] = { $in: userDetails.tenantAndOrgInfo.orgId }
+				} else {
+					matchQuery['tenantId'] = userDetails.userInformation.tenantId
+				}
+
+				// handle currentOrgOnly filter
+				if (currentOrgOnly) {
+					let organizationId = userDetails.userInformation.organizationId
+					matchQuery['orgId'] = { $in: [organizationId] }
 				}
 
 				let sortQuery = {

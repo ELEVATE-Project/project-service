@@ -36,10 +36,11 @@ module.exports = class ProjectTemplatesHelper {
 	 * @method
 	 * @name extractCsvInformation
 	 * @param {Object} csvData - csv data.
+	 * @param {Object} userDetails - user related info
 	 * @returns {Object} Extra csv information.
 	 */
 
-	static extractCsvInformation(csvData) {
+	static extractCsvInformation(csvData, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let categoryIds = []
@@ -69,15 +70,27 @@ module.exports = class ProjectTemplatesHelper {
 				})
 
 				let categoriesData = {}
-
 				if (categoryIds.length > 0) {
+					let matchQuery = {}
+					if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
+						if (csvData.tenantId && csvData.tenantId.length) {
+							matchQuery['tenantId'] = csvData.tenantId
+						} else {
+							matchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+						}
+					} else {
+						if (csvData.tenantId && csvData.tenantId.length) {
+							matchQuery['tenantId'] = csvData.tenantId
+						} else {
+							matchQuery['tenantId'] = userDetails.userInformation.tenantId
+						}
+					}
+					matchQuery['externalId'] = { $in: categoryIds }
 					// what is category documents
-					let categories = await projectCategoriesQueries.categoryDocuments(
-						{
-							externalId: { $in: categoryIds },
-						},
-						['externalId', 'name']
-					)
+					let categories = await projectCategoriesQueries.categoryDocuments(matchQuery, [
+						'externalId',
+						'name',
+					])
 
 					if (!categories.length > 0) {
 						throw {
@@ -302,7 +315,6 @@ module.exports = class ProjectTemplatesHelper {
 				})
 				parsedData['translations'] = translations
 				parsedData.isReusable = true
-
 				return resolve(parsedData)
 			} catch (error) {
 				return reject(error)
@@ -320,7 +332,7 @@ module.exports = class ProjectTemplatesHelper {
 	 * @returns {Object} Bulk create project templates.
 	 */
 
-	static bulkCreate(templates, userId, translationFiles = {}) {
+	static bulkCreate(templates, userDetails, translationFiles = {}) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				if (templates[0].solutionId && templates[0].solutionId !== '') {
@@ -345,8 +357,7 @@ module.exports = class ProjectTemplatesHelper {
 					})
 				})()
 
-				let csvInformation = await this.extractCsvInformation(templates)
-
+				let csvInformation = await this.extractCsvInformation(templates, userDetails)
 				if (!csvInformation.success) {
 					return resolve(csvInformation)
 				}
@@ -367,14 +378,25 @@ module.exports = class ProjectTemplatesHelper {
 
 				for (let template = 0; template < templates.length; template++) {
 					let currentData = templates[template]
-					let templateData = await projectTemplateQueries.templateDocument(
-						{
-							status: CONSTANTS.common.PUBLISHED,
-							externalId: currentData.externalId,
-							isReusable: true,
-						},
-						['_id']
-					)
+					// create match query
+					let matchQuery = {}
+					if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
+						if (currentData.tenantId && currentData.tenantId.length > 0) {
+							matchQuery['tenantId'] = currentData.tenantId
+						} else {
+							matchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+						}
+					} else {
+						if (currentData.tenantId && currentData.tenantId.length > 0) {
+							matchQuery['tenantId'] = currentData.tenantId
+						} else {
+							matchQuery['tenantId'] = userDetails.userInformation.tenantId
+						}
+					}
+					matchQuery['status'] = CONSTANTS.common.PUBLISHED
+					matchQuery['externalId'] = currentData.externalId
+					matchQuery['isReusable'] = true
+					let templateData = await projectTemplateQueries.templateDocument(matchQuery, ['_id'])
 
 					if (templateData.length > 0 && templateData[0]._id) {
 						currentData['_SYSTEM_ID'] = CONSTANTS.apiResponses.PROJECT_TEMPLATE_EXISTS
@@ -383,13 +405,31 @@ module.exports = class ProjectTemplatesHelper {
 						let templateData = await this.templateData(
 							currentData,
 							csvInformation.data,
-							userId,
+							userDetails.userInformation.userId,
 							translationData
 						)
 
 						templateData.status = CONSTANTS.common.PUBLISHED_STATUS
-						templateData.createdBy = templateData.updatedBy = templateData.userId = userId
+						templateData.createdBy =
+							templateData.updatedBy =
+							templateData.userId =
+								userDetails.userInformation.userId
 						templateData.isReusable = true
+						if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
+							if (!templateData.tenantId || !(templateData.tenantId.length > 0)) {
+								templateData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+							}
+							if (!templateData.orgId || !(templateData.orgId.length > 0)) {
+								templateData['orgId'] = userDetails.tenantAndOrgInfo.orgId
+							}
+						} else {
+							if (!templateData.tenantId || !(templateData.tenantId.length > 0)) {
+								templateData['tenantId'] = userDetails.userInformation.tenantId
+							}
+							if (!templateData.orgId || !(templateData.orgId.length > 0)) {
+								templateData['orgId'] = [userDetails.userInformation.organizationId]
+							}
+						}
 
 						let createdTemplate = await projectTemplateQueries.createTemplate(templateData)
 
@@ -409,9 +449,10 @@ module.exports = class ProjectTemplatesHelper {
 									},
 									{
 										$inc: { noOfProjects: 1 },
-									}
+									},
+									{},
+									userDetails
 								)
-
 								if (!updatedCategories.success) {
 									currentData['_SYSTEM_ID'] = updatedCategories.message
 								}
@@ -1360,11 +1401,28 @@ module.exports = class ProjectTemplatesHelper {
 	 * @returns {Object}            - project templates list.
 	 */
 
-	static list(pageNo = '', pageSize = '', searchText = '') {
+	static list(pageNo = '', pageSize = '', searchText = '', currentOrgOnly = false, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Create a query object with the 'isReusable' property set to true.
 				let queryObject = { isReusable: true }
+				currentOrgOnly = UTILS.convertStringToBoolean(currentOrgOnly)
+
+				// create query to fetch assets as a SUPER_ADMIN
+				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
+					queryObject['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+					queryObject['orgId'] = { $in: userDetails.tenantAndOrgInfo.orgId }
+				}
+				// create query to fetch assets as a normal user
+				else {
+					queryObject['tenantId'] = userDetails.userInformation.tenantId
+				}
+
+				// handle currentOrgOnly filter
+				if (currentOrgOnly) {
+					let organizationId = userDetails.userInformation.organizationId
+					queryObject['orgId'] = { $in: [organizationId] }
+				}
 
 				// If 'searchText' is provided, create a search query using '$or'.
 				if (searchText !== '') {

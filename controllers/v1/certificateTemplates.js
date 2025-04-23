@@ -117,12 +117,16 @@ module.exports = class CertificateTemplates extends Abstract {
 				// Check if the request method is POST
 				if (req.method === 'POST') {
 					// Call the create method of certificateTemplateHelper with the provided data
-					let certificateTemplateData = await certificateTemplateHelper.create(req.body)
+					let certificateTemplateData = await certificateTemplateHelper.create(req.body, req.userDetails)
 					// Resolve the promise with the created certificate template data
 					return resolve(certificateTemplateData)
 				} else if (req.method === 'PATCH') {
 					// Call the update method of certificateTemplateHelper with the provided data
-					let certificateTemplateData = await certificateTemplateHelper.update(req.params._id, req.body)
+					let certificateTemplateData = await certificateTemplateHelper.update(
+						req.params._id,
+						req.body,
+						req.userDetails
+					)
 					// Resolve the promise with the updated certificate template data
 					return resolve(certificateTemplateData)
 				}

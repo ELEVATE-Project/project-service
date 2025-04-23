@@ -19,5 +19,11 @@ module.exports = {
 		url: {
 			type: String,
 		},
+		tenantId: {
+			type: String,
+		},
+		orgId: {
+			type: Array,
+		},
 	},
 }

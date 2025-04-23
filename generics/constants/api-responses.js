@@ -264,4 +264,8 @@ module.exports = {
 	PROJECT_TEMPLATES_CREATED: 'Template and Tasks Created Successfully',
 	FAILED_TO_UPDATE_TEMPLATE: 'Failed to update the template',
 	CATEGORY_SHOULD_HAVE_LABEL_AND_VALUE: 'Each category must have a label and a value.',
+	INVALID_TENANT_AND_ORG_CODE: 'ERR_TENANT_AND_ORG_INVALID',
+	INVALID_TENANT_AND_ORG_MESSAGE: 'Invalid tenant and org info',
+	LINK_GENERATION_FAILED: 'Link Generation Failed',
+	INVALID_TASK_DATA: 'Invalid task data',
 }

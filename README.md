@@ -969,31 +969,37 @@ Before setting up the following ELEVATE-Project application, dependencies given 
 
     -   **Ubuntu/Linux/Windows**
 
-        1. Install the Ionic framework:
+            1. Install the Ionic framework:
 
-            ```
-            npm install -g ionic
-            ```
+                ```
+                npm install -g ionic
+                ```
 
-        2. Install the Ionic client:
+            2. Install the Ionic client:
 
-            ```
-            npm install -g @ionic/cli
-            ```
+                ```
+                npm install -g @ionic/cli
+                ```
 
-        3. Navigate to `observation-survey-projects-pwa` directory:
+            3. Navigate to `observation-survey-projects-pwa` directory:
 
-            ```
-            cd observation-survey-projects-pwa
-            ```
+                ```
+                cd observation-survey-projects-pwa
+                ```
 
-        4. Run the project on your local system using the following command:
+            4. Run the project on your local system using the following command:
 
-            ```
-            ionic serve
-            ```
+                ```
+                ionic serve
+                ```
 
-    Navigate to http://localhost:8100 to access the ELEVATE-Project Portal.
+            5. Start the portal
+
+                ```
+                pm2 start pm2.config.json && cd ..
+                ```
+
+        Navigate to http://localhost:8100 to access the ELEVATE-Project Portal.
 
 13. **Start The Self-Creation Portal**
 
@@ -1025,6 +1031,12 @@ Before setting up the following ELEVATE-Project application, dependencies given 
             ng build lib-shared-modules && ng build lib-project && ng build program-with-rollout && ng serve
             ```
 
+        5. Start the portal
+
+            ```
+            pm2 start pm2.config.json && cd ..
+            ```
+
     Navigate to http://localhost:4200 to access the Self-Creation Portal.
 
 ## Sample User Accounts Generation
@@ -1039,7 +1051,7 @@ In such cases, you can generate sample user accounts using the steps below. This
 
     ```
     curl -o insert_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/native/scripts/linux/insert_sample_data.sh && \
-    chmod +x insert_sample_data.sh && \
+    chmod +x insert_sample_data.sh &&
     ./insert_sample_data.sh
     ```
 

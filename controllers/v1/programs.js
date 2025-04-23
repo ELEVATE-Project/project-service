@@ -73,7 +73,8 @@ module.exports = class Programs extends Abstract {
 				let programCreationData = await programsHelper.create(
 					req.body,
 					req.userDetails.userInformation.userId,
-					true //this is true for when its called via API calls
+					true, //this is true for when its called via API calls
+					req.userDetails
 				)
 
 				return resolve(programCreationData)
@@ -142,7 +143,7 @@ module.exports = class Programs extends Abstract {
 				let programUpdationData = await programsHelper.update(
 					req.params._id,
 					req.body,
-					req.userDetails.userInformation.userId,
+					req.userDetails,
 					true //this is true for when its called via API calls
 				)
 
@@ -463,7 +464,13 @@ module.exports = class Programs extends Abstract {
 	async list(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let listOfPrograms = await programsHelper.list(req.pageNo, req.pageSize, req.searchText)
+				let listOfPrograms = await programsHelper.list(
+					req.pageNo,
+					req.pageSize,
+					req.searchText,
+					req.userDetails,
+					req.query.currentOrgOnly ? req.query.currentOrgOnly : false
+				)
 
 				return resolve(listOfPrograms)
 			} catch (error) {

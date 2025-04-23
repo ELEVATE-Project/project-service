@@ -58,7 +58,8 @@ module.exports = class CertificateBaseTemplates extends Abstract {
 						let certificateBaseTemplateData = await certificateBaseTemplatesHelper.create(
 							req.body,
 							req.files,
-							req.userDetails.userInformation.userId
+							req.userDetails.userInformation.userId,
+							req.userDetails
 						)
 						// Resolve the promise with the created certificate data
 						return resolve(certificateBaseTemplateData)
@@ -75,7 +76,8 @@ module.exports = class CertificateBaseTemplates extends Abstract {
 						req.params._id,
 						req.body,
 						req.files,
-						req.userDetails.userInformation.userId
+						req.userDetails.userInformation.userId,
+						req.userDetails
 					)
 					// Add the updated data to the result key
 					certificateBaseTemplateData['result'] = certificateBaseTemplateData.data

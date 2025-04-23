@@ -21,10 +21,11 @@ module.exports = class CertificateBaseTemplatesHelper {
 	 * @param {Object} data - certificate base template creation data.
 	 * @param {String} file - file.
 	 * @param {String} userId - userId.
+	 * @param {Object} userDetails - user related info
 	 * @returns {JSON} created certificate base template details.
 	 */
 
-	static create(data, file, userId) {
+	static create(data, file, userId, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Call the uploadToCloud method of certificateTemplatesHelper with the provided file data
@@ -39,6 +40,15 @@ module.exports = class CertificateBaseTemplatesHelper {
 				data.url = uploadFile.data.templateUrl
 				// Call the create method of certificateBaseTemplateQueries to create a new certificate base template
 				let certificateBaseTemplateCreated = await certificateBaseTemplateQueries.create(data)
+
+				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
+					data['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+					data['orgId'] = userDetails.tenantAndOrgInfo.tenantId
+				} else {
+					data['tenantId'] = userDetails.userInformation.tenantId
+					data['orgId'] = [userDetails.userInformation.organizationId]
+				}
+
 				// Resolve the promise with the created certificate base template details
 				return resolve({
 					message: CONSTANTS.apiResponses.CERTIFICATE_BASE_TEMPLATE_ADDED,
@@ -64,12 +74,17 @@ module.exports = class CertificateBaseTemplatesHelper {
 	 * @param {Object} data - certificate template updation data.
 	 * @param {String} file - file.
 	 * @param {String} userId - userId.
+	 * @param {Object} userDetails - user related info
 	 * @returns {JSON} Updated certificate template details.
 	 */
 
-	static update(baseTemplateId, data, file = {}, userId) {
+	static update(baseTemplateId, data, file = {}, userId, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				// avoid adding manupulative data
+				delete data.tenantId
+				delete data.orgId
+
 				// Check if a file is provided in the request
 				if (Object.keys(file).length > 0) {
 					// Call the uploadToCloud method of certificateTemplatesHelper with the provided file data
@@ -88,9 +103,15 @@ module.exports = class CertificateBaseTemplatesHelper {
 				let updateObject = {
 					$set: data,
 				}
+				let tenantId
+				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
+					tenantId = userDetails.tenantAndOrgInfo.tenantId
+				} else {
+					tenantId = userDetails.userInformation.tenantId
+				}
 				// Call the update method of certificateBaseTemplateQueries to update the database
 				let certificateBaseTemplateUpdated = await certificateBaseTemplateQueries.update(
-					{ _id: baseTemplateId },
+					{ _id: baseTemplateId, tenantId: tenantId },
 					updateObject
 				)
 				// Throw an error if the update was not successful

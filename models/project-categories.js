@@ -11,8 +11,6 @@ module.exports = {
 		externalId: {
 			type: String,
 			required: true,
-			index: true,
-			unique: true,
 		},
 		name: {
 			type: String,
@@ -51,5 +49,17 @@ module.exports = {
 			type: Array,
 			default: [],
 		},
+		tenantId: {
+			type: String,
+		},
+		orgId: {
+			type: Array,
+		},
 	},
+	compoundIndex: [
+		{
+			name: { externalId: 1, name: 1, tenantId: 1 },
+			indexType: { unique: true },
+		},
+	],
 }

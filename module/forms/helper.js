@@ -21,13 +21,14 @@ module.exports = class FormsHelper {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// call user-service to fetch default organization details
-				let defaultOrgDetails = await userService.fetchDefaultOrgDetails(
-					process.env.DEFAULT_ORGANISATION_CODE,
-					userToken
-				)
-				if (defaultOrgDetails.success && defaultOrgDetails.data) {
-					return resolve(defaultOrgDetails.data.id)
-				} else return resolve(null)
+				// let defaultOrgDetails = await userService.fetchDefaultOrgDetails(
+				// 	process.env.DEFAULT_ORGANISATION_CODE,
+				// 	userToken
+				// )
+				// if (defaultOrgDetails.success && defaultOrgDetails.data) {
+				// 	return resolve(defaultOrgDetails.data.id)
+				// } else return resolve(null)
+				return resolve(process.env.DEFAULT_ORGANISATION_CODE)
 			} catch (error) {
 				throw error
 			}
@@ -39,13 +40,20 @@ module.exports = class FormsHelper {
 	 * @method
 	 * @name create
 	 * @param {Object} bodyData
-	 * @param {Number} orgId
+	 * @param {Object} userDetails
 	 * @returns {JSON} - Form creation data.
 	 */
-	static create(bodyData, orgId) {
+	static create(bodyData, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				bodyData['organizationId'] = orgId
+				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
+					bodyData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+					bodyData['orgId'] = userDetails.tenantAndOrgInfo.orgId
+				} else {
+					bodyData['tenantId'] = userDetails.userInformation.tenantId
+					bodyData['orgId'] = [userDetails.userInformation.organizationId]
+				}
+
 				const form = await formQueries.createForm(bodyData)
 				if (!form || !form._id) {
 					throw {
@@ -53,10 +61,6 @@ module.exports = class FormsHelper {
 						message: CONSTANTS.apiResponses.FORM_NOT_CREATED,
 					}
 				}
-
-				// await utils.internalDel('formVersion')
-
-				// await KafkaProducer.clearInternalCache('formVersion')
 
 				return resolve({
 					success: true,
@@ -79,29 +83,37 @@ module.exports = class FormsHelper {
 	 * @name update
 	 * @param {String} _id
 	 * @param {Object} bodyData
-	 * @param {Number} orgId
+	 * @param {Number} userDetails
 	 * @returns {JSON} - Update form data.
 	 */
-	static update(_id, bodyData, orgId) {
+	static update(_id, bodyData, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// validate _id field
 				_id = _id === ':_id' ? null : _id
 				let filter = {}
+
 				if (_id) {
-					filter = {
-						_id: ObjectId(_id),
-						organizationId: orgId,
-					}
+					filter['_id'] = ObjectId(_id)
 				} else {
-					filter = {
-						type: bodyData.type,
-						// subType: bodyData.subType,
-						organizationId: orgId,
-					}
+					filter['type'] = bodyData.type
 				}
+
+				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
+					filter['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+					// filter['orgId'] = {'$in' : userDetails.tenantAndOrgInfo.orgId}
+				} else {
+					filter['tenantId'] = userDetails.userInformation.tenantId
+					// filter['orgId'] = {'$in' : [userDetails.userInformation.organizationId]}
+				}
+
 				// create update object to pass to db query
 				let updateData = {}
+
+				// avoding addition of manupulative data
+				delete bodyData.tenantId
+				delete bodyData.orgId
+
 				updateData['$set'] = bodyData
 				const updatedForm = await formQueries.updateOneForm(filter, updateData, { new: true })
 				if (!updatedForm || !updatedForm._id) {
@@ -131,20 +143,31 @@ module.exports = class FormsHelper {
 	 * @name read
 	 * @param {String} _id
 	 * @param {Object} bodyData
-	 * @param {Number} orgId
+	 * @param {Object} userDetails
 	 * @param {String} userToken
 	 * @returns {JSON} - Read form data.
 	 */
-	static read(_id, bodyData, orgId, userToken) {
+	static read(_id, bodyData, userDetails, userToken) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// validate _id field
 				_id = _id === ':_id' ? null : _id
 				let filter = {}
+
 				if (_id) {
-					filter = { _id: ObjectId(_id), organizationId: orgId }
+					filter['_id'] = ObjectId(_id)
 				} else {
-					filter = { ...bodyData, organizationId: orgId }
+					Object.keys(bodyData).map((key) => {
+						filter[`${key}`] = bodyData[`${key}`]
+					})
+				}
+
+				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
+					;(filter['tenantId'] = userDetails.tenantAndOrgInfo.tenantId),
+						(filter['orgId'] = { $in: userDetails.tenantAndOrgInfo.orgId })
+				} else {
+					;(filter['tenantId'] = userDetails.userInformation.tenantId),
+						(filter['orgId'] = { $in: [userDetails.userInformation.organizationId] })
 				}
 				const form = await formQueries.findOneForm(filter)
 				let defaultOrgForm
@@ -158,9 +181,20 @@ module.exports = class FormsHelper {
 							message: CONSTANTS.apiResponses.DEFAULT_ORG_ID_NOT_SET,
 						})
 					}
-					filter = _id
-						? { _id: ObjectId(_id), organizationId: defaultOrgId }
-						: { ...bodyData, organizationId: defaultOrgId }
+					filter = {}
+					if (_id) {
+						filter['_id'] = ObjectId(_id)
+					} else {
+						Object.keys(bodyData).map((key) => {
+							filter[`${key}`] = bodyData[`${key}`]
+						})
+					}
+					filter['orgId'] = { $in: [defaultOrgId] }
+					if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
+						filter['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+					} else {
+						filter['tenantId'] = userDetails.userInformation.tenantId
+					}
 					defaultOrgForm = await formQueries.findOneForm(filter)
 				}
 				if (!form && !defaultOrgForm) {

@@ -25,9 +25,16 @@ module.exports = class CertificateTemplatesHelper {
 	 * @returns {JSON} created certificate template details.
 	 */
 
-	static create(data) {
+	static create(data, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
+					data['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+					data['orgId'] = userDetails.tenantAndOrgInfo.tenantId
+				} else {
+					data['tenantId'] = userDetails.userInformation.tenantId
+					data['orgId'] = [userDetails.userInformation.organizationId]
+				}
 				let certificateTemplateCreated = await certificateTemplateQueries.createCertificateTemplate(data)
 				return resolve({
 					message: CONSTANTS.apiResponses.CERTIFICATE_TEMPLATE_ADDED,
@@ -50,12 +57,17 @@ module.exports = class CertificateTemplatesHelper {
 	 * @name update
 	 * @param {String} templateId - certificate template Id.
 	 * @param {Object} data - certificate template updation data.
+	 * @param {Object} userDetails - user related info
 	 * @returns {JSON} Updated certificate template details.
 	 */
 
-	static update(templateId, data) {
+	static update(templateId, data, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				// avoid adding manupulative data
+				delete data.tenantId
+				delete data.orgId
+
 				// If templateUrl value is passed as an empty string, remove it from the data object
 				if (!data.templateUrl) {
 					delete data.templateUrl
@@ -73,9 +85,17 @@ module.exports = class CertificateTemplatesHelper {
 				let updateObject = {
 					$set: data,
 				}
+
+				let tenantId
+				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
+					tenantId = userDetails.tenantAndOrgInfo.tenantId
+				} else {
+					tenantId = userDetails.userInformation.tenantId
+				}
+
 				// Call the updateCertificateTemplate method of certificateTemplateQueries to update the database
 				let certificateTemplateUpdated = await certificateTemplateQueries.updateCertificateTemplate(
-					{ _id: templateId },
+					{ _id: templateId, tenantId: tenantId },
 					updateObject
 				)
 				// Throw an error if the update was not successful

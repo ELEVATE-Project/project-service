@@ -353,10 +353,14 @@ module.exports = class SolutionsHelper {
 	 * @method
 	 * @name createSolution
 	 * @param {Object} solutionData - solution creation data.
+	 * @param {Boolean} checkDate
+	 * @param {Object} userDetails - user related info
+	 * @param {String} tenantId - tenant id
+	 * @param {String} orgId - org id
 	 * @returns {JSON} solution creation data.
 	 */
 
-	static createSolution(solutionData, checkDate = false) {
+	static createSolution(solutionData, checkDate = false, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				solutionData.type = solutionData.subType = CONSTANTS.common.IMPROVEMENT_PROJECT
@@ -365,13 +369,24 @@ module.exports = class SolutionsHelper {
 				solutionData.keywords = [CONSTANTS.common.KEYWORDS]
 				solutionData.isDeleted = false
 				solutionData.isReusable = false
+				delete solutionData.tenantId
+				delete solutionData.orgId
 
-				let programData = await programQueries.programsDocument(
-					{
-						externalId: solutionData.programExternalId,
-					},
-					['name', 'description', 'scope', 'endDate', 'startDate']
-				)
+				let programMatchQuery = {}
+				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
+					programMatchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+				} else {
+					programMatchQuery['tenantId'] = userDetails.userInformation.tenantId
+				}
+
+				programMatchQuery['externalId'] = solutionData.programExternalId
+				let programData = await programQueries.programsDocument(programMatchQuery, [
+					'name',
+					'description',
+					'scope',
+					'endDate',
+					'startDate',
+				])
 
 				if (!programData.length > 0) {
 					throw {
@@ -454,8 +469,19 @@ module.exports = class SolutionsHelper {
 						}
 					}
 				}
-
 				solutionData['submissionLevel'] = process.env.SUBMISSION_LEVEL
+
+				// add tenantId and orgId
+				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
+					solutionData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+					solutionData['orgId'] = userDetails.tenantAndOrgInfo.orgId
+				} else {
+					let orgIds = []
+					solutionData['tenantId'] = userDetails.userInformation.tenantId
+					orgIds.push(userDetails.userInformation.organizationId)
+					solutionData['orgId'] = orgIds
+				}
+
 				let solutionCreation = await solutionsQueries.createSolution(_.omit(solutionData, ['scope']))
 
 				if (!solutionCreation._id) {
@@ -464,14 +490,12 @@ module.exports = class SolutionsHelper {
 					}
 				}
 
-				let updateProgram = await programQueries.findAndUpdate(
-					{
-						_id: solutionData.programId,
-					},
-					{
-						$addToSet: { components: solutionCreation._id },
-					}
-				)
+				delete programMatchQuery.externalId
+				programMatchQuery['_id'] = solutionData.programId
+
+				let updateProgram = await programQueries.findAndUpdate(programMatchQuery, {
+					$addToSet: { components: solutionCreation._id },
+				})
 
 				if (!solutionData.excludeScope && programData[0].scope) {
 					await this.setScope(solutionCreation._id, solutionData.scope ? solutionData.scope : {})
@@ -498,14 +522,21 @@ module.exports = class SolutionsHelper {
 	 * @name update
 	 * @param {String} solutionId - solution id.
 	 * @param {Object} solutionData - solution creation data.
+	 * @param {Object} userDetails - user related info
 	 * @returns {JSON} solution creation data.
 	 */
 
-	static update(solutionId, solutionData, userId, checkDate = false) {
+	static update(solutionId, solutionData, userDetails, checkDate = false) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let queryObject = {
 					_id: solutionId,
+				}
+				// modify the query object to fetch relevant data
+				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
+					queryObject['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+				} else {
+					queryObject['tenantId'] = userDetails.userInformation.tenantId
 				}
 
 				let solutionDocument = await solutionsQueries.solutionsDocument(queryObject, ['_id', 'programId'])
@@ -561,13 +592,16 @@ module.exports = class SolutionsHelper {
 					}
 				}
 
+				// prevent adding manupulative data
+				delete solutionData.tenantId
+				delete solutionData.orgId
+
 				let solutionUpdateData = solutionData
 
 				Object.keys(_.omit(solutionUpdateData, ['scope'])).forEach((updationData) => {
 					updateObject['$set'][updationData] = solutionUpdateData[updationData]
 				})
-
-				updateObject['$set']['updatedBy'] = userId
+				updateObject['$set']['updatedBy'] = userDetails.userInformation.userId
 				let solutionUpdatedData = await solutionsQueries.updateSolutionDocument(
 					{
 						_id: solutionDocument[0]._id,
@@ -621,15 +655,41 @@ module.exports = class SolutionsHelper {
 	 * @param {Number} pageSize - page size.
 	 * @param {String} searchText - search text.
 	 * @param {Object} filter - Filtered data.
+	 * @param {Object} userDetails - user related info
+	 * @param {Boolean} currentOrgOnly
 	 * @returns {JSON} List of solutions.
 	 */
 
-	static list(type, subType, filter = {}, pageNo, pageSize, searchText, projection = []) {
+	static list(
+		type,
+		subType,
+		filter = {},
+		pageNo,
+		pageSize,
+		searchText,
+		projection = [],
+		userDetails,
+		currentOrgOnly = false
+	) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let matchQuery = {
 					isDeleted: false,
 				}
+				currentOrgOnly = UTILS.convertStringToBoolean(currentOrgOnly)
+
+				// modify query to fetch documents accordingly
+				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
+					matchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+					matchQuery['orgId'] = { $in: userDetails.tenantAndOrgInfo.orgId }
+				} else {
+					matchQuery['tenantId'] = userDetails.userInformation.tenantId
+				}
+
+				if (currentOrgOnly) {
+					matchQuery['orgId'] = { $in: [userDetails.userInformation.organizationId] }
+				}
+
 				// if (type == CONSTANTS.common.SURVEY) {
 				//   matchQuery["status"] = {
 				//     $in: [CONSTANTS.common.ACTIVE_STATUS, CONSTANTS.common.INACTIVE],
@@ -745,12 +805,24 @@ module.exports = class SolutionsHelper {
 	 * @param {String} pageSize - Page size.
 	 * @param {String} pageNo - Page no.
 	 * @param {String} searchText - search text.
+	 * @param {Object} userDetails - user related info
 	 * @returns {JSON} - List of solutions based on role and location.
 	 */
 
-	static forUserRoleAndLocation(bodyData, type, subType = '', programId, pageSize, pageNo, searchText = '') {
+	static forUserRoleAndLocation(
+		bodyData,
+		type,
+		subType = '',
+		programId,
+		pageSize,
+		pageNo,
+		searchText = '',
+		userDetails,
+		currentOrgOnly = false
+	) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				currentOrgOnly = UTILS.convertStringToBoolean(currentOrgOnly)
 				let queryData = await this.queryBasedOnRoleAndLocation(bodyData, type)
 				if (!queryData.success) {
 					return resolve(queryData)
@@ -805,26 +877,35 @@ module.exports = class SolutionsHelper {
 				if (programId !== '') {
 					matchQuery['programId'] = ObjectId(programId)
 				}
-
 				matchQuery['startDate'] = { $lte: new Date() }
 				// for survey type solutions even after expiry it should be visible to user for 15 days
-				let targetedSolutions = await this.list(type, subType, matchQuery, pageNo, pageSize, searchText, [
-					'name',
-					'description',
-					'programName',
-					'programId',
-					'externalId',
-					'projectTemplateId',
-					'type',
-					'language',
-					'creator',
-					'endDate',
-					'link',
-					'referenceFrom',
-					'entityType',
-					'certificateTemplateId',
-					'metaInformation',
-				])
+				let targetedSolutions = await this.list(
+					type,
+					subType,
+					matchQuery,
+					pageNo,
+					pageSize,
+					searchText,
+					[
+						'name',
+						'description',
+						'programName',
+						'programId',
+						'externalId',
+						'projectTemplateId',
+						'type',
+						'language',
+						'creator',
+						'endDate',
+						'link',
+						'referenceFrom',
+						'entityType',
+						'certificateTemplateId',
+						'metaInformation',
+					],
+					userDetails,
+					currentOrgOnly
+				)
 				return resolve({
 					success: true,
 					message: CONSTANTS.apiResponses.TARGETED_SOLUTIONS_FETCHED,
@@ -1695,21 +1776,31 @@ module.exports = class SolutionsHelper {
 	 * @method
 	 * @name fetchLink
 	 * @param {String} solutionId - solution Id.
-	 * @param {String} userId - user Id.
+	 * @param {String} userDetails - user related info.
 	 * @returns {Object} - Details of the solution.
 	 */
 
-	static fetchLink(solutionId, userId) {
+	static fetchLink(solutionId, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let solutionData = await solutionsQueries.solutionsDocument(
-					{
-						_id: solutionId,
-						isReusable: false,
-						isAPrivateProgram: false,
-					},
-					['link', 'type', 'author']
-				)
+				// build solution match query
+				let solutionMatchQuery = {
+					_id: solutionId,
+					isReusable: false,
+					isAPrivateProgram: false,
+				}
+
+				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
+					solutionMatchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+				} else {
+					solutionMatchQuery['tenantId'] = userDetails.userInformation.tenantId
+				}
+
+				let solutionData = await solutionsQueries.solutionsDocument(solutionMatchQuery, [
+					'link',
+					'type',
+					'author',
+				])
 
 				if (!Array.isArray(solutionData) || solutionData.length < 1) {
 					return resolve({
@@ -1725,7 +1816,18 @@ module.exports = class SolutionsHelper {
 				if (!solutionData[0].link) {
 					let updateLink = await UTILS.md5Hash(solutionData[0]._id + '###' + solutionData[0].author)
 
-					let updateSolution = await this.update(solutionId, { link: updateLink }, userId)
+					let updateSolution = await this.update(solutionId, { link: updateLink }, userDetails)
+
+					if (
+						!updateSolution.success ||
+						!updateSolution.data ||
+						!(Object.keys(updateSolution.data).length > 0)
+					) {
+						throw {
+							status: HTTP_STATUS_CODE.bad_request.status,
+							message: CONSTANTS.apiResponses.LINK_GENERATION_FAILED,
+						}
+					}
 
 					solutionLink = updateLink
 				} else {
@@ -1757,7 +1859,7 @@ module.exports = class SolutionsHelper {
 	 * @returns {Object} - Details of the solution.
 	 */
 
-	static verifySolutionDetails(link = '', userId = '', userToken = '') {
+	static verifySolutionDetails(link = '', userId = '', userToken = '', userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let response = {
@@ -1772,6 +1874,14 @@ module.exports = class SolutionsHelper {
 					throw new Error(CONSTANTS.apiResponses.USER_ID_REQUIRED_CHECK)
 				}
 
+				let tenantId
+
+				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
+					tenantId = userDetails.tenantAndOrgInfo.tenantId
+				} else {
+					tenantId = userDetails.userInformation.tenantId
+				}
+
 				let solutionData = await solutionsQueries.solutionsDocument(
 					{
 						link: link,
@@ -1779,6 +1889,7 @@ module.exports = class SolutionsHelper {
 						status: {
 							$ne: CONSTANTS.common.INACTIVE,
 						},
+						tenantId: tenantId,
 					},
 					['type', 'status', 'endDate']
 				)
@@ -1794,6 +1905,7 @@ module.exports = class SolutionsHelper {
 					return resolve({
 						message: CONSTANTS.apiResponses.LINK_IS_EXPIRED,
 						result: [],
+						syuccess: false,
 					})
 				}
 
@@ -2401,9 +2513,19 @@ module.exports = class SolutionsHelper {
 	 * @returns {Object} List of library projects.
 	 */
 
-	static projects(query, searchQuery, fieldsArray, pageNo, pageSize, groupBy = '') {
+	static projects(
+		query,
+		searchQuery,
+		fieldsArray,
+		pageNo,
+		pageSize,
+		groupBy = '',
+		userDetails,
+		currentOrgOnly = false
+	) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				currentOrgOnly = UTILS.convertStringToBoolean(currentOrgOnly)
 				let matchQuery = {
 					$match: query,
 				}
@@ -2415,6 +2537,19 @@ module.exports = class SolutionsHelper {
 							{ $or: searchQuery }, // Then apply the search conditions
 						],
 					}
+				}
+
+				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
+					matchQuery['$match']['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+					matchQuery['$match']['orgId'] = { $in: userDetails.tenantAndOrgInfo.orgId }
+				} else {
+					matchQuery['$match']['tenantId'] = userDetails.userInformation.tenantId
+					matchQuery['$match']['orgId'] = { $in: [userDetails.userInformation.organizationId] }
+				}
+
+				if (currentOrgOnly) {
+					let organizationId = userDetails.userInformation.organizationId
+					matchQuery['$match']['orgId'] = { $in: [organizationId] }
 				}
 
 				let projection = {}
@@ -2533,9 +2668,10 @@ module.exports = class SolutionsHelper {
 	 * @returns {Object}
 	 */
 
-	static assignedProjects(userId, search, filter, pageNo, pageSize, bodyData) {
+	static assignedProjects(userId, search, filter, pageNo, pageSize, bodyData, userDetails, currentOrgOnly = false) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				currentOrgOnly = UTILS.convertStringToBoolean(currentOrgOnly)
 				let searchQuery = []
 				let query
 
@@ -2575,7 +2711,10 @@ module.exports = class SolutionsHelper {
 						'certificate',
 					],
 					pageNo,
-					pageSize
+					pageSize,
+					'',
+					userDetails,
+					currentOrgOnly
 				)
 
 				let totalCount = 0
@@ -2680,9 +2819,20 @@ module.exports = class SolutionsHelper {
 	 * @returns {Object} - Details of the solution.
 	 */
 
-	static assignedUserSolutions(solutionType, userId, search, filter, pageNo, pageSize, bodyData) {
+	static assignedUserSolutions(
+		solutionType,
+		userId,
+		search,
+		filter,
+		pageNo,
+		pageSize,
+		bodyData,
+		userDetails,
+		currentOrgOnly = false
+	) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				currentOrgOnly = UTILS.convertStringToBoolean(currentOrgOnly)
 				let userAssignedSolutions = {}
 				if (solutionType === CONSTANTS.common.IMPROVEMENT_PROJECT) {
 					userAssignedSolutions = await this.assignedProjects(
@@ -2691,7 +2841,9 @@ module.exports = class SolutionsHelper {
 						filter,
 						pageNo,
 						pageSize,
-						bodyData
+						bodyData,
+						userDetails,
+						currentOrgOnly
 					)
 				} else {
 					throw {
@@ -2735,7 +2887,8 @@ module.exports = class SolutionsHelper {
 		search = '',
 		filter,
 		surveyReportPage = '',
-		currentScopeOnly = false
+		currentScopeOnly = false,
+		userDetails
 	) {
 		return new Promise(async (resolve, reject) => {
 			try {
@@ -2766,7 +2919,6 @@ module.exports = class SolutionsHelper {
 				}
 
 				let copiedRequestedData = _.cloneDeep(requestedData)
-
 				// Fetch all the targeted solutions
 				if (getTargetedSolution) {
 					targetedSolutions = await this.forUserRoleAndLocation(
@@ -2776,7 +2928,9 @@ module.exports = class SolutionsHelper {
 						'',
 						'',
 						'',
-						search
+						search,
+						userDetails,
+						true // to fetch current org assets only
 					)
 				}
 
@@ -2788,7 +2942,9 @@ module.exports = class SolutionsHelper {
 					filter,
 					'',
 					'',
-					requestedData
+					requestedData,
+					userDetails,
+					true // to fetch current org assets only
 				)
 				if (!userCreatedProjects.success) {
 					throw {
@@ -2979,7 +3135,6 @@ module.exports = class SolutionsHelper {
 					},
 					['_id', 'programId', 'programName']
 				)
-
 				if (!privateSolutionDetails.length > 0) {
 					// Data for program and solution creation
 					let programAndSolutionData = {
@@ -3000,7 +3155,6 @@ module.exports = class SolutionsHelper {
 						userToken,
 						true // create duplicate solution
 					)
-
 					if (!solutionAndProgramCreation.success) {
 						throw {
 							status: HTTP_STATUS_CODE.bad_request.status,
@@ -3040,10 +3194,16 @@ module.exports = class SolutionsHelper {
 	 * @returns {Object} - Details of the solution.
 	 */
 
-	static verifyLink(link = '', bodyData = {}, userId = '', userToken = '', createProject = true) {
+	static verifyLink(link = '', bodyData = {}, userId = '', userToken = '', createProject = true, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let verifySolution = await this.verifySolutionDetails(link, userId, userToken)
+				let verifySolution = await this.verifySolutionDetails(link, userId, userToken, userDetails)
+				if (!verifySolution.success) {
+					throw {
+						satus: HTTP_STATUS_CODE.bad_request.status,
+						message: verifySolution.message ? verifySolution.message : CONSTANTS.apiResponses.INVALID_LINK,
+					}
+				}
 				let checkForTargetedSolution = await this.checkForTargetedSolution(link, bodyData)
 				if (!checkForTargetedSolution || Object.keys(checkForTargetedSolution.result).length <= 0) {
 					return resolve(checkForTargetedSolution)
@@ -3237,16 +3397,26 @@ module.exports = class SolutionsHelper {
 	 * @method
 	 * @name details
 	 * @param {String} solutionId - Solution Id.
+	 * @param {Object} userDetails - user related info
 	 * @returns {Object} - Details of the solution.
 	 */
 
-	static getDetails(solutionId) {
+	static getDetails(solutionId, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let solutionData = await solutionsQueries.solutionsDocument({
+				// build solution match query
+				let solutionMatchQuery = {
 					_id: solutionId,
 					isDeleted: false,
-				})
+				}
+
+				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
+					solutionMatchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+				} else {
+					solutionMatchQuery['tenantId'] = userDetails.userInformation.tenantId
+				}
+
+				let solutionData = await solutionsQueries.solutionsDocument(solutionMatchQuery)
 
 				if (!solutionData.length > 0) {
 					return resolve({

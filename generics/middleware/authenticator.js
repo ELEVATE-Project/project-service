@@ -67,8 +67,29 @@ module.exports = async function (req, res, next, token = '') {
 		return
 	}
 
-	let internalAccessApiPaths = ['/templates/bulkCreate', '/projectAttributes/update', '/scp/publishTemplateAndTasks']
+	let internalAccessApiPaths = [
+		'/templates/bulkCreate',
+		'/projectAttributes/update',
+		'/scp/publishTemplateAndTasks',
+		'/library/categories/create',
+		'/library/categories/update',
+		'/programs/create',
+		'/programs/update',
+		'/admin/createIndex',
+		'/solutions/create',
+		'/solutions/update',
+		'/forms/create',
+		'/forms/update',
+		'/templateTasks/bulkCreate',
+		'/certificateBaseTemplates/create',
+		'/certificateBaseTemplates/update',
+	]
 	let performInternalAccessTokenCheck = false
+	let adminHeader = false
+	if (process.env.ADMIN_ACCESS_TOKEN) {
+		adminHeader = req.headers[process.env.ADMIN_TOKEN_HEADER_NAME]
+	}
+
 	await Promise.all(
 		internalAccessApiPaths.map(async function (path) {
 			if (req.path.includes(path)) {
@@ -110,7 +131,6 @@ module.exports = async function (req, res, next, token = '') {
 	} else {
 		token = token?.trim()
 	}
-
 	rspObj.errCode = CONSTANTS.apiResponses.TOKEN_INVALID_CODE
 	rspObj.errMsg = CONSTANTS.apiResponses.TOKEN_INVALID_MESSAGE
 	rspObj.responseCode = HTTP_STATUS_CODE['unauthorized'].status
@@ -187,6 +207,29 @@ module.exports = async function (req, res, next, token = '') {
 			decodedToken = decodedToken || {}
 			decodedToken['data'] = data
 		}
+
+		if (adminHeader) {
+			if (adminHeader != process.env.ADMIN_ACCESS_TOKEN) {
+				return res.status(HTTP_STATUS_CODE['unauthorized'].status).send(respUtil(rspObj))
+			}
+			if (
+				!req.headers['tenantid'] ||
+				!req.headers['orgid'] ||
+				!req.headers['tenantid'].length ||
+				!req.headers['orgid'].length
+			) {
+				rspObj.errCode = CONSTANTS.apiResponses.INVALID_TENANT_AND_ORG_CODE
+				rspObj.errMsg = CONSTANTS.apiResponses.INVALID_TENANT_AND_ORG_MESSAGE
+				rspObj.responseCode = HTTP_STATUS_CODE['unauthorized'].status
+				return res.status(HTTP_STATUS_CODE['unauthorized'].status).send(respUtil(rspObj))
+			}
+			decodedToken.data['tenantAndOrgInfo'] = {}
+
+			decodedToken.data.tenantAndOrgInfo['tenantId'] = req.get('tenantid').toString()
+
+			decodedToken.data.tenantAndOrgInfo['orgId'] = req.get('orgid').split(',')
+			decodedToken.data.roles.push({ title: CONSTANTS.common.ADMIN_ROLE })
+		}
 	} catch (err) {
 		rspObj.errCode = CONSTANTS.apiResponses.TOKEN_MISSING_CODE
 		rspObj.errMsg = CONSTANTS.apiResponses.TOKEN_MISSING_MESSAGE
@@ -242,8 +285,10 @@ module.exports = async function (req, res, next, token = '') {
 		userInformation = {
 			userId: typeof decodedToken.data.id == 'string' ? decodedToken.data.id : decodedToken.data.id.toString(),
 			userName: decodedToken.data.name,
-			organizationId: decodedToken.data.organization_id ? decodedToken.data.organization_id : null,
+			organizationId: decodedToken.data.organization_id ? decodedToken.data.organization_id.toString() : null,
 			firstName: decodedToken.data.name,
+			roles: decodedToken.data.roles.map((role) => role.title),
+			tenantId: decodedToken.data.tenant_id.toString(),
 		}
 	} else {
 		// Iterate through each key in the config object
@@ -260,7 +305,9 @@ module.exports = async function (req, res, next, token = '') {
 	}
 	// Update user details object
 	req.userDetails.userInformation = userInformation
-
+	if (decodedToken.data.tenantAndOrgInfo) {
+		req.userDetails.tenantAndOrgInfo = decodedToken.data.tenantAndOrgInfo
+	}
 	// Helper function to access nested properties
 	function getNestedValue(obj, path) {
 		return path.split('.').reduce((acc, part) => acc && acc[part], obj)

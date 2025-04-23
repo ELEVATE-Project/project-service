@@ -23,6 +23,7 @@ module.exports = {
 	STARTED: 'started',
 	SUBMITTED_STATUS: 'submitted',
 	OBSERVATION: 'observation',
+	SURVEY: 'survey',
 	PUBLISHED_STATUS: 'published',
 	LEAD_ASSESSOR: 'LEAD_ASSESSOR',
 	PROJECT_DESCRIPTION:

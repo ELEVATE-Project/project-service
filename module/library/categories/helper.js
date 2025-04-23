@@ -167,6 +167,8 @@ module.exports = class LibraryCategoriesHelper {
 							let userRoleInformation = await entitiesService.getUserRoleExtensionDocuments(
 								{
 									code: { $in: roles },
+									tenantId: userDetails.userInformation.tenantId,
+									orgId: { $in: [userDetails.userInformation.organizationId] },
 								},
 								['title']
 							)

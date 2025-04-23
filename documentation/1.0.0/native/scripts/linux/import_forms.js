@@ -55,30 +55,49 @@ async function fetchAndInsertProjectData() {
 }
 
 async function fetchAndInsertSCPData() {
+	const client = new Client({
+		connectionString: 'postgres://postgres:postgres@localhost:9700/scp',
+	})
+
 	try {
+		await client.connect()
+		console.log('Connected to PostgreSQL database')
+
 		const response = await axios.get(
 			'https://raw.githubusercontent.com/ELEVATE-Project/self-creation-portal/refs/heads/sprint-5/forms.json'
 		)
 		const forms = response.data
 
 		for (const form of forms) {
-			// Pull values from JSON, set defaults
 			const { type, sub_type, data } = form
 
-			// Insert with raw SQL
-			const query = `
-				INSERT INTO forms (type, sub_type, data, organization_id, version)
-				VALUES ($1, $2, $3, $4, $5, $6, $7)
-			`
+			try {
+				const query = `
+          INSERT INTO forms (type, sub_type, data, organization_id, version, created_at, updated_at)
+          VALUES ($1, $2, $3, $4, $5, $6, $7)
+          RETURNING id;
+        `
+				const values = [
+					type,
+					sub_type,
+					JSON.stringify(data),
+					1, // organization_id
+					0, // version
+					new Date().toISOString(), // created_at
+					new Date().toISOString(), // updated_at
+				]
 
-			const values = [type, sub_type, data, 1, 0]
-			await client.query(query, values)
+				const result = await client.query(query, values)
+				console.log(`Inserted form ${type} with ID:`, result.rows[0].id)
+			} catch (insertError) {
+				console.error('Error inserting form:', insertError.message)
+			}
 		}
-		console.log('Data inserted successfully')
 	} catch (error) {
-		console.error('Error fetching or inserting data:', error)
+		console.error('Error in fetchAndInsertSCPData:', error.message)
 	} finally {
-		mongoose.connection.close()
+		await client.end()
+		console.log('Disconnected from PostgreSQL database')
 	}
 }
 

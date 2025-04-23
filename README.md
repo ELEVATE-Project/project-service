@@ -616,7 +616,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         git clone -b master https://github.com/ELEVATE-Project/scheduler.git && \
         git clone -b staging https://github.com/ELEVATE-Project/survey-project-creation-service && \
         git clone -b main https://github.com/ELEVATE-Project/observation-survey-projects-pwa && \
-        git clone -b staging https://github.com/ELEVATE-Project/self-creation-portal
+        git clone -b sprint-5 https://github.com/ELEVATE-Project/self-creation-portal
         ```
 
     -   **Windows**
@@ -710,7 +710,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         curl -L -o observation-survey-projects-pwa\src\environments\environment.ts https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/enviroment.ts
         ```
 
-    > **Note:** Modify the environment files as necessary for your deployment using any text editor, ensuring that the values are appropriate for your environment. The default values provided in the current files are functional and serve as a good starting point. Refer to the sample env files provided at the [Project](https://github.com/ELEVATE-Project/project-service/blob/main/.env.sample), [User](https://github.com/ELEVATE-Project/user/blob/master/src/.env.sample), [Notification](https://github.com/ELEVATE-Project/notification/blob/master/src/.env.sample), [Scheduler](https://github.com/ELEVATE-Project/scheduler/blob/master/src/.env.sample), [Interface](https://github.com/ELEVATE-Project/interface-service/blob/main/src/.env.sample), [Entity-Management](https://github.com/ELEVATE-Project/entity-management/blob/main/src/.env.sample) and [Survey-Project-Creation-Service(https://github.com/ELEVATE-Project/survey-project-creation-service/blob/staging/src/.env.sample)]repositories for reference.
+    > **Note:** Modify the environment files as necessary for your deployment using any text editor, ensuring that the values are appropriate for your environment. The default values provided in the current files are functional and serve as a good starting point. Refer to the sample env files provided at the [Project](https://github.com/ELEVATE-Project/project-service/blob/main/.env.sample), [User](https://github.com/ELEVATE-Project/user/blob/master/src/.env.sample), [Notification](https://github.com/ELEVATE-Project/notification/blob/master/src/.env.sample), [Scheduler](https://github.com/ELEVATE-Project/scheduler/blob/master/src/.env.sample), [Interface](https://github.com/ELEVATE-Project/interface-service/blob/main/src/.env.sample), [Entity-Management](https://github.com/ELEVATE-Project/entity-management/blob/main/src/.env.sample) and [Survey-Project-Creation-Service](https://github.com/ELEVATE-Project/survey-project-creation-service/blob/staging/src/.env.sample)repositories for reference.
 
     > **Caution:** While the default values in the downloaded environment files enable the ELEVATE-Project Application to operate, certain features may not function correctly or could be impaired unless the adopter-specific environment variables are properly configured.
 

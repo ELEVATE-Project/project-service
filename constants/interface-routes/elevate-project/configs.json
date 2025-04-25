@@ -3366,8 +3366,8 @@
 			"orchestrated": false,
 			"targetPackages": [
 				{
-					"basePackageName": "entity",
-					"packageName": "elevate-entity-management"
+					"basePackageName": "project",
+					"packageName": "elevate-project"
 				}
 			]
 		},
@@ -3379,8 +3379,8 @@
 			"orchestrated": false,
 			"targetPackages": [
 				{
-					"basePackageName": "entity",
-					"packageName": "elevate-entity-management"
+					"basePackageName": "project",
+					"packageName": "elevate-project"
 				}
 			]
 		},

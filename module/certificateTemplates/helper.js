@@ -28,13 +28,8 @@ module.exports = class CertificateTemplatesHelper {
 	static create(data, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
-					data['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-					data['orgId'] = userDetails.tenantAndOrgInfo.tenantId
-				} else {
-					data['tenantId'] = userDetails.userInformation.tenantId
-					data['orgId'] = [userDetails.userInformation.organizationId]
-				}
+				data['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+				data['orgId'] = userDetails.tenantAndOrgInfo.tenantId
 				let certificateTemplateCreated = await certificateTemplateQueries.createCertificateTemplate(data)
 				return resolve({
 					message: CONSTANTS.apiResponses.CERTIFICATE_TEMPLATE_ADDED,
@@ -86,12 +81,7 @@ module.exports = class CertificateTemplatesHelper {
 					$set: data,
 				}
 
-				let tenantId
-				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
-					tenantId = userDetails.tenantAndOrgInfo.tenantId
-				} else {
-					tenantId = userDetails.userInformation.tenantId
-				}
+				let tenantId = userDetails.tenantAndOrgInfo.tenantId
 
 				// Call the updateCertificateTemplate method of certificateTemplateQueries to update the database
 				let certificateTemplateUpdated = await certificateTemplateQueries.updateCertificateTemplate(
@@ -132,7 +122,7 @@ module.exports = class CertificateTemplatesHelper {
 	 * @returns {JSON} Uploaded certificate template details.
 	 */
 
-	static uploadToCloud(fileData, templateId, userId = '', updateTemplate = false) {
+	static uploadToCloud(fileData, templateId, userId = '', updateTemplate = false, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Normalize the updateTemplate flag
@@ -201,9 +191,13 @@ module.exports = class CertificateTemplatesHelper {
 						let updateCertificateTemplate = {}
 						if (updateTemplate == true) {
 							// Update the certificate template URL in the certificateTemplates collection
-							updateCertificateTemplate = await this.update(templateId, {
-								templateUrl: signedUrl.data[uniqueId].files[0].payload.sourcePath,
-							})
+							updateCertificateTemplate = await this.update(
+								templateId,
+								{
+									templateUrl: signedUrl.data[uniqueId].files[0].payload.sourcePath,
+								},
+								userDetails
+							)
 							return resolve({
 								success: true,
 								data: {
@@ -242,12 +236,14 @@ module.exports = class CertificateTemplatesHelper {
 	 * @param {String} baseTemplateId - Base template Id.
 	 * @returns {JSON} Uploaded certificate template details.
 	 */
-	static createSvg(files, textData, baseTemplateId) {
+	static createSvg(files, textData, baseTemplateId, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				let tenantId = userDetails.tenantAndOrgInfo.tenantId
 				let baseTemplateData = await certificateBaseTemplateQueries.findDocument(
 					{
 						_id: baseTemplateId,
+						tenantId: tenantId,
 					},
 					['url']
 				)
@@ -308,7 +304,7 @@ module.exports = class CertificateTemplatesHelper {
 					},
 				}
 				// upload new svg created from base template to cloud
-				const uploadTemplate = await this.uploadToCloud(fileData, 'BASE_TEMPLATE', '', false)
+				const uploadTemplate = await this.uploadToCloud(fileData, 'BASE_TEMPLATE', '', false, userDetails)
 				if (!uploadTemplate.success) {
 					throw {
 						message: CONSTANTS.apiResponses.COULD_NOT_UPLOAD_CONTENT,

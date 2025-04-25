@@ -247,15 +247,8 @@ module.exports = class ProgramsHelper {
 				})
 
 				// add tenantId and orgId
-				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
-					programData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-					programData['orgId'] = userDetails.tenantAndOrgInfo.orgId
-				} else {
-					let orgIds = []
-					programData['tenantId'] = userDetails.userInformation.tenantId
-					orgIds.push(userDetails.userInformation.organizationId)
-					programData['orgId'] = orgIds
-				}
+				programData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+				programData['orgId'] = userDetails.tenantAndOrgInfo.orgId
 
 				programData = _.omit(programData, ['scope', 'userId'])
 				let program = await programsQueries.createProgram(programData)
@@ -324,11 +317,7 @@ module.exports = class ProgramsHelper {
 
 				let programMatchQuery = {}
 				programMatchQuery['_id'] = programId
-				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
-					programMatchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-				} else {
-					programMatchQuery['tenantId'] = userDetails.userInformation.tenantId
-				}
+				programMatchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
 				let program = await programsQueries.findAndUpdate(
 					programMatchQuery,
 					{ $set: _.omit(data, ['scope']) },
@@ -959,13 +948,13 @@ module.exports = class ProgramsHelper {
 					)
 				}
 
-				// modify query to fetch documents based on tenantId and orgId
-				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
-					matchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-					matchQuery['orgId'] = { $in: userDetails.tenantAndOrgInfo.orgId }
-				} else {
-					matchQuery['tenantId'] = userDetails.userInformation.tenantId
-				}
+				// modify query to fetch documents
+				matchQuery['tenantId'] = userDetails.tenantAndOrgInfo
+					? userDetails.tenantAndOrgInfo.tenantId
+					: userDetails.userInformation.tenantId
+				matchQuery['orgId'] = userDetails.tenantAndOrgInfo
+					? { $in: userDetails.tenantAndOrgInfo.orgId }
+					: { $in: [userDetails.userInformation.organizationId] }
 
 				// handle currentOrgOnly filter
 				if (currentOrgOnly) {

@@ -373,11 +373,7 @@ module.exports = class SolutionsHelper {
 				delete solutionData.orgId
 
 				let programMatchQuery = {}
-				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
-					programMatchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-				} else {
-					programMatchQuery['tenantId'] = userDetails.userInformation.tenantId
-				}
+				programMatchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
 
 				programMatchQuery['externalId'] = solutionData.programExternalId
 				let programData = await programQueries.programsDocument(programMatchQuery, [
@@ -472,15 +468,8 @@ module.exports = class SolutionsHelper {
 				solutionData['submissionLevel'] = process.env.SUBMISSION_LEVEL
 
 				// add tenantId and orgId
-				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
-					solutionData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-					solutionData['orgId'] = userDetails.tenantAndOrgInfo.orgId
-				} else {
-					let orgIds = []
-					solutionData['tenantId'] = userDetails.userInformation.tenantId
-					orgIds.push(userDetails.userInformation.organizationId)
-					solutionData['orgId'] = orgIds
-				}
+				solutionData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+				solutionData['orgId'] = userDetails.tenantAndOrgInfo.orgId
 
 				let solutionCreation = await solutionsQueries.createSolution(_.omit(solutionData, ['scope']))
 
@@ -533,11 +522,7 @@ module.exports = class SolutionsHelper {
 					_id: solutionId,
 				}
 				// modify the query object to fetch relevant data
-				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
-					queryObject['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-				} else {
-					queryObject['tenantId'] = userDetails.userInformation.tenantId
-				}
+				queryObject['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
 
 				let solutionDocument = await solutionsQueries.solutionsDocument(queryObject, ['_id', 'programId'])
 
@@ -679,12 +664,12 @@ module.exports = class SolutionsHelper {
 				currentOrgOnly = UTILS.convertStringToBoolean(currentOrgOnly)
 
 				// modify query to fetch documents accordingly
-				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
-					matchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-					matchQuery['orgId'] = { $in: userDetails.tenantAndOrgInfo.orgId }
-				} else {
-					matchQuery['tenantId'] = userDetails.userInformation.tenantId
-				}
+				matchQuery['tenantId'] = userDetails.tenantAndOrgInfo
+					? userDetails.tenantAndOrgInfo.tenantId
+					: userDetails.userInformation.tenantId
+				matchQuery['orgId'] = userDetails.tenantAndOrgInfo
+					? { $in: userDetails.tenantAndOrgInfo.orgId }
+					: { $in: [userDetails.userInformation.organizationId] }
 
 				if (currentOrgOnly) {
 					matchQuery['orgId'] = { $in: [userDetails.userInformation.organizationId] }
@@ -1790,11 +1775,9 @@ module.exports = class SolutionsHelper {
 					isAPrivateProgram: false,
 				}
 
-				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
-					solutionMatchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-				} else {
-					solutionMatchQuery['tenantId'] = userDetails.userInformation.tenantId
-				}
+				solutionMatchQuery['tenantId'] = userDetails.tenantAndOrgInfo
+					? userDetails.tenantAndOrgInfo.tenantId
+					: userDetails.userInformation.tenantId
 
 				let solutionData = await solutionsQueries.solutionsDocument(solutionMatchQuery, [
 					'link',
@@ -1874,13 +1857,9 @@ module.exports = class SolutionsHelper {
 					throw new Error(CONSTANTS.apiResponses.USER_ID_REQUIRED_CHECK)
 				}
 
-				let tenantId
-
-				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
-					tenantId = userDetails.tenantAndOrgInfo.tenantId
-				} else {
-					tenantId = userDetails.userInformation.tenantId
-				}
+				let tenantId = userDetails.tenantAndOrgInfo
+					? userDetails.tenantAndOrgInfo.tenantId
+					: userDetails.userInformation.tenantId
 
 				let solutionData = await solutionsQueries.solutionsDocument(
 					{
@@ -2539,13 +2518,12 @@ module.exports = class SolutionsHelper {
 					}
 				}
 
-				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
-					matchQuery['$match']['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-					matchQuery['$match']['orgId'] = { $in: userDetails.tenantAndOrgInfo.orgId }
-				} else {
-					matchQuery['$match']['tenantId'] = userDetails.userInformation.tenantId
-					matchQuery['$match']['orgId'] = { $in: [userDetails.userInformation.organizationId] }
-				}
+				matchQuery['$match']['tenantId'] = userDetails.tenantAndOrgInfo
+					? userDetails.tenantAndOrgInfo.tenantId
+					: userDetails.userInformation.tenantId
+				matchQuery['$match']['orgId'] = userDetails.tenantAndOrgInfo
+					? { $in: userDetails.tenantAndOrgInfo.orgId }
+					: { $in: [userDetails.userInformation.organizationId] }
 
 				if (currentOrgOnly) {
 					let organizationId = userDetails.userInformation.organizationId
@@ -3410,11 +3388,9 @@ module.exports = class SolutionsHelper {
 					isDeleted: false,
 				}
 
-				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
-					solutionMatchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-				} else {
-					solutionMatchQuery['tenantId'] = userDetails.userInformation.tenantId
-				}
+				solutionMatchQuery['tenantId'] = userDetails.tenantAndOrgInfo
+					? userDetails.tenantAndOrgInfo.tenantId
+					: userDetails.userInformation.tenantId
 
 				let solutionData = await solutionsQueries.solutionsDocument(solutionMatchQuery)
 

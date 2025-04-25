@@ -38,16 +38,12 @@ module.exports = class CertificateBaseTemplatesHelper {
 				}
 				// Add the uploaded file URL to the data object
 				data.url = uploadFile.data.templateUrl
+
+				data['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+				data['orgId'] = userDetails.tenantAndOrgInfo.tenantId
+
 				// Call the create method of certificateBaseTemplateQueries to create a new certificate base template
 				let certificateBaseTemplateCreated = await certificateBaseTemplateQueries.create(data)
-
-				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
-					data['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-					data['orgId'] = userDetails.tenantAndOrgInfo.tenantId
-				} else {
-					data['tenantId'] = userDetails.userInformation.tenantId
-					data['orgId'] = [userDetails.userInformation.organizationId]
-				}
 
 				// Resolve the promise with the created certificate base template details
 				return resolve({
@@ -103,12 +99,8 @@ module.exports = class CertificateBaseTemplatesHelper {
 				let updateObject = {
 					$set: data,
 				}
-				let tenantId
-				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
-					tenantId = userDetails.tenantAndOrgInfo.tenantId
-				} else {
-					tenantId = userDetails.userInformation.tenantId
-				}
+				let tenantId = userDetails.tenantAndOrgInfo.tenantId
+
 				// Call the update method of certificateBaseTemplateQueries to update the database
 				let certificateBaseTemplateUpdated = await certificateBaseTemplateQueries.update(
 					{ _id: baseTemplateId, tenantId: tenantId },

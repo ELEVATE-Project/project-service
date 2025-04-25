@@ -66,13 +66,12 @@ module.exports = class LibraryCategoriesHelper {
 					},
 				}
 
-				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
-					matchQuery['$match']['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-					matchQuery['$match']['orgId'] = { $in: userDetails.tenantAndOrgInfo.orgId }
-				} else {
-					matchQuery['$match']['tenantId'] = userDetails.userInformation.tenantId
-					matchQuery['$match']['orgId'] = { $in: [userDetails.userInformation.organizationId] }
-				}
+				matchQuery['$match']['tenantId'] = userDetails.tenantAndOrgInfo
+					? userDetails.tenantAndOrgInfo.tenantId
+					: userDetails.userInformation.tenantId
+				matchQuery['$match']['orgId'] = userDetails.tenantAndOrgInfo
+					? { $in: userDetails.tenantAndOrgInfo.orgId }
+					: { $in: [userDetails.userInformation.organizationId] }
 
 				if (categoryId && categoryId !== '') {
 					matchQuery['$match']['categories.externalId'] = categoryId
@@ -436,11 +435,8 @@ module.exports = class LibraryCategoriesHelper {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let matchQuery = { _id: filterQuery._id }
-				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
-					matchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-				} else {
-					matchQuery['tenantId'] = userDetails.userInformation.tenantId
-				}
+				matchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+
 				let categoryData = await projectCategoriesQueries.categoryDocuments(matchQuery, 'all')
 				// Throw error if category is not found
 				if (
@@ -474,6 +470,8 @@ module.exports = class LibraryCategoriesHelper {
 				// delete tenantId & orgId attached in req.body to avoid adding manupulative data
 				delete updateData.tenantId
 				delete updateData.orgId
+
+				filterQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
 
 				// Update the category
 				let categoriesUpdated = await projectCategoriesQueries.updateMany(filterQuery, updateData)
@@ -601,11 +599,8 @@ module.exports = class LibraryCategoriesHelper {
 				// Check if the category already exists
 				let filterQuery = {}
 				filterQuery['externalId'] = categoryData.externalId.toString()
-				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
-					filterQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-				} else {
-					filterQuery['tenantId'] = userDetails.userInformation.tenantId
-				}
+				filterQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+
 				const checkIfCategoryExist = await projectCategoriesQueries.categoryDocuments(filterQuery, [
 					'_id',
 					'externalId',
@@ -629,13 +624,8 @@ module.exports = class LibraryCategoriesHelper {
 				categoryData['evidences'] = evidences.data
 
 				// add tenantId and orgId
-				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
-					categoryData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-					categoryData['orgId'] = userDetails.tenantAndOrgInfo.orgId
-				} else {
-					categoryData['tenantId'] = userDetails.userInformation.tenantId
-					categoryData['orgId'] = [userDetails.userInformation.organizationId]
-				}
+				categoryData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+				categoryData['orgId'] = userDetails.tenantAndOrgInfo.orgId
 
 				let projectCategoriesData = await projectCategoriesQueries.create(categoryData)
 
@@ -678,21 +668,20 @@ module.exports = class LibraryCategoriesHelper {
 				let query = {}
 				let userRoles = req.userDetails.userInformation.roles ? req.userDetails.userInformation.roles : []
 
-				// create query to fetch assets as a SUPER_ADMIN
-				if (userRoles.includes(CONSTANTS.common.ADMIN_ROLE)) {
-					tenantId = req.userDetails.tenantAndOrgInfo.tenantId
-					query['orgId'] = { $in: req.userDetails.tenantAndOrgInfo.orgId }
-				}
-				// create query to fetch assets as a normal user
-				else {
-					tenantId = req.userDetails.userInformation.tenantId
-				}
-				query['tenantId'] = tenantId
+				// create query to fetch assets
+				query['tenantId'] = req.userDetails.tenantAndOrgInfo
+					? req.userDetails.tenantAndOrgInfo.tenantId
+					: req.userDetails.userInformation.tenantId
+				query['orgId'] = req.userDetails.tenantAndOrgInfo
+					? { $in: req.userDetails.tenantAndOrgInfo.orgId }
+					: { $in: [req.userDetails.userInformation.organizationId] }
 
 				// handle currentOrgOnly filter
-				if (req.query['currentOrgOnly'] && req.query['currentOrgOnly'] == 'true') {
-					organizationId = req.userDetails.userInformation.organizationId
-					query['orgId'] = { $in: [organizationId] }
+				if (req.query['currentOrgOnly']) {
+					let currentOrgOnly = UTILS.convertStringToBoolean(req.query['currentOrgOnly'])
+					if (currentOrgOnly) {
+						query['orgId'] = { $in: [req.userDetails.userInformation.organizationId] }
+					}
 				}
 				query['status'] = CONSTANTS.common.ACTIVE_STATUS
 				let categoryData = await projectCategoriesQueries.categoryDocuments(query, [

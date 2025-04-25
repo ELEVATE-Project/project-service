@@ -72,19 +72,7 @@ module.exports = class ProjectTemplatesHelper {
 				let categoriesData = {}
 				if (categoryIds.length > 0) {
 					let matchQuery = {}
-					if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
-						if (csvData.tenantId && csvData.tenantId.length) {
-							matchQuery['tenantId'] = csvData.tenantId
-						} else {
-							matchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-						}
-					} else {
-						if (csvData.tenantId && csvData.tenantId.length) {
-							matchQuery['tenantId'] = csvData.tenantId
-						} else {
-							matchQuery['tenantId'] = userDetails.userInformation.tenantId
-						}
-					}
+					matchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
 					matchQuery['externalId'] = { $in: categoryIds }
 					// what is category documents
 					let categories = await projectCategoriesQueries.categoryDocuments(matchQuery, [
@@ -380,19 +368,7 @@ module.exports = class ProjectTemplatesHelper {
 					let currentData = templates[template]
 					// create match query
 					let matchQuery = {}
-					if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
-						if (currentData.tenantId && currentData.tenantId.length > 0) {
-							matchQuery['tenantId'] = currentData.tenantId
-						} else {
-							matchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-						}
-					} else {
-						if (currentData.tenantId && currentData.tenantId.length > 0) {
-							matchQuery['tenantId'] = currentData.tenantId
-						} else {
-							matchQuery['tenantId'] = userDetails.userInformation.tenantId
-						}
-					}
+					matchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
 					matchQuery['status'] = CONSTANTS.common.PUBLISHED
 					matchQuery['externalId'] = currentData.externalId
 					matchQuery['isReusable'] = true
@@ -415,21 +391,8 @@ module.exports = class ProjectTemplatesHelper {
 							templateData.userId =
 								userDetails.userInformation.userId
 						templateData.isReusable = true
-						if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
-							if (!templateData.tenantId || !(templateData.tenantId.length > 0)) {
-								templateData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-							}
-							if (!templateData.orgId || !(templateData.orgId.length > 0)) {
-								templateData['orgId'] = userDetails.tenantAndOrgInfo.orgId
-							}
-						} else {
-							if (!templateData.tenantId || !(templateData.tenantId.length > 0)) {
-								templateData['tenantId'] = userDetails.userInformation.tenantId
-							}
-							if (!templateData.orgId || !(templateData.orgId.length > 0)) {
-								templateData['orgId'] = [userDetails.userInformation.organizationId]
-							}
-						}
+						templateData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+						templateData['orgId'] = userDetails.tenantAndOrgInfo.orgId
 
 						let createdTemplate = await projectTemplateQueries.createTemplate(templateData)
 
@@ -1408,15 +1371,12 @@ module.exports = class ProjectTemplatesHelper {
 				let queryObject = { isReusable: true }
 				currentOrgOnly = UTILS.convertStringToBoolean(currentOrgOnly)
 
-				// create query to fetch assets as a SUPER_ADMIN
-				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
-					queryObject['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-					queryObject['orgId'] = { $in: userDetails.tenantAndOrgInfo.orgId }
-				}
-				// create query to fetch assets as a normal user
-				else {
-					queryObject['tenantId'] = userDetails.userInformation.tenantId
-				}
+				queryObject['tenantId'] = userDetails.tenantAndOrgInfo
+					? userDetails.tenantAndOrgInfo.tenantId
+					: userDetails.userInformation.tenantId
+				queryObject['orgId'] = userDetails.tenantAndOrgInfo
+					? { $in: userDetails.tenantAndOrgInfo.orgId }
+					: { $in: [userDetails.userInformation.organizationId] }
 
 				// handle currentOrgOnly filter
 				if (currentOrgOnly) {

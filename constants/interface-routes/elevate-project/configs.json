@@ -3508,7 +3508,10 @@
 					"packageName": "elevate-project"
 				}
 			],
-			"service": "entity"
+			"service": "entity",
+			"rateLimit": {
+				"type": "public-low"
+			}
 		},
 		{
 			"sourceRoute": "/entity-management/v1/entities/details/:id",

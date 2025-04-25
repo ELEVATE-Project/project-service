@@ -182,7 +182,8 @@ module.exports = class CertificateTemplates extends Abstract {
 						req.files,
 						req.params._id,
 						req.userDetails ? req.userDetails.userInformation.userId : '',
-						req.query.updateTemplate ? req.query.updateTemplate : true
+						req.query.updateTemplate ? req.query.updateTemplate : true,
+						req.userDetails
 					)
 					// Resolve the promise with the uploaded template details
 					return resolve({
@@ -238,7 +239,12 @@ module.exports = class CertificateTemplates extends Abstract {
 	async createSvg(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let svgData = await certificateTemplateHelper.createSvg(req.files, req.body, req.query.baseTemplateId)
+				let svgData = await certificateTemplateHelper.createSvg(
+					req.files,
+					req.body,
+					req.query.baseTemplateId,
+					req.userDetails
+				)
 				return resolve(svgData)
 			} catch (error) {
 				return reject({

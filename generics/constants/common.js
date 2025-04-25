@@ -145,4 +145,6 @@ module.exports = {
 	APP_ELEVATE_PROJECT: 'elevate-project',
 	SYSTEM: 'SYSTEM',
 	ADMIN_ROLE: 'admin',
+	ORG_ADMIN: 'org_admin',
+	TENANT_ADMIN: 'tenant_admin',
 }

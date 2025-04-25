@@ -479,21 +479,8 @@ module.exports = class ProjectTemplateTasksHelper {
 				let checkMandatoryTask = []
 				let subTaskIds = []
 
+				let tenantId = userDetails.tenantAndOrgInfo.tenantId
 				for (let task = 0; task < tasks.length; task++) {
-					let tenantId
-					if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
-						if (tasks[task].tenantId && tasks[task].tenantId.length) {
-							tenantId = tasks[task].tenantId
-						} else {
-							tenantId = userDetails.tenantAndOrgInfo.tenantId
-						}
-					} else {
-						if (tasks[task].tenantId && tasks[task].tenantId.length) {
-							tenantId = tasks[task].tenantId
-						} else {
-							tenantId = userDetails.userInformation.tenantId
-						}
-					}
 					let isTaskValid = await projectTemplateQueries.templateDocument({
 						_id: projectTemplateId,
 						tenantId,
@@ -507,21 +494,9 @@ module.exports = class ProjectTemplateTasksHelper {
 					}
 
 					let currentData = UTILS.valueParser(tasks[task])
-					if (!currentData.tenantId || !(currentData.tenantId.length > 0)) {
-						if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
-							currentData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-						} else {
-							currentData['tenantId'] = userDetails.userInformation.tenantId
-						}
-					}
+					currentData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+					currentData['orgId'] = userDetails.tenantAndOrgInfo.orgId
 
-					if (!currentData.orgId || !(currentData.orgId.length > 0)) {
-						if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
-							currentData['orgId'] = userDetails.tenantAndOrgInfo.orgId
-						} else {
-							currentData['orgId'] = [userDetails.userInformation.organizationId]
-						}
-					}
 					currentData.createdBy = currentData.updatedBy = userDetails.userInformation.userId
 
 					if (currentData.isDeletable != '' && currentData.isDeletable === 'TRUE') {

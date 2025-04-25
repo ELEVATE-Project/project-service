@@ -268,4 +268,8 @@ module.exports = {
 	INVALID_TENANT_AND_ORG_MESSAGE: 'Invalid tenant and org info',
 	LINK_GENERATION_FAILED: 'Link Generation Failed',
 	INVALID_TASK_DATA: 'Invalid task data',
+	INVALID_TENANT_AND_ORG_CODE: 'ERR_TENANT_AND_ORG_INVALID',
+	INVALID_TENANT_AND_ORG_MESSAGE: 'Invalid tenant and org info',
+	ORG_DETAILS_FETCH_UNSUCCESSFUL_CODE: 'ERR_ORG_DETAILS_NOT_FETCHED',
+	ORG_DETAILS_FETCH_UNSUCCESSFUL_MESSAGE: 'Org details fetch unsuccessful',
 }

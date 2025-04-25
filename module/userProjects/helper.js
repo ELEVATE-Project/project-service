@@ -2758,13 +2758,12 @@ module.exports = class UserProjectsHelper {
 					},
 				}
 
-				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
-					matchQuery['$match']['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-					matchQuery['$match']['orgId'] = { $in: userDetails.tenantAndOrgInfo.orgId }
-				} else {
-					matchQuery['$match']['tenantId'] = userDetails.userInformation.tenantId
-					matchQuery['$match']['orgId'] = { $in: [userDetails.userInformation.organizationId] }
-				}
+				matchQuery['$match']['tenantId'] = userDetails.tenantAndOrgInfo
+					? userDetails.tenantAndOrgInfo.tenantId
+					: userDetails.userInformation.tenantId
+				matchQuery['$match']['orgId'] = userDetails.tenantAndOrgInfo
+					? { $in: userDetails.tenantAndOrgInfo.orgId }
+					: { $in: [userDetails.userInformation.organizationId] }
 
 				// pass matchQuery based on reflection
 				if (process.env.ENABLE_REFLECTION === 'true') {

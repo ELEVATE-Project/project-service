@@ -21,14 +21,13 @@ module.exports = class FormsHelper {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// call user-service to fetch default organization details
-				// let defaultOrgDetails = await userService.fetchDefaultOrgDetails(
-				// 	process.env.DEFAULT_ORGANISATION_CODE,
-				// 	userToken
-				// )
-				// if (defaultOrgDetails.success && defaultOrgDetails.data) {
-				// 	return resolve(defaultOrgDetails.data.id)
-				// } else return resolve(null)
-				return resolve(process.env.DEFAULT_ORGANISATION_CODE)
+				let defaultOrgDetails = await userService.fetchDefaultOrgDetails(
+					process.env.DEFAULT_ORGANISATION_CODE,
+					userToken
+				)
+				if (defaultOrgDetails.success && defaultOrgDetails.data) {
+					return resolve(defaultOrgDetails.data.id)
+				} else return resolve(null)
 			} catch (error) {
 				throw error
 			}
@@ -46,14 +45,8 @@ module.exports = class FormsHelper {
 	static create(bodyData, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
-					bodyData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-					bodyData['orgId'] = userDetails.tenantAndOrgInfo.orgId
-				} else {
-					bodyData['tenantId'] = userDetails.userInformation.tenantId
-					bodyData['orgId'] = [userDetails.userInformation.organizationId]
-				}
-
+				bodyData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+				bodyData['orgId'] = userDetails.tenantAndOrgInfo.orgId
 				const form = await formQueries.createForm(bodyData)
 				if (!form || !form._id) {
 					throw {
@@ -99,13 +92,7 @@ module.exports = class FormsHelper {
 					filter['type'] = bodyData.type
 				}
 
-				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
-					filter['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-					// filter['orgId'] = {'$in' : userDetails.tenantAndOrgInfo.orgId}
-				} else {
-					filter['tenantId'] = userDetails.userInformation.tenantId
-					// filter['orgId'] = {'$in' : [userDetails.userInformation.organizationId]}
-				}
+				filter['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
 
 				// create update object to pass to db query
 				let updateData = {}
@@ -162,13 +149,13 @@ module.exports = class FormsHelper {
 					})
 				}
 
-				if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
-					;(filter['tenantId'] = userDetails.tenantAndOrgInfo.tenantId),
-						(filter['orgId'] = { $in: userDetails.tenantAndOrgInfo.orgId })
-				} else {
-					;(filter['tenantId'] = userDetails.userInformation.tenantId),
-						(filter['orgId'] = { $in: [userDetails.userInformation.organizationId] })
-				}
+				filter['tenantId'] = userDetails.tenantAndOrgInfo
+					? userDetails.tenantAndOrgInfo.tenantId
+					: userDetails.userInformation.tenantId
+				filter['orgId'] = userDetails.tenantAndOrgInfo
+					? { $in: userDetails.tenantAndOrgInfo.orgId }
+					: { $in: [userDetails.userInformation.organizationId] }
+
 				const form = await formQueries.findOneForm(filter)
 				let defaultOrgForm
 				if (!form || !form._id) {
@@ -190,11 +177,9 @@ module.exports = class FormsHelper {
 						})
 					}
 					filter['orgId'] = { $in: [defaultOrgId] }
-					if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
-						filter['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-					} else {
-						filter['tenantId'] = userDetails.userInformation.tenantId
-					}
+					filter['tenantId'] = userDetails.tenantAndOrgInfo
+						? userDetails.tenantAndOrgInfo.tenantId
+						: userDetails.userInformation.tenantId
 					defaultOrgForm = await formQueries.findOneForm(filter)
 				}
 				if (!form && !defaultOrgForm) {

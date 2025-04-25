@@ -3359,6 +3359,32 @@
 			"service": "entity"
 		},
 		{
+			"sourceRoute": "/entity-management/v1/admin/createIndex",
+			"type": "POST",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "elevate-project"
+				}
+			]
+		},
+		{
+			"sourceRoute": "/entity-management/v1/admin/createIndex/:id",
+			"type": "POST",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "elevate-project"
+				}
+			]
+		},
+		{
 			"sourceRoute": "/entity-management/v1/entities/entityListBasedOnEntityType",
 			"type": "GET",
 			"priority": "MUST_HAVE",

@@ -34,6 +34,8 @@ const QRCode = require('qrcode')
 const path = require('path')
 const gotenbergService = require(SERVICES_BASE_PATH + '/gotenberg')
 const projectService = require(SERVICES_BASE_PATH + '/projects')
+const surveyService = require(SERVICES_BASE_PATH + '/survey')
+
 /**
  * UserProjectsHelper
  * @class
@@ -1195,17 +1197,19 @@ module.exports = class UserProjectsHelper {
 				let assessmentOrObservationData = {}
 
 				if (
-					project[0].entityInformation &&
-					project[0].entityInformation._id &&
-					project[0].programInformation &&
-					project[0].programInformation._id
+					// project[0].entityInformation &&
+					// project[0].entityInformation._id &&
+					// project[0].programInformation &&
+					// project[0].programInformation._id
+					project[0]
 				) {
-					assessmentOrObservationData = {
-						entityId: project[0].entityInformation._id,
-						programId: project[0].programInformation._id,
-					}
-
-					if (currentTask.observationInformation) {
+					// assessmentOrObservationData = {
+					// 	entityId: project[0].entityInformation._id,
+					// 	programId: project[0].programInformation._id,
+					// }
+					let dynamicTaskInfromation = `${solutionDetails.solutionType}Information`
+					console.log(dynamicTaskInfromation, 'this is value')
+					if (currentTask.dynamicTaskInfromation) {
 						assessmentOrObservationData = currentTask.observationInformation
 					} else {
 						let assessmentOrObservation = {
@@ -1219,10 +1223,41 @@ module.exports = class UserProjectsHelper {
 							},
 						}
 
-						let assignedAssessmentOrObservation =
-							solutionDetails.type === CONSTANTS.common.ASSESSMENT
-								? await _assessmentDetails(assessmentOrObservation)
-								: await _observationDetails(assessmentOrObservation, bodyData)
+						// let assignedAssessmentOrObservation =
+						// 	solutionDetails.type === CONSTANTS.common.ASSESSMENT
+						// 		? await _assessmentDetails(assessmentOrObservation)
+						// 		: await _observationDetails(assessmentOrObservation, bodyData)
+
+						let assignedAssessmentOrObservation
+						console.log(solutionDetails.solutionType, 'this is data')
+						switch (solutionDetails.solutionType) {
+							case CONSTANTS.common.ASSESSMENT:
+								assignedAssessmentOrObservation = await _assessmentDetails(assessmentOrObservation)
+								break
+
+							case CONSTANTS.common.OBSERVATION:
+								assignedAssessmentOrObservation = await _observationDetails(
+									assessmentOrObservation,
+									bodyData
+								)
+								break
+
+							case CONSTANTS.common.IMPROVEMENT_PROJECT:
+								assignedAssessmentOrObservation = await _improvementProjectDetails(
+									assessmentOrObservation
+								)
+								break
+
+							case CONSTANTS.common.SURVEY: // Another new type
+								assignedAssessmentOrObservation = await _surveyDetails(
+									assessmentOrObservation,
+									bodyData
+								)
+								break
+
+							default:
+								throw new Error(`Unsupported solution type: ${solutionDetails.type}`)
+						}
 
 						if (!assignedAssessmentOrObservation.success) {
 							return resolve(assignedAssessmentOrObservation)
@@ -1236,6 +1271,7 @@ module.exports = class UserProjectsHelper {
 						if (!currentTask.solutionDetails.isReusable) {
 							assessmentOrObservationData['programId'] = currentTask.solutionDetails.programId
 						}
+						let fieldToUpdate = `tasks.$.${solutionDetails.solutionType}Information`
 
 						await projectQueries.findOneAndUpdate(
 							{
@@ -1244,13 +1280,13 @@ module.exports = class UserProjectsHelper {
 							},
 							{
 								$set: {
-									'tasks.$.observationInformation': assessmentOrObservationData,
+									[fieldToUpdate]: assessmentOrObservationData,
 								},
 							}
 						)
 					}
 
-					assessmentOrObservationData['entityType'] = project[0].entityInformation.entityType
+					// assessmentOrObservationData['entityType'] = project[0].entityInformation.entityType
 				}
 
 				if (currentTask.solutionDetails && !_.isEmpty(currentTask.solutionDetails)) {
@@ -1263,6 +1299,7 @@ module.exports = class UserProjectsHelper {
 					data: assessmentOrObservationData,
 				})
 			} catch (error) {
+				console.log(error, 'this is error')
 				return resolve({
 					status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
 					success: false,
@@ -4820,8 +4857,8 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 					}
 				}
 
-				result['solutionId'] = observationCreatedFromTemplate.data._id
-				result['observationId'] = observationCreatedFromTemplate.data.observationId
+				result['solutionId'] = observationCreatedFromTemplate.data.solutionId
+				result['observationId'] = observationCreatedFromTemplate.data._id
 			} else {
 				let startDate = new Date()
 				let endDate = new Date()
@@ -4858,6 +4895,81 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 				data: result,
 			})
 		} catch (error) {
+			console.log(error, 'observation creation')
+			return resolve({
+				message: error.message,
+				success: false,
+				status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
+			})
+		}
+	})
+}
+
+function _surveyDetails(surveyData, userRoleAndProfileInformation = {}) {
+	return new Promise(async (resolve, reject) => {
+		try {
+			let result = {}
+			if (surveyData.project) {
+				let templateTasks = await projectTemplateTaskQueries.taskDocuments(
+					{
+						externalId: surveyData.project.taskId,
+					},
+					['_id']
+				)
+
+				if (templateTasks.length > 0) {
+					surveyData.project.taskId = templateTasks[0]._id
+				}
+			}
+
+			if (surveyData.solutionDetails.isReusable) {
+				// Need to change it to  importSurveryTemplateToSolution
+				let surveyCreatedFromTemplate = await surveyService.importSurveryTemplateToSolution(
+					surveyData.token,
+					surveyData.solutionDetails._id,
+					{
+						name: surveyData.solutionDetails.name + '-' + UTILS.epochTime(),
+						description: surveyData.solutionDetails.name + '-' + UTILS.epochTime(),
+						program: {
+							_id: surveyData.programId,
+							name: '',
+						},
+						project: surveyData.project,
+					}
+				)
+
+				if (!surveyCreatedFromTemplate.success) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.SURVEY_NOT_CREATED,
+					}
+				}
+				surveyData.solutionDetails._id = surveyCreatedFromTemplate.data.solutionId
+				surveyData.solutionDetails.externalId = surveyCreatedFromTemplate.data.solutionExternalId
+			}
+
+			// create survey using details api
+			let surveyCreated = await surveyService.surveyDetails(
+				surveyData.token,
+				surveyData.solutionDetails._id,
+				'',
+				userRoleAndProfileInformation && Object.keys(userRoleAndProfileInformation).length > 0
+					? userRoleAndProfileInformation
+					: {}
+			)
+
+			if (surveyCreated.success) {
+				// result['surveyId'] = surveyCreated.data._id
+				result['surveySubmissionId'] = surveyCreated.data.assessment.submissionId
+			}
+			result['solutionId'] = surveyData.solutionDetails._id
+
+			return resolve({
+				success: true,
+				data: result,
+			})
+		} catch (error) {
+			console.log(error, 'this is error')
 			return resolve({
 				message: error.message,
 				success: false,

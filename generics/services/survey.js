@@ -29,11 +29,11 @@ const createAssessmentSolutionFromTemplate = function (token, templateId, bodyDa
 				headers: {
 					'content-type': 'application/json',
 					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
-					'x-authenticated-user-token': token,
+					'x-auth-token': token,
 				},
 				json: bodyData,
 			}
-
+			console.log(options, 'thisis opti')
 			request.post(assessmentCreateUrl, options, assessmentCallback)
 
 			function assessmentCallback(err, data) {
@@ -72,13 +72,109 @@ const createAssessmentSolutionFromTemplate = function (token, templateId, bodyDa
 const createObservationFromSolutionTemplate = function (token, templateId, bodyData) {
 	return new Promise(async (resolve, reject) => {
 		try {
-			let observationCreateUrl = ASSESSMENT_URL + 'api/v2/observations/create?solutionId=' + templateId
+			let observationCreateUrl = ASSESSMENT_URL + '/v1/observations/create?solutionId=' + templateId
 
 			const options = {
 				headers: {
 					'content-type': 'application/json',
 					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
-					'x-authenticated-user-token': token,
+					'x-auth-token': token,
+				},
+				json: { data: bodyData },
+			}
+			console.log(options, 'this is options')
+			request.post(observationCreateUrl, options, assessmentCallback)
+
+			function assessmentCallback(err, data) {
+				let result = {
+					success: true,
+				}
+				if (err) {
+					result.success = false
+				} else {
+					let response = data.body
+					if (response.status === HTTP_STATUS_CODE['ok'].status) {
+						result['data'] = response.result
+					} else {
+						result.success = false
+					}
+				}
+				return resolve(result)
+			}
+		} catch (error) {
+			return reject(error)
+		}
+	})
+}
+
+/**
+ * Create Child solutions for survey
+ * @function
+ * @name importSurveryTemplateToSolution
+ * @param {String} token - logged in user token.
+ * @param {String} solutionId - parent solution id.
+ * @param {Object} bodyData - Body data
+ * @returns {JSON} - Create child solution from parent  solution.
+ */
+const importSurveryTemplateToSolution = function (token, solutionId, bodyData) {
+	return new Promise(async (resolve, reject) => {
+		try {
+			let observationCreateUrl =
+				ASSESSMENT_URL + '/v1/surveys/importSurveryTemplateToSolution' + '/' + solutionId + '?appName=elevate'
+
+			const options = {
+				headers: {
+					'content-type': 'application/json',
+					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
+					'x-auth-token': token,
+				},
+				json: bodyData,
+			}
+
+			request.post(observationCreateUrl, options, assessmentCallback)
+
+			function assessmentCallback(err, data) {
+				let result = {
+					success: true,
+				}
+				if (err) {
+					result.success = false
+				} else {
+					let response = data.body
+					if (response.status === HTTP_STATUS_CODE['ok'].status) {
+						result['data'] = response.result
+					} else {
+						result.success = false
+					}
+				}
+				return resolve(result)
+			}
+		} catch (error) {
+			return reject(error)
+		}
+	})
+}
+
+/**
+ * Create get or create surveyDetails
+ * @function
+ * @name surveyDetails
+ * @param {String} token - logged in user token.
+ * @param {String} solutionId - child solution id.
+ * @param {Object} bodyData - Body data
+ * @returns {JSON} - survey create or details
+ */
+const surveyDetails = function (token, solutionId, bodyData) {
+	return new Promise(async (resolve, reject) => {
+		try {
+			let observationCreateUrl =
+				ASSESSMENT_URL + '/v1/surveys/details' + '?solutionId=' + solutionId + '&&fromPrjectService=true'
+
+			const options = {
+				headers: {
+					'content-type': 'application/json',
+					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
+					'x-auth-token': token,
 				},
 				json: bodyData,
 			}
@@ -136,7 +232,7 @@ const addEntitiesToSolution = function (token, solutionId, bodyData) {
 				headers: {
 					'content-type': 'application/json',
 					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
-					'x-authenticated-user-token': token,
+					'x-auth-token': token,
 				},
 				json: {
 					entities: bodyData,
@@ -188,7 +284,7 @@ const addEntityToObservation = function (token, observationId, bodyData) {
 				headers: {
 					'content-type': 'application/json',
 					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
-					'x-authenticated-user-token': token,
+					'x-auth-token': token,
 				},
 				json: {
 					data: bodyData,
@@ -246,7 +342,7 @@ const createEntityAssessors = function (token, programId, solutionId, entities) 
 				headers: {
 					'content-type': 'application/json',
 					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
-					'x-authenticated-user-token': token,
+					'x-auth-token': token,
 				},
 				json: {
 					entities: entities,
@@ -296,7 +392,7 @@ const observationDetails = function (token, observationId) {
 				headers: {
 					'content-type': 'application/json',
 					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
-					'x-authenticated-user-token': token,
+					'x-auth-token': token,
 				},
 			}
 
@@ -338,6 +434,7 @@ const listSolutions = function (solutionIds) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			const url = ASSESSMENT_URL + CONSTANTS.endpoints.LIST_SOLUTIONS
+
 			let options = {
 				headers: {
 					'content-type': 'application/json',
@@ -345,7 +442,7 @@ const listSolutions = function (solutionIds) {
 				},
 			}
 			options['json'] = solutionIds
-
+			console.log(options, 'this is opt')
 			request.post(url, options, assessmentCallback)
 
 			function assessmentCallback(err, data) {
@@ -445,7 +542,7 @@ const createObservation = function (token, solutionId, data, userRoleAndProfileI
 				headers: {
 					'content-type': 'application/json',
 					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
-					'x-authenticated-user-token': token,
+					'x-auth-token': token,
 				},
 				json: {
 					data: data,
@@ -549,7 +646,7 @@ const removeSolutionsFromProgram = function (token, programId, solutionIds) {
 				headers: {
 					'content-type': 'application/json',
 					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
-					'x-authenticated-user-token': token,
+					'x-auth-token': token,
 				},
 				json: {
 					solutionIds: solutionIds,
@@ -595,7 +692,7 @@ const removeEntitiesFromSolution = function (token, solutionId, entities) {
 				headers: {
 					'content-type': 'application/json',
 					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
-					'x-authenticated-user-token': token,
+					'x-auth-token': token,
 				},
 				json: {
 					entities: entities,
@@ -641,7 +738,7 @@ const listEntitiesByLocationIds = function (token, locationIds) {
 				headers: {
 					'content-type': 'application/json',
 					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
-					'x-authenticated-user-token': token,
+					'x-auth-token': token,
 				},
 				json: {
 					locationIds: locationIds,
@@ -689,4 +786,6 @@ module.exports = {
 	removeSolutionsFromProgram: removeSolutionsFromProgram,
 	removeEntitiesFromSolution: removeEntitiesFromSolution,
 	listEntitiesByLocationIds: listEntitiesByLocationIds,
+	importSurveryTemplateToSolution: importSurveryTemplateToSolution,
+	surveyDetails: surveyDetails,
 }

@@ -264,4 +264,5 @@ module.exports = {
 	PROJECT_TEMPLATES_CREATED: 'Template and Tasks Created Successfully',
 	FAILED_TO_UPDATE_TEMPLATE: 'Failed to update the template',
 	CATEGORY_SHOULD_HAVE_LABEL_AND_VALUE: 'Each category must have a label and a value.',
+	SURVEY_NOT_CREATED: 'Could not create survey',
 }

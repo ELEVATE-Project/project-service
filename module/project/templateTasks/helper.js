@@ -187,11 +187,16 @@ module.exports = class ProjectTemplateTasksHelper {
 					CONSTANTS.common.IMPROVEMENT_PROJECT,
 					CONSTANTS.common.SURVEY,
 				]
+
 				if (allValues.type === CONSTANTS.common.CONTENT) {
 					let learningResources = await learningResourcesHelper.extractLearningResourcesFromCsv(parsedData)
 
 					allValues.learningResources = learningResources.data
-				} else if (solutionTypes.includes(allValues.type) && !parsedData.isAnExternalTask) {
+				} else if (
+					solutionTypes.includes(allValues.type) &&
+					!UTILS.convertStringToBoolean(parsedData.isAnExternalTask)
+				) {
+					console.log('entering hereeeeeeeee....')
 					allValues.solutionDetails = {}
 					if (parsedData.solutionType && parsedData.solutionType !== '') {
 						allValues.solutionDetails.type = parsedData.solutionType
@@ -250,18 +255,20 @@ module.exports = class ProjectTemplateTasksHelper {
 									allValues.solutionDetails,
 									_.pick(solutionData[parsedData.solutionId], projectionFields)
 								)
-								let solutionDetails = {
-									solutionSubType: parsedData.solutionSubType,
-									solutionType: parsedData.solutionType,
-									_id: solutionData[parsedData.solutionId]._id,
-									solutionExternalId: parsedData.solutionId,
-								}
-								allValues.solutionDetails = solutionDetails
 							}
 						}
 					} else {
 						parsedData.STATUS = CONSTANTS.apiResponses.REQUIRED_SOLUTION_ID
 					}
+					let solutionDetails = {
+						solutionSubType: parsedData.solutionSubType,
+						solutionType: parsedData.solutionType,
+						_id: solutionData[parsedData.solutionId]._id,
+						solutionExternalId: parsedData.solutionId,
+						name: solutionData[parsedData.solutionId].name,
+						isReusable: solutionData[parsedData.solutionId].isReusable,
+					}
+					allValues.solutionDetails = solutionDetails
 				}
 
 				allValues.projectTemplateId = template._id
@@ -367,11 +374,11 @@ module.exports = class ProjectTemplateTasksHelper {
 									},
 									$set: {
 										hasSubTasks: true,
-										solutionDetails: {
-											solutionType: parsedData.solutionType,
-											solutionId: parsedData.solutionId,
-											solutionSubType: parsedData.solutionSubType,
-										},
+										// solutionDetails: {
+										// 	solutionType: parsedData.solutionType,
+										// 	solutionId: parsedData.solutionId,
+										// 	solutionSubType: parsedData.solutionSubType,
+										// },
 									},
 								},
 								{
@@ -401,12 +408,12 @@ module.exports = class ProjectTemplateTasksHelper {
 										$set: {
 											parentId: parentTask._id,
 											visibleIf: visibleIf,
-											solutionDetails: {
-												solutionType: parsedData.solutionType,
-												_id: solutionData[parsedData.solutionId]._id,
-												solutionSubType: parsedData.solutionSubType,
-												solutionExternalId: parsedData.solutionId,
-											},
+											// solutionDetails: {
+											// 	solutionType: parsedData.solutionType,
+											// 	_id: solutionData[parsedData.solutionId]._id,
+											// 	solutionSubType: parsedData.solutionSubType,
+											// 	solutionExternalId: parsedData.solutionId,
+											// },
 										},
 									}
 								)

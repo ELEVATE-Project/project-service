@@ -865,7 +865,6 @@ module.exports = class UserProjectsHelper {
 				let matchQuery = {
 					$match: query,
 				}
-
 				if (searchQuery && searchQuery.length > 0) {
 					matchQuery['$match']['$or'] = searchQuery
 				}
@@ -1162,7 +1161,7 @@ module.exports = class UserProjectsHelper {
 	 * @returns {Object}
 	 */
 
-	static solutionDetails(userToken, projectId, taskId, bodyData = {}) {
+	static solutionDetails(userToken, projectId, taskId, bodyData = {}, userId) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let project = await projectQueries.projectDocument(
@@ -1208,7 +1207,6 @@ module.exports = class UserProjectsHelper {
 					// 	programId: project[0].programInformation._id,
 					// }
 					let dynamicTaskInfromation = `${solutionDetails.solutionType}Information`
-					console.log(dynamicTaskInfromation, 'this is value')
 					if (currentTask.dynamicTaskInfromation) {
 						assessmentOrObservationData = currentTask.observationInformation
 					} else {
@@ -1229,7 +1227,6 @@ module.exports = class UserProjectsHelper {
 						// 		: await _observationDetails(assessmentOrObservation, bodyData)
 
 						let assignedAssessmentOrObservation
-						console.log(solutionDetails.solutionType, 'this is data')
 						switch (solutionDetails.solutionType) {
 							case CONSTANTS.common.ASSESSMENT:
 								assignedAssessmentOrObservation = await _assessmentDetails(assessmentOrObservation)
@@ -1243,8 +1240,11 @@ module.exports = class UserProjectsHelper {
 								break
 
 							case CONSTANTS.common.IMPROVEMENT_PROJECT:
-								assignedAssessmentOrObservation = await _improvementProjectDetails(
-									assessmentOrObservation
+								assignedAssessmentOrObservation = await this._improvementProjectDetails(
+									assessmentOrObservation,
+									bodyData,
+									userToken,
+									userId
 								)
 								break
 
@@ -1299,7 +1299,6 @@ module.exports = class UserProjectsHelper {
 					data: assessmentOrObservationData,
 				})
 			} catch (error) {
-				console.log(error, 'this is error')
 				return resolve({
 					status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
 					success: false,
@@ -1416,21 +1415,18 @@ module.exports = class UserProjectsHelper {
 					'entityId',
 					'acl',
 				])
-
 				if (projectId === '') {
 					// This will check wether the user user is targeted to solution or not based on his userRoleInformation
 					const targetedSolutionId = await solutionsHelper.isTargetedBasedOnUserProfile(
 						solutionId,
 						userRoleInformation
 					)
-
 					if (!targetedSolutionId.success) {
 						throw {
 							success: false,
 							message: targetedSolutionId.message,
 						}
 					}
-
 					//based on above api will check for projects wether its is private project or public project
 					const projectDetails = await projectQueries.projectDocument(
 						{
@@ -3602,7 +3598,6 @@ module.exports = class UserProjectsHelper {
 
 				// Handle errors during the request stream
 				requestObject.on('error', async () => {
-					console.log('Error generating PDF', error)
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.CERTIFICATE_GENERATION_FAILED,
@@ -4109,6 +4104,50 @@ module.exports = class UserProjectsHelper {
 					status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
 					success: false,
 					data: {},
+				})
+			}
+		})
+	}
+
+	static _improvementProjectDetails(projectData, userRoleAndProfileInformation = {}, userToken, userId) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let result = {}
+				let matchQuery = {
+					// solutionId:new ObjectId(projectData.solutionDetails.solutionId)
+					solutionId: new ObjectId('667a4086b070696248731b30'),
+				}
+				let projectIdFromsolutionId = await this.projects(
+					matchQuery,
+					CONSTANTS.common.DEFAULT_PAGE_SIZE,
+					CONSTANTS.common.DEFAULT_PAGE_NO,
+					'',
+					['title', 'description', 'solutionId', 'programId', '_id']
+				)
+				projectIdFromsolutionId = projectIdFromsolutionId.data.data[0]._id
+
+				// create survey using details api
+				let projectDetails = await this.detailsV2(
+					projectIdFromsolutionId ? projectIdFromsolutionId : '',
+					projectData.solutionDetails._id,
+					'162',
+					userToken,
+					userRoleAndProfileInformation
+				)
+				if (projectDetails.success) {
+					result['projectId'] = projectDetails.data._id
+				}
+				result['solutionId'] = projectData.solutionDetails._id
+
+				return resolve({
+					success: true,
+					data: result,
+				})
+			} catch (error) {
+				return resolve({
+					message: error.message,
+					success: false,
+					status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
 				})
 			}
 		})
@@ -4832,11 +4871,11 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 					observationData.project.taskId = templateTasks[0]._id
 				}
 			}
-
 			if (observationData.solutionDetails.isReusable) {
 				let observationCreatedFromTemplate = await surveyService.createObservationFromSolutionTemplate(
 					observationData.token,
 					observationData.solutionDetails._id,
+					// userRoleAndProfileInformation,
 					{
 						name: observationData.solutionDetails.name + '-' + UTILS.epochTime(),
 						description: observationData.solutionDetails.name + '-' + UTILS.epochTime(),
@@ -4845,7 +4884,7 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 							name: '',
 						},
 						status: CONSTANTS.common.PUBLISHED_STATUS,
-						entities: [observationData.entityId],
+						entities: [userRoleAndProfileInformation.school],
 						project: observationData.project,
 					}
 				)
@@ -4895,7 +4934,6 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 				data: result,
 			})
 		} catch (error) {
-			console.log(error, 'observation creation')
 			return resolve({
 				message: error.message,
 				success: false,
@@ -4952,10 +4990,7 @@ function _surveyDetails(surveyData, userRoleAndProfileInformation = {}) {
 			let surveyCreated = await surveyService.surveyDetails(
 				surveyData.token,
 				surveyData.solutionDetails._id,
-				'',
-				userRoleAndProfileInformation && Object.keys(userRoleAndProfileInformation).length > 0
-					? userRoleAndProfileInformation
-					: {}
+				userRoleAndProfileInformation
 			)
 
 			if (surveyCreated.success) {
@@ -4969,7 +5004,6 @@ function _surveyDetails(surveyData, userRoleAndProfileInformation = {}) {
 				data: result,
 			})
 		} catch (error) {
-			console.log(error, 'this is error')
 			return resolve({
 				message: error.message,
 				success: false,

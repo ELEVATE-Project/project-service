@@ -1954,20 +1954,6 @@
 			"service": "scheduler"
 		},
 		{
-			"sourceRoute": "/entity-management/v1/entityTypes/find",
-			"type": "POST",
-			"priority": "MUST_HAVE",
-			"inSequence": false,
-			"orchestrated": false,
-			"targetPackages": [
-				{
-					"basePackageName": "project",
-					"packageName": "shiksha-project"
-				}
-			],
-			"service": "entity"
-		},
-		{
 			"sourceRoute": "/entity-management/v1/entities/find",
 			"type": "POST",
 			"priority": "MUST_HAVE",
@@ -2268,20 +2254,6 @@
 		{
 			"sourceRoute": "/entity-management/v1/entities/list/:id",
 			"type": "GET",
-			"priority": "MUST_HAVE",
-			"inSequence": false,
-			"orchestrated": false,
-			"targetPackages": [
-				{
-					"basePackageName": "project",
-					"packageName": "shiksha-project"
-				}
-			],
-			"service": "entity"
-		},
-		{
-			"sourceRoute": "/entity-management/v1/entities/find",
-			"type": "POST",
 			"priority": "MUST_HAVE",
 			"inSequence": false,
 			"orchestrated": false,

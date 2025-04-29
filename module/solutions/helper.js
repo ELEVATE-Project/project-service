@@ -145,7 +145,8 @@ module.exports = class SolutionsHelper {
 		endDate,
 		createdBy = '',
 		language = [],
-		source = {}
+		source = {},
+		userDetails
 	) {
 		let programData = {}
 		programData.name = name
@@ -159,6 +160,8 @@ module.exports = class SolutionsHelper {
 		programData.endDate = endDate
 		programData.language = language
 		programData.source = source
+		;(programData.tenantId = userDetails.userInformation.tenantId),
+			(programData.orgIds = [userDetails.userInformation.organizationId])
 		return programData
 	}
 
@@ -469,7 +472,7 @@ module.exports = class SolutionsHelper {
 
 				// add tenantId and orgId
 				solutionData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-				solutionData['orgId'] = userDetails.tenantAndOrgInfo.orgId
+				solutionData['orgIds'] = userDetails.tenantAndOrgInfo.orgId
 
 				let solutionCreation = await solutionsQueries.createSolution(_.omit(solutionData, ['scope']))
 
@@ -667,12 +670,12 @@ module.exports = class SolutionsHelper {
 				matchQuery['tenantId'] = userDetails.tenantAndOrgInfo
 					? userDetails.tenantAndOrgInfo.tenantId
 					: userDetails.userInformation.tenantId
-				matchQuery['orgId'] = userDetails.tenantAndOrgInfo
+				matchQuery['orgIds'] = userDetails.tenantAndOrgInfo
 					? { $in: userDetails.tenantAndOrgInfo.orgId }
 					: { $in: [userDetails.userInformation.organizationId] }
 
 				if (currentOrgOnly) {
-					matchQuery['orgId'] = { $in: [userDetails.userInformation.organizationId] }
+					matchQuery['orgIds'] = { $in: [userDetails.userInformation.organizationId] }
 				}
 
 				// if (type == CONSTANTS.common.SURVEY) {
@@ -1259,10 +1262,8 @@ module.exports = class SolutionsHelper {
    * @method
    * @name verifySolution
    * @param {String} solutionId - solution Id.
-   * @param {String} userId - user Id.
-   * @param {String} userToken - user token.
-   * @param {Boolean} createProject - create project.
    * @param {Object} bodyData - Req Body.
+   * @param {Object} userDetails - loogedin user's info
    * @returns {Object} - Details of the solution.
    * Takes SolutionId and userRoleInformation as parameters.
    * @return {Object} - {
@@ -1275,18 +1276,22 @@ module.exports = class SolutionsHelper {
   }
    */
 
-	static isTargetedBasedOnUserProfile(solutionId = '', bodyData = {}) {
+	static isTargetedBasedOnUserProfile(solutionId = '', bodyData = {}, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let response = {
 					isATargetedSolution: false,
 					_id: solutionId,
 				}
+				let tenantId = userDetails.userInformation.tenantId
+				let orgId = userDetails.userInformation.organizationId
 				let queryData = await this.queryBasedOnRoleAndLocation(bodyData, bodyData.type)
 				if (!queryData.success) {
 					return resolve(queryData)
 				}
 				queryData.data['_id'] = solutionId
+				queryData.data['tenantId'] = tenantId
+				queryData.data['orgIds'] = { $in: [orgId] }
 				let matchQuery = queryData.data
 				let solutionData = await solutionsQueries.solutionsDocument(matchQuery, [
 					'_id',
@@ -1391,18 +1396,22 @@ module.exports = class SolutionsHelper {
 	 * @returns {Array} - Created user program and solution.
 	 */
 
-	static createProgramAndSolution(userId, data, userToken, createADuplicateSolution = '') {
+	static createProgramAndSolution(userId, data, userToken, createADuplicateSolution = '', userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let userPrivateProgram = {}
 				let dateFormat = UTILS.epochTime()
 				let parentSolutionInformation = {}
+				let tenantId = userDetails.userInformation.tenantId
+				let orgId = userDetails.userInformation.organizationId
 
 				createADuplicateSolution = UTILS.convertStringToBoolean(createADuplicateSolution)
 				//program part
 				if (data.programId && data.programId !== '') {
 					let filterQuery = {
 						_id: data.programId,
+						tenantId: tenantId,
+						orgIds: { $in: [orgId] },
 					}
 
 					if (createADuplicateSolution === false) {
@@ -1431,7 +1440,11 @@ module.exports = class SolutionsHelper {
 							duplicateProgram.description,
 							userId,
 							duplicateProgram.startDate,
-							duplicateProgram.endDate
+							duplicateProgram.endDate,
+							'',
+							'',
+							{},
+							userDetails
 						)
 						// set rootorganisation from parent program
 						if (checkforProgramExist[0].hasOwnProperty('rootOrganisations')) {
@@ -1541,6 +1554,8 @@ module.exports = class SolutionsHelper {
 					let solutionData = await solutionsQueries.solutionsDocument(
 						{
 							_id: data.solutionId,
+							tenantId: userDetails.userInformation.tenantId,
+							orgIds: { $in: [userDetails.userInformation.organizationId] },
 						},
 						[
 							'name',
@@ -1583,6 +1598,8 @@ module.exports = class SolutionsHelper {
 
 						_.merge(duplicateSolution, solutionCreationData)
 						_.merge(duplicateSolution, solutionDataToBeUpdated)
+						duplicateSolution['tenantId'] = userDetails.userInformation.tenantId
+						duplicateSolution['orgIds'] = [userDetails.userInformation.organizationId]
 
 						solution = await solutionsQueries.createSolution(_.omit(duplicateSolution, ['_id', 'link']))
 						parentSolutionInformation.solutionId = duplicateSolution._id
@@ -1599,6 +1616,7 @@ module.exports = class SolutionsHelper {
 						solution = await solutionsQueries.updateSolutionDocument(
 							{
 								_id: solutionData[0]._id,
+								tenantId: userDetails.userInformation.tenantId,
 							},
 							{
 								$set: solutionDataToBeUpdated,
@@ -1633,6 +1651,8 @@ module.exports = class SolutionsHelper {
 						data.type ? data.type : CONSTANTS.common.ASSESSMENT,
 						data.subType ? data.subType : CONSTANTS.common.INSTITUTIONAL
 					)
+					createSolutionData['tenantId'] = userDetails.userInformation.tenantId
+					createSolutionData['orgIds'] = [userDetails.userInformation.organizationId]
 					_.merge(solutionDataToBeUpdated, createSolutionData)
 					solution = await solutionsQueries.createSolution(solutionDataToBeUpdated)
 				}
@@ -1641,6 +1661,7 @@ module.exports = class SolutionsHelper {
 					let updatedProgram = await programQueries.findAndUpdate(
 						{
 							_id: userPrivateProgram._id,
+							tenantId: userDetails.userInformation.tenantId,
 						},
 						{
 							$addToSet: { components: ObjectId(solution._id) },
@@ -2518,12 +2539,8 @@ module.exports = class SolutionsHelper {
 					}
 				}
 
-				matchQuery['$match']['tenantId'] = userDetails.tenantAndOrgInfo
-					? userDetails.tenantAndOrgInfo.tenantId
-					: userDetails.userInformation.tenantId
-				matchQuery['$match']['orgId'] = userDetails.tenantAndOrgInfo
-					? { $in: userDetails.tenantAndOrgInfo.orgId }
-					: { $in: [userDetails.userInformation.organizationId] }
+				matchQuery['$match']['tenantId'] = userDetails.userInformation.tenantId
+				matchQuery['$match']['orgId'] = userDetails.userInformation.organizationId
 
 				if (currentOrgOnly) {
 					let organizationId = userDetails.userInformation.organizationId
@@ -2973,6 +2990,8 @@ module.exports = class SolutionsHelper {
 						let programsData = await programQueries.programsDocument(
 							{
 								_id: { $in: programIds },
+								tenantId: userDetails.userInformation.tenantId,
+								orgIds: { $in: [userDetails.userInformation.organizationId] },
 							},
 							['name']
 						)
@@ -3422,18 +3441,19 @@ module.exports = class SolutionsHelper {
 	 * @name details
 	 * @param {String} solutionId - Solution Id.
 	 * @param {Object} bodyData - Body data.
-	 * @param {String} userId - User Id.
+	 * @param {String} userDetails - loggedin user's info.
 	 * @returns {Object} - Details of the solution.
 	 */
 
-	static details(solutionId, bodyData = {}, userId = '') {
+	static details(solutionId, bodyData = {}, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let solutionData = await solutionsQueries.solutionsDocument({ _id: solutionId }, [
-					'type',
-					'projectTemplateId',
-					'programId',
-				])
+				let tenantId = userDetails.userInformation.tenantId
+				let orgId = userDetails.userInformation.organizationId
+				let solutionData = await solutionsQueries.solutionsDocument(
+					{ _id: solutionId, tenantId: tenantId, orgIds: { $in: [orgId] } },
+					['type', 'projectTemplateId', 'programId']
+				)
 
 				if (!Array.isArray(solutionData) || solutionData.length < 1) {
 					return resolve({
@@ -3445,7 +3465,7 @@ module.exports = class SolutionsHelper {
 				solutionData = solutionData[0]
 				let templateOrQuestionDetails
 				//this will get wether user is targeted to the solution or not based on user Role Information
-				const isSolutionTargeted = await this.isTargetedBasedOnUserProfile(solutionId, bodyData)
+				const isSolutionTargeted = await this.isTargetedBasedOnUserProfile(solutionId, bodyData, userDetails)
 
 				if (solutionData.type === CONSTANTS.common.IMPROVEMENT_PROJECT) {
 					if (!solutionData.projectTemplateId) {
@@ -3456,8 +3476,10 @@ module.exports = class SolutionsHelper {
 					templateOrQuestionDetails = await projectTemplatesHelper.details(
 						solutionData.projectTemplateId,
 						'',
-						userId,
-						isSolutionTargeted.result.isATargetedSolution ? false : true
+						userDetails.userInformation.userId,
+						isSolutionTargeted.result.isATargetedSolution ? false : true,
+						'',
+						userDetails
 					)
 				} else {
 					templateOrQuestionDetails = {

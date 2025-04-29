@@ -63,9 +63,13 @@ module.exports = {
 		},
 		tenantId: {
 			type: String,
+			required: true,
+			index: true,
 		},
-		orgId: {
+		orgIds: {
 			type: Array,
+			index: true,
+			required: true,
 		},
 	},
 	compoundIndex: [

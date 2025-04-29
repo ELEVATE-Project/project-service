@@ -81,9 +81,7 @@ module.exports = class LibraryCategories extends Abstract {
 					req.pageNo,
 					req.searchText,
 					req.query.sort,
-					req.userDetails,
-					req.query.tenantId ? req.query.tenantId : null,
-					req.query.orgId ? req.query.orgId : null
+					req.userDetails
 				)
 
 				return resolve({

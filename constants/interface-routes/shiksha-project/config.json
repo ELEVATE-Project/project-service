@@ -9,9 +9,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/userProjects/details/:id",
@@ -22,9 +23,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/userProjects/addStory/:id",
@@ -35,9 +37,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/userProjects/addStory",
@@ -48,9 +51,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/userProjects/certificates",
@@ -61,9 +65,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/configurations/read",
@@ -74,9 +79,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/userProjects/verifyCertificate",
@@ -87,9 +93,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/userProjects/verifyCertificate/:id",
@@ -100,9 +107,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/userProjects/certificateReIssue",
@@ -113,9 +121,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/userProjects/certificateCallback",
@@ -126,9 +135,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/userProjects/certificateCallbackError",
@@ -139,9 +149,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/userProjects/certificateReIssue/:id",
@@ -152,9 +163,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/certificateBaseTemplates/createOrUpdate",
@@ -165,9 +177,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/certificateBaseTemplates/createOrUpdate/:id",
@@ -178,9 +191,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/certificateTemplates/createOrUpdate",
@@ -191,9 +205,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/certificateTemplates/createOrUpdate/:id",
@@ -204,9 +219,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/certificateTemplates/uploadTemplate",
@@ -217,9 +233,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/certificateTemplates/uploadTemplate/:id",
@@ -230,9 +247,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/certificateTemplates/createSvg",
@@ -243,9 +261,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/userProjects/sync",
@@ -256,9 +275,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/userProjects/sync/:id",
@@ -269,9 +289,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/userProjects/tasksStatus",
@@ -282,9 +303,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/userProjects/tasksStatus/:id",
@@ -295,9 +317,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/userProjects/add",
@@ -308,9 +331,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/userProjects/userAssigned",
@@ -321,9 +345,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/userProjects/share",
@@ -334,9 +359,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/userProjects/share/:id",
@@ -347,9 +373,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/userProjects/importedProjects",
@@ -360,9 +387,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/userProjects/importedProjects/:id",
@@ -373,9 +401,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/interface/v1/userProjects/list",
@@ -387,7 +416,7 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project",
+					"packageName": "shiksha-project",
 					"targetBody": [],
 					"responseBody": [
 						{
@@ -401,14 +430,15 @@
 				},
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project",
+					"packageName": "shiksha-project",
 					"targetBody": [],
 					"responseBody": [],
 					"service": "project",
 					"merge": true,
 					"mergeKey": "second"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/cloud-services/files/download",
@@ -419,9 +449,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/cloud-services/files/preSignedUrls",
@@ -432,9 +463,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/cloud-services/files/getDownloadableUrl",
@@ -445,9 +477,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/dataPipeline/userProject",
@@ -458,9 +491,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/dataPipeline/userProject/:id",
@@ -471,9 +505,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/project/templates/bulkCreate",
@@ -484,9 +519,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/project/templates/bulkUpdate",
@@ -497,9 +533,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/project/templates/importProjectTemplate",
@@ -510,9 +547,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/project/templates/importProjectTemplate/:id",
@@ -523,9 +561,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/project/templates/listByIds",
@@ -536,9 +575,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/project/templates/details",
@@ -549,9 +589,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/project/templates/details/:id",
@@ -562,9 +603,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/project/templates/update",
@@ -575,9 +617,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/project/templates/update/:id",
@@ -588,9 +631,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/project/templates/list",
@@ -601,9 +645,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/project/templateTasks/bulkCreate",
@@ -614,9 +659,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/project/templateTasks/bulkCreate/:id",
@@ -627,9 +673,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/project/templateTasks/bulkUpdate",
@@ -640,9 +687,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/project/templateTasks/bulkUpdate/:id",
@@ -653,9 +701,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/project/templateTasks/update",
@@ -666,9 +715,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/project/templateTasks/update/:id",
@@ -679,9 +729,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/library/categories/projects",
@@ -692,9 +743,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/library/categories/projects/:id",
@@ -705,9 +757,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/library/categories/create",
@@ -718,9 +771,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/library/categories/update",
@@ -731,9 +785,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/library/categories/update/:id",
@@ -744,9 +799,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/library/categories/list",
@@ -757,9 +813,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/programs/create",
@@ -770,9 +827,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/programs/update",
@@ -783,9 +841,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/programs/update/:id",
@@ -796,9 +855,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/programs/details",
@@ -809,9 +869,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/programs/details/:id",
@@ -822,9 +883,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/programs/addRolesInScope",
@@ -835,9 +897,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/programs/addRolesInScope/:id",
@@ -848,9 +911,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/programs/removeRolesInScope",
@@ -861,9 +925,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/programs/removeRolesInScope/:id",
@@ -874,9 +939,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/programs/addEntitiesInScope",
@@ -887,9 +953,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/programs/addEntitiesInScope/:id",
@@ -900,9 +967,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/programs/removeEntitiesInScope",
@@ -913,9 +981,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/programs/removeEntitiesInScope/:id",
@@ -926,9 +995,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/programs/list",
@@ -939,9 +1009,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/programs/join",
@@ -952,9 +1023,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/programs/join/:id",
@@ -965,9 +1037,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/solutions/create",
@@ -978,9 +1051,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/solutions/update",
@@ -991,9 +1065,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/solutions/update/:id",
@@ -1004,9 +1079,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/solutions/list",
@@ -1017,9 +1093,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/solutions/forUserRoleAndLocation",
@@ -1030,9 +1107,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/solutions/detailsBasedOnRoleAndLocation",
@@ -1043,9 +1121,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/solutions/detailsBasedOnRoleAndLocation/:id",
@@ -1056,9 +1135,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/solutions/addRolesInScope",
@@ -1069,9 +1149,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/solutions/addRolesInScope/:id",
@@ -1082,9 +1163,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/solutions/addEntitiesInScope",
@@ -1095,9 +1177,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/solutions/addEntitiesInScope/:id",
@@ -1108,9 +1191,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/solutions/removeRolesInScope",
@@ -1121,9 +1205,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/solutions/removeRolesInScope/:id",
@@ -1134,9 +1219,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/solutions/targetedSolutions",
@@ -1147,9 +1233,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/solutions/fetchLink",
@@ -1160,9 +1247,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/solutions/fetchLink/:id",
@@ -1173,9 +1261,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/solutions/verifyLink",
@@ -1186,9 +1275,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/solutions/verifyLink/:id",
@@ -1199,9 +1289,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/solutions/verifySolution",
@@ -1212,9 +1303,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/solutions/verifySolution/:id",
@@ -1225,9 +1317,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/solutions/getDetails",
@@ -1238,9 +1331,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/solutions/getDetails/:id",
@@ -1251,9 +1345,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/solutions/removeEntitiesInScope",
@@ -1264,9 +1359,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/solutions/removeEntitiesInScope/:id",
@@ -1277,9 +1373,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/userProjects/importFromLibrary",
@@ -1290,9 +1387,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/userProjects/importFromLibrary/:id",
@@ -1303,9 +1401,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/userProjects/update",
@@ -1316,9 +1415,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/userProjects/update/:id",
@@ -1329,9 +1429,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/forms/create",
@@ -1342,9 +1443,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/forms/update",
@@ -1355,9 +1457,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/forms/update/:id",
@@ -1368,9 +1471,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/forms/read",
@@ -1381,9 +1485,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/forms/read/:id",
@@ -1394,9 +1499,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/admin/dbFind",
@@ -1407,9 +1513,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/admin/dbFind/:id",
@@ -1420,9 +1527,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/reports/entity",
@@ -1433,9 +1541,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/reports/getProgramsByEntity/:id",
@@ -1446,9 +1555,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/reports/entity/:id",
@@ -1459,9 +1569,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/reports/getProgramsByEntity",
@@ -1472,9 +1583,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/reports/detailView",
@@ -1485,9 +1597,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/reports/detailView/:id",
@@ -1498,9 +1611,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/admin/createIndex",
@@ -1511,9 +1625,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/admin/createIndex/:id",
@@ -1524,9 +1639,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/solutions/details",
@@ -1537,9 +1653,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/profile/read",
@@ -1550,9 +1667,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/solutions/details/:id",
@@ -1563,9 +1681,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/users/solutions",
@@ -1576,9 +1695,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/users/solutions/:id",
@@ -1589,9 +1709,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/users/programs",
@@ -1602,9 +1723,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/projectAttributes/create",
@@ -1615,9 +1737,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/projectAttributes/find",
@@ -1628,9 +1751,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/projectAttributes/update",
@@ -1641,9 +1765,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/wishlist/list",
@@ -1654,9 +1779,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/wishlist/remove",
@@ -1667,9 +1793,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/wishlist/remove/:id",
@@ -1680,9 +1807,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/wishlist/add/:id",
@@ -1693,9 +1821,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/wishlist/add",
@@ -1706,9 +1835,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/template/list",
@@ -1719,9 +1849,10 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
 				}
-			]
+			],
+			"service": "project"
 		},
 		{
 			"sourceRoute": "/project/v1/scp/publishTemplateAndTasks",
@@ -1732,9 +1863,662 @@
 			"targetPackages": [
 				{
 					"basePackageName": "project",
-					"packageName": "elevate-project"
+					"packageName": "shiksha-project"
+				}
+			],
+			"service": "project"
+		},
+		{
+			"sourceRoute": "/scheduler/jobs/create",
+			"type": "POST",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"rateLimit": {
+				"type": "none"
+			},
+			"service": "scheduler"
+		},
+		{
+			"sourceRoute": "/scheduler/jobs/updateDelay",
+			"type": "POST",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"rateLimit": {
+				"type": "none"
+			},
+			"service": "scheduler"
+		},
+		{
+			"sourceRoute": "/scheduler/jobs/remove",
+			"type": "POST",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"rateLimit": {
+				"type": "none"
+			},
+			"service": "scheduler"
+		},
+		{
+			"sourceRoute": "/scheduler/jobs/list",
+			"type": "GET",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"rateLimit": {
+				"type": "none"
+			},
+			"service": "scheduler"
+		},
+		{
+			"sourceRoute": "/scheduler/jobs/purge",
+			"type": "POST",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"rateLimit": {
+				"type": "none"
+			},
+			"service": "scheduler"
+		},
+		{
+			"sourceRoute": "/entity-management/v1/entities/find",
+			"type": "POST",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"service": "entity"
+		},
+		{
+			"sourceRoute": "/user/v1/user/read",
+			"type": "GET",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"requiresCustomHandling": true,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"service": "user"
+		},
+		{
+			"sourceRoute": "/user/v1/user/read/:id",
+			"type": "GET",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"requiresCustomHandling": true,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"service": "user"
+		},
+		{
+			"sourceRoute": "/user/v1/organization/read",
+			"type": "GET",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"service": "user",
+			"requiresCustomHandling": true,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"rateLimit": {
+				"type": "internal"
+			}
+		},
+		{
+			"sourceRoute": "/entity-management/v1/entityTypes/bulkCreate",
+			"type": "POST",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"service": "entity"
+		},
+		{
+			"sourceRoute": "/entity-management/v1/entityTypes/bulkUpdate",
+			"type": "POST",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"service": "entity"
+		},
+		{
+			"sourceRoute": "/entity-management/v1/entityTypes/find",
+			"type": "POST",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"service": "entity"
+		},
+		{
+			"sourceRoute": "/entity-management/v1/entityTypes/list",
+			"type": "GET",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"service": "entity"
+		},
+		{
+			"sourceRoute": "/entity-management/v1/entityTypes/create",
+			"type": "POST",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"service": "entity"
+		},
+		{
+			"sourceRoute": "/entity-management/v1/entityTypes/update",
+			"type": "POST",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"service": "entity"
+		},
+		{
+			"sourceRoute": "/entity-management/v1/entityTypes/update/:id",
+			"type": "POST",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"service": "entity"
+		},
+		{
+			"sourceRoute": "/entity-management/v1/entities/bulkCreate",
+			"type": "POST",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"service": "entity"
+		},
+		{
+			"sourceRoute": "/entity-management/v1/entities/targetedRoles/:id",
+			"type": "GET",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"service": "entity"
+		},
+		{
+			"sourceRoute": "/entity-management/v1/admin/createIndex",
+			"type": "POST",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
 				}
 			]
+		},
+		{
+			"sourceRoute": "/entity-management/v1/admin/createIndex/:id",
+			"type": "POST",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			]
+		},
+		{
+			"sourceRoute": "/entity-management/v1/entities/entityListBasedOnEntityType",
+			"type": "GET",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"service": "entity"
+		},
+		{
+			"sourceRoute": "/entity-management/v1/entities/bulkUpdate",
+			"type": "POST",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"service": "entity"
+		},
+		{
+			"sourceRoute": "/entity-management/v1/entities/add",
+			"type": "POST",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"service": "entity"
+		},
+		{
+			"sourceRoute": "/entity-management/v1/entities/update",
+			"type": "POST",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"service": "entity"
+		},
+		{
+			"sourceRoute": "/entity-management/v1/entities/update/:id",
+			"type": "POST",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"service": "entity"
+		},
+		{
+			"sourceRoute": "/entity-management/v1/entities/list",
+			"type": "GET",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"service": "entity"
+		},
+		{
+			"sourceRoute": "/entity-management/v1/entities/list/:id",
+			"type": "GET",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"service": "entity"
+		},
+		{
+			"sourceRoute": "/entity-management/v1/entities/details",
+			"type": "GET",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"service": "entity",
+			"rateLimit": {
+				"type": "public-low"
+			}
+		},
+		{
+			"sourceRoute": "/entity-management/v1/entities/details/:id",
+			"type": "GET",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"service": "entity"
+		},
+		{
+			"sourceRoute": "/entity-management/v1/entities/listByEntityType",
+			"type": "GET",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"service": "entity"
+		},
+		{
+			"sourceRoute": "/entity-management/v1/entities/listByEntityType/:id",
+			"type": "GET",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"service": "entity"
+		},
+		{
+			"sourceRoute": "/entity-management/v1/entities/subEntityList",
+			"type": "GET",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"service": "entity"
+		},
+		{
+			"sourceRoute": "/entity-management/v1/entities/subEntityList/:id",
+			"type": "GET",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"service": "entity"
+		},
+		{
+			"sourceRoute": "/entity-management/v1/entities/listByIds",
+			"type": "POST",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"service": "entity"
+		},
+		{
+			"sourceRoute": "/entity-management/v1/entities/subEntityListBasedOnRoleAndLocation",
+			"type": "GET",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"service": "entity"
+		},
+		{
+			"sourceRoute": "/entity-management/v1/entities/subEntityListBasedOnRoleAndLocation/:id",
+			"type": "GET",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"service": "entity"
+		},
+		{
+			"sourceRoute": "/entity-management/v1/entities/relatedEntities",
+			"type": "GET",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"service": "entity"
+		},
+		{
+			"sourceRoute": "/entity-management/v1/entities/relatedEntities/:id",
+			"type": "GET",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"service": "entity"
+		},
+		{
+			"sourceRoute": "/entity-management/v1/userRoleExtension/create",
+			"type": "POST",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"service": "entity"
+		},
+		{
+			"sourceRoute": "/entity-management/v1/userRoleExtension/update/:id",
+			"type": "POST",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"service": "entity"
+		},
+		{
+			"sourceRoute": "/entity-management/v1/userRoleExtension/find",
+			"type": "POST",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"service": "entity"
+		},
+		{
+			"sourceRoute": "/entity-management/v1/userRoleExtension/delete/:id",
+			"type": "DELETE",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"service": "entity"
+		},
+		{
+			"sourceRoute": "/entity-management/v1/entities/mappingUpload",
+			"type": "POST",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"service": "entity"
+		},
+		{
+			"sourceRoute": "/entity-management/v1/entities/createMappingCsv",
+			"type": "POST",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"service": "entity"
+		},
+		{
+			"sourceRoute": "/entity-management/v1/entities/listByLocationIds",
+			"type": "POST",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "shiksha-project"
+				}
+			],
+			"service": "entity"
 		}
 	]
 }

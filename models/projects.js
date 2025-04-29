@@ -211,9 +211,13 @@ module.exports = {
 		conversation: Array,
 		tenantId: {
 			type: String,
+			index: true,
+			required: true,
 		},
 		orgId: {
-			type: Array,
+			type: String,
+			index: true,
+			required: true,
 		},
 	},
 	compoundIndex: [

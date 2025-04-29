@@ -1149,11 +1149,7 @@ module.exports = class Solutions extends Abstract {
 	async details(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let solutionData = await solutionsHelper.details(
-					req.params._id,
-					req.body,
-					req.userDetails.userInformation.userId
-				)
+				let solutionData = await solutionsHelper.details(req.params._id, req.body, req.userDetails)
 				return resolve(solutionData)
 			} catch (error) {
 				return reject({

@@ -48,8 +48,6 @@ module.exports = class LibraryCategoriesHelper {
 		search,
 		sortedData,
 		userDetails,
-		tenantId = null,
-		orgId = null,
 		language = 'en',
 		hasSpotlight = false,
 		filter = {}
@@ -69,7 +67,7 @@ module.exports = class LibraryCategoriesHelper {
 				matchQuery['$match']['tenantId'] = userDetails.tenantAndOrgInfo
 					? userDetails.tenantAndOrgInfo.tenantId
 					: userDetails.userInformation.tenantId
-				matchQuery['$match']['orgId'] = userDetails.tenantAndOrgInfo
+				matchQuery['$match']['orgIds'] = userDetails.tenantAndOrgInfo
 					? { $in: userDetails.tenantAndOrgInfo.orgId }
 					: { $in: [userDetails.userInformation.organizationId] }
 
@@ -167,7 +165,7 @@ module.exports = class LibraryCategoriesHelper {
 								{
 									code: { $in: roles },
 									tenantId: userDetails.userInformation.tenantId,
-									orgId: { $in: [userDetails.userInformation.organizationId] },
+									orgIds: { $in: [userDetails.userInformation.organizationId] },
 								},
 								['title']
 							)
@@ -306,6 +304,8 @@ module.exports = class LibraryCategoriesHelper {
 
 				let allCategoryInfo = await projectCategoriesQueries.categoryDocuments({
 					_id: { $in: allCategoryId },
+					tenantId: userDetails.userInformation.tenantId,
+					orgIds: { $in: [userDetails.userInformation.organizationId] },
 				})
 				for (let singleCategoryInfo of allCategoryInfo) {
 					if (singleCategoryInfo.evidences && singleCategoryInfo.evidences.length > 0) {
@@ -506,14 +506,16 @@ module.exports = class LibraryCategoriesHelper {
 	 * @returns {Object} Details of library projects.
 	 */
 
-	static projectDetails(projectId, userToken = '', isATargetedSolution = '', language = '') {
+	static projectDetails(projectId, userToken = '', isATargetedSolution = '', language = '', userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				let tenantId = userDetails.userInformation.tenantId
 				let projectsData = await projectTemplateQueries.templateDocument(
 					{
 						_id: projectId,
 						status: CONSTANTS.common.PUBLISHED,
 						isDeleted: false,
+						tenantId: tenantId,
 					},
 					'all',
 					['__v']
@@ -625,7 +627,7 @@ module.exports = class LibraryCategoriesHelper {
 
 				// add tenantId and orgId
 				categoryData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-				categoryData['orgId'] = userDetails.tenantAndOrgInfo.orgId
+				categoryData['orgIds'] = userDetails.tenantAndOrgInfo.orgId
 
 				let projectCategoriesData = await projectCategoriesQueries.create(categoryData)
 
@@ -666,13 +668,12 @@ module.exports = class LibraryCategoriesHelper {
 				let tenantId
 				let organizationId
 				let query = {}
-				let userRoles = req.userDetails.userInformation.roles ? req.userDetails.userInformation.roles : []
 
 				// create query to fetch assets
 				query['tenantId'] = req.userDetails.tenantAndOrgInfo
 					? req.userDetails.tenantAndOrgInfo.tenantId
 					: req.userDetails.userInformation.tenantId
-				query['orgId'] = req.userDetails.tenantAndOrgInfo
+				query['orgIds'] = req.userDetails.tenantAndOrgInfo
 					? { $in: req.userDetails.tenantAndOrgInfo.orgId }
 					: { $in: [req.userDetails.userInformation.organizationId] }
 

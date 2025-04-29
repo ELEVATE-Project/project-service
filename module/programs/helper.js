@@ -209,10 +209,10 @@ module.exports = class ProgramsHelper {
 	 * Create program
 	 * @method
 	 * @name create
-	 * @param {Array} data
-	 * @param {String} user user id
-	 * @param {Boolean} checkDate this is true for when its called via API calls
-	 * @param {Object} userDetails user related info
+	 * @param {Object} data - request body data
+	 * @param {String} user - user id
+	 * @param {Boolean} checkDate - this is true for when its called via API calls
+	 * @param {Object} userDetails - user related info
 	 * @returns {JSON} - create program.
 	 */
 
@@ -248,7 +248,7 @@ module.exports = class ProgramsHelper {
 
 				// add tenantId and orgId
 				programData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-				programData['orgId'] = userDetails.tenantAndOrgInfo.orgId
+				programData['orgIds'] = userDetails.tenantAndOrgInfo.orgId
 
 				programData = _.omit(programData, ['scope', 'userId'])
 				let program = await programsQueries.createProgram(programData)
@@ -369,15 +369,20 @@ module.exports = class ProgramsHelper {
 	 * @param {String} programId - Program Id.
 	 * @param {Array} projections - Projections.
 	 * @param {Array} skipFields - Skip fields
+	 * @param {Object} userDetails - loggedin user's info
 	 * @returns {Object} - Details of the program.
 	 */
 
-	static details(programId, projections = 'all', skipFields = 'none') {
+	static details(programId, projections = 'all', skipFields = 'none', userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				let tenantId = userDetails.userInformation.tenantId
+				let orgId = userDetails.userInformation.organizationId
 				let programData = await programsQueries.programsDocument(
 					{
 						_id: programId,
+						tenantId: tenantId,
+						orgIds: { $in: [orgId] },
 					},
 					projections,
 					skipFields
@@ -952,14 +957,14 @@ module.exports = class ProgramsHelper {
 				matchQuery['tenantId'] = userDetails.tenantAndOrgInfo
 					? userDetails.tenantAndOrgInfo.tenantId
 					: userDetails.userInformation.tenantId
-				matchQuery['orgId'] = userDetails.tenantAndOrgInfo
+				matchQuery['orgIds'] = userDetails.tenantAndOrgInfo
 					? { $in: userDetails.tenantAndOrgInfo.orgId }
 					: { $in: [userDetails.userInformation.organizationId] }
 
 				// handle currentOrgOnly filter
 				if (currentOrgOnly) {
 					let organizationId = userDetails.userInformation.organizationId
-					matchQuery['orgId'] = { $in: [organizationId] }
+					matchQuery['orgIds'] = { $in: [organizationId] }
 				}
 
 				let sortQuery = {
@@ -1082,17 +1087,22 @@ module.exports = class ProgramsHelper {
 	 * @param {Boolean} getProjectsCount - get the projectsCount under that program.
 	 * @param {Number} pageNo - pageNo
 	 * @param {Number} pageSize - pageSize
+	 * @param {Object} userDetails -loggedin user's info
 	 * @returns {JSON} - List of programs that user created on app.
 	 */
 
-	static userPrivatePrograms(userId, language = '', getProjectsCount = false, pageNo, pageSize) {
+	static userPrivatePrograms(userId, language = '', getProjectsCount = false, pageNo, pageSize, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				let tenantId = userDetails.userInformation.tenantId
+				let orgId = userDetails.userInformation.organizationId
 				let programsData = await programsQueries.programsDocument(
 					{
 						createdBy: userId,
 						isAPrivateProgram: true,
 						isDeleted: false,
+						tenantId: tenantId,
+						orgIds: { $in: [orgId] },
 					},
 					['name', 'externalId', 'description', '_id', 'isAPrivateProgram', 'translations'],
 					'none',
@@ -1117,6 +1127,8 @@ module.exports = class ProgramsHelper {
 						{
 							$match: {
 								programId: { $in: userProgramIds },
+								tenantId: tenantId,
+								orgId: orgId,
 							},
 						},
 						{
@@ -1310,7 +1322,15 @@ module.exports = class ProgramsHelper {
 	 * @returns {JSON} - List of programs based on role and location.
 	 */
 
-	static forUserRoleAndLocation(bodyData, pageSize, pageNo, searchText = '', programId = '', projection) {
+	static forUserRoleAndLocation(
+		bodyData,
+		pageSize,
+		pageNo,
+		searchText = '',
+		programId = '',
+		projection,
+		userDetails
+	) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let queryData = await this.queryBasedOnRoleAndLocation(bodyData)
@@ -1322,7 +1342,15 @@ module.exports = class ProgramsHelper {
 				}
 				queryData.data.startDate = { $lte: new Date() }
 				queryData.data.endDate = { $gte: new Date() }
-				let targetedPrograms = await this.list(pageNo, pageSize, searchText, queryData.data, projection)
+				let targetedPrograms = await this.list(
+					pageNo,
+					pageSize,
+					searchText,
+					userDetails,
+					false,
+					queryData.data,
+					projection
+				)
 				return resolve({
 					success: true,
 					message: CONSTANTS.apiResponses.TARGETED_PROGRAMS_FETCHED,

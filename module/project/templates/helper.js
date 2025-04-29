@@ -392,7 +392,7 @@ module.exports = class ProjectTemplatesHelper {
 								userDetails.userInformation.userId
 						templateData.isReusable = true
 						templateData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-						templateData['orgId'] = userDetails.tenantAndOrgInfo.orgId
+						templateData['orgIds'] = userDetails.tenantAndOrgInfo.orgId
 
 						let createdTemplate = await projectTemplateQueries.createTemplate(templateData)
 
@@ -970,18 +970,23 @@ module.exports = class ProjectTemplatesHelper {
 	 * @param {String} userId - logged in user id.
 	 * @param {String} link - solution link.
 	 * @param {String} language- languageCode
+	 * @param {Object} userDetails - loggedin user's info
 	 * @returns {Array} Project templates data.
 	 */
 
-	static details(templateId = '', link = '', userId = '', isAPrivateProgram, language = '') {
+	static details(templateId = '', link = '', userId = '', isAPrivateProgram, language = '', userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let solutionsResult = {}
 				let findQuery = {}
+				let tenantId = userDetails.userInformation.tenantId
+				let orgId = userInformation.userInformation.organizationId
 				//get data when link is given
 				if (link != '') {
 					let queryData = {}
 					queryData['link'] = link
+					queryData['tenantId'] = tenantId
+					queryData['orgIds'] = { $in: [orgId] }
 
 					//   fetch solution details based on the link
 					let solutionDocument = await solutionsQueries.solutionsDocument(queryData, [
@@ -1020,6 +1025,9 @@ module.exports = class ProjectTemplatesHelper {
 						findQuery['externalId'] = templateId
 					}
 				}
+
+				findQuery['tenantId'] = tenantId
+				findQuery['orgIds'] = { $in: [orgId] }
 				//getting template data using templateId
 				let templateData = await projectTemplateQueries.templateDocument(findQuery, 'all', [
 					'ratings',
@@ -1148,6 +1156,8 @@ module.exports = class ProjectTemplatesHelper {
 					let certificateTemplateDetails = await certificateTemplateQueries.certificateTemplateDocument(
 						{
 							_id: templateData[0].certificateTemplateId,
+							tenantId: tenantId,
+							orgIds: { $in: [orgId] },
 						},
 						['criteria']
 					)
@@ -1162,7 +1172,7 @@ module.exports = class ProjectTemplatesHelper {
 				}
 
 				if (templateData[0].tasks && templateData[0].tasks.length > 0) {
-					templateData[0].tasks = await this.tasksAndSubTasks(templateData[0]._id, language)
+					templateData[0].tasks = await this.tasksAndSubTasks(templateData[0]._id, language, tenantId, orgId)
 				}
 				let result = await _templateInformation(templateData[0])
 				if (!result.success) {
@@ -1175,6 +1185,8 @@ module.exports = class ProjectTemplatesHelper {
 					const projectIdQuery = {
 						userId: userId,
 						projectTemplateId: templateData[0]._id,
+						tenantId: tenantId,
+						orgId: orgId,
 					}
 
 					if (isAPrivateProgram !== '') {
@@ -1220,16 +1232,20 @@ module.exports = class ProjectTemplatesHelper {
 	 * @name tasksAndSubTasks
 	 * @param {Array} templateId - Template id.
 	 * @param {String} language - language code
+	 * @param {String} tenantId - loggedin user's tenant id
+	 * @param {String} orgId - loggedin user's org id
 	 * @returns {Array} Tasks and sub task.
 	 */
 
-	static tasksAndSubTasks(templateId, language) {
+	static tasksAndSubTasks(templateId, language, tenantId, orgId) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				const templateDocument = await projectTemplateQueries.templateDocument(
 					{
 						_id: templateId,
 						status: CONSTANTS.common.PUBLISHED,
+						tenantId: tenantId,
+						orgIds: { $in: [orgId] },
 					},
 					['tasks', 'taskSequence']
 				)

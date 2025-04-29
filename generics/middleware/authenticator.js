@@ -307,7 +307,6 @@ module.exports = async function (req, res, next, token = '') {
 		async function validateIfOrgsBelongsToTenant(tenantId, orgId) {
 			let orgIdArr = orgId?.split(',') || []
 			let orgDetails = await userService.fetchDefaultOrgDetails(tenantId)
-			orgDetails.data.related_orgs = ['24']
 			let validOrgIds = null
 
 			if (orgIdArr.includes('ALL') || orgIdArr.includes('all')) {
@@ -380,7 +379,6 @@ module.exports = async function (req, res, next, token = '') {
 		}
 
 		let userRoles = decodedToken.data.roles.map((role) => role.title)
-		userRoles = ['tenant_admin']
 
 		if (performInternalAccessTokenCheck) {
 			decodedToken.data['tenantAndOrgInfo'] = {}

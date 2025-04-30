@@ -46,7 +46,7 @@ module.exports = class FormsHelper {
 		return new Promise(async (resolve, reject) => {
 			try {
 				bodyData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-				bodyData['orgId'] = userDetails.tenantAndOrgInfo.orgId
+				bodyData['orgIds'] = userDetails.tenantAndOrgInfo.orgId
 				const form = await formQueries.createForm(bodyData)
 				if (!form || !form._id) {
 					throw {
@@ -152,7 +152,7 @@ module.exports = class FormsHelper {
 				filter['tenantId'] = userDetails.tenantAndOrgInfo
 					? userDetails.tenantAndOrgInfo.tenantId
 					: userDetails.userInformation.tenantId
-				filter['orgId'] = userDetails.tenantAndOrgInfo
+				filter['orgIds'] = userDetails.tenantAndOrgInfo
 					? { $in: userDetails.tenantAndOrgInfo.orgId }
 					: { $in: [userDetails.userInformation.organizationId] }
 

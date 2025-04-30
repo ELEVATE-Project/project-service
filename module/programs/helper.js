@@ -164,7 +164,7 @@ module.exports = class ProgramsHelper {
 				updateObject.$set.entities = entities
 
 				// Join all keys except 'roles' into a comma-separated string and set it as entityType
-				scopeData['entityType'] = Object.keys(_.omit(scopeData, ['roles'])).join(',')
+				scopeData['entityType'] = Object.keys(_.omit(scopeData, ['roles']))
 
 				// Add the entityType to updateObject
 				updateObject['$set']['entityType'] = scopeData.entityType

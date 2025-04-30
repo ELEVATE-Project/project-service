@@ -311,7 +311,7 @@ module.exports = class SolutionsHelper {
 				updateObject.$set.entities = entities
 
 				// Create a comma-separated string of all keys in scopeData except 'roles'
-				scopeData['entityType'] = Object.keys(_.omit(scopeData, ['roles'])).join(',')
+				scopeData['entityType'] = Object.keys(_.omit(scopeData, ['roles']))
 
 				// Assign the entityType string to the entityType field in updateObject
 				updateObject['$set']['entityType'] = scopeData.entityType
@@ -2931,7 +2931,6 @@ module.exports = class SolutionsHelper {
 						true // to fetch current org assets only
 					)
 				}
-
 				// fetch projects created by the user
 				let userCreatedProjects = await this.assignedUserSolutions(
 					solutionType,

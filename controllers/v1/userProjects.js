@@ -1332,7 +1332,7 @@ module.exports = class UserProjects extends Abstract {
 		return new Promise(async (resolve, reject) => {
 			try {
 				const projectId = req.params._id
-				const verifyCertificateData = await userProjectsHelper.verifyCertificate(projectId, userDetails)
+				const verifyCertificateData = await userProjectsHelper.verifyCertificate(projectId, req.userDetails)
 				return resolve(verifyCertificateData)
 			} catch (error) {
 				return reject({

@@ -980,7 +980,7 @@ module.exports = class ProjectTemplatesHelper {
 				let solutionsResult = {}
 				let findQuery = {}
 				let tenantId = userDetails.userInformation.tenantId
-				let orgId = userInformation.userInformation.organizationId
+				let orgId = userDetails.userInformation.organizationId
 				//get data when link is given
 				if (link != '') {
 					let queryData = {}
@@ -1041,7 +1041,6 @@ module.exports = class ProjectTemplatesHelper {
 					'updatedAt',
 					'__v',
 				])
-
 				// Fetch downloadable urls for the category evidences
 				if (templateData[0].categories && templateData[0].categories.length > 0) {
 					// iterate over each category
@@ -1157,7 +1156,7 @@ module.exports = class ProjectTemplatesHelper {
 						{
 							_id: templateData[0].certificateTemplateId,
 							tenantId: tenantId,
-							orgIds: { $in: [orgId] },
+							orgIds: { $in: ['ALL', orgId] },
 						},
 						['criteria']
 					)

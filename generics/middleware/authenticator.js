@@ -70,6 +70,7 @@ module.exports = async function (req, res, next, token = '') {
 
 	let internalAccessApiPaths = [
 		'/templates/bulkCreate',
+		'/templates/update',
 		'/projectAttributes/update',
 		'/scp/publishTemplateAndTasks',
 		'/library/categories/create',

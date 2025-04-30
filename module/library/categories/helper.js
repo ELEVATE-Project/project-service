@@ -510,12 +510,14 @@ module.exports = class LibraryCategoriesHelper {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let tenantId = userDetails.userInformation.tenantId
+				let orgId = userDetails.userInformation.organizationId
 				let projectsData = await projectTemplateQueries.templateDocument(
 					{
 						_id: projectId,
 						status: CONSTANTS.common.PUBLISHED,
 						isDeleted: false,
 						tenantId: tenantId,
+						orgIds: { $in: ['ALL', orgId] },
 					},
 					'all',
 					['__v']

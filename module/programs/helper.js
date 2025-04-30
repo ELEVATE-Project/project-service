@@ -231,7 +231,7 @@ module.exports = class ProgramsHelper {
 
 				// avoid adding manupulative data
 				delete data.tenantId
-				delete data.orgId
+				delete data.orgIds
 
 				if (checkDate) {
 					if (data.hasOwnProperty(CONSTANTS.common.END_DATE)) {
@@ -247,8 +247,12 @@ module.exports = class ProgramsHelper {
 				})
 
 				// add tenantId and orgId
-				programData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-				programData['orgIds'] = userDetails.tenantAndOrgInfo.orgId
+				programData['tenantId'] = userDetails.tenantAndOrgInfo
+					? userDetails.tenantAndOrgInfo.tenantId
+					: userDetails.userInformation.tenantId
+				programData['orgIds'] = userDetails.tenantAndOrgInfo
+					? userDetails.tenantAndOrgInfo.orgId
+					: [userDetails.userInformation.organizationId]
 
 				programData = _.omit(programData, ['scope', 'userId'])
 				let program = await programsQueries.createProgram(programData)

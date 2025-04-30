@@ -525,7 +525,7 @@ module.exports = class SolutionsHelper {
 					_id: solutionId,
 				}
 				// modify the query object to fetch relevant data
-				queryObject['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+				queryObject['tenantId'] = userDetails.userInformation.tenantId
 
 				let solutionDocument = await solutionsQueries.solutionsDocument(queryObject, ['_id', 'programId'])
 
@@ -544,6 +544,8 @@ module.exports = class SolutionsHelper {
 					let programData = await programQueries.programsDocument(
 						{
 							_id: solutionDocument[0].programId,
+							tenantId: userDetails.userInformation.tenantId,
+							orgIds: { $in: ['ALL', userDetails.userInformation.organizationId] },
 						},
 						['_id', 'endDate', 'startDate']
 					)
@@ -593,6 +595,8 @@ module.exports = class SolutionsHelper {
 				let solutionUpdatedData = await solutionsQueries.updateSolutionDocument(
 					{
 						_id: solutionDocument[0]._id,
+						tenantId: userDetails.userInformation.tenantId,
+						orgIds: { $in: ['ALL', userDetails.userInformation.organizationId] },
 					},
 					updateObject,
 					{ new: true }
@@ -1454,7 +1458,10 @@ module.exports = class SolutionsHelper {
 							duplicateProgram.requestForPIIConsent = checkforProgramExist[0].requestForPIIConsent
 						}
 						userPrivateProgram = await programsHelper.create(
-							_.omit(duplicateProgram, ['_id', 'components', 'scope'])
+							_.omit(duplicateProgram, ['_id', 'components', 'scope']),
+							userDetails.userInformation.userId,
+							false,
+							userDetails
 						)
 						userPrivateProgram = userPrivateProgram.result
 					} else {
@@ -1890,6 +1897,7 @@ module.exports = class SolutionsHelper {
 							$ne: CONSTANTS.common.INACTIVE,
 						},
 						tenantId: tenantId,
+						orgIds: { $in: ['ALL', userDetails.userInformation.organizationId] },
 					},
 					['type', 'status', 'endDate']
 				)
@@ -1916,7 +1924,7 @@ module.exports = class SolutionsHelper {
 							{
 								status: CONSTANTS.common.INACTIVE,
 							},
-							userId
+							userDetails
 						)
 					}
 
@@ -1925,9 +1933,9 @@ module.exports = class SolutionsHelper {
 						result: [],
 					})
 				}
-
 				response.verified = true
 				return resolve({
+					success: true,
 					message: CONSTANTS.apiResponses.LINK_VERIFIED,
 					result: response,
 				})
@@ -2139,7 +2147,7 @@ module.exports = class SolutionsHelper {
 	 * @returns {Object} - Details of the solution.
 	 */
 
-	static checkForTargetedSolution(link = '', bodyData = {}) {
+	static checkForTargetedSolution(link = '', bodyData = {}, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let response = {
@@ -2147,15 +2155,10 @@ module.exports = class SolutionsHelper {
 					link: link,
 				}
 
-				let solutionDetails = await solutionsQueries.solutionsDocument({ link: link }, [
-					'type',
-					'_id',
-					'programId',
-					'name',
-					'projectTemplateId',
-					'programName',
-					'status',
-				])
+				let solutionDetails = await solutionsQueries.solutionsDocument(
+					{ link: link, tenantId: userDetails.userInformation.tenantId },
+					['type', '_id', 'programId', 'name', 'projectTemplateId', 'programName', 'status']
+				)
 
 				let queryData = await this.queryBasedOnRoleAndLocation(bodyData)
 				if (!queryData.success) {
@@ -2164,7 +2167,7 @@ module.exports = class SolutionsHelper {
 
 				queryData.data['link'] = link
 				let matchQuery = queryData.data
-
+				matchQuery['tenantId'] = userDetails.userInformation.tenantId
 				let solutionData = await solutionsQueries.solutionsDocument(matchQuery, [
 					'_id',
 					'link',
@@ -3119,7 +3122,7 @@ module.exports = class SolutionsHelper {
 	 * @returns {Object} - Details of the private solution.
 	 */
 
-	static privateProgramAndSolutionDetails(solutionData, userId = '', userToken) {
+	static privateProgramAndSolutionDetails(solutionData, userId = '', userToken, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Check if a private program and private solution already exist or not for this user.
@@ -3129,6 +3132,7 @@ module.exports = class SolutionsHelper {
 						author: userId,
 						type: solutionData.type,
 						isAPrivateProgram: true,
+						tenantId: userDetails.userInformation.tenantId,
 					},
 					['_id', 'programId', 'programName']
 				)
@@ -3150,7 +3154,8 @@ module.exports = class SolutionsHelper {
 						userId,
 						programAndSolutionData,
 						userToken,
-						true // create duplicate solution
+						true, // create duplicate solution
+						userDetails
 					)
 					if (!solutionAndProgramCreation.success) {
 						throw {
@@ -3201,7 +3206,7 @@ module.exports = class SolutionsHelper {
 						message: verifySolution.message ? verifySolution.message : CONSTANTS.apiResponses.INVALID_LINK,
 					}
 				}
-				let checkForTargetedSolution = await this.checkForTargetedSolution(link, bodyData)
+				let checkForTargetedSolution = await this.checkForTargetedSolution(link, bodyData, userDetails)
 				if (!checkForTargetedSolution || Object.keys(checkForTargetedSolution.result).length <= 0) {
 					return resolve(checkForTargetedSolution)
 				}
@@ -3327,6 +3332,7 @@ module.exports = class SolutionsHelper {
 							createdBy: userId,
 							referenceFrom: CONSTANTS.common.LINK,
 							link: link,
+							tenantId: userDetails.userInformation.tenantId,
 						}
 						let checkForProjectExist = await projectQueries.projectDocument(checkIfUserProjectExistsQuery, [
 							'_id',
@@ -3355,7 +3361,8 @@ module.exports = class SolutionsHelper {
 							let privateProgramAndSolutionDetails = await this.privateProgramAndSolutionDetails(
 								solutionData,
 								userId,
-								userToken
+								userToken,
+								userDetails
 							)
 							if (!privateProgramAndSolutionDetails.success) {
 								throw {

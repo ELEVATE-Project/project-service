@@ -1671,7 +1671,7 @@
 					"packageName": "shiksha-project"
 				}
 			],
-			"service": "project"
+			"service": "user"
 		},
 		{
 			"sourceRoute": "/project/v1/solutions/details/:id",

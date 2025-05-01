@@ -36,7 +36,6 @@ module.exports = class ProjectTemplateTasksHelper {
 
 				csvData.forEach((data) => {
 					let parsedData = UTILS.valueParser(data)
-
 					if (parsedData._SYSTEM_ID) {
 						taskIds.push(parsedData._SYSTEM_ID)
 						systemId = true
@@ -160,7 +159,7 @@ module.exports = class ProjectTemplateTasksHelper {
 	static createOrUpdateTask(data, template, solutionData, update = false, translationData = {}, taskNo) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let parsedData = UTILS.valueParser(data)
+				let parsedData = data
 
 				let allValues = {
 					type: parsedData.type,
@@ -446,7 +445,7 @@ module.exports = class ProjectTemplateTasksHelper {
 	 * @returns {Object} Bulk create project template tasks.
 	 */
 
-	static bulkCreate(tasks, projectTemplateId, userId, translationFiles = {}) {
+	static bulkCreate(tasks, projectTemplateId, userDetails, translationFiles = {}) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				const fileName = `create-project-template-tasks`
@@ -465,7 +464,6 @@ module.exports = class ProjectTemplateTasksHelper {
 				if (!csvData.success) {
 					return resolve(csvData)
 				}
-
 				// convert the translation files
 				let translationDataObject = {}
 				if (Object.keys(translationFiles).length > 0) {
@@ -481,9 +479,25 @@ module.exports = class ProjectTemplateTasksHelper {
 				let checkMandatoryTask = []
 				let subTaskIds = []
 
+				let tenantId = userDetails.tenantAndOrgInfo.tenantId
 				for (let task = 0; task < tasks.length; task++) {
+					let isTaskValid = await projectTemplateQueries.templateDocument({
+						_id: projectTemplateId,
+						tenantId,
+					})
+
+					if (!isTaskValid || !(isTaskValid.length > 0)) {
+						throw {
+							status: HTTP_STATUS_CODE.bad_request.status,
+							message: CONSTANTS.apiResponses.INVALID_TASK_DATA,
+						}
+					}
+
 					let currentData = UTILS.valueParser(tasks[task])
-					currentData.createdBy = currentData.updatedBy = userId
+					currentData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+					currentData['orgIds'] = userDetails.tenantAndOrgInfo.orgId
+
+					currentData.createdBy = currentData.updatedBy = userDetails.userInformation.userId
 
 					if (currentData.isDeletable != '' && currentData.isDeletable === 'TRUE') {
 						checkMandatoryTask.push(currentData.externalId)
@@ -497,6 +511,7 @@ module.exports = class ProjectTemplateTasksHelper {
 							currentData._SYSTEM_ID = CONSTANTS.apiResponses.PROJECT_TEMPLATE_TASK_EXISTS
 							input.push(currentData)
 						} else {
+							delete currentData._arrayFields
 							let createdTask = await this.createOrUpdateTask(
 								currentData,
 								csvData.data.template,
@@ -520,7 +535,7 @@ module.exports = class ProjectTemplateTasksHelper {
 					for (let item = 0; item < pendingItems.length; item++) {
 						let currentData = pendingItems[item]
 
-						currentData.createdBy = currentData.updatedBy = userId
+						currentData.createdBy = currentData.updatedBy = userDetails.userInformation.userId
 
 						if (csvData.data.tasks[currentData.externalId]) {
 							currentData._SYSTEM_ID = CONSTANTS.apiResponses.PROJECT_TEMPLATE_TASK_EXISTS

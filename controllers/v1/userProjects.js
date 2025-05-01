@@ -130,7 +130,7 @@ module.exports = class UserProjects extends Abstract {
 					req.query.lastDownloadedAt,
 					req.body,
 					req.userDetails.userInformation.userId,
-					req.userDetails.userToken,
+					req.userDetails,
 					req.headers['x-app-id'] ? req.headers['x-app-id'] : req.headers.appname ? req.headers.appname : '',
 					req.headers['x-app-ver']
 						? req.headers['x-app-ver']
@@ -285,7 +285,8 @@ module.exports = class UserProjects extends Abstract {
 						? req.headers.appversion
 						: '',
 					req.query.templateId,
-					req.query.language ? req.query.language : ''
+					req.query.language ? req.query.language : '',
+					req.userDetails
 				)
 
 				return resolve(projectDetails)
@@ -423,7 +424,7 @@ module.exports = class UserProjects extends Abstract {
 	async tasksStatus(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let taskStatus = await userProjectsHelper.tasksStatus(req.params._id, req.body.taskIds)
+				let taskStatus = await userProjectsHelper.tasksStatus(req.params._id, req.body.taskIds, req.userDetails)
 
 				taskStatus.result = taskStatus.data
 
@@ -719,7 +720,8 @@ module.exports = class UserProjects extends Abstract {
 					req.params._id,
 					taskIds,
 					req.userDetails.userInformation.userId,
-					req.headers['x-app-ver']
+					req.headers['x-app-ver'],
+					req.userDetails
 				)
 				return resolve(report)
 			} catch (error) {
@@ -911,7 +913,8 @@ module.exports = class UserProjects extends Abstract {
 					req.searchText,
 					req.query.language ? req.query.language : '',
 					req.query.programId ? req.query.programId : '',
-					req.query.status ? req.query.status : ''
+					req.query.status ? req.query.status : '',
+					req.userDetails
 				)
 				return resolve(projects)
 			} catch (error) {
@@ -1085,7 +1088,8 @@ module.exports = class UserProjects extends Abstract {
 					req.userDetails.userToken,
 					req.userDetails.userInformation.userId,
 					req.query.isATargetedSolution ? req.query.isATargetedSolution : '',
-					req.query.language ? req.query.language : ''
+					req.query.language ? req.query.language : '',
+					req.userDetails
 				)
 
 				return resolve({
@@ -1233,7 +1237,10 @@ module.exports = class UserProjects extends Abstract {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// fetch projects data of user, whish has certificate on completion
-				let projectDetails = await userProjectsHelper.certificates(req.userDetails.userInformation.userId)
+				let projectDetails = await userProjectsHelper.certificates(
+					req.userDetails.userInformation.userId,
+					req.userDetails
+				)
 				return resolve({
 					message: projectDetails.message,
 					result: projectDetails.data,
@@ -1325,7 +1332,7 @@ module.exports = class UserProjects extends Abstract {
 		return new Promise(async (resolve, reject) => {
 			try {
 				const projectId = req.params._id
-				const verifyCertificateData = await userProjectsHelper.verifyCertificate(projectId)
+				const verifyCertificateData = await userProjectsHelper.verifyCertificate(projectId, req.userDetails)
 				return resolve(verifyCertificateData)
 			} catch (error) {
 				return reject({

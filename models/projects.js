@@ -209,6 +209,16 @@ module.exports = {
 		},
 		duration: String,
 		conversation: Array,
+		tenantId: {
+			type: String,
+			index: true,
+			required: true,
+		},
+		orgId: {
+			type: String,
+			index: true,
+			required: true,
+		},
 	},
 	compoundIndex: [
 		{

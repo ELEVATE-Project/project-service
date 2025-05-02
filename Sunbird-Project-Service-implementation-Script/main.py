@@ -4163,6 +4163,8 @@ def solutionCreationAndMapping(projectName_for_folder_path, entityToUpload, list
             
                 solutionDetails = fetchSolutionDetailsFromProgramSheet(projectName_for_folder_path, programFile,
                                                                        solutionId, accessToken)
+                newRole = rolesPGM.split(",")
+                RoleArray = list(newRole)
                 scopeEntities = entitiesPGMID
                 scopeRoles = solutionDetails[0]
                 scope = {}
@@ -4173,7 +4175,7 @@ def solutionCreationAndMapping(projectName_for_folder_path, entityToUpload, list
                         scope[entity_type].append(entity_value)
                     else:
                         scope[entity_type] = [entity_value]
-                scope["roles"] = [rolesPGM]
+                scope["roles"] = RoleArray
                 bodySolutionUpdate = {
                   "scope": scope
                 }

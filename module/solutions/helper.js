@@ -2533,11 +2533,11 @@ module.exports = class SolutionsHelper {
 				}
 
 				matchQuery['$match']['tenantId'] = userDetails.userInformation.tenantId
-				matchQuery['$match']['orgIds'] = { $in: ['ALL', userDetails.userInformation.organizationId] }
+				matchQuery['$match']['orgId'] = userDetails.userInformation.organizationId
 
 				if (currentOrgOnly) {
 					let organizationId = userDetails.userInformation.organizationId
-					matchQuery['$match']['orgIds'] = { $in: ['ALL', organizationId] }
+					matchQuery['$match']['orgId'] = organizationId
 				}
 
 				let projection = {}

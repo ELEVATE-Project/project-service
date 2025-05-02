@@ -4423,12 +4423,6 @@ def mainFunc(MainFilePath, programFile, addObservationSolution, millisecond, isP
     if not isCourse:
         parentFolder = createFileStructre(MainFilePath, addObservationSolution)
         accessToken = generateAccessToken(parentFolder)
-        accessTokenSecret  = config.get(environment, 'access_token_secret')
-        decodedToken = jwt.decode(accessToken, accessTokenSecret , algorithms=["HS256"])
-        global tenantId
-        tenantId = clean_single_value(decodedToken['data']['tenant_id'])
-        global orgIds
-        orgIds = clean_single_value(decodedToken['data']['organization_id'])
         programsFileCheck(programFile, accessToken, parentFolder, MainFilePath)
         
         typeofSolution = validateSheets(addObservationSolution, accessToken, parentFolder)

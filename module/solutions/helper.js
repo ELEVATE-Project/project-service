@@ -311,11 +311,10 @@ module.exports = class SolutionsHelper {
 				updateObject.$set.entities = entities
 
 				// Create a comma-separated string of all keys in scopeData except 'roles'
-				scopeData['entityType'] = Object.keys(_.omit(scopeData, ['roles']))
+				scopeData['entityType'] = Object.keys(_.omit(scopeData, ['roles'])).join(',')
 
 				// Assign the entityType string to the entityType field in updateObject
 				updateObject['$set']['entityType'] = scopeData.entityType
-
 				// Update the solution document with the updateObject
 				let updateSolution = await solutionsQueries.updateSolutionDocument(
 					{
@@ -324,7 +323,6 @@ module.exports = class SolutionsHelper {
 					updateObject,
 					{ new: true }
 				)
-
 				// If the update was unsuccessful, throw an error
 				if (!updateSolution._id) {
 					throw {
@@ -607,7 +605,6 @@ module.exports = class SolutionsHelper {
 						message: CONSTANTS.apiResponses.SOLUTION_NOT_CREATED,
 					}
 				}
-
 				if (solutionData.scope && Object.keys(solutionData.scope).length > 0) {
 					let solutionScope = await this.setScope(solutionUpdatedData._id, solutionData.scope)
 

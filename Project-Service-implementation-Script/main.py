@@ -38,6 +38,7 @@ from openpyxl.styles import Color, PatternFill, Font, Border
 from openpyxl.styles import colors
 from openpyxl.cell import Cell
 import gdown
+import jwt
 
 # get current working directory
 currentDirectory = os.getcwd()
@@ -116,6 +117,37 @@ ccRootOrgName = None
 ccRootOrgId  = None
 certificatetemplateid = None
 question_sequence_arr = []
+tenantID = None
+orgIDFromTemplate = None
+
+
+
+#helper function 
+def clean_single_value(value):
+    value = str(value).strip()
+    try:
+        f = float(value)
+        if f.is_integer():
+            return str(int(f))
+        return str(f)
+    except ValueError:
+        return value  # not a number, return as-is
+
+def append_to_list(base, items_to_add):
+    if not isinstance(base, list):
+        base = [base]
+
+    if isinstance(items_to_add, list):
+        return base + items_to_add
+    else:
+        return base + [items_to_add]
+
+def normalize_cell_value(value):
+    if isinstance(value, str) and ',' in value:
+        return [clean_single_value(part) for part in value.split(',') if part.strip()]
+    return clean_single_value(value)
+
+
 
 # program creation function 
 def programCreation(accessToken,parentFolder,externalId,pName,pDescription,roles,userId):
@@ -167,8 +199,7 @@ def programCreation(accessToken,parentFolder,externalId,pName,pDescription,roles
     messageArr.append("Body : " + str(payload))
     headers = {'X-auth-token': accessToken,
                'internal-access-token': config.get(environment, 'internal-access-token'),
-               'Content-Type': 'application/json',
-               'Authorization':config.get(environment, 'Authorization')}
+               'Content-Type': 'application/json'}
     
     # program creation 
     responsePgmCreate = requests.request("POST", programCreationurl, headers=headers, data=(payload))
@@ -379,8 +410,7 @@ def programsFileCheck(filePathAddPgm, accessToken, parentFolder, MainFilePath):
                     global scopeEntityType
                     scopeEntityType = "state"
                     global entitiesType
-                    entitiesType = fetchEntityType(parentFolder, accessToken,
-                                                  entitiesPGM.lstrip().rstrip().split(","), scopeEntityType)
+                    entitiesType = fetchEntityType(parentFolder, accessToken,entitiesPGM.lstrip().rstrip().split(","), scopeEntityType)
                     if entitiesPGM:
                         entitiesPGM = entitiesPGM
                         scopeEntityType = entitiesType
@@ -582,8 +612,7 @@ def getProgramInfo(accessTokenUser, solutionName_for_folder_path, programNameInp
     programUrl = config.get(environment, 'elevateprojecthost') + config.get(environment, 'fetchProgramInfoApiUrl') + programNameInp.lstrip().rstrip()
 
     
-    headersProgramSearch = {'Authorization': config.get(environment, 'Authorization'),
-                            'Content-Type': 'application/json', 'X-auth-token': accessTokenUser,
+    headersProgramSearch = {'Content-Type': 'application/json', 'X-auth-token': accessTokenUser,
                             'internal-access-token': config.get(environment, 'internal-access-token')}
     responseProgramSearch = requests.get(url=programUrl, headers=headersProgramSearch)
     messageArr = []
@@ -731,9 +760,9 @@ def fetchEntityId(solutionName_for_folder_path, accessToken, entitiesNameList, s
     payload = {
 
     "query" : {
-          "entityType": {
-            "$in": scopeEntityType
-        }
+          "entityType": {"$in": scopeEntityType},
+          "tenantId" : tenantId,
+          "orgIds" : {"$in" : [orgIds]}
     },
 
     "projection": [
@@ -801,7 +830,9 @@ def fetchEntityType(solutionName_for_folder_path, accessToken, entitiesPGM, scop
         # Prepare the payload for the API request
         payload = {
             "query": {
-                "metaInformation.name": entityName  # Use the current entity name
+                "metaInformation.name": entityName,  # Use the current entity name
+                "tenantId" : tenantId,
+                "orgIds": {"$in": [orgIds]}   # Convert org_ids to strings for payload
             },
             "projection": [
                 "entityType"
@@ -1760,7 +1791,6 @@ def solutionUpdate(solutionName_for_folder_path, accessToken, solutionId, bodySo
     solutionUpdateApi = config.get(environment, 'elevateprojecthost') + config.get(environment, 'solutionUpdateApi') + str(solutionId)
     headerUpdateSolutionApi = {
         'Content-Type': 'application/json',
-        'Authorization': config.get(environment, 'Authorization'),
         'X-auth-token': accessToken,
         'X-Channel-id': config.get(environment, 'X-Channel-id'),
         "internal-access-token": config.get(environment, 'internal-access-token')
@@ -2721,7 +2751,7 @@ def fetchSolutionDetailsFromProgramSheet(solutionName_for_folder_path, programFi
         solutionName = responseFetchSolutionJson["result"]["name"]
 
         xfile = openpyxl.load_workbook(programFile)
-        resourceDetailsSheet = xfile.get_sheet_by_name('Resource Details')
+        resourceDetailsSheet = xfile['Resource Details']
         rowCountRD = resourceDetailsSheet.max_row
         columnCountRD = resourceDetailsSheet.max_column
         for row in range(3, rowCountRD + 1):
@@ -2786,7 +2816,7 @@ def prepareProgramSuccessSheet(MainFilePath, solutionName_for_folder_path, progr
         else:
             xfile = openpyxl.load_workbook(programFile)
 
-        resourceDetailsSheet = xfile.get_sheet_by_name('Resource Details')
+        resourceDetailsSheet = xfile['Resource Details']
 
         greenFill = PatternFill(start_color='0000FF00',
                                 end_color='0000FF00',
@@ -2892,7 +2922,7 @@ def prepareProgramSuccessSheetcsv(MainFilePath, solutionName_for_folder_path, pr
         else:
             xfile = openpyxl.load_workbook(programFile)
 
-        resourceDetailsSheet = xfile.get_sheet_by_name('Resource Details')
+        resourceDetailsSheet = xfile['Resource Details']
 
         greenFill = PatternFill(start_color='0000FF00',
                                 end_color='0000FF00',
@@ -4097,8 +4127,8 @@ def solutionCreationAndMapping(projectName_for_folder_path, entityToUpload, list
         urlCreateProjectSolutionApi = config.get(environment, 'elevateprojecthost') + config.get(environment, 'projectSolutionCreationApi')
         headerCreateSolutionApi = {
             'Content-Type': config.get(environment, 'Content-Type'),
-            'Authorization': config.get(environment, 'Authorization'),
             'X-auth-token': accessToken,
+            "internal-access-token" : config.get(environment, 'internal-access-token'),
             'X-Channel-id': config.get(environment, 'X-Channel-id')
         }
         sol_payload = {
@@ -4371,6 +4401,12 @@ def mainFunc(MainFilePath, programFile, addObservationSolution, millisecond, isP
     if not isCourse:
         parentFolder = createFileStructre(MainFilePath, addObservationSolution)
         accessToken = generateAccessToken(parentFolder)
+        accessTokenSecret  = config.get(environment, 'access_token_secret')
+        decodedToken = jwt.decode(accessToken, accessTokenSecret , algorithms=["HS256"])
+        global tenantId
+        tenantId = clean_single_value(decodedToken['data']['tenant_id'])
+        global orgIds
+        orgIds = clean_single_value(decodedToken['data']['organization_id'])
         programsFileCheck(programFile, accessToken, parentFolder, MainFilePath)
         
         typeofSolution = validateSheets(addObservationSolution, accessToken, parentFolder)

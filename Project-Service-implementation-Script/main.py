@@ -593,6 +593,28 @@ def generateAccessToken(solutionName_for_folder_path):
         fileheader = ["Access Token","Access Token succesfully genarated","Passed"]
         apicheckslog(solutionName_for_folder_path,fileheader)
         print("--->Access Token Generated!")
+        try:
+            accessTokenSecret = config.get(environment , 'access_token_secret')
+            decodedToken = jwt.decode(accessTokenUser, accessTokenSecret, algorithms=["HS256"])
+            if 'data' not in decodedToken:
+                print("Data not present in decodedToken")
+                terminatingMessage("Invalid Token")
+            if 'tenant_id' not in decodedToken['data']:
+                print("Tenant Id is not present in decodedToken")
+                terminatingMessage("Invalid Token")
+            if 'organization_id' not in decodedToken['data']:
+                print("Organization Id is not present in decodedToken")
+                terminatingMessage("Invalid Token")
+
+            global tenantId
+            tenantId = clean_single_value(decodedToken['data']['tenant_id'])
+            global orgIds
+            orgIds = clean_single_value(decodedToken['data']['organization_id'])
+
+        except jwt.exceptions.InvalidTokenError as e:
+            raise Exception(f"Invalid token: {str(e)}")
+        except Exception as e:
+            raise Exception(f"Token decoding failed: {str(e)}")
         return accessTokenUser
     
     print("Error in generating Access token")

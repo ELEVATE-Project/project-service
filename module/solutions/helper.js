@@ -668,12 +668,8 @@ module.exports = class SolutionsHelper {
 				currentOrgOnly = UTILS.convertStringToBoolean(currentOrgOnly)
 
 				// modify query to fetch documents accordingly
-				matchQuery['tenantId'] = userDetails.tenantAndOrgInfo
-					? userDetails.tenantAndOrgInfo.tenantId
-					: userDetails.userInformation.tenantId
-				matchQuery['orgIds'] = userDetails.tenantAndOrgInfo
-					? { $in: userDetails.tenantAndOrgInfo.orgId }
-					: { $in: [userDetails.userInformation.organizationId] }
+				matchQuery['tenantId'] = userDetails.userInformation.tenantId
+				matchQuery['orgIds'] = { $in: ['ALL', userDetails.userInformation.organizationId] }
 
 				if (currentOrgOnly) {
 					matchQuery['orgIds'] = { $in: [userDetails.userInformation.organizationId] }
@@ -1800,9 +1796,8 @@ module.exports = class SolutionsHelper {
 					isAPrivateProgram: false,
 				}
 
-				solutionMatchQuery['tenantId'] = userDetails.tenantAndOrgInfo
-					? userDetails.tenantAndOrgInfo.tenantId
-					: userDetails.userInformation.tenantId
+				solutionMatchQuery['tenantId'] = userDetails.userInformation.tenantId
+				solutionMatchQuery['orgIds'] = { $in: ['ALL', userDetails.userInformation.organizationId] }
 
 				let solutionData = await solutionsQueries.solutionsDocument(solutionMatchQuery, [
 					'link',
@@ -1882,9 +1877,7 @@ module.exports = class SolutionsHelper {
 					throw new Error(CONSTANTS.apiResponses.USER_ID_REQUIRED_CHECK)
 				}
 
-				let tenantId = userDetails.tenantAndOrgInfo
-					? userDetails.tenantAndOrgInfo.tenantId
-					: userDetails.userInformation.tenantId
+				let tenantId = userDetails.userInformation.tenantId
 
 				let solutionData = await solutionsQueries.solutionsDocument(
 					{
@@ -2540,11 +2533,11 @@ module.exports = class SolutionsHelper {
 				}
 
 				matchQuery['$match']['tenantId'] = userDetails.userInformation.tenantId
-				matchQuery['$match']['orgId'] = userDetails.userInformation.organizationId
+				matchQuery['$match']['orgIds'] = { $in: ['ALL', userDetails.userInformation.organizationId] }
 
 				if (currentOrgOnly) {
 					let organizationId = userDetails.userInformation.organizationId
-					matchQuery['$match']['orgId'] = { $in: [organizationId] }
+					matchQuery['$match']['orgIds'] = { $in: ['ALL', organizationId] }
 				}
 
 				let projection = {}
@@ -3410,9 +3403,7 @@ module.exports = class SolutionsHelper {
 					isDeleted: false,
 				}
 
-				solutionMatchQuery['tenantId'] = userDetails.tenantAndOrgInfo
-					? userDetails.tenantAndOrgInfo.tenantId
-					: userDetails.userInformation.tenantId
+				solutionMatchQuery['tenantId'] = userDetails.userInformation.tenantId
 
 				let solutionData = await solutionsQueries.solutionsDocument(solutionMatchQuery)
 

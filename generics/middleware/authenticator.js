@@ -85,7 +85,7 @@ module.exports = async function (req, res, next, token = '') {
 		'/templateTasks/bulkCreate',
 		'/certificateBaseTemplates/createOrUpdate',
 		'/certificateTemplates/createOrUpdate',
-		'certificateTemplates/uploadTemplate',
+		'/certificateTemplates/uploadTemplate',
 		'/certificateTemplates/createSvg',
 	]
 	let performInternalAccessTokenCheck = false

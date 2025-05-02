@@ -64,12 +64,8 @@ module.exports = class LibraryCategoriesHelper {
 					},
 				}
 
-				matchQuery['$match']['tenantId'] = userDetails.tenantAndOrgInfo
-					? userDetails.tenantAndOrgInfo.tenantId
-					: userDetails.userInformation.tenantId
-				matchQuery['$match']['orgIds'] = userDetails.tenantAndOrgInfo
-					? { $in: userDetails.tenantAndOrgInfo.orgId }
-					: { $in: [userDetails.userInformation.organizationId] }
+				matchQuery['$match']['tenantId'] = userDetails.userInformation.tenantId
+				matchQuery['$match']['orgIds'] = { $in: ['ALL', userDetails.userInformation.organizationId] }
 
 				if (categoryId && categoryId !== '') {
 					matchQuery['$match']['categories.externalId'] = categoryId
@@ -677,13 +673,13 @@ module.exports = class LibraryCategoriesHelper {
 					: req.userDetails.userInformation.tenantId
 				query['orgIds'] = req.userDetails.tenantAndOrgInfo
 					? { $in: req.userDetails.tenantAndOrgInfo.orgId }
-					: { $in: [req.userDetails.userInformation.organizationId] }
+					: { $in: ['ALL', req.userDetails.userInformation.organizationId] }
 
 				// handle currentOrgOnly filter
 				if (req.query['currentOrgOnly']) {
 					let currentOrgOnly = UTILS.convertStringToBoolean(req.query['currentOrgOnly'])
 					if (currentOrgOnly) {
-						query['orgId'] = { $in: [req.userDetails.userInformation.organizationId] }
+						query['orgIds'] = { $in: ['ALL', req.userDetails.userInformation.organizationId] }
 					}
 				}
 				query['status'] = CONSTANTS.common.ACTIVE_STATUS

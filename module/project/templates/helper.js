@@ -1386,17 +1386,13 @@ module.exports = class ProjectTemplatesHelper {
 				let queryObject = { isReusable: true }
 				currentOrgOnly = UTILS.convertStringToBoolean(currentOrgOnly)
 
-				queryObject['tenantId'] = userDetails.tenantAndOrgInfo
-					? userDetails.tenantAndOrgInfo.tenantId
-					: userDetails.userInformation.tenantId
-				queryObject['orgId'] = userDetails.tenantAndOrgInfo
-					? { $in: userDetails.tenantAndOrgInfo.orgId }
-					: { $in: [userDetails.userInformation.organizationId] }
+				queryObject['tenantId'] = userDetails.userInformation.tenantId
+				queryObject['orgIds'] = { $in: ['ALL', userDetails.userInformation.organizationId] }
 
 				// handle currentOrgOnly filter
 				if (currentOrgOnly) {
 					let organizationId = userDetails.userInformation.organizationId
-					queryObject['orgId'] = { $in: [organizationId] }
+					queryObject['orgIds'] = { $in: [organizationId] }
 				}
 
 				// If 'searchText' is provided, create a search query using '$or'.

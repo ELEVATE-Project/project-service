@@ -247,12 +247,8 @@ module.exports = class ProgramsHelper {
 				})
 
 				// add tenantId and orgId
-				programData['tenantId'] = userDetails.tenantAndOrgInfo
-					? userDetails.tenantAndOrgInfo.tenantId
-					: userDetails.userInformation.tenantId
-				programData['orgIds'] = userDetails.tenantAndOrgInfo
-					? userDetails.tenantAndOrgInfo.orgId
-					: [userDetails.userInformation.organizationId]
+				programData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+				programData['orgIds'] = userDetails.tenantAndOrgInfo.orgId
 
 				programData = _.omit(programData, ['scope', 'userId'])
 				let program = await programsQueries.createProgram(programData)
@@ -958,12 +954,8 @@ module.exports = class ProgramsHelper {
 				}
 
 				// modify query to fetch documents
-				matchQuery['tenantId'] = userDetails.tenantAndOrgInfo
-					? userDetails.tenantAndOrgInfo.tenantId
-					: userDetails.userInformation.tenantId
-				matchQuery['orgIds'] = userDetails.tenantAndOrgInfo
-					? { $in: userDetails.tenantAndOrgInfo.orgId }
-					: { $in: [userDetails.userInformation.organizationId] }
+				matchQuery['tenantId'] = userDetails.userInformation.tenantId
+				matchQuery['orgIds'] = { $in: ['ALL', userDetails.userInformation.organizationId] }
 
 				// handle currentOrgOnly filter
 				if (currentOrgOnly) {

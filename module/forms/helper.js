@@ -149,12 +149,8 @@ module.exports = class FormsHelper {
 					})
 				}
 
-				filter['tenantId'] = userDetails.tenantAndOrgInfo
-					? userDetails.tenantAndOrgInfo.tenantId
-					: userDetails.userInformation.tenantId
-				filter['orgIds'] = userDetails.tenantAndOrgInfo
-					? { $in: userDetails.tenantAndOrgInfo.orgId }
-					: { $in: [userDetails.userInformation.organizationId] }
+				filter['tenantId'] = userDetails.userInformation.tenantId
+				filter['orgIds'] = { $in: ['ALL', userDetails.userInformation.organizationId] }
 
 				const form = await formQueries.findOneForm(filter)
 				let defaultOrgForm
@@ -176,10 +172,8 @@ module.exports = class FormsHelper {
 							filter[`${key}`] = bodyData[`${key}`]
 						})
 					}
-					filter['orgId'] = { $in: [defaultOrgId] }
-					filter['tenantId'] = userDetails.tenantAndOrgInfo
-						? userDetails.tenantAndOrgInfo.tenantId
-						: userDetails.userInformation.tenantId
+					filter['orgIds'] = { $in: [defaultOrgId] }
+					filter['tenantId'] = userDetails.userInformation.tenantId
 					defaultOrgForm = await formQueries.findOneForm(filter)
 				}
 				if (!form && !defaultOrgForm) {

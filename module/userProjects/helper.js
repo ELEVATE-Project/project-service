@@ -2823,12 +2823,8 @@ module.exports = class UserProjectsHelper {
 					},
 				}
 
-				matchQuery['$match']['tenantId'] = userDetails.tenantAndOrgInfo
-					? userDetails.tenantAndOrgInfo.tenantId
-					: userDetails.userInformation.tenantId
-				matchQuery['$match']['orgId'] = userDetails.tenantAndOrgInfo
-					? { $in: userDetails.tenantAndOrgInfo.orgId }
-					: { $in: [userDetails.userInformation.organizationId] }
+				matchQuery['$match']['tenantId'] = userDetails.userInformation.tenantId
+				matchQuery['$match']['orgId'] = userDetails.userInformation.organizationId
 
 				// pass matchQuery based on reflection
 				if (process.env.ENABLE_REFLECTION === 'true') {

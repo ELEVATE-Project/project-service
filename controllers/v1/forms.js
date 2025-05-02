@@ -71,14 +71,14 @@ module.exports = class Forms extends Abstract {
 	 * @method
 	 * @name create
 	 * @param {Object} req.body -request data.
-	 * @param {Number} req.userDetails.userInformation.organizationId -organization id.
+	 * @param {Object} req.userDetails - user related info.
 	 * @returns {JSON} - forms creation object.
 	 */
 
 	async create(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let createdForm = await formsHelpers.create(req.body, req.userDetails.userInformation.organizationId)
+				let createdForm = await formsHelpers.create(req.body, req.userDetails)
 
 				return resolve(createdForm)
 			} catch (error) {
@@ -145,11 +145,7 @@ module.exports = class Forms extends Abstract {
 	async update(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				const updatedForm = await formsHelpers.update(
-					req.params._id,
-					req.body,
-					req.userDetails.userInformation.organizationId
-				)
+				const updatedForm = await formsHelpers.update(req.params._id, req.body, req.userDetails)
 				return resolve(updatedForm)
 			} catch (error) {
 				return resolve({
@@ -219,7 +215,7 @@ module.exports = class Forms extends Abstract {
 					const formData = await formsHelpers.read(
 						req.params._id,
 						req.body,
-						req.userDetails.userInformation.organizationId,
+						req.userDetails,
 						req.userDetails.userToken
 					)
 					return resolve(formData)

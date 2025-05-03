@@ -209,12 +209,14 @@ module.exports = class ProgramsHelper {
 	 * Create program
 	 * @method
 	 * @name create
-	 * @param {Array} data
-	 * @param {Boolean} checkDate this is true for when its called via API calls
+	 * @param {Object} data - request body data
+	 * @param {String} user - user id
+	 * @param {Boolean} checkDate - this is true for when its called via API calls
+	 * @param {Object} userDetails - user related info
 	 * @returns {JSON} - create program.
 	 */
 
-	static create(data, userId = '', checkDate = false) {
+	static create(data, userId = '', checkDate = false, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let programData = {
@@ -226,6 +228,10 @@ module.exports = class ProgramsHelper {
 					createdBy: userId == '' ? data.userId : userId,
 					updatedBy: userId == '' ? data.userId : userId,
 				}
+
+				// avoid adding manupulative data
+				delete data.tenantId
+				delete data.orgIds
 
 				if (checkDate) {
 					if (data.hasOwnProperty(CONSTANTS.common.END_DATE)) {
@@ -239,6 +245,11 @@ module.exports = class ProgramsHelper {
 				_.assign(programData, {
 					...data,
 				})
+
+				// add tenantId and orgId
+				programData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+				programData['orgIds'] = userDetails.tenantAndOrgInfo.orgId
+
 				programData = _.omit(programData, ['scope', 'userId'])
 				let program = await programsQueries.createProgram(programData)
 
@@ -281,10 +292,10 @@ module.exports = class ProgramsHelper {
 	 * @returns {JSON} - update program.
 	 */
 
-	static update(programId, data, userId, checkDate = false) {
+	static update(programId, data, userDetails, checkDate = false) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				data.updatedBy = userId
+				data.updatedBy = userDetails.userInformation.userId
 				data.updatedAt = new Date()
 				//convert components to objectedIds
 				if (data.components && data.components.length > 0) {
@@ -300,16 +311,22 @@ module.exports = class ProgramsHelper {
 					}
 				}
 
+				// delete tenantId & orgId attached in req.body to avoid adding manupulative data
+				delete data.tenantId
+				delete data.orgId
+
+				let programMatchQuery = {}
+				programMatchQuery['_id'] = programId
+				programMatchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
 				let program = await programsQueries.findAndUpdate(
-					{
-						_id: programId,
-					},
+					programMatchQuery,
 					{ $set: _.omit(data, ['scope']) },
 					{ new: true }
 				)
 
 				if (!program || !program._id) {
 					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.PROGRAM_NOT_UPDATED,
 					}
 				}
@@ -336,6 +353,7 @@ module.exports = class ProgramsHelper {
 				})
 			} catch (error) {
 				return resolve({
+					status: error.status || 400,
 					success: false,
 					message: error.message,
 					data: {},
@@ -351,15 +369,20 @@ module.exports = class ProgramsHelper {
 	 * @param {String} programId - Program Id.
 	 * @param {Array} projections - Projections.
 	 * @param {Array} skipFields - Skip fields
+	 * @param {Object} userDetails - loggedin user's info
 	 * @returns {Object} - Details of the program.
 	 */
 
-	static details(programId, projections = 'all', skipFields = 'none') {
+	static details(programId, projections = 'all', skipFields = 'none', userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				let tenantId = userDetails.userInformation.tenantId
+				let orgId = userDetails.userInformation.organizationId
 				let programData = await programsQueries.programsDocument(
 					{
 						_id: programId,
+						tenantId: tenantId,
+						orgIds: { $in: [orgId] },
 					},
 					projections,
 					skipFields
@@ -899,16 +922,17 @@ module.exports = class ProgramsHelper {
 	 * @param {Number} pageNo - page no.
 	 * @param {Number} pageSize - page size.
 	 * @param {String} searchText - text to search.
-	 *  @param {Object} filter - filter.
-	 *  @param {Array} projection - projection.
+	 * @param {Object} userDetails - user related info
+	 * @param {Object} filter - filter.
+	 * @param {Array} projection - projection.
 	 * @returns {Object} - Programs list.
 	 */
 
-	static list(pageNo = '', pageSize = '', searchText, filter = {}, projection) {
+	static list(pageNo = '', pageSize = '', searchText, userDetails, currentOrgOnly = false, filter = {}, projection) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let programDocument = []
-
+				currentOrgOnly = UTILS.convertStringToBoolean(currentOrgOnly)
 				let matchQuery = { status: CONSTANTS.common.ACTIVE_STATUS }
 				if (Object.keys(filter).length > 0) {
 					matchQuery = _.merge(matchQuery, filter)
@@ -927,6 +951,16 @@ module.exports = class ProgramsHelper {
 							description: new RegExp(searchText, 'i'),
 						}
 					)
+				}
+
+				// modify query to fetch documents
+				matchQuery['tenantId'] = userDetails.userInformation.tenantId
+				matchQuery['orgIds'] = { $in: ['ALL', userDetails.userInformation.organizationId] }
+
+				// handle currentOrgOnly filter
+				if (currentOrgOnly) {
+					let organizationId = userDetails.userInformation.organizationId
+					matchQuery['orgIds'] = { $in: [organizationId] }
 				}
 
 				let sortQuery = {
@@ -1049,17 +1083,22 @@ module.exports = class ProgramsHelper {
 	 * @param {Boolean} getProjectsCount - get the projectsCount under that program.
 	 * @param {Number} pageNo - pageNo
 	 * @param {Number} pageSize - pageSize
+	 * @param {Object} userDetails -loggedin user's info
 	 * @returns {JSON} - List of programs that user created on app.
 	 */
 
-	static userPrivatePrograms(userId, language = '', getProjectsCount = false, pageNo, pageSize) {
+	static userPrivatePrograms(userId, language = '', getProjectsCount = false, pageNo, pageSize, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				let tenantId = userDetails.userInformation.tenantId
+				let orgId = userDetails.userInformation.organizationId
 				let programsData = await programsQueries.programsDocument(
 					{
 						createdBy: userId,
 						isAPrivateProgram: true,
 						isDeleted: false,
+						tenantId: tenantId,
+						orgIds: { $in: [orgId] },
 					},
 					['name', 'externalId', 'description', '_id', 'isAPrivateProgram', 'translations'],
 					'none',
@@ -1084,6 +1123,8 @@ module.exports = class ProgramsHelper {
 						{
 							$match: {
 								programId: { $in: userProgramIds },
+								tenantId: tenantId,
+								orgId: orgId,
 							},
 						},
 						{
@@ -1277,7 +1318,15 @@ module.exports = class ProgramsHelper {
 	 * @returns {JSON} - List of programs based on role and location.
 	 */
 
-	static forUserRoleAndLocation(bodyData, pageSize, pageNo, searchText = '', programId = '', projection) {
+	static forUserRoleAndLocation(
+		bodyData,
+		pageSize,
+		pageNo,
+		searchText = '',
+		programId = '',
+		projection,
+		userDetails
+	) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let queryData = await this.queryBasedOnRoleAndLocation(bodyData)
@@ -1289,7 +1338,15 @@ module.exports = class ProgramsHelper {
 				}
 				queryData.data.startDate = { $lte: new Date() }
 				queryData.data.endDate = { $gte: new Date() }
-				let targetedPrograms = await this.list(pageNo, pageSize, searchText, queryData.data, projection)
+				let targetedPrograms = await this.list(
+					pageNo,
+					pageSize,
+					searchText,
+					userDetails,
+					false,
+					queryData.data,
+					projection
+				)
 				return resolve({
 					success: true,
 					message: CONSTANTS.apiResponses.TARGETED_PROGRAMS_FETCHED,

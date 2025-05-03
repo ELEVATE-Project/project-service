@@ -63,7 +63,7 @@ module.exports = class ProjectTemplateTasks extends Abstract {
 				const projectTemplateTasks = await projectTemplateTasksHelper.bulkCreate(
 					templateTasks,
 					req.params._id,
-					req.userDetails.userInformation.userId,
+					req.userDetails,
 					req.files.translationFiles
 				)
 

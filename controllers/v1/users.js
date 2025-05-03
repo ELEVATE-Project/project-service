@@ -78,7 +78,8 @@ module.exports = class Users {
 					req.pageSize,
 					req.pageNo,
 					req.searchText,
-					req.userDetails.userInformation.userId
+					req.userDetails.userInformation.userId,
+					req.userDetails
 				)
 
 				return resolve(targetedSolutions)
@@ -158,7 +159,8 @@ module.exports = class Users {
 						req.query.language ? req.query.language : '',
 						req.query.getProjectsCount ? req.query.getProjectsCount : false,
 						req.pageNo,
-						req.pageSize
+						req.pageSize,
+						req.userDetails
 					)
 					return resolve(programsData)
 				} else {
@@ -167,7 +169,8 @@ module.exports = class Users {
 						req.pageNo,
 						req.pageSize,
 						req.searchText,
-						req.userDetails.userInformation.userId
+						req.userDetails.userInformation.userId,
+						req.userDetails
 					)
 
 					programs.result = programs.data

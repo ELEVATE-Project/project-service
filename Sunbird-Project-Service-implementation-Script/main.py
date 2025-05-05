@@ -158,7 +158,7 @@ def programCreation(accessToken,parentFolder,externalId,pName,pDescription,roles
       ],
        "scope": {
             entitiesTypeStr: entitiesPGMID,
-            "roles": [roles]
+            "roles": roles
         },
         
       "requestForPIIConsent" : True
@@ -357,6 +357,8 @@ def programsFileCheck(filePathAddPgm, accessToken, parentFolder, MainFilePath):
                     extIdPGM = dictDetailsEnv['Program ID'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Program ID'] else terminatingMessage("\"Program ID\" must not be Empty in \"Program details\" sheet")
                     proDesc = dictDetailsEnv['Description of the Program'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Description of the Program'] else terminatingMessage("\"Program ID\" must not be Empty in \"Program details\" sheet")
                     roles = dictDetailsEnv['Targeted subrole at program level'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Targeted subrole at program level'] else terminatingMessage("\"Program ID\" must not be Empty in \"Program details\" sheet")
+                    newProgramRole = roles.split(",")
+                    programRoleArray = list(newProgramRole)
                     returnvalues = []
                     global entitiesPGM
                     entitiesPGM = dictDetailsEnv['Targeted entities at program level'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Targeted entities at program level'] else terminatingMessage("\"Targeted entities at program level\" must not be Empty in \"Program details\" sheet")
@@ -426,7 +428,7 @@ def programsFileCheck(filePathAddPgm, accessToken, parentFolder, MainFilePath):
                         # sys.exit()
 
                         # call function to create program 
-                        programCreation(accessToken,parentFolder,extIdPGM,programNameInp,proDesc,roles,userId)
+                        programCreation(accessToken,parentFolder,extIdPGM,programNameInp,proDesc,programRoleArray,userId)
                         # accessToken, parentFolder, extIdPGM, programNameInp, descriptionPGM,keywordsPGM.lstrip().rstrip().split(","),mainRole,rolesPGM
                         # sys.exit()
                         programmappingpdpmsheetcreation(MainFilePath, accessToken, program_file, extIdPGM,parentFolder)

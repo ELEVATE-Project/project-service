@@ -2250,7 +2250,6 @@
 			"type": "GET",
 			"priority": "MUST_HAVE",
 			"inSequence": false,
-			"requiresCustomHandling": true,
 			"orchestrated": false,
 			"targetPackages": [
 				{

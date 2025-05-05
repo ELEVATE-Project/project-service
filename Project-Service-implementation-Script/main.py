@@ -190,7 +190,7 @@ def programCreation(accessToken,parentFolder,externalId,pName,pDescription,roles
       ],
        "scope": {
             entitiesTypeStr: entitiesPGMID,
-            "roles": [roles]
+            "roles": roles
         },
         
       "requestForPIIConsent" : True
@@ -388,6 +388,8 @@ def programsFileCheck(filePathAddPgm, accessToken, parentFolder, MainFilePath):
                     extIdPGM = dictDetailsEnv['Program ID'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Program ID'] else terminatingMessage("\"Program ID\" must not be Empty in \"Program details\" sheet")
                     proDesc = dictDetailsEnv['Description of the Program'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Description of the Program'] else terminatingMessage("\"Program ID\" must not be Empty in \"Program details\" sheet")
                     roles = dictDetailsEnv['Targeted subrole at program level'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Targeted subrole at program level'] else terminatingMessage("\"Program ID\" must not be Empty in \"Program details\" sheet")
+                    newProgramRole = roles.split(",")
+                    programRoleArray = list(newProgramRole)
                     returnvalues = []
                     global entitiesPGM
                     entitiesPGM = dictDetailsEnv['Targeted entities at program level'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Targeted entities at program level'] else terminatingMessage("\"Targeted entities at program level\" must not be Empty in \"Program details\" sheet")
@@ -456,7 +458,7 @@ def programsFileCheck(filePathAddPgm, accessToken, parentFolder, MainFilePath):
                         # sys.exit()
 
                         # call function to create program 
-                        programCreation(accessToken,parentFolder,extIdPGM,programNameInp,proDesc,roles,userId)
+                        programCreation(accessToken,parentFolder,extIdPGM,programNameInp,proDesc,programRoleArray,userId)
                         # accessToken, parentFolder, extIdPGM, programNameInp, descriptionPGM,keywordsPGM.lstrip().rstrip().split(","),mainRole,rolesPGM
                         # sys.exit()
                         programmappingpdpmsheetcreation(MainFilePath, accessToken, program_file, extIdPGM,parentFolder)
@@ -569,6 +571,31 @@ def envCheck():
         print(e)
         return False
 
+
+def decodeToken(accessTokenUser):
+    try:
+        accessTokenSecret = config.get(environment , 'access_token_secret')
+        decodedToken = jwt.decode(accessTokenUser, accessTokenSecret, algorithms=["HS256"])
+        if 'data' not in decodedToken:
+            print("Data not present in decodedToken")
+            terminatingMessage("Invalid Token")
+        if 'tenant_id' not in decodedToken['data']:
+            print("Tenant Id is not present in decodedToken")
+            terminatingMessage("Invalid Token")
+        if 'organization_id' not in decodedToken['data']:
+            print("Organization Id is not present in decodedToken")
+            terminatingMessage("Invalid Token")
+        global tenantId
+        tenantId = clean_single_value(decodedToken['data']['tenant_id'])
+        global orgIds
+        orgIds = clean_single_value(decodedToken['data']['organization_id'])
+
+    except jwt.exceptions.InvalidTokenError as e:
+        raise Exception(f"Invalid token: {str(e)}")
+    except Exception as e:
+            raise Exception(f"Token decoding failed: {str(e)}")
+    
+
 # Generate access token for the APIs. 
 def generateAccessToken(solutionName_for_folder_path):
     # production search user api - start
@@ -593,28 +620,7 @@ def generateAccessToken(solutionName_for_folder_path):
         fileheader = ["Access Token","Access Token succesfully genarated","Passed"]
         apicheckslog(solutionName_for_folder_path,fileheader)
         print("--->Access Token Generated!")
-        try:
-            accessTokenSecret = config.get(environment , 'access_token_secret')
-            decodedToken = jwt.decode(accessTokenUser, accessTokenSecret, algorithms=["HS256"])
-            if 'data' not in decodedToken:
-                print("Data not present in decodedToken")
-                terminatingMessage("Invalid Token")
-            if 'tenant_id' not in decodedToken['data']:
-                print("Tenant Id is not present in decodedToken")
-                terminatingMessage("Invalid Token")
-            if 'organization_id' not in decodedToken['data']:
-                print("Organization Id is not present in decodedToken")
-                terminatingMessage("Invalid Token")
-
-            global tenantId
-            tenantId = clean_single_value(decodedToken['data']['tenant_id'])
-            global orgIds
-            orgIds = clean_single_value(decodedToken['data']['organization_id'])
-
-        except jwt.exceptions.InvalidTokenError as e:
-            raise Exception(f"Invalid token: {str(e)}")
-        except Exception as e:
-            raise Exception(f"Token decoding failed: {str(e)}")
+        decodeToken(accessTokenUser)
         return accessTokenUser
     
     print("Error in generating Access token")

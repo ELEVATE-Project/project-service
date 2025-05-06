@@ -119,7 +119,7 @@ const createObservationFromSolutionTemplate = function (token, templateId, bodyD
 const importSurveryTemplateToSolution = function (token, solutionId, bodyData) {
 	return new Promise(async (resolve, reject) => {
 		try {
-			let observationCreateUrl =
+			let surveyCreateUrl =
 				ASSESSMENT_URL + '/v1/surveys/importSurveryTemplateToSolution' + '/' + solutionId + '?appName=elevate'
 
 			const options = {
@@ -131,7 +131,7 @@ const importSurveryTemplateToSolution = function (token, solutionId, bodyData) {
 				json: bodyData,
 			}
 
-			request.post(observationCreateUrl, options, assessmentCallback)
+			request.post(surveyCreateUrl, options, assessmentCallback)
 
 			function assessmentCallback(err, data) {
 				let result = {
@@ -150,6 +150,7 @@ const importSurveryTemplateToSolution = function (token, solutionId, bodyData) {
 				return resolve(result)
 			}
 		} catch (error) {
+			console.log(error, 'this is errro')
 			return reject(error)
 		}
 	})

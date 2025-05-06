@@ -1177,6 +1177,9 @@ module.exports = class UserProjectsHelper {
 						'tasks.solutionDetails',
 						'tasks.submissions',
 						'tasks.observationInformation',
+						'tasks.surveyInformation',
+						'tasks.improvementProjectInformation',
+						'tasks.currentTask',
 						'tasks.externalId',
 						'programInformation._id',
 						'projectTemplateId',
@@ -1192,28 +1195,30 @@ module.exports = class UserProjectsHelper {
 				let currentTask = project[0].tasks.find((task) => task._id == taskId)
 
 				let solutionDetails = currentTask.solutionDetails
-
+				console.log(currentTask, 'this is task')
 				let assessmentOrObservationData = {}
 
 				if (
-					// project[0].entityInformation &&
-					// project[0].entityInformation._id &&
-					// project[0].programInformation &&
-					// project[0].programInformation._id
-					project[0]
+					project[0].entityInformation &&
+					project[0].entityInformation.entityType &&
+					project[0].programInformation &&
+					project[0].programInformation._id
 				) {
-					// assessmentOrObservationData = {
-					// 	entityId: project[0].entityInformation._id,
-					// 	programId: project[0].programInformation._id,
-					// }
+					assessmentOrObservationData = {
+						entityType: project[0].entityInformation.entityType,
+						programId: project[0].programInformation._id,
+					}
 					let dynamicTaskInfromation = `${solutionDetails.solutionType}Information`
-					if (currentTask.dynamicTaskInfromation) {
-						assessmentOrObservationData = currentTask.observationInformation
+					console.log(dynamicTaskInfromation, currentTask[dynamicTaskInfromation], 'this is data')
+					if (currentTask[dynamicTaskInfromation]) {
+						console.log(dynamicTaskInfromation, 'this is data2')
+
+						assessmentOrObservationData = currentTask[dynamicTaskInfromation]
 					} else {
 						let assessmentOrObservation = {
 							token: userToken,
 							solutionDetails: solutionDetails,
-							entityId: assessmentOrObservationData.entityId,
+							entityType: assessmentOrObservationData.entityType,
 							programId: assessmentOrObservationData.programId,
 							project: {
 								_id: projectId,
@@ -2905,7 +2910,6 @@ module.exports = class UserProjectsHelper {
 					isATargetedSolution,
 					language
 				)
-
 				// If template data is not found throw error
 				if (libraryProjects.data && !Object.keys(libraryProjects.data).length > 0) {
 					throw {
@@ -2989,16 +2993,16 @@ module.exports = class UserProjectsHelper {
 						return resolve(programAndSolutionInformation)
 					}
 
-					if (
-						libraryProjects.data['entityInformation'] &&
-						libraryProjects.data['entityInformation'].entityType !==
-							programAndSolutionInformation.data.solutionInformation.entityType
-					) {
-						throw {
-							message: CONSTANTS.apiResponses.ENTITY_TYPE_MIS_MATCHED,
-							status: HTTP_STATUS_CODE.bad_request.status,
-						}
-					}
+					// if (
+					// 	libraryProjects.data['entityInformation'] &&
+					// 	libraryProjects.data.entityType !==
+					// 		programAndSolutionInformation.data.solutionInformation.entityType
+					// ) {
+					// 	throw {
+					// 		message: CONSTANTS.apiResponses.ENTITY_TYPE_MIS_MATCHED,
+					// 		status: HTTP_STATUS_CODE.bad_request.status,
+					// 	}
+					// }
 
 					libraryProjects.data = _.merge(libraryProjects.data, programAndSolutionInformation.data)
 				}
@@ -3063,9 +3067,10 @@ module.exports = class UserProjectsHelper {
 				if (requestedData.hasAcceptedTAndC) {
 					libraryProjects.data.hasAcceptedTAndC = true
 				}
-
 				libraryProjects.data.projectTemplateId = libraryProjects.data._id
 				libraryProjects.data.projectTemplateExternalId = libraryProjects.data.externalId
+				// libraryProjects.data.entityType =libraryProjects.data.entityType
+				libraryProjects.data.entityInformation = { entityType: libraryProjects.data.entityType }
 
 				let projectCreation = await projectQueries.createProject(_.omit(libraryProjects.data, ['_id']))
 
@@ -3121,6 +3126,7 @@ module.exports = class UserProjectsHelper {
 					data: projectCreation.data,
 				})
 			} catch (error) {
+				console.log(error, 'this is error')
 				return resolve({
 					success: false,
 					message: error.message,
@@ -4108,32 +4114,48 @@ module.exports = class UserProjectsHelper {
 			}
 		})
 	}
-
+	/**
+	 * Get project  infromation when project as a task
+	 * @method
+	 * @name _improvementProjectDetails
+	 * @param {Object} projectData - Task data of project
+	 * @param {Object} userRoleAndProfileInformation -
+	 * @param {String} userToken - filter to search project to be updated.
+	 * @param {String} userId - Logged in user Id.
+	 * @param {String} [appName = ""] - App Name.
+	 * @param {String} [appVersion = ""] - App Version.
+	 * @returns {Object} status of update project
+	 */
 	static _improvementProjectDetails(projectData, userRoleAndProfileInformation = {}, userToken, userId) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let result = {}
 				let matchQuery = {
-					// solutionId:new ObjectId(projectData.solutionDetails.solutionId)
-					solutionId: new ObjectId('667a4086b070696248731b30'),
+					solutionId: new ObjectId(projectData.solutionDetails.solutionId),
 				}
-				let projectIdFromsolutionId = await this.projects(
-					matchQuery,
-					CONSTANTS.common.DEFAULT_PAGE_SIZE,
-					CONSTANTS.common.DEFAULT_PAGE_NO,
-					'',
-					['title', 'description', 'solutionId', 'programId', '_id']
-				)
-				projectIdFromsolutionId = projectIdFromsolutionId.data.data[0]._id
+
+				let projectIdFromsolutionId = await projectTemplateQueries.templateDocument(matchQuery)
+				if (!projectIdFromsolutionId.length > 0) {
+					throw {
+						message: CONSTANTS.apiResponses.PROJECT_TEMPLATE_NOT_FOUND,
+						status: HTTP_STATUS_CODE.bad_request.status,
+					}
+				}
+
+				projectIdFromsolutionId = projectIdFromsolutionId[0].externalId
 
 				// create survey using details api
 				let projectDetails = await this.detailsV2(
-					projectIdFromsolutionId ? projectIdFromsolutionId : '',
+					'',
 					projectData.solutionDetails._id,
 					'162',
 					userToken,
-					userRoleAndProfileInformation
+					userRoleAndProfileInformation,
+					'',
+					'',
+					projectIdFromsolutionId ? projectIdFromsolutionId : ''
 				)
+				console.log(projectDetails, 'this is details')
 				if (projectDetails.success) {
 					result['projectId'] = projectDetails.data._id
 				}
@@ -4144,6 +4166,7 @@ module.exports = class UserProjectsHelper {
 					data: result,
 				})
 			} catch (error) {
+				console.log(error)
 				return resolve({
 					message: error.message,
 					success: false,
@@ -4884,7 +4907,7 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 							name: '',
 						},
 						status: CONSTANTS.common.PUBLISHED_STATUS,
-						entities: [userRoleAndProfileInformation.school],
+						// entities: [userRoleAndProfileInformation[observationData.entityType]],
 						project: observationData.project,
 					}
 				)
@@ -4898,6 +4921,37 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 
 				result['solutionId'] = observationCreatedFromTemplate.data.solutionId
 				result['observationId'] = observationCreatedFromTemplate.data._id
+				let fetchedSolutions = await surveyService.listSolutions({
+					externalId: { $in: [observationCreatedFromTemplate.data.solutionExternalId] },
+				})
+				fetchedSolutions = fetchedSolutions.data[0]
+
+				if (!fetchedSolutions) {
+					throw {
+						message: CONSTANTS.apiResponses.SOLUTION_NOT_FOUND,
+						status: HTTP_STATUS_CODE.bad_request.status,
+					}
+				}
+				let solutionDetails = {
+					solutionSubType: fetchedSolutions.entityType,
+					solutionType: fetchedSolutions.type,
+					_id: fetchedSolutions._id,
+					solutionExternalId: fetchedSolutions.externalId,
+					name: fetchedSolutions.name,
+					isReusable: fetchedSolutions.isReusable,
+					minNoOfSubmissionsRequired: fetchedSolutions.minNoOfSubmissionsRequired,
+				}
+				await projectQueries.findOneAndUpdate(
+					{
+						_id: new ObjectId(observationData.project._id),
+						'tasks._id': observationData.project.taskId,
+					},
+					{
+						$set: {
+							'tasks.$.solutionDetails': solutionDetails,
+						},
+					}
+				)
 			} else {
 				let startDate = new Date()
 				let endDate = new Date()
@@ -4982,8 +5036,40 @@ function _surveyDetails(surveyData, userRoleAndProfileInformation = {}) {
 						message: CONSTANTS.apiResponses.SURVEY_NOT_CREATED,
 					}
 				}
+				console.log(surveyCreatedFromTemplate.data.solutionExternalId)
 				surveyData.solutionDetails._id = surveyCreatedFromTemplate.data.solutionId
 				surveyData.solutionDetails.externalId = surveyCreatedFromTemplate.data.solutionExternalId
+
+				let fetchedSolutions = await surveyService.listSolutions({
+					externalId: { $in: [surveyData.solutionDetails.externalId] },
+				})
+				fetchedSolutions = fetchedSolutions.data[0]
+				if (!fetchedSolutions) {
+					throw {
+						message: CONSTANTS.apiResponses.SOLUTION_NOT_FOUND,
+						status: HTTP_STATUS_CODE.bad_request.status,
+					}
+				}
+				let solutionDetails = {
+					solutionSubType: fetchedSolutions.entityType,
+					solutionType: fetchedSolutions.type,
+					_id: fetchedSolutions._id,
+					solutionExternalId: fetchedSolutions.externalId,
+					name: fetchedSolutions.name,
+					isReusable: fetchedSolutions.isReusable,
+					minNoOfSubmissionsRequired: fetchedSolutions.minNoOfSubmissionsRequired,
+				}
+				await projectQueries.findOneAndUpdate(
+					{
+						_id: new ObjectId(surveyData.project._id),
+						'tasks._id': surveyData.project.taskId,
+					},
+					{
+						$set: {
+							'tasks.$.solutionDetails': solutionDetails,
+						},
+					}
+				)
 			}
 
 			// create survey using details api
@@ -4992,7 +5078,7 @@ function _surveyDetails(surveyData, userRoleAndProfileInformation = {}) {
 				surveyData.solutionDetails._id,
 				userRoleAndProfileInformation
 			)
-
+			console.log(surveyCreated, 'this is survey')
 			if (surveyCreated.success) {
 				// result['surveyId'] = surveyCreated.data._id
 				result['surveySubmissionId'] = surveyCreated.data.assessment.submissionId

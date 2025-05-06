@@ -267,7 +267,7 @@ module.exports = async function (req, res, next, token = '') {
 			)
 
 			if (!fetchSingleOrgIdFunc.success) {
-				return res.status(responseCode.unauthorized.status).send(respUtil(fetchSingleOrgIdFunc.errorObj))
+				return res.status(HTTP_STATUS_CODE['unauthorized'].status).send(respUtil(fetchSingleOrgIdFunc.errorObj))
 			}
 			userInformation = {
 				userId:

@@ -4449,8 +4449,7 @@ def validateTenantAndOrgIdsFromProgramSheet(programFileContent):
     # if roleOfResourceCreator not in ['org_admin'] and not orgIdsFromProgramFile:
     #     raise ValueError("Org ID is required for role 'admin' and 'tenant_admin' in program template and cannot be empty")
 
-    assignTenantOrgValuesToGlobalVariables(tenantIdFromProgramFile, orgIdsFromProgramFile)    
-    exit()
+    assignTenantOrgValuesToGlobalVariables(tenantIdFromProgramFile, orgIdsFromProgramFile)   
 
 def validateTenantAndOrgIdsFromResourceSheet(resourceFileContent):
 

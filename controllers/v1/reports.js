@@ -76,7 +76,8 @@ module.exports = class Reports {
 					req.query.reportType,
 					req.query.programId ? req.query.programId : '',
 					req.query.requestPdf ? (req.query.requestPdf.toLowerCase() == 'true' ? true : false) : false,
-					req.headers['x-app-ver']
+					req.headers['x-app-ver'],
+					req.userDetails
 				)
 
 				return resolve({
@@ -146,7 +147,8 @@ module.exports = class Reports {
 					req.pageSize,
 					req.pageNo,
 					req.searchText,
-					req.body.role
+					req.body.role,
+					req.userDetails
 				)
 
 				return resolve({

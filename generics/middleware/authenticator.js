@@ -371,13 +371,19 @@ module.exports = async function (req, res, next, token = '') {
 				// Check if orgIdFromHeader is provided and valid
 				if (orgIdFromHeader && orgIdFromHeader != '') {
 					if (!orgIdArr.includes(orgIdFromHeader)) {
-						throw reqMsg.ORG_ID_FETCH_ERROR.MISSING_CODE
+						rspObj.errCode = CONSTANTS.apiResponses.TENANTID_AND_ORGID_REQUIRED_IN_TOKEN_CODE
+						rspObj.errMsg = CONSTANTS.apiResponses.TENANTID_AND_ORGID_REQUIRED_IN_TOKEN_MESSAGE
+						rspObj.responseCode = HTTP_STATUS_CODE['bad_request'].status
+						return res.status(HTTP_STATUS_CODE['bad_request'].status).send(respUtil(rspObj))
 					}
 
 					let validateOrgsResult = await validateIfOrgsBelongsToTenant(tenantId, orgIdFromHeader)
 
 					if (!validateOrgsResult.success) {
-						throw reqMsg.ORG_ID_FETCH_ERROR.MISSING_CODE
+						rspObj.errCode = CONSTANTS.apiResponses.TENANTID_AND_ORGID_REQUIRED_IN_TOKEN_CODE
+						rspObj.errMsg = CONSTANTS.apiResponses.TENANTID_AND_ORGID_REQUIRED_IN_TOKEN_MESSAGE
+						rspObj.responseCode = HTTP_STATUS_CODE['bad_request'].status
+						return res.status(HTTP_STATUS_CODE['bad_request'].status).send(respUtil(rspObj))
 					}
 
 					return { success: true, orgId: orgIdFromHeader }
@@ -389,20 +395,20 @@ module.exports = async function (req, res, next, token = '') {
 				}
 
 				// If no orgId is found, throw error
-				throw reqMsg.ORG_ID_FETCH_ERROR.MISSING_CODE
+				rspObj.errCode = CONSTANTS.apiResponses.TENANTID_AND_ORGID_REQUIRED_IN_TOKEN_CODE
+				rspObj.errMsg = CONSTANTS.apiResponses.TENANTID_AND_ORGID_REQUIRED_IN_TOKEN_MESSAGE
+				rspObj.responseCode = HTTP_STATUS_CODE['bad_request'].status
+				return res.status(HTTP_STATUS_CODE['bad_request'].status).send(respUtil(rspObj))
 			} catch (err) {
 				// Handle error when no valid orgId is found
 				if (orgIdArr.length > 0) {
 					return { success: true, orgId: orgIdArr[0] }
 				}
 
-				let rspObj = {
-					errCode: reqMsg.ORG_ID_FETCH_ERROR.MISSING_CODE,
-					errMsg: reqMsg.ORG_ID_FETCH_ERROR.MISSING_MESSAGE,
-					responseCode: responseCode.unauthorized.status,
-				}
-
-				return { success: false, errorObj: rspObj }
+				rspObj.errCode = CONSTANTS.apiResponses.TENANTID_AND_ORGID_REQUIRED_IN_TOKEN_CODE
+				rspObj.errMsg = CONSTANTS.apiResponses.TENANTID_AND_ORGID_REQUIRED_IN_TOKEN_MESSAGE
+				rspObj.responseCode = HTTP_STATUS_CODE['bad_request'].status
+				return res.status(HTTP_STATUS_CODE['bad_request'].status).send(respUtil(rspObj))
 			}
 		}
 

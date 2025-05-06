@@ -4497,7 +4497,6 @@ def assignTenantOrgValuesToGlobalVariables(tenantIdFromTheSheets, orgIdsFromTheS
     tenantIDFromTemplate = clean_single_value(tenantIdFromTheSheets)
     global orgIDFromTemplate
     orgIDFromTemplate = clean_single_value(orgIdsFromTheSheets)
-    print(tenantIDFromTemplate, orgIDFromTemplate)
 
 # Main function were all the function def are called
 def mainFunc(MainFilePath, programFile, addObservationSolution, millisecond, isProgramnamePresent, isCourse,

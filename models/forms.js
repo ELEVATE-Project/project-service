@@ -33,9 +33,6 @@ const formSchema = new Schema({
 		index: true,
 		required: true,
 	},
-	organizationId: {
-		type: String,
-	},
 })
 
 // Pre-update hook to increment version

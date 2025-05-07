@@ -137,7 +137,6 @@ module.exports = class FormsHelper {
 	static read(_id, bodyData, userDetails, userToken) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				console.log(bodyData, 'bodyData**')
 				// validate _id field
 				_id = _id === ':_id' ? null : _id
 				let filter = {}

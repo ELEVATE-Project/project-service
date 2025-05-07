@@ -137,6 +137,7 @@ module.exports = class FormsHelper {
 	static read(_id, bodyData, userDetails, userToken) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				console.log(bodyData, 'bodyData**')
 				// validate _id field
 				_id = _id === ':_id' ? null : _id
 				let filter = {}
@@ -172,8 +173,10 @@ module.exports = class FormsHelper {
 							filter[`${key}`] = bodyData[`${key}`]
 						})
 					}
-					filter['orgIds'] = { $in: [defaultOrgId] }
-					filter['tenantId'] = userDetails.userInformation.tenantId
+
+					filter = _id
+						? { _id: ObjectId(_id), organizationId: defaultOrgId }
+						: { ...bodyData, organizationId: defaultOrgId }
 					defaultOrgForm = await formQueries.findOneForm(filter)
 				}
 				if (!form && !defaultOrgForm) {

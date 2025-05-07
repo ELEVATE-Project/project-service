@@ -172,8 +172,16 @@ module.exports = class FormsHelper {
 							filter[`${key}`] = bodyData[`${key}`]
 						})
 					}
-					filter['orgIds'] = { $in: [defaultOrgId] }
-					filter['tenantId'] = userDetails.userInformation.tenantId
+
+					filter = {}
+					if (_id) {
+						filter['_id'] = ObjectId(_id)
+					} else {
+						Object.keys(bodyData).map((key) => {
+							filter[`${key}`] = bodyData[`${key}`]
+						})
+					}
+					filter['orgIds'] = { $in: [defaultOrgId.toString()] }
 					defaultOrgForm = await formQueries.findOneForm(filter)
 				}
 				if (!form && !defaultOrgForm) {

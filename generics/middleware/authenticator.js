@@ -284,6 +284,9 @@ module.exports = async function (req, res, next, token = '') {
 			for (let key in configData) {
 				if (configData.hasOwnProperty(key)) {
 					let keyValue = getNestedValue(decodedToken, configData[key])
+					if (key == 'userId') {
+						keyValue = keyValue?.toString()
+					}
 					if (key === organizationKey) {
 						let value = getOrgId(req.headers, decodedToken, configData[key])
 						userInformation[`organizationId`] = value.toString()

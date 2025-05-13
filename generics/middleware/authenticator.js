@@ -307,7 +307,7 @@ module.exports = async function (req, res, next, token = '') {
 					if (key == 'tenant_id') {
 						userInformation[`tenantId`] = keyValue.toString()
 					} else {
-						userInformation[`${key}`] = keyValue.toString()
+						userInformation[`${key}`] = keyValue
 					}
 				}
 			}

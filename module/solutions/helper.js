@@ -1093,22 +1093,22 @@ module.exports = class SolutionsHelper {
 						}
 					}
 
-					if (!data.role) {
-						throw {
-							message: CONSTANTS.apiResponses.USER_ROLES_NOT_FOUND,
-						}
-					}
+					// if (!data.role) {
+					// 	throw {
+					// 		message: CONSTANTS.apiResponses.USER_ROLES_NOT_FOUND,
+					// 	}
+					// }
 
 					// If prefix is given use it to form query
-					if (prefix != '') {
-						filterQuery[`${prefix}.scope.roles`] = {
-							$in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')],
-						}
-					} else {
-						filterQuery['scope.roles'] = {
-							$in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')],
-						}
-					}
+					// if (prefix != '') {
+					// 	filterQuery[`${prefix}.scope.roles`] = {
+					// 		$in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')],
+					// 	}
+					// } else {
+					// 	filterQuery['scope.roles'] = {
+					// 		$in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')],
+					// 	}
+					// }
 
 					filterQuery.$or = []
 					Object.keys(_.omit(data, ['filter', 'role', 'factors', 'type'])).forEach((key) => {
@@ -1239,6 +1239,7 @@ module.exports = class SolutionsHelper {
 
 					filterQuery = _.merge(filterQuery, data.filter)
 				}
+				delete filterQuery['scope.entityType'];
 				return resolve({
 					success: true,
 					data: filterQuery,

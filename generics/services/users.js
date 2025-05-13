@@ -25,6 +25,7 @@ const profile = function (userId = '', userToken = '') {
 				headers: {
 					'content-type': 'application/json',
 					internal_access_token: process.env.INTERNAL_ACCESS_TOKEN,
+					'x-auth-token': userToken,
 				},
 			}
 

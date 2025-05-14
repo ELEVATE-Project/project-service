@@ -149,7 +149,7 @@ const importSurveryTemplateToSolution = function (token, solutionId, programId) 
 				},
 			}
 
-			request.post(observationCreateUrl, options, assessmentCallback)
+			request.post(surveyCreateUrl, options, assessmentCallback)
 
 			function assessmentCallback(err, data) {
 				let result = {
@@ -222,6 +222,7 @@ const importObservationTemplateToSolution = function (token, solutionId, entityT
 				return resolve(result)
 			}
 		} catch (error) {
+			console.log(error, 'this is errro')
 			return reject(error)
 		}
 	})

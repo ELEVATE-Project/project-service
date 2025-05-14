@@ -497,7 +497,8 @@ module.exports = class UserProjects extends Abstract {
 					req.userDetails.userToken,
 					req.params._id,
 					req.query.taskId,
-					req.body
+					req.body,
+					req.userDetails.userInformation.userId
 				)
 
 				solutionDetails.result = solutionDetails.data

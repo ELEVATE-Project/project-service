@@ -196,7 +196,6 @@ module.exports = class ProjectTemplateTasksHelper {
 					solutionTypes.includes(allValues.type) &&
 					!UTILS.convertStringToBoolean(parsedData.isAnExternalTask)
 				) {
-					console.log('entering hereeeeeeeee....')
 					allValues.solutionDetails = {}
 					if (parsedData.solutionType && parsedData.solutionType !== '') {
 						allValues.solutionDetails.type = parsedData.solutionType
@@ -267,6 +266,7 @@ module.exports = class ProjectTemplateTasksHelper {
 						solutionExternalId: parsedData.solutionId,
 						name: solutionData[parsedData.solutionId].name,
 						isReusable: solutionData[parsedData.solutionId].isReusable,
+						minNoOfSubmissionsRequired: parsedData.minNoOfSubmissionsRequired,
 					}
 					allValues.solutionDetails = solutionDetails
 				}

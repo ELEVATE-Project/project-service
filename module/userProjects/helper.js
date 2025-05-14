@@ -1601,6 +1601,8 @@ module.exports = class UserProjectsHelper {
 									? solutionDetails.submissionLevel
 									: process.env.SUBMISSION_LEVEL,
 								scope: solutionDetails.scope,
+								referenceFrom: solutionDetails.referenceFrom ? solutionDetails.referenceFrom : '',
+								project: solutionDetails.project ? solutionDetails.project : '',
 							}
 
 							projectCreation.data['programId'] = projectCreation.data.programInformation._id

@@ -32,7 +32,17 @@ module.exports = class ReportsHelper {
 	 * @param {Boolean} getPdf - pdf true or false
 	 * @returns {Object} Entity report.
 	 */
-	static entity(entityId = '', userId, userToken, userName, reportType, programId = '', getPdf, appVersion) {
+	static entity(
+		entityId = '',
+		userId,
+		userToken,
+		userName,
+		reportType,
+		programId = '',
+		getPdf,
+		appVersion,
+		userDetails
+	) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let query = {}
@@ -56,6 +66,8 @@ module.exports = class ReportsHelper {
 					query['programId'] = ObjectId(programId)
 				}
 				query['isDeleted'] = { $ne: true }
+				query['tenantId'] = userDetails.userInformation.tenantId
+				query['orgId'] = userDetails.userInformation.organizationId
 
 				query['$or'] = [
 					{ syncedAt: { $gte: new Date(startFrom), $lte: new Date(endOf) } },
@@ -336,7 +348,7 @@ module.exports = class ReportsHelper {
 	 * @returns {Object} -  returns programs list
 	 */
 
-	static getProgramsByEntity(userId = '', entityId = '', pageSize, pageNo, search, userRole = '') {
+	static getProgramsByEntity(userId = '', entityId = '', pageSize, pageNo, search, userRole = '', userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let query = {
@@ -344,6 +356,8 @@ module.exports = class ReportsHelper {
 					programId: {
 						$exists: true,
 					},
+					tenantId: userDetails.userInformation.tenantId,
+					orgId: userDetails.userInformation.organizationId,
 				}
 
 				if (entityId != '') {

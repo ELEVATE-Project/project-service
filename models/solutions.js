@@ -100,5 +100,21 @@ module.exports = {
 		},
 		translations: Object,
 		reflectionEnabled: Boolean,
+		tenantId: {
+			type: String,
+			index: true,
+			required: true,
+		},
+		orgIds: {
+			type: Array,
+			index: true,
+			required: true,
+		},
 	},
+	compoundIndex: [
+		{
+			name: { externalId: 1, tenantId: 1 },
+			indexType: { unique: true },
+		},
+	],
 }

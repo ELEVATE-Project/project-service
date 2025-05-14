@@ -159,7 +159,7 @@ def programCreation(accessToken,parentFolder,externalId,pName,pDescription,roles
       ],
        "scope": {
             entitiesTypeStr: entitiesPGMID,
-            "roles": [roles]
+            "roles": roles
         },
         
       "requestForPIIConsent" : True
@@ -360,6 +360,8 @@ def programsFileCheck(filePathAddPgm, accessToken, parentFolder, MainFilePath):
                         extIdPGM = dictDetailsEnv['Program ID'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Program ID'] else terminatingMessage("\"Program ID\" must not be Empty in \"Program details\" sheet")
                         proDesc = dictDetailsEnv['Description of the Program'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Description of the Program'] else terminatingMessage("\"Program ID\" must not be Empty in \"Program details\" sheet")
                         roles = dictDetailsEnv['Targeted subrole at program level'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Targeted subrole at program level'] else terminatingMessage("\"Program ID\" must not be Empty in \"Program details\" sheet")
+                        newProgramRole = roles.split(",")
+                        programRoleArray = list(newProgramRole)
                         returnvalues = []
                         global entitiesPGM
                         entitiesPGM = dictDetailsEnv['Targeted entities at program level'].encode('utf-8').decode('utf-8')
@@ -429,7 +431,7 @@ def programsFileCheck(filePathAddPgm, accessToken, parentFolder, MainFilePath):
                             # sys.exit()
 
                             # call function to create program 
-                            programCreation(accessToken,parentFolder,extIdPGM,programNameInp,proDesc,roles,userId)
+                            programCreation(accessToken,parentFolder,extIdPGM,programNameInp,proDesc,programRoleArray,userId)
                             # accessToken, parentFolder, extIdPGM, programNameInp, descriptionPGM,keywordsPGM.lstrip().rstrip().split(","),mainRole,rolesPGM
                             # sys.exit()
                             programmappingpdpmsheetcreation(MainFilePath, accessToken, program_file, extIdPGM,parentFolder)
@@ -447,6 +449,8 @@ def programsFileCheck(filePathAddPgm, accessToken, parentFolder, MainFilePath):
                         extIdPGM = dictDetailsEnv['Program ID'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Program ID'] else terminatingMessage("\"Program ID\" must not be Empty in \"Program details\" sheet")
                         proDesc = dictDetailsEnv['Description of the Program'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Description of the Program'] else terminatingMessage("\"Program ID\" must not be Empty in \"Program details\" sheet")
                         roles = dictDetailsEnv['Targeted subrole at program level'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Targeted subrole at program level'] else terminatingMessage("\"Program ID\" must not be Empty in \"Program details\" sheet")
+                        newProgramRole = roles.split(",")
+                        programRoleArray = list(newProgramRole)
                         returnvalues = []
                         entitiesType = dictDetailsEnv['Targeted entities at program level'].encode('utf-8').decode('utf-8')
                         stateEntitiesPGM = dictDetailsEnv['Targeted state at program level'].encode('utf-8').decode('utf-8')
@@ -499,7 +503,7 @@ def programsFileCheck(filePathAddPgm, accessToken, parentFolder, MainFilePath):
                             # sys.exit()
 
                             # call function to create program 
-                            programCreation(accessToken,parentFolder,extIdPGM,programNameInp,proDesc,roles,userId)
+                            programCreation(accessToken,parentFolder,extIdPGM,programNameInp,proDesc,programRoleArray,userId)
                             # accessToken, parentFolder, extIdPGM, programNameInp, descriptionPGM,keywordsPGM.lstrip().rstrip().split(","),mainRole,rolesPGM
                             # sys.exit()
                             programmappingpdpmsheetcreation(MainFilePath, accessToken, program_file, extIdPGM,parentFolder)
@@ -4472,6 +4476,8 @@ def solutionCreationAndMapping(projectName_for_folder_path, entityToUpload, list
             
                 solutionDetails = fetchSolutionDetailsFromProgramSheet(projectName_for_folder_path, programFile,
                                                                        solutionId, accessToken)
+                newRole = rolesPGM.split(",")
+                RoleArray = list(newRole)
                 scopeEntities = entitiesPGMID
                 scopeRoles = solutionDetails[0]
                 scope = {}
@@ -4482,7 +4488,7 @@ def solutionCreationAndMapping(projectName_for_folder_path, entityToUpload, list
                         scope[entity_type].append(entity_value)
                     else:
                         scope[entity_type] = [entity_value]
-                scope["roles"] = [rolesPGM]
+                scope["roles"] = RoleArray
                 bodySolutionUpdate = {
                   "scope": scope
                 }

@@ -17,54 +17,54 @@ module.exports = class Programs extends Abstract {
 	}
 
 	/**
-   * Create program.
-   * @api {post} /project/v1/programs/create
+    * Create program.
+    * @api {post} /project/v1/programs/create
     * @apiVersion 1.0.0
     * @apiName 
     * @apiGroup Programs
     * @apiHeader {String} X-authenticated-user-token Authenticity token
-   * @method
-   * @name create
-   * @param {Object} req - requested data.
-   * @apiParamExample {json} Request-Body:
-   * {
-      "externalId" : "PROGID01",
-      "name" : "DCPCR School Development Index 2018-19",
-      "description" : "DCPCR School Development Index 2018-19",
-      "isDeleted" : false,
-      "resourceType" : [ 
-          "program"
-      ],
-      "language" : [ 
-          "English"
-      ],
-      "keywords" : [],
-      "concepts" : [],
-      "userId":"a082787f-8f8f-42f2-a706-35457ca6f1fd",
-      "imageCompression" : {
-          "quality" : 10
-      },
-      "components" : [ 
-          "5b98fa069f664f7e1ae7498c"
-      ],
-      "scope" : {
-          "state" : ["e3a58f2b3c4d719a6821b590"],
-          "roles" : [ "head_master","distrct_education_officer"]
-      },
-      "requestForPIIConsent" : true
-    }
+    * @method
+    * @name create
+    * @param {Object} req - requested data.
+    * @apiParamExample {json} Request-Body:
+    * {
+        "externalId" : "PROGID01",
+        "name" : "DCPCR School Development Index 2018-19",
+        "description" : "DCPCR School Development Index 2018-19",
+        "isDeleted" : false,
+        "resourceType" : [ 
+            "program"
+        ],
+        "language" : [ 
+            "English"
+        ],
+        "keywords" : [],
+        "concepts" : [],
+        "userId":"a082787f-8f8f-42f2-a706-35457ca6f1fd",
+        "imageCompression" : {
+            "quality" : 10
+        },
+        "components" : [ 
+            "5b98fa069f664f7e1ae7498c"
+        ],
+        "scope" : {
+            "state" : ["e3a58f2b3c4d719a6821b590"],
+            "roles" : [ "head_master","distrct_education_officer"]
+        },
+        "requestForPIIConsent" : true
+        }
 
-    * @apiParamExample {json} Response:
-    {
-      "message": "Program created successfully",
-      "status": 200,
-      "result": {
-          "_id": "5ff09aa4a43c952a32279234"
-      }
-    }
+        * @apiParamExample {json} Response:
+        {
+        "message": "Program created successfully",
+        "status": 200,
+        "result": {
+            "_id": "5ff09aa4a43c952a32279234"
+        }
+        }
 
 
-   * @returns {JSON} - created program document.
+    * @returns {JSON} - created program document.
    */
 
 	async create(req) {
@@ -73,7 +73,8 @@ module.exports = class Programs extends Abstract {
 				let programCreationData = await programsHelper.create(
 					req.body,
 					req.userDetails.userInformation.userId,
-					true //this is true for when its called via API calls
+					true, //this is true for when its called via API calls
+					req.userDetails
 				)
 
 				return resolve(programCreationData)
@@ -142,7 +143,7 @@ module.exports = class Programs extends Abstract {
 				let programUpdationData = await programsHelper.update(
 					req.params._id,
 					req.body,
-					req.userDetails.userInformation.userId,
+					req.userDetails,
 					true //this is true for when its called via API calls
 				)
 
@@ -463,7 +464,13 @@ module.exports = class Programs extends Abstract {
 	async list(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let listOfPrograms = await programsHelper.list(req.pageNo, req.pageSize, req.searchText)
+				let listOfPrograms = await programsHelper.list(
+					req.pageNo,
+					req.pageSize,
+					req.searchText,
+					req.userDetails,
+					req.query.currentOrgOnly ? req.query.currentOrgOnly : false
+				)
 
 				return resolve(listOfPrograms)
 			} catch (error) {

@@ -19,24 +19,26 @@ const profile = function (userId = '', userToken = '') {
 			if (userId !== '') {
 				url = url + '/' + userId
 			}
-
+			console.log(url, 'url profile*************')
 			// Set the options for the HTTP GET request
 			const options = {
 				headers: {
 					'content-type': 'application/json',
 					internal_access_token: process.env.INTERNAL_ACCESS_TOKEN,
-					'x-auth-token': userToken,
+					'X-auth-token': userToken,
 				},
 			}
-
+			console.log(options.headers, 'headers profile************')
 			request.get(url, options, userReadCallback)
 			let result = {
 				success: true,
 			}
 			function userReadCallback(err, data) {
 				if (err) {
+					console.log(err, 'user profile err************')
 					result.success = false
 				} else {
+					console.log(data.body, 'data.body user profile ********')
 					let response = JSON.parse(data.body)
 					if (response.responseCode === HTTP_STATUS_CODE['ok'].code) {
 						result['data'] = response.result

@@ -14,7 +14,7 @@ const profileRead = function (userToken) {
 		try {
 			// Construct the URL for the user service
 			let url = `${projectServiceUrl}/${process.env.SERVICE_NAME}${CONSTANTS.endpoints.PROFILE_READ}`
-
+			console.log(url, 'url profileRead************************8')
 			// Set the options for the HTTP GET request
 			const options = {
 				headers: {
@@ -29,8 +29,10 @@ const profileRead = function (userToken) {
 			// Handle callback fucntion
 			function userReadCallback(err, data) {
 				if (err) {
+					console.log(err, 'err inside profileRead****************')
 					result.success = false
 				} else {
+					console.log(data.body, 'data.body profileRead**************')
 					let response = JSON.parse(data.body)
 					if (response.status === HTTP_STATUS_CODE.ok.status) {
 						result['data'] = response.result
@@ -48,6 +50,7 @@ const profileRead = function (userToken) {
 				)
 			}, CONSTANTS.common.SERVER_TIME_OUT)
 		} catch (error) {
+			console.log(error, 'error line no 53 profileRead***************************')
 			return reject(error)
 		}
 	})

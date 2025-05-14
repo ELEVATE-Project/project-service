@@ -16,9 +16,9 @@ const profile = function (userId = '', userToken = '') {
 			// Construct the URL for the user service
 			let url = interfaceServiceUrl + process.env.USER_SERVICE_BASE_URL + CONSTANTS.endpoints.USER_READ
 			// Append the userId to the URL if it is provided
-			if (userId !== '') {
-				url = url + '/' + userId
-			}
+			// if (userId !== '') {
+			// 	url = url + '/' + userId
+			// }
 			console.log(url, 'url profile*************')
 			// Set the options for the HTTP GET request
 			const options = {

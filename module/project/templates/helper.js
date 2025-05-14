@@ -30,6 +30,8 @@ const evidencesHelper = require(MODULES_BASE_PATH + '/evidences/helper')
 const userExtensionQueries = require(DB_QUERY_BASE_PATH + '/userExtension')
 const filesHelpers = require(MODULES_BASE_PATH + '/cloud-services/files/helper')
 const testimonialsHelper = require(MODULES_BASE_PATH + '/testimonials/helper')
+const surveyService = require(SERVICES_BASE_PATH + '/survey')
+
 module.exports = class ProjectTemplatesHelper {
 	/**
 	 * Extract csv information.
@@ -615,12 +617,12 @@ module.exports = class ProjectTemplatesHelper {
 							status: HTTP_STATUS_CODE.bad_request.status,
 						}
 					}
-					if (solutionData.length > 0 && solutionData[0].projectTemplateId) {
-						throw {
-							message: CONSTANTS.apiResponses.PROJECT_TEMPLATE_EXISTS_IN_SOLUTION,
-							status: HTTP_STATUS_CODE.bad_request.status,
-						}
-					}
+					// if (solutionData.length > 0 && solutionData[0].projectTemplateId) {
+					// 	throw {
+					// 		message: CONSTANTS.apiResponses.PROJECT_TEMPLATE_EXISTS_IN_SOLUTION,
+					// 		status: HTTP_STATUS_CODE.bad_request.status,
+					// 	}
+					// }
 					if (
 						solutionData.length > 0 &&
 						projectTemplateData[0].entityType &&
@@ -640,6 +642,11 @@ module.exports = class ProjectTemplatesHelper {
 					}
 				}
 
+				let programDetails = {}
+
+				programDetails.programId = solutionData[0].programId
+				programDetails.programName = solutionData[0].programName
+				programDetails.programDescription = solutionData[0].programDescription
 				newProjectTemplate.parentTemplateId = projectTemplateData[0]._id
 
 				let updationKeys = Object.keys(updateData)
@@ -671,7 +678,9 @@ module.exports = class ProjectTemplatesHelper {
 					await this.duplicateTemplateTasks(
 						tasksIds,
 						duplicateTemplateDocument._id,
-						duplicateTemplateDocument.externalId
+						duplicateTemplateDocument.externalId,
+						programDetails,
+						userToken
 					)
 				}
 
@@ -814,7 +823,13 @@ module.exports = class ProjectTemplatesHelper {
 	 * @returns {Object} Duplicated tasks.
 	 */
 
-	static duplicateTemplateTasks(taskIds = [], duplicateTemplateId, duplicateTemplateExternalId) {
+	static duplicateTemplateTasks(
+		taskIds = [],
+		duplicateTemplateId,
+		duplicateTemplateExternalId,
+		programDetails,
+		userToken
+	) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let newTaskId = []
@@ -823,12 +838,14 @@ module.exports = class ProjectTemplatesHelper {
 					let taskId = taskIds[pointerToTask]
 					let taskData = await projectTemplateTaskQueries.taskDocuments({
 						_id: taskId,
-						parentId: { $exists: false },
+						// parentId: { $exists: false },
 					})
 
 					if (taskData && taskData.length > 0) {
 						taskData = taskData[0]
 					}
+
+					// if (String(newProjectTemplateTask.type) === 'improvementProject') {
 
 					if (taskData && Object.keys(taskData).length > 0) {
 						//duplicate parent task
@@ -836,12 +853,98 @@ module.exports = class ProjectTemplatesHelper {
 						newProjectTemplateTask.projectTemplateId = duplicateTemplateId
 						newProjectTemplateTask.projectTemplateExternalId = duplicateTemplateExternalId
 						newProjectTemplateTask.externalId = taskData.externalId + '-' + UTILS.epochTime()
+						newProjectTemplateTask.programId = programDetails.programId
+						newProjectTemplateTask.programName = programDetails.programName
+						newProjectTemplateTask.programDescription = programDetails.programDescription
 
-						let duplicateTemplateTask = await projectTemplateTaskQueries.createTemplateTask(
-							_.omit(newProjectTemplateTask, ['_id'])
-						)
+						let duplicateTemplateTask
+						if (String(newProjectTemplateTask.type) === 'improvementProject') {
+							console.log(newProjectTemplateTask.projectTemplateId, 'line no 854')
 
-						newTaskId.push(duplicateTemplateTask._id)
+							let duplicateProjectTemplateTask = await projectTemplateTaskQueries.createTemplateTask(
+								_.omit(newProjectTemplateTask, ['_id'])
+							)
+
+							duplicateTemplateTask = duplicateProjectTemplateTask._id
+						} else if (String(newProjectTemplateTask.type) === 'observation') {
+							let duplicateObservationTask = await surveyService.createObservationFromSolutionTemplate(
+								newProjectTemplateTask.solutionDetails._id,
+								{},
+								userToken,
+								newProjectTemplateTask.solutionDetails,
+								newProjectTemplateTask.programId,
+								// false
+								newProjectTemplateTask.solutionDetails.isReusable
+							)
+							// console.log(duplicateObservationTask.data.solutionExternalId, 'line no 3333333333333333333')
+							let fetchedSolutions = await surveyService.listSolutions({
+								externalId: { $in: [duplicateObservationTask.data.solutionExternalId] },
+							})
+
+							if (!fetchedSolutions.data.length > 0) {
+								throw {
+									message: CONSTANTS.apiResponses.SOLUTION_NOT_FOUND,
+									status: HTTP_STATUS_CODE.bad_request.status,
+								}
+							}
+							let solutionDetails = {
+								solutionType: fetchedSolutions.data[0].type,
+								_id: fetchedSolutions.data[0]._id,
+								solutionExternalId: fetchedSolutions.data[0].externalId,
+								name: fetchedSolutions.data[0].name,
+								isReusable: fetchedSolutions.data[0].isReusable,
+							}
+
+							console.log(solutionDetails, 'line no 555555555555555555')
+
+							newProjectTemplateTask.solutionDetails = solutionDetails
+
+							duplicateTemplateTask = await projectTemplateTaskQueries.createTemplateTask(
+								_.omit(newProjectTemplateTask, ['_id'])
+							)
+							duplicateTemplateTask = duplicateTemplateTask._id
+						} else if (String(newProjectTemplateTask.type) === 'survey') {
+							let duplicateSurveyTask = await surveyService.importSurveryTemplateToSolution(
+								userToken,
+								newProjectTemplateTask.solutionDetails._id,
+								newProjectTemplateTask.programId
+							)
+							console.log(duplicateSurveyTask.result.solutionExternalId, 'line no 222222222222')
+
+							let fetchedSolutions = await surveyService.listSolutions({
+								externalId: { $in: [duplicateSurveyTask.result.solutionExternalId] },
+							})
+							console.log(fetchedSolutions.data[0], 'line no 77777777777')
+
+							if (!fetchedSolutions.data.length > 0) {
+								throw {
+									message: CONSTANTS.apiResponses.SOLUTION_NOT_FOUND,
+									status: HTTP_STATUS_CODE.bad_request.status,
+								}
+							}
+							let solutionDetails = {
+								solutionType: fetchedSolutions.data[0].type,
+								_id: fetchedSolutions.data[0]._id,
+								solutionExternalId: fetchedSolutions.data[0].externalId,
+								name: fetchedSolutions.data[0].name,
+								isReusable: fetchedSolutions.data[0].isReusable,
+							}
+							console.log(solutionDetails, 'line no 999999999999999')
+							newProjectTemplateTask.solutionDetails = solutionDetails
+							console.log(newProjectTemplateTask, 'line no ttttttttttttttttttt')
+
+							duplicateTemplateTask = await projectTemplateTaskQueries.createTemplateTask(
+								_.omit(newProjectTemplateTask, ['_id'])
+							)
+
+							duplicateTemplateTask = duplicateTemplateTask._id
+						}
+						// duplicateTemplateTask = await projectTemplateTaskQueries.createTemplateTask(
+						// 	_.omit(newProjectTemplateTask, ['_id'])
+						// )
+						console.log(duplicateTemplateTask, 'line no ------------------')
+
+						newTaskId.push(duplicateTemplateTask)
 
 						//duplicate child task
 						if (duplicateTemplateTask.children && duplicateTemplateTask.children.length > 0) {
@@ -895,6 +998,11 @@ module.exports = class ProjectTemplatesHelper {
 					}
 				}
 
+				// }
+
+				console.log(duplicateTemplateId, 'line no 947')
+				console.log(newTaskId, 'line no ====================')
+
 				let updateDuplicateTemplate
 				//adding duplicate tasj to duplicate template
 				if (newTaskId && newTaskId.length > 0) {
@@ -909,9 +1017,12 @@ module.exports = class ProjectTemplatesHelper {
 						}
 					)
 				}
+				console.log(updateDuplicateTemplate, 'line no 972')
 
 				return resolve(updateDuplicateTemplate)
 			} catch (error) {
+				console.log(error, 'line no 9999')
+
 				return reject(error)
 			}
 		})

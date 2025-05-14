@@ -1224,15 +1224,15 @@ module.exports = class ProgramsHelper {
 						}
 					}
 
-					if (!data.role) {
-						throw {
-							message: CONSTANTS.apiResponses.USER_ROLES_NOT_FOUND,
-						}
-					}
+					// if (!data.role) {
+					// 	throw {
+					// 		message: CONSTANTS.apiResponses.USER_ROLES_NOT_FOUND,
+					// 	}
+					// }
 
-					filterQuery['scope.roles'] = {
-						$in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')],
-					}
+					// filterQuery['scope.roles'] = {
+					// 	$in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')],
+					// }
 
 					filterQuery.$or = []
 					Object.keys(_.omit(data, ['filter', 'role', 'factors', 'type'])).forEach((key) => {
@@ -1292,6 +1292,7 @@ module.exports = class ProgramsHelper {
 				if (type != '') {
 					filterQuery.type = type
 				}
+				delete filterQuery['scope.entityType']
 				return resolve({
 					success: true,
 					data: filterQuery,

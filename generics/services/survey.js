@@ -64,15 +64,29 @@ const createAssessmentSolutionFromTemplate = function (token, templateId, bodyDa
  * @function
  * @name createObservationFromSolutionTemplate
  * @param {String} token - logged in user token.
- * @param {String} templateId - template id.
+ * @param {String} solutionId - template id.
  * @param {Object} bodyData - Body data
  * @returns {JSON} - Create assessment from template solution.
  */
 
-const createObservationFromSolutionTemplate = function (token, templateId, bodyData) {
+const createObservationFromSolutionTemplate = function (
+	solutionId,
+	bodyData,
+	token,
+	solutionDetails,
+	programId,
+	isExternal
+) {
 	return new Promise(async (resolve, reject) => {
 		try {
-			let observationCreateUrl = ASSESSMENT_URL + '/v1/observations/create?solutionId=' + templateId
+			let observationCreateUrl =
+				ASSESSMENT_URL +
+				'/v1/observations/create?solutionId=' +
+				solutionId +
+				'&programId=' +
+				programId +
+				'&isExternal=' +
+				isExternal
 
 			const options = {
 				headers: {
@@ -116,19 +130,23 @@ const createObservationFromSolutionTemplate = function (token, templateId, bodyD
  * @param {Object} bodyData - Body data
  * @returns {JSON} - Create child solution from parent  solution.
  */
-const importSurveryTemplateToSolution = function (token, solutionId, bodyData) {
+const importSurveryTemplateToSolution = function (token, solutionId, programId) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			let observationCreateUrl =
-				ASSESSMENT_URL + '/v1/surveys/importSurveryTemplateToSolution' + '/' + solutionId + '?appName=elevate'
-
+				ASSESSMENT_URL +
+				'/v1/surveys/importSurveryTemplateToSolution' +
+				'/' +
+				solutionId +
+				'?appName=elevate' +
+				'&programId=' +
+				programId
 			const options = {
 				headers: {
 					'content-type': 'application/json',
 					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
 					'x-auth-token': token,
 				},
-				json: bodyData,
 			}
 
 			request.post(observationCreateUrl, options, assessmentCallback)
@@ -141,7 +159,61 @@ const importSurveryTemplateToSolution = function (token, solutionId, bodyData) {
 					result.success = false
 				} else {
 					let response = data.body
-					if (response.status === HTTP_STATUS_CODE['ok'].status) {
+					result = JSON.parse(response)
+					if (result.status === HTTP_STATUS_CODE['ok'].status) {
+						result['data'] = response.result
+					} else {
+						result.success = false
+					}
+				}
+				return resolve(result)
+			}
+		} catch (error) {
+			return reject(error)
+		}
+	})
+}
+
+/**
+ * Create Child solutions for survey
+ * @function
+ * @name importSurveryTemplateToSolution
+ * @param {String} token - logged in user token.
+ * @param {String} solutionId - parent solution id.
+ * @param {Object} bodyData - Body data
+ * @returns {JSON} - Create child solution from parent  solution.
+ */
+const importObservationTemplateToSolution = function (token, solutionId, entityType, programId) {
+	return new Promise(async (resolve, reject) => {
+		try {
+			let observationCreateUrl =
+				ASSESSMENT_URL +
+				'/v1/surveys/importFromFramework?frameworkId=' +
+				solutionId +
+				'&entityType=' +
+				entityType +
+				'&programId=' +
+				programId
+			const options = {
+				headers: {
+					'content-type': 'application/json',
+					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
+					'x-auth-token': token,
+				},
+			}
+
+			request.post(observationCreateUrl, options, assessmentCallback)
+
+			function assessmentCallback(err, data) {
+				let result = {
+					success: true,
+				}
+				if (err) {
+					result.success = false
+				} else {
+					let response = data.body
+					result = JSON.parse(response)
+					if (result.status === HTTP_STATUS_CODE['ok'].status) {
 						result['data'] = response.result
 					} else {
 						result.success = false
@@ -788,4 +860,5 @@ module.exports = {
 	listEntitiesByLocationIds: listEntitiesByLocationIds,
 	importSurveryTemplateToSolution: importSurveryTemplateToSolution,
 	surveyDetails: surveyDetails,
+	importObservationTemplateToSolution: importObservationTemplateToSolution,
 }

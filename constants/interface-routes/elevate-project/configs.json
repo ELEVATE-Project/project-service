@@ -500,6 +500,34 @@
 			"service": "project"
 		},
 		{
+			"sourceRoute": "/project/v1/dataPipeline/pushProjectDetailsToKafka",
+			"type": "POST",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "elevate-project"
+				}
+			],
+			"service": "project"
+		},
+		{
+			"sourceRoute": "/project/v1/dataPipeline/pushProjectDetailsToKafka/:id",
+			"type": "POST",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "elevate-project"
+				}
+			],
+			"service": "project"
+		},
+		{
 			"sourceRoute": "/project/v1/dataPipeline/userProject/:id",
 			"type": "GET",
 			"priority": "MUST_HAVE",

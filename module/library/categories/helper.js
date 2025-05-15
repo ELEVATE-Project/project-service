@@ -507,6 +507,7 @@ module.exports = class LibraryCategoriesHelper {
 			try {
 				let tenantId = userDetails.userInformation.tenantId
 				let orgId = userDetails.userInformation.organizationId
+
 				let projectsData = await projectTemplateQueries.templateDocument(
 					{
 						_id: projectId,

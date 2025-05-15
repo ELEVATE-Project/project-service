@@ -570,7 +570,6 @@ module.exports = class UserProjectsHelper {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let result = {}
-
 				let programAndSolutionData = {
 					type: CONSTANTS.common.IMPROVEMENT_PROJECT,
 					subType: CONSTANTS.common.IMPROVEMENT_PROJECT,
@@ -640,6 +639,7 @@ module.exports = class UserProjectsHelper {
 					data: result,
 				})
 			} catch (error) {
+				console.log(error, 'this is erre')
 				return resolve({
 					status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
 					success: false,
@@ -1234,20 +1234,17 @@ module.exports = class UserProjectsHelper {
 				let assessmentOrObservationData = {}
 
 				if (
-					project[0].entityInformation &&
-					project[0].entityInformation.entityType &&
+					// project[0].entityInformation &&
+					// project[0].entityInformation.entityType &&
 					project[0].programInformation &&
 					project[0].programInformation._id
 				) {
 					assessmentOrObservationData = {
-						entityType: project[0].entityInformation.entityType,
+						// entityType: project[0].entityInformation.entityType,
 						programId: project[0].programInformation._id,
 					}
 					let dynamicTaskInfromation = `${solutionDetails.solutionType}Information`
-					console.log(dynamicTaskInfromation, currentTask[dynamicTaskInfromation], 'this is data')
 					if (currentTask[dynamicTaskInfromation]) {
-						console.log(dynamicTaskInfromation, 'this is data2')
-
 						assessmentOrObservationData = currentTask[dynamicTaskInfromation]
 					} else {
 						let assessmentOrObservation = {
@@ -1309,7 +1306,7 @@ module.exports = class UserProjectsHelper {
 						)
 
 						if (!currentTask.solutionDetails.isReusable) {
-							assessmentOrObservationData['programId'] = currentTask.solutionDetails.programId
+							assessmentOrObservationData['programId'] = project[0].programInformation._id
 						}
 						let fieldToUpdate = `tasks.$.${solutionDetails.solutionType}Information`
 
@@ -2988,7 +2985,7 @@ module.exports = class UserProjectsHelper {
 				isATargetedSolution = UTILS.convertStringToBoolean(isATargetedSolution)
 				let tenantId = userDetails.userInformation.tenantId
 				let orgId = userDetails.userInformation.organizationId
-
+				console.log(tenantId, userDetails, 'this is data')
 				// Fetch project template details based on thr projectTemplate ID
 				// Will fetch matched projectTemplate if isDeleted = false && status = published
 				let libraryProjects = await libraryCategoriesHelper.projectDetails(
@@ -5001,7 +4998,6 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 			}
 			if (observationData.solutionDetails.isReusable) {
 				let observationCreatedFromTemplate = await surveyService.createObservationFromSolutionTemplate(
-					observationData.token,
 					observationData.solutionDetails._id,
 					// userRoleAndProfileInformation,
 					{
@@ -5014,7 +5010,11 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 						status: CONSTANTS.common.PUBLISHED_STATUS,
 						// entities: [userRoleAndProfileInformation[observationData.entityType]],
 						project: observationData.project,
-					}
+					},
+					observationData.token,
+					'',
+					observationData.programId,
+					true
 				)
 
 				if (!observationCreatedFromTemplate.success) {
@@ -5124,15 +5124,13 @@ function _surveyDetails(surveyData, userRoleAndProfileInformation = {}) {
 				let surveyCreatedFromTemplate = await surveyService.importSurveryTemplateToSolution(
 					surveyData.token,
 					surveyData.solutionDetails._id,
+					surveyData.programId,
 					{
 						name: surveyData.solutionDetails.name + '-' + UTILS.epochTime(),
 						description: surveyData.solutionDetails.name + '-' + UTILS.epochTime(),
-						program: {
-							_id: surveyData.programId,
-							name: '',
-						},
 						project: surveyData.project,
-					}
+					},
+					true
 				)
 
 				if (!surveyCreatedFromTemplate.success) {
@@ -5141,13 +5139,16 @@ function _surveyDetails(surveyData, userRoleAndProfileInformation = {}) {
 						message: CONSTANTS.apiResponses.SURVEY_NOT_CREATED,
 					}
 				}
-				console.log(surveyCreatedFromTemplate.data.solutionExternalId)
 				surveyData.solutionDetails._id = surveyCreatedFromTemplate.data.solutionId
 				surveyData.solutionDetails.externalId = surveyCreatedFromTemplate.data.solutionExternalId
 
-				let fetchedSolutions = await surveyService.listSolutions({
-					externalId: { $in: [surveyData.solutionDetails.externalId] },
-				})
+				let fetchedSolutions = await surveyService.listSolutions(
+					{
+						externalId: { $in: [surveyData.solutionDetails.externalId] },
+					},
+					surveyData.token
+				)
+
 				fetchedSolutions = fetchedSolutions.data[0]
 				if (!fetchedSolutions) {
 					throw {
@@ -5183,7 +5184,6 @@ function _surveyDetails(surveyData, userRoleAndProfileInformation = {}) {
 				surveyData.solutionDetails._id,
 				userRoleAndProfileInformation
 			)
-			console.log(surveyCreated, 'this is survey')
 			if (surveyCreated.success) {
 				// result['surveyId'] = surveyCreated.data._id
 				result['surveySubmissionId'] = surveyCreated.data.assessment.submissionId

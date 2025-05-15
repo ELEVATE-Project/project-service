@@ -219,6 +219,7 @@ module.exports = class ProjectTemplateTasksHelper {
 							// 	parsedData.STATUS = CONSTANTS.apiResponses.SOLUTION_SUB_TYPE_MIS_MATCH
 							// }
 							if (
+								template.entityType &&
 								!(solutionData[parsedData.solutionId].type === CONSTANTS.common.SURVEY) &&
 								template.entityType !== solutionData[parsedData.solutionId].entityType
 							) {

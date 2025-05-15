@@ -130,25 +130,28 @@ const createObservationFromSolutionTemplate = function (
  * @param {Object} bodyData - Body data
  * @returns {JSON} - Create child solution from parent  solution.
  */
-const importSurveryTemplateToSolution = function (token, solutionId, programId) {
+const importSurveryTemplateToSolution = function (token, solutionId, programId, data = {}, isExternalProgram = true) {
 	return new Promise(async (resolve, reject) => {
 		try {
-			let observationCreateUrl =
+			let surveyCreateUrl =
 				ASSESSMENT_URL +
 				'/v1/surveys/importSurveryTemplateToSolution' +
 				'/' +
 				solutionId +
 				'?appName=elevate' +
 				'&programId=' +
-				programId
+				programId +
+				'&isExternalProgram=' +
+				isExternalProgram
+
 			const options = {
 				headers: {
 					'content-type': 'application/json',
 					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
 					'x-auth-token': token,
 				},
+				json: { data: data },
 			}
-
 			request.post(surveyCreateUrl, options, assessmentCallback)
 
 			function assessmentCallback(err, data) {
@@ -159,9 +162,10 @@ const importSurveryTemplateToSolution = function (token, solutionId, programId) 
 					result.success = false
 				} else {
 					let response = data.body
-					result = JSON.parse(response)
+					result = response
 					if (result.status === HTTP_STATUS_CODE['ok'].status) {
 						result['data'] = response.result
+						result.success = true
 					} else {
 						result.success = false
 					}
@@ -503,7 +507,7 @@ const observationDetails = function (token, observationId) {
  * @returns {JSON} - List of solutions
  */
 
-const listSolutions = function (solutionIds) {
+const listSolutions = function (solutionIds, token) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			const url = ASSESSMENT_URL + CONSTANTS.endpoints.LIST_SOLUTIONS
@@ -512,10 +516,10 @@ const listSolutions = function (solutionIds) {
 				headers: {
 					'content-type': 'application/json',
 					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
+					'x-auth-token': token,
 				},
 			}
 			options['json'] = solutionIds
-			console.log(options, 'this is opt')
 			request.post(url, options, assessmentCallback)
 
 			function assessmentCallback(err, data) {

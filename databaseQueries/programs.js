@@ -66,7 +66,7 @@ module.exports = class Programs {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let queryObject = filterData != 'all' ? filterData : {}
-
+				console.log(filterData)
 				let updatedData = await database.models.programs
 					.findOneAndUpdate(queryObject, setData, returnData)
 					.lean()

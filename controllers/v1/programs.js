@@ -140,6 +140,7 @@ module.exports = class Programs extends Abstract {
 	async update(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				console.log('entering...............................')
 				let programUpdationData = await programsHelper.update(
 					req.params._id,
 					req.body,
@@ -226,7 +227,7 @@ module.exports = class Programs extends Abstract {
 	async details(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let programData = await programsHelper.details(req.params._id)
+				let programData = await programsHelper.details(req.params._id, 'all', 'none', req.userDetails)
 
 				return resolve(programData)
 			} catch (error) {

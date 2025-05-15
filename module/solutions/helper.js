@@ -1394,7 +1394,7 @@ module.exports = class SolutionsHelper {
 	 * @returns {Array} - Created user program and solution.
 	 */
 
-	static createProgramAndSolution(userId, data, userToken, createADuplicateSolution = '', userDetails) {
+	static createProgramAndSolution(userId, data, createADuplicateSolution = '', userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let userPrivateProgram = {}
@@ -1478,7 +1478,10 @@ module.exports = class SolutionsHelper {
 						userId,
 						startDate,
 						endDate,
-						userId
+						userId,
+						'',
+						{},
+						userDetails
 					)
 
 					if (data.rootOrganisations) {

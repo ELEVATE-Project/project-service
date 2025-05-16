@@ -5026,9 +5026,12 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 
 				result['solutionId'] = observationCreatedFromTemplate.data.solutionId
 				result['observationId'] = observationCreatedFromTemplate.data._id
-				let fetchedSolutions = await surveyService.listSolutions({
-					externalId: { $in: [observationCreatedFromTemplate.data.solutionExternalId] },
-				})
+				let fetchedSolutions = await surveyService.listSolutions(
+					{
+						externalId: { $in: [observationCreatedFromTemplate.data.solutionExternalId] },
+					},
+					observationData.token
+				)
 				fetchedSolutions = fetchedSolutions.data[0]
 
 				if (!fetchedSolutions) {
@@ -5078,7 +5081,9 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 					observation,
 					userRoleAndProfileInformation && Object.keys(userRoleAndProfileInformation).length > 0
 						? userRoleAndProfileInformation
-						: {}
+						: {},
+					observationData.programId,
+					true
 				)
 
 				if (observationCreated.success) {

@@ -75,7 +75,7 @@ const createObservationFromSolutionTemplate = function (
 	token,
 	solutionDetails,
 	programId,
-	isExternal
+	isExternalProgram
 ) {
 	return new Promise(async (resolve, reject) => {
 		try {
@@ -85,8 +85,8 @@ const createObservationFromSolutionTemplate = function (
 				solutionId +
 				'&programId=' +
 				programId +
-				'&isExternal=' +
-				isExternal
+				'&isExternalProgram=' +
+				isExternalProgram
 
 			const options = {
 				headers: {
@@ -609,12 +609,25 @@ const updateSolution = function (token, updateData, solutionExternalId) {
  * @returns {JSON} - Create observation.
  */
 
-const createObservation = function (token, solutionId, data, userRoleAndProfileInformation = {}) {
+const createObservation = function (
+	token,
+	solutionId,
+	data,
+	userRoleAndProfileInformation = {},
+	programId,
+	isExternalProgram
+) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			let createdObservationUrl =
-				ASSESSMENT_URL + CONSTANTS.endpoints.CREATE_OBSERVATIONS + '?solutionId=' + solutionId
-
+				ASSESSMENT_URL +
+				CONSTANTS.endpoints.CREATE_OBSERVATIONS +
+				'?solutionId=' +
+				solutionId +
+				'&programId=' +
+				programId +
+				'&isExternalProgram=' +
+				isExternalProgram
 			let options = {
 				headers: {
 					'content-type': 'application/json',

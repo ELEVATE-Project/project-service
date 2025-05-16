@@ -27,7 +27,7 @@ module.exports = class ProjectTemplateTasksHelper {
 	 * @returns {Array} Lists of tasks.
 	 */
 
-	static extractCsvInformation(csvData, projectTemplateId) {
+	static extractCsvInformation(csvData, projectTemplateId, userToken) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let taskIds = []
@@ -122,7 +122,10 @@ module.exports = class ProjectTemplateTasksHelper {
 					}
 
 					if (solutionIds && solutionIds.length > 0) {
-						let fetchedSolutions = await surveyService.listSolutions({ externalId: { $in: solutionIds } })
+						let fetchedSolutions = await surveyService.listSolutions(
+							{ externalId: { $in: solutionIds } },
+							userToken
+						)
 						solutions = [...solutions, ...fetchedSolutions.data] // Merge both
 					}
 
@@ -500,7 +503,7 @@ module.exports = class ProjectTemplateTasksHelper {
 					})
 				})()
 
-				let csvData = await this.extractCsvInformation(tasks, projectTemplateId)
+				let csvData = await this.extractCsvInformation(tasks, projectTemplateId, userToken)
 				if (!csvData.success) {
 					return resolve(csvData)
 				}

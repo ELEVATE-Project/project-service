@@ -370,7 +370,6 @@ module.exports = async function (req, res, next, token = '') {
 				// aggregate valid orgids
 
 				let relatedOrgIds = orgDetails.data.related_orgs
-				console.log(relatedOrgIds, 'relatedOrgIds')
 				validOrgIds = orgIdArr.filter((id) => relatedOrgIds.includes(id))
 
 				if (!(validOrgIds.length > 0)) {
@@ -463,20 +462,16 @@ module.exports = async function (req, res, next, token = '') {
 		}
 
 		let userRoles = decodedToken.data.roles.map((role) => role.title)
-		console.log(userRoles, 'userRoles')
 		if (performInternalAccessTokenCheck) {
-			console.log('**1**')
 			decodedToken.data['tenantAndOrgInfo'] = {}
 			// validate SUPER_ADMIN
 			if (adminHeader) {
-				console.log(adminHeader, 'adminHeader')
 				if (adminHeader != process.env.ADMIN_ACCESS_TOKEN) {
 					return res.status(HTTP_STATUS_CODE['unauthorized'].status).send(respUtil(rspObj))
 				}
 				decodedToken.data.roles.push({ title: CONSTANTS.common.ADMIN_ROLE })
 
 				let result = getTenantIdAndOrgIdFromTheTheReqIntoHeaders(req, decodedToken.data)
-				console.log(result, 'result')
 				if (!result.success) {
 					rspObj.errCode = reqMsg.ADMIN_TOKEN.MISSING_CODE
 					rspObj.errMsg = reqMsg.ADMIN_TOKEN.MISSING_MESSAGE

@@ -1239,7 +1239,7 @@ module.exports = class SolutionsHelper {
 
 					filterQuery = _.merge(filterQuery, data.filter)
 				}
-				delete filterQuery['scope.entityType']
+				delete filterQuery['scope.entityType'];
 				return resolve({
 					success: true,
 					data: filterQuery,

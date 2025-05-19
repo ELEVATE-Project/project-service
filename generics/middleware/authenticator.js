@@ -365,7 +365,7 @@ module.exports = async function (req, res, next, token = '') {
 
 				// convert the types of items to string
 				orgDetails.data.related_orgs = orgDetails.data.organizations.map((data) => {
-					return data.id.toString()
+					return data.code.toString()
 				})
 				// aggregate valid orgids
 

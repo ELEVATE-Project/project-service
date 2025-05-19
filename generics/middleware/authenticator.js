@@ -87,6 +87,7 @@ module.exports = async function (req, res, next, token = '') {
 		'/certificateTemplates/createOrUpdate',
 		'/certificateTemplates/uploadTemplate',
 		'/certificateTemplates/createSvg',
+		'/solutions/getDetails',
 	]
 	let performInternalAccessTokenCheck = false
 	let adminHeader = false

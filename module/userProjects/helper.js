@@ -589,6 +589,7 @@ module.exports = class UserProjectsHelper {
 				let solutionAndProgramCreation = await solutionsHelper.createProgramAndSolution(
 					userId,
 					programAndSolutionData,
+					userDetails.userToken,
 					isATargetedSolution,
 					userDetails
 				)
@@ -639,7 +640,6 @@ module.exports = class UserProjectsHelper {
 					data: result,
 				})
 			} catch (error) {
-				console.log(error, 'this is erre')
 				return resolve({
 					status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
 					success: false,
@@ -1196,13 +1196,15 @@ module.exports = class UserProjectsHelper {
 	 * Solutions details
 	 * @method
 	 * @name solutionDetails
-	 * @param {String} userToken - Logged in user token.
 	 * @param {String} projectId - Project id.
 	 * @param {Array} taskId - Tasks id.
+	 * @param {Object} bodyData - Req body data
+	 * @param {String} userToken - Logged in user token.
+	 * @param {String} userId - userId
 	 * @returns {Object}
 	 */
 
-	static solutionDetails(userToken, projectId, taskId, bodyData = {}, userId) {
+	static solutionDetails(projectId, taskId, bodyData = {}, userToken, userId) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let project = await projectQueries.projectDocument(
@@ -1226,7 +1228,6 @@ module.exports = class UserProjectsHelper {
 						'projectTemplateId',
 					]
 				)
-				console.log()
 				if (!project.length > 0) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
@@ -1237,7 +1238,6 @@ module.exports = class UserProjectsHelper {
 				let currentTask = project[0].tasks.find((task) => task._id == taskId)
 
 				let solutionDetails = currentTask.solutionDetails
-				console.log(currentTask, 'this is task')
 				let assessmentOrObservationData = {}
 
 				if (
@@ -2992,7 +2992,6 @@ module.exports = class UserProjectsHelper {
 				isATargetedSolution = UTILS.convertStringToBoolean(isATargetedSolution)
 				let tenantId = userDetails.userInformation.tenantId
 				let orgId = userDetails.userInformation.organizationId
-				console.log(tenantId, userDetails, 'this is data')
 				// Fetch project template details based on thr projectTemplate ID
 				// Will fetch matched projectTemplate if isDeleted = false && status = published
 				let libraryProjects = await libraryCategoriesHelper.projectDetails(
@@ -3224,7 +3223,6 @@ module.exports = class UserProjectsHelper {
 					data: projectCreation.data,
 				})
 			} catch (error) {
-				console.log(error, 'this is error')
 				return resolve({
 					success: false,
 					message: error.message,
@@ -4252,14 +4250,13 @@ module.exports = class UserProjectsHelper {
 				let projectDetails = await this.detailsV2(
 					'',
 					projectData.solutionDetails._id,
-					'162',
+					userId,
 					userToken,
 					userRoleAndProfileInformation,
 					'',
 					'',
 					projectIdFromsolutionId ? projectIdFromsolutionId : ''
 				)
-				console.log(projectDetails, 'this is details')
 				if (projectDetails.success) {
 					result['projectId'] = projectDetails.data._id
 				}
@@ -4270,7 +4267,6 @@ module.exports = class UserProjectsHelper {
 					data: result,
 				})
 			} catch (error) {
-				console.log(error)
 				return resolve({
 					message: error.message,
 					success: false,
@@ -4982,6 +4978,7 @@ function _assessmentDetails(assessmentData) {
  * @method
  * @name _observationDetails
  * @param {Object} observationData - Observation data.
+ * @param {Object} userRoleAndProfileInformation -req body Data
  * @returns {Object}
  */
 
@@ -5038,14 +5035,14 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 					},
 					observationData.token
 				)
-				fetchedSolutions = fetchedSolutions.data[0]
-
 				if (!fetchedSolutions) {
 					throw {
 						message: CONSTANTS.apiResponses.SOLUTION_NOT_FOUND,
 						status: HTTP_STATUS_CODE.bad_request.status,
 					}
 				}
+				fetchedSolutions = fetchedSolutions.data[0]
+
 				let solutionDetails = {
 					solutionSubType: fetchedSolutions.entityType,
 					solutionType: fetchedSolutions.type,
@@ -5067,6 +5064,16 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 					}
 				)
 			} else {
+				let updateSolutionObj = {
+					$set: {},
+				}
+				updateSolutionObj['$set']['referenceFrom'] = CONSTANTS.common.PROJECT
+				updateSolutionObj['$set']['project'] = observationData.project
+				await surveyService.updateSolution(
+					observationData.token,
+					updateSolutionObj,
+					observationData.solutionDetails.solutionExternalId
+				)
 				let startDate = new Date()
 				let endDate = new Date()
 				endDate.setFullYear(endDate.getFullYear() + 1)
@@ -5110,7 +5117,14 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 		}
 	})
 }
-
+/**
+ * Survey details
+ * @method
+ * @name _surveyDetails
+ * @param {Object} surveyData - survey data.
+ * @param {Object} userRoleAndProfileInformation -req body Data
+ * @returns {Object}
+ */
 function _surveyDetails(surveyData, userRoleAndProfileInformation = {}) {
 	return new Promise(async (resolve, reject) => {
 		try {
@@ -5185,16 +5199,18 @@ function _surveyDetails(surveyData, userRoleAndProfileInformation = {}) {
 						},
 					}
 				)
+			} else {
+				let updateSolutionObj = {
+					$set: {},
+				}
+				updateSolutionObj['$set']['referenceFrom'] = CONSTANTS.common.PROJECT
+				updateSolutionObj['$set']['project'] = surveyData.project
+				await surveyService.updateSolution(
+					surveyData.token,
+					updateSolutionObj,
+					surveyData.solutionDetails.solutionExternalId
+				)
 			}
-
-			let solutionUpdated = await surveyService.updateSolution(
-				surveyData.token,
-				{
-					project: surveyData.project,
-					referenceFrom: 'project',
-				},
-				surveyData.solutionDetails.solutionExternalId
-			)
 
 			// create survey using details api
 			let surveyCreated = await surveyService.surveyDetails(

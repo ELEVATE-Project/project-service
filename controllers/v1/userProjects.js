@@ -495,10 +495,10 @@ module.exports = class UserProjects extends Abstract {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let solutionDetails = await userProjectsHelper.solutionDetails(
-					req.userDetails.userToken,
 					req.params._id,
 					req.query.taskId,
 					req.body,
+					req.userDetails.userToken,
 					req.userDetails.userInformation.userId
 				)
 
@@ -1355,7 +1355,6 @@ module.exports = class UserProjects extends Abstract {
 		return new Promise(async (resolve, reject) => {
 			try {
 				const projectId = req.params._id
-				console.log(req.body)
 				const pushSubmissionToTask = await userProjectsHelper.pushSubmissionToTask(
 					projectId,
 					req.query.taskId,
@@ -1408,7 +1407,6 @@ module.exports = class UserProjects extends Abstract {
 				)
 				return resolve(updateData)
 			} catch (error) {
-				console.log(error)
 				return reject({
 					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
 					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,

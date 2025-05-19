@@ -61,4 +61,7 @@ module.exports = {
 	FIND_USER_ROLE_EXTENSION_DOCUMENTS: '/v1/userRoleExtension/find',
 	ORGANIZATION_READ: '/v1/organization/read',
 	AUTO_DOWNLOAD: '/v1/cloud-services/files/download',
+	IMPORT_SURVEY_TEMPLATE: '/v1/surveys/importSurveryTemplateToSolution',
+	OBSERVATION_CHILD_SOLUTION: '/v1/solutions/importFromSolution',
+	SURVEY_DETAILS: '/v1/surveys/details',
 }

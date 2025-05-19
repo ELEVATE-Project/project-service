@@ -43,7 +43,7 @@ module.exports = class ProjectTemplateTasksHelper {
 					} else {
 						taskIds.push(parsedData.externalId)
 					}
-
+					// Imporovemnt-project needs to query projectService db and other solutions like obs/survey needs to query samiksha DB so we are pusing solutionIds to two diff array
 					if (parsedData.solutionId && parsedData.solutionId !== '') {
 						solutionExists = true
 						if (parsedData.type && parsedData.type === CONSTANTS.common.IMPROVEMENT_PROJECT) {
@@ -159,7 +159,6 @@ module.exports = class ProjectTemplateTasksHelper {
 					},
 				})
 			} catch (error) {
-				console.log(error, 'this is event')
 				return resolve({
 					message: error.message,
 					success: false,
@@ -451,7 +450,6 @@ module.exports = class ProjectTemplateTasksHelper {
 								_id: template._id.toString(),
 								taskId: taskData._id.toString(),
 							}
-							console.log(taskData.solutionDetails._id)
 							if (taskData.type === CONSTANTS.common.IMPROVEMENT_PROJECT) {
 								await solutionsQueries.updateSolutionDocument(
 									{
@@ -478,7 +476,6 @@ module.exports = class ProjectTemplateTasksHelper {
 				}
 				return resolve(_.omit(parsedData, ['createdBy', 'updatedBy']))
 			} catch (error) {
-				console.log(error)
 				return reject(error)
 			}
 		})
@@ -495,13 +492,13 @@ module.exports = class ProjectTemplateTasksHelper {
 	 * @returns {Object} Bulk create project template tasks.
 	 */
 
-	static bulkCreate(tasks, projectTemplateId, userDetails, translationFiles = {}, userToken) {
+	static bulkCreate(tasks, projectTemplateId, userDetails, translationFiles = {}) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				const fileName = `create-project-template-tasks`
 				let fileStream = new CSV_FILE_STREAM(fileName)
 				let input = fileStream.initStream()
-
+				let userToken = userDetails.userToken
 				;(async function () {
 					await fileStream.getProcessorPromise()
 					return resolve({
@@ -636,7 +633,6 @@ module.exports = class ProjectTemplateTasksHelper {
 
 				input.push(null)
 			} catch (error) {
-				console.log(error)
 				return reject(error)
 			}
 		})

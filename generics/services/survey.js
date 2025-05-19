@@ -33,7 +33,6 @@ const createAssessmentSolutionFromTemplate = function (token, templateId, bodyDa
 				},
 				json: bodyData,
 			}
-			console.log(options, 'thisis opti')
 			request.post(assessmentCreateUrl, options, assessmentCallback)
 
 			function assessmentCallback(err, data) {
@@ -81,7 +80,8 @@ const createObservationFromSolutionTemplate = function (
 		try {
 			let observationCreateUrl =
 				ASSESSMENT_URL +
-				'/v1/observations/create?solutionId=' +
+				CONSTANTS.endpoints.CREATE_OBSERVATIONS +
+				'?solutionId=' +
 				solutionId +
 				'&programId=' +
 				programId +
@@ -96,7 +96,6 @@ const createObservationFromSolutionTemplate = function (
 				},
 				json: { data: bodyData },
 			}
-			console.log(options, 'this is options')
 			request.post(observationCreateUrl, options, assessmentCallback)
 
 			function assessmentCallback(err, data) {
@@ -135,7 +134,7 @@ const importSurveryTemplateToSolution = function (token, solutionId, programId, 
 		try {
 			let surveyCreateUrl =
 				ASSESSMENT_URL +
-				'/v1/surveys/importSurveryTemplateToSolution' +
+				CONSTANTS.endpoints.IMPORT_SURVEY_TEMPLATE +
 				'/' +
 				solutionId +
 				'?appName=elevate' +
@@ -187,23 +186,24 @@ const importSurveryTemplateToSolution = function (token, solutionId, programId, 
  * @param {Object} bodyData - Body data
  * @returns {JSON} - Create child solution from parent  solution.
  */
-const importObservationTemplateToSolution = function (token, solutionId, entityType, programId) {
+const importObservationTemplateToSolution = function (token, solutionId, bodyData, isExternalProgram) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			let observationCreateUrl =
 				ASSESSMENT_URL +
-				'/v1/surveys/importFromFramework?frameworkId=' +
+				CONSTANTS.endpoints.OBSERVATION_CHILD_SOLUTION +
+				'?solutionId=' +
 				solutionId +
-				'&entityType=' +
-				entityType +
-				'&programId=' +
-				programId
+				'&isExternalProgram=' +
+				isExternalProgram
+
 			const options = {
 				headers: {
 					'content-type': 'application/json',
 					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
 					'x-auth-token': token,
 				},
+				json: bodyData,
 			}
 
 			request.post(observationCreateUrl, options, assessmentCallback)
@@ -216,7 +216,7 @@ const importObservationTemplateToSolution = function (token, solutionId, entityT
 					result.success = false
 				} else {
 					let response = data.body
-					result = JSON.parse(response)
+					result = response
 					if (result.status === HTTP_STATUS_CODE['ok'].status) {
 						result['data'] = response.result
 					} else {
@@ -226,7 +226,6 @@ const importObservationTemplateToSolution = function (token, solutionId, entityT
 				return resolve(result)
 			}
 		} catch (error) {
-			console.log(error, 'this is errro')
 			return reject(error)
 		}
 	})
@@ -245,7 +244,11 @@ const surveyDetails = function (token, solutionId, bodyData) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			let observationCreateUrl =
-				ASSESSMENT_URL + '/v1/surveys/details' + '?solutionId=' + solutionId + '&&fromPrjectService=true'
+				ASSESSMENT_URL +
+				CONSTANTS.endpoints.SURVEY_DETAILS +
+				'?solutionId=' +
+				solutionId +
+				'&fromPrjectService=true'
 
 			const options = {
 				headers: {

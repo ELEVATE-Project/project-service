@@ -352,7 +352,6 @@ module.exports = class ProgramsHelper {
 					},
 				})
 			} catch (error) {
-				console.log(error)
 				return resolve({
 					status: error.status || 400,
 					success: false,

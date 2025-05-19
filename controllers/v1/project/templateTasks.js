@@ -64,8 +64,7 @@ module.exports = class ProjectTemplateTasks extends Abstract {
 					templateTasks,
 					req.params._id,
 					req.userDetails,
-					req.files.translationFiles,
-					req.userDetails.userToken
+					req.files.translationFiles
 				)
 
 				return resolve(projectTemplateTasks)

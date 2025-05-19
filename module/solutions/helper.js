@@ -3407,7 +3407,7 @@ module.exports = class SolutionsHelper {
 					isDeleted: false,
 				}
 
-				solutionMatchQuery['tenantId'] = userDetails.userInformation.tenantId
+				solutionMatchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
 
 				let solutionData = await solutionsQueries.solutionsDocument(solutionMatchQuery)
 

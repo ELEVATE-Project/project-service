@@ -87,6 +87,7 @@ module.exports = async function (req, res, next, token = '') {
 		'/certificateTemplates/createOrUpdate',
 		'/certificateTemplates/uploadTemplate',
 		'/certificateTemplates/createSvg',
+		'/solutions/getDetails',
 		'/userProjects/pushSubmissionToTask',
 	]
 	let performInternalAccessTokenCheck = false
@@ -266,7 +267,8 @@ module.exports = async function (req, res, next, token = '') {
 			let fetchSingleOrgIdFunc = await fetchSingleOrgIdFromProvidedData(
 				decodedToken.data.tenant_id.toString(),
 				decodedToken.data.organization_ids,
-				req.headers['orgid']
+				req.headers['orgid'],
+				token
 			)
 
 			if (!fetchSingleOrgIdFunc.success) {
@@ -340,9 +342,9 @@ module.exports = async function (req, res, next, token = '') {
 		 * @param {String} orgId - Comma separated string of org IDs or 'ALL'
 		 * @returns {Object} - Success with validOrgIds array or failure with error object
 		 */
-		async function validateIfOrgsBelongsToTenant(tenantId, orgId) {
+		async function validateIfOrgsBelongsToTenant(tenantId, orgId, token) {
 			let orgIdArr = Array.isArray(orgId) ? orgId : typeof orgId === 'string' ? orgId.split(',') : []
-			let orgDetails = await userService.fetchDefaultOrgDetails(tenantId)
+			let orgDetails = await userService.fetchTenantDetails(tenantId, token)
 			let validOrgIds = null
 
 			if (orgIdArr.includes('ALL') || orgIdArr.includes('all')) {
@@ -353,8 +355,8 @@ module.exports = async function (req, res, next, token = '') {
 					!orgDetails.success ||
 					!orgDetails.data ||
 					!(Object.keys(orgDetails.data).length > 0) ||
-					!orgDetails.data.related_orgs ||
-					!(orgDetails.data.related_orgs.length > 0)
+					!orgDetails.data.organizations ||
+					!(orgDetails.data.organizations.length > 0)
 				) {
 					let errorObj = {}
 					errorObj.errCode = CONSTANTS.apiResponses.ORG_DETAILS_FETCH_UNSUCCESSFUL_CODE
@@ -364,11 +366,12 @@ module.exports = async function (req, res, next, token = '') {
 				}
 
 				// convert the types of items to string
-				orgDetails.data.related_orgs = orgDetails.data.related_orgs.map(String)
+				orgDetails.data.related_orgs = orgDetails.data.organizations.map((data) => {
+					return data.code.toString()
+				})
 				// aggregate valid orgids
 
 				let relatedOrgIds = orgDetails.data.related_orgs
-
 				validOrgIds = orgIdArr.filter((id) => relatedOrgIds.includes(id))
 
 				if (!(validOrgIds.length > 0)) {
@@ -390,7 +393,7 @@ module.exports = async function (req, res, next, token = '') {
 		 * @param {String} orgIdFromHeader - The orgId provided in the request headers
 		 * @returns {Promise<Object>} - Returns a promise resolving to an object containing the success status, orgId, or error details
 		 */
-		async function fetchSingleOrgIdFromProvidedData(tenantId, orgIdArr, orgIdFromHeader) {
+		async function fetchSingleOrgIdFromProvidedData(tenantId, orgIdArr, orgIdFromHeader, token) {
 			try {
 				// Check if orgIdFromHeader is provided and valid
 				if (orgIdFromHeader && orgIdFromHeader != '') {
@@ -398,7 +401,7 @@ module.exports = async function (req, res, next, token = '') {
 						throw CONSTANTS.apiResponses.TENANTID_AND_ORGID_REQUIRED_IN_TOKEN_CODE
 					}
 
-					let validateOrgsResult = await validateIfOrgsBelongsToTenant(tenantId, orgIdFromHeader)
+					let validateOrgsResult = await validateIfOrgsBelongsToTenant(tenantId, orgIdFromHeader, token)
 
 					if (!validateOrgsResult.success) {
 						throw CONSTANTS.apiResponses.TENANTID_AND_ORGID_REQUIRED_IN_TOKEN_CODE
@@ -461,7 +464,6 @@ module.exports = async function (req, res, next, token = '') {
 		}
 
 		let userRoles = decodedToken.data.roles.map((role) => role.title)
-
 		if (performInternalAccessTokenCheck) {
 			decodedToken.data['tenantAndOrgInfo'] = {}
 			// validate SUPER_ADMIN
@@ -484,7 +486,8 @@ module.exports = async function (req, res, next, token = '') {
 
 				let validateOrgsResult = await validateIfOrgsBelongsToTenant(
 					req.headers['tenantid'],
-					req.headers['orgid']
+					req.headers['orgid'],
+					token
 				)
 
 				if (!validateOrgsResult.success) {
@@ -510,7 +513,8 @@ module.exports = async function (req, res, next, token = '') {
 
 				let validateOrgsResult = await validateIfOrgsBelongsToTenant(
 					req.headers['tenantid'],
-					req.headers['orgid']
+					req.headers['orgid'],
+					token
 				)
 				if (!validateOrgsResult.success) {
 					return res.status(responseCode['unauthorized'].status).send(respUtil(validateOrgsResult.errorObj))

@@ -1345,6 +1345,33 @@ module.exports = class UserProjects extends Abstract {
 		})
 	}
 	/**
+	 * pushSubmissionTo project Task
+	 * @method
+	 * @name pushSubmissionToTask
+	 * @param {String} projectId - projectId.
+	 * @returns {JSON}  Success body.
+	 */
+	async pushSubmissionToTask(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				const projectId = req.params._id
+				console.log(req.body)
+				const pushSubmissionToTask = await userProjectsHelper.pushSubmissionToTask(
+					projectId,
+					req.query.taskId,
+					req.body
+				)
+				return resolve(pushSubmissionToTask)
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
+				})
+			}
+		})
+	}
+	/**
     * @api {post} /project/v1/userProjects/update/:projectId
     * ReIssue project certificate
     * @apiVersion 1.0.0

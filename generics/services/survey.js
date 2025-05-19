@@ -581,7 +581,6 @@ const updateSolution = function (token, updateData, solutionExternalId) {
 					result.success = false
 				} else {
 					let response = data.body
-
 					if (response.status === HTTP_STATUS_CODE['ok'].status) {
 						result['data'] = response.result
 					} else {

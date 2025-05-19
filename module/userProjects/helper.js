@@ -1062,7 +1062,9 @@ module.exports = class UserProjectsHelper {
 
 					if (
 						currentTask.type === CONSTANTS.common.ASSESSMENT ||
-						currentTask.type === CONSTANTS.common.OBSERVATION
+						currentTask.type === CONSTANTS.common.OBSERVATION ||
+						currentTask.type === CONSTANTS.common.SURVEY ||
+						currentTask.type === CONSTANTS.common.IMPROVEMENT_PROJECT
 					) {
 						let completedSubmissionCount = 0
 
@@ -1073,8 +1075,9 @@ module.exports = class UserProjectsHelper {
 						data['submissionStatus'] = CONSTANTS.common.STARTED
 
 						let submissionDetails = {}
-						if (currentTask.observationInformation) {
-							submissionDetails = currentTask.observationInformation
+						let dynamicTaskInfromation = `${currentTask.type}Information`
+						if (currentTask[dynamicTaskInfromation]) {
+							submissionDetails = currentTask[dynamicTaskInfromation]
 						} else if (currentTask.submissionDetails) {
 							submissionDetails = currentTask.submissionDetails
 						}
@@ -1179,7 +1182,10 @@ module.exports = class UserProjectsHelper {
 					}
 				)
 
-				return resolve(tasksUpdated)
+				return resolve({
+					success: true,
+					data: tasksUpdated,
+				})
 			} catch (error) {
 				return reject(error)
 			}
@@ -1220,6 +1226,7 @@ module.exports = class UserProjectsHelper {
 						'projectTemplateId',
 					]
 				)
+				console.log()
 				if (!project.length > 0) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
@@ -3161,7 +3168,6 @@ module.exports = class UserProjectsHelper {
 				libraryProjects.data['tenantId'] = userDetails.userInformation.tenantId
 				libraryProjects.data['orgId'] = userDetails.userInformation.organizationId // libraryProjects.data.entityType =libraryProjects.data.entityType
 				libraryProjects.data.entityInformation = { entityType: libraryProjects.data.entityType }
-
 				let projectCreation = await projectQueries.createProject(_.omit(libraryProjects.data, ['_id']))
 
 				// if (addReportInfoToSolution && projectCreation._doc.solutionId) {
@@ -5008,7 +5014,7 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 							name: '',
 						},
 						status: CONSTANTS.common.PUBLISHED_STATUS,
-						// entities: [userRoleAndProfileInformation[observationData.entityType]],
+						entities: [userRoleAndProfileInformation[observationData.solutionDetails.solutionSubType]],
 						project: observationData.project,
 					},
 					observationData.token,
@@ -5064,14 +5070,13 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 				let startDate = new Date()
 				let endDate = new Date()
 				endDate.setFullYear(endDate.getFullYear() + 1)
-
 				let observation = {
 					name: observationData.solutionDetails.name,
 					description: observationData.solutionDetails.name,
 					status: CONSTANTS.common.PUBLISHED_STATUS,
 					startDate: startDate,
 					endDate: endDate,
-					entities: [observationData.entityId],
+					entities: [userRoleAndProfileInformation[observationData.solutionDetails.solutionSubType]],
 					project: observationData.project,
 				}
 
@@ -5085,7 +5090,6 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 					observationData.programId,
 					true
 				)
-
 				if (observationCreated.success) {
 					result['observationId'] = observationCreated.data._id
 				}
@@ -5182,6 +5186,15 @@ function _surveyDetails(surveyData, userRoleAndProfileInformation = {}) {
 					}
 				)
 			}
+
+			let solutionUpdated = await surveyService.updateSolution(
+				surveyData.token,
+				{
+					project: surveyData.project,
+					referenceFrom: 'project',
+				},
+				surveyData.solutionDetails.solutionExternalId
+			)
 
 			// create survey using details api
 			let surveyCreated = await surveyService.surveyDetails(

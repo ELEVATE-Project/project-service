@@ -126,6 +126,12 @@ module.exports = class ProjectTemplateTasksHelper {
 							{ externalId: { $in: solutionIds } },
 							userToken
 						)
+						if (!fetchedSolutions.data.length > 0) {
+							throw {
+								message: CONSTANTS.apiResponses.SOLUTION_NOT_FOUND,
+								status: HTTP_STATUS_CODE.bad_request.status,
+							}
+						}
 						solutions = [...solutions, ...fetchedSolutions.data] // Merge both
 					}
 
@@ -153,6 +159,7 @@ module.exports = class ProjectTemplateTasksHelper {
 					},
 				})
 			} catch (error) {
+				console.log(error, 'this is event')
 				return resolve({
 					message: error.message,
 					success: false,
@@ -629,6 +636,7 @@ module.exports = class ProjectTemplateTasksHelper {
 
 				input.push(null)
 			} catch (error) {
+				console.log(error)
 				return reject(error)
 			}
 		})

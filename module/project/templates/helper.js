@@ -594,7 +594,6 @@ module.exports = class ProjectTemplatesHelper {
 					externalId: templateId,
 					isReusable: true,
 				})
-
 				if (!projectTemplateData.length > 0) {
 					throw new Error(CONSTANTS.apiResponses.PROJECT_TEMPLATE_NOT_FOUND)
 				}
@@ -644,10 +643,10 @@ module.exports = class ProjectTemplatesHelper {
 
 				let programDetails = {}
 
-				programDetails.programId = solutionData[0].programId
-				programDetails.programName = solutionData[0].programName
-				programDetails.programDescription = solutionData[0].programDescription
-				newProjectTemplate.parentTemplateId = projectTemplateData[0]._id
+				// programDetails.programId = solutionData[0].programId
+				// programDetails.programName = solutionData[0].programName
+				// programDetails.programDescription = solutionData[0].programDescription
+				// newProjectTemplate.parentTemplateId = projectTemplateData[0]._id
 
 				let updationKeys = Object.keys(updateData)
 				if (updationKeys.length > 0) {
@@ -704,6 +703,7 @@ module.exports = class ProjectTemplatesHelper {
 					},
 				})
 			} catch (error) {
+				console.log(error)
 				return resolve({
 					status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
 					success: false,
@@ -856,11 +856,9 @@ module.exports = class ProjectTemplatesHelper {
 						newProjectTemplateTask.programId = programDetails.programId
 						newProjectTemplateTask.programName = programDetails.programName
 						newProjectTemplateTask.programDescription = programDetails.programDescription
-
+						console.log(newProjectTemplateTask.type, 'this is tasktype')
 						let duplicateTemplateTask
 						if (String(newProjectTemplateTask.type) === 'improvementProject') {
-							console.log(newProjectTemplateTask.projectTemplateId, 'line no 854')
-
 							let duplicateProjectTemplateTask = await projectTemplateTaskQueries.createTemplateTask(
 								_.omit(newProjectTemplateTask, ['_id'])
 							)
@@ -869,16 +867,27 @@ module.exports = class ProjectTemplatesHelper {
 						} else if (String(newProjectTemplateTask.type) === 'observation') {
 							let duplicateObservationTask = await surveyService.createObservationFromSolutionTemplate(
 								newProjectTemplateTask.solutionDetails._id,
-								{},
+								{
+									name: newProjectTemplateTask.solutionDetails.name + '-' + UTILS.epochTime(),
+									description: newProjectTemplateTask.solutionDetails.name + '-' + UTILS.epochTime(),
+									program: {
+										_id: newProjectTemplateTask.programId,
+										name: '',
+									},
+									status: CONSTANTS.common.PUBLISHED_STATUS,
+									// entities: [userRoleAndProfileInformation[observationData.entityType]],
+									// project: newProjectTemplateTask.project,
+								},
 								userToken,
-								newProjectTemplateTask.solutionDetails,
+								'',
 								newProjectTemplateTask.programId,
 								// false
 								newProjectTemplateTask.solutionDetails.isReusable
 							)
-							// console.log(duplicateObservationTask.data.solutionExternalId, 'line no 3333333333333333333')
+							console.log(duplicateObservationTask, 'this is obs')
 							let fetchedSolutions = await surveyService.listSolutions({
 								externalId: { $in: [duplicateObservationTask.data.solutionExternalId] },
+								userToken,
 							})
 
 							if (!fetchedSolutions.data.length > 0) {
@@ -889,13 +898,13 @@ module.exports = class ProjectTemplatesHelper {
 							}
 							let solutionDetails = {
 								solutionType: fetchedSolutions.data[0].type,
+								solutionSubType: fetchedSolutions.data[0].entityType,
 								_id: fetchedSolutions.data[0]._id,
 								solutionExternalId: fetchedSolutions.data[0].externalId,
 								name: fetchedSolutions.data[0].name,
 								isReusable: fetchedSolutions.data[0].isReusable,
+								minNoOfSubmissionsRequired: fetchedSolutions.data[0].minNoOfSubmissionsRequired,
 							}
-
-							console.log(solutionDetails, 'line no 555555555555555555')
 
 							newProjectTemplateTask.solutionDetails = solutionDetails
 
@@ -907,14 +916,13 @@ module.exports = class ProjectTemplatesHelper {
 							let duplicateSurveyTask = await surveyService.importSurveryTemplateToSolution(
 								userToken,
 								newProjectTemplateTask.solutionDetails._id,
-								newProjectTemplateTask.programId
+								newProjectTemplateTask.programId,
+								true
 							)
-							console.log(duplicateSurveyTask.result.solutionExternalId, 'line no 222222222222')
-
 							let fetchedSolutions = await surveyService.listSolutions({
 								externalId: { $in: [duplicateSurveyTask.result.solutionExternalId] },
+								userToken,
 							})
-							console.log(fetchedSolutions.data[0], 'line no 77777777777')
 
 							if (!fetchedSolutions.data.length > 0) {
 								throw {
@@ -928,15 +936,19 @@ module.exports = class ProjectTemplatesHelper {
 								solutionExternalId: fetchedSolutions.data[0].externalId,
 								name: fetchedSolutions.data[0].name,
 								isReusable: fetchedSolutions.data[0].isReusable,
+								solutionSubType: fetchedSolutions.data[0].entityType,
+								minNoOfSubmissionsRequired: fetchedSolutions.data[0].minNoOfSubmissionsRequired,
 							}
-							console.log(solutionDetails, 'line no 999999999999999')
 							newProjectTemplateTask.solutionDetails = solutionDetails
-							console.log(newProjectTemplateTask, 'line no ttttttttttttttttttt')
-
 							duplicateTemplateTask = await projectTemplateTaskQueries.createTemplateTask(
 								_.omit(newProjectTemplateTask, ['_id'])
 							)
 
+							duplicateTemplateTask = duplicateTemplateTask._id
+						} else {
+							duplicateTemplateTask = await projectTemplateTaskQueries.createTemplateTask(
+								_.omit(newProjectTemplateTask, ['_id'])
+							)
 							duplicateTemplateTask = duplicateTemplateTask._id
 						}
 						// duplicateTemplateTask = await projectTemplateTaskQueries.createTemplateTask(
@@ -1000,9 +1012,6 @@ module.exports = class ProjectTemplatesHelper {
 
 				// }
 
-				console.log(duplicateTemplateId, 'line no 947')
-				console.log(newTaskId, 'line no ====================')
-
 				let updateDuplicateTemplate
 				//adding duplicate tasj to duplicate template
 				if (newTaskId && newTaskId.length > 0) {
@@ -1017,7 +1026,6 @@ module.exports = class ProjectTemplatesHelper {
 						}
 					)
 				}
-				console.log(updateDuplicateTemplate, 'line no 972')
 
 				return resolve(updateDuplicateTemplate)
 			} catch (error) {

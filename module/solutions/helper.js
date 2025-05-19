@@ -1239,7 +1239,7 @@ module.exports = class SolutionsHelper {
 
 					filterQuery = _.merge(filterQuery, data.filter)
 				}
-				delete filterQuery['scope.entityType'];
+				delete filterQuery['scope.entityType']
 				return resolve({
 					success: true,
 					data: filterQuery,
@@ -3404,7 +3404,7 @@ module.exports = class SolutionsHelper {
 					isDeleted: false,
 				}
 
-				solutionMatchQuery['tenantId'] = userDetails.userInformation.tenantId
+				solutionMatchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
 
 				let solutionData = await solutionsQueries.solutionsDocument(solutionMatchQuery)
 

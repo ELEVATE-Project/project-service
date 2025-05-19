@@ -82,9 +82,9 @@ var _sendToKafkaConsumers = function (topic, host) {
 			console.log('Message: ', JSON.stringify(message))
 			console.log('-------Kafka consumer log ends here------------------')
 
-			// if (message && message.topic === SUBMISSION_TOPIC) {
-			// 	submissionsConsumer.messageReceived(message)
-			// }
+			if (message && message.topic === SUBMISSION_TOPIC) {
+				submissionsConsumer.messageReceived(message)
+			}
 			// call projectCertificateConsumer
 			if (message && message.topic === CERTIFICATE_TOPIC) {
 				projectCertificateConsumer.messageReceived(message)

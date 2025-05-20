@@ -593,7 +593,7 @@ module.exports = class SolutionsHelper {
 				let solutionUpdatedData = await solutionsQueries.updateSolutionDocument(
 					{
 						_id: solutionDocument[0]._id,
-						tenantId: userDetails.userInformation.tenantId,
+						tenantId: userDetails.tenantAndOrgInfo.tenantId,
 						orgIds: { $in: ['ALL', ...userDetails.tenantAndOrgInfo.orgId] },
 					},
 					updateObject,

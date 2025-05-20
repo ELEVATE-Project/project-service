@@ -523,7 +523,7 @@ module.exports = class SolutionsHelper {
 					_id: solutionId,
 				}
 				// modify the query object to fetch relevant data
-				queryObject['tenantId'] = userDetails.userInformation.tenantId
+				queryObject['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
 
 				let solutionDocument = await solutionsQueries.solutionsDocument(queryObject, ['_id', 'programId'])
 
@@ -542,8 +542,8 @@ module.exports = class SolutionsHelper {
 					let programData = await programQueries.programsDocument(
 						{
 							_id: solutionDocument[0].programId,
-							tenantId: userDetails.userInformation.tenantId,
-							orgIds: { $in: ['ALL', userDetails.userInformation.organizationId] },
+							tenantId: userDetails.tenantAndOrgInfo.tenantId,
+							orgIds: { $in: ['ALL', ...userDetails.tenantAndOrgInfo.orgId] },
 						},
 						['_id', 'endDate', 'startDate']
 					)
@@ -593,8 +593,8 @@ module.exports = class SolutionsHelper {
 				let solutionUpdatedData = await solutionsQueries.updateSolutionDocument(
 					{
 						_id: solutionDocument[0]._id,
-						tenantId: userDetails.userInformation.tenantId,
-						orgIds: { $in: ['ALL', userDetails.userInformation.organizationId] },
+						tenantId: userDetails.tenantAndOrgInfo.tenantId,
+						orgIds: { $in: ['ALL', ...userDetails.tenantAndOrgInfo.orgId] },
 					},
 					updateObject,
 					{ new: true }
@@ -1800,8 +1800,8 @@ module.exports = class SolutionsHelper {
 					isAPrivateProgram: false,
 				}
 
-				solutionMatchQuery['tenantId'] = userDetails.userInformation.tenantId
-				solutionMatchQuery['orgIds'] = { $in: ['ALL', userDetails.userInformation.organizationId] }
+				solutionMatchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+				solutionMatchQuery['orgIds'] = { $in: ['ALL', ...userDetails.tenantAndOrgInfo.orgId] }
 
 				let solutionData = await solutionsQueries.solutionsDocument(solutionMatchQuery, [
 					'link',

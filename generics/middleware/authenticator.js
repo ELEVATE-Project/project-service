@@ -80,6 +80,7 @@ module.exports = async function (req, res, next, token = '') {
 		'/admin/createIndex',
 		'/solutions/create',
 		'/solutions/update',
+		'/solutions/fetchLink',
 		'/forms/create',
 		'/forms/update',
 		'/templateTasks/bulkCreate',

@@ -523,7 +523,7 @@ module.exports = class SolutionsHelper {
 					_id: solutionId,
 				}
 				// modify the query object to fetch relevant data
-				queryObject['tenantId'] = userDetails.userInformation.tenantId
+				queryObject['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
 
 				let solutionDocument = await solutionsQueries.solutionsDocument(queryObject, ['_id', 'programId'])
 
@@ -542,8 +542,8 @@ module.exports = class SolutionsHelper {
 					let programData = await programQueries.programsDocument(
 						{
 							_id: solutionDocument[0].programId,
-							tenantId: userDetails.userInformation.tenantId,
-							orgIds: { $in: ['ALL', userDetails.userInformation.organizationId] },
+							tenantId: userDetails.tenantAndOrgInfo.tenantId,
+							orgIds: { $in: ['ALL', ...userDetails.tenantAndOrgInfo.orgId] },
 						},
 						['_id', 'endDate', 'startDate']
 					)
@@ -594,7 +594,7 @@ module.exports = class SolutionsHelper {
 					{
 						_id: solutionDocument[0]._id,
 						tenantId: userDetails.userInformation.tenantId,
-						orgIds: { $in: ['ALL', userDetails.userInformation.organizationId] },
+						orgIds: { $in: ['ALL', ...userDetails.tenantAndOrgInfo.orgId] },
 					},
 					updateObject,
 					{ new: true }
@@ -1239,7 +1239,7 @@ module.exports = class SolutionsHelper {
 
 					filterQuery = _.merge(filterQuery, data.filter)
 				}
-				delete filterQuery['scope.entityType'];
+				delete filterQuery['scope.entityType']
 				return resolve({
 					success: true,
 					data: filterQuery,

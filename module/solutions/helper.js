@@ -1797,8 +1797,8 @@ module.exports = class SolutionsHelper {
 					isAPrivateProgram: false,
 				}
 
-				solutionMatchQuery['tenantId'] = userDetails.userInformation.tenantId
-				solutionMatchQuery['orgIds'] = { $in: ['ALL', userDetails.userInformation.organizationId] }
+				solutionMatchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+				solutionMatchQuery['orgIds'] = { $in: ['ALL', ...userDetails.tenantAndOrgInfo.orgId] }
 
 				let solutionData = await solutionsQueries.solutionsDocument(solutionMatchQuery, [
 					'link',

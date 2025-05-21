@@ -34,6 +34,7 @@ const QRCode = require('qrcode')
 const path = require('path')
 const gotenbergService = require(SERVICES_BASE_PATH + '/gotenberg')
 const projectService = require(SERVICES_BASE_PATH + '/projects')
+const userProfileConfig = require('@config/userProfileConfig')
 /**
  * UserProjectsHelper
  * @class
@@ -4210,27 +4211,24 @@ module.exports = class UserProjectsHelper {
 					userId: userId,
 				}
 
-				const updateProfile = {
-					$set: {
-						'userProfile.firstName': CONSTANTS.common.DELETED_USER,
-					},
-					$unset: {
-						'userProfile.email': 1,
-						'userProfile.maskedEmail': 1,
-						'userProfile.maskedPhone': 1,
-						'userProfile.recoveryEmail': 1,
-						'userProfile.phone': 1,
-						'userProfile.lastName': 1,
-						'userProfile.prevUsedPhone': 1,
-						'userProfile.prevUsedEmail': 1,
-						'userProfile.recoveryPhone': 1,
-						'userProfile.dob': 1,
-						'userProfile.encEmail': 1,
-						'userProfile.encPhone': 1,
-					},
+				const specificValuesMap = userProfileConfig.specificMaskedValues || {}
+				const setOperations = {}
+				userProfileConfig.preserveAndMask.forEach((key) => {
+					const maskValue = specificValuesMap[key] || userProfileConfig.defaultMaskedDataPlaceholder
+					setOperations[`userProfile.${key}`] = maskValue
+				})
+
+				const unsetOperations = {}
+				userProfileConfig.fieldsToRemove.forEach((key) => {
+					unsetOperations[`userProfile.${key}`] = 1
+				})
+
+				const updateOperations = {
+					$set: setOperations,
+					$unset: unsetOperations,
 				}
 
-				let result = await projectQueries.updateMany(filter, updateProfile)
+				let result = await projectQueries.updateMany(filter, updateOperations)
 				return resolve({
 					success: true,
 					message:
@@ -4239,6 +4237,7 @@ module.exports = class UserProjectsHelper {
 							: CONSTANTS.apiResponses.FAILED_TO_DELETE_DATA,
 				})
 			} catch (error) {
+				console.log(error)
 				return resolve({
 					status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
 					message: error.message || error,

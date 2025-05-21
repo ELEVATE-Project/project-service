@@ -149,5 +149,4 @@ module.exports = {
 	TENANT_ADMIN: 'tenant_admin',
 	DELETE_EVENT_ENTITY: 'user',
 	DELETE_EVENT_TYPE: 'delete',
-	DELETED_USER: 'Deleted User',
 }

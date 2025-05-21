@@ -1407,7 +1407,6 @@ module.exports = class UserProjects extends Abstract {
 		return new Promise(async (resolve, reject) => {
 			try {
 				const result = await userProjectsHelper.deleteUserPIIData(req.body)
-
 				return resolve(result)
 			} catch (error) {
 				return reject({

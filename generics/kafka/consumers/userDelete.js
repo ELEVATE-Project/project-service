@@ -13,13 +13,18 @@ const userProjectsHelper = require(MODULES_BASE_PATH + '/userProjects/helper')
  * @name messageReceived
  * @param {Object} message - consumer data
  * {
- *   highWaterOffset:63
- *   key:null
- *   offset:62
- *   partition:0
- *   topic:'deleteuser'
- *   value:'{"eid":"BE_JOB_REQUEST","ets":1619527882745,"mid":"LP.1619527882745.32dc378a-430f-49f6-83b5-bd73b767ad36","actor":{"id":"delete-user","type":"System"},"context":{"channel":"01309282781705830427","pdata":{"id":"org.sunbird.platform","ver":"1.0"},"env":"dev"},"object":{"id":"<deleted-userId>","type":"User"},"edata":{"organisationId":"0126796199493140480","userId":"a102c136-c6da-4c6c-b6b7-0f0681e1aab9","suggested_users":[{"role":"ORG_ADMIN","users":["<orgAdminUserId>"]},{"role":"CONTENT_CREATOR","users":["<contentCreatorUserId>"]},{"role":"COURSE_MENTOR","users":["<courseMentorUserId>"]}],"action":"delete-user","iteration":1}}'
- * }
+    "entity": "user",
+    "eventType": "delete",
+    "entityId": 101,
+    "changes": {},
+    "created_by": 4,
+    "organization_id": 22,
+    "tenant_code": "shikshagraha",
+    "status": "INACTIVE",
+    "deleted": true,
+    "id": 101,
+    "username" : "user_shqwq1ssddw"
+	}
  * @returns {Promise} return a Promise.
  */
 
@@ -32,7 +37,7 @@ var messageReceived = function (message) {
 				parsedMessage.eventType === CONSTANTS.common.DELETE_EVENT_TYPE
 			) {
 				let userDataDeleteStatus = await userProjectsHelper.deleteUserPIIData(parsedMessage)
-				if (userDataDeleteStatus.success === true) {
+				if (userDataDeleteStatus.status === 200) {
 					return resolve('Message Processed.')
 				} else {
 					return resolve('Failed to Process message.')

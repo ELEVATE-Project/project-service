@@ -22,7 +22,7 @@ var respUtil = function (resp) {
 
 var removedHeaders = [
 	'host',
-	'origin',
+	// 'origin',
 	'accept',
 	'referer',
 	'content-length',

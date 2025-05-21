@@ -21,6 +21,7 @@ const projectTemplateQueries = require(DB_QUERY_BASE_PATH + '/projectTemplates')
 const projectTemplatesHelper = require(MODULES_BASE_PATH + '/project/templates/helper')
 const programUsersHelper = require(MODULES_BASE_PATH + '/programUsers/helper')
 const timeZoneDifference = process.env.TIMEZONE_DIFFRENECE_BETWEEN_LOCAL_TIME_AND_UTC
+const userService = require(GENERICS_FILES_PATH + '/services/users')
 
 /**
  * SolutionsHelper
@@ -791,6 +792,7 @@ module.exports = class SolutionsHelper {
 	 * @param {String} pageNo - Page no.
 	 * @param {String} searchText - search text.
 	 * @param {Object} userDetails - user related info
+	 * @param {String} origin - origin header
 	 * @returns {JSON} - List of solutions based on role and location.
 	 */
 
@@ -803,12 +805,13 @@ module.exports = class SolutionsHelper {
 		pageNo,
 		searchText = '',
 		userDetails,
-		currentOrgOnly = false
+		currentOrgOnly = false,
+		origin
 	) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				currentOrgOnly = UTILS.convertStringToBoolean(currentOrgOnly)
-				let queryData = await this.queryBasedOnRoleAndLocation(bodyData, type)
+				let queryData = await this.queryBasedOnRoleAndLocation(bodyData, type, '', origin)
 				if (!queryData.success) {
 					return resolve(queryData)
 				}
@@ -1065,10 +1068,11 @@ module.exports = class SolutionsHelper {
 	 * @param {String} data - Requested body data.
 	 * @param {String} type - solution type
 	 * @param {String} prefix - prefix word/letters for query making
+	 * @param {String} origin - origin header
 	 * @returns {JSON} - Auto targeted solutions query.
 	 */
 
-	static queryBasedOnRoleAndLocation(data, type = '', prefix = '') {
+	static queryBasedOnRoleAndLocation(data, type = '', prefix = '', origin) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let registryIds = []
@@ -1129,6 +1133,26 @@ module.exports = class SolutionsHelper {
 						filterQuery[`${prefix}.scope.entityType`] = { $in: entityTypes }
 					} else {
 						filterQuery['scope.entityType'] = { $in: entityTypes }
+					}
+
+					let userRoleInfo = _.omit(data, ['filter', 'factors', 'role', 'type', 'tenantId', 'orgId'])
+
+					let orgDetails = await userService.tenantDetails(origin)
+					if (orgDetails.data.meta.hasOwnProperty('factors') && orgDetails.data.meta.factors.length > 0) {
+						let factors = orgDetails.data.meta.factors
+						let queryFilter = []
+
+						// Build query based on each key
+						factors.forEach((factor) => {
+							let scope = 'scope.' + factor
+							let values = userRoleInfo[factor]
+							if (!Array.isArray(values)) {
+								queryFilter.push({ [scope]: { $in: values.split(',') } })
+							} else {
+								queryFilter.push({ [scope]: { $in: [...values] } })
+							}
+						})
+						filterQuery['$and'] = queryFilter
 					}
 				} else {
 					// Obtain userInfo
@@ -2864,6 +2888,7 @@ module.exports = class SolutionsHelper {
 	 * @param {String} search - Search term to filter solutions by title or description.
 	 * @param {String} filter - Filter criteria to further refine the solution search.
 	 * @param {Boolean} currentScopeOnly - If true, limits results to the current scope only. Default: false.
+	 * @param {String} origin - origin header
 	 * @returns {Object} - Details of the solution.
 	 */
 
@@ -2877,7 +2902,8 @@ module.exports = class SolutionsHelper {
 		filter,
 		surveyReportPage = '',
 		currentScopeOnly = false,
-		userDetails
+		userDetails,
+		origin
 	) {
 		return new Promise(async (resolve, reject) => {
 			try {
@@ -2919,7 +2945,8 @@ module.exports = class SolutionsHelper {
 						'',
 						search,
 						userDetails,
-						true // to fetch current org assets only
+						true, // to fetch current org assets only,
+						origin
 					)
 				}
 				// fetch projects created by the user

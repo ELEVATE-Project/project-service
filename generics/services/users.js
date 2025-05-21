@@ -430,6 +430,53 @@ const fetchTenantDetails = function (tenantId, userToken) {
 		}
 	})
 }
+
+/**
+ * Fetches the tenant details for a given tenant ID along with org it is associated with.
+ * @param {String} origin - origin details
+ * @returns {Promise} A promise that resolves with the organization details or rejects with an error.
+ */
+const tenantDetails = function (origin) {
+	return new Promise(async (resolve, reject) => {
+		try {
+			let url = interfaceServiceUrl + process.env.USER_SERVICE_BASE_URL + CONSTANTS.endpoints.PUBLIC_BRANDING
+			const options = {
+				headers: {
+					'content-type': 'application/json',
+					origin: origin,
+				},
+			}
+			request.get(url, options, publicBranding)
+			let result = {
+				success: true,
+			}
+			function publicBranding(err, data) {
+				if (err) {
+					result.success = false
+				} else {
+					let response = JSON.parse(data.body)
+					if (response.responseCode === HTTP_STATUS_CODE['ok'].code) {
+						result['data'] = response.result
+					} else {
+						result.success = false
+					}
+				}
+
+				return resolve(result)
+			}
+			setTimeout(function () {
+				return resolve(
+					(result = {
+						success: false,
+					})
+				)
+			}, CONSTANTS.common.SERVER_TIME_OUT)
+		} catch (error) {
+			return reject(error)
+		}
+	})
+}
+
 module.exports = {
 	profile: profile,
 	// locationSearch : locationSearch,
@@ -439,4 +486,5 @@ module.exports = {
 	// getUserRoles: getUserRoles,
 	fetchDefaultOrgDetails: fetchDefaultOrgDetails,
 	fetchTenantDetails: fetchTenantDetails,
+	tenantDetails: tenantDetails,
 }

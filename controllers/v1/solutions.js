@@ -855,7 +855,8 @@ module.exports = class Solutions extends Abstract {
 					req.query.filter,
 					req.query.surveyReportPage ? req.query.surveyReportPage : '',
 					req.query.currentScopeOnly ? req.query.currentScopeOnly : false,
-					req.userDetails
+					req.userDetails,
+					req.headers.origin
 				)
 
 				return resolve(observations)

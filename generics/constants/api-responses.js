@@ -275,4 +275,7 @@ module.exports = {
 	TENANTID_AND_ORGID_REQUIRED_IN_TOKEN_MESSAGE: 'TenantId and OrgnizationId required in the token',
 	TENANTID_AND_ORGID_REQUIRED_IN_TOKEN_CODE: 'ERR_TENANTID_AND_ORGID_REQUIRED',
 	LINK_VERIFIED: 'Solution link verified',
+	DATA_DELETED_SUCCESSFULLY: 'Data deleted successfully',
+	FAILED_TO_DELETE_DATA: 'No user data found to delete.',
+	USER_ID_MISSING: 'User ID is missing',
 }

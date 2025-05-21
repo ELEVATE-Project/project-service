@@ -4174,6 +4174,78 @@ module.exports = class UserProjectsHelper {
 			}
 		})
 	}
+
+	/**
+   * deleteUserPIIData function to delete users Data.
+   * @method
+   * @name deleteUserPIIData
+   * @param {userDeleteEvent} - userDeleteEvent message object 
+   * {
+      	"entity": "user",
+		"eventType": "delete",
+		"entityId": 101,
+		"changes": {},
+		"created_by": 4,
+		"organization_id": 22,
+		"tenant_code": "shikshagraha",
+		"status": "INACTIVE",
+		"deleted": true,
+		"id": 101,
+		"username" : "user_shqwq1ssddw"
+    }
+   * @returns {Promise} success Data.
+   */
+	static deleteUserPIIData(userDeleteEvent) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let userId = userDeleteEvent.id
+				if (!userId) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.USER_ID_MISSING,
+					}
+				}
+
+				let filter = {
+					userId: userId,
+				}
+
+				const updateProfile = {
+					$set: {
+						'userProfile.firstName': CONSTANTS.common.DELETED_USER,
+					},
+					$unset: {
+						'userProfile.email': 1,
+						'userProfile.maskedEmail': 1,
+						'userProfile.maskedPhone': 1,
+						'userProfile.recoveryEmail': 1,
+						'userProfile.phone': 1,
+						'userProfile.lastName': 1,
+						'userProfile.prevUsedPhone': 1,
+						'userProfile.prevUsedEmail': 1,
+						'userProfile.recoveryPhone': 1,
+						'userProfile.dob': 1,
+						'userProfile.encEmail': 1,
+						'userProfile.encPhone': 1,
+					},
+				}
+
+				let result = await projectQueries.updateMany(filter, updateProfile)
+				return resolve({
+					success: true,
+					message:
+						result?.nModified > 0
+							? CONSTANTS.apiResponses.DATA_DELETED_SUCCESSFULLY
+							: CONSTANTS.apiResponses.FAILED_TO_DELETE_DATA,
+				})
+			} catch (error) {
+				return resolve({
+					status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || error,
+				})
+			}
+		})
+	}
 }
 
 /**

@@ -1389,4 +1389,33 @@ module.exports = class UserProjects extends Abstract {
 			}
 		})
 	}
+
+	/**
+	 * Delete user PII data
+	 * @method
+	 * @name deleteUserPIIData
+	 * @param {Object} req - request data.
+     * @apiParamExample {json} Response:
+        {
+            "message": "Data deleted successfully.",
+            "status": 200
+        }
+	 * @returns {JSON} import project from library.
+	 */
+
+	async deleteUserPIIData(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				const result = await userProjectsHelper.deleteUserPIIData(req.body)
+
+				return resolve(result)
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
+				})
+			}
+		})
+	}
 }

@@ -1400,7 +1400,7 @@ module.exports = class UserProjects extends Abstract {
             "message": "Data deleted successfully.",
             "status": 200
         }
-	 * @returns {JSON} import project from library.
+	 * @returns {JSON} User data deletion response
 	 */
 
 	async deleteUserPIIData(req) {

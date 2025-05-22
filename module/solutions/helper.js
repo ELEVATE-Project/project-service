@@ -1114,8 +1114,43 @@ module.exports = class SolutionsHelper {
 					// 	}
 					// }
 
+					let userRoleInfo = _.omit(data, ['filter', 'factors', 'role', 'type', 'tenantId', 'orgId'])
+
+					let tenantDetails = await userService.tenantDetails(origin)
+					if (!tenantDetails.data && !tenantDetails.data.meta) {
+						return resolve({
+							success: false,
+							message: CONSTANTS.apiResponses.FAILED_TO_FETCH_TENANT_DETAILS,
+						})
+					}
+					let factors
+					if (
+						tenantDetails.data.meta.hasOwnProperty('factors') &&
+						tenantDetails.data.meta.factors.length > 0
+					) {
+						factors = tenantDetails.data.meta.factors
+						let queryFilter = []
+
+						// Build query based on each key
+						factors.forEach((factor) => {
+							let scope = 'scope.' + factor
+							let values = userRoleInfo[factor]
+							if (!Array.isArray(values)) {
+								queryFilter.push({ [scope]: { $in: values.split(',') } })
+							} else {
+								queryFilter.push({ [scope]: { $in: [...values] } })
+							}
+						})
+						filterQuery['$and'] = queryFilter
+					}
+
+					let dataToOmit = ['filter', 'role', 'factors', 'type', 'tenantId', 'orgId']
+					// factors.append(dataToOmit)
+
+					const finalKeysToRemove = [...new Set([...dataToOmit, ...factors])]
+
 					filterQuery.$or = []
-					Object.keys(_.omit(data, ['filter', 'role', 'factors', 'type'])).forEach((key) => {
+					Object.keys(_.omit(data, finalKeysToRemove)).forEach((key) => {
 						// If prefix is given use it to form query
 						if (prefix != '') {
 							filterQuery.$or.push({
@@ -1135,36 +1170,7 @@ module.exports = class SolutionsHelper {
 						filterQuery['scope.entityType'] = { $in: entityTypes }
 					}
 
-					let userRoleInfo = _.omit(data, ['filter', 'factors', 'role', 'type', 'tenantId', 'orgId'])
-
-					let tenantDetails = await userService.tenantDetails(origin)
-					if (!tenantDetails.data && !tenantDetails.data.meta) {
-						return resolve({
-							success: false,
-							message: CONSTANTS.apiResponses.FAILED_TO_FETCH_TENANT_DETAILS,
-						})
-					}
-
-					if (
-						tenantDetails.data.meta.hasOwnProperty('factors') &&
-						tenantDetails.data.meta.factors.length > 0
-					) {
-						let factors = tenantDetails.data.meta.factors
-						let queryFilter = []
-
-						// Build query based on each key
-						factors.forEach((factor) => {
-							let scope = 'scope.' + factor
-							let values = userRoleInfo[factor]
-							if (!Array.isArray(values)) {
-								queryFilter.push({ [scope]: { $in: values.split(',') } })
-							} else {
-								queryFilter.push({ [scope]: { $in: [...values] } })
-							}
-						})
-						filterQuery['$and'] = queryFilter
-						console.log(filterQuery, 'line no 1159')
-					}
+					console.log(filterQuery, 'line no 1177')
 				} else {
 					// Obtain userInfo
 					let userRoleInfo = _.omit(data, ['filter', 'factors', 'role', 'type'])

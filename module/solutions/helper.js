@@ -20,6 +20,7 @@ const entitiesService = require(GENERICS_FILES_PATH + '/services/entity-manageme
 const projectTemplateQueries = require(DB_QUERY_BASE_PATH + '/projectTemplates')
 const projectTemplatesHelper = require(MODULES_BASE_PATH + '/project/templates/helper')
 const programUsersHelper = require(MODULES_BASE_PATH + '/programUsers/helper')
+const userService = require(GENERICS_FILES_PATH + '/services/users')
 const timeZoneDifference = process.env.TIMEZONE_DIFFRENECE_BETWEEN_LOCAL_TIME_AND_UTC
 const userService = require(GENERICS_FILES_PATH + '/services/users')
 
@@ -1825,10 +1826,11 @@ module.exports = class SolutionsHelper {
 	 * @name fetchLink
 	 * @param {String} solutionId - solution Id.
 	 * @param {String} userDetails - user related info.
+	 * @param {String} token - user token.
 	 * @returns {Object} - Details of the solution.
 	 */
 
-	static fetchLink(solutionId, userDetails) {
+	static fetchLink(solutionId, userDetails, token) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// build solution match query
@@ -1845,6 +1847,7 @@ module.exports = class SolutionsHelper {
 					'link',
 					'type',
 					'author',
+					'tenantId',
 				])
 
 				if (!Array.isArray(solutionData) || solutionData.length < 1) {
@@ -1856,7 +1859,7 @@ module.exports = class SolutionsHelper {
 
 				let prefix = CONSTANTS.common.PREFIX_FOR_SOLUTION_LINK
 
-				let solutionLink, link
+				let solutionLink
 
 				if (!solutionData[0].link) {
 					let updateLink = await UTILS.md5Hash(solutionData[0]._id + '###' + solutionData[0].author)
@@ -1879,12 +1882,35 @@ module.exports = class SolutionsHelper {
 					solutionLink = solutionData[0].link
 				}
 
-				link = this._generateLink(appsPortalBaseUrl, prefix, solutionLink, solutionData[0].type)
+				// fetch tenant domain by calling  tenant details API
+				let tenantDetails = await userService.fetchTenantDetails(solutionData[0].tenantId, token)
+
+				// Error handling if API failed or no domains found
+				if (
+					!tenantDetails.success ||
+					!tenantDetails.data ||
+					!Array.isArray(tenantDetails.data.domains) ||
+					tenantDetails.data.domains.length === 0
+				) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.DOMAIN_FETCH_FAILED,
+					}
+				}
+				// Collect all verified domains into an array
+				let allDomains = tenantDetails.data.domains
+					.filter((domainObj) => domainObj.verified)
+					.map((domainObj) => domainObj.domain)
+				// Generate link for each domain
+				let links = allDomains.map((domain) => {
+					const fullUrl = `https://${domain}${process.env.APP_PORTAL_DIRECTORY}`
+					return this._generateLink(fullUrl, prefix, solutionLink, solutionData[0].type)
+				})
 
 				return resolve({
 					success: true,
 					message: CONSTANTS.apiResponses.LINK_GENERATED,
-					result: link,
+					result: links,
 				})
 			} catch (error) {
 				return resolve({

@@ -103,6 +103,11 @@ let enviromentVariables = {
 		optional: false,
 		default: 'https://dev.elevate.org',
 	},
+	APP_PORTAL_DIRECTORY: {
+		message: 'App Portal base url required',
+		optional: false,
+		default: '/ml/',
+	},
 	TIMEZONE_DIFFRENECE_BETWEEN_LOCAL_TIME_AND_UTC: {
 		message: 'Timezone diffrence required',
 		optional: false,

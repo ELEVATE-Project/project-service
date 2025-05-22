@@ -1138,6 +1138,13 @@ module.exports = class SolutionsHelper {
 					let userRoleInfo = _.omit(data, ['filter', 'factors', 'role', 'type', 'tenantId', 'orgId'])
 
 					let tenantDetails = await userService.tenantDetails(origin)
+					if (!tenantDetails.data && !tenantDetails.data.meta) {
+						return resolve({
+							success: false,
+							message: CONSTANTS.apiResponses.FAILED_TO_FETCH_TENANT_DETAILS,
+						})
+					}
+
 					if (
 						tenantDetails.data.meta.hasOwnProperty('factors') &&
 						tenantDetails.data.meta.factors.length > 0
@@ -1156,6 +1163,7 @@ module.exports = class SolutionsHelper {
 							}
 						})
 						filterQuery['$and'] = queryFilter
+						console.log(filterQuery, 'line no 1159')
 					}
 				} else {
 					// Obtain userInfo
@@ -3103,6 +3111,11 @@ module.exports = class SolutionsHelper {
 							totalCount = mergedData.length
 						}
 					}
+				} else {
+					return resolve({
+						...targetedSolutions,
+						status: HTTP_STATUS_CODE.bad_request.status,
+					})
 				}
 
 				if (mergedData.length > 0) {

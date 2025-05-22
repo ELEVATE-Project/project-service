@@ -275,4 +275,5 @@ module.exports = {
 	TENANTID_AND_ORGID_REQUIRED_IN_TOKEN_MESSAGE: 'TenantId and OrgnizationId required in the token',
 	TENANTID_AND_ORGID_REQUIRED_IN_TOKEN_CODE: 'ERR_TENANTID_AND_ORGID_REQUIRED',
 	LINK_VERIFIED: 'Solution link verified',
+	FAILED_TO_FETCH_TENANT_DETAILS: 'Failed to fetch tenant details',
 }

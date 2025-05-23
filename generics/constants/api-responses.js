@@ -277,4 +277,5 @@ module.exports = {
 	LINK_VERIFIED: 'Solution link verified',
 	DOMAIN_FETCH_FAILED: 'Tenants domain fetch failed',
 	SURVEY_NOT_CREATED: 'Could not create survey',
+	SURVEY_CREATED: ' survey create successfully',
 }

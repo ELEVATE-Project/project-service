@@ -46,7 +46,10 @@ module.exports = class ProjectTemplateTasksHelper {
 					// Imporovemnt-project needs to query projectService db and other solutions like obs/survey needs to query samiksha DB so we are pusing solutionIds to two diff array
 					if (parsedData.solutionId && parsedData.solutionId !== '') {
 						solutionExists = true
-						if (parsedData.type && parsedData.type === CONSTANTS.common.IMPROVEMENT_PROJECT) {
+						if (
+							parsedData.solutionType &&
+							parsedData.solutionType === CONSTANTS.common.IMPROVEMENT_PROJECT
+						) {
 							projectSolutionIds.push(parsedData.solutionId)
 						} else {
 							solutionIds.push(parsedData.solutionId)
@@ -269,10 +272,10 @@ module.exports = class ProjectTemplateTasksHelper {
 						parsedData.STATUS = CONSTANTS.apiResponses.REQUIRED_SOLUTION_ID
 					}
 					let solutionDetails = {
-						solutionSubType: parsedData.solutionSubType,
-						solutionType: parsedData.solutionType,
+						subType: parsedData.solutionSubType,
+						type: parsedData.solutionType,
 						_id: solutionData[parsedData.solutionId]._id,
-						solutionExternalId: parsedData.solutionId,
+						externalId: parsedData.solutionId,
 						name: solutionData[parsedData.solutionId].name,
 						isReusable: solutionData[parsedData.solutionId].isReusable,
 						minNoOfSubmissionsRequired: parsedData.minNoOfSubmissionsRequired,
@@ -462,7 +465,7 @@ module.exports = class ProjectTemplateTasksHelper {
 								await surveyService.updateSolution(
 									userToken,
 									updateSolutionObj,
-									taskData.solutionDetails.solutionExternalId
+									taskData.solutionDetails.externalId
 								)
 							}
 						}

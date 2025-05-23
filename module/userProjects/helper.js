@@ -1222,7 +1222,6 @@ module.exports = class UserProjectsHelper {
 						'tasks.observationInformation',
 						'tasks.surveyInformation',
 						'tasks.improvementProjectInformation',
-						'tasks.currentTask',
 						'tasks.externalId',
 						'programInformation._id',
 						'projectTemplateId',
@@ -1271,7 +1270,7 @@ module.exports = class UserProjectsHelper {
 						// 		: await _observationDetails(assessmentOrObservation, bodyData)
 
 						let assignedAssessmentOrObservation
-						switch (solutionDetails.solutionType) {
+						switch (solutionDetails.type) {
 							case CONSTANTS.common.ASSESSMENT:
 								assignedAssessmentOrObservation = await _assessmentDetails(assessmentOrObservation)
 								break
@@ -1315,7 +1314,7 @@ module.exports = class UserProjectsHelper {
 						if (!currentTask.solutionDetails.isReusable) {
 							assessmentOrObservationData['programId'] = project[0].programInformation._id
 						}
-						let fieldToUpdate = `tasks.$.${solutionDetails.solutionType}Information`
+						let fieldToUpdate = `tasks.$.${solutionDetails.type}Information`
 
 						await projectQueries.findOneAndUpdate(
 							{
@@ -3088,16 +3087,17 @@ module.exports = class UserProjectsHelper {
 						return resolve(programAndSolutionInformation)
 					}
 
-					// if (
-					// 	libraryProjects.data['entityInformation'] &&
-					// 	libraryProjects.data.entityType !==
-					// 		programAndSolutionInformation.data.solutionInformation.entityType
-					// ) {
-					// 	throw {
-					// 		message: CONSTANTS.apiResponses.ENTITY_TYPE_MIS_MATCHED,
-					// 		status: HTTP_STATUS_CODE.bad_request.status,
-					// 	}
-					// }
+					if (
+						libraryProjects.data['entityInformation'] &&
+						libraryProjects.data.entityType &&
+						libraryProjects.data.entityType !==
+							programAndSolutionInformation.data.solutionInformation.entityType
+					) {
+						throw {
+							message: CONSTANTS.apiResponses.ENTITY_TYPE_MIS_MATCHED,
+							status: HTTP_STATUS_CODE.bad_request.status,
+						}
+					}
 
 					libraryProjects.data = _.merge(libraryProjects.data, programAndSolutionInformation.data)
 				}
@@ -5011,11 +5011,12 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 							name: '',
 						},
 						status: CONSTANTS.common.PUBLISHED_STATUS,
-						entities: [userRoleAndProfileInformation[observationData.solutionDetails.solutionSubType]],
+						...(userRoleAndProfileInformation[observationData.solutionDetails.subType] && {
+							entities: [userRoleAndProfileInformation[observationData.solutionDetails.subType]],
+						}),
 						project: observationData.project,
 					},
 					observationData.token,
-					'',
 					observationData.programId,
 					true
 				)
@@ -5044,10 +5045,10 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 				fetchedSolutions = fetchedSolutions.data[0]
 
 				let solutionDetails = {
-					solutionSubType: fetchedSolutions.entityType,
-					solutionType: fetchedSolutions.type,
+					subType: fetchedSolutions.entityType,
+					type: fetchedSolutions.type,
 					_id: fetchedSolutions._id,
-					solutionExternalId: fetchedSolutions.externalId,
+					externalId: fetchedSolutions.externalId,
 					name: fetchedSolutions.name,
 					isReusable: fetchedSolutions.isReusable,
 					minNoOfSubmissionsRequired: fetchedSolutions.minNoOfSubmissionsRequired,
@@ -5072,7 +5073,7 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 				await surveyService.updateSolution(
 					observationData.token,
 					updateSolutionObj,
-					observationData.solutionDetails.solutionExternalId
+					observationData.solutionDetails.externalId
 				)
 				let startDate = new Date()
 				let endDate = new Date()
@@ -5083,7 +5084,9 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 					status: CONSTANTS.common.PUBLISHED_STATUS,
 					startDate: startDate,
 					endDate: endDate,
-					entities: [userRoleAndProfileInformation[observationData.solutionDetails.solutionSubType]],
+					...(userRoleAndProfileInformation[observationData.solutionDetails.subType] && {
+						entities: [userRoleAndProfileInformation[observationData.solutionDetails.subType]],
+					}),
 					project: observationData.project,
 				}
 
@@ -5097,7 +5100,12 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 					observationData.programId,
 					true
 				)
-				if (observationCreated.success) {
+				if (!observationCreated.success) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.OBSERVATION_NOT_CREATED,
+					}
+				} else {
 					result['observationId'] = observationCreated.data._id
 				}
 
@@ -5143,7 +5151,7 @@ function _surveyDetails(surveyData, userRoleAndProfileInformation = {}) {
 			}
 
 			if (surveyData.solutionDetails.isReusable) {
-				// Need to change it to  importSurveryTemplateToSolution
+				// Creating child solution
 				let surveyCreatedFromTemplate = await surveyService.importSurveryTemplateToSolution(
 					surveyData.token,
 					surveyData.solutionDetails._id,
@@ -5155,7 +5163,6 @@ function _surveyDetails(surveyData, userRoleAndProfileInformation = {}) {
 					},
 					true
 				)
-
 				if (!surveyCreatedFromTemplate.success) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
@@ -5164,30 +5171,31 @@ function _surveyDetails(surveyData, userRoleAndProfileInformation = {}) {
 				}
 				surveyData.solutionDetails._id = surveyCreatedFromTemplate.data.solutionId
 				surveyData.solutionDetails.externalId = surveyCreatedFromTemplate.data.solutionExternalId
-
+				// fetch details of solution to store in solutionDetails
 				let fetchedSolutions = await surveyService.listSolutions(
 					{
 						externalId: { $in: [surveyData.solutionDetails.externalId] },
 					},
 					surveyData.token
 				)
-
-				fetchedSolutions = fetchedSolutions.data[0]
-				if (!fetchedSolutions) {
+				if (!fetchedSolutions.success && fetchedSolutions.data.length > 0) {
 					throw {
 						message: CONSTANTS.apiResponses.SOLUTION_NOT_FOUND,
 						status: HTTP_STATUS_CODE.bad_request.status,
 					}
 				}
+				fetchedSolutions = fetchedSolutions.data[0]
+
 				let solutionDetails = {
-					solutionSubType: fetchedSolutions.entityType,
-					solutionType: fetchedSolutions.type,
+					subType: fetchedSolutions.entityType,
+					type: fetchedSolutions.type,
 					_id: fetchedSolutions._id,
-					solutionExternalId: fetchedSolutions.externalId,
+					externalId: fetchedSolutions.externalId,
 					name: fetchedSolutions.name,
 					isReusable: fetchedSolutions.isReusable,
 					minNoOfSubmissionsRequired: fetchedSolutions.minNoOfSubmissionsRequired,
 				}
+				// Updating task solutionDetails with child solution data
 				await projectQueries.findOneAndUpdate(
 					{
 						_id: new ObjectId(surveyData.project._id),
@@ -5208,7 +5216,7 @@ function _surveyDetails(surveyData, userRoleAndProfileInformation = {}) {
 				await surveyService.updateSolution(
 					surveyData.token,
 					updateSolutionObj,
-					surveyData.solutionDetails.solutionExternalId
+					surveyData.solutionDetails.externalId
 				)
 			}
 

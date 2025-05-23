@@ -140,7 +140,6 @@ module.exports = class Programs extends Abstract {
 	async update(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				console.log('entering...............................')
 				let programUpdationData = await programsHelper.update(
 					req.params._id,
 					req.body,

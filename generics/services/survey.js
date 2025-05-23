@@ -29,10 +29,11 @@ const createAssessmentSolutionFromTemplate = function (token, templateId, bodyDa
 				headers: {
 					'content-type': 'application/json',
 					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
-					'x-auth-token': token,
+					'x-authenticated-user-token': token,
 				},
 				json: bodyData,
 			}
+
 			request.post(assessmentCreateUrl, options, assessmentCallback)
 
 			function assessmentCallback(err, data) {
@@ -62,20 +63,15 @@ const createAssessmentSolutionFromTemplate = function (token, templateId, bodyDa
  * Create Observation
  * @function
  * @name createObservationFromSolutionTemplate
- * @param {String} token - logged in user token.
  * @param {String} solutionId - template id.
  * @param {Object} bodyData - Body data
+ * @param {String} token - logged in user token.
+ * @param {String} programId -programId
+ * @param {Boolean} isExternalProgram - query external db for programDetails
  * @returns {JSON} - Create assessment from template solution.
  */
 
-const createObservationFromSolutionTemplate = function (
-	solutionId,
-	bodyData,
-	token,
-	solutionDetails,
-	programId,
-	isExternalProgram
-) {
+const createObservationFromSolutionTemplate = function (solutionId, bodyData, token, programId, isExternalProgram) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			let observationCreateUrl =
@@ -126,7 +122,9 @@ const createObservationFromSolutionTemplate = function (
  * @name importSurveryTemplateToSolution
  * @param {String} token - logged in user token.
  * @param {String} solutionId - parent solution id.
- * @param {Object} bodyData - Body data
+ * @param {String} programId -programId
+ * @param {Object} data - Body data
+ * @param {Boolean} isExternalProgram - query external db for programDetails
  * @returns {JSON} - Create child solution from parent  solution.
  */
 const importSurveryTemplateToSolution = function (token, solutionId, programId, data = {}, isExternalProgram = true) {
@@ -184,6 +182,7 @@ const importSurveryTemplateToSolution = function (token, solutionId, programId, 
  * @param {String} token - logged in user token.
  * @param {String} solutionId - parent solution id.
  * @param {Object} bodyData - Body data
+ * @param {Boolean} isExternalProgram - query external db for programDetails
  * @returns {JSON} - Create child solution from parent  solution.
  */
 const importObservationTemplateToSolution = function (token, solutionId, bodyData, isExternalProgram) {
@@ -248,7 +247,7 @@ const surveyDetails = function (token, solutionId, bodyData) {
 				CONSTANTS.endpoints.SURVEY_DETAILS +
 				'?solutionId=' +
 				solutionId +
-				'&fromPrjectService=true'
+				'&disableScopeQuery=true'
 
 			const options = {
 				headers: {
@@ -284,16 +283,6 @@ const surveyDetails = function (token, solutionId, bodyData) {
 }
 
 /**
- * Add entity to observation
- * @function
- * @name addEntityToObservation
- * @param {String} token - logged in user token.
- * @param {String} observationId - template id.
- * @param {Object} bodyData - Body data
- * @returns {JSON} - Create assessment from template solution.
- */
-
-/**
  * Add entities to assessment solution
  * @function
  * @name addEntitiesToSolution
@@ -312,7 +301,7 @@ const addEntitiesToSolution = function (token, solutionId, bodyData) {
 				headers: {
 					'content-type': 'application/json',
 					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
-					'x-auth-token': token,
+					'x-authenticated-user-token': token,
 				},
 				json: {
 					entities: bodyData,
@@ -364,7 +353,7 @@ const addEntityToObservation = function (token, observationId, bodyData) {
 				headers: {
 					'content-type': 'application/json',
 					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
-					'x-auth-token': token,
+					'x-authenticated-user-token': token,
 				},
 				json: {
 					data: bodyData,
@@ -422,7 +411,7 @@ const createEntityAssessors = function (token, programId, solutionId, entities) 
 				headers: {
 					'content-type': 'application/json',
 					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
-					'x-auth-token': token,
+					'x-authenticated-user-token': token,
 				},
 				json: {
 					entities: entities,
@@ -507,6 +496,7 @@ const observationDetails = function (token, observationId) {
  * @function
  * @name listSolutions
  * @param {Array} solutionIds - solution external ids.
+ * @param {String} token -userToken
  * @returns {JSON} - List of solutions
  */
 
@@ -514,7 +504,6 @@ const listSolutions = function (solutionIds, token) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			const url = ASSESSMENT_URL + CONSTANTS.endpoints.LIST_SOLUTIONS
-
 			let options = {
 				headers: {
 					'content-type': 'application/json',
@@ -608,6 +597,9 @@ const updateSolution = function (token, updateData, solutionExternalId) {
  * @param {String} token - logged in user token.
  * @param {String} solutionId - solution id.
  * @param {Object} data - body data
+ * @param {Object} userRoleAndProfileInformation -userRoleInformation
+ * @param {String} programId-programId
+ * @param {Boolean} isExternalProgram -query external db for programDetails
  * @returns {JSON} - Create observation.
  */
 

@@ -1344,19 +1344,26 @@ module.exports = class UserProjects extends Abstract {
 			}
 		})
 	}
+
+	/**
+	 * @api {post} /project/v1/pushSubmissionToTask/:_projectid
+	 * Push task Submission status
+	 * @apiVersion 1.0.0
+	 * @apiGroup User Projects
+	 * @apiSampleRequest /project/v1/userProjects/pushSubmissionToTask/66ac9949227504a96d8dce1c
+	 **/
 	/**
 	 * pushSubmissionTo project Task
 	 * @method
 	 * @name pushSubmissionToTask
-	 * @param {String} projectId - projectId.
+	 * @param {Object} req .
 	 * @returns {JSON}  Success body.
 	 */
 	async pushSubmissionToTask(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				const projectId = req.params._id
 				const pushSubmissionToTask = await userProjectsHelper.pushSubmissionToTask(
-					projectId,
+					req.params._id,
 					req.query.taskId,
 					req.body
 				)

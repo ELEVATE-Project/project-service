@@ -1330,18 +1330,18 @@ module.exports = class UserProjectsHelper {
 					],
 				}
 
-				let entities = await entitiesService.entityDocuments(filterQuery, [
-					'metaInformation',
-					'entityType',
-					'entityTypeId',
-					'registryDetails',
-				])
+				// let entities = await entitiesService.entityDocuments(filterQuery, [
+				// 	'metaInformation',
+				// 	'entityType',
+				// 	'entityTypeId',
+				// 	'registryDetails',
+				// ])
 
-				if (!entities.length > 0) {
-					throw {
-						message: CONSTANTS.apiResponses.ENTITIES_FETCHED,
-					}
-				}
+				// if (!entities.length > 0) {
+				// 	throw {
+				// 		message: CONSTANTS.apiResponses.ENTITIES_FETCHED,
+				// 	}
+				// }
 
 				return resolve({
 					success: true,

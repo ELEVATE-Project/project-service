@@ -51,7 +51,7 @@ module.exports = class ProfileHelper {
 					// Define the fields to be projected in the entity documents
 					const projection = ['_id', 'metaInformation.name', 'metaInformation.externalId']
 					// Use the entityDocuments function to fetch entity details
-					const response = await entityManagementService.entityDocuments(filterData, projection)
+					// const response = await entityManagementService.entityDocuments(filterData, projection)
 
 					// Check if the response is successful and has data
 					const entityDetails = response.data

@@ -157,23 +157,23 @@ module.exports = class LibraryCategoriesHelper {
 						roles = roles.split(',')
 						if (roles.length > 0) {
 							//Getting roles from the entity service
-							let userRoleInformation = await entitiesService.getUserRoleExtensionDocuments(
-								{
-									code: { $in: roles },
-									tenantId: userDetails.userInformation.tenantId,
-									orgIds: { $in: [userDetails.userInformation.organizationId] },
-								},
-								['title']
-							)
-							if (!userRoleInformation.success) {
-								throw {
-									message: CONSTANTS.apiResponses.FAILED_TO_FETCH_USERROLE,
-									status: HTTP_STATUS_CODE.bad_request.status,
-								}
-							}
-							// Extract titles
-							let userRoles = await userRoleInformation.data.map((eachRole) => eachRole.title)
-							matchQuery['$match']['recommendedFor'] = { $in: userRoles }
+							// let userRoleInformation = await entitiesService.getUserRoleExtensionDocuments(
+							// 	{
+							// 		code: { $in: roles },
+							// 		tenantId: userDetails.userInformation.tenantId,
+							// 		orgIds: { $in: [userDetails.userInformation.organizationId] },
+							// 	},
+							// 	['title']
+							// )
+							// if (!userRoleInformation.success) {
+							// 	throw {
+							// 		message: CONSTANTS.apiResponses.FAILED_TO_FETCH_USERROLE,
+							// 		status: HTTP_STATUS_CODE.bad_request.status,
+							// 	}
+							// }
+							// // Extract titles
+							// let userRoles = await userRoleInformation.data.map((eachRole) => eachRole.title)
+							// matchQuery['$match']['recommendedFor'] = { $in: userRoles }
 						}
 					}
 				}

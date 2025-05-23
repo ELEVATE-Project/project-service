@@ -143,27 +143,26 @@ module.exports = class ProjectAttributesHelper {
 
 			if (code === 'role') {
 				// Fetch latest user role information from entityService
-				userRoleInformation = await entitiesService.getUserRoleExtensionDocuments(
-					{
-						status: CONSTANTS.common.ACTIVE_STATUS.toUpperCase(),
-					},
-					['title', 'code']
-				)
-
-				if (!userRoleInformation.success) {
-					throw {
-						message: CONSTANTS.apiResponses.FAILED_TO_FETCH_USERROLE,
-						status: HTTP_STATUS_CODE.bad_request.status,
-					}
-				}
-				if (userRoleInformation.data.length > 0) {
-					roleToAddForFilter = userRoleInformation.data.map((eachResult) => {
-						return {
-							label: eachResult.title,
-							value: eachResult.code,
-						}
-					})
-				}
+				// userRoleInformation = await entitiesService.getUserRoleExtensionDocuments(
+				// 	{
+				// 		status: CONSTANTS.common.ACTIVE_STATUS.toUpperCase(),
+				// 	},
+				// 	['title', 'code']
+				// )
+				// if (!userRoleInformation.success) {
+				// 	throw {
+				// 		message: CONSTANTS.apiResponses.FAILED_TO_FETCH_USERROLE,
+				// 		status: HTTP_STATUS_CODE.bad_request.status,
+				// 	}
+				// }
+				// if (userRoleInformation.data.length > 0) {
+				// 	roleToAddForFilter = userRoleInformation.data.map((eachResult) => {
+				// 		return {
+				// 			label: eachResult.title,
+				// 			value: eachResult.code,
+				// 		}
+				// 	})
+				// }
 			}
 
 			// If current role filter doesn't match with userRole of entityService then updating the existing role filter

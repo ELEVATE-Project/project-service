@@ -433,17 +433,17 @@ const fetchTenantDetails = function (tenantId, userToken) {
 
 /**
  * Fetches the tenant details for a given tenant ID along with org it is associated with.
- * @param {String} origin - origin details
+ * @param {String} tenantId - tenantId details
  * @returns {Promise} A promise that resolves with the organization details or rejects with an error.
  */
-const tenantDetails = function (origin) {
+const tenantDetails = function (tenantId) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			let url = interfaceServiceUrl + process.env.USER_SERVICE_BASE_URL + CONSTANTS.endpoints.PUBLIC_BRANDING
 			const options = {
 				headers: {
 					'content-type': 'application/json',
-					origin: origin,
+					tenantid: tenantId,
 				},
 			}
 			request.get(url, options, publicBranding)

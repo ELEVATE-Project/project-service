@@ -792,7 +792,6 @@ module.exports = class SolutionsHelper {
 	 * @param {String} pageNo - Page no.
 	 * @param {String} searchText - search text.
 	 * @param {Object} userDetails - user related info
-	 * @param {String} origin - origin header
 	 * @returns {JSON} - List of solutions based on role and location.
 	 */
 
@@ -805,13 +804,12 @@ module.exports = class SolutionsHelper {
 		pageNo,
 		searchText = '',
 		userDetails,
-		currentOrgOnly = false,
-		origin
+		currentOrgOnly = false
 	) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				currentOrgOnly = UTILS.convertStringToBoolean(currentOrgOnly)
-				let queryData = await this.queryBasedOnRoleAndLocation(bodyData, type, '', origin)
+				let queryData = await this.queryBasedOnRoleAndLocation(bodyData, type, '')
 				if (!queryData.success) {
 					return resolve(queryData)
 				}
@@ -1068,11 +1066,10 @@ module.exports = class SolutionsHelper {
 	 * @param {String} data - Requested body data.
 	 * @param {String} type - solution type
 	 * @param {String} prefix - prefix word/letters for query making
-	 * @param {String} origin - origin header
 	 * @returns {JSON} - Auto targeted solutions query.
 	 */
 
-	static queryBasedOnRoleAndLocation(data, type = '', prefix = '', origin) {
+	static queryBasedOnRoleAndLocation(data, type = '', prefix = '') {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let registryIds = []
@@ -1116,7 +1113,7 @@ module.exports = class SolutionsHelper {
 
 					let userRoleInfo = _.omit(data, ['filter', 'factors', 'role', 'type', 'tenantId', 'orgId'])
 
-					let tenantDetails = await userService.tenantDetails(origin)
+					let tenantDetails = await userService.tenantDetails(data.tenantId)
 					if (!tenantDetails.data && !tenantDetails.data.meta) {
 						return resolve({
 							success: false,
@@ -2905,7 +2902,6 @@ module.exports = class SolutionsHelper {
 	 * @param {String} search - Search term to filter solutions by title or description.
 	 * @param {String} filter - Filter criteria to further refine the solution search.
 	 * @param {Boolean} currentScopeOnly - If true, limits results to the current scope only. Default: false.
-	 * @param {String} origin - origin header
 	 * @returns {Object} - Details of the solution.
 	 */
 
@@ -2919,8 +2915,7 @@ module.exports = class SolutionsHelper {
 		filter,
 		surveyReportPage = '',
 		currentScopeOnly = false,
-		userDetails,
-		origin
+		userDetails
 	) {
 		return new Promise(async (resolve, reject) => {
 			try {
@@ -2962,8 +2957,7 @@ module.exports = class SolutionsHelper {
 						'',
 						search,
 						userDetails,
-						true, // to fetch current org assets only,
-						origin
+						true // to fetch current org assets only,
 					)
 				}
 				// fetch projects created by the user

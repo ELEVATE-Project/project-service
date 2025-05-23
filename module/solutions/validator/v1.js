@@ -87,8 +87,8 @@ module.exports = (req) => {
 			req.checkBody('role').exists().withMessage('roles required')
 		},
 		targetedSolutions: function () {
-			req.checkHeaders('origin').exists().withMessage('Required origin')
-			// req.checkBody('entities').exists().withMessage('required entities to remove')
+			// req.checkHeaders('origin').exists().withMessage('Required origin')
+			// req.checkBody('tenantId').exists().withMessage('Required tenantId')
 			// req.checkBody('role').exists().withMessage('roles required')
 			// req.checkBody('entityType').exists().withMessage('entityType required')
 		},

@@ -845,8 +845,11 @@ module.exports = class Solutions extends Abstract {
 	async targetedSolutions(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				let reqBody = req.body
+				reqBody['tenantId'] = req.userDetails.userInformation.tenantId
+				reqBody['orgIds'] = req.userDetails.userInformation.organizationId
 				let observations = await solutionsHelper.targetedSolutions(
-					req.body,
+					reqBody,
 					req.query.type,
 					req.userDetails.userInformation.userId,
 					req.pageSize,
@@ -855,8 +858,7 @@ module.exports = class Solutions extends Abstract {
 					req.query.filter,
 					req.query.surveyReportPage ? req.query.surveyReportPage : '',
 					req.query.currentScopeOnly ? req.query.currentScopeOnly : false,
-					req.userDetails,
-					req.headers.origin
+					req.userDetails
 				)
 
 				return resolve(observations)

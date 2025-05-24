@@ -1264,43 +1264,25 @@ module.exports = class UserProjectsHelper {
 							},
 						}
 
-						// let assignedAssessmentOrObservation =
-						// 	solutionDetails.type === CONSTANTS.common.ASSESSMENT
-						// 		? await _assessmentDetails(assessmentOrObservation)
-						// 		: await _observationDetails(assessmentOrObservation, bodyData)
-
-						let assignedAssessmentOrObservation
-						switch (solutionDetails.type) {
-							case CONSTANTS.common.ASSESSMENT:
-								assignedAssessmentOrObservation = await _assessmentDetails(assessmentOrObservation)
-								break
-
-							case CONSTANTS.common.OBSERVATION:
-								assignedAssessmentOrObservation = await _observationDetails(
-									assessmentOrObservation,
-									bodyData
-								)
-								break
-
-							case CONSTANTS.common.IMPROVEMENT_PROJECT:
-								assignedAssessmentOrObservation = await this._improvementProjectDetails(
-									assessmentOrObservation,
-									bodyData,
-									userToken,
-									userId
-								)
-								break
-
-							case CONSTANTS.common.SURVEY: // Another new type
-								assignedAssessmentOrObservation = await _surveyDetails(
-									assessmentOrObservation,
-									bodyData
-								)
-								break
-
-							default:
-								throw new Error(`Unsupported solution type: ${solutionDetails.type}`)
+						// get solutions details based on solutionTypes
+						const getSolutionDetails = {
+							[CONSTANTS.common.ASSESSMENT]: () => _assessmentDetails(assessmentOrObservation),
+							[CONSTANTS.common.OBSERVATION]: () =>
+								_observationDetails(assessmentOrObservation, bodyData),
+							[CONSTANTS.common.IMPROVEMENT_PROJECT]: () =>
+								this._improvementProjectDetails(assessmentOrObservation, bodyData, userToken, userId),
+							[CONSTANTS.common.SURVEY]: () => _surveyDetails(assessmentOrObservation, bodyData),
 						}
+						let fetchSolutions = getSolutionDetails[solutionDetails.type]
+
+						if (!fetchSolutions) {
+							throw {
+								status: HTTP_STATUS_CODE.bad_request.status,
+								message: CONSTANTS.apiResponses.SOLUTION_TYPE_INVALID,
+							}
+						}
+
+						let assignedAssessmentOrObservation = await fetchSolutions()
 
 						if (!assignedAssessmentOrObservation.success) {
 							return resolve(assignedAssessmentOrObservation)
@@ -5021,7 +5003,7 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 					true
 				)
 
-				if (!observationCreatedFromTemplate.success) {
+				if (!observationCreatedFromTemplate.success || !observationCreatedFromTemplate?.data?._id) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.OBSERVATION_NOT_CREATED,
@@ -5036,7 +5018,7 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 					},
 					observationData.token
 				)
-				if (!fetchedSolutions) {
+				if (!fetchedSolutions || !fetchedSolutions?.data?.length > 0) {
 					throw {
 						message: CONSTANTS.apiResponses.SOLUTION_NOT_FOUND,
 						status: HTTP_STATUS_CODE.bad_request.status,
@@ -5066,19 +5048,26 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 				)
 			} else {
 				let updateSolutionObj = {
-					$set: {},
+					$set: {
+						referenceFrom: CONSTANTS.common.PROJECT,
+						project: observationData.project,
+					},
 				}
-				updateSolutionObj['$set']['referenceFrom'] = CONSTANTS.common.PROJECT
-				updateSolutionObj['$set']['project'] = observationData.project
-				await surveyService.updateSolution(
+				let solutionUpdated = await surveyService.updateSolution(
 					observationData.token,
 					updateSolutionObj,
 					observationData.solutionDetails.externalId
 				)
+				if (!solutionUpdated.success) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.SOLUTION_NOT_UPDATED,
+					}
+				}
 				let startDate = new Date()
 				let endDate = new Date()
 				endDate.setFullYear(endDate.getFullYear() + 1)
-				let observation = {
+				let observationPayload = {
 					name: observationData.solutionDetails.name,
 					description: observationData.solutionDetails.name,
 					status: CONSTANTS.common.PUBLISHED_STATUS,
@@ -5093,14 +5082,14 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 				let observationCreated = await surveyService.createObservation(
 					observationData.token,
 					observationData.solutionDetails._id,
-					observation,
+					observationPayload,
 					userRoleAndProfileInformation && Object.keys(userRoleAndProfileInformation).length > 0
 						? userRoleAndProfileInformation
 						: {},
 					observationData.programId,
 					true
 				)
-				if (!observationCreated.success) {
+				if (!observationCreated.success || !observationCreated?.data?._id) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.OBSERVATION_NOT_CREATED,
@@ -5163,7 +5152,8 @@ function _surveyDetails(surveyData, userRoleAndProfileInformation = {}) {
 					},
 					true
 				)
-				if (!surveyCreatedFromTemplate.success) {
+
+				if (!surveyCreatedFromTemplate.success || !surveyCreatedFromTemplate?.data?.solutionId) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.SURVEY_NOT_CREATED,
@@ -5178,7 +5168,7 @@ function _surveyDetails(surveyData, userRoleAndProfileInformation = {}) {
 					},
 					surveyData.token
 				)
-				if (!fetchedSolutions.success && fetchedSolutions.data.length > 0) {
+				if (!fetchedSolutions.success && !fetchedSolutions?.data?.length > 0) {
 					throw {
 						message: CONSTANTS.apiResponses.SOLUTION_NOT_FOUND,
 						status: HTTP_STATUS_CODE.bad_request.status,
@@ -5209,15 +5199,22 @@ function _surveyDetails(surveyData, userRoleAndProfileInformation = {}) {
 				)
 			} else {
 				let updateSolutionObj = {
-					$set: {},
+					$set: {
+						referenceFrom: CONSTANTS.common.PROJECT,
+						project: surveyData.project,
+					},
 				}
-				updateSolutionObj['$set']['referenceFrom'] = CONSTANTS.common.PROJECT
-				updateSolutionObj['$set']['project'] = surveyData.project
-				await surveyService.updateSolution(
+				let solutionUpdated = await surveyService.updateSolution(
 					surveyData.token,
 					updateSolutionObj,
 					surveyData.solutionDetails.externalId
 				)
+				if (!solutionUpdated.success) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.SOLUTION_NOT_UPDATED,
+					}
+				}
 			}
 
 			// create survey using details api
@@ -5226,8 +5223,12 @@ function _surveyDetails(surveyData, userRoleAndProfileInformation = {}) {
 				surveyData.solutionDetails._id,
 				userRoleAndProfileInformation
 			)
-			if (surveyCreated.success) {
-				// result['surveyId'] = surveyCreated.data._id
+			if (!surveyCreated.success || !surveyCreated?.data?.assessment?.submissionId) {
+				throw {
+					status: HTTP_STATUS_CODE.bad_request.status,
+					message: CONSTANTS.apiResponses.SURVEY_NOT_CREATED,
+				}
+			} else {
 				result['surveySubmissionId'] = surveyCreated.data.assessment.submissionId
 			}
 			result['solutionId'] = surveyData.solutionDetails._id

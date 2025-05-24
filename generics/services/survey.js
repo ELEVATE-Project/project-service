@@ -8,7 +8,7 @@
 //dependencies
 const request = require('request')
 
-const ASSESSMENT_URL = process.env.SURVEY_SERVICE_URL
+const SURVEY_SERVICE_URL = process.env.SURVEY_SERVICE_URL
 /**
  * Assessment create
  * @function
@@ -23,7 +23,7 @@ const createAssessmentSolutionFromTemplate = function (token, templateId, bodyDa
 	return new Promise(async (resolve, reject) => {
 		try {
 			let assessmentCreateUrl =
-				ASSESSMENT_URL + CONSTANTS.endpoints.ASSESSMENTS_CREATE + '?solutionId=' + templateId
+				SURVEY_SERVICE_URL + CONSTANTS.endpoints.ASSESSMENTS_CREATE + '?solutionId=' + templateId
 
 			const options = {
 				headers: {
@@ -75,7 +75,7 @@ const createObservationFromSolutionTemplate = function (solutionId, bodyData, to
 	return new Promise(async (resolve, reject) => {
 		try {
 			let observationCreateUrl =
-				ASSESSMENT_URL +
+				SURVEY_SERVICE_URL +
 				CONSTANTS.endpoints.CREATE_OBSERVATIONS +
 				'?solutionId=' +
 				solutionId +
@@ -131,7 +131,7 @@ const importSurveryTemplateToSolution = function (token, solutionId, programId, 
 	return new Promise(async (resolve, reject) => {
 		try {
 			let surveyCreateUrl =
-				ASSESSMENT_URL +
+				SURVEY_SERVICE_URL +
 				CONSTANTS.endpoints.IMPORT_SURVEY_TEMPLATE +
 				'/' +
 				solutionId +
@@ -189,8 +189,8 @@ const importObservationTemplateToSolution = function (token, solutionId, bodyDat
 	return new Promise(async (resolve, reject) => {
 		try {
 			let observationCreateUrl =
-				ASSESSMENT_URL +
-				CONSTANTS.endpoints.OBSERVATION_CHILD_SOLUTION +
+				SURVEY_SERVICE_URL +
+				CONSTANTS.endpoints.CREATE_CHILD_OBSERVATION_SOLUTION +
 				'?solutionId=' +
 				solutionId +
 				'&isExternalProgram=' +
@@ -243,11 +243,11 @@ const surveyDetails = function (token, solutionId, bodyData) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			let observationCreateUrl =
-				ASSESSMENT_URL +
+				SURVEY_SERVICE_URL +
 				CONSTANTS.endpoints.SURVEY_DETAILS +
 				'?solutionId=' +
 				solutionId +
-				'&disableScopeQuery=true'
+				'&skipScopeCheck=true'
 
 			const options = {
 				headers: {
@@ -295,7 +295,8 @@ const surveyDetails = function (token, solutionId, bodyData) {
 const addEntitiesToSolution = function (token, solutionId, bodyData) {
 	return new Promise(async (resolve, reject) => {
 		try {
-			let assessmentCreateUrl = ASSESSMENT_URL + CONSTANTS.endpoints.ADD_ENTITIES_TO_SOLUTIONS + '/' + solutionId
+			let assessmentCreateUrl =
+				SURVEY_SERVICE_URL + CONSTANTS.endpoints.ADD_ENTITIES_TO_SOLUTIONS + '/' + solutionId
 
 			const options = {
 				headers: {
@@ -347,7 +348,7 @@ const addEntityToObservation = function (token, observationId, bodyData) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			let addEntityToObservationUrl =
-				ASSESSMENT_URL + CONSTANTS.endpoints.ADD_ENTITY_TO_OBSERVATIONS + '/' + observationId
+				SURVEY_SERVICE_URL + CONSTANTS.endpoints.ADD_ENTITY_TO_OBSERVATIONS + '/' + observationId
 
 			const options = {
 				headers: {
@@ -400,7 +401,7 @@ const createEntityAssessors = function (token, programId, solutionId, entities) 
 	return new Promise(async (resolve, reject) => {
 		try {
 			let createdEntityAssessor =
-				ASSESSMENT_URL +
+				SURVEY_SERVICE_URL +
 				CONSTANTS.endpoints.CREATE_ENTITY_ASSESSORS +
 				'/' +
 				programId +
@@ -455,7 +456,7 @@ const createEntityAssessors = function (token, programId, solutionId, entities) 
 const observationDetails = function (token, observationId) {
 	return new Promise(async (resolve, reject) => {
 		try {
-			let url = ASSESSMENT_URL + CONSTANTS.endpoints.OBSERVATION_DETAILS + '/' + observationId
+			let url = SURVEY_SERVICE_URL + CONSTANTS.endpoints.OBSERVATION_DETAILS + '/' + observationId
 
 			const options = {
 				headers: {
@@ -503,7 +504,7 @@ const observationDetails = function (token, observationId) {
 const listSolutions = function (solutionIds, token) {
 	return new Promise(async (resolve, reject) => {
 		try {
-			const url = ASSESSMENT_URL + CONSTANTS.endpoints.LIST_SOLUTIONS
+			const url = SURVEY_SERVICE_URL + CONSTANTS.endpoints.LIST_SOLUTIONS
 			let options = {
 				headers: {
 					'content-type': 'application/json',
@@ -552,7 +553,7 @@ const updateSolution = function (token, updateData, solutionExternalId) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			const url =
-				ASSESSMENT_URL + CONSTANTS.endpoints.UPDATE_SOLUTIONS + '?solutionExternalId=' + solutionExternalId
+				SURVEY_SERVICE_URL + CONSTANTS.endpoints.UPDATE_SOLUTIONS + '?solutionExternalId=' + solutionExternalId
 
 			const options = {
 				headers: {
@@ -614,7 +615,7 @@ const createObservation = function (
 	return new Promise(async (resolve, reject) => {
 		try {
 			let createdObservationUrl =
-				ASSESSMENT_URL +
+				SURVEY_SERVICE_URL +
 				CONSTANTS.endpoints.CREATE_OBSERVATIONS +
 				'?solutionId=' +
 				solutionId +
@@ -674,7 +675,7 @@ const createObservation = function (
 const listProgramsBasedOnIds = function (programIds) {
 	return new Promise(async (resolve, reject) => {
 		try {
-			const url = ASSESSMENT_URL + CONSTANTS.endpoints.LIST_PROGRAMS_BY_IDS
+			const url = SURVEY_SERVICE_URL + CONSTANTS.endpoints.LIST_PROGRAMS_BY_IDS
 
 			const options = {
 				headers: {
@@ -724,7 +725,7 @@ const listProgramsBasedOnIds = function (programIds) {
 const removeSolutionsFromProgram = function (token, programId, solutionIds) {
 	return new Promise(async (resolve, reject) => {
 		try {
-			const url = ASSESSMENT_URL + CONSTANTS.endpoints.REMOVE_SOLUTIONS_FROM_PROGRAM + '/' + programId
+			const url = SURVEY_SERVICE_URL + CONSTANTS.endpoints.REMOVE_SOLUTIONS_FROM_PROGRAM + '/' + programId
 
 			const options = {
 				headers: {
@@ -770,7 +771,7 @@ const removeSolutionsFromProgram = function (token, programId, solutionIds) {
 const removeEntitiesFromSolution = function (token, solutionId, entities) {
 	return new Promise(async (resolve, reject) => {
 		try {
-			const url = ASSESSMENT_URL + CONSTANTS.endpoints.REMOVE_ENTITY_FROM_SOLUTION + '/' + solutionId
+			const url = SURVEY_SERVICE_URL + CONSTANTS.endpoints.REMOVE_ENTITY_FROM_SOLUTION + '/' + solutionId
 
 			const options = {
 				headers: {
@@ -816,7 +817,7 @@ const removeEntitiesFromSolution = function (token, solutionId, entities) {
 const listEntitiesByLocationIds = function (token, locationIds) {
 	return new Promise(async (resolve, reject) => {
 		try {
-			const url = ASSESSMENT_URL + CONSTANTS.endpoints.LIST_ENTITIES_BY_LOCATION_IDS
+			const url = SURVEY_SERVICE_URL + CONSTANTS.endpoints.LIST_ENTITIES_BY_LOCATION_IDS
 
 			const options = {
 				headers: {

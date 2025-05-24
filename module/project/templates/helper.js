@@ -844,14 +844,12 @@ module.exports = class ProjectTemplatesHelper {
 					let taskId = taskIds[pointerToTask]
 					let taskData = await projectTemplateTaskQueries.taskDocuments({
 						_id: taskId,
-						// parentId: { $exists: false },
+						parentId: { $exists: false },
 					})
 
 					if (taskData && taskData.length > 0) {
 						taskData = taskData[0]
 					}
-					// if (String(newProjectTemplateTask.type) === 'improvementProject') {
-
 					if (taskData && Object.keys(taskData).length > 0) {
 						//duplicate parent task
 						let newProjectTemplateTask = { ...taskData }
@@ -940,7 +938,6 @@ module.exports = class ProjectTemplatesHelper {
 
 				return resolve(updateDuplicateTemplate)
 			} catch (error) {
-				console.log(error, 'this is my data')
 				return reject(error)
 			}
 		})
@@ -958,8 +955,7 @@ module.exports = class ProjectTemplatesHelper {
 	 */
 	static async handleDuplicateTemplateTask(userToken, newProjectTemplateTask, taskData, taskSequence) {
 		try {
-			const taskType = String(newProjectTemplateTask.type)
-			let solutionDetails
+			const taskType = newProjectTemplateTask.type
 			let duplicateTemplateTaskId
 
 			const updateTaskSequence = () => {
@@ -969,15 +965,45 @@ module.exports = class ProjectTemplatesHelper {
 				}
 			}
 
-			if (taskType === CONSTANTS.common.IMPROVEMENT_PROJECT) {
-				const duplicateTask = await projectTemplateTaskQueries.createTemplateTask(
+			const createTemplateTask = async () => {
+				const task = await projectTemplateTaskQueries.createTemplateTask(
 					_.omit(newProjectTemplateTask, ['_id'])
 				)
-				duplicateTemplateTaskId = duplicateTask._id
+				if (!task._id) {
+					throw {
+						message: CONSTANTS.apiResponses.PROJECT_TEMPLATE_TASKS_NOT_CREATED,
+						status: HTTP_STATUS_CODE.bad_request.status,
+					}
+				}
+				return task._id
+			}
+
+			const fetchSolutionDetails = (solution) => ({
+				type: solution.type,
+				subType: solution.entityType,
+				_id: solution._id,
+				externalId: solution.externalId,
+				name: solution.name,
+				isReusable: solution.isReusable,
+				minNoOfSubmissionsRequired: solution.minNoOfSubmissionsRequired,
+			})
+
+			const fetchSolutionByExternalId = async (externalId) => {
+				const result = await surveyService.listSolutions({ externalId: { $in: [externalId] } }, userToken)
+				if (!result?.success || !result?.data?.length) {
+					throw {
+						message: CONSTANTS.apiResponses.SOLUTION_NOT_FOUND,
+						status: HTTP_STATUS_CODE.bad_request.status,
+					}
+				}
+				return fetchSolutionDetails(result.data[0])
+			}
+
+			if (taskType === CONSTANTS.common.IMPROVEMENT_PROJECT) {
+				duplicateTemplateTaskId = await createTemplateTask()
 			} else if (taskType === CONSTANTS.common.OBSERVATION) {
 				const timestamp = UTILS.epochTime()
-				//Creating child solution for child or duplicateTask
-				const duplicateObservationTask = await surveyService.importObservationTemplateToSolution(
+				const importSolutionsResponse = await surveyService.importObservationTemplateToSolution(
 					userToken,
 					newProjectTemplateTask.solutionDetails._id,
 					{
@@ -989,95 +1015,46 @@ module.exports = class ProjectTemplatesHelper {
 					},
 					newProjectTemplateTask.solutionDetails.isReusable
 				)
-				if (!duplicateObservationTask.success && !duplicateObservationTask.data.externalId) {
+
+				if (
+					importSolutionsResponse.status != HTTP_STATUS_CODE['ok'].status ||
+					!importSolutionsResponse?.data?.externalId
+				) {
 					throw {
 						message: CONSTANTS.apiResponses.SOLUTION_NOT_CREATED,
 						status: HTTP_STATUS_CODE.bad_request.status,
 					}
 				}
-				let fetchedSolutions = await surveyService.listSolutions(
-					{ externalId: { $in: [duplicateObservationTask.data.externalId] } },
-					userToken
+				newProjectTemplateTask.solutionDetails = await fetchSolutionByExternalId(
+					importSolutionsResponse.data.externalId
 				)
-
-				if (!fetchedSolutions.data.length) {
-					throw {
-						message: CONSTANTS.apiResponses.SOLUTION_NOT_FOUND,
-						status: HTTP_STATUS_CODE.bad_request.status,
-					}
-				}
-
-				fetchedSolutions = fetchedSolutions.data[0]
-				solutionDetails = {
-					type: fetchedSolutions.type,
-					subType: fetchedSolutions.entityType,
-					_id: fetchedSolutions._id,
-					externalId: fetchedSolutions.externalId,
-					name: fetchedSolutions.name,
-					isReusable: fetchedSolutions.isReusable,
-					minNoOfSubmissionsRequired: fetchedSolutions.minNoOfSubmissionsRequired,
-				}
-
-				newProjectTemplateTask.solutionDetails = solutionDetails
-
-				const duplicateTask = await projectTemplateTaskQueries.createTemplateTask(
-					_.omit(newProjectTemplateTask, ['_id'])
-				)
-				duplicateTemplateTaskId = duplicateTask._id
-
+				duplicateTemplateTaskId = await createTemplateTask()
 				updateTaskSequence()
 			} else if (taskType === CONSTANTS.common.SURVEY) {
-				//Creating child solution for child or duplicateTask
-				const duplicateSurveyTask = await surveyService.importSurveryTemplateToSolution(
+				const importSolutionsResponse = await surveyService.importSurveryTemplateToSolution(
 					userToken,
 					newProjectTemplateTask.solutionDetails._id,
 					newProjectTemplateTask.programId,
 					true
 				)
-
-				if (!duplicateSurveyTask.success && !duplicateSurveyTask.result.externalId) {
+				if (
+					importSolutionsResponse.status != HTTP_STATUS_CODE['ok'].status ||
+					!importSolutionsResponse?.result?.solutionExternalId
+				) {
 					throw {
 						message: CONSTANTS.apiResponses.SOLUTION_NOT_CREATED,
 						status: HTTP_STATUS_CODE.bad_request.status,
 					}
 				}
-				//Getting child solutionDetails to store in childTask
-				let fetchedSolutions = await surveyService.listSolutions(
-					{ externalId: { $in: [duplicateSurveyTask.result.solutionExternalId] } },
-					userToken
+
+				newProjectTemplateTask.solutionDetails = await fetchSolutionByExternalId(
+					importSolutionsResponse.result.solutionExternalId
 				)
-
-				if (!fetchedSolutions.data.length) {
-					throw {
-						message: CONSTANTS.apiResponses.SOLUTION_NOT_FOUND,
-						status: HTTP_STATUS_CODE.bad_request.status,
-					}
-				}
-
-				fetchedSolutions = fetchedSolutions.data[0]
-				solutionDetails = {
-					type: fetchedSolutions.type,
-					_id: fetchedSolutions._id,
-					externalId: fetchedSolutions.externalId,
-					name: fetchedSolutions.name,
-					isReusable: fetchedSolutions.isReusable,
-					subType: fetchedSolutions.entityType,
-					minNoOfSubmissionsRequired: fetchedSolutions.minNoOfSubmissionsRequired,
-				}
-
-				newProjectTemplateTask.solutionDetails = solutionDetails
-
-				const duplicateTask = await projectTemplateTaskQueries.createTemplateTask(
-					_.omit(newProjectTemplateTask, ['_id'])
-				)
-				duplicateTemplateTaskId = duplicateTask._id
-
+				duplicateTemplateTaskId = await createTemplateTask()
 				updateTaskSequence()
 			} else {
-				const duplicateTask = await projectTemplateTaskQueries.createTemplateTask(
-					_.omit(newProjectTemplateTask, ['_id'])
-				)
-				duplicateTemplateTaskId = duplicateTask._id
+				// Default fallback task creation
+				duplicateTemplateTaskId = await createTemplateTask()
 			}
 
 			return duplicateTemplateTaskId

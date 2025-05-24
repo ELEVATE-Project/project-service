@@ -129,7 +129,7 @@ module.exports = class ProjectTemplateTasksHelper {
 							{ externalId: { $in: solutionIds } },
 							userToken
 						)
-						if (!fetchedSolutions.data.length > 0) {
+						if (!fetchedSolutions.success || !fetchedSolutions?.data.length > 0) {
 							throw {
 								message: CONSTANTS.apiResponses.SOLUTION_NOT_FOUND,
 								status: HTTP_STATUS_CODE.bad_request.status,
@@ -386,11 +386,6 @@ module.exports = class ProjectTemplateTasksHelper {
 									},
 									$set: {
 										hasSubTasks: true,
-										// solutionDetails: {
-										// 	solutionType: parsedData.solutionType,
-										// 	solutionId: parsedData.solutionId,
-										// 	solutionSubType: parsedData.solutionSubType,
-										// },
 									},
 								},
 								{
@@ -420,12 +415,6 @@ module.exports = class ProjectTemplateTasksHelper {
 										$set: {
 											parentId: parentTask._id,
 											visibleIf: visibleIf,
-											// solutionDetails: {
-											// 	solutionType: parsedData.solutionType,
-											// 	_id: solutionData[parsedData.solutionId]._id,
-											// 	solutionSubType: parsedData.solutionSubType,
-											// 	solutionExternalId: parsedData.solutionId,
-											// },
 										},
 									}
 								)
@@ -462,11 +451,17 @@ module.exports = class ProjectTemplateTasksHelper {
 									{ new: true }
 								)
 							} else {
-								await surveyService.updateSolution(
+								let solutionUpdated = await surveyService.updateSolution(
 									userToken,
 									updateSolutionObj,
 									taskData.solutionDetails.externalId
 								)
+								if (!solutionUpdated.success) {
+									throw {
+										status: HTTP_STATUS_CODE.bad_request.status,
+										message: CONSTANTS.apiResponses.SOLUTION_NOT_UPDATED,
+									}
+								}
 							}
 						}
 
@@ -501,7 +496,6 @@ module.exports = class ProjectTemplateTasksHelper {
 				const fileName = `create-project-template-tasks`
 				let fileStream = new CSV_FILE_STREAM(fileName)
 				let input = fileStream.initStream()
-				let userToken = userDetails.userToken
 				;(async function () {
 					await fileStream.getProcessorPromise()
 					return resolve({
@@ -510,7 +504,7 @@ module.exports = class ProjectTemplateTasksHelper {
 					})
 				})()
 
-				let csvData = await this.extractCsvInformation(tasks, projectTemplateId, userToken)
+				let csvData = await this.extractCsvInformation(tasks, projectTemplateId, userDetails.userToken)
 				if (!csvData.success) {
 					return resolve(csvData)
 				}
@@ -569,7 +563,7 @@ module.exports = class ProjectTemplateTasksHelper {
 								false,
 								translationDataObject,
 								task + 1,
-								userToken
+								userDetails.userToken
 							)
 
 							if (createdTask._SYSTEM_ID != '') {
@@ -599,7 +593,7 @@ module.exports = class ProjectTemplateTasksHelper {
 								false,
 								translationDataObject,
 								subTaskIds[item],
-								userToken
+								userDetails.userToken
 							)
 
 							if (createdTask._SYSTEM_ID != '') {

@@ -63,6 +63,6 @@ module.exports = {
 	AUTO_DOWNLOAD: '/v1/cloud-services/files/download',
 	TENANT_READ: '/v1/tenant/read',
 	IMPORT_SURVEY_TEMPLATE: '/v1/surveys/importSurveryTemplateToSolution',
-	OBSERVATION_CHILD_SOLUTION: '/v1/solutions/importFromSolution',
+	CREATE_CHILD_OBSERVATION_SOLUTION: '/v1/solutions/importFromSolution',
 	SURVEY_DETAILS: '/v1/surveys/details',
 }

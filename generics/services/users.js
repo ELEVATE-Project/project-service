@@ -436,7 +436,7 @@ const fetchTenantDetails = function (tenantId, userToken) {
  * @param {String} tenantId - tenantId details
  * @returns {Promise} A promise that resolves with the organization details or rejects with an error.
  */
-const tenantDetails = function (tenantId) {
+const fetchPublicTenantDetails = function (tenantId) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			let url = interfaceServiceUrl + process.env.USER_SERVICE_BASE_URL + CONSTANTS.endpoints.PUBLIC_BRANDING
@@ -486,5 +486,5 @@ module.exports = {
 	// getUserRoles: getUserRoles,
 	fetchDefaultOrgDetails: fetchDefaultOrgDetails,
 	fetchTenantDetails: fetchTenantDetails,
-	tenantDetails: tenantDetails,
+	fetchPublicTenantDetails: fetchPublicTenantDetails,
 }

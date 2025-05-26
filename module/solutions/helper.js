@@ -22,7 +22,6 @@ const projectTemplatesHelper = require(MODULES_BASE_PATH + '/project/templates/h
 const programUsersHelper = require(MODULES_BASE_PATH + '/programUsers/helper')
 const userService = require(GENERICS_FILES_PATH + '/services/users')
 const timeZoneDifference = process.env.TIMEZONE_DIFFRENECE_BETWEEN_LOCAL_TIME_AND_UTC
-const userService = require(GENERICS_FILES_PATH + '/services/users')
 
 /**
  * SolutionsHelper
@@ -810,7 +809,7 @@ module.exports = class SolutionsHelper {
 		return new Promise(async (resolve, reject) => {
 			try {
 				currentOrgOnly = UTILS.convertStringToBoolean(currentOrgOnly)
-				let queryData = await this.queryBasedOnRoleAndLocation(bodyData, type, '')
+				let queryData = await this.queryBasedOnRoleAndLocation(bodyData, type)
 				if (!queryData.success) {
 					return resolve(queryData)
 				}
@@ -1079,16 +1078,18 @@ module.exports = class SolutionsHelper {
 					isReusable: false,
 					isDeleted: false,
 				}
-				Object.keys(_.omit(data, ['role', 'filter', 'factors', 'type'])).forEach((key) => {
+				Object.keys(_.omit(data, ['role', 'filter', 'factors', 'type', 'tenantId', 'orgId'])).forEach((key) => {
 					data[key] = data[key].split(',')
 				})
 
 				// If validate entity set to ON . strict scoping should be applied
 				if (validateEntity !== CONSTANTS.common.OFF) {
-					Object.keys(_.omit(data, ['filter', 'role', 'factors', 'type'])).forEach((requestedDataKey) => {
-						registryIds.push(...data[requestedDataKey])
-						entityTypes.push(requestedDataKey)
-					})
+					Object.keys(_.omit(data, ['filter', 'role', 'factors', 'type', 'tenantId', 'orgId'])).forEach(
+						(requestedDataKey) => {
+							registryIds.push(...data[requestedDataKey])
+							entityTypes.push(requestedDataKey)
+						}
+					)
 					if (!registryIds.length > 0) {
 						throw {
 							message: CONSTANTS.apiResponses.NO_LOCATION_ID_FOUND_IN_DATA,
@@ -1114,8 +1115,8 @@ module.exports = class SolutionsHelper {
 
 					let userRoleInfo = _.omit(data, ['filter', 'factors', 'role', 'type', 'tenantId', 'orgId'])
 
-					let tenantDetails = await userService.tenantDetails(data.tenantId)
-					if (!tenantDetails.data && !tenantDetails.data.meta) {
+					let tenantDetails = await userService.fetchPublicTenantDetails(data.tenantId)
+					if (!tenantDetails.data || !tenantDetails.data.meta || tenantDetails.success !== true) {
 						return resolve({
 							success: false,
 							message: CONSTANTS.apiResponses.FAILED_TO_FETCH_TENANT_DETAILS,
@@ -1167,11 +1168,9 @@ module.exports = class SolutionsHelper {
 					} else {
 						filterQuery['scope.entityType'] = { $in: entityTypes }
 					}
-
-					console.log(filterQuery, 'line no 1177')
 				} else {
 					// Obtain userInfo
-					let userRoleInfo = _.omit(data, ['filter', 'factors', 'role', 'type'])
+					let userRoleInfo = _.omit(data, ['filter', 'factors', 'role', 'type', 'tenantId', 'orgId'])
 					let userRoleKeys = Object.keys(userRoleInfo)
 					let queryFilter = []
 
@@ -1279,6 +1278,9 @@ module.exports = class SolutionsHelper {
 					filterQuery = _.merge(filterQuery, data.filter)
 				}
 				delete filterQuery['scope.entityType']
+				filterQuery.tenantId = data.tenantId
+				filterQuery.orgIds = { $in: ['ALL', ...data.orgIds] }
+				console.log(filterQuery, 'line no 1285')
 				return resolve({
 					success: true,
 					data: filterQuery,

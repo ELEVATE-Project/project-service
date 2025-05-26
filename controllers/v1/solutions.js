@@ -358,6 +358,8 @@ module.exports = class Solutions extends Abstract {
 	async detailsBasedOnRoleAndLocation(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				req.body['tenantId'] = req.userDetails.userInformation.tenantId
+				req.body['orgIds'] = req.userDetails.userInformation.organizationId
 				let solutionDetails = await solutionsHelper.detailsBasedOnRoleAndLocation(
 					req.params._id,
 					req.body,
@@ -508,6 +510,8 @@ module.exports = class Solutions extends Abstract {
 	async verifyLink(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				req.body['tenantId'] = req.userDetails.userInformation.tenantId
+				req.body['orgIds'] = req.userDetails.userInformation.organizationId
 				let solutionData = await solutionsHelper.verifyLink(
 					req.params._id,
 					req.body,
@@ -658,6 +662,8 @@ module.exports = class Solutions extends Abstract {
 	async verifySolution(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				req.body['tenantId'] = req.userDetails.userInformation.tenantId
+				req.body['orgIds'] = req.userDetails.userInformation.organizationId
 				let solutionData = await solutionsHelper.isTargetedBasedOnUserProfile(req.params._id, req.body)
 
 				return resolve(solutionData)
@@ -849,11 +855,10 @@ module.exports = class Solutions extends Abstract {
 	async targetedSolutions(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let reqBody = req.body
-				reqBody['tenantId'] = req.userDetails.userInformation.tenantId
-				reqBody['orgIds'] = req.userDetails.userInformation.organizationId
+				req.body['tenantId'] = req.userDetails.userInformation.tenantId
+				req.body['orgIds'] = req.userDetails.userInformation.organizationId
 				let observations = await solutionsHelper.targetedSolutions(
-					reqBody,
+					req.body,
 					req.query.type,
 					req.userDetails.userInformation.userId,
 					req.pageSize,

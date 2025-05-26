@@ -125,6 +125,8 @@ module.exports = class UserProjects extends Abstract {
 	async sync(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				req.body['tenantId'] = req.userDetails.userInformation.tenantId
+				req.body['orgIds'] = req.userDetails.userInformation.organizationId
 				let createdProject = await userProjectsHelper.sync(
 					req.params._id,
 					req.query.lastDownloadedAt,

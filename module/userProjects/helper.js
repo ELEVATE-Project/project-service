@@ -1249,6 +1249,10 @@ module.exports = class UserProjectsHelper {
 						// entityType: project[0].entityInformation.entityType,
 						programId: project[0].programInformation._id,
 					}
+					if (project[0]?.entityInformation && project[0]?.entityInformation?.entityType) {
+						assessmentOrObservationData['entityType'] = project[0].entityInformation.entityType
+						assessmentOrObservationData['entityId'] = project[0].entityInformation._id
+					}
 					let dynamicTaskInfromation = `${solutionDetails.solutionType}Information`
 					if (currentTask[dynamicTaskInfromation]) {
 						assessmentOrObservationData = currentTask[dynamicTaskInfromation]
@@ -1741,31 +1745,39 @@ module.exports = class UserProjectsHelper {
 								projectCreation.data['userRole'] = bodyData.role
 							}
 
-							// if (solutionDetails.entityType && bodyData[solutionDetails.entityType]) {
-							// 	let entityInformation = await entitiesService.entityTypeDocuments(
-							// 		{ name: bodyData[solutionDetails.entityType] },
-							// 		'all'
-							// 	)
+							if (solutionDetails.entityType && bodyData[solutionDetails.entityType]) {
+								// let entityInformation = await entitiesService.entityTypeDocuments(
+								// 	{ name: bodyData[solutionDetails.entityType] },
+								// 	'all'
+								// )
 
-							// 	// if( !entityInformation.success ) {
-							// 	//     throw {
-							// 	//         message : CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
-							// 	//         status : HTTP_STATUS_CODE.bad_request.status
-							// 	//     }
-							// 	// }
+								// if( !entityInformation.success || !entityInformation.data.length >0  ) {
+								//     throw {
+								//         message : CONSTANTS.apiResponses.ENTITY_TYPES_NOT_FOUND,
+								//         status : HTTP_STATUS_CODE.bad_request.status
+								//     }
+								// }
 
-							// 	// let entityDetails = await entitiesService.entityDocuments(
-							// 	//     entityInformation.data
-							// 	// );
+								let entityDetails = await entitiesService.entityDocuments({
+									_id: bodyData[solutionDetails.entityType],
+									tenantId: tenantId,
+									orgIds: { $in: [orgId] },
+								})
 
-							// 	// if ( entityDetails && entityDetails.length > 0 ) {
-							// 	//     projectCreation.data["entityInformation"] = entityDetails[0];
-							// 	// }
-
-							// 	if (entityInformation.success && entityInformation.data.length > 0) {
-							// 		projectCreation.data.entityType = entityInformation.data[0]._id
-							// 	}
-							// }
+								if (!entityDetails.success || !entityDetails?.data.length > 0) {
+									throw {
+										message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
+										status: HTTP_STATUS_CODE.bad_request.status,
+									}
+								}
+								if (entityDetails && entityDetails?.data.length > 0) {
+									projectCreation.data['entityInformation'] = _.pick(entityDetails.data[0], [
+										'_id',
+										'entityType',
+										'entityTypeId',
+									])
+								}
+							}
 						}
 
 						projectCreation.data.status = CONSTANTS.common.STARTED
@@ -3019,19 +3031,19 @@ module.exports = class UserProjectsHelper {
 				// If an entityId is passed in body data. we need to varify if it is a valid entity
 				// If not a valid entity throw error
 				// If it is valid make sure we add those data to newly creating projects
-				// if (requestedData.entityId && requestedData.entityId !== '') {
-				// 	let entityInformation = await entitiesService.entityDocuments(
-				// 		{ _id: requestedData.entityId },
-				// 		'all'
-				// 	)
+				if (requestedData.entityId && requestedData.entityId !== '') {
+					let entityInformation = await entitiesService.entityDocuments(
+						{ _id: requestedData.entityId },
+						'all'
+					)
 
-				// 	if (!entityInformation.success) {
-				// 		return resolve(entityInformation)
-				// 	}
+					if (!entityInformation.success) {
+						return resolve(entityInformation)
+					}
 
-				// 	libraryProjects.data['entityInformation'] = entityInformation.data[0]
-				// 	libraryProjects.data.entityId = entityInformation.data[0]._id
-				// }
+					libraryProjects.data['entityInformation'] = entityInformation.data[0]
+					libraryProjects.data.entityId = entityInformation.data[0]._id
+				}
 
 				if (requestedData.solutionId && requestedData.solutionId !== '' && isATargetedSolution === false) {
 					let programAndSolutionInformation = await this.createProgramAndSolution(
@@ -4982,7 +4994,8 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 				}
 			}
 			if (observationData.solutionDetails.isReusable) {
-				let observationCreatedFromTemplate = await surveyService.createObservationFromSolutionTemplate(
+				let observationCreatedFromTemplate = await surveyService.createObservation(
+					observationData.token,
 					observationData.solutionDetails._id,
 					// userRoleAndProfileInformation,
 					{
@@ -4998,7 +5011,9 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 						}),
 						project: observationData.project,
 					},
-					observationData.token,
+					userRoleAndProfileInformation && Object.keys(userRoleAndProfileInformation).length > 0
+						? userRoleAndProfileInformation
+						: {},
 					observationData.programId,
 					true
 				)
@@ -5048,10 +5063,8 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 				)
 			} else {
 				let updateSolutionObj = {
-					$set: {
-						referenceFrom: CONSTANTS.common.PROJECT,
-						project: observationData.project,
-					},
+					referenceFrom: CONSTANTS.common.PROJECT,
+					project: observationData.project,
 				}
 				let solutionUpdated = await surveyService.updateSolution(
 					observationData.token,
@@ -5074,7 +5087,9 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 					startDate: startDate,
 					endDate: endDate,
 					...(userRoleAndProfileInformation[observationData.solutionDetails.subType] && {
-						entities: [userRoleAndProfileInformation[observationData.solutionDetails.subType]],
+						entities: observationData.entityId
+							? [observationData.entityId]
+							: [userRoleAndProfileInformation[observationData.solutionDetails.subType]],
 					}),
 					project: observationData.project,
 				}
@@ -5199,10 +5214,8 @@ function _surveyDetails(surveyData, userRoleAndProfileInformation = {}) {
 				)
 			} else {
 				let updateSolutionObj = {
-					$set: {
-						referenceFrom: CONSTANTS.common.PROJECT,
-						project: surveyData.project,
-					},
+					referenceFrom: CONSTANTS.common.PROJECT,
+					project: surveyData.project,
 				}
 				let solutionUpdated = await surveyService.updateSolution(
 					surveyData.token,

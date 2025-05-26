@@ -226,7 +226,12 @@ module.exports = class Programs extends Abstract {
 	async details(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let programData = await programsHelper.details(req.params._id, 'all', 'none', req.userDetails)
+				let programData = await programsHelper.details(
+					req.params._id,
+					'all', //projections
+					'none', //skipFields
+					req.userDetails
+				)
 
 				return resolve(programData)
 			} catch (error) {

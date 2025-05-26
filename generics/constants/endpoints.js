@@ -20,7 +20,7 @@ module.exports = {
 	USER_EXTENSION_GET_PROFILE: '/v2/user-extension/getProfile',
 	USER_EXTENSION_UPDATE_USER_PROFILE: '/v1/user-extension/update',
 	USER_PRIVATE_PROGRAMS: '/v1/users/privatePrograms',
-	UPDATE_SOLUTIONS: '/v1/solutions/updateSolutions',
+	UPDATE_SOLUTIONS: '/v1/solutions/update',
 	LIST_PROGRAMS: '/v1/programs/list',
 	PRESIGNED_GCP_URL: '/v1/cloud-services/gcp/preSignedUrls', // Kendra service
 	PRESIGNED_AWS_URL: '/v1/cloud-services/aws/preSignedUrls', // Kendra service

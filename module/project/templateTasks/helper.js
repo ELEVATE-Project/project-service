@@ -227,9 +227,12 @@ module.exports = class ProjectTemplateTasksHelper {
 							if (solutionData[parsedData.solutionId].type !== allValues.solutionDetails.type) {
 								parsedData.STATUS = CONSTANTS.apiResponses.SOLUTION_TYPE_MIS_MATCH
 							}
-							// if (solutionData[parsedData.solutionId].subType !== allValues.solutionDetails.subType) {
-							// 	parsedData.STATUS = CONSTANTS.apiResponses.SOLUTION_SUB_TYPE_MIS_MATCH
-							// }
+							if (
+								!(solutionData[parsedData.solutionId].type === CONSTANTS.common.SURVEY) &&
+								solutionData[parsedData.solutionId].entityType !== allValues.solutionDetails.subType
+							) {
+								parsedData.STATUS = CONSTANTS.apiResponses.SOLUTION_SUB_TYPE_MIS_MATCH
+							}
 							if (
 								template.entityType &&
 								!(solutionData[parsedData.solutionId].type === CONSTANTS.common.SURVEY) &&
@@ -433,12 +436,10 @@ module.exports = class ProjectTemplateTasksHelper {
 							taskData.solutionDetails &&
 							taskData.solutionDetails._id
 						) {
-							let updateSolutionObj = {
-								$set: {},
-							}
+							let updateSolutionObj = {}
 
-							updateSolutionObj['$set']['referenceFrom'] = CONSTANTS.common.PROJECT
-							updateSolutionObj['$set']['project'] = {
+							updateSolutionObj['referenceFrom'] = CONSTANTS.common.PROJECT
+							updateSolutionObj['project'] = {
 								_id: template._id.toString(),
 								taskId: taskData._id.toString(),
 							}

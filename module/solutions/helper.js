@@ -1480,8 +1480,8 @@ module.exports = class SolutionsHelper {
 						startDate,
 						endDate,
 						userId,
-						'',
-						{},
+						'', //language
+						{}, //source- Additional source metadata related to the program
 						userDetails
 					)
 

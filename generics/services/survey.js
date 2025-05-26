@@ -9,112 +9,6 @@
 const request = require('request')
 
 const SURVEY_SERVICE_URL = process.env.SURVEY_SERVICE_URL
-/**
- * Assessment create
- * @function
- * @name createAssessmentSolutionFromTemplate
- * @param {String} token - logged in user token.
- * @param {String} templateId - template id.
- * @param {Object} bodyData - Body data
- * @returns {JSON} - Create assessment from template solution.
- */
-
-const createAssessmentSolutionFromTemplate = function (token, templateId, bodyData) {
-	return new Promise(async (resolve, reject) => {
-		try {
-			let assessmentCreateUrl =
-				SURVEY_SERVICE_URL + CONSTANTS.endpoints.ASSESSMENTS_CREATE + '?solutionId=' + templateId
-
-			const options = {
-				headers: {
-					'content-type': 'application/json',
-					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
-					'x-authenticated-user-token': token,
-				},
-				json: bodyData,
-			}
-
-			request.post(assessmentCreateUrl, options, assessmentCallback)
-
-			function assessmentCallback(err, data) {
-				let result = {
-					success: true,
-				}
-
-				if (err) {
-					result.success = false
-				} else {
-					let response = data.body
-					if (response.status === HTTP_STATUS_CODE['ok'].status) {
-						result['data'] = response.result
-					} else {
-						result.success = false
-					}
-				}
-				return resolve(result)
-			}
-		} catch (error) {
-			return reject(error)
-		}
-	})
-}
-
-/**
- * Create Observation
- * @function
- * @name createObservationFromSolutionTemplate
- * @param {String} solutionId - template id.
- * @param {Object} bodyData - Body data
- * @param {String} token - logged in user token.
- * @param {String} programId -programId
- * @param {Boolean} isExternalProgram - query external db for programDetails
- * @returns {JSON} - Create assessment from template solution.
- */
-
-const createObservationFromSolutionTemplate = function (solutionId, bodyData, token, programId, isExternalProgram) {
-	return new Promise(async (resolve, reject) => {
-		try {
-			let observationCreateUrl =
-				SURVEY_SERVICE_URL +
-				CONSTANTS.endpoints.CREATE_OBSERVATIONS +
-				'?solutionId=' +
-				solutionId +
-				'&programId=' +
-				programId +
-				'&isExternalProgram=' +
-				isExternalProgram
-
-			const options = {
-				headers: {
-					'content-type': 'application/json',
-					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
-					'x-auth-token': token,
-				},
-				json: { data: bodyData },
-			}
-			request.post(observationCreateUrl, options, assessmentCallback)
-
-			function assessmentCallback(err, data) {
-				let result = {
-					success: true,
-				}
-				if (err) {
-					result.success = false
-				} else {
-					let response = data.body
-					if (response.status === HTTP_STATUS_CODE['ok'].status) {
-						result['data'] = response.result
-					} else {
-						result.success = false
-					}
-				}
-				return resolve(result)
-			}
-		} catch (error) {
-			return reject(error)
-		}
-	})
-}
 
 /**
  * Create Child solutions for survey
@@ -243,12 +137,7 @@ const surveyDetails = function (token, solutionId, bodyData) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			let observationCreateUrl =
-				SURVEY_SERVICE_URL +
-				CONSTANTS.endpoints.SURVEY_DETAILS +
-				'?solutionId=' +
-				solutionId +
-				'&skipScopeCheck=true'
-
+				SURVEY_SERVICE_URL + CONSTANTS.endpoints.SURVEY_DETAILS + '?solutionId=' + solutionId
 			const options = {
 				headers: {
 					'content-type': 'application/json',
@@ -264,168 +153,6 @@ const surveyDetails = function (token, solutionId, bodyData) {
 				let result = {
 					success: true,
 				}
-				if (err) {
-					result.success = false
-				} else {
-					let response = data.body
-					if (response.status === HTTP_STATUS_CODE['ok'].status) {
-						result['data'] = response.result
-					} else {
-						result.success = false
-					}
-				}
-				return resolve(result)
-			}
-		} catch (error) {
-			return reject(error)
-		}
-	})
-}
-
-/**
- * Add entities to assessment solution
- * @function
- * @name addEntitiesToSolution
- * @param {String} token - logged in user token.
- * @param {String} solutionId - solution id.
- * @param {Object} bodyData - Body data
- * @returns {JSON} - Add entity to assessment solution.
- */
-
-const addEntitiesToSolution = function (token, solutionId, bodyData) {
-	return new Promise(async (resolve, reject) => {
-		try {
-			let assessmentCreateUrl =
-				SURVEY_SERVICE_URL + CONSTANTS.endpoints.ADD_ENTITIES_TO_SOLUTIONS + '/' + solutionId
-
-			const options = {
-				headers: {
-					'content-type': 'application/json',
-					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
-					'x-authenticated-user-token': token,
-				},
-				json: {
-					entities: bodyData,
-				},
-			}
-
-			request.post(assessmentCreateUrl, options, assessmentCallback)
-
-			function assessmentCallback(err, data) {
-				let result = {
-					success: true,
-				}
-
-				if (err) {
-					result.success = false
-				} else {
-					let response = data.body
-					if (response.status === HTTP_STATUS_CODE['ok'].status) {
-						result['data'] = response.result ? response.result : {}
-					} else {
-						result.success = false
-					}
-				}
-				return resolve(result)
-			}
-		} catch (error) {
-			return reject(error)
-		}
-	})
-}
-
-/**
- * Add entity to observation
- * @function
- * @name addEntityToObservation
- * @param {String} token - logged in user token.
- * @param {String} observationId - observation id.
- * @param {Object} bodyData - Body data
- * @returns {JSON} - Add entity to observation.
- */
-
-const addEntityToObservation = function (token, observationId, bodyData) {
-	return new Promise(async (resolve, reject) => {
-		try {
-			let addEntityToObservationUrl =
-				SURVEY_SERVICE_URL + CONSTANTS.endpoints.ADD_ENTITY_TO_OBSERVATIONS + '/' + observationId
-
-			const options = {
-				headers: {
-					'content-type': 'application/json',
-					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
-					'x-authenticated-user-token': token,
-				},
-				json: {
-					data: bodyData,
-				},
-			}
-
-			request.post(addEntityToObservationUrl, options, assessmentCallback)
-
-			function assessmentCallback(err, data) {
-				let result = {
-					success: true,
-				}
-
-				if (err) {
-					result.success = false
-				} else {
-					let response = data.body
-					if (response.status === HTTP_STATUS_CODE['ok'].status) {
-						result['data'] = response.result
-					} else {
-						result.success = false
-					}
-				}
-				return resolve(result)
-			}
-		} catch (error) {
-			return reject(error)
-		}
-	})
-}
-
-/**
- * Create entity assessors
- * @function
- * @name createEntityAssessors
- * @param {String} token - logged in user token.
- * @param {String} programId - program id.
- * @param {String} solutionId - solution id.
- * @param {Array} entities - Entities data
- * @returns {JSON} - Add entity to observation.
- */
-
-const createEntityAssessors = function (token, programId, solutionId, entities) {
-	return new Promise(async (resolve, reject) => {
-		try {
-			let createdEntityAssessor =
-				SURVEY_SERVICE_URL +
-				CONSTANTS.endpoints.CREATE_ENTITY_ASSESSORS +
-				'/' +
-				programId +
-				'?solutionId=' +
-				solutionId
-
-			const options = {
-				headers: {
-					'content-type': 'application/json',
-					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
-					'x-authenticated-user-token': token,
-				},
-				json: {
-					entities: entities,
-				},
-			}
-
-			request.post(createdEntityAssessor, options, assessmentCallback)
-
-			function assessmentCallback(err, data) {
-				let result = {
-					success: true,
-				}
-
 				if (err) {
 					result.success = false
 				} else {
@@ -552,8 +279,7 @@ const listSolutions = function (solutionIds, token) {
 const updateSolution = function (token, updateData, solutionExternalId) {
 	return new Promise(async (resolve, reject) => {
 		try {
-			const url =
-				SURVEY_SERVICE_URL + CONSTANTS.endpoints.UPDATE_SOLUTIONS + '?solutionExternalId=' + solutionExternalId
+			const url = SURVEY_SERVICE_URL + CONSTANTS.endpoints.UPDATE_SOLUTIONS + '/' + solutionExternalId
 
 			const options = {
 				headers: {
@@ -858,11 +584,6 @@ const listEntitiesByLocationIds = function (token, locationIds) {
 }
 
 module.exports = {
-	createAssessmentSolutionFromTemplate: createAssessmentSolutionFromTemplate,
-	createObservationFromSolutionTemplate: createObservationFromSolutionTemplate,
-	addEntityToObservation: addEntityToObservation,
-	addEntitiesToSolution: addEntitiesToSolution,
-	createEntityAssessors: createEntityAssessors,
 	observationDetails: observationDetails,
 	listSolutions: listSolutions,
 	updateSolution: updateSolution,

@@ -151,8 +151,6 @@ module.exports = class Users {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let isAPrivateProgram = UTILS.convertStringToBoolean(req.query.isAPrivateProgram)
-				req.body['tenantId'] = req.userDetails.userInformation.tenantId
-				req.body['orgIds'] = req.userDetails.userInformation.organizationId
 				req.query.getProjectsCount = UTILS.convertStringToBoolean(req.query.getProjectsCount)
 				if (isAPrivateProgram) {
 					let programsData = await usersHelper.privatePrograms(

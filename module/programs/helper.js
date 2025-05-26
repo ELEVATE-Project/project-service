@@ -1235,24 +1235,14 @@ module.exports = class ProgramsHelper {
 							message: CONSTANTS.apiResponses.FAILED_TO_FETCH_TENANT_DETAILS,
 						})
 					}
+					// factors = [ 'professional_role', 'professional_subroles' ]
 					let factors
 					if (
 						tenantDetails.data.meta.hasOwnProperty('factors') &&
 						tenantDetails.data.meta.factors.length > 0
 					) {
 						factors = tenantDetails.data.meta.factors
-						let queryFilter = []
-
-						// Build query based on each key
-						factors.forEach((factor) => {
-							let scope = 'scope.' + factor
-							let values = userRoleInfo[factor]
-							if (!Array.isArray(values)) {
-								queryFilter.push({ [scope]: { $in: values.split(',') } })
-							} else {
-								queryFilter.push({ [scope]: { $in: [...values] } })
-							}
-						})
+						let queryFilter = UTILS.factorQuery(factors, userRoleInfo)
 						filterQuery['$and'] = queryFilter
 					}
 
@@ -1274,6 +1264,7 @@ module.exports = class ProgramsHelper {
 					let userRoleKeys = Object.keys(userRoleInfo)
 					let queryFilter = []
 
+					// factors = [ 'professional_role', 'professional_subroles' ]
 					// if factors are passed or query has to be build based on the keys passed
 					if (data.hasOwnProperty('factors') && data.factors.length > 0) {
 						let factors = data.factors
@@ -1321,8 +1312,6 @@ module.exports = class ProgramsHelper {
 				}
 				delete filterQuery['scope.entityType']
 				filterQuery.tenantId = data.tenantId
-				filterQuery.orgIds = { $in: ['ALL', ...data.orgIds] }
-				console.log(filterQuery, 'line no 1336')
 				return resolve({
 					success: true,
 					data: filterQuery,

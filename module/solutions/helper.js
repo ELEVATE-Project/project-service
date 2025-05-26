@@ -1078,16 +1078,18 @@ module.exports = class SolutionsHelper {
 					isReusable: false,
 					isDeleted: false,
 				}
-				Object.keys(_.omit(data, ['role', 'filter', 'factors', 'type'])).forEach((key) => {
+				Object.keys(_.omit(data, ['role', 'filter', 'factors', 'type', 'tenantId', 'orgId'])).forEach((key) => {
 					data[key] = data[key].split(',')
 				})
 
 				// If validate entity set to ON . strict scoping should be applied
 				if (validateEntity !== CONSTANTS.common.OFF) {
-					Object.keys(_.omit(data, ['filter', 'role', 'factors', 'type'])).forEach((requestedDataKey) => {
-						registryIds.push(...data[requestedDataKey])
-						entityTypes.push(requestedDataKey)
-					})
+					Object.keys(_.omit(data, ['filter', 'role', 'factors', 'type', 'tenantId', 'orgId'])).forEach(
+						(requestedDataKey) => {
+							registryIds.push(...data[requestedDataKey])
+							entityTypes.push(requestedDataKey)
+						}
+					)
 					if (!registryIds.length > 0) {
 						throw {
 							message: CONSTANTS.apiResponses.NO_LOCATION_ID_FOUND_IN_DATA,
@@ -1111,8 +1113,33 @@ module.exports = class SolutionsHelper {
 					// 	}
 					// }
 
+					let userRoleInfo = _.omit(data, ['filter', 'factors', 'role', 'type', 'tenantId', 'orgId'])
+
+					let tenantDetails = await userService.fetchPublicTenantDetails(data.tenantId)
+					if (!tenantDetails.data || !tenantDetails.data.meta || tenantDetails.success !== true) {
+						return resolve({
+							success: false,
+							message: CONSTANTS.apiResponses.FAILED_TO_FETCH_TENANT_DETAILS,
+						})
+					}
+					// factors = [ 'professional_role', 'professional_subroles' ]
+					let factors
+					if (
+						tenantDetails.data.meta.hasOwnProperty('factors') &&
+						tenantDetails.data.meta.factors.length > 0
+					) {
+						factors = tenantDetails.data.meta.factors
+						let queryFilter = UTILS.factorQuery(factors, userRoleInfo)
+						filterQuery['$and'] = queryFilter
+					}
+
+					let dataToOmit = ['filter', 'role', 'factors', 'type', 'tenantId', 'orgId']
+					// factors.append(dataToOmit)
+
+					const finalKeysToRemove = [...new Set([...dataToOmit, ...factors])]
+
 					filterQuery.$or = []
-					Object.keys(_.omit(data, ['filter', 'role', 'factors', 'type'])).forEach((key) => {
+					Object.keys(_.omit(data, finalKeysToRemove)).forEach((key) => {
 						// If prefix is given use it to form query
 						if (prefix != '') {
 							filterQuery.$or.push({
@@ -1133,10 +1160,11 @@ module.exports = class SolutionsHelper {
 					}
 				} else {
 					// Obtain userInfo
-					let userRoleInfo = _.omit(data, ['filter', 'factors', 'role', 'type'])
+					let userRoleInfo = _.omit(data, ['filter', 'factors', 'role', 'type', 'tenantId', 'orgId'])
 					let userRoleKeys = Object.keys(userRoleInfo)
 					let queryFilter = []
 
+					// factors = [ 'professional_role', 'professional_subroles' ]
 					// if factors are passed or query has to be build based on the keys passed
 					if (data.hasOwnProperty('factors') && data.factors.length > 0) {
 						let factors = data.factors
@@ -1241,6 +1269,7 @@ module.exports = class SolutionsHelper {
 					filterQuery = _.merge(filterQuery, data.filter)
 				}
 				delete filterQuery['scope.entityType']
+				filterQuery.tenantId = data.tenantId
 				return resolve({
 					success: true,
 					data: filterQuery,
@@ -2945,7 +2974,7 @@ module.exports = class SolutionsHelper {
 						'',
 						search,
 						userDetails,
-						true // to fetch current org assets only
+						true // to fetch current org assets only,
 					)
 				}
 				// fetch projects created by the user
@@ -3099,6 +3128,11 @@ module.exports = class SolutionsHelper {
 							totalCount = mergedData.length
 						}
 					}
+				} else {
+					return resolve({
+						...targetedSolutions,
+						status: HTTP_STATUS_CODE.bad_request.status,
+					})
 				}
 
 				if (mergedData.length > 0) {

@@ -152,7 +152,6 @@ module.exports = class Users {
 			try {
 				let isAPrivateProgram = UTILS.convertStringToBoolean(req.query.isAPrivateProgram)
 				req.query.getProjectsCount = UTILS.convertStringToBoolean(req.query.getProjectsCount)
-
 				if (isAPrivateProgram) {
 					let programsData = await usersHelper.privatePrograms(
 						req.userDetails.userInformation.userId,

@@ -827,6 +827,28 @@ function convertDurationToDays(duration) {
 }
 
 /**
+ * Generates a MongoDB query filter based on factor scopes and user role information.
+ *
+ * @param {string[]} factors - An array of factor names used to construct scoped keys.
+ * @param {Object.<string, string|string[]>} userRoleInfo - An object where keys are factor names and values are either comma-separated strings or arrays of values.
+ * @returns {Object[]} An array of query filter objects for MongoDB.
+ */
+function factorQuery(factors, userRoleInfo) {
+	let queryFilter = []
+	factors.forEach((factor) => {
+		let scope = 'scope.' + factor
+		let values = userRoleInfo[factor]
+		if (!Array.isArray(values)) {
+			queryFilter.push({ [scope]: { $in: values.split(',') } })
+		} else {
+			queryFilter.push({ [scope]: { $in: [...values] } })
+		}
+	})
+
+	return queryFilter
+}
+
+/**
  * Convert Learning Resource
  * @name convertResources
  * @param {Array} resources - learning resource data
@@ -882,4 +904,5 @@ module.exports = {
 	formatMetaInformation,
 	convertResources,
 	convertDurationToDays,
+	factorQuery,
 }

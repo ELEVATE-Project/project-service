@@ -176,6 +176,19 @@ let enviromentVariables = {
 		message: 'Required admin access token',
 		optional: false,
 	},
+	USER_DELETE_ON_OFF: {
+		message: 'Enable/Disable User data deletion',
+		optional: false,
+	},
+	USER_DELETE_TOPIC: {
+		message: 'Required user data delete kafka topic',
+		optional: true,
+		requiredIf: {
+			key: 'USER_DELETE_ON_OFF',
+			operator: 'EQUALS',
+			value: 'ON',
+		},
+	},
 }
 
 let success = true

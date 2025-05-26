@@ -4200,6 +4200,7 @@ module.exports = class UserProjectsHelper {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let userId = userDeleteEvent.id
+				// Throw an error if userId is missing
 				if (!userId) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
@@ -4211,24 +4212,31 @@ module.exports = class UserProjectsHelper {
 					userId: userId,
 				}
 
+				// Get any specific masked values if defined, else fallback to default
 				const specificValuesMap = userProfileConfig.specificMaskedValues || {}
 				const setOperations = {}
+
+				// Prepare $set operations for fields to mask (anonymize)
 				userProfileConfig.preserveAndMask.forEach((key) => {
 					const maskValue = specificValuesMap[key] || userProfileConfig.defaultMaskedDataPlaceholder
 					setOperations[`userProfile.${key}`] = maskValue
 				})
 
+				// Prepare $unset operations for fields to remove
 				const unsetOperations = {}
 				userProfileConfig.fieldsToRemove.forEach((key) => {
 					unsetOperations[`userProfile.${key}`] = 1
 				})
 
+				// Combine $set and $unset operations
 				const updateOperations = {
 					$set: setOperations,
 					$unset: unsetOperations,
 				}
 
+				// Update all matching records with the specified operations
 				let result = await projectQueries.updateMany(filter, updateOperations)
+
 				return resolve({
 					success: true,
 					message:

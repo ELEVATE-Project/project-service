@@ -1,7 +1,7 @@
 /**
  * name : userDelete.js
- * author : Ankit
- * created-date : 10-Nov-2023
+ * author : Priyanka Pradeep
+ * created-date : 26-May-2025
  * Description : user delete event consumer.
  */
 

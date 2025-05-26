@@ -6,7 +6,6 @@
  */
 
 // Dependencies
-
 const libraryCategoriesHelper = require(MODULES_BASE_PATH + '/library/categories/helper')
 const projectTemplatesHelper = require(MODULES_BASE_PATH + '/project/templates/helper')
 const { v4: uuidv4 } = require('uuid')
@@ -34,7 +33,8 @@ const QRCode = require('qrcode')
 const path = require('path')
 const gotenbergService = require(SERVICES_BASE_PATH + '/gotenberg')
 const projectService = require(SERVICES_BASE_PATH + '/projects')
-const userProfileConfig = require('@config/userProfileConfig')
+const defaultUserProfileConfig = require('@config/defaultUserProfileDeleteConfig')
+const configFilePath = process.env.AUTH_CONFIG_FILE_PATH
 /**
  * UserProjectsHelper
  * @class
@@ -4208,12 +4208,32 @@ module.exports = class UserProjectsHelper {
 					}
 				}
 
+				let userProfileConfig = defaultUserProfileConfig
+
+				// Attempt to load configuration from the config JSON file if path is provided
+				if (configFilePath) {
+					const absolutePath = path.resolve(PROJECT_ROOT_DIRECTORY, configFilePath)
+					if (fs.existsSync(absolutePath)) {
+						const fileContent = fs.readFileSync(absolutePath)
+						const parsed = JSON.parse(fileContent)
+
+						if (
+							parsed &&
+							typeof parsed === CONSTANTS.common.OBJECT &&
+							parsed.userProfileKeysForDelete &&
+							typeof parsed.userProfileKeysForDelete === CONSTANTS.common.OBJECT
+						) {
+							userProfileConfig = parsed.userProfileKeysForDelete
+						}
+					}
+				}
+
 				let filter = {
 					userId: userId,
 				}
 
 				// Get any specific masked values if defined, else fallback to default
-				const specificValuesMap = userProfileConfig.specificMaskedValues || {}
+				const specificValuesMap = userProfileConfig?.specificMaskedValues || {}
 				const setOperations = {}
 
 				// Prepare $set operations for fields to mask (anonymize)
@@ -4245,7 +4265,6 @@ module.exports = class UserProjectsHelper {
 							: CONSTANTS.apiResponses.FAILED_TO_DELETE_DATA,
 				})
 			} catch (error) {
-				console.log(error)
 				return resolve({
 					status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
 					message: error.message || error,

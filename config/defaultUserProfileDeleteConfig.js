@@ -12,26 +12,13 @@
  * - Add/remove keys in `preserveAndMask` to control which fields are masked instead of deleted.
  * - Optionally define specific placeholder values in `specificMaskedValues` to set custom text instead of the default placeholder (currently commented out).
  */
-const userProfileKeys = {
-	preserveAndMask: ['firstName'], // keys to mask instead of delete
-	fieldsToRemove: [
-		'email',
-		'maskedEmail',
-		'maskedPhone',
-		'recoveryEmail',
-		'phone',
-		'lastName',
-		'prevUsedPhone',
-		'prevUsedEmail',
-		'recoveryPhone',
-		'dob',
-		'encEmail',
-		'encPhone',
-	], //keys to update
+const userProfileKeysForDelete = {
+	preserveAndMask: ['name'], // keys to mask instead of delete
+	fieldsToRemove: ['email', 'username', 'phone'], //keys to update
 	defaultMaskedDataPlaceholder: 'Deleted User',
 	// specificMaskedValues: {
-	//     "firstName": "User Deleted"    // Specific placeholder for first name
+	//     "name": "User Deleted"    // Specific placeholder for first name
 	// },
 }
 
-module.exports = userProfileKeys
+module.exports = userProfileKeysForDelete

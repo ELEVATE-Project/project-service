@@ -5,66 +5,67 @@
  * Description : Migration script to update roles with there _id
  */
 
+require('dotenv').config({ path: '../.env' })
 
-const { MongoClient } = require('mongodb');
-const mongoose = require('mongoose');
-const MONGODB_URL = 'mongodb://localhost:27017';
-const DB = 'elevate-project';
-const tenantId = 'shikshagraha';
-const entityBaseURL = 'http://localhost:5001';
+const { MongoClient } = require('mongodb')
+const mongoose = require('mongoose')
+const request = require('request')
 
-const dbClient = new MongoClient(MONGODB_URL);
-const request = require('request');
+const MONGODB_URL = process.env.MONGODB_URL
+const DB = MONGODB_URL.split('/').pop()
+const tenantId = process.env.TENANT_ID
+const entityBaseURL = process.env.ENTITY_BASE_URL
 
-let ObjectId = mongoose.Types.ObjectId;
+const dbClient = new MongoClient(MONGODB_URL)
+let ObjectId = mongoose.Types.ObjectId
 
 async function getSubRolesData(professional_role_id) {
-  console.log(professional_role_id);
+	console.log(professional_role_id)
 
-  var options = {
-    method: 'GET',
-    url: `${entityBaseURL}/entity-management/v1/entities/subEntityList/${professional_role_id}?type=professional_subroles`,
-    headers: {
-      tenantId: tenantId,
-      'Content-Type': 'application/json',
-    },
-  };
-  return new Promise((resolve, reject) => {
-    request(options, function (error, response) {
-      if (error) return reject(error);
-      let parsedResponse = JSON.parse(response.body);
+	const options = {
+		method: 'GET',
+		url: `${entityBaseURL}/entity-management/v1/entities/subEntityList/${professional_role_id}?type=professional_subroles`,
+		headers: {
+			tenantId: tenantId,
+			'Content-Type': 'application/json',
+		},
+	}
+	return new Promise((resolve, reject) => {
+		request(options, function (error, response) {
+			if (error) return reject(error)
+			let parsedResponse = JSON.parse(response.body)
 
-      if (parsedResponse.status !== 200) {
-        return reject(error);
-      }
+			if (parsedResponse.status !== 200) {
+				return reject(new Error('Invalid response status'))
+			}
 
-      resolve(parsedResponse.result['data']);
-    });
-  });
+			resolve(parsedResponse.result['data'])
+		})
+	})
 }
 
 async function getProfessionalRolesData() {
-  var options = {
-    method: 'GET',
-    url: `${entityBaseURL}/entity-management/v1/entities/entityListBasedOnEntityType?entityType=professional_role`,
-    headers: {
-      'Content-Type': 'application/json',
-      tenantId: tenantId,
-    },
-  };
+	const options = {
+		method: 'GET',
+		url: `${entityBaseURL}/entity-management/v1/entities/entityListBasedOnEntityType?entityType=professional_role`,
+		headers: {
+			'Content-Type': 'application/json',
+			tenantId: tenantId,
+		},
+	}
 
-  return new Promise((resolve, reject) => {
-    request(options, function (error, response) {
-      if (error) return reject(error);
-      let parsedResponse = JSON.parse(response.body);
+	return new Promise((resolve, reject) => {
+		request(options, function (error, response) {
+			if (error) return reject(error)
+			let parsedResponse = JSON.parse(response.body)
 
-      if (parsedResponse.status !== 200) {
-        return reject(error);
-      }
+			if (parsedResponse.status !== 200) {
+				return reject(new Error('Invalid response status'))
+			}
 
-      resolve(parsedResponse.result);
-    });
-  });
+			resolve(parsedResponse.result)
+		})
+	})
 }
 
 // async function getIdFromAPI(type, name) {
@@ -79,99 +80,95 @@ async function getProfessionalRolesData() {
 // }
 
 async function modifyCollection(collectionName) {
-  let professionalRolesData = await getProfessionalRolesData();
+	let professionalRolesData = await getProfessionalRolesData()
 
-  await dbClient.connect();
-  const db = dbClient.db(DB); // default DB from connection string
-  const collection = db.collection(collectionName);
+	await dbClient.connect()
+	const db = dbClient.db(DB) // default DB from connection string
+	const collection = db.collection(collectionName)
 
-  const cursor = collection.find({
-    'scope.professional_role': { $exists: true, $type: 'array' },
-    'scope.professional_subroles': { $exists: true, $type: 'array' },
-  });
+	const cursor = collection.find({
+		'scope.professional_role': { $exists: true, $type: 'array' },
+		'scope.professional_subroles': { $exists: true, $type: 'array' },
+	})
 
-  while (await cursor.hasNext()) {
-    const doc = await cursor.next();
-    const updatedScope = { ...doc.scope };
+	while (await cursor.hasNext()) {
+		const doc = await cursor.next()
+		const updatedScope = { ...doc.scope }
 
-    console.log('before update', updatedScope);
+		console.log('before update', updatedScope)
 
-    let professional_role_id_arr = [];
+		let professional_role_id_arr = []
 
-    if (updatedScope['professional_role'].includes('ALL') || updatedScope['professional_subroles'].includes('ALL')) {
-      continue;
-    }
+		if (
+			updatedScope['professional_role'].includes('ALL') ||
+			updatedScope['professional_subroles'].includes('ALL')
+		) {
+			continue
+		}
 
-    {
-      if (
-        updatedScope.hasOwnProperty('professional_role') &&
-        updatedScope['professional_role'].length >= 1 &&
-        !updatedScope['professional_role'].includes('ALL')
-      ) {
-        let currentProfessionalRole = updatedScope['professional_role'];
+		if (
+			updatedScope.hasOwnProperty('professional_role') &&
+			updatedScope['professional_role'].length >= 1 &&
+			!updatedScope['professional_role'].includes('ALL')
+		) {
+			let currentProfessionalRole = updatedScope['professional_role']
+			let modifiedProfessionalRole = []
 
-        let modifiedProfessionalRole = [];
+			for (let professionalRoleElement of currentProfessionalRole) {
+				let professionalRole = professionalRolesData.find((role) => role.externalId === professionalRoleElement)
 
-        for (let professionalRoleElement of currentProfessionalRole) {
-          let professionalRole = professionalRolesData.find((role) => role.externalId === professionalRoleElement);
+				if (professionalRole) {
+					modifiedProfessionalRole.push(professionalRole._id)
+				} else {
+					modifiedProfessionalRole.push(professionalRoleElement)
+				}
+			}
 
-          if (professionalRole) {
-            modifiedProfessionalRole.push(professionalRole._id);
-          } else {
-            modifiedProfessionalRole.push(professionalRoleElement);
-          }
-        }
+			updatedScope['professional_role'] = modifiedProfessionalRole
+			professional_role_id_arr = modifiedProfessionalRole
+		}
 
-        updatedScope['professional_role'] = modifiedProfessionalRole;
-        professional_role_id_arr = modifiedProfessionalRole;
-      }
+		if (
+			updatedScope.hasOwnProperty('professional_subroles') &&
+			updatedScope['professional_subroles'].length >= 1 &&
+			!updatedScope['professional_subroles'].includes('ALL')
+		) {
+			let currentProfessionalSubRole = updatedScope['professional_subroles']
+			let modifiedSubRole = []
 
-      if (
-        updatedScope.hasOwnProperty('professional_subroles') &&
-        updatedScope['professional_subroles'].length >= 1 &&
-        !updatedScope['professional_subroles'].includes('ALL')
-      ) {
-        let currentProfessionalSubRole = updatedScope['professional_subroles'];
+			for (let professional_role_id of professional_role_id_arr) {
+				for (let subRoleElement of currentProfessionalSubRole) {
+					let subRolesData = null
+					try {
+						subRolesData = await getSubRolesData(professional_role_id)
+					} catch (e) {
+						console.log(e)
+						continue
+					}
 
-        let modifiedSubRole = [];
+					let professionalSubRole = subRolesData.find((role) => role.externalId === subRoleElement)
 
-        for (let professional_role_id of professional_role_id_arr) {
-          for (let subRoleElement of currentProfessionalSubRole) {
-            let subRolesData = null;
-            try {
-              subRolesData = await getSubRolesData(professional_role_id);
-            } catch (e) {
-              console.log(e);
-              continue;
-            }
+					if (professionalSubRole) {
+						modifiedSubRole.push(professionalSubRole._id)
+					}
+				}
+			}
 
-            let professionalSubRole = subRolesData.find((role) => role.externalId === subRoleElement);
+			updatedScope['professional_subroles'] = modifiedSubRole
+		}
 
-            if (professionalSubRole) {
-              modifiedSubRole.push(professionalSubRole._id);
-            } else {
-              // modifiedSubRole.push(subRoleElement)
-            }
-          }
-        }
+		console.log(updatedScope, 'updatedScope')
 
-        updatedScope['professional_subroles'] = modifiedSubRole;
-      }
-    }
+		await collection.updateOne({ _id: doc._id }, { $set: { scope: updatedScope } })
+	}
 
-    console.log(updatedScope, 'updatedScope');
-
-    await collection.updateOne({ _id: doc._id }, { $set: { scope: updatedScope } });
-  }
-
-  await dbClient.close();
-  console.log(`Collection "${collectionName}" migration completed.`);
+	await dbClient.close()
+	console.log(`Collection "${collectionName}" migration completed.`)
 }
 
 async function runMigration() {
-  // Example call, you can call modifyCollection with different collection names
-  await modifyCollection('programs');
-  await modifyCollection('solutions');
+	await modifyCollection('programs')
+	await modifyCollection('solutions')
 }
 
-runMigration();
+runMigration()

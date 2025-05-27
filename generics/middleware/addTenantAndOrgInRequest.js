@@ -14,6 +14,7 @@ module.exports = async function (req, res, next) {
 		'userProjects/sync',
 		'users/programs',
 		'userProjects/details',
+		'users/solutions',
 	]
 
 	let performTenantAndOrgCheck = false

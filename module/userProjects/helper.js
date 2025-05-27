@@ -6,7 +6,6 @@
  */
 
 // Dependencies
-
 const libraryCategoriesHelper = require(MODULES_BASE_PATH + '/library/categories/helper')
 const projectTemplatesHelper = require(MODULES_BASE_PATH + '/project/templates/helper')
 const { v4: uuidv4 } = require('uuid')
@@ -34,6 +33,8 @@ const QRCode = require('qrcode')
 const path = require('path')
 const gotenbergService = require(SERVICES_BASE_PATH + '/gotenberg')
 const projectService = require(SERVICES_BASE_PATH + '/projects')
+const defaultUserProfileConfig = require('@config/defaultUserProfileDeleteConfig')
+const configFilePath = process.env.AUTH_CONFIG_FILE_PATH
 /**
  * UserProjectsHelper
  * @class
@@ -278,7 +279,7 @@ module.exports = class UserProjectsHelper {
 					const solutionInformation = await solutionsQueries.solutionsDocument({
 						_id: data.solutionId,
 						tenantId: tenantId,
-						orgIds: { $in: [orgId] },
+						orgId: { $in: [orgId] },
 					})
 					if (solutionInformation.length > 0) {
 						updateProject.solutionInformation = solutionInformation[0]
@@ -288,7 +289,7 @@ module.exports = class UserProjectsHelper {
 					const programInformation = await programQueries.programsDocument({
 						_id: data.programId,
 						tenantId: tenantId,
-						orgIds: { $in: [orgId] },
+						orgId: { $in: [orgId] },
 					})
 					if (programInformation.length > 0) {
 						updateProject.programInformation = programInformation[0]
@@ -1397,7 +1398,7 @@ module.exports = class UserProjectsHelper {
 						externalId: templateId,
 						isReusable: false,
 						tenantId: tenantId,
-						orgIds: { $in: [orgId] },
+						orgId: { $in: [orgId] },
 					})
 
 					if (!templateDocuments.length > 0) {
@@ -1459,7 +1460,7 @@ module.exports = class UserProjectsHelper {
 										_id: solutionId,
 										isAPrivateProgram: true,
 										tenantId: tenantId,
-										orgIds: { $in: [orgId] },
+										orgId: { $in: [orgId] },
 									},
 									[
 										'name',
@@ -1521,7 +1522,7 @@ module.exports = class UserProjectsHelper {
 							solutionDetails = await solutionsQueries.solutionsDocument({
 								_id: solutionId,
 								tenantId: tenantId,
-								orgIds: { $in: [orgId] },
+								orgId: { $in: [orgId] },
 							})
 							solutionDetails = solutionDetails[0]
 							// if( !solutionDetails.success ) {
@@ -1665,7 +1666,7 @@ module.exports = class UserProjectsHelper {
 								await certificateTemplateQueries.certificateTemplateDocument({
 									_id: solutionDetails.certificateTemplateId,
 									tenantId: tenantId,
-									orgIds: { $in: [orgId] },
+									orgId: { $in: [orgId] },
 								})
 
 							// create certificate object and add data if certificate template is present.
@@ -1990,7 +1991,7 @@ module.exports = class UserProjectsHelper {
 						_id: templateId,
 						isReusable: false,
 						tenantId: tenantId,
-						orgIds: { $in: [orgId] },
+						orgId: { $in: [orgId] },
 					},
 					'all',
 					['ratings', 'noOfRatings', 'averageRating']
@@ -3166,7 +3167,7 @@ module.exports = class UserProjectsHelper {
 						{
 							_id: projectTemplateId,
 							tenantId: userDetails.userInformation.tenantId,
-							orgIds: { $in: [userDetails.userInformation.organizationId] },
+							orgId: { $in: [userDetails.userInformation.organizationId] },
 						},
 						{
 							$set: { importCount: updateProjectTemplateImportCount },
@@ -4174,6 +4175,103 @@ module.exports = class UserProjectsHelper {
 			}
 		})
 	}
+
+	/**
+   * deleteUserPIIData function to delete users Data.
+   * @method
+   * @name deleteUserPIIData
+   * @param {userDeleteEvent} - userDeleteEvent message object 
+   * {
+      	"entity": "user",
+		"eventType": "delete",
+		"entityId": 101,
+		"changes": {},
+		"created_by": 4,
+		"organization_id": 22,
+		"tenant_code": "shikshagraha",
+		"status": "INACTIVE",
+		"deleted": true,
+		"id": 101,
+		"username" : "user_shqwq1ssddw"
+    }
+   * @returns {Promise} success Data.
+   */
+	static deleteUserPIIData(userDeleteEvent) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let userId = userDeleteEvent.id
+				// Throw an error if userId is missing
+				if (!userId) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.USER_ID_MISSING,
+					}
+				}
+
+				let userProfileConfig = defaultUserProfileConfig
+
+				// Attempt to load configuration from the config JSON file if path is provided
+				if (configFilePath) {
+					const absolutePath = path.resolve(PROJECT_ROOT_DIRECTORY, configFilePath)
+					if (fs.existsSync(absolutePath)) {
+						const fileContent = fs.readFileSync(absolutePath)
+						const parsed = JSON.parse(fileContent)
+
+						if (
+							parsed &&
+							typeof parsed === CONSTANTS.common.OBJECT &&
+							parsed.userProfileKeysForDelete &&
+							typeof parsed.userProfileKeysForDelete === CONSTANTS.common.OBJECT
+						) {
+							userProfileConfig = parsed.userProfileKeysForDelete
+						}
+					}
+				}
+
+				let filter = {
+					userId: userId,
+				}
+
+				// Get any specific masked values if defined, else fallback to default
+				const specificValuesMap = userProfileConfig?.specificMaskedValues || {}
+				const setOperations = {}
+
+				// Prepare $set operations for fields to mask (anonymize)
+				userProfileConfig.preserveAndMask.forEach((key) => {
+					const maskValue = specificValuesMap[key] || userProfileConfig.defaultMaskedDataPlaceholder
+					setOperations[`userProfile.${key}`] = maskValue
+				})
+
+				// Prepare $unset operations for fields to remove
+				const unsetOperations = {}
+				userProfileConfig.fieldsToRemove.forEach((key) => {
+					unsetOperations[`userProfile.${key}`] = 1
+				})
+
+				// Combine $set and $unset operations
+				const updateOperations = {
+					$set: setOperations,
+					$unset: unsetOperations,
+				}
+
+				// Update all matching records with the specified operations
+				let result = await projectQueries.updateMany(filter, updateOperations)
+
+				return resolve({
+					success: true,
+					message:
+						result?.nModified > 0
+							? CONSTANTS.apiResponses.DATA_DELETED_SUCCESSFULLY
+							: CONSTANTS.apiResponses.FAILED_TO_DELETE_DATA,
+				})
+			} catch (error) {
+				return resolve({
+					status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || error,
+				})
+			}
+		})
+	}
 }
 
 /**
@@ -4634,7 +4732,7 @@ function _projectCategories(categories, tenantId, orgId) {
 					{
 						_id: { $in: categoryIds },
 						tenantId: tenantId,
-						orgIds: { $in: [orgId] },
+						orgId: { $in: [orgId] },
 					},
 					['name', 'externalId']
 				)

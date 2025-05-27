@@ -29,7 +29,7 @@ module.exports = class CertificateTemplatesHelper {
 		return new Promise(async (resolve, reject) => {
 			try {
 				data['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-				data['orgIds'] = userDetails.tenantAndOrgInfo.orgId
+				data['orgId'] = userDetails.tenantAndOrgInfo.orgId
 				let certificateTemplateCreated = await certificateTemplateQueries.createCertificateTemplate(data)
 				return resolve({
 					message: CONSTANTS.apiResponses.CERTIFICATE_TEMPLATE_ADDED,

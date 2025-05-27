@@ -62,4 +62,5 @@ module.exports = {
 	ORGANIZATION_READ: '/v1/organization/read',
 	AUTO_DOWNLOAD: '/v1/cloud-services/files/download',
 	TENANT_READ: '/v1/tenant/read',
+	PUBLIC_BRANDING: '/v1/public/branding',
 }

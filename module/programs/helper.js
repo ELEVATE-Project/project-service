@@ -12,6 +12,7 @@ const programsQueries = require(DB_QUERY_BASE_PATH + '/programs')
 const projectQueries = require(DB_QUERY_BASE_PATH + '/projects')
 const entitiesService = require(GENERICS_FILES_PATH + '/services/entity-management')
 const validateEntity = process.env.VALIDATE_ENTITIES
+const userService = require(GENERICS_FILES_PATH + '/services/users')
 
 /**
  * ProgramsHelper
@@ -155,20 +156,6 @@ module.exports = class ProgramsHelper {
 				// Set the scope in updateObject to the updated scopeData
 				updateObject['$set']['scope'] = scopeData
 
-				// Extract entities from scopeData excluding the 'roles' key
-				const entities = Object.keys(scopeData)
-					.filter((key) => key !== 'roles')
-					.reduce((acc, key) => acc.concat(scopeData[key]), [])
-
-				// Add the entities array to updateObject
-				updateObject.$set.entities = entities
-
-				// Join all keys except 'roles' into a comma-separated string and set it as entityType
-				scopeData['entityType'] = Object.keys(_.omit(scopeData, ['roles'])).join(',')
-
-				// Add the entityType to updateObject
-				updateObject['$set']['entityType'] = scopeData.entityType
-
 				// Find and update the program with the specified programId
 				let updateProgram = await programsQueries.findAndUpdate(
 					{
@@ -231,7 +218,7 @@ module.exports = class ProgramsHelper {
 
 				// avoid adding manupulative data
 				delete data.tenantId
-				delete data.orgIds
+				delete data.orgId
 
 				if (checkDate) {
 					if (data.hasOwnProperty(CONSTANTS.common.END_DATE)) {
@@ -248,7 +235,7 @@ module.exports = class ProgramsHelper {
 
 				// add tenantId and orgId
 				programData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-				programData['orgIds'] = userDetails.tenantAndOrgInfo.orgId
+				programData['orgId'] = userDetails.tenantAndOrgInfo.orgId
 
 				programData = _.omit(programData, ['scope', 'userId'])
 				let program = await programsQueries.createProgram(programData)
@@ -258,6 +245,7 @@ module.exports = class ProgramsHelper {
 						message: CONSTANTS.apiResponses.PROGRAM_NOT_CREATED,
 					}
 				}
+				data.scope['organizations'] = [userDetails.tenantAndOrgInfo.orgId]
 
 				if (data.scope) {
 					let programScopeUpdated = await this.setScope(program._id, data.scope)
@@ -382,7 +370,7 @@ module.exports = class ProgramsHelper {
 					{
 						_id: programId,
 						tenantId: tenantId,
-						orgIds: { $in: [orgId] },
+						orgId: { $in: [orgId] },
 					},
 					projections,
 					skipFields
@@ -955,12 +943,12 @@ module.exports = class ProgramsHelper {
 
 				// modify query to fetch documents
 				matchQuery['tenantId'] = userDetails.userInformation.tenantId
-				matchQuery['orgIds'] = { $in: ['ALL', userDetails.userInformation.organizationId] }
+				matchQuery['orgId'] = { $in: ['ALL', userDetails.userInformation.organizationId] }
 
 				// handle currentOrgOnly filter
 				if (currentOrgOnly) {
 					let organizationId = userDetails.userInformation.organizationId
-					matchQuery['orgIds'] = { $in: [organizationId] }
+					matchQuery['orgId'] = { $in: [organizationId] }
 				}
 
 				let sortQuery = {
@@ -1098,7 +1086,7 @@ module.exports = class ProgramsHelper {
 						isAPrivateProgram: true,
 						isDeleted: false,
 						tenantId: tenantId,
-						orgIds: { $in: [orgId] },
+						orgId: { $in: [orgId] },
 					},
 					['name', 'externalId', 'description', '_id', 'isAPrivateProgram', 'translations'],
 					'none',
@@ -1208,34 +1196,50 @@ module.exports = class ProgramsHelper {
 				let filterQuery = {
 					isDeleted: false,
 				}
-				Object.keys(_.omit(data, ['role', 'filter', 'factors', 'type'])).forEach((key) => {
+				Object.keys(_.omit(data, ['role', 'filter', 'factors', 'type', 'tenantId', 'orgId'])).forEach((key) => {
 					data[key] = data[key].split(',')
 				})
 
 				// If validate entity set to ON . strict scoping should be applied
 				if (validateEntity !== CONSTANTS.common.OFF) {
-					Object.keys(_.omit(data, ['filter', 'role', 'factors', 'type'])).forEach((requestedDataKey) => {
-						registryIds.push(...data[requestedDataKey])
-						entityTypes.push(requestedDataKey)
-					})
+					Object.keys(_.omit(data, ['filter', 'role', 'factors', 'type', 'tenantId', 'orgId'])).forEach(
+						(requestedDataKey) => {
+							registryIds.push(...data[requestedDataKey])
+							entityTypes.push(requestedDataKey)
+						}
+					)
 					if (!registryIds.length > 0) {
 						throw {
 							message: CONSTANTS.apiResponses.NO_LOCATION_ID_FOUND_IN_DATA,
 						}
 					}
+					let userRoleInfo = _.omit(data, ['filter', 'factors', 'role', 'type', 'tenantId', 'orgId'])
 
-					// if (!data.role) {
-					// 	throw {
-					// 		message: CONSTANTS.apiResponses.USER_ROLES_NOT_FOUND,
-					// 	}
-					// }
+					let tenantDetails = await userService.fetchPublicTenantDetails(data.tenantId)
+					if (!tenantDetails.data || !tenantDetails.data.meta || tenantDetails.success !== true) {
+						return resolve({
+							success: false,
+							message: CONSTANTS.apiResponses.FAILED_TO_FETCH_TENANT_DETAILS,
+						})
+					}
+					// factors = [ 'professional_role', 'professional_subroles' ]
+					let factors
+					if (
+						tenantDetails.data.meta.hasOwnProperty('factors') &&
+						tenantDetails.data.meta.factors.length > 0
+					) {
+						factors = tenantDetails.data.meta.factors
+						let queryFilter = UTILS.factorQuery(factors, userRoleInfo)
+						filterQuery['$and'] = queryFilter
+					}
 
-					// filterQuery['scope.roles'] = {
-					// 	$in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')],
-					// }
+					let dataToOmit = ['filter', 'role', 'factors', 'type', 'tenantId', 'orgId']
+					// factors.append(dataToOmit)
+
+					const finalKeysToRemove = [...new Set([...dataToOmit, ...factors])]
 
 					filterQuery.$or = []
-					Object.keys(_.omit(data, ['filter', 'role', 'factors', 'type'])).forEach((key) => {
+					Object.keys(_.omit(data, finalKeysToRemove)).forEach((key) => {
 						filterQuery.$or.push({
 							[`scope.${key}`]: { $in: data[key] },
 						})
@@ -1243,10 +1247,11 @@ module.exports = class ProgramsHelper {
 					filterQuery['scope.entityType'] = { $in: entityTypes }
 				} else {
 					// Obtain userInfo
-					let userRoleInfo = _.omit(data, ['filter', 'factors', 'role', 'type'])
+					let userRoleInfo = _.omit(data, ['filter', 'factors', 'role', 'type', 'tenantId', 'orgId'])
 					let userRoleKeys = Object.keys(userRoleInfo)
 					let queryFilter = []
 
+					// factors = [ 'professional_role', 'professional_subroles' ]
 					// if factors are passed or query has to be build based on the keys passed
 					if (data.hasOwnProperty('factors') && data.factors.length > 0) {
 						let factors = data.factors
@@ -1293,6 +1298,7 @@ module.exports = class ProgramsHelper {
 					filterQuery.type = type
 				}
 				delete filterQuery['scope.entityType']
+				filterQuery.tenantId = data.tenantId
 				return resolve({
 					success: true,
 					data: filterQuery,

@@ -392,7 +392,7 @@ module.exports = class ProjectTemplatesHelper {
 								userDetails.userInformation.userId
 						templateData.isReusable = true
 						templateData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-						templateData['orgIds'] = userDetails.tenantAndOrgInfo.orgId
+						templateData['orgId'] = userDetails.tenantAndOrgInfo.orgId
 
 						let createdTemplate = await projectTemplateQueries.createTemplate(templateData)
 
@@ -986,7 +986,7 @@ module.exports = class ProjectTemplatesHelper {
 					let queryData = {}
 					queryData['link'] = link
 					queryData['tenantId'] = tenantId
-					queryData['orgIds'] = { $in: [orgId] }
+					queryData['orgId'] = { $in: [orgId] }
 
 					//   fetch solution details based on the link
 					let solutionDocument = await solutionsQueries.solutionsDocument(queryData, [
@@ -1027,7 +1027,7 @@ module.exports = class ProjectTemplatesHelper {
 				}
 
 				findQuery['tenantId'] = tenantId
-				findQuery['orgIds'] = { $in: [orgId] }
+				findQuery['orgId'] = { $in: [orgId] }
 				//getting template data using templateId
 				let templateData = await projectTemplateQueries.templateDocument(findQuery, 'all', [
 					'ratings',
@@ -1156,7 +1156,7 @@ module.exports = class ProjectTemplatesHelper {
 						{
 							_id: templateData[0].certificateTemplateId,
 							tenantId: tenantId,
-							orgIds: { $in: ['ALL', orgId] },
+							orgId: { $in: ['ALL', orgId] },
 						},
 						['criteria']
 					)
@@ -1244,7 +1244,7 @@ module.exports = class ProjectTemplatesHelper {
 						_id: templateId,
 						status: CONSTANTS.common.PUBLISHED,
 						tenantId: tenantId,
-						orgIds: { $in: [orgId] },
+						orgId: { $in: [orgId] },
 					},
 					['tasks', 'taskSequence']
 				)
@@ -1387,12 +1387,12 @@ module.exports = class ProjectTemplatesHelper {
 				currentOrgOnly = UTILS.convertStringToBoolean(currentOrgOnly)
 
 				queryObject['tenantId'] = userDetails.userInformation.tenantId
-				queryObject['orgIds'] = { $in: ['ALL', userDetails.userInformation.organizationId] }
+				queryObject['orgId'] = { $in: ['ALL', userDetails.userInformation.organizationId] }
 
 				// handle currentOrgOnly filter
 				if (currentOrgOnly) {
 					let organizationId = userDetails.userInformation.organizationId
-					queryObject['orgIds'] = { $in: [organizationId] }
+					queryObject['orgId'] = { $in: [organizationId] }
 				}
 
 				// If 'searchText' is provided, create a search query using '$or'.

@@ -13,8 +13,16 @@ const request = require('request')
 
 const MONGODB_URL = process.env.MONGODB_URL
 const DB = MONGODB_URL.split('/').pop()
-const tenantId = process.env.TENANT_ID
 const entityBaseURL = process.env.ENTITY_BASE_URL
+
+const args = process.argv.slice(2)
+let tenantIdArg = args.find((arg) => arg.startsWith('tenantId--'))
+
+if (!tenantIdArg) {
+	console.error('Error: tenantId not provided. Usage: node mapRolesToId.js tenantId--{tenantId}')
+	process.exit(1)
+}
+const tenantId = tenantIdArg.split('--')[1]
 
 const dbClient = new MongoClient(MONGODB_URL)
 let ObjectId = mongoose.Types.ObjectId

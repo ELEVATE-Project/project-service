@@ -156,20 +156,6 @@ module.exports = class ProgramsHelper {
 				// Set the scope in updateObject to the updated scopeData
 				updateObject['$set']['scope'] = scopeData
 
-				// Extract entities from scopeData excluding the 'roles' key
-				const entities = Object.keys(scopeData)
-					.filter((key) => key !== 'roles')
-					.reduce((acc, key) => acc.concat(scopeData[key]), [])
-
-				// Add the entities array to updateObject
-				updateObject.$set.entities = entities
-
-				// Join all keys except 'roles' into a comma-separated string and set it as entityType
-				scopeData['entityType'] = Object.keys(_.omit(scopeData, ['roles'])).join(',')
-
-				// Add the entityType to updateObject
-				updateObject['$set']['entityType'] = scopeData.entityType
-
 				// Find and update the program with the specified programId
 				let updateProgram = await programsQueries.findAndUpdate(
 					{
@@ -232,7 +218,7 @@ module.exports = class ProgramsHelper {
 
 				// avoid adding manupulative data
 				delete data.tenantId
-				delete data.orgIds
+				delete data.orgId
 
 				if (checkDate) {
 					if (data.hasOwnProperty(CONSTANTS.common.END_DATE)) {
@@ -249,7 +235,7 @@ module.exports = class ProgramsHelper {
 
 				// add tenantId and orgId
 				programData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-				programData['orgIds'] = userDetails.tenantAndOrgInfo.orgId
+				programData['orgId'] = userDetails.tenantAndOrgInfo.orgId
 
 				programData = _.omit(programData, ['scope', 'userId'])
 				let program = await programsQueries.createProgram(programData)
@@ -259,6 +245,7 @@ module.exports = class ProgramsHelper {
 						message: CONSTANTS.apiResponses.PROGRAM_NOT_CREATED,
 					}
 				}
+				data.scope['organizations'] = [userDetails.tenantAndOrgInfo.orgId]
 
 				if (data.scope) {
 					let programScopeUpdated = await this.setScope(program._id, data.scope)
@@ -383,7 +370,7 @@ module.exports = class ProgramsHelper {
 					{
 						_id: programId,
 						tenantId: tenantId,
-						orgIds: { $in: [orgId] },
+						orgId: { $in: [orgId] },
 					},
 					projections,
 					skipFields
@@ -956,12 +943,12 @@ module.exports = class ProgramsHelper {
 
 				// modify query to fetch documents
 				matchQuery['tenantId'] = userDetails.userInformation.tenantId
-				matchQuery['orgIds'] = { $in: ['ALL', userDetails.userInformation.organizationId] }
+				matchQuery['orgId'] = { $in: ['ALL', userDetails.userInformation.organizationId] }
 
 				// handle currentOrgOnly filter
 				if (currentOrgOnly) {
 					let organizationId = userDetails.userInformation.organizationId
-					matchQuery['orgIds'] = { $in: [organizationId] }
+					matchQuery['orgId'] = { $in: [organizationId] }
 				}
 
 				let sortQuery = {
@@ -1099,7 +1086,7 @@ module.exports = class ProgramsHelper {
 						isAPrivateProgram: true,
 						isDeleted: false,
 						tenantId: tenantId,
-						orgIds: { $in: [orgId] },
+						orgId: { $in: [orgId] },
 					},
 					['name', 'externalId', 'description', '_id', 'isAPrivateProgram', 'translations'],
 					'none',

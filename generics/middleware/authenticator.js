@@ -477,8 +477,8 @@ module.exports = async function (req, res, next, token = '') {
 				if (!result.success) {
 					rspObj.errCode = reqMsg.ADMIN_TOKEN.MISSING_CODE
 					rspObj.errMsg = reqMsg.ADMIN_TOKEN.MISSING_MESSAGE
-					rspObj.responseCode = responseCode.unauthorized.status
-					return res.status(responseCode.unauthorized.status).send(respUtil(rspObj))
+					rspObj.responseCode = HTTP_STATUS_CODE['unauthorized'].status
+					return res.status(HTTP_STATUS_CODE['unauthorized'].status).send(respUtil(rspObj))
 				}
 
 				req.headers['tenantid'] = result.tenantId
@@ -517,21 +517,23 @@ module.exports = async function (req, res, next, token = '') {
 					token
 				)
 				if (!validateOrgsResult.success) {
-					return res.status(responseCode['unauthorized'].status).send(respUtil(validateOrgsResult.errorObj))
+					return res
+						.status(HTTP_STATUS_CODE['unauthorized'].status)
+						.send(respUtil(validateOrgsResult.errorObj))
 				}
 				req.headers['orgid'] = validateOrgsResult.validOrgIds
 			} else if (userRoles.includes(CONSTANTS.common.ORG_ADMIN)) {
 				req.headers['tenantid'] = decodedToken.data.tenant_id.toString()
 				req.headers['orgid'] = [decodedToken.data.organization_id.toString()]
 			} else {
-				rspObj.errCode = reqMsg.INVALID_ROLE.INVALID_CODE
-				rspObj.errMsg = reqMsg.INVALID_ROLE.INVALID_MESSAGE
-				rspObj.responseCode = responseCode.unauthorized.status
-				return res.status(responseCode['unauthorized'].status).send(respUtil(rspObj))
+				rspObj.errCode = CONSTANTS.apiResponses.TOKEN_MISSING_CODE
+				rspObj.errMsg = CONSTANTS.apiResponses.TOKEN_MISSING_MESSAGE
+				rspObj.responseCode = HTTP_STATUS_CODE['unauthorized'].status
+				return res.status(HTTP_STATUS_CODE['unauthorized'].status).send(respUtil(rspObj))
 			}
 
 			decodedToken.data.tenantAndOrgInfo['tenantId'] = req.headers['tenantid'].toString()
-			decodedToken.data.tenantAndOrgInfo['orgId'] = req.headers['orgid']
+			decodedToken.data.tenantAndOrgInfo['orgId'] = req.headers['orgid'][0]
 		}
 	} catch (err) {
 		rspObj.errCode = CONSTANTS.apiResponses.TOKEN_MISSING_CODE

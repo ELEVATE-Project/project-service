@@ -13,6 +13,7 @@ module.exports = async function (req, res, next) {
 		'solutions/verifyLink',
 		'userProjects/sync',
 		'users/programs',
+		'userProjects/details',
 	]
 
 	let performTenantAndOrgCheck = false
@@ -27,7 +28,7 @@ module.exports = async function (req, res, next) {
 
 	if (performTenantAndOrgCheck) {
 		req.body['tenantId'] = req.userDetails.userInformation.tenantId
-		req.body['orgIds'] = req.userDetails.userInformation.organizationId
+		req.body['organizations'] = [req.userDetails.userInformation.organizationId]
 	}
 
 	next()

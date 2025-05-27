@@ -278,7 +278,7 @@ module.exports = class UserProjectsHelper {
 					const solutionInformation = await solutionsQueries.solutionsDocument({
 						_id: data.solutionId,
 						tenantId: tenantId,
-						orgIds: { $in: [orgId] },
+						orgId: { $in: [orgId] },
 					})
 					if (solutionInformation.length > 0) {
 						updateProject.solutionInformation = solutionInformation[0]
@@ -288,7 +288,7 @@ module.exports = class UserProjectsHelper {
 					const programInformation = await programQueries.programsDocument({
 						_id: data.programId,
 						tenantId: tenantId,
-						orgIds: { $in: [orgId] },
+						orgId: { $in: [orgId] },
 					})
 					if (programInformation.length > 0) {
 						updateProject.programInformation = programInformation[0]
@@ -1397,7 +1397,7 @@ module.exports = class UserProjectsHelper {
 						externalId: templateId,
 						isReusable: false,
 						tenantId: tenantId,
-						orgIds: { $in: [orgId] },
+						orgId: { $in: [orgId] },
 					})
 
 					if (!templateDocuments.length > 0) {
@@ -1459,7 +1459,7 @@ module.exports = class UserProjectsHelper {
 										_id: solutionId,
 										isAPrivateProgram: true,
 										tenantId: tenantId,
-										orgIds: { $in: [orgId] },
+										orgId: { $in: [orgId] },
 									},
 									[
 										'name',
@@ -1521,7 +1521,7 @@ module.exports = class UserProjectsHelper {
 							solutionDetails = await solutionsQueries.solutionsDocument({
 								_id: solutionId,
 								tenantId: tenantId,
-								orgIds: { $in: [orgId] },
+								orgId: { $in: [orgId] },
 							})
 							solutionDetails = solutionDetails[0]
 							// if( !solutionDetails.success ) {
@@ -1665,7 +1665,7 @@ module.exports = class UserProjectsHelper {
 								await certificateTemplateQueries.certificateTemplateDocument({
 									_id: solutionDetails.certificateTemplateId,
 									tenantId: tenantId,
-									orgIds: { $in: [orgId] },
+									orgId: { $in: [orgId] },
 								})
 
 							// create certificate object and add data if certificate template is present.
@@ -1990,7 +1990,7 @@ module.exports = class UserProjectsHelper {
 						_id: templateId,
 						isReusable: false,
 						tenantId: tenantId,
-						orgIds: { $in: [orgId] },
+						orgId: { $in: [orgId] },
 					},
 					'all',
 					['ratings', 'noOfRatings', 'averageRating']
@@ -3166,7 +3166,7 @@ module.exports = class UserProjectsHelper {
 						{
 							_id: projectTemplateId,
 							tenantId: userDetails.userInformation.tenantId,
-							orgIds: { $in: [userDetails.userInformation.organizationId] },
+							orgId: { $in: [userDetails.userInformation.organizationId] },
 						},
 						{
 							$set: { importCount: updateProjectTemplateImportCount },
@@ -4634,7 +4634,7 @@ function _projectCategories(categories, tenantId, orgId) {
 					{
 						_id: { $in: categoryIds },
 						tenantId: tenantId,
-						orgIds: { $in: [orgId] },
+						orgId: { $in: [orgId] },
 					},
 					['name', 'externalId']
 				)

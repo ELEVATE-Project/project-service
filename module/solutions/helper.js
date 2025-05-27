@@ -458,7 +458,7 @@ module.exports = class SolutionsHelper {
 
 				// add tenantId and orgId
 				solutionData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-				solutionData['orgId'] = userDetails.tenantAndOrgInfo.orgId
+				solutionData['orgId'] = userDetails.tenantAndOrgInfo.orgId[0]
 
 				let solutionCreation = await solutionsQueries.createSolution(_.omit(solutionData, ['scope']))
 
@@ -475,7 +475,7 @@ module.exports = class SolutionsHelper {
 					$addToSet: { components: solutionCreation._id },
 				})
 
-				solutionData.scope['organizations'] = [userDetails.tenantAndOrgInfo.orgId]
+				solutionData.scope['organizations'] = userDetails.tenantAndOrgInfo.orgId
 				if (!solutionData.excludeScope && programData[0].scope) {
 					await this.setScope(solutionCreation._id, solutionData.scope ? solutionData.scope : {})
 				}
@@ -532,7 +532,7 @@ module.exports = class SolutionsHelper {
 						{
 							_id: solutionDocument[0].programId,
 							tenantId: userDetails.tenantAndOrgInfo.tenantId,
-							orgId: { $in: ['ALL', userDetails.tenantAndOrgInfo.orgId] },
+							orgId: { $in: ['ALL', ...userDetails.tenantAndOrgInfo.orgId] },
 						},
 						['_id', 'endDate', 'startDate']
 					)
@@ -583,7 +583,7 @@ module.exports = class SolutionsHelper {
 					{
 						_id: solutionDocument[0]._id,
 						tenantId: userDetails.tenantAndOrgInfo.tenantId,
-						orgId: { $in: ['ALL', userDetails.tenantAndOrgInfo.orgId] },
+						orgId: { $in: ['ALL', ...userDetails.tenantAndOrgInfo.orgId] },
 					},
 					updateObject,
 					{ new: true }
@@ -1780,7 +1780,7 @@ module.exports = class SolutionsHelper {
 				}
 
 				solutionMatchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-				solutionMatchQuery['orgId'] = { $in: ['ALL', userDetails.tenantAndOrgInfo.orgId] }
+				solutionMatchQuery['orgId'] = { $in: ['ALL', ...userDetails.tenantAndOrgInfo.orgId] }
 
 				let solutionData = await solutionsQueries.solutionsDocument(solutionMatchQuery, [
 					'link',

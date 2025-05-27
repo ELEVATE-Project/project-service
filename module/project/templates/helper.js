@@ -392,7 +392,7 @@ module.exports = class ProjectTemplatesHelper {
 								userDetails.userInformation.userId
 						templateData.isReusable = true
 						templateData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-						templateData['orgId'] = userDetails.tenantAndOrgInfo.orgId
+						templateData['orgId'] = userDetails.tenantAndOrgInfo.orgId[0]
 
 						let createdTemplate = await projectTemplateQueries.createTemplate(templateData)
 

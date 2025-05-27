@@ -625,7 +625,7 @@ module.exports = class LibraryCategoriesHelper {
 
 				// add tenantId and orgId
 				categoryData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-				categoryData['orgId'] = userDetails.tenantAndOrgInfo.orgId
+				categoryData['orgId'] = userDetails.tenantAndOrgInfo.orgId[0]
 
 				let projectCategoriesData = await projectCategoriesQueries.create(categoryData)
 
@@ -672,7 +672,7 @@ module.exports = class LibraryCategoriesHelper {
 					? req.userDetails.tenantAndOrgInfo.tenantId
 					: req.userDetails.userInformation.tenantId
 				query['orgId'] = req.userDetails.tenantAndOrgInfo
-					? { $in: [req.userDetails.tenantAndOrgInfo.orgId] }
+					? { $in: req.userDetails.tenantAndOrgInfo.orgId }
 					: { $in: ['ALL', req.userDetails.userInformation.organizationId] }
 
 				// handle currentOrgOnly filter

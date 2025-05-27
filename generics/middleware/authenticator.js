@@ -89,6 +89,7 @@ module.exports = async function (req, res, next, token = '') {
 		'/certificateTemplates/uploadTemplate',
 		'/certificateTemplates/createSvg',
 		'/solutions/getDetails',
+		'/userProjects/deleteUserPIIData',
 	]
 	let performInternalAccessTokenCheck = false
 	let adminHeader = false
@@ -223,7 +224,10 @@ module.exports = async function (req, res, next, token = '') {
 		}
 
 		// Path to config.json
-		const configFilePath = path.resolve(__dirname, '../../', 'config.json')
+		let configFilePath
+		if (process.env.AUTH_CONFIG_FILE_PATH) {
+			configFilePath = path.resolve(PROJECT_ROOT_DIRECTORY, process.env.AUTH_CONFIG_FILE_PATH)
+		}
 
 		// Initialize variables
 		let configData = {}

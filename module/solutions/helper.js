@@ -2899,6 +2899,10 @@ module.exports = class SolutionsHelper {
 				let targetedSolutions = {
 					success: false,
 				}
+				let result = {
+					data: [],
+					count: 0,
+				}
 
 				let filteredTargetedSolutions = []
 
@@ -2915,7 +2919,6 @@ module.exports = class SolutionsHelper {
 				if (filter === CONSTANTS.common.DISCOVERED_BY_ME) {
 					getTargetedSolution = false
 				}
-
 				let copiedRequestedData = _.cloneDeep(requestedData)
 				// Fetch all the targeted solutions
 				if (getTargetedSolution) {
@@ -2997,7 +3000,6 @@ module.exports = class SolutionsHelper {
 							},
 							['name']
 						)
-
 						if (programsData.length > 0) {
 							let programs = programsData.reduce(
 								(ac, program) => ({ ...ac, [program._id.toString()]: program }),
@@ -3013,7 +3015,6 @@ module.exports = class SolutionsHelper {
 						}
 					}
 				}
-
 				if (targetedSolutions.success) {
 					// When targetedSolutions is empty and currentScopeOnly is set to true send empty response
 					if (!(targetedSolutions.data.data.length > 0) && currentScopeOnly) {
@@ -3084,8 +3085,10 @@ module.exports = class SolutionsHelper {
 					}
 				} else {
 					return resolve({
-						...targetedSolutions,
-						status: HTTP_STATUS_CODE.bad_request.status,
+						success: true,
+						message: CONSTANTS.apiResponses.TARGETED_SOLUTIONS_FETCHED,
+						data: result,
+						result,
 					})
 				}
 

@@ -235,7 +235,7 @@ module.exports = class ProgramsHelper {
 
 				// add tenantId and orgId
 				programData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-				programData['orgId'] = userDetails.tenantAndOrgInfo.orgId
+				programData['orgId'] = userDetails.tenantAndOrgInfo.orgId[0]
 
 				programData = _.omit(programData, ['scope', 'userId'])
 				let program = await programsQueries.createProgram(programData)
@@ -245,7 +245,7 @@ module.exports = class ProgramsHelper {
 						message: CONSTANTS.apiResponses.PROGRAM_NOT_CREATED,
 					}
 				}
-				data.scope['organizations'] = [userDetails.tenantAndOrgInfo.orgId]
+				data.scope['organizations'] = userDetails.tenantAndOrgInfo.orgId
 
 				if (data.scope) {
 					let programScopeUpdated = await this.setScope(program._id, data.scope)

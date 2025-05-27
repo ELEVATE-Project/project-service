@@ -40,7 +40,7 @@ module.exports = class CertificateBaseTemplatesHelper {
 				data.url = uploadFile.data.templateUrl
 
 				data['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-				data['orgId'] = userDetails.tenantAndOrgInfo.orgId
+				data['orgId'] = userDetails.tenantAndOrgInfo.orgId[0]
 
 				// Call the create method of certificateBaseTemplateQueries to create a new certificate base template
 				let certificateBaseTemplateCreated = await certificateBaseTemplateQueries.create(data)

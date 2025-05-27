@@ -537,7 +537,7 @@ module.exports = async function (req, res, next, token = '') {
 			}
 
 			decodedToken.data.tenantAndOrgInfo['tenantId'] = req.headers['tenantid'].toString()
-			decodedToken.data.tenantAndOrgInfo['orgId'] = req.headers['orgid'][0]
+			decodedToken.data.tenantAndOrgInfo['orgId'] = req.headers['orgid']
 		}
 	} catch (err) {
 		rspObj.errCode = CONSTANTS.apiResponses.TOKEN_MISSING_CODE

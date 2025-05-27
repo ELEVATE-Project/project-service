@@ -46,7 +46,7 @@ module.exports = class FormsHelper {
 		return new Promise(async (resolve, reject) => {
 			try {
 				bodyData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-				bodyData['orgId'] = userDetails.tenantAndOrgInfo.orgId
+				bodyData['orgId'] = userDetails.tenantAndOrgInfo.orgId[0]
 				const form = await formQueries.createForm(bodyData)
 				if (!form || !form._id) {
 					throw {

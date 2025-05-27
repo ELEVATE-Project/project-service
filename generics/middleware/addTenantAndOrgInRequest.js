@@ -10,6 +10,7 @@ module.exports = async function (req, res, next) {
 		'solutions/targetedSolutions',
 		'solutions/detailsBasedOnRoleAndLocation',
 		'solutions/verifySolution',
+		'solutions/details',
 		'solutions/verifyLink',
 		'userProjects/sync',
 		'users/programs',

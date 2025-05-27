@@ -65,7 +65,7 @@ module.exports = class LibraryCategoriesHelper {
 				}
 
 				matchQuery['$match']['tenantId'] = userDetails.userInformation.tenantId
-				matchQuery['$match']['orgIds'] = { $in: ['ALL', userDetails.userInformation.organizationId] }
+				matchQuery['$match']['orgId'] = { $in: ['ALL', userDetails.userInformation.organizationId] }
 
 				if (categoryId && categoryId !== '') {
 					matchQuery['$match']['categories.externalId'] = categoryId
@@ -161,7 +161,7 @@ module.exports = class LibraryCategoriesHelper {
 								{
 									code: { $in: roles },
 									tenantId: userDetails.userInformation.tenantId,
-									orgIds: { $in: [userDetails.userInformation.organizationId] },
+									orgId: { $in: [userDetails.userInformation.organizationId] },
 								},
 								['title']
 							)
@@ -301,7 +301,7 @@ module.exports = class LibraryCategoriesHelper {
 				let allCategoryInfo = await projectCategoriesQueries.categoryDocuments({
 					_id: { $in: allCategoryId },
 					tenantId: userDetails.userInformation.tenantId,
-					orgIds: { $in: [userDetails.userInformation.organizationId] },
+					orgId: { $in: [userDetails.userInformation.organizationId] },
 				})
 				for (let singleCategoryInfo of allCategoryInfo) {
 					if (singleCategoryInfo.evidences && singleCategoryInfo.evidences.length > 0) {
@@ -513,7 +513,7 @@ module.exports = class LibraryCategoriesHelper {
 						status: CONSTANTS.common.PUBLISHED,
 						isDeleted: false,
 						tenantId: tenantId,
-						orgIds: { $in: ['ALL', orgId] },
+						orgId: { $in: ['ALL', orgId] },
 					},
 					'all',
 					['__v']
@@ -625,7 +625,7 @@ module.exports = class LibraryCategoriesHelper {
 
 				// add tenantId and orgId
 				categoryData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-				categoryData['orgIds'] = userDetails.tenantAndOrgInfo.orgId
+				categoryData['orgId'] = userDetails.tenantAndOrgInfo.orgId[0]
 
 				let projectCategoriesData = await projectCategoriesQueries.create(categoryData)
 
@@ -671,7 +671,7 @@ module.exports = class LibraryCategoriesHelper {
 				query['tenantId'] = req.userDetails.tenantAndOrgInfo
 					? req.userDetails.tenantAndOrgInfo.tenantId
 					: req.userDetails.userInformation.tenantId
-				query['orgIds'] = req.userDetails.tenantAndOrgInfo
+				query['orgId'] = req.userDetails.tenantAndOrgInfo
 					? { $in: req.userDetails.tenantAndOrgInfo.orgId }
 					: { $in: ['ALL', req.userDetails.userInformation.organizationId] }
 
@@ -679,7 +679,7 @@ module.exports = class LibraryCategoriesHelper {
 				if (req.query['currentOrgOnly']) {
 					let currentOrgOnly = UTILS.convertStringToBoolean(req.query['currentOrgOnly'])
 					if (currentOrgOnly) {
-						query['orgIds'] = { $in: ['ALL', req.userDetails.userInformation.organizationId] }
+						query['orgId'] = { $in: ['ALL', req.userDetails.userInformation.organizationId] }
 					}
 				}
 				query['status'] = CONSTANTS.common.ACTIVE_STATUS

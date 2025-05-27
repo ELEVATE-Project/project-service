@@ -162,7 +162,7 @@ module.exports = class SolutionsHelper {
 		programData.language = language
 		programData.source = source
 		;(programData.tenantId = userDetails.userInformation.tenantId),
-			(programData.orgIds = [userDetails.userInformation.organizationId])
+			(programData.orgId = [userDetails.userInformation.organizationId])
 		return programData
 	}
 
@@ -303,19 +303,6 @@ module.exports = class SolutionsHelper {
 				// Assign the scopeData to the scope field in updateObject
 				updateObject['$set']['scope'] = scopeData
 
-				// Extract all keys from scopeData except 'roles', and merge their values into a single array
-				const entities = Object.keys(scopeData)
-					.filter((key) => key !== 'roles')
-					.reduce((acc, key) => acc.concat(scopeData[key]), [])
-
-				// Assign the entities array to the entities field in updateObject
-				updateObject.$set.entities = entities
-
-				// Create a comma-separated string of all keys in scopeData except 'roles'
-				scopeData['entityType'] = Object.keys(_.omit(scopeData, ['roles'])).join(',')
-
-				// Assign the entityType string to the entityType field in updateObject
-				updateObject['$set']['entityType'] = scopeData.entityType
 				// Update the solution document with the updateObject
 				let updateSolution = await solutionsQueries.updateSolutionDocument(
 					{
@@ -471,7 +458,7 @@ module.exports = class SolutionsHelper {
 
 				// add tenantId and orgId
 				solutionData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-				solutionData['orgIds'] = userDetails.tenantAndOrgInfo.orgId
+				solutionData['orgId'] = userDetails.tenantAndOrgInfo.orgId[0]
 
 				let solutionCreation = await solutionsQueries.createSolution(_.omit(solutionData, ['scope']))
 
@@ -488,6 +475,7 @@ module.exports = class SolutionsHelper {
 					$addToSet: { components: solutionCreation._id },
 				})
 
+				solutionData.scope['organizations'] = userDetails.tenantAndOrgInfo.orgId
 				if (!solutionData.excludeScope && programData[0].scope) {
 					await this.setScope(solutionCreation._id, solutionData.scope ? solutionData.scope : {})
 				}
@@ -544,7 +532,7 @@ module.exports = class SolutionsHelper {
 						{
 							_id: solutionDocument[0].programId,
 							tenantId: userDetails.tenantAndOrgInfo.tenantId,
-							orgIds: { $in: ['ALL', ...userDetails.tenantAndOrgInfo.orgId] },
+							orgId: { $in: ['ALL', ...userDetails.tenantAndOrgInfo.orgId] },
 						},
 						['_id', 'endDate', 'startDate']
 					)
@@ -595,7 +583,7 @@ module.exports = class SolutionsHelper {
 					{
 						_id: solutionDocument[0]._id,
 						tenantId: userDetails.tenantAndOrgInfo.tenantId,
-						orgIds: { $in: ['ALL', ...userDetails.tenantAndOrgInfo.orgId] },
+						orgId: { $in: ['ALL', ...userDetails.tenantAndOrgInfo.orgId] },
 					},
 					updateObject,
 					{ new: true }
@@ -670,10 +658,10 @@ module.exports = class SolutionsHelper {
 
 				// modify query to fetch documents accordingly
 				matchQuery['tenantId'] = userDetails.userInformation.tenantId
-				matchQuery['orgIds'] = { $in: ['ALL', userDetails.userInformation.organizationId] }
+				matchQuery['orgId'] = { $in: ['ALL', userDetails.userInformation.organizationId] }
 
 				if (currentOrgOnly) {
-					matchQuery['orgIds'] = { $in: [userDetails.userInformation.organizationId] }
+					matchQuery['orgId'] = { $in: [userDetails.userInformation.organizationId] }
 				}
 
 				// if (type == CONSTANTS.common.SURVEY) {
@@ -1066,6 +1054,7 @@ module.exports = class SolutionsHelper {
 	 * @param {String} data - Requested body data.
 	 * @param {String} type - solution type
 	 * @param {String} prefix - prefix word/letters for query making
+	 * @param {Object} userDetails - user info
 	 * @returns {JSON} - Auto targeted solutions query.
 	 */
 
@@ -1078,13 +1067,16 @@ module.exports = class SolutionsHelper {
 					isReusable: false,
 					isDeleted: false,
 				}
-				Object.keys(_.omit(data, ['role', 'filter', 'factors', 'type'])).forEach((key) => {
+				Object.keys(
+					_.omit(data, ['role', 'filter', 'factors', 'type', 'tenantId', 'orgId', 'organizations'])
+				).forEach((key) => {
 					data[key] = data[key].split(',')
 				})
-
 				// If validate entity set to ON . strict scoping should be applied
 				if (validateEntity !== CONSTANTS.common.OFF) {
-					Object.keys(_.omit(data, ['filter', 'role', 'factors', 'type'])).forEach((requestedDataKey) => {
+					Object.keys(
+						_.omit(data, ['filter', 'role', 'factors', 'type', 'tenantId', 'orgId', 'organizations'])
+					).forEach((requestedDataKey) => {
 						registryIds.push(...data[requestedDataKey])
 						entityTypes.push(requestedDataKey)
 					})
@@ -1094,25 +1086,31 @@ module.exports = class SolutionsHelper {
 						}
 					}
 
-					// if (!data.role) {
-					// 	throw {
-					// 		message: CONSTANTS.apiResponses.USER_ROLES_NOT_FOUND,
-					// 	}
-					// }
+					let userRoleInfo = _.omit(data, ['filter', 'factors', 'role', 'type', 'tenantId', 'orgId'])
+					let tenantDetails = await userService.fetchPublicTenantDetails(data.tenantId)
+					if (!tenantDetails.success || !tenantDetails.data || !tenantDetails.data.meta) {
+						return resolve({
+							success: false,
+							message: CONSTANTS.apiResponses.FAILED_TO_FETCH_TENANT_DETAILS,
+						})
+					}
+					// factors = [ 'professional_role', 'professional_subroles' ]
+					let factors
+					if (
+						tenantDetails.data.meta.hasOwnProperty('factors') &&
+						tenantDetails.data.meta.factors.length > 0
+					) {
+						factors = tenantDetails.data.meta.factors
+						let queryFilter = UTILS.factorQuery(factors, userRoleInfo)
+						filterQuery['$and'] = queryFilter
+					}
+					let dataToOmit = ['filter', 'role', 'factors', 'type', 'tenantId', 'orgId', 'organizations']
+					// factors.append(dataToOmit)
 
-					// If prefix is given use it to form query
-					// if (prefix != '') {
-					// 	filterQuery[`${prefix}.scope.roles`] = {
-					// 		$in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')],
-					// 	}
-					// } else {
-					// 	filterQuery['scope.roles'] = {
-					// 		$in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')],
-					// 	}
-					// }
+					const finalKeysToRemove = [...new Set([...dataToOmit, ...factors])]
 
 					filterQuery.$or = []
-					Object.keys(_.omit(data, ['filter', 'role', 'factors', 'type'])).forEach((key) => {
+					Object.keys(_.omit(data, finalKeysToRemove)).forEach((key) => {
 						// If prefix is given use it to form query
 						if (prefix != '') {
 							filterQuery.$or.push({
@@ -1124,19 +1122,13 @@ module.exports = class SolutionsHelper {
 							})
 						}
 					})
-
-					// If prefix is given use it to form query
-					if (prefix != '') {
-						filterQuery[`${prefix}.scope.entityType`] = { $in: entityTypes }
-					} else {
-						filterQuery['scope.entityType'] = { $in: entityTypes }
-					}
 				} else {
 					// Obtain userInfo
-					let userRoleInfo = _.omit(data, ['filter', 'factors', 'role', 'type'])
+					let userRoleInfo = _.omit(data, ['filter', 'factors', 'role', 'type', 'tenantId', 'orgId'])
 					let userRoleKeys = Object.keys(userRoleInfo)
 					let queryFilter = []
 
+					// factors = [ 'professional_role', 'professional_subroles' ]
 					// if factors are passed or query has to be build based on the keys passed
 					if (data.hasOwnProperty('factors') && data.factors.length > 0) {
 						let factors = data.factors
@@ -1206,19 +1198,6 @@ module.exports = class SolutionsHelper {
 					}
 				}
 
-				// if (type === CONSTANTS.common.SURVEY) {
-				//   filterQuery["status"] = {
-				//     $in: [CONSTANTS.common.ACTIVE_STATUS, CONSTANTS.common.INACTIVE],
-				//   };
-				//   let validDate = new Date();
-				//   validDate.setDate(
-				//     validDate.getDate() - CONSTANTS.common.DEFAULT_SURVEY_REMOVED_DAY
-				//   );
-				//   filterQuery["endDate"] = { $gte: validDate };
-				// } else {
-				//   filterQuery.status = CONSTANTS.common.ACTIVE_STATUS;
-				// }
-
 				filterQuery.status = CONSTANTS.common.ACTIVE_STATUS
 				if (type != '') {
 					filterQuery.type = type
@@ -1241,6 +1220,7 @@ module.exports = class SolutionsHelper {
 					filterQuery = _.merge(filterQuery, data.filter)
 				}
 				delete filterQuery['scope.entityType']
+				filterQuery.tenantId = data.tenantId
 				return resolve({
 					success: true,
 					data: filterQuery,
@@ -1290,7 +1270,7 @@ module.exports = class SolutionsHelper {
 				}
 				queryData.data['_id'] = solutionId
 				queryData.data['tenantId'] = tenantId
-				queryData.data['orgIds'] = { $in: [orgId] }
+				queryData.data['orgId'] = { $in: [orgId] }
 				let matchQuery = queryData.data
 				let solutionData = await solutionsQueries.solutionsDocument(matchQuery, [
 					'_id',
@@ -1410,7 +1390,7 @@ module.exports = class SolutionsHelper {
 					let filterQuery = {
 						_id: data.programId,
 						tenantId: tenantId,
-						orgIds: { $in: [orgId] },
+						orgId: { $in: [orgId] },
 					}
 
 					if (createADuplicateSolution === false) {
@@ -1560,7 +1540,7 @@ module.exports = class SolutionsHelper {
 						{
 							_id: data.solutionId,
 							tenantId: userDetails.userInformation.tenantId,
-							orgIds: { $in: [userDetails.userInformation.organizationId] },
+							orgId: { $in: [userDetails.userInformation.organizationId] },
 						},
 						[
 							'name',
@@ -1604,7 +1584,7 @@ module.exports = class SolutionsHelper {
 						_.merge(duplicateSolution, solutionCreationData)
 						_.merge(duplicateSolution, solutionDataToBeUpdated)
 						duplicateSolution['tenantId'] = userDetails.userInformation.tenantId
-						duplicateSolution['orgIds'] = [userDetails.userInformation.organizationId]
+						duplicateSolution['orgId'] = [userDetails.userInformation.organizationId]
 
 						solution = await solutionsQueries.createSolution(_.omit(duplicateSolution, ['_id', 'link']))
 						parentSolutionInformation.solutionId = duplicateSolution._id
@@ -1657,7 +1637,7 @@ module.exports = class SolutionsHelper {
 						data.subType ? data.subType : CONSTANTS.common.INSTITUTIONAL
 					)
 					createSolutionData['tenantId'] = userDetails.userInformation.tenantId
-					createSolutionData['orgIds'] = [userDetails.userInformation.organizationId]
+					createSolutionData['orgId'] = [userDetails.userInformation.organizationId]
 					_.merge(solutionDataToBeUpdated, createSolutionData)
 					solution = await solutionsQueries.createSolution(solutionDataToBeUpdated)
 				}
@@ -1803,7 +1783,7 @@ module.exports = class SolutionsHelper {
 				}
 
 				solutionMatchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-				solutionMatchQuery['orgIds'] = { $in: ['ALL', ...userDetails.tenantAndOrgInfo.orgId] }
+				solutionMatchQuery['orgId'] = { $in: ['ALL', ...userDetails.tenantAndOrgInfo.orgId] }
 
 				let solutionData = await solutionsQueries.solutionsDocument(solutionMatchQuery, [
 					'link',
@@ -1917,7 +1897,7 @@ module.exports = class SolutionsHelper {
 							$ne: CONSTANTS.common.INACTIVE,
 						},
 						tenantId: tenantId,
-						orgIds: { $in: ['ALL', userDetails.userInformation.organizationId] },
+						orgId: { $in: ['ALL', userDetails.userInformation.organizationId] },
 					},
 					['type', 'status', 'endDate']
 				)
@@ -2948,7 +2928,7 @@ module.exports = class SolutionsHelper {
 						'',
 						search,
 						userDetails,
-						true // to fetch current org assets only
+						true // to fetch current org assets only,
 					)
 				}
 				// fetch projects created by the user
@@ -3013,7 +2993,7 @@ module.exports = class SolutionsHelper {
 							{
 								_id: { $in: programIds },
 								tenantId: userDetails.userInformation.tenantId,
-								orgIds: { $in: [userDetails.userInformation.organizationId] },
+								orgId: { $in: [userDetails.userInformation.organizationId] },
 							},
 							['name']
 						)
@@ -3102,6 +3082,11 @@ module.exports = class SolutionsHelper {
 							totalCount = mergedData.length
 						}
 					}
+				} else {
+					return resolve({
+						...targetedSolutions,
+						status: HTTP_STATUS_CODE.bad_request.status,
+					})
 				}
 
 				if (mergedData.length > 0) {
@@ -3475,7 +3460,7 @@ module.exports = class SolutionsHelper {
 				let tenantId = userDetails.userInformation.tenantId
 				let orgId = userDetails.userInformation.organizationId
 				let solutionData = await solutionsQueries.solutionsDocument(
-					{ _id: solutionId, tenantId: tenantId, orgIds: { $in: [orgId] } },
+					{ _id: solutionId, tenantId: tenantId, orgId: { $in: [orgId] } },
 					['type', 'projectTemplateId', 'programId']
 				)
 

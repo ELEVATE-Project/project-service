@@ -12,6 +12,7 @@ const CERTIFICATE_TOPIC = process.env.PROJECT_SUBMISSION_TOPIC
 const USER_DELETE_TOPIC = process.env.USER_DELETE_TOPIC
 const USER_DELETE_ON_OFF = process.env.USER_DELETE_ON_OFF
 const projectCertificateConsumer = require(GENERICS_FILES_PATH + '/kafka/consumers/projectCertificate')
+const userDeleteConsumer = require(GENERICS_FILES_PATH + '/kafka/consumers/userDelete')
 
 /**
  * Kafka configurations.
@@ -91,9 +92,9 @@ var _sendToKafkaConsumers = function (topic, host) {
 			}
 
 			// call userDelete consumer
-			// if (message && message.topic === USER_DELETE_TOPIC) {
-			//   userDeleteConsumer.messageReceived(message);
-			// }
+			if (message && message.topic === USER_DELETE_TOPIC) {
+				userDeleteConsumer.messageReceived(message)
+			}
 		})
 
 		consumer.on('error', async function (error) {
@@ -104,9 +105,9 @@ var _sendToKafkaConsumers = function (topic, host) {
 				projectCertificateConsumer.errorTriggered(error)
 			}
 
-			// if (error.topics && error.topics[0] === USER_DELETE_TOPIC) {
-			//   userDeleteConsumer.errorTriggered(error);
-			// }
+			if (error.topics && error.topics[0] === USER_DELETE_TOPIC) {
+				userDeleteConsumer.errorTriggered(error)
+			}
 		})
 	}
 }

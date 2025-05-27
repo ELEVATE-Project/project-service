@@ -65,4 +65,5 @@ module.exports = {
 	IMPORT_SURVEY_TEMPLATE: '/v1/surveys/importSurveryTemplateToSolution',
 	CREATE_CHILD_OBSERVATION_SOLUTION: '/v1/solutions/importFromSolution',
 	SURVEY_DETAILS: '/v1/surveys/details',
+	PUBLIC_BRANDING: '/v1/public/branding',
 }

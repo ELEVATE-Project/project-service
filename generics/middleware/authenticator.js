@@ -22,7 +22,7 @@ var respUtil = function (resp) {
 
 var removedHeaders = [
 	'host',
-	'origin',
+	// 'origin',
 	'accept',
 	'referer',
 	'content-length',
@@ -89,6 +89,7 @@ module.exports = async function (req, res, next, token = '') {
 		'/certificateTemplates/uploadTemplate',
 		'/certificateTemplates/createSvg',
 		'/solutions/getDetails',
+		'/userProjects/deleteUserPIIData',
 		'/userProjects/pushSubmissionToTask',
 	]
 	let performInternalAccessTokenCheck = false
@@ -224,7 +225,10 @@ module.exports = async function (req, res, next, token = '') {
 		}
 
 		// Path to config.json
-		const configFilePath = path.resolve(__dirname, '../../', 'config.json')
+		let configFilePath
+		if (process.env.AUTH_CONFIG_FILE_PATH) {
+			configFilePath = path.resolve(PROJECT_ROOT_DIRECTORY, process.env.AUTH_CONFIG_FILE_PATH)
+		}
 
 		// Initialize variables
 		let configData = {}
@@ -478,8 +482,8 @@ module.exports = async function (req, res, next, token = '') {
 				if (!result.success) {
 					rspObj.errCode = reqMsg.ADMIN_TOKEN.MISSING_CODE
 					rspObj.errMsg = reqMsg.ADMIN_TOKEN.MISSING_MESSAGE
-					rspObj.responseCode = responseCode.unauthorized.status
-					return res.status(responseCode.unauthorized.status).send(respUtil(rspObj))
+					rspObj.responseCode = HTTP_STATUS_CODE['unauthorized'].status
+					return res.status(HTTP_STATUS_CODE['unauthorized'].status).send(respUtil(rspObj))
 				}
 
 				req.headers['tenantid'] = result.tenantId
@@ -518,17 +522,19 @@ module.exports = async function (req, res, next, token = '') {
 					token
 				)
 				if (!validateOrgsResult.success) {
-					return res.status(responseCode['unauthorized'].status).send(respUtil(validateOrgsResult.errorObj))
+					return res
+						.status(HTTP_STATUS_CODE['unauthorized'].status)
+						.send(respUtil(validateOrgsResult.errorObj))
 				}
 				req.headers['orgid'] = validateOrgsResult.validOrgIds
 			} else if (userRoles.includes(CONSTANTS.common.ORG_ADMIN)) {
 				req.headers['tenantid'] = decodedToken.data.tenant_id.toString()
 				req.headers['orgid'] = [decodedToken.data.organization_id.toString()]
 			} else {
-				rspObj.errCode = reqMsg.INVALID_ROLE.INVALID_CODE
-				rspObj.errMsg = reqMsg.INVALID_ROLE.INVALID_MESSAGE
-				rspObj.responseCode = responseCode.unauthorized.status
-				return res.status(responseCode['unauthorized'].status).send(respUtil(rspObj))
+				rspObj.errCode = CONSTANTS.apiResponses.TOKEN_MISSING_CODE
+				rspObj.errMsg = CONSTANTS.apiResponses.TOKEN_MISSING_MESSAGE
+				rspObj.responseCode = HTTP_STATUS_CODE['unauthorized'].status
+				return res.status(HTTP_STATUS_CODE['unauthorized'].status).send(respUtil(rspObj))
 			}
 
 			decodedToken.data.tenantAndOrgInfo['tenantId'] = req.headers['tenantid'].toString()

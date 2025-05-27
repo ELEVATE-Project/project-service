@@ -5146,7 +5146,7 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 					externalId: fetchedSolutions.externalId,
 					name: fetchedSolutions.name,
 					isReusable: fetchedSolutions.isReusable,
-					minNoOfSubmissionsRequired: fetchedSolutions.minNoOfSubmissionsRequired,
+					minNoOfSubmissionsRequired: observationData.solutionDetails.minNoOfSubmissionsRequired,
 				}
 				await projectQueries.findOneAndUpdate(
 					{

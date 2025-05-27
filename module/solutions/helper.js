@@ -161,8 +161,8 @@ module.exports = class SolutionsHelper {
 		programData.endDate = endDate
 		programData.language = language
 		programData.source = source
-		;(programData.tenantId = userDetails.userInformation.tenantId),
-			(programData.orgId = [userDetails.userInformation.organizationId])
+		programData.tenantId = userDetails.userInformation.tenantId
+		programData.orgId = [userDetails.userInformation.organizationId]
 		return programData
 	}
 
@@ -1637,7 +1637,7 @@ module.exports = class SolutionsHelper {
 						data.subType ? data.subType : CONSTANTS.common.INSTITUTIONAL
 					)
 					createSolutionData['tenantId'] = userDetails.userInformation.tenantId
-					createSolutionData['orgId'] = [userDetails.userInformation.organizationId]
+					createSolutionData['orgId'] = userDetails.userInformation.organizationId
 					_.merge(solutionDataToBeUpdated, createSolutionData)
 					solution = await solutionsQueries.createSolution(solutionDataToBeUpdated)
 				}

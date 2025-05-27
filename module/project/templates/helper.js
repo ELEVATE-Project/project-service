@@ -985,7 +985,7 @@ module.exports = class ProjectTemplatesHelper {
 				externalId: solution.externalId,
 				name: solution.name,
 				isReusable: solution.isReusable,
-				minNoOfSubmissionsRequired: solution.minNoOfSubmissionsRequired,
+				minNoOfSubmissionsRequired: newProjectTemplateTask.solutionDetails.minNoOfSubmissionsRequired,
 			})
 
 			const fetchSolutionByExternalId = async (externalId) => {

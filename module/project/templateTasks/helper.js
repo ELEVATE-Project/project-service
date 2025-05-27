@@ -495,7 +495,7 @@ module.exports = class ProjectTemplateTasksHelper {
 
 					let currentData = UTILS.valueParser(tasks[task])
 					currentData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-					currentData['orgId'] = userDetails.tenantAndOrgInfo.orgId
+					currentData['orgId'] = userDetails.tenantAndOrgInfo.orgId[0]
 
 					currentData.createdBy = currentData.updatedBy = userDetails.userInformation.userId
 

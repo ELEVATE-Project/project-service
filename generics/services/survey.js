@@ -13,7 +13,7 @@ const SURVEY_SERVICE_URL = process.env.SURVEY_SERVICE_URL
 /**
  * Create Child solutions for survey
  * @function
- * @name importSurveryTemplateToSolution
+ * @name importSurveyTemplateToSolution
  * @param {String} token - logged in user token.
  * @param {String} solutionId - parent solution id.
  * @param {String} programId -programId
@@ -21,7 +21,7 @@ const SURVEY_SERVICE_URL = process.env.SURVEY_SERVICE_URL
  * @param {Boolean} isExternalProgram - query external db for programDetails
  * @returns {JSON} - Create child solution from parent  solution.
  */
-const importSurveryTemplateToSolution = function (token, solutionId, programId, data = {}, isExternalProgram = true) {
+const importSurveyTemplateToSolution = function (token, solutionId, programId, data = {}, isExternalProgram = true) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			let surveyCreateUrl =
@@ -72,7 +72,7 @@ const importSurveryTemplateToSolution = function (token, solutionId, programId, 
 /**
  * Create Child solutions for survey
  * @function
- * @name importSurveryTemplateToSolution
+ * @name importObservationTemplateToSolution
  * @param {String} token - logged in user token.
  * @param {String} solutionId - parent solution id.
  * @param {Object} bodyData - Body data
@@ -592,7 +592,7 @@ module.exports = {
 	removeSolutionsFromProgram: removeSolutionsFromProgram,
 	removeEntitiesFromSolution: removeEntitiesFromSolution,
 	listEntitiesByLocationIds: listEntitiesByLocationIds,
-	importSurveryTemplateToSolution: importSurveryTemplateToSolution,
+	importSurveyTemplateToSolution: importSurveyTemplateToSolution,
 	surveyDetails: surveyDetails,
 	importObservationTemplateToSolution: importObservationTemplateToSolution,
 }

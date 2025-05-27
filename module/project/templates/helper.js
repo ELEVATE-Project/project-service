@@ -1031,7 +1031,7 @@ module.exports = class ProjectTemplatesHelper {
 				duplicateTemplateTaskId = await createTemplateTask()
 				updateTaskSequence()
 			} else if (taskType === CONSTANTS.common.SURVEY) {
-				const importSolutionsResponse = await surveyService.importSurveryTemplateToSolution(
+				const importSolutionsResponse = await surveyService.importSurveyTemplateToSolution(
 					userToken,
 					newProjectTemplateTask.solutionDetails._id,
 					newProjectTemplateTask.programId,

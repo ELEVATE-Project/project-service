@@ -1642,8 +1642,8 @@ module.exports = class UserProjectsHelper {
 									? solutionDetails.submissionLevel
 									: process.env.SUBMISSION_LEVEL,
 								scope: solutionDetails.scope,
-								referenceFrom: solutionDetails.referenceFrom ? solutionDetails.referenceFrom : '',
-								project: solutionDetails.project ? solutionDetails.project : '',
+								// referenceFrom: solutionDetails.referenceFrom ? solutionDetails.referenceFrom : '', // added for project as a task
+								// project: solutionDetails.project ? solutionDetails.project : '',
 							}
 
 							projectCreation.data['programId'] = projectCreation.data.programInformation._id
@@ -3037,7 +3037,7 @@ module.exports = class UserProjectsHelper {
 						'all'
 					)
 
-					if (!entityInformation.success) {
+					if (!entityInformation.success || !entityInformation.data.length > 0) {
 						return resolve(entityInformation)
 					}
 
@@ -5156,7 +5156,7 @@ function _surveyDetails(surveyData, userRoleAndProfileInformation = {}) {
 
 			if (surveyData.solutionDetails.isReusable) {
 				// Creating child solution
-				let surveyCreatedFromTemplate = await surveyService.importSurveryTemplateToSolution(
+				let surveyCreatedFromTemplate = await surveyService.importSurveyTemplateToSolution(
 					surveyData.token,
 					surveyData.solutionDetails._id,
 					surveyData.programId,

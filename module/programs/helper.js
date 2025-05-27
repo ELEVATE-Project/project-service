@@ -1196,18 +1196,20 @@ module.exports = class ProgramsHelper {
 				let filterQuery = {
 					isDeleted: false,
 				}
-				Object.keys(_.omit(data, ['role', 'filter', 'factors', 'type', 'tenantId', 'orgId'])).forEach((key) => {
+				Object.keys(
+					_.omit(data, ['role', 'filter', 'factors', 'type', 'tenantId', 'orgId', 'organizations'])
+				).forEach((key) => {
 					data[key] = data[key].split(',')
 				})
 
 				// If validate entity set to ON . strict scoping should be applied
 				if (validateEntity !== CONSTANTS.common.OFF) {
-					Object.keys(_.omit(data, ['filter', 'role', 'factors', 'type', 'tenantId', 'orgId'])).forEach(
-						(requestedDataKey) => {
-							registryIds.push(...data[requestedDataKey])
-							entityTypes.push(requestedDataKey)
-						}
-					)
+					Object.keys(
+						_.omit(data, ['filter', 'role', 'factors', 'type', 'tenantId', 'orgId', 'organizations'])
+					).forEach((requestedDataKey) => {
+						registryIds.push(...data[requestedDataKey])
+						entityTypes.push(requestedDataKey)
+					})
 					if (!registryIds.length > 0) {
 						throw {
 							message: CONSTANTS.apiResponses.NO_LOCATION_ID_FOUND_IN_DATA,
@@ -1233,7 +1235,7 @@ module.exports = class ProgramsHelper {
 						filterQuery['$and'] = queryFilter
 					}
 
-					let dataToOmit = ['filter', 'role', 'factors', 'type', 'tenantId', 'orgId']
+					let dataToOmit = ['filter', 'role', 'factors', 'type', 'tenantId', 'orgId', 'organizations']
 					// factors.append(dataToOmit)
 
 					const finalKeysToRemove = [...new Set([...dataToOmit, ...factors])]
@@ -1244,7 +1246,6 @@ module.exports = class ProgramsHelper {
 							[`scope.${key}`]: { $in: data[key] },
 						})
 					})
-					filterQuery['scope.entityType'] = { $in: entityTypes }
 				} else {
 					// Obtain userInfo
 					let userRoleInfo = _.omit(data, ['filter', 'factors', 'role', 'type', 'tenantId', 'orgId'])

@@ -1782,8 +1782,9 @@ module.exports = class SolutionsHelper {
 					isAPrivateProgram: false,
 				}
 
-				solutionMatchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-				solutionMatchQuery['orgId'] = { $in: ['ALL', ...userDetails.tenantAndOrgInfo.orgId] }
+				// Only super admin can generate solution links for all tenants and orgs
+				// solutionMatchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+				// solutionMatchQuery['orgId'] = { $in: ['ALL', ...userDetails.tenantAndOrgInfo.orgId] }
 
 				let solutionData = await solutionsQueries.solutionsDocument(solutionMatchQuery, [
 					'link',
@@ -1792,22 +1793,34 @@ module.exports = class SolutionsHelper {
 					'tenantId',
 				])
 
-				if (!Array.isArray(solutionData) || solutionData.length < 1) {
-					return resolve({
+				if (!Array.isArray(solutionData) || solutionData.length === 0) {
+					throw {
 						message: CONSTANTS.apiResponses.SOLUTION_NOT_FOUND,
-						result: {},
-					})
+						status: HTTP_STATUS_CODE.bad_request.status,
+					}
+				}
+
+				const solution = solutionData[0]
+
+				if (!solution?.tenantId) {
+					throw {
+						message: CONSTANTS.apiResponses.TENANTID_REQUIRED_IN_SOLUTION,
+						status: HTTP_STATUS_CODE.bad_request.status,
+					}
 				}
 
 				let prefix = CONSTANTS.common.PREFIX_FOR_SOLUTION_LINK
+				let solutionLink = solution?.link
 
-				let solutionLink
+				if (!solutionLink) {
+					solutionLink = await UTILS.md5Hash(solution._id + '###' + solution.author)
+					// replacing the userDetails tena
+					userDetails.tenantAndOrgInfo = {
+						tenantId: solution.tenantId,
+						orgId: [solution.orgId],
+					}
 
-				if (!solutionData[0].link) {
-					let updateLink = await UTILS.md5Hash(solutionData[0]._id + '###' + solutionData[0].author)
-
-					let updateSolution = await this.update(solutionId, { link: updateLink }, userDetails)
-
+					let updateSolution = await this.update(solutionId, { link: solutionLink }, userDetails)
 					if (
 						!updateSolution.success ||
 						!updateSolution.data ||
@@ -1818,35 +1831,29 @@ module.exports = class SolutionsHelper {
 							message: CONSTANTS.apiResponses.LINK_GENERATION_FAILED,
 						}
 					}
-
-					solutionLink = updateLink
-				} else {
-					solutionLink = solutionData[0].link
 				}
 
 				// fetch tenant domain by calling  tenant details API
-				let tenantDetails = await userService.fetchTenantDetails(solutionData[0].tenantId, token)
+				let tenantDetailsResponse = await userService.fetchTenantDetails(solution.tenantId, token)
+				const domains = tenantDetailsResponse?.data?.domains || []
 
 				// Error handling if API failed or no domains found
-				if (
-					!tenantDetails.success ||
-					!tenantDetails.data ||
-					!Array.isArray(tenantDetails.data.domains) ||
-					tenantDetails.data.domains.length === 0
-				) {
+				if (!tenantDetailsResponse.success || !Array.isArray(domains) || domains.length === 0) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.DOMAIN_FETCH_FAILED,
 					}
 				}
 				// Collect all verified domains into an array
-				let allDomains = tenantDetails.data.domains
-					.filter((domainObj) => domainObj.verified)
-					.map((domainObj) => domainObj.domain)
+				let allDomains = domains.filter((domainObj) => domainObj.verified).map((domainObj) => domainObj.domain)
 				// Generate link for each domain
 				let links = allDomains.map((domain) => {
-					const fullUrl = `https://${domain}${process.env.APP_PORTAL_DIRECTORY}`
-					return this._generateLink(fullUrl, prefix, solutionLink, solutionData[0].type)
+					return this._generateLink(
+						`https://${domain}${process.env.APP_PORTAL_DIRECTORY}`,
+						prefix,
+						solutionLink,
+						solution.type
+					)
 				})
 
 				return resolve({

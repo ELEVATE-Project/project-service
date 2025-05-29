@@ -274,6 +274,7 @@ module.exports = {
 	USER_ID_MISSING: 'User ID is missing',
 	FAILED_TO_FETCH_TENANT_DETAILS: 'Failed to fetch tenant details',
 	DOMAIN_FETCH_FAILED: 'Tenants domain fetch failed',
+	TENANTID_REQUIRED_IN_SOLUTION: 'TenantId required in solution',
 	SURVEY_NOT_CREATED: 'Could not create survey',
 	SURVEY_CREATED: 'Survey created successfully',
 }

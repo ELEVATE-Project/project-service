@@ -1254,7 +1254,7 @@ module.exports = class UserProjectsHelper {
 						assessmentOrObservationData['entityType'] = project[0].entityInformation.entityType
 						assessmentOrObservationData['entityId'] = project[0].entityInformation._id
 					}
-					let dynamicTaskInfromation = `${solutionDetails.solutionType}Information`
+					let dynamicTaskInfromation = `${solutionDetails.type}Information`
 					if (currentTask[dynamicTaskInfromation]) {
 						assessmentOrObservationData = currentTask[dynamicTaskInfromation]
 					} else {
@@ -1758,11 +1758,10 @@ module.exports = class UserProjectsHelper {
 								//         status : HTTP_STATUS_CODE.bad_request.status
 								//     }
 								// }
-
 								let entityDetails = await entitiesService.entityDocuments({
 									_id: bodyData[solutionDetails.entityType],
 									tenantId: tenantId,
-									orgIds: { $in: [orgId] },
+									orgIds: { $in: ['ALL', orgId] },
 								})
 
 								if (!entityDetails.success || !entityDetails?.data.length > 0) {

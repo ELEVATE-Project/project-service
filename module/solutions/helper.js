@@ -695,17 +695,13 @@ module.exports = class SolutionsHelper {
 						description: new RegExp(searchText, 'i'),
 					},
 				]
-
 				if (searchText !== '') {
-					if (matchQuery['$or']) {
-						matchQuery['$and'] = [{ $or: matchQuery.$or }, { $or: searchData }]
-
-						delete matchQuery.$or
+					if (matchQuery['$and']) {
+						matchQuery['$and'].push({ $or: searchData })
 					} else {
 						matchQuery['$or'] = searchData
 					}
 				}
-
 				let projection1 = {}
 
 				if (projection.length > 0) {

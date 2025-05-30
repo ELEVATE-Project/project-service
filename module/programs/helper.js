@@ -927,8 +927,7 @@ module.exports = class ProgramsHelper {
 				}
 
 				if (searchText !== '') {
-					matchQuery['$or'] = []
-					matchQuery['$or'].push(
+					let searchData = [
 						{
 							externalId: new RegExp(searchText, 'i'),
 						},
@@ -937,8 +936,14 @@ module.exports = class ProgramsHelper {
 						},
 						{
 							description: new RegExp(searchText, 'i'),
-						}
-					)
+						},
+					]
+
+					if (matchQuery['$and']) {
+						matchQuery['$and'].push({ $or: searchData })
+					} else {
+						matchQuery['$or'] = searchData
+					}
 				}
 
 				// modify query to fetch documents

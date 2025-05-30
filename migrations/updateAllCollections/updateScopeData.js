@@ -190,12 +190,12 @@ async function runMigration() {
 				.filter(
 					(item) => item.tenantId === tenantId && progProfRoles.includes(item.metaInformation?.externalId)
 				)
-				.map((item) => item._id)
+				.map((item) => item._id.toString())
 			const professional_subroles = entitiesDocs
 				.filter(
 					(item) => item.tenantId === tenantId && progProfSubroles.includes(item.metaInformation?.externalId)
 				)
-				.map((item) => item._id)
+				.map((item) => item._id.toString())
 
 			const updateProgam = await projectDB.collection('programs').findOneAndUpdate(
 				{
@@ -240,12 +240,12 @@ async function runMigration() {
 				.filter(
 					(item) => item.tenantId === tenantId && progProfRoles.includes(item.metaInformation?.externalId)
 				)
-				.map((item) => item._id)
+				.map((item) => item._id.toString())
 			const professional_subroles = entitiesDocs
 				.filter(
 					(item) => item.tenantId === tenantId && progProfSubroles.includes(item.metaInformation?.externalId)
 				)
-				.map((item) => item._id)
+				.map((item) => item._id.toString())
 
 			const updateProgam = await surveyDB.collection('programs').findOneAndUpdate(
 				{

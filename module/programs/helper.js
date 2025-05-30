@@ -943,7 +943,6 @@ module.exports = class ProgramsHelper {
 
 				// modify query to fetch documents
 				matchQuery['tenantId'] = userDetails.userInformation.tenantId
-				matchQuery['orgId'] = { $in: ['ALL', userDetails.userInformation.organizationId] }
 
 				// handle currentOrgOnly filter
 				if (currentOrgOnly) {

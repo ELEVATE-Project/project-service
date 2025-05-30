@@ -658,8 +658,6 @@ module.exports = class SolutionsHelper {
 
 				// modify query to fetch documents accordingly
 				matchQuery['tenantId'] = userDetails.userInformation.tenantId
-				matchQuery['orgId'] = { $in: ['ALL', userDetails.userInformation.organizationId] }
-
 				if (currentOrgOnly) {
 					matchQuery['orgId'] = { $in: [userDetails.userInformation.organizationId] }
 				}
@@ -697,17 +695,13 @@ module.exports = class SolutionsHelper {
 						description: new RegExp(searchText, 'i'),
 					},
 				]
-
 				if (searchText !== '') {
-					if (matchQuery['$or']) {
-						matchQuery['$and'] = [{ $or: matchQuery.$or }, { $or: searchData }]
-
-						delete matchQuery.$or
+					if (matchQuery['$and']) {
+						matchQuery['$and'].push({ $or: searchData })
 					} else {
 						matchQuery['$or'] = searchData
 					}
 				}
-
 				let projection1 = {}
 
 				if (projection.length > 0) {
@@ -2934,8 +2928,7 @@ module.exports = class SolutionsHelper {
 						'',
 						'',
 						search,
-						userDetails,
-						true // to fetch current org assets only,
+						userDetails
 					)
 				}
 				// fetch projects created by the user
@@ -2947,8 +2940,7 @@ module.exports = class SolutionsHelper {
 					'',
 					'',
 					requestedData,
-					userDetails,
-					true // to fetch current org assets only
+					userDetails
 				)
 				if (!userCreatedProjects.success) {
 					throw {

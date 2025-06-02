@@ -44,10 +44,8 @@ module.exports = class ProfileHelper {
 						},
 					}
 					let tenantId = reqUserDetails.userInformation.tenantId
-					let orgId = reqUserDetails.userInformation.organizationId
 
 					filterData['tenantId'] = tenantId
-					filterData['orgIds'] = { $in: ['ALL', orgId] }
 					// Define the fields to be projected in the entity documents
 					const projection = ['_id', 'metaInformation.name', 'metaInformation.externalId']
 					// Use the entityDocuments function to fetch entity details

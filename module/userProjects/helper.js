@@ -657,13 +657,19 @@ module.exports = class UserProjectsHelper {
 	 * @param {Array} solutionData - solutions data
 	 * @param {String} userId - user id
 	 * @param {Boolean} isAPrivateProgram - isAPrivateProgram
+	 * @param {Object} userDetails - loggedin user's info
 	 * @returns {Object} Created program and solution data.
 	 */
 
-	static createProgramAndMultipleSolutions(programData, solutionData, userId, isAPrivateProgram = false) {
+	static createProgramAndMultipleSolutions(
+		programData,
+		solutionData,
+		userId,
+		isAPrivateProgram = false,
+		userDetails
+	) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				const dateFormat = UTILS.epochTime()
 				let startDate = new Date()
 				let endDate = new Date()
 				endDate.setFullYear(endDate.getFullYear() + 1)
@@ -674,6 +680,8 @@ module.exports = class UserProjectsHelper {
 					userPrivateProgram = await programQueries.programsDocument(
 						{
 							_id: programData._id,
+							tenantId: userDetails.userInformation.tenantId,
+							orgId: userDetails.userInformation.organizationId,
 						},
 						'all'
 					)
@@ -682,7 +690,7 @@ module.exports = class UserProjectsHelper {
 					// Create a program if program id is not passed
 					let program = await solutionsHelper._createProgramData(
 						programData.name,
-						programData.externalId ? programData.externalId : programData.name + '-' + dateFormat,
+						programData.externalId ? programData.externalId : programData.name + '-' + UTILS.epochTime(),
 						isAPrivateProgram,
 						CONSTANTS.common.ACTIVE_STATUS,
 						programData.description ? programData.description : programData.name,
@@ -691,18 +699,17 @@ module.exports = class UserProjectsHelper {
 						programData.endDate ? programData.endDate : endDate,
 						userId,
 						programData.language ? programData.language : [],
-						[],
-						programData.source ? programData.source : {}
+						programData.source ? programData.source : {},
+						userDetails
 					)
 					userPrivateProgram = await programQueries.createProgram(program)
 				}
-
 				let solutionsCreated = []
 				for (const item of solutionData) {
 					// Create a solution if solutions
 					let solution = await solutionsHelper._createSolutionData(
 						item.name ? item.name : programData.name,
-						item.externalId ? item.externalId : programData.name + '-' + dateFormat,
+						item.externalId ? item.externalId : programData.name + '-' + UTILS.epochTime(),
 						isAPrivateProgram,
 						CONSTANTS.common.ACTIVE_STATUS,
 						item.description != '' ? item.description : programData.name,
@@ -714,7 +721,8 @@ module.exports = class UserProjectsHelper {
 						userId,
 						'',
 						item.startDate ? item.startDate : startDate,
-						item.endDate ? item.endDate : endDate
+						item.endDate ? item.endDate : endDate,
+						userDetails
 					)
 					solution = await solutionsQueries.createSolution(solution)
 					solutionsCreated.push(solution)
@@ -727,6 +735,8 @@ module.exports = class UserProjectsHelper {
 				const updateProgram = await programsQueries.findAndUpdate(
 					{
 						_id: userPrivateProgram._id,
+						tenantId: userDetails.userInformation.tenantId,
+						orgId: userDetails.userInformation.organizationId,
 					},
 					{
 						$addToSet: { components: solutionIds },
@@ -2085,10 +2095,11 @@ module.exports = class UserProjectsHelper {
 	 * @param {String} userToken - User token.
 	 * @param {String} [appName = ""] - App Name.
 	 * @param {String} [appVersion = ""] - App Version.
+	 * @param {Object} userDetails - loggedin user's info
 	 * @returns {Object} Project created information.
 	 */
 
-	static add(data, userId, userToken, appName = '', appVersion = '') {
+	static add(data, userId, userToken, appName = '', appVersion = '', userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				const projectsModel = Object.keys(schemas['projects'].schema)
@@ -2116,7 +2127,9 @@ module.exports = class UserProjectsHelper {
 				if (!createNewProgram) {
 					const program = await programQueries.programsDocument(
 						{
-							_id: data.program._id,
+							_id: ObjectId(data.program._id),
+							tenantId: userDetails.userInformation.tenantId,
+							orgId: userDetails.userInformation.organizationId,
 						},
 						'all'
 					)
@@ -2179,7 +2192,8 @@ module.exports = class UserProjectsHelper {
 					data.program,
 					solutionsData,
 					userId,
-					true
+					true,
+					userDetails
 				)
 				if (
 					!programAndMultipleSolutionsData.success ||
@@ -2258,6 +2272,8 @@ module.exports = class UserProjectsHelper {
 					const categories = await projectCategoriesQueries.categoryDocuments(
 						{
 							externalId: { $in: project.category },
+							tenantId: userDetails.userInformation.tenantId,
+							orgId: userDetails.userInformation.organizationId,
 						},
 						['_id', 'name', 'externalId', 'evidences']
 					)
@@ -2298,6 +2314,8 @@ module.exports = class UserProjectsHelper {
 
 					// Attach userProfile to each project
 					project['userProfile'] = userProfile.data
+					project['tenantId'] = userDetails.userInformation.tenantId
+					project['orgId'] = userDetails.userInformation.organizationId
 					let userProject = await projectQueries.createProject(project)
 					userCreatedProjects.push(userProject)
 
@@ -4105,17 +4123,21 @@ module.exports = class UserProjectsHelper {
 	 * @param {String} userToken - filter to search project to be updated.
 	 * @param {String} [appName = ""] - App Name.
 	 * @param {String} [appVersion = ""] - App Version.
+	 * @param {Object} userDetails - loggedin user's info
 	 * @returns {Object} status of update project
 	 */
 
-	static update(projectId, updateData, userId, userToken, appName = '', appVersion = '') {
+	static update(projectId, updateData, userId, appName = '', appVersion = '', userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				const userProject = await projectQueries.projectDocument({ _id: projectId }, [
-					'_id',
-					'reflection',
-					'tasks',
-				])
+				const userProject = await projectQueries.projectDocument(
+					{
+						_id: projectId,
+						tenantId: userDetails.userInformation.tenantId,
+						orgId: userDetails.userInformation.organizationId,
+					},
+					['_id', 'reflection', 'tasks']
+				)
 
 				if (!(userProject.length > 0)) {
 					throw {
@@ -4145,7 +4167,7 @@ module.exports = class UserProjectsHelper {
 					'',
 					updateData,
 					userId,
-					userToken,
+					userDetails,
 					appName,
 					appVersion,
 					true

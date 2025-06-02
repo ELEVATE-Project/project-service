@@ -79,7 +79,8 @@ module.exports = class SolutionsHelper {
 		updatedBy = '',
 		projectTemplateId = '',
 		startDate = '',
-		endDate = ''
+		endDate = '',
+		userDetails
 	) {
 		let solutionData = {}
 		solutionData.name = name
@@ -113,6 +114,8 @@ module.exports = class SolutionsHelper {
 		if (endDate) {
 			solutionData.endDate = endDate
 		}
+		solutionData['tenantId'] = userDetails.userInformation.tenantId
+		solutionData['orgId'] = userDetails.userInformation.organizationId
 
 		return solutionData
 	}
@@ -162,7 +165,7 @@ module.exports = class SolutionsHelper {
 		programData.language = language
 		programData.source = source
 		;(programData.tenantId = userDetails.userInformation.tenantId),
-			(programData.orgId = [userDetails.userInformation.organizationId])
+			(programData.orgId = userDetails.userInformation.organizationId)
 		return programData
 	}
 

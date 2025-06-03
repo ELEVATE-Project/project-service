@@ -162,7 +162,7 @@ module.exports = class SolutionsHelper {
 		programData.language = language
 		programData.source = source
 		programData.tenantId = userDetails.userInformation.tenantId
-		programData.orgId = [userDetails.userInformation.organizationId]
+		programData.orgId = userDetails.userInformation.organizationId
 		return programData
 	}
 
@@ -1578,7 +1578,7 @@ module.exports = class SolutionsHelper {
 						_.merge(duplicateSolution, solutionCreationData)
 						_.merge(duplicateSolution, solutionDataToBeUpdated)
 						duplicateSolution['tenantId'] = userDetails.userInformation.tenantId
-						duplicateSolution['orgId'] = [userDetails.userInformation.organizationId]
+						duplicateSolution['orgId'] = userDetails.userInformation.organizationId
 
 						solution = await solutionsQueries.createSolution(_.omit(duplicateSolution, ['_id', 'link']))
 						parentSolutionInformation.solutionId = duplicateSolution._id

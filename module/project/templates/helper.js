@@ -586,7 +586,7 @@ module.exports = class ProjectTemplatesHelper {
 	 * @returns {Object} imported templates data.
 	 */
 
-	static importProjectTemplate(templateId, userId, userToken, solutionId = '', updateData = {}) {
+	static importProjectTemplate(templateId, userId, userToken, solutionId = '', updateData = {}, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let projectTemplateData = await projectTemplateQueries.templateDocument({
@@ -680,7 +680,8 @@ module.exports = class ProjectTemplatesHelper {
 						duplicateTemplateDocument.externalId,
 						programDetails,
 						userToken,
-						duplicateTemplateDocument.taskSequence
+						duplicateTemplateDocument.taskSequence,
+						userDetails
 					)
 				}
 
@@ -834,7 +835,8 @@ module.exports = class ProjectTemplatesHelper {
 		duplicateTemplateExternalId,
 		programDetails,
 		userToken,
-		taskSequence
+		taskSequence,
+		userDetails
 	) {
 		return new Promise(async (resolve, reject) => {
 			try {
@@ -863,7 +865,8 @@ module.exports = class ProjectTemplatesHelper {
 							userToken,
 							newProjectTemplateTask,
 							taskData,
-							taskSequence
+							taskSequence,
+							userDetails
 						)
 						newTaskId.push(duplicateTemplateTask)
 
@@ -953,7 +956,7 @@ module.exports = class ProjectTemplatesHelper {
 	 * @param {Array} taskSequence - task Sequence array of parent template
 	 * @returns {Object} Duplicated tasks.
 	 */
-	static async handleDuplicateTemplateTask(userToken, newProjectTemplateTask, taskData, taskSequence) {
+	static async handleDuplicateTemplateTask(userToken, newProjectTemplateTask, taskData, taskSequence, userDetails) {
 		try {
 			const taskType = newProjectTemplateTask.type
 			let duplicateTemplateTaskId
@@ -964,7 +967,7 @@ module.exports = class ProjectTemplatesHelper {
 					taskSequence[index] = newProjectTemplateTask.externalId
 				}
 			}
-
+			// create duplicate templateTask
 			const createTemplateTask = async () => {
 				const task = await projectTemplateTaskQueries.createTemplateTask(
 					_.omit(newProjectTemplateTask, ['_id'])
@@ -977,7 +980,7 @@ module.exports = class ProjectTemplatesHelper {
 				}
 				return task._id
 			}
-
+			// getting solutionDetails to store in tasks document
 			const fetchSolutionDetails = (solution) => ({
 				type: solution.type,
 				subType: solution.entityType,
@@ -988,8 +991,13 @@ module.exports = class ProjectTemplatesHelper {
 				minNoOfSubmissionsRequired: newProjectTemplateTask.solutionDetails.minNoOfSubmissionsRequired,
 			})
 
+			//fetchSolution from external service
 			const fetchSolutionByExternalId = async (externalId) => {
-				const result = await surveyService.listSolutions({ externalId: { $in: [externalId] } }, userToken)
+				const result = await surveyService.listSolutions(
+					{ externalId: { $in: [externalId] } },
+					userToken,
+					userDetails
+				)
 				if (!result?.success || !result?.data?.length) {
 					throw {
 						message: CONSTANTS.apiResponses.SOLUTION_NOT_FOUND,
@@ -997,6 +1005,30 @@ module.exports = class ProjectTemplatesHelper {
 					}
 				}
 				return fetchSolutionDetails(result.data[0])
+			}
+			//update  duplicate template and duplicateTemplate task in child solutions
+			const updateSolutionReferenceForProject = async (templateId, taskId, solutionId) => {
+				let updateSolutionObj = {
+					referenceFrom: CONSTANTS.common.PROJECT,
+					project: {
+						_id: templateId.toString(),
+						taskId: taskId.toString(),
+					},
+				}
+
+				const solutionUpdated = await surveyService.updateSolution(
+					userToken,
+					updateSolutionObj,
+					solutionId,
+					userDetails
+				)
+				solutionId, console.log(solutionUpdated, solutionId, '============================')
+				if (!solutionUpdated.success) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.SOLUTION_NOT_UPDATED,
+					}
+				}
 			}
 
 			if (taskType === CONSTANTS.common.IMPROVEMENT_PROJECT) {
@@ -1013,7 +1045,7 @@ module.exports = class ProjectTemplatesHelper {
 						programId: newProjectTemplateTask.programId,
 						status: CONSTANTS.common.PUBLISHED_STATUS,
 					},
-					newProjectTemplateTask.solutionDetails.isReusable
+					userDetails
 				)
 
 				if (
@@ -1030,12 +1062,18 @@ module.exports = class ProjectTemplatesHelper {
 				)
 				duplicateTemplateTaskId = await createTemplateTask()
 				updateTaskSequence()
+				await updateSolutionReferenceForProject(
+					newProjectTemplateTask.projectTemplateId,
+					duplicateTemplateTaskId,
+					importSolutionsResponse.result.externalId
+				)
 			} else if (taskType === CONSTANTS.common.SURVEY) {
 				const importSolutionsResponse = await surveyService.importSurveyTemplateToSolution(
 					userToken,
 					newProjectTemplateTask.solutionDetails._id,
 					newProjectTemplateTask.programId,
-					true
+					'',
+					userDetails
 				)
 				if (
 					importSolutionsResponse.status != HTTP_STATUS_CODE['ok'].status ||
@@ -1052,6 +1090,11 @@ module.exports = class ProjectTemplatesHelper {
 				)
 				duplicateTemplateTaskId = await createTemplateTask()
 				updateTaskSequence()
+				await updateSolutionReferenceForProject(
+					newProjectTemplateTask.projectTemplateId,
+					duplicateTemplateTaskId,
+					importSolutionsResponse.result.solutionExternalId
+				)
 			} else {
 				// Default fallback task creation
 				duplicateTemplateTaskId = await createTemplateTask()

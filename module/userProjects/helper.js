@@ -5111,8 +5111,7 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 					userRoleAndProfileInformation && Object.keys(userRoleAndProfileInformation).length > 0
 						? userRoleAndProfileInformation
 						: {},
-					observationData.programId,
-					true
+					observationData.programId
 				)
 
 				if (!observationCreatedFromTemplate.success || !observationCreatedFromTemplate?.data?._id) {
@@ -5198,8 +5197,7 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 					userRoleAndProfileInformation && Object.keys(userRoleAndProfileInformation).length > 0
 						? userRoleAndProfileInformation
 						: {},
-					observationData.programId,
-					true
+					observationData.programId
 				)
 				if (!observationCreated.success || !observationCreated?.data?._id) {
 					throw {
@@ -5261,8 +5259,7 @@ function _surveyDetails(surveyData, userRoleAndProfileInformation = {}) {
 						name: surveyData.solutionDetails.name + '-' + UTILS.epochTime(),
 						description: surveyData.solutionDetails.name + '-' + UTILS.epochTime(),
 						project: surveyData.project,
-					},
-					true
+					}
 				)
 
 				if (!surveyCreatedFromTemplate.success || !surveyCreatedFromTemplate?.data?.solutionId) {

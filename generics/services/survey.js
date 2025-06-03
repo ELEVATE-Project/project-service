@@ -18,10 +18,9 @@ const SURVEY_SERVICE_URL = process.env.SURVEY_SERVICE_URL
  * @param {String} solutionId - parent solution id.
  * @param {String} programId -programId
  * @param {Object} data - Body data
- * @param {Boolean} isExternalProgram - query external db for programDetails
  * @returns {JSON} - Create child solution from parent  solution.
  */
-const importSurveyTemplateToSolution = function (token, solutionId, programId, data = {}, isExternalProgram = true) {
+const importSurveyTemplateToSolution = function (token, solutionId, programId, data = {}, userDetails) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			let surveyCreateUrl =
@@ -31,15 +30,16 @@ const importSurveyTemplateToSolution = function (token, solutionId, programId, d
 				solutionId +
 				'?appName=elevate' +
 				'&programId=' +
-				programId +
-				'&isExternalProgram=' +
-				isExternalProgram
+				programId
 
 			const options = {
 				headers: {
 					'content-type': 'application/json',
 					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
 					'x-auth-token': token,
+					'admin-auth-token': process.env.SURVEY_ADMIN_AUTH_TOKEN,
+					tenantId: userDetails.tenantAndOrgInfo.tenantId,
+					orgId: userDetails.tenantAndOrgInfo.orgId.join(','),
 				},
 				json: { data: data },
 			}
@@ -76,25 +76,22 @@ const importSurveyTemplateToSolution = function (token, solutionId, programId, d
  * @param {String} token - logged in user token.
  * @param {String} solutionId - parent solution id.
  * @param {Object} bodyData - Body data
- * @param {Boolean} isExternalProgram - query external db for programDetails
  * @returns {JSON} - Create child solution from parent  solution.
  */
-const importObservationTemplateToSolution = function (token, solutionId, bodyData, isExternalProgram) {
+const importObservationTemplateToSolution = function (token, solutionId, bodyData, userDetails) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			let observationCreateUrl =
-				SURVEY_SERVICE_URL +
-				CONSTANTS.endpoints.CREATE_CHILD_OBSERVATION_SOLUTION +
-				'?solutionId=' +
-				solutionId +
-				'&isExternalProgram=' +
-				isExternalProgram
+				SURVEY_SERVICE_URL + CONSTANTS.endpoints.CREATE_CHILD_OBSERVATION_SOLUTION + '?solutionId=' + solutionId
 
 			const options = {
 				headers: {
 					'content-type': 'application/json',
 					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
 					'x-auth-token': token,
+					'admin-auth-token': process.env.SURVEY_ADMIN_AUTH_TOKEN,
+					tenantId: userDetails.tenantAndOrgInfo.tenantId,
+					orgId: userDetails.tenantAndOrgInfo.orgId.join(','),
 				},
 				json: bodyData,
 			}
@@ -228,7 +225,7 @@ const observationDetails = function (token, observationId) {
  * @returns {JSON} - List of solutions
  */
 
-const listSolutions = function (solutionIds, token) {
+const listSolutions = function (solutionIds, token, userDetails) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			const url = SURVEY_SERVICE_URL + CONSTANTS.endpoints.LIST_SOLUTIONS
@@ -237,6 +234,9 @@ const listSolutions = function (solutionIds, token) {
 					'content-type': 'application/json',
 					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
 					'x-auth-token': token,
+					'admin-auth-token': process.env.SURVEY_ADMIN_AUTH_TOKEN,
+					tenantId: userDetails.tenantAndOrgInfo.tenantId,
+					orgId: userDetails.tenantAndOrgInfo.orgId.join(','),
 				},
 			}
 			options['json'] = solutionIds
@@ -276,7 +276,7 @@ const listSolutions = function (solutionIds, token) {
  * @returns {JSON} - Update solutions.
  */
 
-const updateSolution = function (token, updateData, solutionExternalId) {
+const updateSolution = function (token, updateData, solutionExternalId, userDetails) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			const url = SURVEY_SERVICE_URL + CONSTANTS.endpoints.UPDATE_SOLUTIONS + '/' + solutionExternalId
@@ -286,6 +286,9 @@ const updateSolution = function (token, updateData, solutionExternalId) {
 					'content-type': 'application/json',
 					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
 					'x-auth-token': token,
+					'admin-auth-token': process.env.SURVEY_ADMIN_AUTH_TOKEN,
+					tenantId: userDetails.tenantAndOrgInfo.tenantId,
+					orgId: userDetails.tenantAndOrgInfo.orgId.join(','),
 				},
 				json: updateData,
 			}
@@ -326,18 +329,10 @@ const updateSolution = function (token, updateData, solutionExternalId) {
  * @param {Object} data - body data
  * @param {Object} userRoleAndProfileInformation -userRoleInformation
  * @param {String} programId-programId
- * @param {Boolean} isExternalProgram -query external db for programDetails
  * @returns {JSON} - Create observation.
  */
 
-const createObservation = function (
-	token,
-	solutionId,
-	data,
-	userRoleAndProfileInformation = {},
-	programId,
-	isExternalProgram
-) {
+const createObservation = function (token, solutionId, data, userRoleAndProfileInformation = {}, programId) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			let createdObservationUrl =
@@ -346,9 +341,7 @@ const createObservation = function (
 				'?solutionId=' +
 				solutionId +
 				'&programId=' +
-				programId +
-				'&isExternalProgram=' +
-				isExternalProgram
+				programId
 			let options = {
 				headers: {
 					'content-type': 'application/json',

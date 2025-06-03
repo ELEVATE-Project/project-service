@@ -443,6 +443,10 @@ module.exports = class ProjectTemplateTasksHelper {
 								_id: template._id.toString(),
 								taskId: taskData._id.toString(),
 							}
+							updateSolutionObj['isExternalProgram'] = parsedData?.isExternalProgram
+								? parsedData.isExternalProgram
+								: true
+
 							if (taskData.type === CONSTANTS.common.IMPROVEMENT_PROJECT) {
 								await solutionsQueries.updateSolutionDocument(
 									{

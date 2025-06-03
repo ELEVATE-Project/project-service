@@ -559,8 +559,8 @@ module.exports = async function (req, res, next, token = '') {
 
 	// Helper function to access nested properties
 	function getOrgId(headers, decodedToken, orgConfigData) {
-		if (headers['organization_id']) {
-			return (orgId = headers['organization_id'].toString())
+		if (headers['orgId']) {
+			return (orgId = headers['orgId'].toString())
 		} else {
 			const orgIdPath = orgConfigData
 			return (orgId = getNestedValue(decodedToken, orgIdPath)?.toString())

@@ -1785,6 +1785,7 @@ module.exports = class SolutionsHelper {
 					'type',
 					'author',
 					'tenantId',
+					'orgId',
 				])
 
 				if (!Array.isArray(solutionData) || solutionData.length === 0) {

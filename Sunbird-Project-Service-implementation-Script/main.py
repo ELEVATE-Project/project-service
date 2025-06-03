@@ -38,6 +38,7 @@ from openpyxl.styles import Color, PatternFill, Font, Border
 from openpyxl.styles import colors
 from openpyxl.cell import Cell
 import gdown
+import jwt
 
 # get current working directory
 currentDirectory = os.getcwd()
@@ -105,6 +106,7 @@ endDateOfResource = None
 startDateOfProgram = None
 endDateOfProgram = None
 rolesPGM =None
+ProfessionalrolesPGM = None
 mainRole = None
 solutionRolesArray = []
 solutionStartDate = ""
@@ -116,9 +118,41 @@ ccRootOrgName = None
 ccRootOrgId  = None
 certificatetemplateid = None
 question_sequence_arr = []
+tenantID = None
+orgIDFromTemplate = None
+mainRoleproff = []
+
+
+
+#helper function 
+def clean_single_value(value):
+    value = str(value).strip()
+    try:
+        f = float(value)
+        if f.is_integer():
+            return str(int(f))
+        return str(f)
+    except ValueError:
+        return value  # not a number, return as-is
+
+def append_to_list(base, items_to_add):
+    if not isinstance(base, list):
+        base = [base]
+
+    if isinstance(items_to_add, list):
+        return base + items_to_add
+    else:
+        return base + [items_to_add]
+
+def normalize_cell_value(value):
+    if isinstance(value, str) and ',' in value:
+        return [clean_single_value(part) for part in value.split(',') if part.strip()]
+    return clean_single_value(value)
+
+
 
 # program creation function 
-def programCreation(accessToken,parentFolder,externalId,pName,pDescription,roles,userId):
+def programCreation(accessToken,parentFolder,externalId,pName,pDescription,roles,userId,mainRoleproff,rolesPGMID,entitiesPGMID):
     # accessToken, parentFolder, externalId, pName, pDescription, keywords, entities, roles, orgIds,entitiesPGM,mainRole,rolesPGM
     messageArr = []
     messageArr.append("++++++++++++ Program Creation ++++++++++++")
@@ -127,47 +161,56 @@ def programCreation(accessToken,parentFolder,externalId,pName,pDescription,roles
     messageArr.append("Program Creation URL : " + programCreationurl)
 
     # adding state entities
-    entities = stateEntitiesPGM.split(',')
-    role = mainRole.split(',')
-    entitiesTypeStr = entitiesType[0]
+    scope={}
+    for i in range(len(scopeEntityType)):
+        entity_type = scopeEntityType[i]
+        entity_value = entitiesPGMID[i]
+        if entity_type in scope:
+            scope[entity_type].append(entity_value)
+        else:
+            scope[entity_type] = [entity_value]
+                    # bodySolutionUpdate = {
+                    #     "scope": {"entityType": scopeEntityType, "entities": scopeEntities, "roles": scopeRoles}}
+    scope["organizations"] = [orgIDFromTemplate]
+    scope["professional_subroles"] = rolesPGMID
+    scope["professional_role"] = mainRoleproff
     # program creation payload
     payload = json.dumps({
-        "externalId" : externalId,
-      "name" : pName,
-      "description" : pDescription,
-      "isDeleted" : False,
-      "resourceType" : [ 
-          "program"
-      ],
-      "language" : [ 
-          "English"
-      ],
-      "metaInformation" : {
-        "state" : entities,
-        "recommendedFor" : role
-      },
-      "keywords" : [],
-      "concepts" : [],
-      "userId":userId,
-      "imageCompression" : {
-          "quality" : 10
-      },
-       "startDate": startDateOfProgram,
-        "endDate": endDateOfProgram,
-      "components" : [
-      ],
-       "scope": {
-            entitiesTypeStr: entitiesPGMID,
-            "roles": roles
-        },
-        
-      "requestForPIIConsent" : True
-}
-)
+                "externalId": externalId,
+                "name": pName,
+                "description": pDescription,
+                "isDeleted": False,
+                "resourceType": [
+                    "program"
+                ],
+                "language": [
+                    "English"
+                ],
+                "metaInformation": {
+                    "state":stateEntitiesPGM.split(","),
+                    "roles": mainRoleproff
+                    },
+                "keywords": [],
+                "concepts": [],
+                "userId":userId,
+                "imageCompression": {
+                    "quality": 10
+                },
+                "startDate": startDateOfProgram,
+                "endDate": endDateOfProgram,
+                "components": [],
+                "scope": scope,
+                "requestForPIIConsent": True
+            }
+    )
     messageArr.append("Body : " + str(payload))
-    headers = {'X-auth-token': accessToken,
+    headers ={'X-auth-token': accessToken,
                'internal-access-token': config.get(environment, 'internal-access-token'),
                'Content-Type': 'application/json',
+               'Authorization':config.get(environment, 'Authorization'),
+               'tenantId': "shikshagraha",
+               'orgid': orgIDFromTemplate,
+               config.get(environment,'adminTokenHeaderName'): config.get(environment, 'adminAccessToken'),
                }
     
     # program creation 
@@ -227,15 +270,16 @@ def programmappingpdpmsheetcreation(MainFilePath,accessToken, program_file,progr
             extIdPGM = dictDetailsEnv['Program ID'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Program ID'] else terminatingMessage("\"Program ID\" must not be Empty in \"Program details\" sheet")
 
             programdesigner = dictDetailsEnv['projectService username/user id/email id/phone no. of Program Designer'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Program ID'] else terminatingMessage("\"projectService username/user id/email id/phone no. of Program Designer\" must not be Empty in \"Program details\" sheet")
-            userDetails = fetchUserDetails(environment, accessToken, programdesigner)
-            creatorKeyCloakId = userDetails[0]
-            creatorName = userDetails[1]
+            # userDetails = fetchUserDetails(environment, accessToken, programdesigner)
+            # creatorKeyCloakId = userDetails[0]
+            # creatorName = userDetails[1]
             # if "program_designer" in userDetails[4]:
             #     creatorKeyCloakId = userDetails[0]
             #     creatorName = userDetails[1]
             # else :
             #     terminatingMessage("user does't have program designer role")
-
+            creatorName = "Admin"
+            creatorKeyCloakId = "25"
             pdpmcolo1 = [creatorName, " ", " ", " ", creatorKeyCloakId, " ", " ","ADD","program_desiginer", extIdPGM, "programs"]
             with open(pdpmsheet + 'mapping.csv', 'a',encoding='utf-8') as file:
                 writer = csv.writer(file, quoting=csv.QUOTE_NONNUMERIC, delimiter=',',lineterminator='\n')
@@ -254,17 +298,17 @@ def programmappingpdpmsheetcreation(MainFilePath,accessToken, program_file,progr
                                   for
                                   col_index_env in range(detailsEnvSheet.ncols)}
 
-                if str(dictDetailsEnv['Is a SSO user?']).strip() == "YES":
-                    programmanagername2 = dictDetailsEnv['projectService user id ( profile ID)'] if dictDetailsEnv['projectService user id ( profile ID)'] else terminatingMessage("\"projectService user id ( profile ID)\" must not be Empty in \"Program details\" sheet")
-                else:
-                    try :
-                        programmanagername2 = dictDetailsEnv['Login ID on projectService'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Login ID on projectService'] else terminatingMessage("\"Login ID on projectService\" must not be Empty in \"Program details\" sheet")
-                        userDetails = fetchUserDetails(environment, accessToken, programmanagername2)
-                    except :
-                        programmanagername2 = dictDetailsEnv['projectService user id ( profile ID)'].encode('utf-8').decode('utf-8') if dictDetailsEnv['projectService user id ( profile ID)'] else terminatingMessage("\"projectService user id ( profile ID)\" must not be Empty in \"Program details\" sheet")
-                        userDetails = fetchUserDetails(environment, accessToken, programmanagername2)
-                creatorKeyCloakId = userDetails[0]
-                creatorName = userDetails[1]
+                # if str(dictDetailsEnv['Is a SSO user?']).strip() == "YES":
+                #     programmanagername2 = dictDetailsEnv['projectService user id ( profile ID)'] if dictDetailsEnv['projectService user id ( profile ID)'] else terminatingMessage("\"projectService user id ( profile ID)\" must not be Empty in \"Program details\" sheet")
+                # else:
+                #     try :
+                #         programmanagername2 = dictDetailsEnv['Login ID on projectService'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Login ID on projectService'] else terminatingMessage("\"Login ID on projectService\" must not be Empty in \"Program details\" sheet")
+                #         userDetails = fetchUserDetails(environment, accessToken, programmanagername2)
+                #     except :
+                #         programmanagername2 = dictDetailsEnv['projectService user id ( profile ID)'].encode('utf-8').decode('utf-8') if dictDetailsEnv['projectService user id ( profile ID)'] else terminatingMessage("\"projectService user id ( profile ID)\" must not be Empty in \"Program details\" sheet")
+                #         userDetails = fetchUserDetails(environment, accessToken, programmanagername2)
+                # creatorKeyCloakId = userDetails[0]
+                # creatorName = userDetails[1]
                 # if "program_manager" in userDetails[4]:
                 #     creatorKeyCloakId = userDetails[0]
                 #     creatorName = userDetails[1]
@@ -378,11 +422,28 @@ def programsFileCheck(filePathAddPgm, accessToken, parentFolder, MainFilePath):
                     endDateOfProgram = endDateArr[2] + "-" + endDateArr[1] + "-" + endDateArr[0] + " 23:59:59"
                     global mainRole
                     mainRole = dictDetailsEnv['Targeted role at program level'] if dictDetailsEnv['Targeted role at program level'] else terminatingMessage("\"Targeted role at program level\" must not be Empty in \"Program details\" sheet")
+                    global rolesPGM
+                    rolesPGM = dictDetailsEnv['Targeted subrole at program level'] if dictDetailsEnv['Targeted subrole at program level'] else terminatingMessage("\"Targeted subrole at program level\" must not be Empty in \"Program details\" sheet")
+                    mainRoles = str(mainRole).strip().encode('utf-8').decode('utf-8').split(",")
+                    subRoles = str(rolesPGM).strip().encode('utf-8').decode('utf-8').split(",")
+
+                    mainRoles = [r.strip() for r in mainRoles if r.strip()]
+                    subRoles = [r.strip() for r in subRoles if r.strip()]
+
+                    verifiedRoles = validate_roles_against_api(mainRoles, subRoles)
+                    global mainRoleproff
+
+                    mainRoleproff = verifiedRoles[0]
+                    rolesPGM = verifiedRoles[1]
+
+                    print("mainRole", mainRole)
+                    print("rolesPGMID", rolesPGM)
+
+
                     global scopeEntityType
                     scopeEntityType = "state"
                     global entitiesType
-                    entitiesType = fetchEntityType(parentFolder, accessToken,
-                                                  entitiesPGM.lstrip().rstrip().split(","), scopeEntityType)
+                    entitiesType = fetchEntityType(parentFolder, accessToken,entitiesPGM.lstrip().rstrip().split(","), scopeEntityType)
                     if entitiesPGM:
                         entitiesPGM = entitiesPGM
                         scopeEntityType = entitiesType
@@ -409,12 +470,11 @@ def programsFileCheck(filePathAddPgm, accessToken, parentFolder, MainFilePath):
                             entitiesPGM = entitiesPGM
                             scopeEntityType = entitiesType
 
-                        global rolesPGM
-                        rolesPGM = dictDetailsEnv['Targeted subrole at program level'] if dictDetailsEnv['Targeted subrole at program level'] else terminatingMessage("\"Targeted subrole at program level\" must not be Empty in \"Program details\" sheet")
-                        if "teacher" in mainRole.strip().lower():
-                            rolesPGM = str(rolesPGM).strip() + ",TEACHER"
-                        userDetails = fetchUserDetails(environment, accessToken, dictDetailsEnv['projectService username/user id/email id/phone no. of Program Designer'])
-                        userId = userDetails[0]
+                        
+                        # global ProfessionalrolesPGM
+                        # ProfessionalrolesPGM = dictDetailsEnv['Target role at the resource level'] 
+                        # userDetails = fetchUserDetails(environment, accessToken, dictDetailsEnv['projectService username/user id/email id/phone no. of Program Designer'])
+                        # userId = userDetails[0]
                         messageArr = []
 
                         scopeEntityType = entitiesType
@@ -428,7 +488,8 @@ def programsFileCheck(filePathAddPgm, accessToken, parentFolder, MainFilePath):
                         # sys.exit()
 
                         # call function to create program 
-                        programCreation(accessToken,parentFolder,extIdPGM,programNameInp,proDesc,programRoleArray,userId)
+                        userId = "25"
+                        programCreation(accessToken,parentFolder,extIdPGM,programNameInp,proDesc,programRoleArray,userId,mainRoleproff,rolesPGM,entitiesPGMID)
                         # accessToken, parentFolder, extIdPGM, programNameInp, descriptionPGM,keywordsPGM.lstrip().rstrip().split(","),mainRole,rolesPGM
                         # sys.exit()
                         programmappingpdpmsheetcreation(MainFilePath, accessToken, program_file, extIdPGM,parentFolder)
@@ -459,6 +520,9 @@ def programsFileCheck(filePathAddPgm, accessToken, parentFolder, MainFilePath):
                     resourceStatusOrExtPGM = dictDetailsEnv['Resource Status'] if dictDetailsEnv['Resource Status'] else terminatingMessage("\"Resource Status\" must not be Empty in \"Resource Details\" sheet")
                     # global rolesPGM
                     rolesPGM = dictDetailsEnv['Targeted subrole at resource level'] if dictDetailsEnv['Targeted subrole at resource level'] else terminatingMessage("\"Targeted subrole at resource level\" must not be Empty in \"Program details\" sheet")
+                    global ProfessionalrolesPGM
+                    ProfessionalrolesPGM = dictDetailsEnv['Target role at the resource level'] if dictDetailsEnv['Target role at the resource level'] else terminatingMessage("\"Target role at the resource level\" must not be Empty in \"Program details\" sheet")
+
                     # setting start and end dates globally. 
                     global startDateOfResource, endDateOfResource
                     startDateOfResource = dictDetailsEnv['Start date of resource']
@@ -535,39 +599,62 @@ def valid_file(param):
 # function to check environment 
 def envCheck():
     try:
-        config.get(environment, 'userlogin')
+        config.get(environment, 'keyclockapiurl')
         return True
     except Exception as e:
         print(e)
         return False
 
+
+def decodeToken(accessTokenUser):
+    try:
+        accessTokenSecret = config.get(environment , 'access_token_secret')
+        decodedToken = jwt.decode(accessTokenUser, accessTokenSecret, algorithms=["HS256"])
+        # if 'data' not in decodedToken:
+        #     print("Data not present in decodedToken")
+        #     terminatingMessage("Invalid Token")
+        # if 'tenant_id' not in decodedToken['data']:
+        #     print("Tenant Id is not present in decodedToken")
+        #     terminatingMessage("Invalid Token")
+        # if 'organization_id' not in decodedToken['data']:
+        #     print("Organization Id is not present in decodedToken")
+        #     terminatingMessage("Invalid Token")
+        global tenantId
+        tenantId = clean_single_value(decodedToken['data']['tenant_code'])
+        global orgIds
+        orgIds = clean_single_value(decodedToken['data']['organization_codes'])
+    except jwt.exceptions.InvalidTokenError as e:
+        raise Exception(f"Invalid token: {str(e)}")
+    except Exception as e:
+        raise Exception(f"Token decoding failed: {str(e)}")
+    
+
 # Generate access token for the APIs. 
 def generateAccessToken(solutionName_for_folder_path):
     # production search user api - start
-    headerKeyClockUser = {'Content-Type': 'application/x-www-form-urlencoded'}
-    # responseKeyClockUser = requests.post(url=config.get(environment, 'elevateuserhost') + config.get(environment, 'userlogin'), headers=headerKeyClockUser,
+    headerKeyClockUser = {'Content-Type': config.get(environment, 'content-type'),'origin': config.get(environment, 'origin') }
+    # responseKeyClockUser = requests.post(url=config.get(environment, 'elevateuserhost') + config.get(environment, 'keyclockapiurl'), headers=headerKeyClockUser,
                                         #  data=json.dumps(config.get(environment, 'keyclockAPIBody')))
     # terminatingMessage(type(json.loads(config.get(environment, 'keyclockAPIBody'))))\
     loginBody = {
-        'client_id' : config.get(environment, 'clientId'),
-        'client_secret' : config.get(environment, 'clientSecret'),
-        'grant_type' : config.get(environment, 'grantType'),
-        'username' : config.get(environment, 'username'),
+        'identifier' : config.get(environment, 'username'),
         'password' : config.get(environment, 'password'),
     }
-    responseKeyClockUser = requests.post(config.get(environment, 'elevateuserhost') + config.get(environment, 'userlogin'), headers=headerKeyClockUser, data=loginBody)
+    responseKeyClockUser = requests.post(config.get(environment, 'elevateuserhost') + config.get(environment, 'keyclockapiurl'), headers=headerKeyClockUser, json=loginBody)
     messageArr = []
-    messageArr.append("URL : " + str(config.get(environment, 'userlogin')))
+
+    messageArr.append("URL : " + str(config.get(environment, 'keyclockapiurl')))
     messageArr.append("Body : " + str(config.get(environment, 'keyclockAPIBody')))
     messageArr.append("Status Code : " + str(responseKeyClockUser.status_code))
     if responseKeyClockUser.status_code == 200:
         responseKeyClockUser = responseKeyClockUser.json()
-        accessTokenUser = responseKeyClockUser['access_token']
+        accessTokenUser = responseKeyClockUser['result']['access_token']
         messageArr.append("Acccess Token : " + str(accessTokenUser))
         createAPILog(solutionName_for_folder_path, messageArr)
         fileheader = ["Access Token","Access Token succesfully genarated","Passed"]
         apicheckslog(solutionName_for_folder_path,fileheader)
         print("--->Access Token Generated!")
+        decodeToken(accessTokenUser)
         return accessTokenUser
     
     print("Error in generating Access token")
@@ -587,8 +674,7 @@ def getProgramInfo(accessTokenUser, solutionName_for_folder_path, programNameInp
     programUrl = config.get(environment, 'elevateprojecthost') + config.get(environment, 'fetchProgramInfoApiUrl') + programNameInp.lstrip().rstrip()
 
     
-    headersProgramSearch = {'Authorization': config.get(environment, 'Authorization'),
-                            'Content-Type': 'application/json', 'X-auth-token': accessTokenUser,
+    headersProgramSearch = {'Content-Type': 'application/json', 'X-auth-token': accessTokenUser,
                             'internal-access-token': config.get(environment, 'internal-access-token')}
     responseProgramSearch = requests.get(url=programUrl, headers=headersProgramSearch)
     messageArr = []
@@ -695,6 +781,76 @@ def checkEmailValidation(email):
         return True
     else:
         return False
+    
+
+def validate_roles_against_api(mainRoles, subRoles):
+    print(mainRoles, "mainRoles")
+    print(subRoles, "subRoles")
+
+    urlFetchRoleList = config.get(environment, 'elevateentityhost') + config.get(environment, 'fetchprofessionalRole')
+    headers = {
+        'Content-Type': config.get(environment, 'Content-Type'),
+        'tenantId': tenantId,
+        'X-Channel-id': config.get(environment, 'X-Channel-id'),
+    }
+
+    print(urlFetchRoleList, "urlFetchRoleList")
+    print(headers, "headers")
+
+    response = requests.get(urlFetchRoleList, headers=headers, data=json.dumps({}))
+    print(response.text, "response")
+
+    messageArr = []
+    messageArr.append("Fetched professional roles from: " + urlFetchRoleList)
+    messageArr.append("Status Code: " + str(response.status_code))
+
+    if response.status_code != 200:
+        messageArr.append("Error fetching roles.")
+        print("Error fetching roles.")
+        return [], []
+
+    role_data = response.json()
+    validated_main_role_ids = []
+    validated_subrole_ids_list = []
+
+    remaining_subroles = [s.strip().lower() for s in subRoles]
+
+    for role in mainRoles:
+        matched = next((r for r in role_data['result']
+                        if r.get('externalId', '').strip().lower() == role.strip().lower() or
+                           r.get('name', '').strip().lower() == role.strip().lower()), None)
+
+        if matched:
+            main_role_id = matched['_id']
+            validated_main_role_ids.append(main_role_id)
+            subrole_url = f"{config.get(environment, 'elevateentityhost')}entity-management/v1/entities/subEntityList/{main_role_id}?type=professional_subroles"
+            subrole_resp = requests.get(subrole_url, headers=headers)
+
+            if subrole_resp.status_code == 200:
+                subroles_data = subrole_resp.json()
+                for item in subroles_data['result']['data']:
+                    sub_external_id = item.get('externalId', '').strip().lower()
+                    sub_name = item.get('name', '').strip().lower()
+                    if sub_external_id in remaining_subroles or sub_name in remaining_subroles:
+                        validated_subrole_ids_list.append(item['_id'])
+                        if sub_external_id in remaining_subroles:
+                            remaining_subroles.remove(sub_external_id)
+                        elif sub_name in remaining_subroles:
+                            remaining_subroles.remove(sub_name)
+                        print(f"Subrole '{sub_external_id}' validated under mainRole '{role}'")
+            else:
+                messageArr.append(f"Failed to fetch subroles for mainRole '{role}'")
+        else:
+            messageArr.append(f"MainRole '{role}' not found in API")
+
+    for s in remaining_subroles:
+        messageArr.append(f"Subrole '{s}' not found in any of the provided mainRoles.")
+
+    for msg in messageArr:
+        print(msg)
+
+    return validated_main_role_ids, validated_subrole_ids_list
+
 
 # Fetch user details 
 def fetchUserDetails(environment, accessToken, projectServiceId):
@@ -712,9 +868,9 @@ def fetchUserDetails(environment, accessToken, projectServiceId):
         if responseUserSearch['result']:
             userKeycloak = responseUserSearch['result']['id']
             userName = responseUserSearch['result']['name']
-            rootOrgName = responseUserSearch['result']['organisations'][1]['addedByName']
-            rootOrgId = responseUserSearch['result']['organisations'][1]['organisationId']
-            roledetails = responseUserSearch['result']['organisations'][1]['roles']
+            rootOrgName = responseUserSearch['result']['organization']['name']
+            rootOrgId = responseUserSearch['result']['organization']['id']
+            roledetails = [role['title'] for role in responseUserSearch['result']['user_roles']]
         else:
             terminatingMessage("-->Given username/email is not present in projectService platform<--.")
     else:
@@ -736,9 +892,9 @@ def fetchEntityId(solutionName_for_folder_path, accessToken, entitiesNameList, s
     payload = {
 
     "query" : {
-          "entityType": {
-            "$in": scopeEntityType
-        }
+          "entityType": {"$in": scopeEntityType},
+          "tenantId" : tenantId
+        #   "orgIds" : {"$in" : [orgIDFromTemplate]}
     },
 
     "projection": [
@@ -806,7 +962,9 @@ def fetchEntityType(solutionName_for_folder_path, accessToken, entitiesPGM, scop
         # Prepare the payload for the API request
         payload = {
             "query": {
-                "metaInformation.name": entityName  # Use the current entity name
+                "metaInformation.name": entityName,  # Use the current entity name
+                "tenantId" : tenantId,
+                # "orgIds": {"$in": [orgIDFromTemplate]}   # Convert org_ids to strings for payload
             },
             "projection": [
                 "entityType"
@@ -987,11 +1145,11 @@ def validateSheets(filePathAddObs, accessToken, parentFolder):
                         if set(detailsCols) == set(dictDetailsEnv.keys()):
                             solutionName = dictDetailsEnv['observation_solution_name'].encode('utf-8').decode('utf-8') if dictDetailsEnv['observation_solution_name'] else terminatingMessage("\"observation_solution_name\" must not be Empty in \"details\" sheet")
                             projectServiceLoginId = dictDetailsEnv['projectService_loginId'].encode('utf-8').decode('utf-8') if dictDetailsEnv['projectService_loginId'] else terminatingMessage("\"projectService_loginId\" must not be Empty in \"details\" sheet")
-                            ccUserDetails = fetchUserDetails(environment, accessToken, projectServiceLoginId)
-                            if not "CONTENT_CREATOR" in ccUserDetails[4]:
-                                terminatingMessage("---> "+projectServiceLoginId +" is not a CONTENT_CREATOR in projectService " + environment)
-                            ccRootOrgName = ccUserDetails[2]
-                            ccRootOrgId = ccUserDetails[3]
+                            # ccUserDetails = fetchUserDetails(environment, accessToken, projectServiceLoginId)
+                            # if not "CONTENT_CREATOR" in ccUserDetails[4]:
+                            #     terminatingMessage("---> "+projectServiceLoginId +" is not a CONTENT_CREATOR in projectService " + environment)
+                            # ccRootOrgName = ccUserDetails[2]
+                            # ccRootOrgId = ccUserDetails[3]
                             solutionDescription = dictDetailsEnv['observation_solution_description'].encode('utf-8').decode('utf-8')
                             pointBasedValue = str(dictDetailsEnv['scoring_system']).encode('utf-8').decode('utf-8') if dictDetailsEnv['scoring_system'] else terminatingMessage("\"scoring_system\" must not be Empty in \"details\" sheet")
                             entityType = dictDetailsEnv['entity_type'].encode('utf-8').decode('utf-8') if dictDetailsEnv['entity_type'] else terminatingMessage("\"entity_type\" must not be Empty in \"details\" sheet")
@@ -1219,11 +1377,11 @@ def validateSheets(filePathAddObs, accessToken, parentFolder):
                         solutionDescription = dictDetailsEnv['observation_solution_description'].encode('utf-8').decode('utf-8') if dictDetailsEnv['observation_solution_description'] else terminatingMessage("\"observation_solution_description\" must not be Empty in \"details\" sheet")
                         projectServiceLoginId = dictDetailsEnv['projectService_loginId'].encode('utf-8').decode('utf-8') if dictDetailsEnv['projectService_loginId'] else terminatingMessage("\"projectService_loginId\" must not be Empty in \"details\" sheet")
                         creator = dictDetailsEnv['Name_of_the_creator'].encode('utf-8').decode('utf-8') if dictDetailsEnv['Name_of_the_creator'] else terminatingMessage("\"Name_of_the_creator\" must not be Empty in \"details\" sheet")
-                        ccUserDetails = fetchUserDetails(environment, accessToken, projectServiceLoginId)
-                        if not "CONTENT_CREATOR" in ccUserDetails[4]:
-                            terminatingMessage("---> "+projectServiceLoginId +" is not a CONTENT_CREATOR in projectService " + environment)
-                        ccRootOrgName = ccUserDetails[2]
-                        ccRootOrgId = ccUserDetails[3]
+                        # ccUserDetails = fetchUserDetails(environment, accessToken, projectServiceLoginId)
+                        # if not "CONTENT_CREATOR" in ccUserDetails[4]:
+                        #     terminatingMessage("---> "+projectServiceLoginId +" is not a CONTENT_CREATOR in projectService " + environment)
+                        # ccRootOrgName = ccUserDetails[2]
+                        # ccRootOrgId = ccUserDetails[3]
                             
                         entityType = dictDetailsEnv['entity_type'].encode('utf-8').decode('utf-8') if dictDetailsEnv['entity_type'] else terminatingMessage("\"entity_type\" must not be Empty in \"details\" sheet")
                         solutionLanguage = dictDetailsEnv['language'].encode('utf-8').decode('utf-8').split(",") if dictDetailsEnv['language'] else [""]
@@ -1765,7 +1923,6 @@ def solutionUpdate(solutionName_for_folder_path, accessToken, solutionId, bodySo
     solutionUpdateApi = config.get(environment, 'elevateprojecthost') + config.get(environment, 'solutionUpdateApi') + str(solutionId)
     headerUpdateSolutionApi = {
         'Content-Type': 'application/json',
-        'Authorization': config.get(environment, 'Authorization'),
         'X-auth-token': accessToken,
         'X-Channel-id': config.get(environment, 'X-Channel-id'),
         "internal-access-token": config.get(environment, 'internal-access-token')
@@ -2726,7 +2883,7 @@ def fetchSolutionDetailsFromProgramSheet(solutionName_for_folder_path, programFi
         solutionName = responseFetchSolutionJson["result"]["name"]
 
         xfile = openpyxl.load_workbook(programFile)
-        resourceDetailsSheet = xfile.get_sheet_by_name('Resource Details')
+        resourceDetailsSheet = xfile['Resource Details']
         rowCountRD = resourceDetailsSheet.max_row
         columnCountRD = resourceDetailsSheet.max_column
         for row in range(3, rowCountRD + 1):
@@ -2734,8 +2891,8 @@ def fetchSolutionDetailsFromProgramSheet(solutionName_for_folder_path, programFi
                 solutionMainRole = str(resourceDetailsSheet["E" + str(row)].value).strip()
                 solutionRolesArray = str(resourceDetailsSheet["F" + str(row)].value).split(",") if str(
                     resourceDetailsSheet["E" + str(row)].value).split(",") else []
-                if "teacher" in solutionMainRole.strip().lower():
-                    solutionRolesArray.append("TEACHER")
+                # if "teacher" in solutionMainRole.strip().lower():
+                #     solutionRolesArray.append("TEACHER")
                 solutionStartDate = resourceDetailsSheet["G" + str(row)].value
                 solutionEndDate = resourceDetailsSheet["H" + str(row)].value
     return [solutionRolesArray, solutionStartDate, solutionEndDate]
@@ -2791,7 +2948,7 @@ def prepareProgramSuccessSheet(MainFilePath, solutionName_for_folder_path, progr
         else:
             xfile = openpyxl.load_workbook(programFile)
 
-        resourceDetailsSheet = xfile.get_sheet_by_name('Resource Details')
+        resourceDetailsSheet = xfile['Resource Details']
 
         greenFill = PatternFill(start_color='0000FF00',
                                 end_color='0000FF00',
@@ -2897,7 +3054,7 @@ def prepareProgramSuccessSheetcsv(MainFilePath, solutionName_for_folder_path, pr
         else:
             xfile = openpyxl.load_workbook(programFile)
 
-        resourceDetailsSheet = xfile.get_sheet_by_name('Resource Details')
+        resourceDetailsSheet = xfile['Resource Details']
 
         greenFill = PatternFill(start_color='0000FF00',
                                 end_color='0000FF00',
@@ -3082,7 +3239,7 @@ def createSurveySolution(parentFolder, wbSurvey, accessToken):
                     sys.exit()
                 else:
                     surveySolutionCreationReqBody['creator'] = dictDetailsEnv['Name_of_the_creator']
-                userDetails = fetchUserDetails(environment, accessToken, dictDetailsEnv['survey_creator_username'])
+                # userDetails = fetchUserDetails(environment, accessToken, dictDetailsEnv['survey_creator_username'])
                 surveySolutionCreationReqBody['author'] = userDetails[0]
                 if dictDetailsEnv["survey_start_date"]:
                     if type(dictDetailsEnv["survey_start_date"]) == str:
@@ -3319,7 +3476,7 @@ def prepareProjectAndTasksSheets(project_inputFile, projectName_for_folder_path,
                  range(tasksDetailsSheet.ncols)]
     taskColumns1 = ["name", "externalId", "description", "type", "hasAParentTask", "parentTaskOperator",
                     "parentTaskValue",
-                    "parentTaskId", "solutionType", "solutionSubType", "solutionId", "isDeletable","startDate","endDate"]
+                    "parentTaskId", "solutionType", "solutionSubType", "solutionId", "isDeletable","startDate","endDate","isAnExternalTask"]
     taskLearningResource_count = 0
 
     for tasksHeader in keysTasks:
@@ -3355,7 +3512,7 @@ def prepareProjectAndTasksSheets(project_inputFile, projectName_for_folder_path,
                 bodyEndDate = endDateArr[0] + "/" + endDateArr[1] + "/" + endDateArr[2]                     
 
         taskId = str(dictTasksDetails["TaskId"]).encode('utf-8').decode('utf-8').strip() + "-" + str(millisecond)
-        taskminNoOfSubmissionsRequired = str(dictTasksDetails["Number of submissions for observation"]).strip()
+        taskminNoOfSubmissionsRequired = int(dictTasksDetails["Number of submissions for observation"])
         sequenceNumber = sequenceNumber + 1
         taskSolutionType = ""
         
@@ -3364,8 +3521,8 @@ def prepareProjectAndTasksSheets(project_inputFile, projectName_for_folder_path,
         except:
             taskDescription = ""
     
-        if dictTasksDetails["observation Name"] != "":
-            taskType = "observation"
+        if dictTasksDetails["SolutionType"]:
+            taskType = dictTasksDetails["SolutionType"]
         elif dictTasksDetails["learningResources1-name"] != "" and dictTasksDetails["learningResources1-link"] != "":
             taskType = "content"
         else:
@@ -3387,32 +3544,21 @@ def prepareProjectAndTasksSheets(project_inputFile, projectName_for_folder_path,
             parentTaskValue = ""
             parentTaskId = ""
 
-        if dictTasksDetails["observation Name"] != "":
-            pass
-            #    solutionNameOrId = dictTasksDetails["observation Name"].encode('utf-8').decode('utf-8')
-            #    taskSolutionType = "observation"
-            #    solutionDetailsInTask = checkEntityOfSolution(projectName_for_folder_path, solutionNameOrId, accessToken)
-            #    solutionSubType = solutionDetailsInTask[0]
-            #    solutionId = solutionDetailsInTask[1]
+        solutionSubTypeForTask = dictTasksDetails["SolutionSubType"]
+        solutionIdForTask = dictTasksDetails["SolutionId"]
+        taskSolutionType = dictTasksDetails["SolutionType"]
 
-
-            #    projectUpload = pd.read_csv(projectFilePath + "projectUpload.csv")
-            #    # updating the column value/data
-            #    projectUpload.loc[0, 'entityType'] = solutionDetailsInTask[0]
-
-            #    # writing into the file
-            #    projectUpload.to_csv(projectFilePath + "projectUpload.csv", index=False)
-        else:
-            solutionId = ""
-            taskSolutionType = ""
-            solutionSubType = ""
-
+        if dictTasksDetails["isAnExternalTask"] == False:
+            AnExternalTask = "False"
+        elif dictTasksDetails["isAnExternalTask"] == True:
+            AnExternalTask = "True"
+        
         if str(dictTasksDetails["Mandatory task(Yes or No)"]).strip().strip().lower() == "no":
             isDeletable = "TRUE"
         else:
             isDeletable = "FALSE"
         task_values = [taskName, taskId, taskDescription, taskType, hasAParentTask, parentTaskOperator, parentTaskValue,
-                          parentTaskId, taskSolutionType, solutionSubType, solutionId, isDeletable,bodyStartDate,bodyEndDate]
+                          parentTaskId, taskSolutionType, solutionSubTypeForTask, solutionIdForTask, isDeletable,bodyStartDate,bodyEndDate,AnExternalTask]
         task_lr_value_count = 1
         for task_lr in range(0, int(taskLearningResource_count)):
             task_lr_name = str(dictTasksDetails["learningResources" + str(task_lr_value_count) + "-name"]).strip()
@@ -3445,10 +3591,13 @@ def prepareProjectAndTasksSheets(project_inputFile, projectName_for_folder_path,
 def projectUpload(projectFile, projectName_for_folder_path, accessToken):
     urlProjectUploadApi = config.get(environment, 'elevateprojecthost') + config.get(environment, 'projectUploadApi')
     headerProjectUploadApi = {
-        'Authorization': config.get(environment, 'Authorization'),
         'X-auth-token': accessToken,
         'X-Channel-id': config.get(environment, 'X-Channel-id'),
-        'internal-access-token': config.get(environment, 'internal-access-token')
+        'internal-access-token': config.get(environment, 'internal-access-token'),
+        'tenantId': tenantIDFromTemplate,
+                'orgId' : orgIDFromTemplate
+                # adminTokenHeaderName: projAdminAccessToken
+
     }
     project_payload = {}
     filesProject = {
@@ -3511,10 +3660,10 @@ def taskUpload(projectFile, projectName_for_folder_path, accessToken):
 
         urlTasksUploadApi = config.get(environment, 'elevateprojecthost') + config.get(environment, 'taskUploadApi') + project_id
         headerTasksUploadApi = {
-            'Authorization': config.get(environment, 'Authorization'),
             'X-auth-token': accessToken,
             'X-Channel-id': config.get(environment, 'X-Channel-id'),
-            'internal-access-token': config.get(environment, 'internal-access-token')
+            'internal-access-token': config.get(environment, 'internal-access-token'),
+            'orgId' : orgIDFromTemplate
         }
         task_payload = {}
         filesTasks = {
@@ -3718,11 +3867,11 @@ def prepareaddingcertificatetemp(filePathAddProject, projectName_for_folder_path
 
     urladdcertificate = config.get(environment, 'elevateprojecthost') + config.get(environment, 'Addcertificatetemplate')
     headeraddcertificateApi = {
-        'Authorization': config.get(environment, 'Authorization'),
         'X-auth-token': accessToken,
         'X-Channel-id': config.get(environment, 'X-Channel-id'),
         'internal-access-token': config.get(environment, 'internal-access-token'),
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'orgId' : orgIDFromTemplate
     }
 
     if str(projectLevelEvidance).strip().lower() == "yes":
@@ -4103,9 +4252,10 @@ def solutionCreationAndMapping(projectName_for_folder_path, entityToUpload, list
         urlCreateProjectSolutionApi = config.get(environment, 'elevateprojecthost') + config.get(environment, 'projectSolutionCreationApi')
         headerCreateSolutionApi = {
             'Content-Type': config.get(environment, 'Content-Type'),
-            'Authorization': config.get(environment, 'Authorization'),
             'X-auth-token': accessToken,
-            'X-Channel-id': config.get(environment, 'X-Channel-id')
+            "internal-access-token" : config.get(environment, 'internal-access-token'),
+            'X-Channel-id': config.get(environment, 'X-Channel-id'),
+            'orgId' : orgIDFromTemplate
         }
         sol_payload = {
             "createdFor": orgIds,
@@ -4137,6 +4287,7 @@ def solutionCreationAndMapping(projectName_for_folder_path, entityToUpload, list
                 'Content-Type': config.get(environment, 'Content-Type'),
                 'Authorization': config.get(environment, 'Authorization'),
                 'X-auth-token': accessToken,
+                "internal-access-token" : config.get(environment, 'internal-access-token'),
                 'X-Channel-id': config.get(environment, 'X-Channel-id')
             }
             payloadMapSolutionProject = {
@@ -4167,8 +4318,18 @@ def solutionCreationAndMapping(projectName_for_folder_path, entityToUpload, list
                                                                        solutionId, accessToken)
                 newRole = rolesPGM.split(",")
                 RoleArray = list(newRole)
+                ProfessionalnewRole = ProfessionalrolesPGM.split(",")
+                ProfessionalRoleArray = list(ProfessionalnewRole)
+                
                 scopeEntities = entitiesPGMID
                 scopeRoles = solutionDetails[0]
+                scopeSubRoles = solutionDetails[1]
+                verifiedRoles = validate_roles_against_api(ProfessionalRoleArray, RoleArray)
+                mainRoleproff = verifiedRoles[0]
+                rolesPGMID = verifiedRoles[1]
+                print("mainRole", mainRoleproff)
+                print("rolesPGMID", rolesPGMID)
+
                 scope = {}
                 for i in range(len(entitiesType)):
                     entity_type = entitiesType[i]
@@ -4177,14 +4338,17 @@ def solutionCreationAndMapping(projectName_for_folder_path, entityToUpload, list
                         scope[entity_type].append(entity_value)
                     else:
                         scope[entity_type] = [entity_value]
-                scope["roles"] = RoleArray
+                scope["organizations"] = [orgIDFromTemplate]
+                scope["professional_subroles"] = rolesPGMID
+                scope["professional_role"] = mainRoleproff
                 bodySolutionUpdate = {
                   "scope": scope
                 }
+                print("bodySolutionUpdate",bodySolutionUpdate)
                 solutionUpdate(projectName_for_folder_path, accessToken, solutionId, bodySolutionUpdate)
-                userDetails = fetchUserDetails(environment, accessToken, projectAuthor)
-                matchedShikshalokamLoginId = userDetails[0]
-                projectCreator = userDetails[1]
+                # userDetails = fetchUserDetails(environment, accessToken, projectAuthor)
+                # matchedShikshalokamLoginId = userDetails[0]
+                # projectCreator = userDetails[1]
                 bodySolutionUpdate = {
                     "creator": projectCreator, "author": matchedShikshalokamLoginId}
                 solutionUpdate(projectName_for_folder_path, accessToken, solutionId, bodySolutionUpdate)
@@ -4369,6 +4533,74 @@ def downloadlogosign(filePathAddProject,projectName_for_folder_path):
                 else:
                     print("--->Logos and signature downlading are failed(check if drive link are  Anyone with the link or not)<---")
 
+def validateTenantAndOrgIdsFromProgramSheet(programFileContent):        
+    tenantIdFromProgramFile = None
+    orgIdsFromProgramFile = None
+    sheetNames = programFileContent.sheet_names()
+    # iterate through the sheets 
+    for sheet in sheetNames:
+        if sheet.strip().lower() == 'program details':
+            print("--->Checking Program details sheet...")
+            programDetailsSheet = programFileContent.sheet_by_name(sheet)
+            keysEnv = [programDetailsSheet.cell(1, col_index_env).value for col_index_env in
+                        range(programDetailsSheet.ncols)]
+            for row_index_env in range(2, programDetailsSheet.nrows):
+                dictDetailsEnv = {keysEnv[col_index_env]: programDetailsSheet.cell(row_index_env, col_index_env).value
+                                    for
+                                    col_index_env in range(programDetailsSheet.ncols)}
+                tenantIdFromProgramFile = dictDetailsEnv.get('Tenant ID')
+                orgIdsFromProgramFile = dictDetailsEnv.get('Org ID')
+
+
+    assignTenantOrgValuesToGlobalVariables(tenantIdFromProgramFile, orgIdsFromProgramFile)   
+
+def validateTenantAndOrgIdsFromResourceSheet(resourceFileContent):
+
+    for projectSheets in resourceFileContent:
+            wbproject = xlrd.open_workbook(programFile, on_demand=True)
+
+            if projectSheets.strip().lower() == 'project upload':
+                print("Checking project details sheet...")
+                detailsColCheck = wbproject.sheet_by_name(projectSheets)
+                keysColCheckDetai = [detailsColCheck.cell(0, col_index_check).value for col_index_check in range(detailsColCheck.ncols)]
+                detailsEnvSheet = wbproject.sheet_by_name(projectSheets)
+                keysEnv = [detailsEnvSheet.cell(1, col_index_env).value for col_index_env in range(detailsEnvSheet.ncols)]
+                for row_index_env in range(2, detailsEnvSheet.nrows):
+                    dictDetailsEnv = { keysEnv[col_index_env]: detailsEnvSheet.cell(row_index_env, col_index_env).value for col_index_env in range(detailsEnvSheet.ncols)}
+                    print(dictDetailsEnv['tenant_id'],"===========================================")
+    print('validating resourceFileconetnt .....')
+    tenantIdFromresourceFile = None
+    orgIdsFromresourceFile = None
+                
+    sheetNames1 = resourceFileContent.sheet_names()
+    for sheetEnv in sheetNames1:
+        if sheetEnv.strip().lower() == 'details':
+            detailsEnvSheet = resourceFileContent.sheet_by_name(sheetEnv)
+            keysEnv = [detailsEnvSheet.cell(1, col_index_env).value for col_index_env in
+                    range(detailsEnvSheet.ncols)]
+
+            for row_index_env in range(2, detailsEnvSheet.nrows):
+                dictDetailsEnv = {keysEnv[col_index_env]: detailsEnvSheet.cell(row_index_env, col_index_env).value
+                                for
+                                col_index_env in range(detailsEnvSheet.ncols)}
+                tenantIdFromresourceFile = dictDetailsEnv.get('Tenant ID')
+                orgIdsFromresourceFile = dictDetailsEnv.get('Org ID')
+
+    global roleOfResourceCreator
+    if roleOfResourceCreator not in ['org_admin', 'tenant_admin'] and not tenantIdFromresourceFile:
+        raise ValueError("Tenant ID is required in program template for role 'admin', it cannot be empty")
+
+    if roleOfResourceCreator not in ['org_admin'] and not orgIdsFromresourceFile:
+        raise ValueError("Org ID is required for role 'admin' and 'tenant_admin' in program template and cannot be empty")
+    
+    assignTenantOrgValuesToGlobalVariables(tenantIdFromresourceFile, orgIdsFromresourceFile)
+
+def assignTenantOrgValuesToGlobalVariables(tenantIdFromTheSheets, orgIdsFromTheSheets):
+    global tenantIDFromTemplate
+    tenantIDFromTemplate = clean_single_value(tenantIdFromTheSheets)
+    global orgIDFromTemplate
+    orgIDFromTemplate = clean_single_value(orgIdsFromTheSheets)
+
 # Main function were all the function def are called
 def mainFunc(MainFilePath, programFile, addObservationSolution, millisecond, isProgramnamePresent, isCourse,
              scopeEntityType=scopeEntityType):
@@ -4376,8 +4608,8 @@ def mainFunc(MainFilePath, programFile, addObservationSolution, millisecond, isP
     if not isCourse:
         parentFolder = createFileStructre(MainFilePath, addObservationSolution)
         accessToken = generateAccessToken(parentFolder)
+        validateTenantAndOrgIdsFromProgramSheet(xlrd.open_workbook(programFile, on_demand=True))
         programsFileCheck(programFile, accessToken, parentFolder, MainFilePath)
-        
         typeofSolution = validateSheets(addObservationSolution, accessToken, parentFolder)
         # sys.exit()
         wbObservation = xlrd.open_workbook(addObservationSolution, on_demand=True)
@@ -4476,7 +4708,7 @@ def mainFunc(MainFilePath, programFile, addObservationSolution, millisecond, isP
                 print("No program name detected.")
         elif typeofSolution == 2:
             criteriaUpload(parentFolder, wbObservation, millisecond, accessToken, "criteria", False)
-            userDetails = fetchUserDetails(environment, accessToken, projectServiceLoginId)
+            # userDetails = fetchUserDetails(environment, accessToken, projectServiceLoginId)
             matchedShikshalokamLoginId = userDetails[0]
             
             frameworkExternalId = frameWorkUpload(parentFolder, wbObservation, millisecond, accessToken)

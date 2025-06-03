@@ -1802,8 +1802,7 @@ module.exports = class SolutionsHelper {
 
 				let prefix = CONSTANTS.common.PREFIX_FOR_SOLUTION_LINK
 				let solutionLink = solution?.link
-
-				if (!solutionLink) {
+				if (solutionLink) {
 					solutionLink = await UTILS.md5Hash(solution._id + '###' + solution.author)
 					// replacing the userDetails tena
 					userDetails.tenantAndOrgInfo = {

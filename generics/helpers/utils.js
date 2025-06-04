@@ -835,18 +835,22 @@ function convertDurationToDays(duration) {
  */
 function factorQuery(factors, userRoleInfo) {
 	let queryFilter = []
+
 	for (let idx = 0; idx < factors.length; idx++) {
 		let factor = factors[idx]
-		console.log(factor)
 		let scope = 'scope.' + factor
 		let values = userRoleInfo[factor]
 		if (!values) continue
-		if (!Array.isArray(values)) {
-			queryFilter.push({ [scope]: { $in: values.split(',') } })
+
+		let valueArray = Array.isArray(values) ? values : values.split(',')
+
+		if (scope === 'scope.organizations') {
+			queryFilter.push({ [scope]: { $in: [...valueArray, 'ALL'] } })
 		} else {
-			queryFilter.push({ [scope]: { $in: [...values] } })
+			queryFilter.push({ [scope]: { $in: valueArray } })
 		}
 	}
+
 	return queryFilter
 }
 

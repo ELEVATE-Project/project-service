@@ -1022,7 +1022,6 @@ module.exports = class ProjectTemplatesHelper {
 					solutionId,
 					userDetails
 				)
-				solutionId, console.log(solutionUpdated, solutionId, '============================')
 				if (!solutionUpdated.success) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
@@ -1042,7 +1041,7 @@ module.exports = class ProjectTemplatesHelper {
 						name: `${newProjectTemplateTask.solutionDetails.name}-${timestamp}`,
 						externalId: `${newProjectTemplateTask.solutionDetails.externalId}-${timestamp}`,
 						description: `${newProjectTemplateTask.solutionDetails.name}-${timestamp}`,
-						programId: newProjectTemplateTask.programId,
+						programExternalId: newProjectTemplateTask.programId,
 						status: CONSTANTS.common.PUBLISHED_STATUS,
 					},
 					userDetails
@@ -1066,6 +1065,16 @@ module.exports = class ProjectTemplatesHelper {
 					newProjectTemplateTask.projectTemplateId,
 					duplicateTemplateTaskId,
 					importSolutionsResponse.result.externalId
+				)
+
+				//updating programComponents
+				await programQueries.findAndUpdate(
+					{
+						_id: newProjectTemplateTask.programId,
+					},
+					{
+						$addToSet: { components: newProjectTemplateTask.solutionDetails._id },
+					}
 				)
 			} else if (taskType === CONSTANTS.common.SURVEY) {
 				const importSolutionsResponse = await surveyService.importSurveyTemplateToSolution(
@@ -1094,6 +1103,15 @@ module.exports = class ProjectTemplatesHelper {
 					newProjectTemplateTask.projectTemplateId,
 					duplicateTemplateTaskId,
 					importSolutionsResponse.result.solutionExternalId
+				)
+				//updating programComponents
+				await programQueries.findAndUpdate(
+					{
+						_id: newProjectTemplateTask.programId,
+					},
+					{
+						$addToSet: { components: newProjectTemplateTask.solutionDetails._id },
+					}
 				)
 			} else {
 				// Default fallback task creation

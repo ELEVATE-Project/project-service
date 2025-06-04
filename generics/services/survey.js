@@ -31,17 +31,20 @@ const importSurveyTemplateToSolution = function (token, solutionId, programId, d
 				'?appName=elevate' +
 				'&programId=' +
 				programId
-
-			const options = {
+			let options = {
 				headers: {
 					'content-type': 'application/json',
 					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
 					'x-auth-token': token,
+				},
+				json: { data: data },
+			}
+			if (userDetails?.userInformation?.roles && !userDetails.userInformation?.roles.includes('org_admin')) {
+				_.assign(options.headers, {
 					'admin-auth-token': process.env.SURVEY_ADMIN_AUTH_TOKEN,
 					tenantId: userDetails.tenantAndOrgInfo.tenantId,
 					orgId: userDetails.tenantAndOrgInfo.orgId.join(','),
-				},
-				json: { data: data },
+				})
 			}
 			request.post(surveyCreateUrl, options, assessmentCallback)
 
@@ -89,11 +92,16 @@ const importObservationTemplateToSolution = function (token, solutionId, bodyDat
 					'content-type': 'application/json',
 					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
 					'x-auth-token': token,
+				},
+				json: bodyData,
+			}
+
+			if (userDetails?.userInformation?.roles && !userDetails.userInformation?.roles.includes('org_admin')) {
+				_.assign(options.headers, {
 					'admin-auth-token': process.env.SURVEY_ADMIN_AUTH_TOKEN,
 					tenantId: userDetails.tenantAndOrgInfo.tenantId,
 					orgId: userDetails.tenantAndOrgInfo.orgId.join(','),
-				},
-				json: bodyData,
+				})
 			}
 
 			request.post(observationCreateUrl, options, assessmentCallback)
@@ -130,7 +138,7 @@ const importObservationTemplateToSolution = function (token, solutionId, bodyDat
  * @param {Object} bodyData - Body data
  * @returns {JSON} - survey create or details
  */
-const surveyDetails = function (token, solutionId, bodyData) {
+const surveyDetails = function (token, solutionId, bodyData, programId) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			let observationCreateUrl =
@@ -234,14 +242,17 @@ const listSolutions = function (solutionIds, token, userDetails) {
 					'content-type': 'application/json',
 					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
 					'x-auth-token': token,
-					'admin-auth-token': process.env.SURVEY_ADMIN_AUTH_TOKEN,
-					tenantId: userDetails.tenantAndOrgInfo.tenantId,
-					orgId: userDetails.tenantAndOrgInfo.orgId.join(','),
 				},
 			}
 			options['json'] = solutionIds
+			if (userDetails?.userInformation?.roles && !userDetails?.userInformation?.roles.includes('org_admin')) {
+				_.assign(options.headers, {
+					'admin-auth-token': process.env.SURVEY_ADMIN_AUTH_TOKEN,
+					tenantId: userDetails.tenantAndOrgInfo.tenantId,
+					orgId: userDetails.tenantAndOrgInfo.orgId.join(','),
+				})
+			}
 			request.post(url, options, assessmentCallback)
-
 			function assessmentCallback(err, data) {
 				let result = {
 					success: true,
@@ -286,11 +297,15 @@ const updateSolution = function (token, updateData, solutionExternalId, userDeta
 					'content-type': 'application/json',
 					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
 					'x-auth-token': token,
+				},
+				json: updateData,
+			}
+			if (userDetails?.userInformation?.roles && !userDetails?.userInformation?.roles.includes('org_admin')) {
+				_.assign(options.headers, {
 					'admin-auth-token': process.env.SURVEY_ADMIN_AUTH_TOKEN,
 					tenantId: userDetails.tenantAndOrgInfo.tenantId,
 					orgId: userDetails.tenantAndOrgInfo.orgId.join(','),
-				},
-				json: updateData,
+				})
 			}
 			request.post(url, options, assessmentCallback)
 

@@ -27,7 +27,7 @@ module.exports = class ProjectTemplateTasksHelper {
 	 * @returns {Array} Lists of tasks.
 	 */
 
-	static extractCsvInformation(csvData, projectTemplateId, userToken) {
+	static extractCsvInformation(csvData, projectTemplateId, userToken, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let taskIds = []
@@ -127,7 +127,8 @@ module.exports = class ProjectTemplateTasksHelper {
 					if (solutionIds && solutionIds.length > 0) {
 						let fetchedSolutions = await surveyService.listSolutions(
 							{ externalId: { $in: solutionIds } },
-							userToken
+							userToken,
+							userDetails
 						)
 						if (!fetchedSolutions.success || !fetchedSolutions?.data.length > 0) {
 							throw {
@@ -184,7 +185,16 @@ module.exports = class ProjectTemplateTasksHelper {
 	 * @returns {Array} Create or update a task.
 	 */
 
-	static createOrUpdateTask(data, template, solutionData, update = false, translationData = {}, taskNo, userToken) {
+	static createOrUpdateTask(
+		data,
+		template,
+		solutionData,
+		update = false,
+		translationData = {},
+		taskNo,
+		userToken,
+		userDetails
+	) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let parsedData = data
@@ -459,7 +469,8 @@ module.exports = class ProjectTemplateTasksHelper {
 								let solutionUpdated = await surveyService.updateSolution(
 									userToken,
 									updateSolutionObj,
-									taskData.solutionDetails.externalId
+									taskData.solutionDetails.externalId,
+									userDetails
 								)
 								if (!solutionUpdated.success) {
 									throw {
@@ -509,7 +520,12 @@ module.exports = class ProjectTemplateTasksHelper {
 					})
 				})()
 
-				let csvData = await this.extractCsvInformation(tasks, projectTemplateId, userDetails.userToken)
+				let csvData = await this.extractCsvInformation(
+					tasks,
+					projectTemplateId,
+					userDetails.userToken,
+					userDetails
+				)
 				if (!csvData.success) {
 					return resolve(csvData)
 				}
@@ -568,7 +584,8 @@ module.exports = class ProjectTemplateTasksHelper {
 								false,
 								translationDataObject,
 								task + 1,
-								userDetails.userToken
+								userDetails.userToken,
+								userDetails
 							)
 
 							if (createdTask._SYSTEM_ID != '') {
@@ -598,7 +615,8 @@ module.exports = class ProjectTemplateTasksHelper {
 								false,
 								translationDataObject,
 								subTaskIds[item],
-								userDetails.userToken
+								userDetails.userToken,
+								userDetails
 							)
 
 							if (createdTask._SYSTEM_ID != '') {

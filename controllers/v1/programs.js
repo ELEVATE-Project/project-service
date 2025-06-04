@@ -226,6 +226,10 @@ module.exports = class Programs extends Abstract {
 	async details(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				if (req.headers.hasOwnProperty('tenantidforadmin')) {
+					req.userDetails.userInformation.tenantId = req.headers.tenantidforadmin
+					req.userDetails.userInformation.organizationId = req.headers.orgidforadmin
+				}
 				let programData = await programsHelper.details(
 					req.params._id,
 					'all', //projections

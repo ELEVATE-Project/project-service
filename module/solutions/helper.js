@@ -1264,7 +1264,7 @@ module.exports = class SolutionsHelper {
 				}
 				queryData.data['_id'] = solutionId
 				queryData.data['tenantId'] = tenantId
-				queryData.data['orgId'] = { $in: [orgId] }
+				// queryData.data['orgId'] = { $in: [orgId] }
 				let matchQuery = queryData.data
 				let solutionData = await solutionsQueries.solutionsDocument(matchQuery, [
 					'_id',

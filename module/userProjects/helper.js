@@ -5120,32 +5120,9 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 						message: CONSTANTS.apiResponses.OBSERVATION_NOT_CREATED,
 					}
 				}
-
 				result['solutionId'] = observationCreatedFromTemplate.data.solutionId
 				result['observationId'] = observationCreatedFromTemplate.data._id
-				let fetchedSolutions = await surveyService.listSolutions(
-					{
-						externalId: { $in: [observationCreatedFromTemplate.data.solutionExternalId] },
-					},
-					observationData.token
-				)
-				if (!fetchedSolutions || !fetchedSolutions?.data?.length > 0) {
-					throw {
-						message: CONSTANTS.apiResponses.SOLUTION_NOT_FOUND,
-						status: HTTP_STATUS_CODE.bad_request.status,
-					}
-				}
-				fetchedSolutions = fetchedSolutions.data[0]
 
-				let solutionDetails = {
-					subType: fetchedSolutions.entityType,
-					type: fetchedSolutions.type,
-					_id: fetchedSolutions._id,
-					externalId: fetchedSolutions.externalId,
-					name: fetchedSolutions.name,
-					isReusable: fetchedSolutions.isReusable,
-					minNoOfSubmissionsRequired: observationData.solutionDetails.minNoOfSubmissionsRequired,
-				}
 				await projectQueries.findOneAndUpdate(
 					{
 						_id: new ObjectId(observationData.project._id),
@@ -5153,26 +5130,20 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 					},
 					{
 						$set: {
-							'tasks.$.solutionDetails': solutionDetails,
+							'tasks.$.solutionDetails': observationCreatedFromTemplate.data.solutionDetails,
 						},
 					}
 				)
-			} else {
-				let updateSolutionObj = {
-					referenceFrom: CONSTANTS.common.PROJECT,
-					project: observationData.project,
-				}
-				let solutionUpdated = await surveyService.updateSolution(
-					observationData.token,
-					updateSolutionObj,
-					observationData.solutionDetails.externalId
-				)
-				if (!solutionUpdated.success) {
-					throw {
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: CONSTANTS.apiResponses.SOLUTION_NOT_UPDATED,
+				//updating programComponents
+				await programsQueries.findAndUpdate(
+					{
+						_id: observationData.programId,
+					},
+					{
+						$addToSet: { components: observationCreatedFromTemplate.data.solutionId },
 					}
-				}
+				)
+			} else {
 				let startDate = new Date()
 				let endDate = new Date()
 				endDate.setFullYear(endDate.getFullYear() + 1)
@@ -5248,52 +5219,34 @@ function _surveyDetails(surveyData, userRoleAndProfileInformation = {}) {
 					surveyData.project.taskId = templateTasks[0]._id
 				}
 			}
-
+			let surveyCreated
 			if (surveyData.solutionDetails.isReusable) {
 				// Creating child solution
-				let surveyCreatedFromTemplate = await surveyService.importSurveyTemplateToSolution(
-					surveyData.token,
-					surveyData.solutionDetails._id,
-					surveyData.programId,
-					{
-						name: surveyData.solutionDetails.name + '-' + UTILS.epochTime(),
-						description: surveyData.solutionDetails.name + '-' + UTILS.epochTime(),
-						project: surveyData.project,
-					}
-				)
-
-				if (!surveyCreatedFromTemplate.success || !surveyCreatedFromTemplate?.data?.solutionId) {
+				surveyCreated = await surveyService.surveyDetails(surveyData.token, surveyData.solutionDetails._id, {
+					name: surveyData.solutionDetails.name + '-' + UTILS.epochTime(),
+					description: surveyData.solutionDetails.name + '-' + UTILS.epochTime(),
+					project: surveyData.project,
+					programExternalId: surveyData.programId,
+				})
+				if (!surveyCreated.success || !surveyCreated?.data?.solution) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.SURVEY_NOT_CREATED,
 					}
 				}
-				surveyData.solutionDetails._id = surveyCreatedFromTemplate.data.solutionId
-				surveyData.solutionDetails.externalId = surveyCreatedFromTemplate.data.solutionExternalId
-				// fetch details of solution to store in solutionDetails
-				let fetchedSolutions = await surveyService.listSolutions(
-					{
-						externalId: { $in: [surveyData.solutionDetails.externalId] },
-					},
-					surveyData.token
-				)
-				if (!fetchedSolutions.success && !fetchedSolutions?.data?.length > 0) {
-					throw {
-						message: CONSTANTS.apiResponses.SOLUTION_NOT_FOUND,
-						status: HTTP_STATUS_CODE.bad_request.status,
-					}
-				}
-				fetchedSolutions = fetchedSolutions.data[0]
-
+				surveyCreated.data = surveyCreated.data.solution
+				surveyData.solutionDetails._id = surveyCreated.data.solutionId
+				surveyData.solutionDetails.externalId = surveyCreated.data.solutionExternalId
 				let solutionDetails = {
-					subType: fetchedSolutions.entityType,
-					type: fetchedSolutions.type,
-					_id: fetchedSolutions._id,
-					externalId: fetchedSolutions.externalId,
-					name: fetchedSolutions.name,
-					isReusable: fetchedSolutions.isReusable,
-					minNoOfSubmissionsRequired: fetchedSolutions.minNoOfSubmissionsRequired,
+					subType: surveyCreated.data.entityType,
+					type: surveyCreated.data.type,
+					_id: surveyCreated.data._id,
+					externalId: surveyCreated.data.externalId,
+					name: surveyCreated.data.name,
+					isReusable: surveyCreated.data.isReusable,
+					minNoOfSubmissionsRequired: surveyCreated.data.minNoOfSubmissionsRequired,
 				}
+
 				// Updating task solutionDetails with child solution data
 				await projectQueries.findOneAndUpdate(
 					{
@@ -5306,38 +5259,33 @@ function _surveyDetails(surveyData, userRoleAndProfileInformation = {}) {
 						},
 					}
 				)
-			} else {
-				let updateSolutionObj = {
-					referenceFrom: CONSTANTS.common.PROJECT,
-					project: surveyData.project,
-				}
-				let solutionUpdated = await surveyService.updateSolution(
-					surveyData.token,
-					updateSolutionObj,
-					surveyData.solutionDetails.externalId
+
+				//updating programComponents
+				await programsQueries.findAndUpdate(
+					{
+						_id: surveyData.programId,
+					},
+					{
+						$addToSet: { components: surveyCreated.data.solutionId },
+					}
 				)
-				if (!solutionUpdated.success) {
+			} else {
+				userRoleAndProfileInformation['project'] = surveyData.project
+				// create survey using details api
+				surveyCreated = await surveyService.surveyDetails(
+					surveyData.token,
+					surveyData.solutionDetails._id,
+					userRoleAndProfileInformation
+				)
+				if (!surveyCreated.success || !surveyCreated?.data?.assessment?.submissionId) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
-						message: CONSTANTS.apiResponses.SOLUTION_NOT_UPDATED,
+						message: CONSTANTS.apiResponses.SURVEY_NOT_CREATED,
 					}
 				}
 			}
+			result['surveySubmissionId'] = surveyCreated.data.assessment.submissionId
 
-			// create survey using details api
-			let surveyCreated = await surveyService.surveyDetails(
-				surveyData.token,
-				surveyData.solutionDetails._id,
-				userRoleAndProfileInformation
-			)
-			if (!surveyCreated.success || !surveyCreated?.data?.assessment?.submissionId) {
-				throw {
-					status: HTTP_STATUS_CODE.bad_request.status,
-					message: CONSTANTS.apiResponses.SURVEY_NOT_CREATED,
-				}
-			} else {
-				result['surveySubmissionId'] = surveyCreated.data.assessment.submissionId
-			}
 			result['solutionId'] = surveyData.solutionDetails._id
 
 			return resolve({

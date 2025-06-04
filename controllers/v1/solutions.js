@@ -90,7 +90,8 @@ module.exports = class Solutions extends Abstract {
 			try {
 				let solutionData = await solutionsHelper.createSolution(
 					req.body,
-					true //this is true for when its called via API calls
+					true, //this is true for when its called via API calls
+					req.userDetails
 				)
 
 				return resolve(solutionData)
@@ -180,7 +181,7 @@ module.exports = class Solutions extends Abstract {
 				let solutionData = await solutionsHelper.update(
 					req.params._id,
 					req.body,
-					req.userDetails.userInformation.userId,
+					req.userDetails,
 					true //this is true for when its called via API calls
 				)
 
@@ -246,7 +247,10 @@ module.exports = class Solutions extends Abstract {
 					req.body,
 					req.pageNo,
 					req.pageSize,
-					req.searchText
+					req.searchText,
+					[],
+					req.userDetails,
+					req.query.currentOrgOnly ? req.query.currentOrgOnly : false
 				)
 
 				return resolve(solutionData)
@@ -448,7 +452,8 @@ module.exports = class Solutions extends Abstract {
 			try {
 				let solutionData = await solutionsHelper.fetchLink(
 					req.params._id,
-					req.userDetails.userInformation.userId
+					req.userDetails,
+					req.userDetails.userToken
 				)
 
 				return resolve(solutionData)
@@ -510,7 +515,8 @@ module.exports = class Solutions extends Abstract {
 					req.userDetails.userToken,
 					req.query.hasOwnProperty('createProject')
 						? UTILS.convertStringToBoolean(req.query.createProject)
-						: true
+						: true,
+					req.userDetails
 				)
 				return resolve(solutionData)
 			} catch (error) {
@@ -714,7 +720,8 @@ module.exports = class Solutions extends Abstract {
 					req.query.programId ? req.query.programId : '',
 					req.pageSize,
 					req.pageNo,
-					req.searchText
+					req.searchText,
+					req.userDetails
 				)
 
 				return resolve(targetedSolutions)
@@ -851,7 +858,8 @@ module.exports = class Solutions extends Abstract {
 					req.searchText,
 					req.query.filter,
 					req.query.surveyReportPage ? req.query.surveyReportPage : '',
-					req.query.currentScopeOnly ? req.query.currentScopeOnly : false
+					req.query.currentScopeOnly ? req.query.currentScopeOnly : false,
+					req.userDetails
 				)
 
 				return resolve(observations)
@@ -1028,7 +1036,7 @@ module.exports = class Solutions extends Abstract {
 	async getDetails(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let solutionData = await solutionsHelper.getDetails(req.params._id)
+				let solutionData = await solutionsHelper.getDetails(req.params._id, req.userDetails)
 
 				solutionData['result'] = solutionData.data
 
@@ -1145,11 +1153,7 @@ module.exports = class Solutions extends Abstract {
 	async details(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let solutionData = await solutionsHelper.details(
-					req.params._id,
-					req.body,
-					req.userDetails.userInformation.userId
-				)
+				let solutionData = await solutionsHelper.details(req.params._id, req.body, req.userDetails)
 				return resolve(solutionData)
 			} catch (error) {
 				return reject({

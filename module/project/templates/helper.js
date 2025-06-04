@@ -36,10 +36,11 @@ module.exports = class ProjectTemplatesHelper {
 	 * @method
 	 * @name extractCsvInformation
 	 * @param {Object} csvData - csv data.
+	 * @param {Object} userDetails - user related info
 	 * @returns {Object} Extra csv information.
 	 */
 
-	static extractCsvInformation(csvData) {
+	static extractCsvInformation(csvData, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let categoryIds = []
@@ -69,15 +70,15 @@ module.exports = class ProjectTemplatesHelper {
 				})
 
 				let categoriesData = {}
-
 				if (categoryIds.length > 0) {
+					let matchQuery = {}
+					matchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+					matchQuery['externalId'] = { $in: categoryIds }
 					// what is category documents
-					let categories = await projectCategoriesQueries.categoryDocuments(
-						{
-							externalId: { $in: categoryIds },
-						},
-						['externalId', 'name']
-					)
+					let categories = await projectCategoriesQueries.categoryDocuments(matchQuery, [
+						'externalId',
+						'name',
+					])
 
 					if (!categories.length > 0) {
 						throw {
@@ -302,7 +303,6 @@ module.exports = class ProjectTemplatesHelper {
 				})
 				parsedData['translations'] = translations
 				parsedData.isReusable = true
-
 				return resolve(parsedData)
 			} catch (error) {
 				return reject(error)
@@ -320,7 +320,7 @@ module.exports = class ProjectTemplatesHelper {
 	 * @returns {Object} Bulk create project templates.
 	 */
 
-	static bulkCreate(templates, userId, translationFiles = {}) {
+	static bulkCreate(templates, userDetails, translationFiles = {}) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				if (templates[0].solutionId && templates[0].solutionId !== '') {
@@ -345,8 +345,7 @@ module.exports = class ProjectTemplatesHelper {
 					})
 				})()
 
-				let csvInformation = await this.extractCsvInformation(templates)
-
+				let csvInformation = await this.extractCsvInformation(templates, userDetails)
 				if (!csvInformation.success) {
 					return resolve(csvInformation)
 				}
@@ -367,14 +366,13 @@ module.exports = class ProjectTemplatesHelper {
 
 				for (let template = 0; template < templates.length; template++) {
 					let currentData = templates[template]
-					let templateData = await projectTemplateQueries.templateDocument(
-						{
-							status: CONSTANTS.common.PUBLISHED,
-							externalId: currentData.externalId,
-							isReusable: true,
-						},
-						['_id']
-					)
+					// create match query
+					let matchQuery = {}
+					matchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+					matchQuery['status'] = CONSTANTS.common.PUBLISHED
+					matchQuery['externalId'] = currentData.externalId
+					matchQuery['isReusable'] = true
+					let templateData = await projectTemplateQueries.templateDocument(matchQuery, ['_id'])
 
 					if (templateData.length > 0 && templateData[0]._id) {
 						currentData['_SYSTEM_ID'] = CONSTANTS.apiResponses.PROJECT_TEMPLATE_EXISTS
@@ -383,13 +381,18 @@ module.exports = class ProjectTemplatesHelper {
 						let templateData = await this.templateData(
 							currentData,
 							csvInformation.data,
-							userId,
+							userDetails.userInformation.userId,
 							translationData
 						)
 
 						templateData.status = CONSTANTS.common.PUBLISHED_STATUS
-						templateData.createdBy = templateData.updatedBy = templateData.userId = userId
+						templateData.createdBy =
+							templateData.updatedBy =
+							templateData.userId =
+								userDetails.userInformation.userId
 						templateData.isReusable = true
+						templateData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+						templateData['orgId'] = userDetails.tenantAndOrgInfo.orgId[0]
 
 						let createdTemplate = await projectTemplateQueries.createTemplate(templateData)
 
@@ -409,9 +412,10 @@ module.exports = class ProjectTemplatesHelper {
 									},
 									{
 										$inc: { noOfProjects: 1 },
-									}
+									},
+									{},
+									userDetails
 								)
-
 								if (!updatedCategories.success) {
 									currentData['_SYSTEM_ID'] = updatedCategories.message
 								}
@@ -966,18 +970,23 @@ module.exports = class ProjectTemplatesHelper {
 	 * @param {String} userId - logged in user id.
 	 * @param {String} link - solution link.
 	 * @param {String} language- languageCode
+	 * @param {Object} userDetails - loggedin user's info
 	 * @returns {Array} Project templates data.
 	 */
 
-	static details(templateId = '', link = '', userId = '', isAPrivateProgram, language = '') {
+	static details(templateId = '', link = '', userId = '', isAPrivateProgram, language = '', userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let solutionsResult = {}
 				let findQuery = {}
+				let tenantId = userDetails.userInformation.tenantId
+				let orgId = userDetails.userInformation.organizationId
 				//get data when link is given
 				if (link != '') {
 					let queryData = {}
 					queryData['link'] = link
+					queryData['tenantId'] = tenantId
+					queryData['orgId'] = { $in: [orgId] }
 
 					//   fetch solution details based on the link
 					let solutionDocument = await solutionsQueries.solutionsDocument(queryData, [
@@ -1016,6 +1025,9 @@ module.exports = class ProjectTemplatesHelper {
 						findQuery['externalId'] = templateId
 					}
 				}
+
+				findQuery['tenantId'] = tenantId
+				findQuery['orgId'] = { $in: [orgId] }
 				//getting template data using templateId
 				let templateData = await projectTemplateQueries.templateDocument(findQuery, 'all', [
 					'ratings',
@@ -1029,7 +1041,6 @@ module.exports = class ProjectTemplatesHelper {
 					'updatedAt',
 					'__v',
 				])
-
 				// Fetch downloadable urls for the category evidences
 				if (templateData[0].categories && templateData[0].categories.length > 0) {
 					// iterate over each category
@@ -1144,6 +1155,8 @@ module.exports = class ProjectTemplatesHelper {
 					let certificateTemplateDetails = await certificateTemplateQueries.certificateTemplateDocument(
 						{
 							_id: templateData[0].certificateTemplateId,
+							tenantId: tenantId,
+							orgId: { $in: ['ALL', orgId] },
 						},
 						['criteria']
 					)
@@ -1158,7 +1171,7 @@ module.exports = class ProjectTemplatesHelper {
 				}
 
 				if (templateData[0].tasks && templateData[0].tasks.length > 0) {
-					templateData[0].tasks = await this.tasksAndSubTasks(templateData[0]._id, language)
+					templateData[0].tasks = await this.tasksAndSubTasks(templateData[0]._id, language, tenantId, orgId)
 				}
 				let result = await _templateInformation(templateData[0])
 				if (!result.success) {
@@ -1171,6 +1184,8 @@ module.exports = class ProjectTemplatesHelper {
 					const projectIdQuery = {
 						userId: userId,
 						projectTemplateId: templateData[0]._id,
+						tenantId: tenantId,
+						orgId: orgId,
 					}
 
 					if (isAPrivateProgram !== '') {
@@ -1216,16 +1231,20 @@ module.exports = class ProjectTemplatesHelper {
 	 * @name tasksAndSubTasks
 	 * @param {Array} templateId - Template id.
 	 * @param {String} language - language code
+	 * @param {String} tenantId - loggedin user's tenant id
+	 * @param {String} orgId - loggedin user's org id
 	 * @returns {Array} Tasks and sub task.
 	 */
 
-	static tasksAndSubTasks(templateId, language) {
+	static tasksAndSubTasks(templateId, language, tenantId, orgId) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				const templateDocument = await projectTemplateQueries.templateDocument(
 					{
 						_id: templateId,
 						status: CONSTANTS.common.PUBLISHED,
+						tenantId: tenantId,
+						orgId: { $in: [orgId] },
 					},
 					['tasks', 'taskSequence']
 				)
@@ -1360,11 +1379,21 @@ module.exports = class ProjectTemplatesHelper {
 	 * @returns {Object}            - project templates list.
 	 */
 
-	static list(pageNo = '', pageSize = '', searchText = '') {
+	static list(pageNo = '', pageSize = '', searchText = '', currentOrgOnly = false, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Create a query object with the 'isReusable' property set to true.
 				let queryObject = { isReusable: true }
+				currentOrgOnly = UTILS.convertStringToBoolean(currentOrgOnly)
+
+				queryObject['tenantId'] = userDetails.userInformation.tenantId
+				queryObject['orgId'] = { $in: ['ALL', userDetails.userInformation.organizationId] }
+
+				// handle currentOrgOnly filter
+				if (currentOrgOnly) {
+					let organizationId = userDetails.userInformation.organizationId
+					queryObject['orgId'] = { $in: [organizationId] }
+				}
 
 				// If 'searchText' is provided, create a search query using '$or'.
 				if (searchText !== '') {

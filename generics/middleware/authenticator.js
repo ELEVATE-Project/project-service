@@ -10,6 +10,7 @@ const jwt = require('jsonwebtoken')
 const fs = require('fs')
 const path = require('path')
 const isBearerRequired = process.env.IS_AUTH_TOKEN_BEARER === 'true'
+const userService = require('../services/users')
 
 var respUtil = function (resp) {
 	return {
@@ -21,7 +22,7 @@ var respUtil = function (resp) {
 
 var removedHeaders = [
 	'host',
-	'origin',
+	// 'origin',
 	'accept',
 	'referer',
 	'content-length',
@@ -67,8 +68,34 @@ module.exports = async function (req, res, next, token = '') {
 		return
 	}
 
-	let internalAccessApiPaths = ['/templates/bulkCreate', '/projectAttributes/update', '/scp/publishTemplateAndTasks']
+	let internalAccessApiPaths = [
+		'/templates/bulkCreate',
+		'/templates/update',
+		'/projectAttributes/update',
+		'/scp/publishTemplateAndTasks',
+		'/library/categories/create',
+		'/library/categories/update',
+		'/programs/create',
+		'/programs/update',
+		'/admin/createIndex',
+		'/solutions/create',
+		'/solutions/update',
+		'/forms/create',
+		'/forms/update',
+		'/templateTasks/bulkCreate',
+		'/certificateBaseTemplates/createOrUpdate',
+		'/certificateTemplates/createOrUpdate',
+		'/certificateTemplates/uploadTemplate',
+		'/certificateTemplates/createSvg',
+		'/solutions/getDetails',
+		'/userProjects/deleteUserPIIData',
+	]
 	let performInternalAccessTokenCheck = false
+	let adminHeader = false
+	if (process.env.ADMIN_ACCESS_TOKEN) {
+		adminHeader = req.headers[process.env.ADMIN_TOKEN_HEADER_NAME]
+	}
+
 	await Promise.all(
 		internalAccessApiPaths.map(async function (path) {
 			if (req.path.includes(path)) {
@@ -76,7 +103,6 @@ module.exports = async function (req, res, next, token = '') {
 			}
 		})
 	)
-
 	if (performInternalAccessTokenCheck) {
 		if (req.headers['internal-access-token'] !== process.env.INTERNAL_ACCESS_TOKEN) {
 			rspObj.errCode = CONSTANTS.apiResponses.TOKEN_MISSING_CODE
@@ -117,6 +143,7 @@ module.exports = async function (req, res, next, token = '') {
 
 	// <---- For Elevate user service user compactibility ---->
 	let decodedToken = null
+	let userInformation = {}
 	try {
 		if (process.env.AUTH_METHOD === CONSTANTS.common.AUTH_METHOD.NATIVE) {
 			try {
@@ -187,6 +214,330 @@ module.exports = async function (req, res, next, token = '') {
 			decodedToken = decodedToken || {}
 			decodedToken['data'] = data
 		}
+
+		if (!decodedToken) {
+			rspObj.errCode = CONSTANTS.apiResponses.TOKEN_MISSING_CODE
+			rspObj.errMsg = CONSTANTS.apiResponses.TOKEN_MISSING_MESSAGE
+			rspObj.responseCode = HTTP_STATUS_CODE['unauthorized'].status
+			return res.status(HTTP_STATUS_CODE['unauthorized'].status).send(respUtil(rspObj))
+		}
+
+		// Path to config.json
+		let configFilePath
+		if (process.env.AUTH_CONFIG_FILE_PATH) {
+			configFilePath = path.resolve(PROJECT_ROOT_DIRECTORY, process.env.AUTH_CONFIG_FILE_PATH)
+		}
+
+		// Initialize variables
+		let configData = {}
+		let defaultTokenExtraction = false
+
+		// Check if config.json exists
+		if (fs.existsSync(configFilePath)) {
+			// Read and parse the config.json file
+			const rawData = fs.readFileSync(configFilePath)
+			try {
+				configData = JSON.parse(rawData)
+				if (!configData.authTokenUserInformation) {
+					defaultTokenExtraction = true
+				}
+				configData = configData.authTokenUserInformation
+			} catch (error) {
+				console.error('Error parsing config.json:', error)
+			}
+		} else {
+			// If file doesn't exist, set defaultTokenExtraction to false
+			defaultTokenExtraction = true
+		}
+
+		let organizationKey = 'organization_id'
+
+		// Create user details to request
+		req.userDetails = {
+			userToken: token,
+		}
+
+		// performing default token data extraction
+		if (defaultTokenExtraction) {
+			if (!decodedToken.data.organization_ids || !decodedToken.data.tenant_id) {
+				rspObj.errCode = CONSTANTS.apiResponses.TENANTID_AND_ORGID_REQUIRED_IN_TOKEN_CODE
+				rspObj.errMsg = CONSTANTS.apiResponses.TENANTID_AND_ORGID_REQUIRED_IN_TOKEN_MESSAGE
+				rspObj.responseCode = HTTP_STATUS_CODE['bad_request'].status
+				return res.status(HTTP_STATUS_CODE['bad_request'].status).send(respUtil(rspObj))
+			}
+
+			//here assuming that req.headers['orgid'] will be a single value if multiple passed first element of the array will be taken
+			let fetchSingleOrgIdFunc = await fetchSingleOrgIdFromProvidedData(
+				decodedToken.data.tenant_id.toString(),
+				decodedToken.data.organization_ids,
+				req.headers['orgid'],
+				token
+			)
+
+			if (!fetchSingleOrgIdFunc.success) {
+				return res.status(HTTP_STATUS_CODE['unauthorized'].status).send(respUtil(fetchSingleOrgIdFunc.errorObj))
+			}
+			userInformation = {
+				userId:
+					typeof decodedToken.data.id == 'string' ? decodedToken.data.id : decodedToken.data.id.toString(),
+				userName: decodedToken.data.name,
+				organizationId: fetchSingleOrgIdFunc.orgId,
+				firstName: decodedToken.data.name,
+				roles: decodedToken.data.roles.map((role) => role.title),
+				tenantId: decodedToken.data.tenant_id.toString(),
+			}
+		} else {
+			for (let key in configData) {
+				if (configData.hasOwnProperty(key)) {
+					let keyValue = getNestedValue(decodedToken, configData[key])
+					if (key == 'userId') {
+						keyValue = keyValue?.toString()
+					}
+					if (key === organizationKey) {
+						let value = getOrgId(req.headers, decodedToken, configData[key])
+						userInformation[`organizationId`] = value.toString()
+						decodedToken.data[key] = value
+						continue
+					}
+					if (key === 'roles') {
+						let orgId = getOrgId(req.headers, decodedToken, configData[organizationKey])
+						// Now extract roles using fully dynamic path
+						const rolePathTemplate = configData['roles']
+						decodedToken.data[organizationKey] = orgId
+						const resolvedRolePath = resolvePathTemplate(rolePathTemplate, decodedToken.data)
+						const roles = getNestedValue(decodedToken, resolvedRolePath) || []
+						userInformation[`${key}`] = roles
+						decodedToken.data[key] = roles
+						continue
+					}
+
+					// For each key in config, assign the corresponding value from decodedToken
+					decodedToken.data[key] = keyValue
+					if (key == 'tenant_id') {
+						userInformation[`tenantId`] = keyValue.toString()
+					} else {
+						userInformation[`${key}`] = keyValue
+					}
+				}
+			}
+			if (userInformation.roles && Array.isArray(userInformation.roles) && userInformation.roles.length) {
+				userInformation.roles = userInformation.roles.map((role) => role.title)
+			}
+		}
+
+		// throw error if tenant_id or organization_id is not present in the decoded token
+		if (
+			!decodedToken.data.tenant_id ||
+			!(decodedToken.data.tenant_id.toString().length > 0) ||
+			!decodedToken.data.organization_id ||
+			!(decodedToken.data.organization_id.toString().length > 0)
+		) {
+			rspObj.errCode = CONSTANTS.apiResponses.TENANTID_AND_ORGID_REQUIRED_IN_TOKEN_CODE
+			rspObj.errMsg = CONSTANTS.apiResponses.TENANTID_AND_ORGID_REQUIRED_IN_TOKEN_MESSAGE
+			rspObj.responseCode = HTTP_STATUS_CODE['bad_request'].status
+			return res.status(HTTP_STATUS_CODE['bad_request'].status).send(respUtil(rspObj))
+		}
+
+		/**
+		 * Validate if provided orgId(s) belong to the tenant by checking against related_orgs.
+		 *
+		 * @param {String} tenantId - ID of the tenant
+		 * @param {String} orgId - Comma separated string of org IDs or 'ALL'
+		 * @returns {Object} - Success with validOrgIds array or failure with error object
+		 */
+		async function validateIfOrgsBelongsToTenant(tenantId, orgId, token) {
+			let orgIdArr = Array.isArray(orgId) ? orgId : typeof orgId === 'string' ? orgId.split(',') : []
+			let orgDetails = await userService.fetchTenantDetails(tenantId, token)
+			let validOrgIds = null
+
+			if (orgIdArr.includes('ALL') || orgIdArr.includes('all')) {
+				validOrgIds = ['ALL']
+			} else {
+				if (
+					!orgDetails ||
+					!orgDetails.success ||
+					!orgDetails.data ||
+					!(Object.keys(orgDetails.data).length > 0) ||
+					!orgDetails.data.organizations ||
+					!(orgDetails.data.organizations.length > 0)
+				) {
+					let errorObj = {}
+					errorObj.errCode = CONSTANTS.apiResponses.ORG_DETAILS_FETCH_UNSUCCESSFUL_CODE
+					errorObj.errMsg = CONSTANTS.apiResponses.ORG_DETAILS_FETCH_UNSUCCESSFUL_MESSAGE
+					errorObj.responseCode = HTTP_STATUS_CODE['bad_request'].status
+					return { success: false, errorObj: errorObj }
+				}
+
+				// convert the types of items to string
+				orgDetails.data.related_orgs = orgDetails.data.organizations.map((data) => {
+					return data.code.toString()
+				})
+				// aggregate valid orgids
+
+				let relatedOrgIds = orgDetails.data.related_orgs
+				validOrgIds = orgIdArr.filter((id) => relatedOrgIds.includes(id))
+
+				if (!(validOrgIds.length > 0)) {
+					rspObj.errCode = CONSTANTS.apiResponses.TENANTID_AND_ORGID_REQUIRED_IN_TOKEN_CODE
+					rspObj.errMsg = CONSTANTS.apiResponses.TENANTID_AND_ORGID_REQUIRED_IN_TOKEN_MESSAGE
+					rspObj.responseCode = HTTP_STATUS_CODE['bad_request'].status
+					return res.status(HTTP_STATUS_CODE['bad_request'].status).send(respUtil(rspObj))
+				}
+			}
+
+			return { success: true, validOrgIds: validOrgIds }
+		}
+
+		/**
+		 * Fetches a valid orgId from the provided data, checking if it's valid for the given tenant.
+		 *
+		 * @param {String} tenantId - ID of the tenant
+		 * @param {String[]} orgIdArr - Array of orgIds to choose from
+		 * @param {String} orgIdFromHeader - The orgId provided in the request headers
+		 * @returns {Promise<Object>} - Returns a promise resolving to an object containing the success status, orgId, or error details
+		 */
+		async function fetchSingleOrgIdFromProvidedData(tenantId, orgIdArr, orgIdFromHeader, token) {
+			try {
+				// Check if orgIdFromHeader is provided and valid
+				if (orgIdFromHeader && orgIdFromHeader != '') {
+					if (!orgIdArr.includes(orgIdFromHeader)) {
+						throw CONSTANTS.apiResponses.TENANTID_AND_ORGID_REQUIRED_IN_TOKEN_CODE
+					}
+
+					let validateOrgsResult = await validateIfOrgsBelongsToTenant(tenantId, orgIdFromHeader, token)
+
+					if (!validateOrgsResult.success) {
+						throw CONSTANTS.apiResponses.TENANTID_AND_ORGID_REQUIRED_IN_TOKEN_CODE
+					}
+
+					return { success: true, orgId: orgIdFromHeader }
+				}
+
+				// If orgIdFromHeader is not provided, check orgIdArr
+				if (orgIdArr.length > 0) {
+					return { success: true, orgId: orgIdArr[0] }
+				}
+
+				// If no orgId is found, throw error
+				throw CONSTANTS.apiResponses.TENANTID_AND_ORGID_REQUIRED_IN_TOKEN_CODE
+			} catch (err) {
+				// Handle error when no valid orgId is found
+				if (orgIdArr.length > 0) {
+					return { success: true, orgId: orgIdArr[0] }
+				}
+
+				rspObj.errCode = CONSTANTS.apiResponses.TENANTID_AND_ORGID_REQUIRED_IN_TOKEN_CODE
+				rspObj.errMsg = CONSTANTS.apiResponses.TENANTID_AND_ORGID_REQUIRED_IN_TOKEN_MESSAGE
+				rspObj.responseCode = HTTP_STATUS_CODE['bad_request'].status
+				return res.status(HTTP_STATUS_CODE['bad_request'].status).send(respUtil(rspObj))
+			}
+		}
+
+		/**
+		 * Extract tenantId and orgId from incoming request or decoded token.
+		 *
+		 * Priority order: body -> query -> headers -> decoded token data
+		 *
+		 * @param {Object} req - Express request object
+		 * @param {Object} decodedTokenData - Decoded JWT token data
+		 * @returns {Object} - Success with tenantId and orgId or failure object
+		 */
+		function getTenantIdAndOrgIdFromTheTheReqIntoHeaders(req, decodedTokenData) {
+			// Step 1: Check in the request body
+			if (req.body && req.body.tenantId && req.body.orgId) {
+				return { success: true, tenantId: req.body.tenantId, orgId: req.body.orgId }
+			}
+
+			// Step 2: Check in query parameters if not found in body
+			if (req.query.tenantId && req.query.orgId) {
+				return { success: true, tenantId: req.query.tenantId, orgId: req.query.orgId }
+			}
+
+			// Step 3: Check in headers if not found in query params
+			if (req.headers['tenantid'] && req.headers['orgid']) {
+				return { success: true, tenantId: req.headers['tenantid'], orgId: req.headers['orgid'] }
+			}
+
+			// Step 4: Check in user token (already decoded) if still not found
+			if (decodedTokenData && decodedTokenData.tenantId && decodedTokenData.orgId) {
+				return { success: true, tenantId: decodedTokenData.tenantId, orgId: decodedTokenData.orgId }
+			}
+
+			return { sucess: false }
+		}
+
+		let userRoles = decodedToken.data.roles.map((role) => role.title)
+		if (performInternalAccessTokenCheck) {
+			decodedToken.data['tenantAndOrgInfo'] = {}
+			// validate SUPER_ADMIN
+			if (adminHeader) {
+				if (adminHeader != process.env.ADMIN_ACCESS_TOKEN) {
+					return res.status(HTTP_STATUS_CODE['unauthorized'].status).send(respUtil(rspObj))
+				}
+				decodedToken.data.roles.push({ title: CONSTANTS.common.ADMIN_ROLE })
+
+				let result = getTenantIdAndOrgIdFromTheTheReqIntoHeaders(req, decodedToken.data)
+				if (!result.success) {
+					rspObj.errCode = reqMsg.ADMIN_TOKEN.MISSING_CODE
+					rspObj.errMsg = reqMsg.ADMIN_TOKEN.MISSING_MESSAGE
+					rspObj.responseCode = HTTP_STATUS_CODE['unauthorized'].status
+					return res.status(HTTP_STATUS_CODE['unauthorized'].status).send(respUtil(rspObj))
+				}
+
+				req.headers['tenantid'] = result.tenantId
+				req.headers['orgid'] = result.orgId
+
+				let validateOrgsResult = await validateIfOrgsBelongsToTenant(
+					req.headers['tenantid'],
+					req.headers['orgid'],
+					token
+				)
+
+				if (!validateOrgsResult.success) {
+					return res
+						.status(HTTP_STATUS_CODE['unauthorized'].status)
+						.send(respUtil(validateOrgsResult.errorObj))
+				}
+
+				req.headers['orgid'] = validateOrgsResult.validOrgIds
+			} else if (userRoles.includes(CONSTANTS.common.TENANT_ADMIN)) {
+				req.headers['tenantid'] = decodedToken.data.tenant_id.toString()
+
+				let orgId = req.body.orgId || req.headers['orgid']
+
+				if (!orgId) {
+					rspObj.errCode = CONSTANTS.apiResponses.INVALID_TENANT_AND_ORG_CODE
+					rspObj.errMsg = CONSTANTS.apiResponses.INVALID_TENANT_AND_ORG_MESSAGE
+					rspObj.responseCode = HTTP_STATUS_CODE['bad_request'].status
+					return res.status(HTTP_STATUS_CODE['bad_request'].status).send(respUtil(rspObj))
+				}
+
+				req.headers['orgid'] = orgId
+
+				let validateOrgsResult = await validateIfOrgsBelongsToTenant(
+					req.headers['tenantid'],
+					req.headers['orgid'],
+					token
+				)
+				if (!validateOrgsResult.success) {
+					return res
+						.status(HTTP_STATUS_CODE['unauthorized'].status)
+						.send(respUtil(validateOrgsResult.errorObj))
+				}
+				req.headers['orgid'] = validateOrgsResult.validOrgIds
+			} else if (userRoles.includes(CONSTANTS.common.ORG_ADMIN)) {
+				req.headers['tenantid'] = decodedToken.data.tenant_id.toString()
+				req.headers['orgid'] = [decodedToken.data.organization_id.toString()]
+			} else {
+				rspObj.errCode = CONSTANTS.apiResponses.TOKEN_MISSING_CODE
+				rspObj.errMsg = CONSTANTS.apiResponses.TOKEN_MISSING_MESSAGE
+				rspObj.responseCode = HTTP_STATUS_CODE['unauthorized'].status
+				return res.status(HTTP_STATUS_CODE['unauthorized'].status).send(respUtil(rspObj))
+			}
+
+			decodedToken.data.tenantAndOrgInfo['tenantId'] = req.headers['tenantid'].toString()
+			decodedToken.data.tenantAndOrgInfo['orgId'] = req.headers['orgid']
+		}
 	} catch (err) {
 		rspObj.errCode = CONSTANTS.apiResponses.TOKEN_MISSING_CODE
 		rspObj.errMsg = CONSTANTS.apiResponses.TOKEN_MISSING_MESSAGE
@@ -200,70 +551,61 @@ module.exports = async function (req, res, next, token = '') {
 		return res.status(HTTP_STATUS_CODE['unauthorized'].status).send(respUtil(rspObj))
 	}
 
-	// Path to config.json
-	const configFilePath = path.resolve(__dirname, '../../', 'config.json')
-
-	// Initialize variables
-	let configData = {}
-	let defaultTokenExtraction = false
-
-	// Check if config.json exists
-	if (fs.existsSync(configFilePath)) {
-		// Read and parse the config.json file
-		const rawData = fs.readFileSync(configFilePath)
-		try {
-			configData = JSON.parse(rawData)
-			if (!configData.authTokenUserInformation) {
-				defaultTokenExtraction = true
-			}
-			configData = configData.authTokenUserInformation
-		} catch (error) {
-			console.error('Error parsing config.json:', error)
-		}
-	} else {
-		// If file doesn't exist, set defaultTokenExtraction to false
-		defaultTokenExtraction = true
-	}
-
-	let userInformation = {}
-	// Create user details to request
-	req.userDetails = {
-		userToken: token,
-	}
-
-	// performing default token data extraction
-	if (defaultTokenExtraction) {
-		if (!decodedToken.data.organization_id) {
-			const orgId = req.get(process.env.ORG_ID_HEADER_NAME)
-			if (orgId && orgId != '') {
-				decodedToken.data.organization_id = orgId.toString()
-			} else decodedToken.data.organization_id = null
-		}
-		userInformation = {
-			userId: typeof decodedToken.data.id == 'string' ? decodedToken.data.id : decodedToken.data.id.toString(),
-			userName: decodedToken.data.name,
-			organizationId: decodedToken.data.organization_id ? decodedToken.data.organization_id : null,
-			firstName: decodedToken.data.name,
-		}
-	} else {
-		// Iterate through each key in the config object
-		for (let key in configData) {
-			if (configData.hasOwnProperty(key)) {
-				let keyValue = getNestedValue(decodedToken, configData[key])
-				if (key === 'userId') {
-					keyValue = keyValue.toString()
-				}
-				// For each key in config, assign the corresponding value from decodedToken
-				userInformation[key] = keyValue
-			}
-		}
-	}
 	// Update user details object
 	req.userDetails.userInformation = userInformation
+	if (decodedToken.data.tenantAndOrgInfo) {
+		req.userDetails.tenantAndOrgInfo = decodedToken.data.tenantAndOrgInfo
+	}
 
 	// Helper function to access nested properties
+	function getOrgId(headers, decodedToken, orgConfigData) {
+		if (headers['orgId']) {
+			return (orgId = headers['orgId'].toString())
+		} else {
+			const orgIdPath = orgConfigData
+			return (orgId = getNestedValue(decodedToken, orgIdPath)?.toString())
+		}
+	}
+
 	function getNestedValue(obj, path) {
-		return path.split('.').reduce((acc, part) => acc && acc[part], obj)
+		const parts = path.split('.')
+		let current = obj
+
+		for (const part of parts) {
+			if (!current) return undefined
+
+			// Conditional match: key[?field=value]
+			const conditionalMatch = part.match(/^(\w+)\[\?(\w+)=([^\]]+)\]$/)
+			if (conditionalMatch) {
+				const [, arrayKey, field, expected] = conditionalMatch
+				const array = current[arrayKey]
+				if (!Array.isArray(array)) return undefined
+				const found = array.find((item) => String(item[field]) === String(expected))
+				if (!found) return undefined
+				current = found
+				continue
+			}
+
+			// Index match: key[0]
+			const indexMatch = part.match(/^(\w+)\[(\d+)\]$/)
+			if (indexMatch) {
+				const [, key, index] = indexMatch
+				const array = current[key]
+				if (!Array.isArray(array)) return undefined
+				current = array[parseInt(index, 10)]
+				continue
+			}
+
+			current = current[part]
+		}
+		return current
+	}
+
+	function resolvePathTemplate(template, contextObject) {
+		return template.replace(/\{\{(.*?)\}\}/g, (_, path) => {
+			const value = getNestedValue(contextObject, path.trim())
+			return value?.toString?.() ?? ''
+		})
 	}
 
 	next()

@@ -80,7 +80,8 @@ module.exports = class LibraryCategories extends Abstract {
 					req.pageSize,
 					req.pageNo,
 					req.searchText,
-					req.query.sort
+					req.query.sort,
+					req.userDetails
 				)
 
 				return resolve({
@@ -120,7 +121,7 @@ module.exports = class LibraryCategories extends Abstract {
 				const libraryProjectcategory = await libraryCategoriesHelper.create(
 					req.body,
 					req.files,
-					req.userDetails.userInformation.userId
+					req.userDetails
 				)
 
 				return resolve({
@@ -164,7 +165,7 @@ module.exports = class LibraryCategories extends Abstract {
 					findQuery,
 					req.body,
 					req.files,
-					req.userDetails.userInformation.userId
+					req.userDetails
 				)
 
 				return resolve({
@@ -236,10 +237,10 @@ module.exports = class LibraryCategories extends Abstract {
 	 * @returns {Array} Library categories.
 	 */
 
-	async list() {
+	async list(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let projectCategories = await libraryCategoriesHelper.list()
+				let projectCategories = await libraryCategoriesHelper.list(req)
 
 				projectCategories.result = projectCategories.data
 

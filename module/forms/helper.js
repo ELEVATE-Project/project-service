@@ -39,13 +39,14 @@ module.exports = class FormsHelper {
 	 * @method
 	 * @name create
 	 * @param {Object} bodyData
-	 * @param {Number} orgId
+	 * @param {Object} userDetails
 	 * @returns {JSON} - Form creation data.
 	 */
-	static create(bodyData, orgId) {
+	static create(bodyData, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				bodyData['organizationId'] = orgId
+				bodyData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+				bodyData['orgId'] = userDetails.tenantAndOrgInfo.orgId[0]
 				const form = await formQueries.createForm(bodyData)
 				if (!form || !form._id) {
 					throw {
@@ -53,10 +54,6 @@ module.exports = class FormsHelper {
 						message: CONSTANTS.apiResponses.FORM_NOT_CREATED,
 					}
 				}
-
-				// await utils.internalDel('formVersion')
-
-				// await KafkaProducer.clearInternalCache('formVersion')
 
 				return resolve({
 					success: true,
@@ -79,29 +76,31 @@ module.exports = class FormsHelper {
 	 * @name update
 	 * @param {String} _id
 	 * @param {Object} bodyData
-	 * @param {Number} orgId
+	 * @param {Number} userDetails
 	 * @returns {JSON} - Update form data.
 	 */
-	static update(_id, bodyData, orgId) {
+	static update(_id, bodyData, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// validate _id field
 				_id = _id === ':_id' ? null : _id
 				let filter = {}
+
 				if (_id) {
-					filter = {
-						_id: ObjectId(_id),
-						organizationId: orgId,
-					}
+					filter['_id'] = ObjectId(_id)
 				} else {
-					filter = {
-						type: bodyData.type,
-						// subType: bodyData.subType,
-						organizationId: orgId,
-					}
+					filter['type'] = bodyData.type
 				}
+
+				filter['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+
 				// create update object to pass to db query
 				let updateData = {}
+
+				// avoding addition of manupulative data
+				delete bodyData.tenantId
+				delete bodyData.orgId
+
 				updateData['$set'] = bodyData
 				const updatedForm = await formQueries.updateOneForm(filter, updateData, { new: true })
 				if (!updatedForm || !updatedForm._id) {
@@ -131,21 +130,28 @@ module.exports = class FormsHelper {
 	 * @name read
 	 * @param {String} _id
 	 * @param {Object} bodyData
-	 * @param {Number} orgId
+	 * @param {Object} userDetails
 	 * @param {String} userToken
 	 * @returns {JSON} - Read form data.
 	 */
-	static read(_id, bodyData, orgId, userToken) {
+	static read(_id, bodyData, userDetails, userToken) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// validate _id field
 				_id = _id === ':_id' ? null : _id
 				let filter = {}
+
 				if (_id) {
-					filter = { _id: ObjectId(_id), organizationId: orgId }
+					filter['_id'] = ObjectId(_id)
 				} else {
-					filter = { ...bodyData, organizationId: orgId }
+					Object.keys(bodyData).map((key) => {
+						filter[`${key}`] = bodyData[`${key}`]
+					})
 				}
+
+				filter['tenantId'] = userDetails.userInformation.tenantId
+				filter['orgId'] = { $in: ['ALL', userDetails.userInformation.organizationId] }
+
 				const form = await formQueries.findOneForm(filter)
 				let defaultOrgForm
 				if (!form || !form._id) {
@@ -158,9 +164,24 @@ module.exports = class FormsHelper {
 							message: CONSTANTS.apiResponses.DEFAULT_ORG_ID_NOT_SET,
 						})
 					}
-					filter = _id
-						? { _id: ObjectId(_id), organizationId: defaultOrgId }
-						: { ...bodyData, organizationId: defaultOrgId }
+					filter = {}
+					if (_id) {
+						filter['_id'] = ObjectId(_id)
+					} else {
+						Object.keys(bodyData).map((key) => {
+							filter[`${key}`] = bodyData[`${key}`]
+						})
+					}
+
+					filter = {}
+					if (_id) {
+						filter['_id'] = ObjectId(_id)
+					} else {
+						Object.keys(bodyData).map((key) => {
+							filter[`${key}`] = bodyData[`${key}`]
+						})
+					}
+					filter['orgId'] = { $in: [defaultOrgId.toString()] }
 					defaultOrgForm = await formQueries.findOneForm(filter)
 				}
 				if (!form && !defaultOrgForm) {

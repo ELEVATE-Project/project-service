@@ -28,20 +28,20 @@ module.exports = class UsersHelper {
 	 * @param {String} search search text.
 	 * @param {String} token user token.
 	 * @param {String} userId user userId.
+	 * @param {Objec} userDetails loggedin user's info
 	 * @returns {Object} targeted user solutions.
 	 */
 
-	static solutions(programId, requestedData, pageSize, pageNo, search, userId) {
+	static solutions(programId, requestedData, pageSize, pageNo, search, userId, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Fetch program data and verify the validity of program
-				let programData = await programsHelper.details(programId, [
-					'name',
-					'requestForPIIConsent',
-					'rootOrganisations',
-					'endDate',
-					'description',
-				])
+				let programData = await programsHelper.details(
+					programId,
+					['name', 'requestForPIIConsent', 'rootOrganisations', 'endDate', 'description'],
+					'none',
+					userDetails
+				)
 
 				if (!programData.success) {
 					return resolve({
@@ -61,7 +61,8 @@ module.exports = class UsersHelper {
 					programId, //program for solutions
 					CONSTANTS.common.DEFAULT_PAGE_SIZE, //page size
 					CONSTANTS.common.DEFAULT_PAGE_NO, //page no
-					search //search text
+					search, //search text
+					userDetails
 				)
 
 				let projectSolutionIdIndexMap = {}
@@ -165,10 +166,11 @@ module.exports = class UsersHelper {
 	 * @param {Boolean} getProjectsCount - get the projectsCount under that program.
 	 * @param {Number} pageNo - pageNo
 	 * @param {Number} pageSize - pageSize
+	 * @param {Object} userDetails - loggedin user's info
 	 * @returns {Array} - List of all private programs created by user.
 	 */
 
-	static privatePrograms(userId, language, getProjectsCount, pageNo, pageSize) {
+	static privatePrograms(userId, language, getProjectsCount, pageNo, pageSize, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let userPrivatePrograms = await programsHelper.userPrivatePrograms(
@@ -176,7 +178,8 @@ module.exports = class UsersHelper {
 					language,
 					getProjectsCount,
 					pageNo,
-					pageSize
+					pageSize,
+					userDetails
 				)
 
 				return resolve({
@@ -198,16 +201,19 @@ module.exports = class UsersHelper {
 	 * @param {String} pageSize - Page size.
 	 * @param {String} searchText - Search text.
 	 * @param {String} userId - User Id.
+	 * @param {Object} userDetails - loggedin user's info
 	 * @returns {Array} - Get user targeted programs.
 	 */
 
-	static programs(bodyData, pageNo, pageSize, searchText, userId) {
+	static programs(bodyData, pageNo, pageSize, searchText, userId, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let programDetails = {}
 				let targetedProgramIds = []
 				let alreadyStartedProgramsIds = []
 				let programCount = 0
+				let tenantId = userDetails.userInformation.tenantId
+				let orgId = userDetails.userInformation.organizationId
 				//get all programs which user has joined irrespective of targeted and non targeted programs
 				// let alreadyStartedPrograms = await this.getUserJoinedPrograms(
 				//   searchText,
@@ -223,7 +229,10 @@ module.exports = class UsersHelper {
 					bodyData,
 					'', // not passing page size
 					'', // not passing page number
-					searchText
+					searchText,
+					'',
+					{},
+					userDetails
 					//   ["_id"]
 				)
 
@@ -262,7 +271,7 @@ module.exports = class UsersHelper {
 
 				//fetching all the programsDocuments
 				let userRelatedProgramsData = await programsQueries.programsDocument(
-					{ _id: { $in: targetedProgramIds } },
+					{ _id: { $in: targetedProgramIds }, tenantId: tenantId, orgId: { $in: [orgId] } },
 					['name', 'externalId', 'metaInformation'],
 					'none', //not passing skip fields
 					{ createdAt: -1 } // sort by 'createdAt' in descending order

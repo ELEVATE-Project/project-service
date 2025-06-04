@@ -5,18 +5,25 @@
  * Description : DataPipeline.
  */
 
- module.exports = (req) => {
+module.exports = (req) => {
+	let dataPipeLineValidator = {
+		userProject: function () {
+			req.checkParams('_id')
+				.exists()
+				.withMessage('required project id')
+				.isMongoId()
+				.withMessage('Invalid project id')
+		},
+		pushProjectDetailsToKafka: function () {
+			req.checkParams('_id')
+				.exists()
+				.withMessage('required project id')
+				.isMongoId()
+				.withMessage('Invalid project id')
+		},
+	}
 
-    let dataPipeLineValidator = {
-
-        userProject : function () {
-            req.checkParams('_id').exists().withMessage("required project id")
-            .isMongoId().withMessage("Invalid project id");
-        }
-    }
-
-    if (dataPipeLineValidator[req.params.method]) {
-        dataPipeLineValidator[req.params.method]();
-    }
-
-};
+	if (dataPipeLineValidator[req.params.method]) {
+		dataPipeLineValidator[req.params.method]()
+	}
+}

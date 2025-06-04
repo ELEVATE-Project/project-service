@@ -12,6 +12,7 @@ const programsQueries = require(DB_QUERY_BASE_PATH + '/programs')
 const projectQueries = require(DB_QUERY_BASE_PATH + '/projects')
 const entitiesService = require(GENERICS_FILES_PATH + '/services/entity-management')
 const validateEntity = process.env.VALIDATE_ENTITIES
+const userService = require(GENERICS_FILES_PATH + '/services/users')
 
 /**
  * ProgramsHelper
@@ -155,20 +156,6 @@ module.exports = class ProgramsHelper {
 				// Set the scope in updateObject to the updated scopeData
 				updateObject['$set']['scope'] = scopeData
 
-				// Extract entities from scopeData excluding the 'roles' key
-				const entities = Object.keys(scopeData)
-					.filter((key) => key !== 'roles')
-					.reduce((acc, key) => acc.concat(scopeData[key]), [])
-
-				// Add the entities array to updateObject
-				updateObject.$set.entities = entities
-
-				// Join all keys except 'roles' into a comma-separated string and set it as entityType
-				scopeData['entityType'] = Object.keys(_.omit(scopeData, ['roles'])).join(',')
-
-				// Add the entityType to updateObject
-				updateObject['$set']['entityType'] = scopeData.entityType
-
 				// Find and update the program with the specified programId
 				let updateProgram = await programsQueries.findAndUpdate(
 					{
@@ -209,12 +196,14 @@ module.exports = class ProgramsHelper {
 	 * Create program
 	 * @method
 	 * @name create
-	 * @param {Array} data
-	 * @param {Boolean} checkDate this is true for when its called via API calls
+	 * @param {Object} data - request body data
+	 * @param {String} user - user id
+	 * @param {Boolean} checkDate - this is true for when its called via API calls
+	 * @param {Object} userDetails - user related info
 	 * @returns {JSON} - create program.
 	 */
 
-	static create(data, userId = '', checkDate = false) {
+	static create(data, userId = '', checkDate = false, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let programData = {
@@ -226,6 +215,10 @@ module.exports = class ProgramsHelper {
 					createdBy: userId == '' ? data.userId : userId,
 					updatedBy: userId == '' ? data.userId : userId,
 				}
+
+				// avoid adding manupulative data
+				delete data.tenantId
+				delete data.orgId
 
 				if (checkDate) {
 					if (data.hasOwnProperty(CONSTANTS.common.END_DATE)) {
@@ -239,6 +232,11 @@ module.exports = class ProgramsHelper {
 				_.assign(programData, {
 					...data,
 				})
+
+				// add tenantId and orgId
+				programData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+				programData['orgId'] = userDetails.tenantAndOrgInfo.orgId[0]
+
 				programData = _.omit(programData, ['scope', 'userId'])
 				let program = await programsQueries.createProgram(programData)
 
@@ -247,6 +245,7 @@ module.exports = class ProgramsHelper {
 						message: CONSTANTS.apiResponses.PROGRAM_NOT_CREATED,
 					}
 				}
+				data.scope['organizations'] = userDetails.tenantAndOrgInfo.orgId
 
 				if (data.scope) {
 					let programScopeUpdated = await this.setScope(program._id, data.scope)
@@ -281,10 +280,10 @@ module.exports = class ProgramsHelper {
 	 * @returns {JSON} - update program.
 	 */
 
-	static update(programId, data, userId, checkDate = false) {
+	static update(programId, data, userDetails, checkDate = false) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				data.updatedBy = userId
+				data.updatedBy = userDetails.userInformation.userId
 				data.updatedAt = new Date()
 				//convert components to objectedIds
 				if (data.components && data.components.length > 0) {
@@ -300,16 +299,22 @@ module.exports = class ProgramsHelper {
 					}
 				}
 
+				// delete tenantId & orgId attached in req.body to avoid adding manupulative data
+				delete data.tenantId
+				delete data.orgId
+
+				let programMatchQuery = {}
+				programMatchQuery['_id'] = programId
+				programMatchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
 				let program = await programsQueries.findAndUpdate(
-					{
-						_id: programId,
-					},
+					programMatchQuery,
 					{ $set: _.omit(data, ['scope']) },
 					{ new: true }
 				)
 
 				if (!program || !program._id) {
 					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.PROGRAM_NOT_UPDATED,
 					}
 				}
@@ -336,6 +341,7 @@ module.exports = class ProgramsHelper {
 				})
 			} catch (error) {
 				return resolve({
+					status: error.status || 400,
 					success: false,
 					message: error.message,
 					data: {},
@@ -351,15 +357,20 @@ module.exports = class ProgramsHelper {
 	 * @param {String} programId - Program Id.
 	 * @param {Array} projections - Projections.
 	 * @param {Array} skipFields - Skip fields
+	 * @param {Object} userDetails - loggedin user's info
 	 * @returns {Object} - Details of the program.
 	 */
 
-	static details(programId, projections = 'all', skipFields = 'none') {
+	static details(programId, projections = 'all', skipFields = 'none', userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				let tenantId = userDetails.userInformation.tenantId
+				let orgId = userDetails.userInformation.organizationId
 				let programData = await programsQueries.programsDocument(
 					{
 						_id: programId,
+						tenantId: tenantId,
+						orgId: { $in: [orgId] },
 					},
 					projections,
 					skipFields
@@ -899,24 +910,24 @@ module.exports = class ProgramsHelper {
 	 * @param {Number} pageNo - page no.
 	 * @param {Number} pageSize - page size.
 	 * @param {String} searchText - text to search.
-	 *  @param {Object} filter - filter.
-	 *  @param {Array} projection - projection.
+	 * @param {Object} userDetails - user related info
+	 * @param {Object} filter - filter.
+	 * @param {Array} projection - projection.
 	 * @returns {Object} - Programs list.
 	 */
 
-	static list(pageNo = '', pageSize = '', searchText, filter = {}, projection) {
+	static list(pageNo = '', pageSize = '', searchText, userDetails, currentOrgOnly = false, filter = {}, projection) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let programDocument = []
-
+				currentOrgOnly = UTILS.convertStringToBoolean(currentOrgOnly)
 				let matchQuery = { status: CONSTANTS.common.ACTIVE_STATUS }
 				if (Object.keys(filter).length > 0) {
 					matchQuery = _.merge(matchQuery, filter)
 				}
 
 				if (searchText !== '') {
-					matchQuery['$or'] = []
-					matchQuery['$or'].push(
+					let searchData = [
 						{
 							externalId: new RegExp(searchText, 'i'),
 						},
@@ -925,8 +936,23 @@ module.exports = class ProgramsHelper {
 						},
 						{
 							description: new RegExp(searchText, 'i'),
-						}
-					)
+						},
+					]
+
+					if (matchQuery['$and']) {
+						matchQuery['$and'].push({ $or: searchData })
+					} else {
+						matchQuery['$or'] = searchData
+					}
+				}
+
+				// modify query to fetch documents
+				matchQuery['tenantId'] = userDetails.userInformation.tenantId
+
+				// handle currentOrgOnly filter
+				if (currentOrgOnly) {
+					let organizationId = userDetails.userInformation.organizationId
+					matchQuery['orgId'] = { $in: [organizationId] }
 				}
 
 				let sortQuery = {
@@ -1049,17 +1075,22 @@ module.exports = class ProgramsHelper {
 	 * @param {Boolean} getProjectsCount - get the projectsCount under that program.
 	 * @param {Number} pageNo - pageNo
 	 * @param {Number} pageSize - pageSize
+	 * @param {Object} userDetails -loggedin user's info
 	 * @returns {JSON} - List of programs that user created on app.
 	 */
 
-	static userPrivatePrograms(userId, language = '', getProjectsCount = false, pageNo, pageSize) {
+	static userPrivatePrograms(userId, language = '', getProjectsCount = false, pageNo, pageSize, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				let tenantId = userDetails.userInformation.tenantId
+				let orgId = userDetails.userInformation.organizationId
 				let programsData = await programsQueries.programsDocument(
 					{
 						createdBy: userId,
 						isAPrivateProgram: true,
 						isDeleted: false,
+						tenantId: tenantId,
+						orgId: { $in: [orgId] },
 					},
 					['name', 'externalId', 'description', '_id', 'isAPrivateProgram', 'translations'],
 					'none',
@@ -1084,6 +1115,8 @@ module.exports = class ProgramsHelper {
 						{
 							$match: {
 								programId: { $in: userProgramIds },
+								tenantId: tenantId,
+								orgId: orgId,
 							},
 						},
 						{
@@ -1167,13 +1200,17 @@ module.exports = class ProgramsHelper {
 				let filterQuery = {
 					isDeleted: false,
 				}
-				Object.keys(_.omit(data, ['role', 'filter', 'factors', 'type'])).forEach((key) => {
+				Object.keys(
+					_.omit(data, ['role', 'filter', 'factors', 'type', 'tenantId', 'orgId', 'organizations'])
+				).forEach((key) => {
 					data[key] = data[key].split(',')
 				})
 
 				// If validate entity set to ON . strict scoping should be applied
 				if (validateEntity !== CONSTANTS.common.OFF) {
-					Object.keys(_.omit(data, ['filter', 'role', 'factors', 'type'])).forEach((requestedDataKey) => {
+					Object.keys(
+						_.omit(data, ['filter', 'role', 'factors', 'type', 'tenantId', 'orgId', 'organizations'])
+					).forEach((requestedDataKey) => {
 						registryIds.push(...data[requestedDataKey])
 						entityTypes.push(requestedDataKey)
 					})
@@ -1182,30 +1219,44 @@ module.exports = class ProgramsHelper {
 							message: CONSTANTS.apiResponses.NO_LOCATION_ID_FOUND_IN_DATA,
 						}
 					}
+					let userRoleInfo = _.omit(data, ['filter', 'factors', 'role', 'type', 'tenantId', 'orgId'])
 
-					if (!data.role) {
-						throw {
-							message: CONSTANTS.apiResponses.USER_ROLES_NOT_FOUND,
-						}
+					let tenantDetails = await userService.fetchPublicTenantDetails(data.tenantId)
+					if (!tenantDetails.data || !tenantDetails.data.meta || tenantDetails.success !== true) {
+						return resolve({
+							success: false,
+							message: CONSTANTS.apiResponses.FAILED_TO_FETCH_TENANT_DETAILS,
+						})
+					}
+					// factors = [ 'professional_role', 'professional_subroles' ]
+					let factors
+					if (
+						tenantDetails.data.meta.hasOwnProperty('factors') &&
+						tenantDetails.data.meta.factors.length > 0
+					) {
+						factors = tenantDetails.data.meta.factors
+						let queryFilter = UTILS.factorQuery(factors, userRoleInfo)
+						filterQuery['$and'] = queryFilter
 					}
 
-					filterQuery['scope.roles'] = {
-						$in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')],
-					}
+					let dataToOmit = ['filter', 'role', 'factors', 'type', 'tenantId', 'orgId', 'organizations']
+					// factors.append(dataToOmit)
+
+					const finalKeysToRemove = [...new Set([...dataToOmit, ...factors])]
 
 					filterQuery.$or = []
-					Object.keys(_.omit(data, ['filter', 'role', 'factors', 'type'])).forEach((key) => {
+					Object.keys(_.omit(data, finalKeysToRemove)).forEach((key) => {
 						filterQuery.$or.push({
 							[`scope.${key}`]: { $in: data[key] },
 						})
 					})
-					filterQuery['scope.entityType'] = { $in: entityTypes }
 				} else {
 					// Obtain userInfo
-					let userRoleInfo = _.omit(data, ['filter', 'factors', 'role', 'type'])
+					let userRoleInfo = _.omit(data, ['filter', 'factors', 'role', 'type', 'tenantId', 'orgId'])
 					let userRoleKeys = Object.keys(userRoleInfo)
 					let queryFilter = []
 
+					// factors = [ 'professional_role', 'professional_subroles' ]
 					// if factors are passed or query has to be build based on the keys passed
 					if (data.hasOwnProperty('factors') && data.factors.length > 0) {
 						let factors = data.factors
@@ -1251,6 +1302,8 @@ module.exports = class ProgramsHelper {
 				if (type != '') {
 					filterQuery.type = type
 				}
+				delete filterQuery['scope.entityType']
+				filterQuery.tenantId = data.tenantId
 				return resolve({
 					success: true,
 					data: filterQuery,
@@ -1277,7 +1330,15 @@ module.exports = class ProgramsHelper {
 	 * @returns {JSON} - List of programs based on role and location.
 	 */
 
-	static forUserRoleAndLocation(bodyData, pageSize, pageNo, searchText = '', programId = '', projection) {
+	static forUserRoleAndLocation(
+		bodyData,
+		pageSize,
+		pageNo,
+		searchText = '',
+		programId = '',
+		projection,
+		userDetails
+	) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let queryData = await this.queryBasedOnRoleAndLocation(bodyData)
@@ -1289,7 +1350,15 @@ module.exports = class ProgramsHelper {
 				}
 				queryData.data.startDate = { $lte: new Date() }
 				queryData.data.endDate = { $gte: new Date() }
-				let targetedPrograms = await this.list(pageNo, pageSize, searchText, queryData.data, projection)
+				let targetedPrograms = await this.list(
+					pageNo,
+					pageSize,
+					searchText,
+					userDetails,
+					false,
+					queryData.data,
+					projection
+				)
 				return resolve({
 					success: true,
 					message: CONSTANTS.apiResponses.TARGETED_PROGRAMS_FETCHED,

@@ -31,8 +31,6 @@ module.exports = {
 		externalId: {
 			type: String,
 			required: true,
-			index: true,
-			unique: true,
 		},
 		type: {
 			type: String,
@@ -86,5 +84,21 @@ module.exports = {
 		},
 		metaInformation: Object,
 		translations: Object,
+		tenantId: {
+			type: String,
+			index: true,
+			required: true,
+		},
+		orgId: {
+			type: String,
+			index: true,
+			required: true,
+		},
 	},
+	compoundIndex: [
+		{
+			name: { externalId: 1, tenantId: 1 },
+			indexType: { unique: true },
+		},
+	],
 }

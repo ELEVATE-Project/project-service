@@ -103,6 +103,11 @@ let enviromentVariables = {
 		optional: false,
 		default: 'https://dev.elevate.org',
 	},
+	APP_PORTAL_DIRECTORY: {
+		message: 'App Portal base url required',
+		optional: false,
+		default: '/ml/',
+	},
 	TIMEZONE_DIFFRENECE_BETWEEN_LOCAL_TIME_AND_UTC: {
 		message: 'Timezone diffrence required',
 		optional: false,
@@ -161,6 +166,34 @@ let enviromentVariables = {
 		message: 'Required OrgId header name',
 		optional: false,
 		default: 'org-id',
+	},
+	ADMIN_TOKEN_HEADER_NAME: {
+		message: 'Required admin access token header name',
+		optional: true,
+		default: 'admin-auth-token',
+	},
+	ADMIN_ACCESS_TOKEN: {
+		message: 'Required admin access token',
+		optional: false,
+	},
+	USER_DELETE_ON_OFF: {
+		message: 'Enable/Disable User data deletion',
+		optional: true,
+		default: 'ON',
+	},
+	USER_DELETE_TOPIC: {
+		message: 'Required user data delete kafka topic',
+		optional: true,
+		requiredIf: {
+			key: 'USER_DELETE_ON_OFF',
+			operator: 'EQUALS',
+			value: 'ON',
+		},
+	},
+	AUTH_CONFIG_FILE_PATH: {
+		message: 'Required auth config file',
+		optional: true,
+		default: 'config.json',
 	},
 }
 

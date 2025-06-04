@@ -86,11 +86,7 @@ module.exports = (req) => {
 		forUserRoleAndLocation: function () {
 			req.checkBody('role').exists().withMessage('roles required')
 		},
-		targetedSolutions: function () {
-			// req.checkBody('entities').exists().withMessage('required entities to remove')
-			// req.checkBody('role').exists().withMessage('roles required')
-			// req.checkBody('entityType').exists().withMessage('entityType required')
-		},
+		targetedSolutions: function () {},
 		isTargetedBasedOnUserProfile: function () {
 			req.checkParams('_id')
 				.exists()

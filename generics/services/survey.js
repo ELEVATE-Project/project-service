@@ -39,7 +39,10 @@ const importSurveyTemplateToSolution = function (token, solutionId, programId, d
 				},
 				json: { data: data },
 			}
-			if (userDetails?.userInformation?.roles && !userDetails.userInformation?.roles.includes('org_admin')) {
+			if (
+				userDetails?.userInformation?.roles &&
+				!userDetails.userInformation?.roles.includes(CONSTANTS.common.ORG_ADMIN)
+			) {
 				_.assign(options.headers, {
 					'admin-auth-token': process.env.SURVEY_ADMIN_AUTH_TOKEN,
 					tenantId: userDetails.tenantAndOrgInfo.tenantId,
@@ -96,7 +99,10 @@ const importObservationTemplateToSolution = function (token, solutionId, bodyDat
 				json: bodyData,
 			}
 
-			if (userDetails?.userInformation?.roles && !userDetails.userInformation?.roles.includes('org_admin')) {
+			if (
+				userDetails?.userInformation?.roles &&
+				!userDetails.userInformation?.roles.includes(CONSTANTS.common.ORG_ADMIN)
+			) {
 				_.assign(options.headers, {
 					'admin-auth-token': process.env.SURVEY_ADMIN_AUTH_TOKEN,
 					tenantId: userDetails.tenantAndOrgInfo.tenantId,
@@ -243,9 +249,13 @@ const listSolutions = function (solutionIds, token, userDetails) {
 					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
 					'x-auth-token': token,
 				},
+				json: solutionIds,
 			}
-			options['json'] = solutionIds
-			if (userDetails?.userInformation?.roles && !userDetails?.userInformation?.roles.includes('org_admin')) {
+			// pass admin and tenant info in header  if user superAdmin
+			if (
+				userDetails?.userInformation?.roles &&
+				!userDetails?.userInformation?.roles.includes(CONSTANTS.common.ORG_ADMIN)
+			) {
 				_.assign(options.headers, {
 					'admin-auth-token': process.env.SURVEY_ADMIN_AUTH_TOKEN,
 					tenantId: userDetails.tenantAndOrgInfo.tenantId,
@@ -300,7 +310,12 @@ const updateSolution = function (token, updateData, solutionExternalId, userDeta
 				},
 				json: updateData,
 			}
-			if (userDetails?.userInformation?.roles && !userDetails?.userInformation?.roles.includes('org_admin')) {
+
+			// pass admin and tenant info in header  if user superAdmin
+			if (
+				userDetails?.userInformation?.roles &&
+				!userDetails?.userInformation?.roles.includes(CONSTANTS.common.ORG_ADMIN)
+			) {
 				_.assign(options.headers, {
 					'admin-auth-token': process.env.SURVEY_ADMIN_AUTH_TOKEN,
 					tenantId: userDetails.tenantAndOrgInfo.tenantId,

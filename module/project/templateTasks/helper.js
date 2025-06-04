@@ -130,7 +130,7 @@ module.exports = class ProjectTemplateTasksHelper {
 							userToken,
 							userDetails
 						)
-						if (!fetchedSolutions.success || !fetchedSolutions?.data.length > 0) {
+						if (!fetchedSolutions?.success || !fetchedSolutions?.data?.length > 0) {
 							throw {
 								message: CONSTANTS.apiResponses.SOLUTION_NOT_FOUND,
 								status: HTTP_STATUS_CODE.bad_request.status,
@@ -234,6 +234,7 @@ module.exports = class ProjectTemplateTasksHelper {
 						if (!solutionData[parsedData.solutionId]) {
 							parsedData.STATUS = CONSTANTS.apiResponses.SOLUTION_NOT_FOUND
 						} else {
+							//Match type of solutionData and csv data
 							if (solutionData[parsedData.solutionId].type !== allValues.solutionDetails.type) {
 								parsedData.STATUS = CONSTANTS.apiResponses.SOLUTION_TYPE_MIS_MATCH
 							}
@@ -284,6 +285,7 @@ module.exports = class ProjectTemplateTasksHelper {
 					} else {
 						parsedData.STATUS = CONSTANTS.apiResponses.REQUIRED_SOLUTION_ID
 					}
+					// adding solutionDetails for task
 					let solutionDetails = {
 						subType: parsedData.solutionSubType,
 						type: parsedData.solutionType,
@@ -440,9 +442,11 @@ module.exports = class ProjectTemplateTasksHelper {
 
 						//update solution project key
 						if (
-							(taskData.type === CONSTANTS.common.OBSERVATION ||
-								taskData.type === CONSTANTS.common.SURVEY ||
-								taskData.type === CONSTANTS.common.IMPROVEMENT_PROJECT) &&
+							[
+								CONSTANTS.common.OBSERVATION,
+								CONSTANTS.common.SURVEY,
+								CONSTANTS.common.IMPROVEMENT_PROJECT,
+							].includes(taskData.type) &&
 							taskData.solutionDetails &&
 							taskData.solutionDetails._id
 						) {

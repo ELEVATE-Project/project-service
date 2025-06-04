@@ -226,14 +226,14 @@ module.exports = class Programs extends Abstract {
 	async details(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				if (req.headers.hasOwnProperty('tenantidforadmin')) {
+				if (req.headers.hasOwnProperty(CONSTANTS.common.ADMIN_TENANTID)) {
 					req.userDetails.userInformation.tenantId = req.headers.tenantidforadmin
 					req.userDetails.userInformation.organizationId = req.headers.orgidforadmin
 				}
 				let programData = await programsHelper.details(
 					req.params._id,
-					'all', //projections
-					'none', //skipFields
+					CONSTANTS.common.ALL, //projections
+					CONSTANTS.common.NONE, //skipFields
 					req.userDetails
 				)
 

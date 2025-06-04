@@ -150,4 +150,7 @@ module.exports = {
 	DELETE_EVENT_ENTITY: 'user',
 	DELETE_EVENT_TYPE: 'delete',
 	OBJECT: 'object',
+	ADMIN_TENANTID: 'tenantidforadmin',
+	ALL: 'all',
+	NONE: 'none',
 }

@@ -1062,10 +1062,12 @@ module.exports = class UserProjectsHelper {
 					}
 
 					if (
-						currentTask.type === CONSTANTS.common.ASSESSMENT ||
-						currentTask.type === CONSTANTS.common.OBSERVATION ||
-						currentTask.type === CONSTANTS.common.SURVEY ||
-						currentTask.type === CONSTANTS.common.IMPROVEMENT_PROJECT
+						[
+							CONSTANTS.common.ASSESSMENT,
+							CONSTANTS.common.OBSERVATION,
+							CONSTANTS.common.SURVEY,
+							CONSTANTS.common.IMPROVEMENT_PROJECT,
+						].includes(currentTask.type)
 					) {
 						let completedSubmissionCount = 0
 
@@ -1076,6 +1078,7 @@ module.exports = class UserProjectsHelper {
 						data['submissionStatus'] = CONSTANTS.common.STARTED
 
 						let submissionDetails = {}
+						//Getting information of dynamic solutions like surveyInformation observationInformation
 						let dynamicTaskInfromation = `${currentTask.type}Information`
 						if (currentTask[dynamicTaskInfromation]) {
 							submissionDetails = currentTask[dynamicTaskInfromation]
@@ -1745,19 +1748,8 @@ module.exports = class UserProjectsHelper {
 							if (bodyData.role) {
 								projectCreation.data['userRole'] = bodyData.role
 							}
-
+							// Adding entityInformation in Project
 							if (solutionDetails.entityType && bodyData[solutionDetails.entityType]) {
-								// let entityInformation = await entitiesService.entityTypeDocuments(
-								// 	{ name: bodyData[solutionDetails.entityType] },
-								// 	'all'
-								// )
-
-								// if( !entityInformation.success || !entityInformation.data.length >0  ) {
-								//     throw {
-								//         message : CONSTANTS.apiResponses.ENTITY_TYPES_NOT_FOUND,
-								//         status : HTTP_STATUS_CODE.bad_request.status
-								//     }
-								// }
 								let entityDetails = await entitiesService.entityDocuments({
 									_id: bodyData[solutionDetails.entityType],
 									tenantId: tenantId,
@@ -3034,10 +3026,10 @@ module.exports = class UserProjectsHelper {
 				if (requestedData.entityId && requestedData.entityId !== '') {
 					let entityInformation = await entitiesService.entityDocuments(
 						{ _id: requestedData.entityId },
-						'all'
+						CONSTANTS.common.ALL
 					)
 
-					if (!entityInformation.success || !entityInformation.data.length > 0) {
+					if (!entityInformation?.success || !entityInformation?.data?.length > 0) {
 						return resolve(entityInformation)
 					}
 
@@ -4131,7 +4123,7 @@ module.exports = class UserProjectsHelper {
 	}
 
 	/**
-	 * update project infromation
+	 * update project Information
 	 * @method
 	 * @name update
 	 * @param {Object} filter - filter to search project to be updated.

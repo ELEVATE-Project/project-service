@@ -641,11 +641,12 @@ module.exports = class ProjectTemplatesHelper {
 					}
 				}
 
-				let programDetails = {}
+				let programDetails = {
+					programId: solutionData[0].programId,
+					programName: solutionData[0].programName,
+					programDescription: solutionData[0].programDescription,
+				}
 
-				programDetails.programId = solutionData[0].programId
-				programDetails.programName = solutionData[0].programName
-				programDetails.programDescription = solutionData[0].programDescription
 				newProjectTemplate.parentTemplateId = projectTemplateData[0]._id
 
 				let updationKeys = Object.keys(updateData)
@@ -826,6 +827,7 @@ module.exports = class ProjectTemplatesHelper {
 	 * @param {Object} programDetails - ProgramDetails
 	 * @param {String} userToken-userToken
 	 * @param {Array} taskSequence - task Sequence array of parent template
+	 * @param {Object} userDetails - This is req.userDetails
 	 * @returns {Object} Duplicated tasks.
 	 */
 
@@ -954,6 +956,7 @@ module.exports = class ProjectTemplatesHelper {
 	 * @param {Object} newProjectTemplateTask - Child taskDetails
 	 * @param {Object} taskData - parent templatetask Details
 	 * @param {Array} taskSequence - task Sequence array of parent template
+	 * @param {Object} userDetails - This is req.userDetails
 	 * @returns {Object} Duplicated tasks.
 	 */
 	static async handleDuplicateTemplateTask(userToken, newProjectTemplateTask, taskData, taskSequence, userDetails) {
@@ -1034,6 +1037,7 @@ module.exports = class ProjectTemplatesHelper {
 				duplicateTemplateTaskId = await createTemplateTask()
 			} else if (taskType === CONSTANTS.common.OBSERVATION) {
 				const timestamp = UTILS.epochTime()
+				//Create child solutions for solutiontype obs
 				const importSolutionsResponse = await surveyService.importObservationTemplateToSolution(
 					userToken,
 					newProjectTemplateTask.solutionDetails._id,
@@ -1056,11 +1060,14 @@ module.exports = class ProjectTemplatesHelper {
 						status: HTTP_STATUS_CODE.bad_request.status,
 					}
 				}
+				//fetch solution details based on created child solutionexternalId
 				newProjectTemplateTask.solutionDetails = await fetchSolutionByExternalId(
 					importSolutionsResponse.data.externalId
 				)
+				//create duplicate
 				duplicateTemplateTaskId = await createTemplateTask()
 				updateTaskSequence()
+				//update solution with  project and refernce from
 				await updateSolutionReferenceForProject(
 					newProjectTemplateTask.projectTemplateId,
 					duplicateTemplateTaskId,
@@ -1077,6 +1084,7 @@ module.exports = class ProjectTemplatesHelper {
 					}
 				)
 			} else if (taskType === CONSTANTS.common.SURVEY) {
+				//Create child solutions for solutiontype survey
 				const importSolutionsResponse = await surveyService.importSurveyTemplateToSolution(
 					userToken,
 					newProjectTemplateTask.solutionDetails._id,
@@ -1099,6 +1107,7 @@ module.exports = class ProjectTemplatesHelper {
 				)
 				duplicateTemplateTaskId = await createTemplateTask()
 				updateTaskSequence()
+				//update solution with  project and refernce from
 				await updateSolutionReferenceForProject(
 					newProjectTemplateTask.projectTemplateId,
 					duplicateTemplateTaskId,

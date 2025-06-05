@@ -843,15 +843,15 @@ function factorQuery(factors, userRoleInfo) {
 		let valueArray
 
 		if (rawValues === undefined || rawValues === null) {
-			valueArray = ['ALL']
+			valueArray = [CONSTANTS.common.ALL_SCOPE_VALUE]
 		} else if (Array.isArray(rawValues)) {
-			valueArray = [...rawValues, 'ALL']
+			valueArray = [...rawValues, CONSTANTS.common.ALL_SCOPE_VALUE]
 		} else if (typeof rawValues === 'string') {
 			const splitValues = rawValues
 				.split(',')
 				.map((v) => v.trim())
 				.filter(Boolean)
-			valueArray = [...splitValues, 'ALL']
+			valueArray = [...splitValues, CONSTANTS.common.ALL_SCOPE_VALUE]
 		}
 
 		queryFilter.push({ [scope]: { $in: valueArray } })

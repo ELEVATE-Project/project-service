@@ -153,4 +153,5 @@ module.exports = {
 	ADMIN_TENANTID: 'tenantidforadmin',
 	ALL: 'all',
 	NONE: 'none',
+	ALL_SCOPE_VALUE: 'ALL',
 }

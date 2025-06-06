@@ -8,6 +8,8 @@
 // Dependencies
 const csv = require('csvtojson')
 const projectTemplateTasksHelper = require(MODULES_BASE_PATH + '/project/templateTasks/helper')
+const utils = require('@helpers/utils')
+const projectQueries = require(DB_QUERY_BASE_PATH + '/projects')
 
 /**
  * ProjectTemplateTasks
@@ -165,6 +167,72 @@ module.exports = class ProjectTemplateTasks extends Abstract {
 					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
 					errorObject: error,
 				})
+			}
+		})
+	}
+
+	/**
+	 * @api {post} /project/v1/project/templateTasks/bulkCreateJson/:projectTemplateId
+	 * Bulk create project template tasks using JSON.
+	 * @apiVersion 1.0.0
+	 * @apiGroup Project Template Tasks
+	 * @apiParam {Object[]} tasks Array of task objects.
+	 * @apiParam {String} tasks.externalId Mandatory external ID of the task.
+	 * @apiParam {String} tasks.name Mandatory name of the task.
+	 * @apiParam {String} tasks.type Type of task (CONTENT/ASSESSMENT/OBSERVATION/IMPROVEMENT_PROJECT).
+	 * @apiParam {String} [tasks.hasAParentTask] Whether task has a parent (YES/NO).
+	 * @apiParam {String} [tasks.parentTaskId] ID of parent task if hasAParentTask is YES.
+	 * @apiParam {String} [tasks.solutionId] Solution ID if task type requires it.
+	 * @apiParam {String} [tasks.solutionType] Type of solution if task type requires it.
+	 * @apiParam {String} [tasks.solutionSubType] Subtype of solution if task type requires it.
+	 * @apiParam {Boolean} [tasks.isDeletable] Whether task can be deleted.
+	 * @apiSampleRequest /project/v1/project/templateTasks/bulkCreateJson/5f2adc57eb351a5a9c68f403
+	 * @apiUse successBody
+	 * @apiUse errorBody
+	 */
+
+	/**
+	 * Bulk create project template tasks using JSON
+	 * @method
+	 * @name bulkCreateJson
+	 * @returns {JSON} returns created project template tasks.
+	 */
+
+	async bulkCreateJson(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let tasks = req.body.tasks
+				let projectId = req.params._id
+				let userId = req.userDetails.id
+
+				// Get projectTemplateId from project document
+				const project = await projectQueries.projectDocument({ _id: projectId })
+				if (!project) {
+					return resolve({
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: 'Project not found',
+					})
+				}
+				const projectTemplateId = project[0].projectTemplateId
+				console.log('projectTemplateId', projectTemplateId)
+				// Validate all task dates
+				const validation = utils.validateAllTaskDates(tasks)
+				if (!validation.isValid) {
+					return resolve({
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: validation.message,
+					})
+				}
+
+				let result = await projectTemplateTasksHelper.bulkCreateJson(
+					tasks,
+					projectTemplateId,
+					userId,
+					projectId
+				)
+				return resolve(result)
+			} catch (error) {
+				return reject(error)
 			}
 		})
 	}

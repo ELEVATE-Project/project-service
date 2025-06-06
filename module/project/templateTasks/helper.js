@@ -15,6 +15,7 @@ const learningResourcesHelper = require(MODULES_BASE_PATH + '/learningResources/
 const projectTemplateTaskQueries = require(DB_QUERY_BASE_PATH + '/projectTemplateTask')
 const projectTemplateQueries = require(DB_QUERY_BASE_PATH + '/projectTemplates')
 const solutionsQueries = require(DB_QUERY_BASE_PATH + '/solutions')
+const projectQueries = require(DB_QUERY_BASE_PATH + '/projects')
 
 module.exports = class ProjectTemplateTasksHelper {
 	/**
@@ -785,6 +786,278 @@ module.exports = class ProjectTemplateTasksHelper {
 					message: CONSTANTS.apiResponses.PROJECT_TEMPLATE_TASK_UPDATED,
 				})
 			} catch (error) {
+				return reject(error)
+			}
+		})
+	}
+
+	/**
+	 * Bulk create project template tasks using JSON.
+	 * @method
+	 * @name bulkCreateJson
+	 * @param {Array} tasks - array of task objects.
+	 * @param {String} projectTemplateId - project template id.
+	 * @param {String} userId - user logged in id.
+	 * @param {String} projectId - project id.
+	 * @returns {Object} Bulk create project template tasks.
+	 */
+
+	static async bulkCreateJson(tasks, projectTemplateId, userId, projectId = '') {
+		return new Promise(async (resolve, reject) => {
+			try {
+				// Get template document
+				const template = await projectTemplateQueries.templateDocument({ _id: projectTemplateId }, [
+					'_id',
+					'externalId',
+					'taskSequence',
+					'solutionId',
+				])
+
+				console.log('[TEMPLATE TASKS] Template data:', JSON.stringify(template, null, 2))
+
+				if (!template || !template.length) {
+					throw new Error('Template not found')
+				}
+
+				// Get solution document
+				const solutionData = await solutionsQueries.solutionsDocument(
+					{ _id: template[0].solutionId },
+					_solutionDocumentProjectionFieldsForTask()
+				)
+
+				console.log('[TEMPLATE TASKS] Solution data:', JSON.stringify(solutionData, null, 2))
+
+				const results = []
+				const newTaskExternalIds = []
+				let projectDoc = null
+				let currentTasks = []
+				let currentTaskSequence = []
+				let taskReport = { total: 0, notStarted: 0 }
+
+				// Fetch project document once if projectId is provided
+				if (projectId) {
+					projectDoc = await projectQueries.projectDocument({ _id: projectId }, [
+						'tasks',
+						'taskSequence',
+						'taskReport',
+					])
+					if (projectDoc.length > 0) {
+						currentTasks = projectDoc[0].tasks || []
+						currentTaskSequence = projectDoc[0].taskSequence || []
+						taskReport = projectDoc[0].taskReport || { total: 0, notStarted: 0 }
+					}
+				}
+
+				// First pass: Create all tasks and collect their data
+				const createdTasks = new Map() // Map to store created tasks by externalId
+				const parentChildMap = new Map() // Map to store parent-child relationships
+
+				for (const task of tasks) {
+					try {
+						// Check if task already exists
+						const existingTask = await projectTemplateTaskQueries.taskDocuments(
+							{ externalId: task.externalId },
+							['_id', 'externalId']
+						)
+
+						if (existingTask.length > 0) {
+							results.push({
+								externalId: task.externalId,
+								STATUS: 'Error',
+								message: 'Task with this externalId already exists',
+							})
+							continue
+						}
+
+						console.log('[TEMPLATE TASKS] Creating task with data:', {
+							...task,
+							projectTemplateId: projectTemplateId,
+							projectTemplateExternalId: template[0].externalId,
+							createdBy: userId,
+							updatedBy: userId,
+							createdAt: new Date(),
+							updatedAt: new Date(),
+							status: 'published',
+							isDeleted: false,
+						})
+
+						// Create new task
+						let newTask = await projectTemplateTaskQueries.createTemplateTask({
+							...task,
+							projectTemplateId,
+							projectTemplateExternalId: template[0].externalId,
+							createdBy: userId,
+							status: CONSTANTS.common.ACTIVE,
+							taskSequence: [], // Initialize empty sequence for all tasks
+							hasAParentTask: task.parentTaskId ? 'YES' : 'NO',
+							hasSubTasks: false, // Set as boolean false
+							children: [],
+						})
+
+						if (newTask._id) {
+							results.push({
+								externalId: newTask.externalId,
+								_id: newTask._id,
+								STATUS: 'Success',
+							})
+							newTaskExternalIds.push(String(newTask.externalId))
+
+							// Store created task data
+							createdTasks.set(task.externalId, {
+								_id: newTask._id,
+								externalId: task.externalId,
+								name: task.name,
+								type: task.type,
+								status: 'notStarted',
+								isDeleted: false,
+								isDeletable: true,
+								children: [],
+								visibleIf: [],
+								hasSubTasks: false,
+								learningResources: task.learningResources || [],
+								deleted: false,
+								metaInformation: task.meta || {},
+								updatedAt: new Date(),
+								createdAt: new Date(),
+								solutionDetails: task.solutionDetails || {},
+								attachments: [],
+								referenceId: newTask._id,
+								isImportedFromLibrary: false,
+								syncedAt: new Date(),
+							})
+
+							// If task has parentTaskId, update parent's children array and hasSubTasks
+							if (task.parentTaskId) {
+								if (!parentChildMap.has(task.parentTaskId)) {
+									parentChildMap.set(task.parentTaskId, [])
+								}
+								parentChildMap.get(task.parentTaskId).push(task.externalId)
+
+								// Update parent task's children array and hasSubTasks
+								await projectTemplateTaskQueries.findOneAndUpdate(
+									{ externalId: task.parentTaskId },
+									{
+										$addToSet: { children: newTask._id },
+										$set: { hasSubTasks: true },
+									}
+								)
+							}
+
+							// Update project template's tasks array
+							await projectTemplateQueries.findOneAndUpdate(
+								{ _id: projectTemplateId },
+								{ $addToSet: { tasks: newTask._id } }
+							)
+						}
+					} catch (error) {
+						console.error(error)
+						results.push({
+							externalId: task.externalId,
+							STATUS: 'Error',
+							message: error.message,
+						})
+					}
+				}
+
+				// Second pass: Build task hierarchy and update project document
+				if (projectId) {
+					const projectDoc = await projectQueries.projectDocument({ _id: projectId }, [
+						'tasks',
+						'taskSequence',
+						'taskReport',
+					])
+
+					if (projectDoc && projectDoc.length > 0) {
+						const currentTasks = projectDoc[0].tasks || []
+						const currentTaskSequence = projectDoc[0].taskSequence || []
+						const taskReport = projectDoc[0].taskReport || { total: 0, notStarted: 0 }
+
+						// Update task hierarchy
+						for (const [parentId, childIds] of parentChildMap.entries()) {
+							const parentTask = createdTasks.get(parentId)
+							if (parentTask) {
+								// Add children to parent task
+								parentTask.children = childIds.map((childId) => createdTasks.get(childId))
+								// Update parent task in currentTasks
+								const parentIndex = currentTasks.findIndex((t) => t.externalId === parentId)
+								if (parentIndex !== -1) {
+									currentTasks[parentIndex] = parentTask
+								}
+							}
+						}
+
+						// Add new tasks to current tasks
+						for (const [externalId, taskData] of createdTasks.entries()) {
+							const task = tasks.find((t) => t.externalId === externalId)
+							// Only add parent tasks to the main tasks array
+							if (!task.parentTaskId && !currentTasks.some((t) => t.externalId === externalId)) {
+								currentTasks.push(taskData)
+							}
+						}
+
+						// Update task sequence
+						const newTaskSequence = [...new Set([...currentTaskSequence, ...newTaskExternalIds])]
+
+						// Update task report
+						taskReport.total = currentTasks.length
+						taskReport.notStarted = currentTasks.filter((task) => task.status === 'notStarted').length
+
+						// Update project document
+						await projectQueries.findOneAndUpdate(
+							{ _id: projectId },
+							{
+								$set: {
+									tasks: currentTasks,
+									taskSequence: newTaskSequence,
+									taskReport: taskReport,
+									updatedAt: new Date(),
+								},
+							},
+							{ new: true }
+						)
+						console.log(
+							'[TEMPLATE TASKS] Updated project document:',
+							projectId,
+							'with new tasks:',
+							newTaskExternalIds
+						)
+					}
+				}
+
+				// Update template's taskSequence
+				if (newTaskExternalIds.length > 0) {
+					const currentSequence = template[0].taskSequence || []
+					let updatedSequence = [...currentSequence]
+
+					// Add parent task's externalId to sequence if it exists
+					for (const [parentId, childIds] of parentChildMap.entries()) {
+						if (!updatedSequence.includes(parentId)) {
+							updatedSequence.push(parentId)
+						}
+					}
+
+					await projectTemplateQueries.findOneAndUpdate(
+						{ _id: projectTemplateId },
+						{ $set: { taskSequence: updatedSequence } }
+					)
+					console.log('[TEMPLATE TASKS] Updated template taskSequence:', projectTemplateId, updatedSequence)
+				}
+
+				// Update parent tasks with their children's sequence
+				for (const [parentId, childIds] of parentChildMap.entries()) {
+					await projectTemplateTaskQueries.findOneAndUpdate(
+						{ externalId: parentId },
+						{ $set: { taskSequence: childIds } }
+					)
+				}
+
+				return resolve({
+					status: HTTP_STATUS_CODE.ok.status,
+					message: CONSTANTS.apiResponses.TASK_CREATED,
+					result: results,
+				})
+			} catch (error) {
+				console.error(error)
 				return reject(error)
 			}
 		})

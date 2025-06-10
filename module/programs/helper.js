@@ -320,6 +320,9 @@ module.exports = class ProgramsHelper {
 				}
 
 				if (data.scope) {
+					if (!data.scope.organizations) {
+						data.scope.organizations = userDetails.tenantAndOrgInfo.orgId
+					}
 					let programScopeUpdated = await this.setScope(programId, data.scope)
 
 					if (!programScopeUpdated.success) {

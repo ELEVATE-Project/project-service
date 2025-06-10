@@ -16,6 +16,22 @@ const projectQueries = require(DB_QUERY_BASE_PATH + '/projects')
  * @class
  */
 
+// Helper function to recursively update a task by externalId in a nested tasks array
+function updateTaskInTree(tasks, targetExternalId, updateData) {
+	for (let i = 0; i < tasks.length; i++) {
+		if (tasks[i].externalId === targetExternalId) {
+			tasks[i] = { ...tasks[i], ...updateData }
+			return true // updated
+		}
+		if (Array.isArray(tasks[i].children) && tasks[i].children.length > 0) {
+			if (updateTaskInTree(tasks[i].children, targetExternalId, updateData)) {
+				return true // updated in children
+			}
+		}
+	}
+	return false // not found
+}
+
 module.exports = class ProjectTemplateTasks extends Abstract {
 	/**
 	 * @apiDefine errorBody
@@ -233,6 +249,102 @@ module.exports = class ProjectTemplateTasks extends Abstract {
 				return resolve(result)
 			} catch (error) {
 				return reject(error)
+			}
+		})
+	}
+
+	/**
+	 * @api {post} /project/v1/project/templateTasks/updateTask/:projectId?externalId=externalIdValue
+	 * Update a project template task and its corresponding project task.
+	 * @apiVersion 1.0.0
+	 * @apiGroup Project Template Tasks
+	 * @apiParam {String} projectId Project ID (URL param)
+	 * @apiParam {String} externalId Task external ID (query param)
+	 * @apiParam {Object} body Fields to update (same as create)
+	 * @apiUse successBody
+	 * @apiUse errorBody
+	 * @apiSampleRequest /project/v1/project/templateTasks/updateTask/5f2adc57eb351a5a9c68f403?externalId=task-1
+	 */
+
+	/**
+	 * Update a project template task and its corresponding project task
+	 * @method
+	 * @name updateTask
+	 * @returns {JSON} returns updated project template task and project task.
+	 */
+
+	async updateTask(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				const projectId = req.params._id
+				const externalId = req.query.externalId
+				const updateData = req.body
+				const userId = req.userDetails.userInformation?.userId || req.userDetails.id
+
+				if (!projectId || !externalId) {
+					return resolve({
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: 'projectId and externalId are required',
+					})
+				}
+
+				// Validate project
+				const projectArr = await projectQueries.projectDocument({ _id: projectId })
+				if (!projectArr || !projectArr.length) {
+					return resolve({
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: 'Project not found',
+					})
+				}
+				const project = projectArr[0]
+				const projectTemplateId = project.projectTemplateId
+
+				// Fetch the template task by externalId and projectTemplateId
+				const templateTasks = await projectTemplateTasksHelper.getTasksByExternalIdAndTemplateId(
+					externalId,
+					projectTemplateId
+				)
+				if (!templateTasks || !templateTasks.length) {
+					return resolve({
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: 'Template task not found',
+					})
+				}
+				const templateTask = templateTasks[0]
+
+				// Update the template task
+				await projectTemplateTasksHelper.update(templateTask._id, updateData, userId)
+
+				// Update the corresponding task in the project document using externalId
+				const projectTasks = project.tasks || []
+				const updated = updateTaskInTree(projectTasks, externalId, updateData)
+				if (!updated) {
+					return resolve({
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: 'Task not found in project',
+					})
+				}
+
+				await projectQueries.findOneAndUpdate(
+					{ _id: projectId },
+					{ $set: { tasks: projectTasks, updatedAt: new Date() } }
+				)
+
+				return resolve({
+					status: HTTP_STATUS_CODE.ok.status,
+					message: 'Task updated successfully',
+					result: {
+						templateTaskId: templateTask._id,
+						projectId: projectId,
+						externalId: externalId,
+					},
+				})
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
+				})
 			}
 		})
 	}

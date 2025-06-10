@@ -735,17 +735,10 @@ module.exports = class ProjectTemplateTasksHelper {
 	static update(taskId, taskData, userId) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let findQuery = {}
-
-				let validateTaskId = UTILS.isValidMongoId(taskId)
-
-				if (validateTaskId) {
-					findQuery['_id'] = taskId
-				} else {
-					findQuery['externalId'] = taskId
+				let taskDocument = await projectTemplateTaskQueries.taskDocuments({ _id: taskId }, ['_id'])
+				if (!taskDocument.length) {
+					taskDocument = await projectTemplateTaskQueries.taskDocuments({ externalId: taskId }, ['_id'])
 				}
-
-				let taskDocument = await projectTemplateTaskQueries.taskDocuments(findQuery, ['_id'])
 
 				if (!taskDocument.length > 0) {
 					throw {
@@ -1060,6 +1053,21 @@ module.exports = class ProjectTemplateTasksHelper {
 				console.error(error)
 				return reject(error)
 			}
+		})
+	}
+
+	/**
+	 * Get tasks by externalId and projectTemplateId
+	 * @method
+	 * @name getTasksByExternalIdAndTemplateId
+	 * @param {String} externalId
+	 * @param {String} projectTemplateId
+	 * @returns {Array} List of matching tasks
+	 */
+	static async getTasksByExternalIdAndTemplateId(externalId, projectTemplateId) {
+		return await projectTemplateTaskQueries.taskDocuments({
+			externalId: externalId,
+			// projectTemplateId: projectTemplateId
 		})
 	}
 }

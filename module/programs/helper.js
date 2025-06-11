@@ -13,7 +13,7 @@ const projectQueries = require(DB_QUERY_BASE_PATH + '/projects')
 const entitiesService = require(GENERICS_FILES_PATH + '/services/entity-management')
 const validateEntity = process.env.VALIDATE_ENTITIES
 const userService = require(GENERICS_FILES_PATH + '/services/users')
-
+const kafkaProducersHelper = require(GENERICS_FILES_PATH + '/kafka/producers')
 /**
  * ProgramsHelper
  * @class
@@ -257,6 +257,30 @@ module.exports = class ProgramsHelper {
 					}
 				}
 
+				let userInfoCall = await userService.fetchProfileById(
+					userDetails.userInformation.tenantId,
+					userDetails.userInformation.userId
+				)
+
+				if (userInfoCall.success) {
+					let eventObj = {
+						entity: 'program',
+						eventType: 'create',
+						username: userInfoCall.data.username,
+						email: userInfoCall.data.username,
+						userId: data.userId,
+						meta: {
+							programInformation: {
+								name: data.name,
+								externalId: data.externalId,
+								id: program._id,
+							},
+						},
+					}
+
+					let event = await kafkaProducersHelper.pushProgramOperationEvent(eventObj)
+				}
+
 				return resolve({
 					success: true,
 					message: CONSTANTS.apiResponses.PROGRAMS_CREATED,
@@ -264,6 +288,7 @@ module.exports = class ProgramsHelper {
 					result: program,
 				})
 			} catch (error) {
+				console.log(error, 'error in create program')
 				return reject(error)
 			}
 		})

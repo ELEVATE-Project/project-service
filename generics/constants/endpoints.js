@@ -63,4 +63,5 @@ module.exports = {
 	AUTO_DOWNLOAD: '/v1/cloud-services/files/download',
 	TENANT_READ: '/v1/tenant/read',
 	PUBLIC_BRANDING: '/v1/public/branding',
+	PROFILE_BY_ID: '/v1/user/profileById',
 }

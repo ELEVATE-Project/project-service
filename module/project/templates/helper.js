@@ -1035,7 +1035,7 @@ module.exports = class ProjectTemplatesHelper {
 
 			if (taskType === CONSTANTS.common.IMPROVEMENT_PROJECT) {
 				duplicateTemplateTaskId = await createTemplateTask()
-			} else if (taskType === CONSTANTS.common.OBSERVATION) {
+			} else if (taskType === CONSTANTS.common.OBSERVATION && newProjectTemplateTask.solutionDetails.isReusable) {
 				const timestamp = UTILS.epochTime()
 				//Create child solutions for solutiontype obs
 				const importSolutionsResponse = await surveyService.importObservationTemplateToSolution(
@@ -1083,7 +1083,7 @@ module.exports = class ProjectTemplatesHelper {
 						$addToSet: { components: newProjectTemplateTask.solutionDetails._id },
 					}
 				)
-			} else if (taskType === CONSTANTS.common.SURVEY) {
+			} else if (taskType === CONSTANTS.common.SURVEY && newProjectTemplateTask.solutionDetails.isReusable) {
 				//Create child solutions for solutiontype survey
 				const importSolutionsResponse = await surveyService.importSurveyTemplateToSolution(
 					userToken,

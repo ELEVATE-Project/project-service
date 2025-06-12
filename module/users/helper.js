@@ -271,7 +271,7 @@ module.exports = class UsersHelper {
 
 				//fetching all the programsDocuments
 				let userRelatedProgramsData = await programsQueries.programsDocument(
-					{ _id: { $in: targetedProgramIds }, tenantId: tenantId, orgId: { $in: [orgId] } },
+					{ _id: { $in: targetedProgramIds }, tenantId: tenantId },
 					['name', 'externalId', 'metaInformation'],
 					'none', //not passing skip fields
 					{ createdAt: -1 } // sort by 'createdAt' in descending order

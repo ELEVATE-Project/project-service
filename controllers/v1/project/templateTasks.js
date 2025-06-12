@@ -259,19 +259,8 @@ module.exports = class ProjectTemplateTasks extends Abstract {
 				}
 				const projectTemplateId = project[0].projectTemplateId
 
-				// Helper function to convert DD-MM-YYYY to YYYY-MM-DD
-				const convertDateFormat = (dateStr) => {
-					if (!dateStr) return ''
-					const [day, month, year] = dateStr.split('-')
-					return `${year}-${month}-${day}T00:00:00.000Z`
-				}
-
 				// Process tasks to add metaInformation
 				tasks = tasks.map((task) => {
-					// Format dates to ISO string if they exist
-					let startDate = task.startDate ? convertDateFormat(task.startDate) : ''
-					let endDate = task.endDate ? convertDateFormat(task.endDate) : ''
-
 					// Create metaInformation object with default values
 					const metaInformation = {
 						hasAParentTask: task.hasAParentTask || 'NO',
@@ -279,8 +268,8 @@ module.exports = class ProjectTemplateTasks extends Abstract {
 						parentTaskValue: task.parentTaskValue || '',
 						parentTaskId: task.parentTaskId || '',
 						minNoOfSubmissionsRequired: task.minNoOfSubmissionsRequired || 1,
-						startDate: startDate,
-						endDate: endDate,
+						startDate: task.startDate || '',
+						endDate: task.endDate || '',
 					}
 
 					// Remove these fields from the main task object

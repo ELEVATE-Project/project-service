@@ -595,6 +595,9 @@ module.exports = class SolutionsHelper {
 					}
 				}
 				if (solutionData.scope && Object.keys(solutionData.scope).length > 0) {
+					if (!solutionData.scope.organizations) {
+						solutionData.scope.organizations = userDetails.tenantAndOrgInfo.orgId
+					}
 					let solutionScope = await this.setScope(solutionUpdatedData._id, solutionData.scope)
 
 					if (!solutionScope.success) {

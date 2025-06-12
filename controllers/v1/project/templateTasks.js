@@ -295,6 +295,22 @@ module.exports = class ProjectTemplateTasks extends Abstract {
 					}
 				})
 
+				// Check for parent tasks that need to be updated
+				for (const task of tasks) {
+					if (task.metaInformation.hasAParentTask === 'YES' && task.metaInformation.parentTaskId) {
+						// Check if parent task exists in the database
+						const parentTasks = await projectTemplateTasksHelper.getTasksByExternalIdAndTemplateId(
+							task.metaInformation.parentTaskId,
+							projectTemplateId
+						)
+
+						if (parentTasks && parentTasks.length > 0) {
+							// Parent task exists, mark it for update
+							task._parentExists = true
+						}
+					}
+				}
+
 				// Validate all task dates
 				const validation = utils.validateAllTaskDates(tasks)
 				if (!validation.isValid) {

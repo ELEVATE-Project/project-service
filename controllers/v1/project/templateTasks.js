@@ -327,46 +327,54 @@ module.exports = class ProjectTemplateTasks extends Abstract {
 				const project = projectArr[0]
 				const projectTemplateId = project.projectTemplateId
 
-				// Fetch the template task by externalId and projectTemplateId
-				const templateTasks = await projectTemplateTasksHelper.getTasksByExternalIdAndTemplateId(
-					externalId,
-					projectTemplateId
-				)
-				if (!templateTasks || !templateTasks.length) {
+				try {
+					const projectTasks = project.tasks || []
+					const updatedTaskIds = []
+
+					// Process each task in the tasks array
+					for (const taskData of updateData.tasks) {
+						// Fetch the template task by externalId and projectTemplateId
+						const templateTasks = await projectTemplateTasksHelper.getTasksByExternalIdAndTemplateId(
+							taskData.externalId,
+							projectTemplateId
+						)
+
+						if (!templateTasks || !templateTasks.length) {
+							throw new Error(`Template task not found for externalId: ${taskData.externalId}`)
+						}
+
+						const templateTask = templateTasks[0]
+
+						// Update the template task
+						await projectTemplateTasksHelper.update(templateTask._id, taskData, userId)
+
+						// Update the task in project document
+						const updated = updateTaskInTree(projectTasks, taskData.externalId, taskData)
+						if (!updated) {
+							throw new Error(`Task not found in project: ${taskData.externalId}`)
+						}
+
+						updatedTaskIds.push(taskData.externalId)
+					}
+
+					// Update the project document with all changes
+					await projectQueries.findOneAndUpdate(
+						{ _id: projectId },
+						{ $set: { tasks: projectTasks, updatedAt: new Date() } }
+					)
+
 					return resolve({
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: 'Template task not found',
+						status: HTTP_STATUS_CODE.ok.status,
+						message: 'Tasks updated successfully',
+						result: {
+							projectId: projectId,
+							projectTemplateId: projectTemplateId,
+							updatedTaskIds: updatedTaskIds,
+						},
 					})
+				} catch (error) {
+					throw error
 				}
-				const templateTask = templateTasks[0]
-
-				// Update the template task
-				await projectTemplateTasksHelper.update(templateTask._id, updateData, userId)
-
-				// Update the corresponding task in the project document using externalId
-				const projectTasks = project.tasks || []
-				const updated = updateTaskInTree(projectTasks, externalId, updateData)
-				if (!updated) {
-					return resolve({
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: 'Task not found in project',
-					})
-				}
-
-				await projectQueries.findOneAndUpdate(
-					{ _id: projectId },
-					{ $set: { tasks: projectTasks, updatedAt: new Date() } }
-				)
-
-				return resolve({
-					status: HTTP_STATUS_CODE.ok.status,
-					message: 'Task updated successfully',
-					result: {
-						templateTaskId: templateTask._id,
-						projectId: projectId,
-						externalId: externalId,
-					},
-				})
 			} catch (error) {
 				return reject({
 					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,

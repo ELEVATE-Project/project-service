@@ -195,7 +195,7 @@ let enviromentVariables = {
 		optional: true,
 		default: 'config.json',
 	},
-	PROGRAM_OPERATION_TOPIC: {
+	PROGRAM_USER_MAPPING_TOPIC: {
 		message: 'Required program operation kafka topic',
 		optional: true,
 		default: 'elevate_program_operation_event',

@@ -275,4 +275,7 @@ module.exports = {
 	FAILED_TO_FETCH_TENANT_DETAILS: 'Failed to fetch tenant details',
 	DOMAIN_FETCH_FAILED: 'Tenants domain fetch failed',
 	TENANTID_REQUIRED_IN_SOLUTION: 'TenantId required in solution',
+	USER_NOT_FOUND: 'User not found',
+	SOMETHING_WENT_WRONG: 'Something went wrong!',
+	FILE_DATA_MISSING: 'File or data is missing.',
 }

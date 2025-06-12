@@ -8,25 +8,33 @@
 module.exports = {
 	name: 'userExtension',
 	schema: {
+		externalId: {
+			type: String,
+			required: true,
+		},
 		userId: {
 			type: String,
 			required: true,
 			index: true,
 			unique: true,
 		},
-		wishlist: [
-			{
-				_id: {
-					type: String,
-				},
-				title: String,
-				description: String,
-				referenceFrom: String,
-				metaInformation: Object,
-				createdAt: {
-					type: Date,
-				},
-			},
-		],
+		createdBy: {
+			type: String,
+			required: true,
+		},
+		updatedBy: {
+			type: String,
+			required: true,
+		},
+		status: {
+			type: String,
+			default: 'active',
+			index: true,
+		},
+		isDeleted: {
+			type: Boolean,
+			default: false,
+		},
+		platformRoles: Array,
 	},
 }

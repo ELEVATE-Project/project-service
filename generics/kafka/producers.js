@@ -19,7 +19,7 @@ const userProjectActivityTopic =
 const programOperationKafkaTopic =
 	process.env.PROGRAM_OPERATION_TOPIC && process.env.PROGRAM_OPERATION_TOPIC != 'OFF'
 		? process.env.PROGRAM_OPERATION_TOPIC
-		: 'program_operation_event'
+		: 'elevate_program_operation_dev'
 
 /**
  * Push improvement projects to kafka.

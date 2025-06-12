@@ -267,8 +267,7 @@ module.exports = class ProgramsHelper {
 						entity: 'program',
 						eventType: 'create',
 						username: userInfoCall.data.username,
-						email: userInfoCall.data.username,
-						userId: data.userId,
+						userId: userInfoCall.data.id,
 						meta: {
 							programInformation: {
 								name: data.name,

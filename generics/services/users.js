@@ -483,20 +483,23 @@ const fetchPublicTenantDetails = function (tenantId) {
  * @returns {Promise} A promise that resolves with the organization details or rejects with an error.
  */
 
-const fetchProfileById = function (tenantId, userId) {
+const fetchProfileById = function (tenantId, userId = null, username) {
 	return new Promise(async (resolve, reject) => {
 		try {
+			let params
+			if (userId) {
+				params = `/${userId}?tenant_code=${tenantId}`
+			} else {
+				params = `?tenant_code=${tenantId}&username=${username}`
+			}
+
 			let url =
-				interfaceServiceUrl +
-				process.env.USER_SERVICE_BASE_URL +
-				CONSTANTS.endpoints.PROFILE_BY_ID +
-				`/${userId}?tenant_code=${tenantId}`
+				interfaceServiceUrl + process.env.USER_SERVICE_BASE_URL + CONSTANTS.endpoints.PROFILE_BY_ID + params
+
 			const options = {
 				headers: {
 					'content-type': 'application/json',
-					tenantid: tenantId,
 					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
-					'X-auth-token': `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoyMDYsIm5hbWUiOiJoaCBkZGQiLCJzZXNzaW9uX2lkIjo1OTY2LCJvcmdhbml6YXRpb25faWRzIjpbIjgiXSwib3JnYW5pemF0aW9uX2NvZGVzIjpbImJsciJdLCJ0ZW5hbnRfY29kZSI6InNoaWtzaGFncmFoYSIsIm9yZ2FuaXphdGlvbnMiOlt7ImlkIjo4LCJuYW1lIjoiQmVuZ2FsdXJ1IiwiY29kZSI6ImJsciIsImRlc2NyaXB0aW9uIjoiQmVuZ2FsdXJ1IGlzIHRoZSBjYXBpdGFsIG9mIEluZGlhcyBzb3V0aGVybiBLYXJuYXRha2Egc3RhdGUuIiwic3RhdHVzIjoiQUNUSVZFIiwicmVsYXRlZF9vcmdzIjpbOV0sInRlbmFudF9jb2RlIjoic2hpa3NoYWdyYWhhIiwibWV0YSI6eyJ0ZXJtcyI6W3siaWRlbnRpZmllciI6Im1pZ3JhdGlvbi1mcmFtZXdvcmtfYm9hcmRfY2JzZSIsIm5vZGVfaWQiOiJtaWdyYXRpb24tZnJhbWV3b3JrX2JvYXJkX2Nic2UifSx7ImlkZW50aWZpZXIiOiJtaWdyYXRpb24tZnJhbWV3b3JrX21lZGl1bV9lbmdsaXNoIiwibm9kZV9pZCI6Im1pZ3JhdGlvbi1mcmFtZXdvcmtfbWVkaXVtX2VuZ2xpc2gifSx7ImlkZW50aWZpZXIiOiJtaWdyYXRpb24tZnJhbWV3b3JrX2dyYWRlbGV2ZWxfZ3JhZGUxMCIsIm5vZGVfaWQiOiJtaWdyYXRpb24tZnJhbWV3b3JrX2dyYWRlbGV2ZWxfZ3JhZGUxMCJ9LHsiaWRlbnRpZmllciI6Im1pZ3JhdGlvbi1mcmFtZXdvcmtfc3ViamVjdF9oaW5kaSIsIm5vZGVfaWQiOiJtaWdyYXRpb24tZnJhbWV3b3JrX3N1YmplY3RfaGluZGkifSx7ImlkZW50aWZpZXIiOiJtaWdyYXRpb24tZnJhbWV3b3JrX3N1YmplY3RfZW5nbGlzaCIsIm5vZGVfaWQiOiJtaWdyYXRpb24tZnJhbWV3b3JrX3N1YmplY3RfZW5nbGlzaCJ9LHsiaWRlbnRpZmllciI6Im1pZ3JhdGlvbi1mcmFtZXdvcmtfc3ViamVjdF9tYXRocyIsIm5vZGVfaWQiOiJtaWdyYXRpb24tZnJhbWV3b3JrX3N1YmplY3RfbWF0aHMifV0sImZyYW1ld29yayI6eyJub2RlX2lkIjoibWlncmF0aW9uLWZyYW1ld29yayIsInZlcnNpb25LZXkiOiIxNzQyODg1NzY3ODQxIn19LCJjcmVhdGVkX2J5IjoxLCJ1cGRhdGVkX2J5IjpudWxsLCJyb2xlcyI6W3siaWQiOjE0LCJ0aXRsZSI6Im1lbnRvciIsImxhYmVsIjpudWxsLCJ1c2VyX3R5cGUiOjAsInN0YXR1cyI6IkFDVElWRSIsIm9yZ2FuaXphdGlvbl9pZCI6NywidmlzaWJpbGl0eSI6IlBVQkxJQyIsInRlbmFudF9jb2RlIjoic2hpa3NoYWdyYWhhIiwidHJhbnNsYXRpb25zIjpudWxsfSx7ImlkIjoxNSwidGl0bGUiOiJtZW50ZWUiLCJsYWJlbCI6bnVsbCwidXNlcl90eXBlIjowLCJzdGF0dXMiOiJBQ1RJVkUiLCJvcmdhbml6YXRpb25faWQiOjcsInZpc2liaWxpdHkiOiJQVUJMSUMiLCJ0ZW5hbnRfY29kZSI6InNoaWtzaGFncmFoYSIsInRyYW5zbGF0aW9ucyI6bnVsbH0seyJpZCI6MzMsInRpdGxlIjoibGVhcm5lciIsImxhYmVsIjoiTGVhcm5lciIsInVzZXJfdHlwZSI6MCwic3RhdHVzIjoiQUNUSVZFIiwib3JnYW5pemF0aW9uX2lkIjo3LCJ2aXNpYmlsaXR5IjoiUFVCTElDIiwidGVuYW50X2NvZGUiOiJzaGlrc2hhZ3JhaGEiLCJ0cmFuc2xhdGlvbnMiOm51bGx9XX1dfSwiaWF0IjoxNzQ5NjE4NjE2LCJleHAiOjE3NDk3MDUwMTZ9.JVF-AX1H9f4OVZlorZVEOXQ2HLZhmz9Px6LIkusCjSQ`,
 				},
 			}
 

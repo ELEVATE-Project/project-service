@@ -258,7 +258,54 @@ module.exports = class ProjectTemplateTasks extends Abstract {
 					})
 				}
 				const projectTemplateId = project[0].projectTemplateId
-				console.log('projectTemplateId', projectTemplateId)
+
+				// Helper function to convert DD-MM-YYYY to YYYY-MM-DD
+				const convertDateFormat = (dateStr) => {
+					if (!dateStr) return ''
+					const [day, month, year] = dateStr.split('-')
+					return `${year}-${month}-${day}T00:00:00.000Z`
+				}
+
+				// Process tasks to add metaInformation
+				tasks = tasks.map((task) => {
+					// Format dates to ISO string if they exist
+					let startDate = task.startDate ? convertDateFormat(task.startDate) : ''
+					let endDate = task.endDate ? convertDateFormat(task.endDate) : ''
+
+					// Create metaInformation object with default values
+					const metaInformation = {
+						hasAParentTask: task.hasAParentTask || 'NO',
+						parentTaskOperator: task.parentTaskOperator || '',
+						parentTaskValue: task.parentTaskValue || '',
+						parentTaskId: task.parentTaskId || '',
+						minNoOfSubmissionsRequired: task.minNoOfSubmissionsRequired || 1,
+						startDate: startDate,
+						endDate: endDate,
+					}
+
+					// Remove these fields from the main task object
+					delete task.hasAParentTask
+					delete task.parentTaskOperator
+					delete task.parentTaskValue
+					delete task.parentTaskId
+					delete task.minNoOfSubmissionsRequired
+
+					// Add metaInformation to task
+					return {
+						...task,
+						metaInformation,
+						hasSubTasks: false,
+						children: [],
+						visibleIf: [],
+						learningResources: task.learningResources || [],
+						solutionDetails: task.solutionDetails || {
+							solutionType: '',
+							solutionId: '',
+							solutionSubType: '',
+						},
+					}
+				})
+
 				// Validate all task dates
 				const validation = utils.validateAllTaskDates(tasks)
 				if (!validation.isValid) {

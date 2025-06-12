@@ -806,8 +806,6 @@ module.exports = class ProjectTemplateTasksHelper {
 					'solutionId',
 				])
 
-				console.log('[TEMPLATE TASKS] Template data:', JSON.stringify(template, null, 2))
-
 				if (!template || !template.length) {
 					throw new Error('Template not found')
 				}
@@ -817,8 +815,6 @@ module.exports = class ProjectTemplateTasksHelper {
 					{ _id: template[0].solutionId },
 					_solutionDocumentProjectionFieldsForTask()
 				)
-
-				console.log('[TEMPLATE TASKS] Solution data:', JSON.stringify(solutionData, null, 2))
 
 				const results = []
 				const newTaskExternalIds = []
@@ -862,19 +858,7 @@ module.exports = class ProjectTemplateTasksHelper {
 							continue
 						}
 
-						console.log('[TEMPLATE TASKS] Creating task with data:', {
-							...task,
-							projectTemplateId: projectTemplateId,
-							projectTemplateExternalId: template[0].externalId,
-							createdBy: userId,
-							updatedBy: userId,
-							createdAt: new Date(),
-							updatedAt: new Date(),
-							status: 'published',
-							isDeleted: false,
-						})
-
-						// Create new task
+						// Create new task with metaInformation
 						let newTask = await projectTemplateTaskQueries.createTemplateTask({
 							...task,
 							projectTemplateId,
@@ -882,9 +866,12 @@ module.exports = class ProjectTemplateTasksHelper {
 							createdBy: userId,
 							status: CONSTANTS.common.ACTIVE,
 							taskSequence: [], // Initialize empty sequence for all tasks
-							hasAParentTask: task.parentTaskId ? 'YES' : 'NO',
-							hasSubTasks: false, // Set as boolean false
+							hasAParentTask: task.metaInformation.hasAParentTask,
+							hasSubTasks: false,
 							children: [],
+							metaInformation: task.metaInformation,
+							createdAt: new Date(),
+							updatedAt: new Date(),
 						})
 
 						if (newTask._id) {
@@ -895,7 +882,7 @@ module.exports = class ProjectTemplateTasksHelper {
 							})
 							newTaskExternalIds.push(String(newTask.externalId))
 
-							// Store created task data
+							// Store created task data with metaInformation
 							createdTasks.set(task.externalId, {
 								_id: newTask._id,
 								externalId: task.externalId,
@@ -909,10 +896,14 @@ module.exports = class ProjectTemplateTasksHelper {
 								hasSubTasks: false,
 								learningResources: task.learningResources || [],
 								deleted: false,
-								metaInformation: task.meta || {},
+								metaInformation: task.metaInformation,
 								updatedAt: new Date(),
 								createdAt: new Date(),
-								solutionDetails: task.solutionDetails || {},
+								solutionDetails: task.solutionDetails || {
+									solutionType: '',
+									solutionId: '',
+									solutionSubType: '',
+								},
 								attachments: [],
 								referenceId: newTask._id,
 								isImportedFromLibrary: false,
@@ -920,15 +911,15 @@ module.exports = class ProjectTemplateTasksHelper {
 							})
 
 							// If task has parentTaskId, update parent's children array and hasSubTasks
-							if (task.parentTaskId) {
-								if (!parentChildMap.has(task.parentTaskId)) {
-									parentChildMap.set(task.parentTaskId, [])
+							if (task.metaInformation.hasAParentTask === 'YES' && task.metaInformation.parentTaskId) {
+								if (!parentChildMap.has(task.metaInformation.parentTaskId)) {
+									parentChildMap.set(task.metaInformation.parentTaskId, [])
 								}
-								parentChildMap.get(task.parentTaskId).push(task.externalId)
+								parentChildMap.get(task.metaInformation.parentTaskId).push(task.externalId)
 
 								// Update parent task's children array and hasSubTasks
 								await projectTemplateTaskQueries.findOneAndUpdate(
-									{ externalId: task.parentTaskId },
+									{ externalId: task.metaInformation.parentTaskId },
 									{
 										$addToSet: { children: newTask._id },
 										$set: { hasSubTasks: true },
@@ -983,7 +974,10 @@ module.exports = class ProjectTemplateTasksHelper {
 						for (const [externalId, taskData] of createdTasks.entries()) {
 							const task = tasks.find((t) => t.externalId === externalId)
 							// Only add parent tasks to the main tasks array
-							if (!task.parentTaskId && !currentTasks.some((t) => t.externalId === externalId)) {
+							if (
+								task.metaInformation.hasAParentTask === 'NO' &&
+								!currentTasks.some((t) => t.externalId === externalId)
+							) {
 								currentTasks.push(taskData)
 							}
 						}
@@ -1008,12 +1002,6 @@ module.exports = class ProjectTemplateTasksHelper {
 							},
 							{ new: true }
 						)
-						console.log(
-							'[TEMPLATE TASKS] Updated project document:',
-							projectId,
-							'with new tasks:',
-							newTaskExternalIds
-						)
 					}
 				}
 
@@ -1033,7 +1021,6 @@ module.exports = class ProjectTemplateTasksHelper {
 						{ _id: projectTemplateId },
 						{ $set: { taskSequence: updatedSequence } }
 					)
-					console.log('[TEMPLATE TASKS] Updated template taskSequence:', projectTemplateId, updatedSequence)
 				}
 
 				// Update parent tasks with their children's sequence

@@ -36,7 +36,7 @@ module.exports = {
 			type: String,
 			required: true,
 		},
-		solutionDetails: {
+		projectTemplateDetails: {
 			type: Object,
 			default: {},
 		},

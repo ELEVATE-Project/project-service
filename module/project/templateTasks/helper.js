@@ -287,20 +287,31 @@ module.exports = class ProjectTemplateTasksHelper {
 					} else {
 						parsedData.STATUS = CONSTANTS.apiResponses.REQUIRED_SOLUTION_ID
 					}
-					// adding projectTemplateDetails for task
-					let projectTemplateDetails = {
-						subType: parsedData.solutionSubType,
-						type: parsedData.solutionType,
-						_id: solutionData[parsedData.solutionId]._id,
-						externalId: parsedData.solutionId,
-						name: solutionData[parsedData.solutionId].name,
-						isReusable: solutionData[parsedData.solutionId].isReusable,
-						minNoOfSubmissionsRequired: parsedData.minNoOfSubmissionsRequired,
-					}
-					allValues.projectTemplateDetails = projectTemplateDetails
-
 					if (solutionData[parsedData.solutionId].type === CONSTANTS.common.IMPROVEMENT_PROJECT) {
+						// adding projectTemplateDetails for task
+						let projectTemplateDetails = {
+							subType: parsedData.solutionSubType,
+							type: parsedData.solutionType,
+							_id: solutionData[parsedData.solutionId]._id,
+							externalId: parsedData.solutionId,
+							name: solutionData[parsedData.solutionId].name,
+							isReusable: solutionData[parsedData.solutionId].isReusable,
+							minNoOfSubmissionsRequired: parsedData.minNoOfSubmissionsRequired,
+						}
+						allValues.projectTemplateDetails = projectTemplateDetails
 						delete allValues.solutionDetails
+					} else {
+						// adding solutionDetails for task
+						let solutionDetails = {
+							subType: parsedData.solutionSubType,
+							type: parsedData.solutionType,
+							_id: solutionData[parsedData.solutionId]._id,
+							externalId: parsedData.solutionId,
+							name: solutionData[parsedData.solutionId].name,
+							isReusable: solutionData[parsedData.solutionId].isReusable,
+							minNoOfSubmissionsRequired: parsedData.minNoOfSubmissionsRequired,
+						}
+						allValues.solutionDetails = solutionDetails
 					}
 				}
 

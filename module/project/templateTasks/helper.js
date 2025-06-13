@@ -287,7 +287,7 @@ module.exports = class ProjectTemplateTasksHelper {
 					} else {
 						parsedData.STATUS = CONSTANTS.apiResponses.REQUIRED_SOLUTION_ID
 					}
-					// adding solutionDetails for task
+					// adding projectTemplateDetails for task
 					let projectTemplateDetails = {
 						subType: parsedData.solutionSubType,
 						type: parsedData.solutionType,
@@ -298,6 +298,10 @@ module.exports = class ProjectTemplateTasksHelper {
 						minNoOfSubmissionsRequired: parsedData.minNoOfSubmissionsRequired,
 					}
 					allValues.projectTemplateDetails = projectTemplateDetails
+
+					if (solutionData[parsedData.solutionId].type === CONSTANTS.common.IMPROVEMENT_PROJECT) {
+						delete allValues.solutionDetails
+					}
 				}
 
 				allValues.projectTemplateId = template._id

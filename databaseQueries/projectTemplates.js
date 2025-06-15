@@ -160,9 +160,7 @@ module.exports = class ProjectTemplates {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Find all projects that have this solution ID
-				const projects = await database.models.projects
-					.find({ solutionId: solutionId }, { _id: 1, projectTemplateId: 1, title: 1, status: 1 })
-					.lean()
+				const projects = await database.models.projects.find({ solutionId: solutionId }).lean()
 
 				if (!projects || projects.length === 0) {
 					return resolve({

@@ -517,77 +517,91 @@ module.exports = class ProjectTemplateTasks extends Abstract {
 	async deleteTask(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				const projectId = req.params._id
+				const solutionId = req.params._id
 				const externalId = req.query.externalId
 				const userId = req.userDetails.userInformation?.userId || req.userDetails.id
 
-				if (!projectId || !externalId) {
+				if (!solutionId || !externalId) {
 					return resolve({
 						status: HTTP_STATUS_CODE.bad_request.status,
-						message: 'projectId and externalId are required',
+						message: 'solutionId and externalId are required',
 					})
 				}
 
-				// Validate project
-				const projectArr = await projectQueries.projectDocument({ _id: projectId })
-				if (!projectArr || !projectArr.length) {
-					return resolve({
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: 'Project not found',
-					})
-				}
-				const project = projectArr[0]
-				const hasStartedTasks =
-					project.tasks &&
-					project.tasks.some((task) => task.status && task.status !== CONSTANTS.common.NOT_STARTED_STATUS)
-
-				if (hasStartedTasks) {
-					return resolve({
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: 'Cannot delete project with started tasks',
-					})
-				}
-				const projectTemplateId = project.projectTemplateId
-
-				// Fetch the template task by externalId and projectTemplateId
-				const templateTasks = await projectTemplateTasksHelper.getTasksByExternalIdAndTemplateId(
-					externalId,
-					projectTemplateId
-				)
-				if (!templateTasks || !templateTasks.length) {
-					return resolve({
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: 'Template task not found',
-					})
-				}
-				const templateTask = templateTasks[0]
-
-				// Delete the template task
-				await database.models.projectTemplateTasks.deleteOne({ _id: templateTask._id })
-
-				// Remove the task from project document using externalId
-				const projectTasks = project.tasks || []
-				const removed = removeTaskFromTree(projectTasks, externalId)
-				if (!removed) {
-					return resolve({
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: 'Task not found in project',
+				// 1. Fetch all projects linked to the solution
+				const projectsResponse = await projectTemplateQueries.getProjectsBySolutionId(solutionId)
+				if (!projectsResponse.success) {
+					return reject({
+						status: HTTP_STATUS_CODE.internal_server_error.status,
+						message: projectsResponse.message || 'Failed to fetch projects',
 					})
 				}
 
-				await projectQueries.findOneAndUpdate(
-					{ _id: projectId },
-					{ $set: { tasks: projectTasks, updatedAt: new Date() } }
-				)
+				const projects = projectsResponse.data
+				if (!projects || !projects.length) {
+					return reject({
+						status: HTTP_STATUS_CODE.not_found.status,
+						message: 'No projects found for this solution',
+					})
+				}
 
-				return resolve({
-					status: HTTP_STATUS_CODE.ok.status,
-					message: 'Task deleted successfully',
-					result: {
+				let deletedTasks = []
+				for (const project of projects) {
+					const projectId = project._id
+					const hasStartedTasks =
+						project.tasks &&
+						project.tasks.some((task) => task.status && task.status !== CONSTANTS.common.NOT_STARTED_STATUS)
+
+					if (hasStartedTasks) {
+						continue // Skip this project if any task has started
+					}
+
+					const projectTemplateId = project.projectTemplateId
+
+					// Fetch the template task by externalId and projectTemplateId
+					const templateTasks = await projectTemplateTasksHelper.getTasksByExternalIdAndTemplateId(
+						externalId,
+						projectTemplateId
+					)
+					if (!templateTasks || !templateTasks.length) {
+						continue // Skip if template task not found
+					}
+
+					const templateTask = templateTasks[0]
+
+					// Delete the template task
+					await database.models.projectTemplateTasks.deleteOne({ _id: templateTask._id })
+
+					// Remove the task from project document using externalId
+					const projectTasks = project.tasks || []
+					const removed = removeTaskFromTree(projectTasks, externalId)
+					if (!removed) {
+						continue // Skip if task not found in project
+					}
+
+					await projectQueries.findOneAndUpdate(
+						{ _id: projectId },
+						{ $set: { tasks: projectTasks, updatedAt: new Date() } }
+					)
+
+					deletedTasks.push({
 						templateTaskId: templateTask._id,
 						projectId: projectId,
 						externalId: externalId,
-					},
+					})
+				}
+
+				if (!deletedTasks.length) {
+					return resolve({
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: 'No tasks deleted. Either tasks were already started or not found.',
+					})
+				}
+
+				return resolve({
+					status: HTTP_STATUS_CODE.ok.status,
+					message: 'Tasks deleted successfully',
+					result: deletedTasks,
 				})
 			} catch (error) {
 				return reject({

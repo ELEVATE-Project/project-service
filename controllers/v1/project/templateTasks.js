@@ -22,7 +22,43 @@ const projectTemplateTaskQueries = require(DB_QUERY_BASE_PATH + '/projectTemplat
 function updateTaskInTree(tasks, targetExternalId, updateData) {
 	for (let i = 0; i < tasks.length; i++) {
 		if (tasks[i].externalId === targetExternalId) {
-			tasks[i] = { ...tasks[i], ...updateData }
+			// If updateData has children, handle them
+			if (updateData.children && Array.isArray(updateData.children)) {
+				// Get existing children
+				const existingChildren = tasks[i].children || []
+
+				// Create a map of existing children by externalId
+				const existingChildrenMap = new Map(existingChildren.map((child) => [child.externalId, child]))
+
+				// Create a map of new children by externalId
+				const newChildrenMap = new Map(updateData.children.map((child) => [child.externalId, child]))
+
+				// Update or add new children
+				const updatedChildren = updateData.children.map((child) => {
+					if (existingChildrenMap.has(child.externalId)) {
+						// Merge existing child with new data
+						return {
+							...existingChildrenMap.get(child.externalId),
+							...child,
+						}
+					}
+					return child
+				})
+
+				// Update the task with new children
+				tasks[i] = {
+					...tasks[i],
+					...updateData,
+					children: updatedChildren,
+				}
+			} else {
+				// If no children in updateData, remove all children
+				tasks[i] = {
+					...tasks[i],
+					...updateData,
+					children: [], // Remove all children if none specified in request
+				}
+			}
 			return true // updated
 		}
 		if (Array.isArray(tasks[i].children) && tasks[i].children.length > 0) {
@@ -216,7 +252,7 @@ module.exports = class ProjectTemplateTasks extends Abstract {
 	}
 
 	/**
-	 * @api {post} /project/v1/project/templateTasks/bulkCreateJson/:projectTemplateId
+	 * @api {post} /project/v1/project/templateTasks/bulkCreateJson/:solutionId
 	 * Bulk create project template tasks using JSON.
 	 * @apiVersion 1.0.0
 	 * @apiGroup Project Template Tasks
@@ -245,23 +281,53 @@ module.exports = class ProjectTemplateTasks extends Abstract {
 	async bulkCreateJson(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let tasks = req.body.tasks
-				let projectId = req.params._id
-				let userId = req.userDetails.id
+				const solutionId = req.params._id
 
-				// Get projectTemplateId from project document
-				const project = await projectQueries.projectDocument({ _id: projectId })
-				if (!project) {
-					return resolve({
+				// 1. Validate solutionId
+				if (!solutionId) {
+					return reject({
 						status: HTTP_STATUS_CODE.bad_request.status,
-						message: 'Project not found',
+						message: 'Solution ID is required',
 					})
 				}
-				const projectTemplateId = project[0].projectTemplateId
 
-				// Process tasks to add metaInformation
-				tasks = tasks.map((task) => {
-					// Create metaInformation object with default values
+				// 2. Get tasks data from request body
+				const tasks = req.body.tasks
+				if (!tasks || !Array.isArray(tasks)) {
+					return reject({
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: 'Tasks array is required in request body',
+					})
+				}
+
+				// 3. Fetch all projects for this solution
+				const projectsResponse = await projectTemplateQueries.getProjectsBySolutionId(solutionId)
+				if (!projectsResponse.success) {
+					return reject({
+						status: HTTP_STATUS_CODE.internal_server_error.status,
+						message: projectsResponse.message || 'Failed to fetch projects',
+					})
+				}
+
+				const projects = projectsResponse.data
+				if (!projects || !projects.length) {
+					return reject({
+						status: HTTP_STATUS_CODE.not_found.status,
+						message: 'No projects found for this solution',
+					})
+				}
+
+				// 4. Get the project template ID from the first project
+				const projectTemplateId = projects[0].projectTemplateId
+				if (!projectTemplateId) {
+					return reject({
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: 'Project template ID not found',
+					})
+				}
+
+				// 5. Process tasks to add metaInformation
+				const processedTasks = tasks.map((task) => {
 					const metaInformation = {
 						hasAParentTask: task.hasAParentTask || 'NO',
 						parentTaskOperator: task.parentTaskOperator || '',
@@ -272,14 +338,12 @@ module.exports = class ProjectTemplateTasks extends Abstract {
 						endDate: task.endDate || '',
 					}
 
-					// Remove these fields from the main task object
 					delete task.hasAParentTask
 					delete task.parentTaskOperator
 					delete task.parentTaskValue
 					delete task.parentTaskId
 					delete task.minNoOfSubmissionsRequired
 
-					// Add metaInformation to task
 					return {
 						...task,
 						metaInformation,
@@ -295,62 +359,56 @@ module.exports = class ProjectTemplateTasks extends Abstract {
 					}
 				})
 
-				// Check for parent tasks that need to be updated
-				for (const task of tasks) {
-					if (task.metaInformation.hasAParentTask === 'YES' && task.metaInformation.parentTaskId) {
-						// Check if parent task exists in the database
-						const parentTasks = await projectTemplateTasksHelper.getTasksByExternalIdAndTemplateId(
-							task.metaInformation.parentTaskId,
-							projectTemplateId
-						)
+				// 6. Create tasks and update projects in one go
+				const projectIds = projects.map((project) => project._id)
+				const result = await projectTemplateTasksHelper.bulkCreateJson(
+					processedTasks,
+					projectTemplateId,
+					req.userDetails.userInformation.userId,
+					projectIds
+				)
 
-						if (parentTasks && parentTasks.length > 0) {
-							// Parent task exists, mark it for update
-							task._parentExists = true
-						}
-					}
-				}
-
-				// Validate all task dates
-				const validation = utils.validateAllTaskDates(tasks)
-				if (!validation.isValid) {
-					return resolve({
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: validation.message,
+				if (!result || !result.success) {
+					return reject({
+						status: HTTP_STATUS_CODE.internal_server_error.status,
+						message: result.message || 'Failed to create project template tasks',
 					})
 				}
 
-				let result = await projectTemplateTasksHelper.bulkCreateJson(
-					tasks,
-					projectTemplateId,
-					userId,
-					projectId
-				)
-				return resolve(result)
+				// 7. Return results
+				return resolve({
+					status: HTTP_STATUS_CODE.ok.status,
+					message: 'Bulk task creation completed',
+					result: result.data,
+				})
 			} catch (error) {
-				return reject(error)
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
+				})
 			}
 		})
 	}
 
 	/**
-	 * @api {post} /project/v1/project/templateTasks/updateTask/:projectId?externalId=externalIdValue
-	 * Update a project template task and its corresponding project task.
+	 * @api {post} /project/v1/project/templateTasks/updateTask/:solutionId?externalId=externalIdValue
+	 * Update a specific task in all projects associated with a solution.
 	 * @apiVersion 1.0.0
 	 * @apiGroup Project Template Tasks
-	 * @apiParam {String} projectId Project ID (URL param)
+	 * @apiParam {String} solutionId Solution ID (URL param)
 	 * @apiParam {String} externalId Task external ID (query param)
-	 * @apiParam {Object} body Fields to update (same as create)
+	 * @apiParam {Object} body Task data to update
 	 * @apiUse successBody
 	 * @apiUse errorBody
 	 * @apiSampleRequest /project/v1/project/templateTasks/updateTask/5f2adc57eb351a5a9c68f403?externalId=task-1
 	 */
 
 	/**
-	 * Update a project template task and its corresponding project task
+	 * Update a specific task in all projects associated with a solution
 	 * @method
 	 * @name updateTask
-	 * @returns {JSON} returns updated project template task and project task.
+	 * @returns {JSON} returns updated project tasks.
 	 */
 
 	async updateTask(req) {
@@ -459,77 +517,91 @@ module.exports = class ProjectTemplateTasks extends Abstract {
 	async deleteTask(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				const projectId = req.params._id
+				const solutionId = req.params._id
 				const externalId = req.query.externalId
 				const userId = req.userDetails.userInformation?.userId || req.userDetails.id
 
-				if (!projectId || !externalId) {
+				if (!solutionId || !externalId) {
 					return resolve({
 						status: HTTP_STATUS_CODE.bad_request.status,
-						message: 'projectId and externalId are required',
+						message: 'solutionId and externalId are required',
 					})
 				}
 
-				// Validate project
-				const projectArr = await projectQueries.projectDocument({ _id: projectId })
-				if (!projectArr || !projectArr.length) {
-					return resolve({
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: 'Project not found',
-					})
-				}
-				const project = projectArr[0]
-				const hasStartedTasks =
-					project.tasks &&
-					project.tasks.some((task) => task.status && task.status !== CONSTANTS.common.NOT_STARTED_STATUS)
-
-				if (hasStartedTasks) {
-					return resolve({
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: 'Cannot delete project with started tasks',
-					})
-				}
-				const projectTemplateId = project.projectTemplateId
-
-				// Fetch the template task by externalId and projectTemplateId
-				const templateTasks = await projectTemplateTasksHelper.getTasksByExternalIdAndTemplateId(
-					externalId,
-					projectTemplateId
-				)
-				if (!templateTasks || !templateTasks.length) {
-					return resolve({
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: 'Template task not found',
-					})
-				}
-				const templateTask = templateTasks[0]
-
-				// Delete the template task
-				await database.models.projectTemplateTasks.deleteOne({ _id: templateTask._id })
-
-				// Remove the task from project document using externalId
-				const projectTasks = project.tasks || []
-				const removed = removeTaskFromTree(projectTasks, externalId)
-				if (!removed) {
-					return resolve({
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: 'Task not found in project',
+				// 1. Fetch all projects linked to the solution
+				const projectsResponse = await projectTemplateQueries.getProjectsBySolutionId(solutionId)
+				if (!projectsResponse.success) {
+					return reject({
+						status: HTTP_STATUS_CODE.internal_server_error.status,
+						message: projectsResponse.message || 'Failed to fetch projects',
 					})
 				}
 
-				await projectQueries.findOneAndUpdate(
-					{ _id: projectId },
-					{ $set: { tasks: projectTasks, updatedAt: new Date() } }
-				)
+				const projects = projectsResponse.data
+				if (!projects || !projects.length) {
+					return reject({
+						status: HTTP_STATUS_CODE.not_found.status,
+						message: 'No projects found for this solution',
+					})
+				}
 
-				return resolve({
-					status: HTTP_STATUS_CODE.ok.status,
-					message: 'Task deleted successfully',
-					result: {
+				let deletedTasks = []
+				for (const project of projects) {
+					const projectId = project._id
+					const hasStartedTasks =
+						project.tasks &&
+						project.tasks.some((task) => task.status && task.status !== CONSTANTS.common.NOT_STARTED_STATUS)
+
+					if (hasStartedTasks) {
+						continue // Skip this project if any task has started
+					}
+
+					const projectTemplateId = project.projectTemplateId
+
+					// Fetch the template task by externalId and projectTemplateId
+					const templateTasks = await projectTemplateTasksHelper.getTasksByExternalIdAndTemplateId(
+						externalId,
+						projectTemplateId
+					)
+					if (!templateTasks || !templateTasks.length) {
+						continue // Skip if template task not found
+					}
+
+					const templateTask = templateTasks[0]
+
+					// Delete the template task
+					await database.models.projectTemplateTasks.deleteOne({ _id: templateTask._id })
+
+					// Remove the task from project document using externalId
+					const projectTasks = project.tasks || []
+					const removed = removeTaskFromTree(projectTasks, externalId)
+					if (!removed) {
+						continue // Skip if task not found in project
+					}
+
+					await projectQueries.findOneAndUpdate(
+						{ _id: projectId },
+						{ $set: { tasks: projectTasks, updatedAt: new Date() } }
+					)
+
+					deletedTasks.push({
 						templateTaskId: templateTask._id,
 						projectId: projectId,
 						externalId: externalId,
-					},
+					})
+				}
+
+				if (!deletedTasks.length) {
+					return resolve({
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: 'No tasks deleted. Either tasks were already started or not found.',
+					})
+				}
+
+				return resolve({
+					status: HTTP_STATUS_CODE.ok.status,
+					message: 'Tasks deleted successfully',
+					result: deletedTasks,
 				})
 			} catch (error) {
 				return reject({
@@ -542,18 +614,18 @@ module.exports = class ProjectTemplateTasks extends Abstract {
 	}
 
 	/**
-	 * @api {delete} /project/v1/project/templateTasks/delete/:projectId
-	 * Delete project and associated template tasks.
+	 * @api {delete} /project/v1/project/templateTasks/delete/:solutionId
+	 * Delete all projects and associated template tasks for a solution.
 	 * @apiVersion 1.0.0
 	 * @apiGroup Project Template Tasks
-	 * @apiParam {String} projectId Project ID (URL param)
+	 * @apiParam {String} solutionId Solution ID (URL param)
 	 * @apiSampleRequest /project/v1/project/templateTasks/delete/5f2adc57eb351a5a9c68f403
 	 * @apiUse successBody
 	 * @apiUse errorBody
 	 */
 
 	/**
-	 * Delete project and associated template tasks
+	 * Delete all projects and associated template tasks for a solution
 	 * @method
 	 * @name delete
 	 * @returns {JSON} returns deletion status
@@ -562,105 +634,198 @@ module.exports = class ProjectTemplateTasks extends Abstract {
 	async delete(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				const projectId = req.params._id
+				const solutionId = req.params._id
 
-				if (!projectId) {
+				if (!solutionId) {
 					return resolve({
 						status: HTTP_STATUS_CODE.bad_request.status,
-						message: 'Project ID is required',
+						message: 'Solution ID is required',
 					})
 				}
 
-				// Get project document to check status and get template ID
-				const projectArr = await projectQueries.projectDocument({ _id: projectId })
-				if (!projectArr || !projectArr.length) {
+				// Get all projects for this solution
+				const projectsResponse = await projectTemplateQueries.getProjectsBySolutionId(solutionId)
+				if (!projectsResponse.success) {
+					return reject({
+						status: HTTP_STATUS_CODE.internal_server_error.status,
+						message: projectsResponse.message || 'Failed to fetch projects',
+					})
+				}
+
+				const projects = projectsResponse.data
+				if (!projects || !projects.length) {
 					return resolve({
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: 'Project not found',
+						status: HTTP_STATUS_CODE.not_found.status,
+						message: 'No projects found for this solution',
 					})
 				}
 
-				const project = projectArr[0]
+				// Check if any project has started tasks
+				for (const project of projects) {
+					const hasStartedTasks =
+						project.tasks &&
+						project.tasks.some((task) => task.status && task.status !== CONSTANTS.common.NOT_STARTED_STATUS)
 
-				// Check if any task has been started
-				const hasStartedTasks =
-					project.tasks &&
-					project.tasks.some((task) => task.status && task.status !== CONSTANTS.common.NOT_STARTED_STATUS)
+					if (hasStartedTasks) {
+						return resolve({
+							status: HTTP_STATUS_CODE.bad_request.status,
+							message: `Cannot delete project ${project._id} as it has started tasks`,
+						})
+					}
+				}
 
-				if (hasStartedTasks) {
+				const deletedProjects = []
+				const deletedTemplates = new Set()
+				const deletedSolutions = new Set()
+				const deletedPrograms = new Set()
+				const deletedEntities = {
+					projects: [],
+					templates: [],
+					solutions: [],
+					programs: [],
+					entities: [],
+					files: [],
+				}
+
+				// Get solution and program details first
+				const solution = await database.models.solutions.findOne({ _id: solutionId })
+				if (!solution) {
 					return resolve({
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: 'Cannot delete project with started tasks',
+						status: HTTP_STATUS_CODE.not_found.status,
+						message: 'Solution not found',
 					})
 				}
 
-				const projectTemplateId = project.projectTemplateId
-				const solutionId = project.solutionId
-				const programId = project.programId
+				const programId = solution.programId
+				const program = programId ? await database.models.programs.findOne({ _id: programId }) : null
 
-				// 1. Delete project document
-				await database.models.projects.deleteOne({ _id: projectId })
+				// Process each project
+				for (const project of projects) {
+					const projectId = project._id
+					const projectTemplateId = project.projectTemplateId
 
-				// 2. Get project template to fetch task IDs
-				const projectTemplate = await database.models.projectTemplates.findOne({ _id: projectTemplateId })
-				if (projectTemplate && projectTemplate.tasks && projectTemplate.tasks.length > 0) {
-					const taskIds = projectTemplate.tasks.map((task) => task)
+					// 1. Delete project document and all its references
+					await database.models.projects.deleteOne({ _id: projectId })
+					await database.models.projects.deleteMany({ parentProjectId: projectId })
+					await database.models.projects.deleteMany({ referenceProjectId: projectId })
+					deletedProjects.push(projectId)
+					deletedEntities.projects.push(projectId)
 
-					// Delete specific template tasks
-					await database.models.projectTemplateTasks.deleteMany({
-						_id: { $in: taskIds },
+					// 2. Get project template to fetch task IDs
+					const projectTemplate = await database.models.projectTemplates.findOne({ _id: projectTemplateId })
+					if (projectTemplate) {
+						// Delete all tasks associated with this template
+						if (projectTemplate.tasks && projectTemplate.tasks.length > 0) {
+							const taskIds = projectTemplate.tasks.map((task) => task)
+
+							// Delete specific template tasks
+							await database.models.projectTemplateTasks.deleteMany({
+								_id: { $in: taskIds },
+							})
+
+							// Delete tasks marked as deleted
+							await database.models.projectTemplateTasks.deleteMany({
+								_id: { $in: taskIds },
+								isDeleted: true,
+							})
+
+							// Delete any remaining tasks for this template
+							await database.models.projectTemplateTasks.deleteMany({
+								projectTemplateId,
+							})
+
+							deletedEntities.entities.push(...taskIds)
+						}
+
+						// Clear the tasks array in the template
+						await database.models.projectTemplates.updateOne(
+							{ _id: projectTemplateId },
+							{ $set: { tasks: [] } }
+						)
+					}
+
+					// 3. Delete project template and any related templates
+					const relatedTemplates = await database.models.projectTemplates.find({
+						$or: [
+							{ _id: projectTemplateId },
+							{ externalId: projectTemplate?.externalId },
+							{ title: projectTemplate?.title },
+						],
 					})
 
-					// Also delete any tasks that might be marked as deleted
-					await database.models.projectTemplateTasks.deleteMany({
-						_id: { $in: taskIds },
-						isDeleted: true,
-					})
-
-					// Clear the tasks array in the template
-					await database.models.projectTemplates.updateOne(
-						{ _id: projectTemplateId },
-						{ $set: { tasks: [] } }
-					)
-
-					// Delete any remaining tasks for this template
-					await database.models.projectTemplateTasks.deleteMany({
-						projectTemplateId,
-					})
+					// Delete all related templates and their references
+					for (const template of relatedTemplates) {
+						await database.models.projectTemplates.deleteOne({ _id: template._id })
+						await database.models.projectTemplates.deleteMany({ parentTemplateId: template._id })
+						await database.models.projectTemplates.deleteMany({ referenceTemplateId: template._id })
+						deletedTemplates.add(template._id)
+						deletedEntities.templates.push(template._id)
+					}
 				}
 
-				// 3. Delete project template and any related templates
-				const relatedTemplates = await database.models.projectTemplates.find({
-					$or: [
-						{ _id: projectTemplateId },
-						{ externalId: projectTemplate?.externalId },
-						{ title: projectTemplate?.title },
-					],
-				})
+				// 4. Delete solution and its associated data
+				if (solution) {
+					// Delete solution files
+					if (solution.files && solution.files.length > 0) {
+						for (const file of solution.files) {
+							if (file.sourcePath) {
+								try {
+									await utils.deleteFile(file.sourcePath)
+									deletedEntities.files.push(file.sourcePath)
+								} catch (error) {
+									console.error('Error deleting file:', file.sourcePath, error)
+								}
+							}
+						}
+					}
 
-				// Delete all related templates
-				for (const template of relatedTemplates) {
-					await database.models.projectTemplates.deleteOne({ _id: template._id })
-				}
+					// Delete solution references
+					await database.models.solutions.deleteMany({ parentSolutionId: solutionId })
+					await database.models.solutions.deleteMany({ referenceSolutionId: solutionId })
 
-				// 4. Delete solution if exists
-				if (solutionId) {
+					// Delete solution document
 					await database.models.solutions.deleteOne({ _id: solutionId })
+
+					deletedSolutions.add(solutionId)
+					deletedEntities.solutions.push(solutionId)
 				}
 
-				// 5. Delete program if exists
-				if (programId) {
+				// 5. Delete program and its associated data
+				if (program) {
+					// Delete program files
+					if (program.files && program.files.length > 0) {
+						for (const file of program.files) {
+							if (file.sourcePath) {
+								try {
+									await utils.deleteFile(file.sourcePath)
+									deletedEntities.files.push(file.sourcePath)
+								} catch (error) {
+									console.error('Error deleting file:', file.sourcePath, error)
+								}
+							}
+						}
+					}
+
+					// Delete program references
+					await database.models.programs.deleteMany({ parentProgramId: programId })
+					await database.models.programs.deleteMany({ referenceProgramId: programId })
+
+					// Delete program document
 					await database.models.programs.deleteOne({ _id: programId })
+
+					deletedPrograms.add(programId)
+					deletedEntities.programs.push(programId)
 				}
 
 				return resolve({
 					status: HTTP_STATUS_CODE.ok.status,
-					message: 'Project and associated data deleted successfully',
+					message: 'Projects and associated data deleted successfully',
 					result: {
-						projectId: projectId,
-						projectTemplateId: projectTemplateId,
-						solutionId: solutionId || null,
-						programId: programId || null,
+						deletedProjects: deletedProjects,
+						deletedTemplates: Array.from(deletedTemplates),
+						deletedSolutions: Array.from(deletedSolutions),
+						deletedPrograms: Array.from(deletedPrograms),
+						deletedEntities: deletedEntities,
 					},
 				})
 			} catch (error) {

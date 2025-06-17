@@ -14,9 +14,6 @@ const app = express()
 const { elevateLog } = require('elevate-logger')
 const logger = elevateLog.init()
 
-// Health check
-require('@healthCheck')(app)
-
 // Setup application config, establish DB connections and set global constants.
 require('@config/globals')()
 require('@config/connections')
@@ -30,7 +27,8 @@ if (!environmentData.success) {
 	})
 	process.exit()
 }
-
+// Health check
+require('@healthCheck')(app)
 // Required modules
 const fileUpload = require('express-fileupload')
 const bodyParser = require('body-parser')

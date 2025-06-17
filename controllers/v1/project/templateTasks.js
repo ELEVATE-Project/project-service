@@ -31,6 +31,14 @@ function updateTaskInTree(tasks, targetExternalId, updateData) {
 					Object.keys(updateData.metaInformation).forEach((metaKey) => {
 						tasks[i].metaInformation[metaKey] = updateData.metaInformation[metaKey]
 					})
+				} else if (key === 'learningResources') {
+					// Explicitly handle learningResources updates
+					if (Array.isArray(updateData.learningResources)) {
+						tasks[i].learningResources = updateData.learningResources
+					} else {
+						// If learningResources is not an array, keep existing resources
+						console.warn(`Invalid learningResources format for task ${targetExternalId}. Expected array.`)
+					}
 				} else {
 					tasks[i][key] = updateData[key]
 				}

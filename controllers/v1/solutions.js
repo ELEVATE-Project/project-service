@@ -274,6 +274,11 @@ module.exports = class Solutions extends Abstract {
         "roles" : ["head_master"]
       }
     * @apiHeader {String} X-authenticated-user-token Authenticity token
+    * @apiHeader {String} internal-access-token
+    * If you are a System Admin use below headers.
+    * @apiHeader {String} admin-auth-token
+    * @apiHeader {String} tenantId
+    * @apiHeader {String} orgid
     * @apiSampleRequest /project/v1/solutions/addRolesInScope/5ffbf8909259097d48017bbf
     * @apiUse successBody
     * @apiUse errorBody
@@ -390,6 +395,11 @@ module.exports = class Solutions extends Abstract {
     * "roles" : ["head_master"]
     }
     * @apiHeader {String} X-authenticated-user-token Authenticity token
+    * @apiHeader {String} internal-access-token
+    * If you are a System Admin use below headers.
+    * @apiHeader {String} admin-auth-token
+    * @apiHeader {String} tenantId
+    * @apiHeader {String} orgid
     * @apiSampleRequest /project/v1/solutions/removeRolesInScope/5ffbf8909259097d48017bbf
     * @apiUse successBody
     * @apiUse errorBody
@@ -549,6 +559,11 @@ module.exports = class Solutions extends Abstract {
       "entities" : ["5f33c3d85f637784791cd830"]
     }
     * @apiHeader {String} X-authenticated-user-token Authenticity token
+    * @apiHeader {String} internal-access-token
+    * If you are a System Admin use below headers.
+    * @apiHeader {String} admin-auth-token
+    * @apiHeader {String} tenantId
+    * @apiHeader {String} orgid
     * @apiSampleRequest /project/v1/solutions/addEntitiesInScope/5ffbf8909259097d48017bbf
     * @apiUse successBody
     * @apiUse errorBody
@@ -602,6 +617,11 @@ module.exports = class Solutions extends Abstract {
       "entities" : ["5f33c3d85f637784791cd830"]
     }
     * @apiHeader {String} X-authenticated-user-token Authenticity token
+    * @apiHeader {String} internal-access-token
+    * If you are a System Admin use below headers.
+    * @apiHeader {String} admin-auth-token
+    * @apiHeader {String} tenantId
+    * @apiHeader {String} orgid
     * @apiSampleRequest /project/v1/solutions/removeEntitiesInScope/5ffbf8909259097d48017bbf
     * @apiUse successBody
     * @apiUse errorBody

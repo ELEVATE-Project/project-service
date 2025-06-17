@@ -11,106 +11,69 @@ const request = require('request')
 const SURVEY_SERVICE_URL = process.env.SURVEY_SERVICE_URL
 
 /**
- * Create Child solutions for survey
+ * Create Child solutions for survey and observation
  * @function
- * @name importSurveyTemplateToSolution
+ * @name importTemplateToSolution
  * @param {String} token - logged in user token.
  * @param {String} solutionId - parent solution id.
- * @param {String} programId -programId
- * @param {Object} data - Body data
+ * @param {String} programId- 	programId
+ * @param {Object} payload - Body data
+ * @param {Object} userDetails - user info
+ * @param {String} solutionType -type of solution
  * @returns {JSON} - Create child solution from parent  solution.
  */
-const importSurveyTemplateToSolution = function (token, solutionId, programId, data = {}, userDetails) {
+const importTemplateToSolution = function (token, solutionId, programId = '', payload = {}, userDetails, solutionType) {
 	return new Promise(async (resolve, reject) => {
 		try {
-			let surveyCreateUrl =
-				SURVEY_SERVICE_URL +
-				CONSTANTS.endpoints.IMPORT_SURVEY_TEMPLATE +
-				'/' +
-				solutionId +
-				'?appName=elevate' +
-				'&programId=' +
-				programId
-			let options = {
-				headers: {
-					'content-type': 'application/json',
-					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
-					'x-auth-token': token,
-				},
-				json: { data: data },
-			}
-			if (
-				userDetails?.userInformation?.roles &&
-				!userDetails.userInformation?.roles.includes(CONSTANTS.common.ORG_ADMIN)
-			) {
-				_.assign(options.headers, {
-					'admin-auth-token': process.env.SURVEY_ADMIN_AUTH_TOKEN,
-					tenantId: userDetails.tenantAndOrgInfo.tenantId,
-					orgId: userDetails.tenantAndOrgInfo.orgId.join(','),
-				})
-			}
-			request.post(surveyCreateUrl, options, assessmentCallback)
+			//Build the endpoint and query
+			let endpoint
+			let url
+			switch (solutionType) {
+				case CONSTANTS.common.SURVEY:
+					endpoint = CONSTANTS.endpoints.IMPORT_SURVEY_TEMPLATE
+					url = `${SURVEY_SERVICE_URL}${endpoint}/${solutionId}` + `?appName=elevate&programId=${programId}`
+					// Survey service expects payload inside `{ data: … }`
+					break
 
-			function assessmentCallback(err, data) {
-				let result = {
-					success: true,
-				}
-				if (err) {
-					result.success = false
-				} else {
-					let response = data.body
-					result = response
-					if (result.status === HTTP_STATUS_CODE['ok'].status) {
-						result['data'] = response.result
-						result.success = true
-					} else {
-						result.success = false
-					}
-				}
-				return resolve(result)
+				case CONSTANTS.common.OBSERVATION:
+					endpoint = CONSTANTS.endpoints.CREATE_CHILD_OBSERVATION_SOLUTION
+					url = `${SURVEY_SERVICE_URL}${endpoint}` + `?solutionId=${solutionId}`
+					// Observation already wants the raw body
+					break
+
+				default:
+					throw new Error('Invalid solutionType: use "survey" or "observation".')
 			}
-		} catch (error) {
-			return reject(error)
-		}
-	})
-}
-
-/**
- * Create Child solutions for survey
- * @function
- * @name importObservationTemplateToSolution
- * @param {String} token - logged in user token.
- * @param {String} solutionId - parent solution id.
- * @param {Object} bodyData - Body data
- * @returns {JSON} - Create child solution from parent  solution.
- */
-const importObservationTemplateToSolution = function (token, solutionId, bodyData, userDetails) {
-	return new Promise(async (resolve, reject) => {
-		try {
-			let observationCreateUrl =
-				SURVEY_SERVICE_URL + CONSTANTS.endpoints.CREATE_CHILD_OBSERVATION_SOLUTION + '?solutionId=' + solutionId
-
 			const options = {
 				headers: {
 					'content-type': 'application/json',
 					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
-					'x-auth-token': token,
 				},
-				json: bodyData,
+				json: payload,
 			}
-
+			//pass the user Token only for admin and orgAdmin
 			if (
 				userDetails?.userInformation?.roles &&
-				!userDetails.userInformation?.roles.includes(CONSTANTS.common.ORG_ADMIN)
+				(userDetails.userInformation.roles.includes(CONSTANTS.common.ORG_ADMIN) ||
+					userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE))
 			) {
 				_.assign(options.headers, {
-					'admin-auth-token': process.env.SURVEY_ADMIN_AUTH_TOKEN,
+					'x-auth-token': token,
+				})
+			}
+
+			// Admin need extra headers
+			if (
+				userDetails?.userInformation?.roles &&
+				userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)
+			) {
+				_.assign(options.headers, {
+					'admin-auth-token': process.env.ADMIN_AUTH_TOKEN,
 					tenantId: userDetails.tenantAndOrgInfo.tenantId,
 					orgId: userDetails.tenantAndOrgInfo.orgId.join(','),
 				})
 			}
-
-			request.post(observationCreateUrl, options, assessmentCallback)
+			request.post(url, options, assessmentCallback)
 
 			function assessmentCallback(err, data) {
 				let result = {
@@ -134,7 +97,6 @@ const importObservationTemplateToSolution = function (token, solutionId, bodyDat
 		}
 	})
 }
-
 /**
  * Create get or create surveyDetails
  * @function
@@ -257,7 +219,7 @@ const listSolutions = function (solutionIds, token, userDetails) {
 				!userDetails?.userInformation?.roles.includes(CONSTANTS.common.ORG_ADMIN)
 			) {
 				_.assign(options.headers, {
-					'admin-auth-token': process.env.SURVEY_ADMIN_AUTH_TOKEN,
+					'admin-auth-token': process.env.ADMIN_AUTH_TOKEN,
 					tenantId: userDetails.tenantAndOrgInfo.tenantId,
 					orgId: userDetails.tenantAndOrgInfo.orgId.join(','),
 				})
@@ -317,7 +279,7 @@ const updateSolution = function (token, updateData, solutionExternalId, userDeta
 				!userDetails?.userInformation?.roles.includes(CONSTANTS.common.ORG_ADMIN)
 			) {
 				_.assign(options.headers, {
-					'admin-auth-token': process.env.SURVEY_ADMIN_AUTH_TOKEN,
+					'admin-auth-token': process.env.ADMIN_AUTH_TOKEN,
 					tenantId: userDetails.tenantAndOrgInfo.tenantId,
 					orgId: userDetails.tenantAndOrgInfo.orgId.join(','),
 				})
@@ -615,7 +577,6 @@ module.exports = {
 	removeSolutionsFromProgram: removeSolutionsFromProgram,
 	removeEntitiesFromSolution: removeEntitiesFromSolution,
 	listEntitiesByLocationIds: listEntitiesByLocationIds,
-	importSurveyTemplateToSolution: importSurveyTemplateToSolution,
 	surveyDetails: surveyDetails,
-	importObservationTemplateToSolution: importObservationTemplateToSolution,
+	importTemplateToSolution: importTemplateToSolution,
 }

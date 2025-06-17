@@ -226,10 +226,6 @@ module.exports = class Programs extends Abstract {
 	async details(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				if (req.headers.hasOwnProperty(CONSTANTS.common.ADMIN_TENANTID)) {
-					req.userDetails.userInformation.tenantId = req.headers.tenantidforadmin
-					req.userDetails.userInformation.organizationId = req.headers.orgidforadmin
-				}
 				let programData = await programsHelper.details(
 					req.params._id,
 					CONSTANTS.common.ALL, //projections
@@ -248,6 +244,106 @@ module.exports = class Programs extends Abstract {
 		})
 	}
 
+	/**
+    * @api {post} /project/v1/programs/getProgramDetails/:programId
+    * @apiVersion 1.0.0
+    * @apiName 
+    * @apiGroup Programs
+    * @apiParamExample {json} Request-Body:
+    * @apiHeader {String} X-auth-token Authenticity token
+    * @apiSampleRequest /project/v1/programs/getProgramDetails/66254d3dd07c5713b46d17c1
+    * @apiUse successBody
+    * @apiUse errorBody
+    * @apiParamExample {json} Response:
+    * {
+        "message": "Programs fetched successfully",
+        "status": 200,
+        "result": {
+            "_id": "66254d3dd07c5713b46d17c1",
+            "scope" : {
+                "state" : ["e3a58f2b3c4d719a6821b590"],
+                "roles" : [ "head_master","distrct_education_officer"]
+            },
+            "resourceType": [
+                "program"
+            ],
+            "language": [
+                "English",
+                "Kannada",
+                "telugu"
+            ],
+            "keywords": [],
+            "concepts": [],
+            "components": [
+                "5b98fa069f664f7e1ae7498c"
+            ],
+            "isAPrivateProgram": false,
+            "isDeleted": false,
+            "requestForPIIConsent": true,
+            "rootOrganisations": [],
+            "createdFor": [],
+            "deleted": false,
+            "status": "active",
+            "owner": "2",
+            "createdBy": "2",
+            "updatedBy": "2",
+            "externalId": "PROGID01",
+            "name": "DCPCR School Development Index 2018-19",
+            "description": "DCPCR School Development Index 2018-19",
+            "imageCompression": {
+                "quality": 10
+            },
+            "updatedAt": "2024-04-23T19:45:34.196Z",
+            "createdAt": "2024-04-21T17:30:37.519Z",
+            "__v": 0
+        }
+    }
+  */
+	/**
+	 * getProgramDetails for internalApi
+	 * @method
+	 * @name getProgramDetails
+	 * @param {Object} req - requested data.
+	 * @param {String} req.params._id - program id.
+	 * @returns {Promise<Object>} The helper’s response, either program data or an error object.
+	 */
+
+	async getProgramDetails(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				// check req.userDetails is available or not if not get tenantAndorg Info from req body
+				if (!req.userDetails && !req.body) {
+					let responseMessage = CONSTANTS.apiResponses.BODY_NOT_EMPTY
+					return resolve({
+						status: HTTP_STATUS_CODE.internal_server_error.status,
+						message: responseMessage,
+					})
+				} else if (!req.userDetails && req?.body?.tenantData) {
+					req.userDetails = {
+						tenantAndOrgInfo: req.body.tenantData,
+						userInformation: {}, //  Initialize to avoid later errors
+					}
+				}
+				//Map tenant / org IDs into the shape expected by programsHelper.
+				req.userDetails.userInformation.tenantId = req.userDetails.tenantAndOrgInfo.tenantId
+				req.userDetails.userInformation.organizationId = req.userDetails.tenantAndOrgInfo.orgId[0]
+				let programData = await programsHelper.details(
+					req.params._id,
+					CONSTANTS.common.ALL, //projections
+					CONSTANTS.common.NONE, //skipFields
+					req.userDetails
+				)
+
+				return resolve(programData)
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
+				})
+			}
+		})
+	}
 	/**
     * @api {post} /project/v1/programs/addRolesInScope/:programId Add roles in programs
     * @apiVersion 1.0.0

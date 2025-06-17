@@ -64,6 +64,13 @@ module.exports = (req) => {
 				.isMongoId()
 				.withMessage('Invalid program ID')
 		},
+		getProgramDetails: function () {
+			req.checkParams('_id')
+				.exists()
+				.withMessage('required program id')
+				.isMongoId()
+				.withMessage('Invalid program ID')
+		},
 	}
 
 	if (programsValidator[req.params.method]) {

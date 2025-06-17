@@ -31,6 +31,7 @@ const userExtensionQueries = require(DB_QUERY_BASE_PATH + '/userExtension')
 const filesHelpers = require(MODULES_BASE_PATH + '/cloud-services/files/helper')
 const testimonialsHelper = require(MODULES_BASE_PATH + '/testimonials/helper')
 const surveyService = require(SERVICES_BASE_PATH + '/survey')
+const solutionsHelper = require(MODULES_BASE_PATH + '/solutions/helper')
 
 module.exports = class ProjectTemplatesHelper {
 	/**
@@ -645,6 +646,7 @@ module.exports = class ProjectTemplatesHelper {
 					programId: solutionData[0].programId,
 					programName: solutionData[0].programName,
 					programDescription: solutionData[0].programDescription,
+					programExternalId: solutionData[0].programExternalId,
 				}
 
 				newProjectTemplate.parentTemplateId = projectTemplateData[0]._id
@@ -863,6 +865,7 @@ module.exports = class ProjectTemplatesHelper {
 						newProjectTemplateTask.programId = programDetails.programId
 						newProjectTemplateTask.programName = programDetails.programName
 						newProjectTemplateTask.programDescription = programDetails.programDescription
+						newProjectTemplateTask.programExternalId = programDetails.programExternalId
 						let duplicateTemplateTask = await this.handleDuplicateTemplateTask(
 							userToken,
 							newProjectTemplateTask,
@@ -1034,13 +1037,36 @@ module.exports = class ProjectTemplatesHelper {
 			}
 
 			if (taskType === CONSTANTS.common.IMPROVEMENT_PROJECT) {
+				//create new solution for project as a task template under same program as project's program
+				let solutionData = {
+					programExternalId: newProjectTemplateTask.programExternalId,
+					externalId: newProjectTemplateTask.projectTemplateExternalId + '-' + UTILS.epochTime(),
+				}
+				let newSolution = await solutionsHelper.createSolution(solutionData, false, userDetails)
+				if (newSolution?.data && !newSolution?.data?._id) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.SOLUTION_NOT_CREATED,
+					}
+				}
+				//create a child template of project as a task template
+				let createChildTemplateforTask = await this.importProjectTemplate(
+					newProjectTemplateTask.projectTemplateDetails.externalId,
+					userDetails.userInformation.userId,
+					userToken,
+					newSolution?.data?._id.toString(),
+					'',
+					userDetails
+				)
+
 				duplicateTemplateTaskId = await createTemplateTask()
 			} else if (taskType === CONSTANTS.common.OBSERVATION && newProjectTemplateTask.solutionDetails.isReusable) {
 				const timestamp = UTILS.epochTime()
 				//Create child solutions for solutiontype obs
-				const importSolutionsResponse = await surveyService.importObservationTemplateToSolution(
+				const importSolutionsResponse = await surveyService.importTemplateToSolution(
 					userToken,
 					newProjectTemplateTask.solutionDetails._id,
+					'',
 					{
 						name: `${newProjectTemplateTask.solutionDetails.name}-${timestamp}`,
 						externalId: `${newProjectTemplateTask.solutionDetails.externalId}-${timestamp}`,
@@ -1048,7 +1074,8 @@ module.exports = class ProjectTemplatesHelper {
 						programExternalId: newProjectTemplateTask.programId,
 						status: CONSTANTS.common.PUBLISHED_STATUS,
 					},
-					userDetails
+					userDetails,
+					taskType
 				)
 
 				if (
@@ -1085,13 +1112,17 @@ module.exports = class ProjectTemplatesHelper {
 				)
 			} else if (taskType === CONSTANTS.common.SURVEY && newProjectTemplateTask.solutionDetails.isReusable) {
 				//Create child solutions for solutiontype survey
-				const importSolutionsResponse = await surveyService.importSurveyTemplateToSolution(
+				let importSolutionsResponse = await surveyService.importTemplateToSolution(
 					userToken,
 					newProjectTemplateTask.solutionDetails._id,
 					newProjectTemplateTask.programId,
 					'',
-					userDetails
+					userDetails,
+					taskType
 				)
+				if (typeof importSolutionsResponse === CONSTANTS.common.STRING) {
+					importSolutionsResponse = JSON.parse(importSolutionsResponse)
+				}
 				if (
 					importSolutionsResponse.status != HTTP_STATUS_CODE['ok'].status ||
 					!importSolutionsResponse?.result?.solutionExternalId

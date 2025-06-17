@@ -376,7 +376,11 @@ module.exports = class Programs extends Abstract {
 	async removeRolesInScope(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let programUpdated = await programsHelper.removeRolesInScope(req.params._id, req.body.roles)
+				let programUpdated = await programsHelper.removeRolesInScope(
+					req.params._id,
+					req.body.roles,
+					req.userDetails
+				)
 
 				return resolve(programUpdated)
 			} catch (error) {

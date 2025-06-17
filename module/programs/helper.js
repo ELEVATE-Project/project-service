@@ -423,8 +423,9 @@ module.exports = class ProgramsHelper {
 						scope: { $exists: true },
 						isAPrivateProgram: false,
 						tenantId: tenantId,
+						orgId: orgId,
 					},
-					['_id']
+					['_id', 'scope.roles']
 				)
 
 				if (!programData.length > 0) {
@@ -437,10 +438,7 @@ module.exports = class ProgramsHelper {
 				let updateQuery = {}
 
 				if (Array.isArray(roles) && roles.length > 0) {
-					let currentRoles = await programsQueries.programsDocument({ _id: programId, tenantId: tenantId }, [
-						'scope.roles',
-					])
-					currentRoles = currentRoles[0].scope.roles
+					let currentRoles = programData[0].scope.roles
 
 					let currentRolesSet = new Set(currentRoles)
 					let rolesSet = new Set(roles)
@@ -463,7 +461,6 @@ module.exports = class ProgramsHelper {
 				let updateProgram = await programsQueries.findAndUpdate(
 					{
 						_id: programId,
-						tenantId: tenantId,
 					},
 					updateQuery,
 					{ new: true }
@@ -512,6 +509,7 @@ module.exports = class ProgramsHelper {
 						scope: { $exists: true },
 						isAPrivateProgram: false,
 						tenantId: tenantId,
+						orgId: orgId,
 					},
 					['_id', 'scope']
 				)
@@ -528,6 +526,7 @@ module.exports = class ProgramsHelper {
 					{
 						_id: { $in: entitiesValue },
 						tenantId: tenantId,
+						orgId: orgId,
 					},
 					['_id', 'entityType']
 				)
@@ -550,16 +549,21 @@ module.exports = class ProgramsHelper {
 
 				// Build the $addToSet updateObject
 				let updateObject = { $addToSet: {} }
-
+				// Loop through each entity type and its corresponding list of IDs
 				for (const [type, ids] of Object.entries(groupedEntities)) {
 					updateObject.$addToSet[`scope.${type}`] = { $each: ids }
 				}
 
+				// Handle organizations if present and user has ADMIN_ROLE
 				if (organizations && userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
+					// Fetch tenant details to validate organization codes
 					let tenantDetails = await userService.fetchTenantDetails(tenantId, userDetails.userToken)
+					// Extract all valid organization codes from the tenant's config
 					const validOrgCodes = tenantDetails.data.organizations.map((org) => org.code)
 
+					// Check if all provided organization codes are valid
 					const isValid = bodyData.organizations.every((orgCode) => validOrgCodes.includes(orgCode))
+					// If valid, include them in the update object under scope.organizations
 					if (isValid) {
 						updateObject.$addToSet[`scope.organizations`] = { $each: bodyData.organizations }
 					}
@@ -568,7 +572,6 @@ module.exports = class ProgramsHelper {
 				let updateProgram = await programsQueries.findAndUpdate(
 					{
 						_id: programId,
-						tenantId: tenantId,
 					},
 					updateObject,
 					{ new: true }
@@ -616,6 +619,7 @@ module.exports = class ProgramsHelper {
 						scope: { $exists: true },
 						isAPrivateProgram: false,
 						tenantId: tenantId,
+						orgId: orgId,
 					},
 					['_id']
 				)
@@ -631,7 +635,6 @@ module.exports = class ProgramsHelper {
 					let updateProgram = await programsQueries.findAndUpdate(
 						{
 							_id: programId,
-							tenantId: tenantId,
 						},
 						{
 							$pull: { 'scope.roles': { $in: roles } },
@@ -687,6 +690,7 @@ module.exports = class ProgramsHelper {
 						scope: { $exists: true },
 						isAPrivateProgram: false,
 						tenantId: tenantId,
+						orgId: orgId,
 					},
 					['_id', 'scope.entityType']
 				)
@@ -703,6 +707,7 @@ module.exports = class ProgramsHelper {
 					{
 						_id: { $in: entitiesValue },
 						tenantId: tenantId,
+						orgId: orgId,
 					},
 					['_id', 'entityType']
 				)
@@ -730,11 +735,16 @@ module.exports = class ProgramsHelper {
 					updateObject['$pull'][`scope.${type}`] = { $in: ids }
 				}
 
+				// Handle organizations if present and user has ADMIN_ROLE
 				if (organizations && userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
+					// Fetch tenant details to validate organization codes
 					let tenantDetails = await userService.fetchTenantDetails(tenantId, userDetails.userToken)
+					// Extract all valid organization codes from the tenant's config
 					const validOrgCodes = tenantDetails.data.organizations.map((org) => org.code)
 
+					// Check if all provided organization codes are valid
 					const isValid = bodyData.organizations.every((orgCode) => validOrgCodes.includes(orgCode))
+					// If valid, include them in the update object under scope.organizations
 					if (isValid) {
 						updateObject['$pull'][`scope.organizations`] = { $in: bodyData.organizations }
 					}
@@ -742,7 +752,6 @@ module.exports = class ProgramsHelper {
 				let updateProgram = await programsQueries.findAndUpdate(
 					{
 						_id: programId,
-						tenantId: tenantId,
 					},
 					updateObject,
 					{ new: true }

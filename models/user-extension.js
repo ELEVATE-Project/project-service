@@ -28,5 +28,21 @@ module.exports = {
 				},
 			},
 		],
+		tenantId: {
+			type: String,
+			index: true,
+			required: true,
+		},
+		orgId: {
+			type: String,
+			required: true,
+			index: true,
+		},
 	},
+	compoundIndex: [
+		{
+			name: { userId: 1, tenantId: 1 },
+			indexType: { unique: true },
+		},
+	],
 }

@@ -793,14 +793,20 @@ module.exports = class ProjectTemplateTasksHelper {
 	 * @name update
 	 * @param {String} taskId - Task id.
 	 * @param {Object} taskData - template task updation data
-	 * @param {String} userId - logged in user id.
+	 * @param {Object} userDetails - logged in user id.
 	 * @returns {Array} Project templates task data.
 	 */
 
-	static update(taskId, taskData, userId) {
+	static update(taskId, taskData, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let findQuery = {}
+				const userId = userDetails.userInformation.userId
+				const tenantId = userDetails.tenantAndOrgInfo.tenantId
+				const orgId = userDetails.tenantAndOrgInfo.orgId[0]
+
+				findQuery['tenantId'] = tenantId
+				findQuery['orgId'] = orgId
 
 				let validateTaskId = UTILS.isValidMongoId(taskId)
 
@@ -823,6 +829,9 @@ module.exports = class ProjectTemplateTasksHelper {
 					$set: {},
 				}
 
+				delete taskData['tenantId']
+				delete taskData['orgId']
+
 				let taskUpdateData = taskData
 
 				Object.keys(taskUpdateData).forEach((updationData) => {
@@ -834,6 +843,8 @@ module.exports = class ProjectTemplateTasksHelper {
 				let taskUpdatedData = await projectTemplateTaskQueries.findOneAndUpdate(
 					{
 						_id: taskDocument[0]._id,
+						tenantId,
+						orgId,
 					},
 					updateObject,
 					{ new: true }

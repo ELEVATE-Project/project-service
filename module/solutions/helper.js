@@ -80,7 +80,7 @@ module.exports = class SolutionsHelper {
 		projectTemplateId = '',
 		startDate = '',
 		endDate = '',
-		userDetails
+		userDetails = {}
 	) {
 		let solutionData = {}
 		solutionData.name = name
@@ -664,6 +664,7 @@ module.exports = class SolutionsHelper {
 
 				// modify query to fetch documents accordingly
 				matchQuery['tenantId'] = userDetails.userInformation.tenantId
+				matchQuery['orgId'] = userDetails.userInformation.organizationId
 				if (currentOrgOnly) {
 					matchQuery['orgId'] = { $in: [userDetails.userInformation.organizationId] }
 				}
@@ -1375,7 +1376,7 @@ module.exports = class SolutionsHelper {
 	 * @returns {Array} - Created user program and solution.
 	 */
 
-	static createProgramAndSolution(userId, data, userToken, createADuplicateSolution = '', userDetails) {
+	static createProgramAndSolution(userId, data, createADuplicateSolution = '', userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let userPrivateProgram = {}
@@ -1390,7 +1391,7 @@ module.exports = class SolutionsHelper {
 					let filterQuery = {
 						_id: data.programId,
 						tenantId: tenantId,
-						orgId: { $in: [orgId] },
+						orgId: orgId,
 					}
 
 					if (createADuplicateSolution === false) {
@@ -1421,7 +1422,7 @@ module.exports = class SolutionsHelper {
 							duplicateProgram.startDate,
 							duplicateProgram.endDate,
 							'',
-							'',
+							[],
 							{},
 							userDetails
 						)
@@ -1444,7 +1445,7 @@ module.exports = class SolutionsHelper {
 					}
 				} else {
 					/* If the programId is not passed from the front end, we will enter this else block. 
-          In this block, we need to provide the necessary basic details to create a new program, Including startDate and endDate.*/
+          			In this block, we need to provide the necessary basic details to create a new program, Including startDate and endDate.*/
 					// Current date
 					let startDate = new Date()
 					// Add one year to the current date
@@ -1459,7 +1460,10 @@ module.exports = class SolutionsHelper {
 						userId,
 						startDate,
 						endDate,
-						userId
+						userId,
+						[],
+						{},
+						userDetails
 					)
 
 					if (data.rootOrganisations) {
@@ -1476,60 +1480,6 @@ module.exports = class SolutionsHelper {
 					isAPrivateProgram: userPrivateProgram.isAPrivateProgram,
 				}
 
-				//entities
-				// if (Array.isArray(data.entities) && data.entities && data.entities.length > 0) {
-				// 	let entitiesData = []
-				// 	let bodyData = {}
-
-				// 	let locationData = UTILS.filterLocationIdandCode(data.entities)
-
-				// 	if (locationData.ids.length > 0) {
-				// 		bodyData = {
-				// 			id: locationData.ids,
-				// 		}
-				// 		let entityData = await entitiesService.entityDocuments(bodyData, 'all')
-
-				// 		if (!entityData.success) {
-				// 			return resolve({
-				// 				status: HTTP_STATUS_CODE.bad_request.status,
-				// 				message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
-				// 				result: {},
-				// 			})
-				// 		}
-
-				// 		entityData.data.forEach((entity) => {
-				// 			entitiesData.push(entity._id)
-				// 		})
-
-				// 		solutionDataToBeUpdated['entityType'] = entityData.data[0].type
-				// 	}
-
-				// 	if (locationData.codes.length > 0) {
-				// 		let filterData = {
-				// 			'registryDetails.code': { $in: locationData.codes },
-				// 		}
-				// 		let entityDetails = await entitiesService.entityDocuments(filterData, 'all')
-				// 		if (!entityDetails.success || !entityDetails.data || !entityDetails.data.length > 0) {
-				// 			return resolve({
-				// 				status: HTTP_STATUS_CODE.bad_request.status,
-				// 				message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
-				// 				result: {},
-				// 			})
-				// 		}
-				// 		let entityDocuments = entityDetails.data
-
-				// 		entityDocuments.forEach((entity) => {
-				// 			entitiesData.push(entity._id)
-				// 		})
-
-				// 		solutionDataToBeUpdated['entityType'] = CONSTANTS.common.SCHOOL
-				// 	}
-
-				// 	if (data.type && data.type !== CONSTANTS.common.IMPROVEMENT_PROJECT) {
-				// 		solutionDataToBeUpdated['entities'] = entitiesData
-				// 	}
-				// }
-
 				//solution part
 				let solution = ''
 				if (data.solutionId && data.solutionId !== '') {
@@ -1537,7 +1487,7 @@ module.exports = class SolutionsHelper {
 						{
 							_id: data.solutionId,
 							tenantId: userDetails.userInformation.tenantId,
-							orgId: { $in: [userDetails.userInformation.organizationId] },
+							orgId: userDetails.userInformation.organizationId,
 						},
 						[
 							'name',
@@ -1575,13 +1525,16 @@ module.exports = class SolutionsHelper {
 							duplicateSolution.type,
 							duplicateSolution.subType,
 							userId,
-							duplicateSolution.projectTemplateId
+							duplicateSolution.projectTemplateId,
+							null,
+							null,
+							userDetails
 						)
 
 						_.merge(duplicateSolution, solutionCreationData)
 						_.merge(duplicateSolution, solutionDataToBeUpdated)
 						duplicateSolution['tenantId'] = userDetails.userInformation.tenantId
-						duplicateSolution['orgId'] = [userDetails.userInformation.organizationId]
+						duplicateSolution['orgId'] = userDetails.userInformation.organizationId
 
 						solution = await solutionsQueries.createSolution(_.omit(duplicateSolution, ['_id', 'link']))
 						parentSolutionInformation.solutionId = duplicateSolution._id
@@ -1627,14 +1580,18 @@ module.exports = class SolutionsHelper {
 						CONSTANTS.common.ACTIVE_STATUS,
 						description,
 						userId,
-						'',
 						false,
 						'',
 						data.type ? data.type : CONSTANTS.common.ASSESSMENT,
-						data.subType ? data.subType : CONSTANTS.common.INSTITUTIONAL
+						data.subType ? data.subType : CONSTANTS.common.INSTITUTIONAL,
+						userId,
+						'',
+						'',
+						'',
+						userDetails
 					)
 					createSolutionData['tenantId'] = userDetails.userInformation.tenantId
-					createSolutionData['orgId'] = [userDetails.userInformation.organizationId]
+					createSolutionData['orgId'] = userDetails.userInformation.organizationId
 					_.merge(solutionDataToBeUpdated, createSolutionData)
 					solution = await solutionsQueries.createSolution(solutionDataToBeUpdated)
 				}
@@ -1644,6 +1601,7 @@ module.exports = class SolutionsHelper {
 						{
 							_id: userPrivateProgram._id,
 							tenantId: userDetails.userInformation.tenantId,
+							orgId: userDetails.userInformation.organizationId,
 						},
 						{
 							$addToSet: { components: ObjectId(solution._id) },
@@ -3162,7 +3120,6 @@ module.exports = class SolutionsHelper {
 					let solutionAndProgramCreation = await this.createProgramAndSolution(
 						userId,
 						programAndSolutionData,
-						userToken,
 						true, // create duplicate solution
 						userDetails
 					)

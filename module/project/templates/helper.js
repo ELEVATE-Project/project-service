@@ -922,15 +922,20 @@ module.exports = class ProjectTemplatesHelper {
 	 * @method
 	 * @name listByIds
 	 * @param {Array} externalIds - External ids
+	 * @param {Object} userDetails - loggedin user info
 	 * @returns {Array} List of templates data.
 	 */
 
-	static listByIds(externalIds) {
+	static listByIds(externalIds, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				const tenantId = userDetails.userInformation.tenantId
+				const orgId = userDetails.userInformation.organizationId
 				let templateData = await projectTemplateQueries.templateDocument(
 					{
 						externalId: { $in: externalIds },
+						tenantId,
+						orgId,
 					},
 					['title', 'metaInformation.goal', 'externalId']
 				)

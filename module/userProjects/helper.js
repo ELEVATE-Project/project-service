@@ -1918,11 +1918,15 @@ module.exports = class UserProjectsHelper {
 	 * @name addStory
 	 * @param {Object} storyData - The data of the story to be added, including its attachments.
 	 * @param {String} projectId - The unique identifier of the project to which the story will be added.
+	 * @param {Object} userDetails - loggedin user info
 	 * @returns {Promise<Object>} - A promise resolving to a success or failure response.
 	 */
-	static addStory(storyData, projectId, userId) {
+	static addStory(storyData, projectId, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				const userId = userDetails.userInformation.userId
+				const tenantId = userDetails.userInformation.tenantId
+				const orgId = userDetails.userInformation.organizationId
 				// Fetch project details from the database
 				const projectDeatils = await projectQueries.projectDocument(
 					{
@@ -1930,6 +1934,8 @@ module.exports = class UserProjectsHelper {
 						status: CONSTANTS.common.SUBMITTED_STATUS,
 						isDeleted: false,
 						userId: userId,
+						tenantId,
+						orgId,
 					},
 					['all']
 				)
@@ -1963,6 +1969,8 @@ module.exports = class UserProjectsHelper {
 				const UpdatedProject = await projectQueries.findOneAndUpdate(
 					{
 						_id: ObjectId(projectId),
+						tenantId,
+						orgId,
 					},
 					{ $set: { attachments: projectDeatils[0].attachments, ...storyData } }
 				)
@@ -2842,8 +2850,11 @@ module.exports = class UserProjectsHelper {
 					},
 				}
 
-				matchQuery['$match']['tenantId'] = userDetails.userInformation.tenantId
-				matchQuery['$match']['orgId'] = userDetails.userInformation.organizationId
+				const tenantId = userDetails.userInformation.tenantId
+				const orgId = userDetails.userInformation.organizationId
+
+				matchQuery['$match']['tenantId'] = tenantId
+				matchQuery['$match']['orgId'] = orgId
 
 				// pass matchQuery based on reflection
 				if (process.env.ENABLE_REFLECTION === 'true') {
@@ -2860,6 +2871,18 @@ module.exports = class UserProjectsHelper {
 						status === CONSTANTS.common.COMPLETED_STATUS
 							? { $eq: CONSTANTS.common.SUBMITTED_STATUS } // Completed
 							: { $ne: CONSTANTS.common.SUBMITTED_STATUS }
+				}
+				let searchData = [
+					{
+						title: new RegExp(searchText, 'i'),
+					},
+				]
+				if (searchText !== '') {
+					if (matchQuery['$match']['$and']) {
+						matchQuery['$match']['$and'].push({ $or: searchData })
+					} else {
+						matchQuery['$match']['$or'] = searchData
+					}
 				}
 				aggregateData.push(matchQuery)
 				// Projection aggregate for multilingual
@@ -2923,7 +2946,16 @@ module.exports = class UserProjectsHelper {
 				if (programId != '' && UTILS.isValidMongoId(programId)) {
 					programData = await programQueries.programsDocument({
 						_id: ObjectId(programId),
+						tenantId,
+						orgId,
 					})
+					if (!(programData.length > 0)) {
+						throw {
+							success: false,
+							status: HTTP_STATUS_CODE.not_found.status,
+							message: CONSTANTS.apiResponses.PROGRAM_NOT_FOUND,
+						}
+					}
 					projects[0]['programName'] = programData[0].name
 				}
 
@@ -2957,7 +2989,7 @@ module.exports = class UserProjectsHelper {
 		requestedData,
 		userToken,
 		userId,
-		isATargetedSolution = '',
+		isATargetedSolution = false,
 		language,
 		userDetails
 	) {
@@ -3185,7 +3217,7 @@ module.exports = class UserProjectsHelper {
 						{
 							_id: projectTemplateId,
 							tenantId: userDetails.userInformation.tenantId,
-							orgId: { $in: [userDetails.userInformation.organizationId] },
+							orgId: userDetails.userInformation.organizationId,
 						},
 						{
 							$set: { importCount: updateProjectTemplateImportCount },

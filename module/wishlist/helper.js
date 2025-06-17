@@ -6,13 +6,16 @@ module.exports = class UserExtensioHelper {
 	 * add wishlist
 	 * @method
 	 * @name add
-	 * @param {projectTempleteId} - projectTempleteId
-	 * @param {userId} -            userId
-	 * @param {bodyData} - 			request body data
+	 * @param {String} projectTemplateId - projectTempleteId
+	 * @param {Object} userDetails -       loggedin users info
+	 * @param {Object} bodyData - 			request body data
 	 * @returns {Object} .
 	 */
-	static async add(projectTempleteId, userId, bodyData) {
+	static async add(projectTempleteId, userDetails, bodyData) {
 		try {
+			let userId = userDetails.userInformation.userId
+			let tenantId = userDetails.userInformation.tenantId
+			let orgId = userDetails.userInformation.organizationId
 			let wishlistItem = {
 				_id: projectTempleteId,
 				createdAt: new Date(),
@@ -24,7 +27,7 @@ module.exports = class UserExtensioHelper {
 			}
 
 			// Find the userExtension document for the given userId
-			let userExtensionDocument = await userExtensionQueries.userExtensionDocument({ userId })
+			let userExtensionDocument = await userExtensionQueries.userExtensionDocument({ userId, tenantId, orgId })
 
 			let updateuserExtensionDocument
 			if (userExtensionDocument && userExtensionDocument.length > 0) {
@@ -41,7 +44,7 @@ module.exports = class UserExtensioHelper {
 				}
 				// If the document exists, update the wishlist by appending the new item
 				updateuserExtensionDocument = await userExtensionQueries.findAndUpdate(
-					{ userId },
+					{ userId, tenantId, orgId },
 					{ $addToSet: { wishlist: wishlistItem } }
 				)
 			} else {
@@ -49,6 +52,8 @@ module.exports = class UserExtensioHelper {
 				const newUserExtension = {
 					userId,
 					wishlist: [wishlistItem],
+					tenantId,
+					orgId,
 				}
 				updateuserExtensionDocument = await userExtensionQueries.createUserExtension(newUserExtension)
 			}
@@ -76,14 +81,17 @@ module.exports = class UserExtensioHelper {
 	 * remove wishlist
 	 * @method
 	 * @name remove
-	 * @param {projectTempleteId} - pprojectTempleteId
-	 * @param {userId} -            userId
+	 * @param {String} projectTempleteId - project templete id
+	 * @param {Object} userDetails - loggedin user info
 	 * @returns {Object} .
 	 */
-	static async remove(projectTempleteId, userId) {
+	static async remove(projectTempleteId, userDetails) {
 		try {
+			let userId = userDetails.userInformation.userId
+			let tenantId = userDetails.userInformation.tenantId
+			let orgId = userDetails.userInformation.organizationId
 			// Find the userExtension document for the given userId
-			let userExtensionDocument = await userExtensionQueries.userExtensionDocument({ userId })
+			let userExtensionDocument = await userExtensionQueries.userExtensionDocument({ userId, tenantId, orgId })
 
 			if (!userExtensionDocument || userExtensionDocument.length === 0) {
 				throw {
@@ -106,7 +114,7 @@ module.exports = class UserExtensioHelper {
 
 			// If the document exists, update the wishlist by removing the specified item
 			let updatedDocument = await userExtensionQueries.findAndUpdate(
-				{ userId, wishlist: { $elemMatch: { _id: projectTempleteId } } },
+				{ userId, wishlist: { $elemMatch: { _id: projectTempleteId } }, tenantId, orgId },
 				{ $pull: { wishlist: { _id: projectTempleteId } } },
 				{ new: true }
 			)
@@ -135,17 +143,19 @@ module.exports = class UserExtensioHelper {
 	 * @method
 	 * @name list
 	 * @param {String} language  -languageCode
-	 * @param {String}  userId   -userId
+	 * @param {Object} userDetails   - loggedin user info
 	 * @param {Number} pageSize  -pageSize
 	 * @param {Number} pageNo    -pageNo
 	 * @returns {Object}          list of wishlist
 	 */
 
-	static async list(language, userId, pageSize, pageNo) {
+	static async list(language, userDetails, pageSize, pageNo) {
 		try {
+			let userId = userDetails.userInformation.userId
+			let tenantId = userDetails.userInformation.tenantId
+			let orgId = userDetails.userInformation.organizationId
 			// Find user's wishlist projectTemplateIds
-			let userExtensionDocument = await userExtensionQueries.userExtensionDocument({ userId })
-
+			let userExtensionDocument = await userExtensionQueries.userExtensionDocument({ userId, tenantId, orgId })
 			// If no user extension document is found or if it's empty
 			if (!userExtensionDocument || userExtensionDocument.length === 0) {
 				return {
@@ -192,6 +202,8 @@ module.exports = class UserExtensioHelper {
 			let matchQuery = {
 				$match: {
 					_id: { $in: projectTemplateIDs },
+					tenantId,
+					orgId,
 				},
 			}
 			aggregateData.push(matchQuery)

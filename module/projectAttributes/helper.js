@@ -6,16 +6,21 @@ module.exports = class ProjectAttributesHelper {
 	 * create project attributes
 	 * @method
 	 * @name create
+	 * @param {Object} userDetails - loggedin user info
 	 * @returns {Object} .
 	 */
-	static async create() {
+	static async create(userDetails) {
 		try {
 			// Get the default project attributes
 			let getProjectAttribute = CONSTANTS.common.DEFAULT_ATTRIBUTES
+			const tenantId = userDetails.tenantAndOrgInfo.tenantId
+			const orgId = userDetails.tenantAndOrgInfo.orgId[0]
 			//Getting roles from the entity service
 			let userRoleInformation = await entitiesService.getUserRoleExtensionDocuments(
 				{
 					status: CONSTANTS.common.ACTIVE_STATUS.toUpperCase(),
+					tenantId,
+					orgId,
 				},
 				['title', 'code']
 			)
@@ -37,6 +42,10 @@ module.exports = class ProjectAttributesHelper {
 			}
 			// Adding the roles into entities of projectAttributes
 			getProjectAttribute[1].entities = roleToAddForFilter
+			getProjectAttribute.forEach((item) => {
+				item['tenantId'] = tenantId
+				item['orgId'] = orgId
+			})
 			await projectAttributesQueries.createProjectAttributes(getProjectAttribute)
 			return {
 				success: true,
@@ -59,11 +68,14 @@ module.exports = class ProjectAttributesHelper {
 	 * @param {code} - which attributes need to be updated
 	 * @param {language} - language code for multilingual
 	 * @param {Object} bodyData  - reqBody
+	 * @param {Object} userDetails - loggedin user info
 	 * @returns {Object} .
 	 */
 
-	static async update(code, language, bodyData) {
+	static async update(code, language, bodyData, userDetails) {
 		try {
+			const tenantId = userDetails.tenantAndOrgInfo.tenantId
+			const orgId = userDetails.tenantAndOrgInfo.orgId[0]
 			if (bodyData.translateData) {
 				// getting name and data from reqBody
 				const { name, data } = bodyData.translateData
@@ -73,6 +85,8 @@ module.exports = class ProjectAttributesHelper {
 					{
 						code: code,
 						[`translation.${language}`]: { $exists: true },
+						tenantId,
+						orgId,
 					},
 					[`translation.${language}`]
 				)
@@ -85,14 +99,14 @@ module.exports = class ProjectAttributesHelper {
 					if (filteredData.length > 0) {
 						// Update only if there is filtered data
 						await projectAttributesQueries.findAndUpdate(
-							{ code: code },
+							{ code: code, tenantId, orgId },
 							{ $set: { [`translation.${language}`]: { name, data: filteredData } } }
 						)
 					}
 				} else {
 					// If no document matches, upsert a new one
 					await projectAttributesQueries.findAndUpdate(
-						{ code: code },
+						{ code: code, tenantId, orgId },
 						{ $set: { [`translation.${language}`]: { name, data } } },
 						{ upsert: true }
 					)
@@ -102,7 +116,13 @@ module.exports = class ProjectAttributesHelper {
 					message: CONSTANTS.apiResponses.PROJECT_ATTRIBUTES_UPDATED,
 				}
 			} else {
-				let projectAttributesDocument = await this.updateEntities('entities', code, bodyData.data)
+				let projectAttributesDocument = await this.updateEntities(
+					'entities',
+					code,
+					bodyData.data,
+					tenantId,
+					orgId
+				)
 				if (projectAttributesDocument.success) {
 					return {
 						success: true,
@@ -134,9 +154,11 @@ module.exports = class ProjectAttributesHelper {
 	 * @param {keyToFilter} - which attributes key need to be updated
 	 * @param {code}       -  attributes code for update
 	 * @param {Object} filterData  - reqBody
+	 * @param {String} tenantId - user's tenant id
+	 * @param {String} orgId - user's org id
 	 * @returns {Object} .
 	 */
-	static async updateEntities(keyToFilter = 'entities', code = 'role', filterData) {
+	static async updateEntities(keyToFilter = 'entities', code = 'role', filterData, tenantId, orgId) {
 		try {
 			let userRoleInformation
 			let roleToAddForFilter = []
@@ -146,6 +168,8 @@ module.exports = class ProjectAttributesHelper {
 				userRoleInformation = await entitiesService.getUserRoleExtensionDocuments(
 					{
 						status: CONSTANTS.common.ACTIVE_STATUS.toUpperCase(),
+						tenantId,
+						orgId,
 					},
 					['title', 'code']
 				)
@@ -169,7 +193,7 @@ module.exports = class ProjectAttributesHelper {
 			// If current role filter doesn't match with userRole of entityService then updating the existing role filter
 
 			let updatedEntities = await projectAttributesQueries.findAndUpdate(
-				{ code: code },
+				{ code: code, tenantId, orgId },
 				{ [keyToFilter]: code === 'role' ? roleToAddForFilter : filterData }
 			)
 			if (!updatedEntities) {
@@ -195,19 +219,21 @@ module.exports = class ProjectAttributesHelper {
 	 * @method
 	 * @name find
 	 * @param {String} language - Language Code of project attributes to get the multilingual response
+	 * @param {Object} userDetails - loggedin user info
 	 * @returns {Object} projectAttributesData.
 	 */
-	static async find(language = '') {
+	static async find(language = '', userDetails) {
 		try {
 			// Get the role updated with the current entityService Roles
 			await this.updateEntities()
 
-			let createProjectAttributes = await projectAttributesQueries.projectAttributesDocument({}, [
-				'name',
-				'code',
-				'entities',
-				language != '' ? 'translation' : '',
-			])
+			const tenantId = userDetails.userInformation.tenantId
+			const orgId = userDetails.userInformation.organizationId
+
+			let createProjectAttributes = await projectAttributesQueries.projectAttributesDocument(
+				{ tenantId, orgId },
+				['name', 'code', 'entities', language != '' ? 'translation' : '']
+			)
 			// Get the response object based on languageCode
 			const filterData = createProjectAttributes.map((eachValue) => {
 				return {

@@ -1422,7 +1422,7 @@ module.exports = class SolutionsHelper {
 							duplicateProgram.startDate,
 							duplicateProgram.endDate,
 							'',
-							[],
+							[], // the function definition is accepting empty array instead of empty string hence replaced it with []
 							{},
 							userDetails
 						)
@@ -1461,8 +1461,8 @@ module.exports = class SolutionsHelper {
 						startDate,
 						endDate,
 						userId,
-						[],
-						{},
+						[], // pass empty array for translation data
+						{}, // pass empty object for source data
 						userDetails
 					)
 

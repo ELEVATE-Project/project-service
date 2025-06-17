@@ -43,6 +43,12 @@ function updateTaskInTree(tasks, targetExternalId, updateData) {
 					tasks[i][key] = updateData[key]
 				}
 			}
+
+			// Handle fields that should be removed if not present in updateData
+			if (!('learningResources' in updateData)) {
+				tasks[i].learningResources = [] // Remove all learning resources if key not present
+			}
+
 			// Do not touch children unless explicitly present in updateData
 			return true
 		}

@@ -93,6 +93,10 @@ module.exports = async function (req, res, next, token = '') {
 		'/programs/removeRolesInScope',
 		'/programs/removeEntitiesInScope',
 		'/programs/addRolesInScope',
+		'/solutions/addEntitiesInScope',
+		'/solutions/removeRolesInScope',
+		'/solutions/removeEntitiesInScope',
+		'/solutions/addRolesInScope',
 	]
 	let performInternalAccessTokenCheck = false
 	let adminHeader = false

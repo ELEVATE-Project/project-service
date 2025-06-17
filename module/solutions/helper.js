@@ -969,20 +969,26 @@ module.exports = class SolutionsHelper {
 	 * @name addRolesInScope
 	 * @param {String} solutionId - Solution Id.
 	 * @param {Array} roles - roles data.
+	 * @param {Object} userDetails - User Details
 	 * @returns {JSON} - Added roles data.
 	 */
 
-	static addRolesInScope(solutionId, roles) {
+	static addRolesInScope(solutionId, roles, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				let tenantId = userDetails.tenantAndOrgInfo.tenantId
+				let orgId = userDetails.tenantAndOrgInfo.orgId[0]
+
 				let solutionData = await solutionsQueries.solutionsDocument(
 					{
 						_id: solutionId,
 						scope: { $exists: true },
 						isReusable: false,
 						isDeleted: false,
+						tenantId: tenantId,
+						orgId: orgId,
 					},
-					['_id']
+					['_id', 'scope.roles']
 				)
 
 				if (!solutionData.length > 0) {
@@ -995,8 +1001,7 @@ module.exports = class SolutionsHelper {
 				let updateQuery = {}
 
 				if (Array.isArray(roles) && roles.length > 0) {
-					let currentRoles = await solutionsQueries.solutionsDocument({ _id: solutionId }, ['scope.roles'])
-					currentRoles = currentRoles[0].scope.roles
+					let currentRoles = solutionData[0].scope.roles
 
 					let currentRolesSet = new Set(currentRoles)
 					let rolesSet = new Set(roles)
@@ -1672,18 +1677,24 @@ module.exports = class SolutionsHelper {
 	 * @name removeRolesInScope
 	 * @param {String} solutionId - Solution Id.
 	 * @param {Array} roles - roles data.
+	 * @param {Object} userDetails - User Details
 	 * @returns {JSON} - Removed solution roles.
 	 */
 
-	static removeRolesInScope(solutionId, roles) {
+	static removeRolesInScope(solutionId, roles, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				let tenantId = userDetails.tenantAndOrgInfo.tenantId
+				let orgId = userDetails.tenantAndOrgInfo.orgId[0]
+
 				let solutionData = await solutionsQueries.solutionsDocument(
 					{
 						_id: solutionId,
 						scope: { $exists: true },
 						isReusable: false,
 						isDeleted: false,
+						tenantId: tenantId,
+						orgId: orgId,
 					},
 					['_id']
 				)
@@ -1955,21 +1966,27 @@ module.exports = class SolutionsHelper {
 	 * @method
 	 * @name addEntitiesInScope
 	 * @param {String} solutionId - solution Id.
-	 * @param {Array} entities - entities data.
+	 * @param {Object} bodyData - body data.
+	 * @param {Object} userDetails - User Details
+	 * @param {Boolean} organizations - If organizations is Present.
 	 * @returns {JSON} - Added entities data.
 	 */
 
-	static addEntitiesInScope(solutionId, entities) {
+	static addEntitiesInScope(solutionId, bodyData, userDetails, organizations) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				let tenantId = userDetails.tenantAndOrgInfo.tenantId
+				let orgId = userDetails.tenantAndOrgInfo.orgId[0]
 				let solutionData = await solutionsQueries.solutionsDocument(
 					{
 						_id: solutionId,
 						scope: { $exists: true },
 						isReusable: false,
 						isDeleted: false,
+						tenantId: tenantId,
+						orgId: orgId,
 					},
-					['_id', 'programId', 'scope.entityType']
+					['_id', 'programId', 'scope']
 				)
 
 				if (!solutionData.length > 0) {
@@ -1982,8 +1999,10 @@ module.exports = class SolutionsHelper {
 				let programData = await programQueries.programsDocument(
 					{
 						_id: solutionData[0].programId,
+						tenantId: tenantId,
+						orgId: orgId,
 					},
-					['scope.entities', 'scope.entityType']
+					['scope']
 				)
 
 				if (!programData.length > 0) {
@@ -1993,27 +2012,32 @@ module.exports = class SolutionsHelper {
 					})
 				}
 
-				if (solutionData[0].scope.entityType !== programData[0].scope.entityType) {
-					let checkEntityInParent = await entitiesService.entityDocuments(
-						{
-							_id: programData[0].scope.entities,
-							[`groups.${solutionData[0].scope.entityType}`]: entities,
-						},
-						['_id']
-					)
-					if (!checkEntityInParent.success) {
-						throw {
-							message: CONSTANTS.apiResponses.ENTITY_NOT_EXISTS_IN_PARENT,
-						}
-					}
-				}
+				// This logic we need to re-look --------------------------------------------
+				// if (solutionData[0].scope !== programData[0].scope) {
+				// 	let checkEntityInParent = await entitiesService.entityDocuments(
+				// 		{
+				// 			_id: programData[0].scope.entities,- state
+				// 			[`groups.${solutionData[0].scope.entityType}`]: entities,- district
+				// 		},
+				// 		['_id']
+				// 	)
+				// 	if (!checkEntityInParent.success) {
+				// 		throw {
+				// 			message: CONSTANTS.apiResponses.ENTITY_NOT_EXISTS_IN_PARENT,
+				// 		}
+				// 	}
+				// }
 
+				let entities = bodyData.entities
+				let entitiesKeys = Object.keys(entities)
+				const entitiesValue = entitiesKeys.flatMap((key) => entities[key])
 				let entitiesData = await entitiesService.entityDocuments(
 					{
-						_id: { $in: entities },
-						entityType: solutionData[0].scope.entityType,
+						_id: { $in: entitiesValue },
+						tenantId: tenantId,
+						orgId: orgId,
 					},
-					['_id']
+					['_id', 'entityType']
 				)
 
 				if (!entitiesData.success || !entitiesData.data.length > 0) {
@@ -2021,16 +2045,44 @@ module.exports = class SolutionsHelper {
 						message: CONSTANTS.apiResponses.ENTITIES_NOT_FOUND,
 					}
 				}
-				entitiesData = entitiesData.data
-				let entityIds = []
 
-				entitiesData.forEach((entity) => {
-					entityIds.push(entity._id)
-				})
-				let updateObject = {
-					$addToSet: {},
+				if (!entitiesData.success || !entitiesData.data.length > 0) {
+					throw {
+						message: CONSTANTS.apiResponses.ENTITIES_NOT_FOUND,
+					}
 				}
-				updateObject['$addToSet'][`scope.${solutionData[0].scope.entityType}`] = { $each: entityIds }
+				entitiesData = entitiesData.data
+				let groupedEntities = {}
+
+				// Group IDs by entityType
+				for (const entity of entitiesData) {
+					if (!groupedEntities[entity.entityType]) {
+						groupedEntities[entity.entityType] = []
+					}
+					groupedEntities[entity.entityType].push(entity._id)
+				}
+
+				// Build the $addToSet updateObject
+				let updateObject = { $addToSet: {} }
+				// Loop through each entity type and its corresponding list of IDs
+				for (const [type, ids] of Object.entries(groupedEntities)) {
+					updateObject.$addToSet[`scope.${type}`] = { $each: ids }
+				}
+
+				// Handle organizations if present and user has ADMIN_ROLE
+				if (organizations && userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
+					// Fetch tenant details to validate organization codes
+					let tenantDetails = await userService.fetchTenantDetails(tenantId, userDetails.userToken)
+					// Extract all valid organization codes from the tenant's config
+					const validOrgCodes = tenantDetails.data.organizations.map((org) => org.code)
+
+					// Check if all provided organization codes are valid
+					const isValid = bodyData.organizations.every((orgCode) => validOrgCodes.includes(orgCode))
+					// If valid, include them in the update object under scope.organizations
+					if (isValid) {
+						updateObject.$addToSet[`scope.organizations`] = { $each: bodyData.organizations }
+					}
+				}
 
 				let updateSolution = await solutionsQueries.updateSolutionDocument(
 					{
@@ -2065,19 +2117,26 @@ module.exports = class SolutionsHelper {
 	 * @method
 	 * @name removeEntitiesInScope
 	 * @param {String} solutionId - Program Id.
-	 * @param {Array} entities - entities.
+	 * @param {Object} bodyData - body data.
+	 * @param {Object} userDetails - User Details
+	 * @param {Boolean} organizations - If organizations is Present.
 	 * @returns {JSON} - Removed entities from solution scope.
 	 */
 
-	static removeEntitiesInScope(solutionId, entities) {
+	static removeEntitiesInScope(solutionId, bodyData, userDetails, organizations) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				let tenantId = userDetails.tenantAndOrgInfo.tenantId
+				let orgId = userDetails.tenantAndOrgInfo.orgId[0]
+
 				let solutionData = await solutionsQueries.solutionsDocument(
 					{
 						_id: solutionId,
 						scope: { $exists: true },
 						isReusable: false,
 						isDeleted: false,
+						tenantId: tenantId,
+						orgId: orgId,
 					},
 					['_id', 'scope.entityType']
 				)
@@ -2089,12 +2148,16 @@ module.exports = class SolutionsHelper {
 					})
 				}
 
+				let entities = bodyData.entities
+				let entitiesKeys = Object.keys(entities)
+				const entitiesValue = entitiesKeys.flatMap((key) => entities[key])
 				let entitiesData = await entitiesService.entityDocuments(
 					{
-						_id: { $in: entities },
-						entityType: solutionData[0].scope.entityType,
+						_id: { $in: entitiesValue },
+						tenantId: tenantId,
+						orgId: orgId,
 					},
-					['_id']
+					['_id', 'entityType']
 				)
 
 				if (!entitiesData.success || !entitiesData.data.length > 0) {
@@ -2103,15 +2166,37 @@ module.exports = class SolutionsHelper {
 					}
 				}
 				entitiesData = entitiesData.data
-				let entityIds = []
+				let groupedEntities = {}
 
-				entitiesData.forEach((entity) => {
-					entityIds.push(entity._id)
-				})
-				let updateObject = {
-					$pull: {},
+				// Group IDs by entityType
+				for (const entity of entitiesData) {
+					if (!groupedEntities[entity.entityType]) {
+						groupedEntities[entity.entityType] = []
+					}
+					groupedEntities[entity.entityType].push(entity._id)
 				}
-				updateObject['$pull'][`scope.${solutionData[0].scope.entityType}`] = { $in: entityIds }
+
+				// Build the $addToSet updateObject
+				let updateObject = { $pull: {} }
+
+				for (const [type, ids] of Object.entries(groupedEntities)) {
+					updateObject['$pull'][`scope.${type}`] = { $in: ids }
+				}
+
+				// Handle organizations if present and user has ADMIN_ROLE
+				if (organizations && userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
+					// Fetch tenant details to validate organization codes
+					let tenantDetails = await userService.fetchTenantDetails(tenantId, userDetails.userToken)
+					// Extract all valid organization codes from the tenant's config
+					const validOrgCodes = tenantDetails.data.organizations.map((org) => org.code)
+
+					// Check if all provided organization codes are valid
+					const isValid = bodyData.organizations.every((orgCode) => validOrgCodes.includes(orgCode))
+					// If valid, include them in the update object under scope.organizations
+					if (isValid) {
+						updateObject['$pull'][`scope.organizations`] = { $in: bodyData.organizations }
+					}
+				}
 				let updateSolution = await solutionsQueries.updateSolutionDocument(
 					{
 						_id: solutionId,

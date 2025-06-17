@@ -24,6 +24,7 @@ module.exports = (req) => {
 				.isMongoId()
 				.withMessage('Invalid solution ID')
 			req.checkBody('roles').exists().withMessage('required solution roles to be added')
+			req.checkBody('roles').isArray().withMessage('roles must be an array')
 		},
 		removeRolesInScope: function () {
 			req.checkParams('_id')
@@ -32,6 +33,7 @@ module.exports = (req) => {
 				.isMongoId()
 				.withMessage('Invalid solution ID')
 			req.checkBody('roles').exists().withMessage('required solution roles to remove')
+			req.checkBody('roles').isArray().withMessage('roles must be an array')
 		},
 		update: function () {
 			req.checkParams('_id')
@@ -63,7 +65,20 @@ module.exports = (req) => {
 				.withMessage('required solution id')
 				.isMongoId()
 				.withMessage('Invalid solution ID')
-			req.checkBody('entities').exists().withMessage('required entities to add')
+			req.checkBody('entities').exists().withMessage('required entities to be added')
+			const entities = req.body.entities
+			if (entities && typeof entities === 'object') {
+				for (const [key, value] of Object.entries(entities)) {
+					req.checkBody(`entities.${key}`).isArray().withMessage(`${key} should be an array`)
+				}
+			}
+			if (req.query.organizations === 'true') {
+				req.checkBody('organizations')
+					.exists()
+					.withMessage('Organizations field is required when organizations=true in query')
+					.isArray()
+					.withMessage('Organizations must be an array')
+			}
 		},
 		removeEntitiesInScope: function () {
 			req.checkParams('_id')
@@ -72,6 +87,19 @@ module.exports = (req) => {
 				.isMongoId()
 				.withMessage('Invalid solution ID')
 			req.checkBody('entities').exists().withMessage('required entities to remove')
+			const entities = req.body.entities
+			if (entities && typeof entities === 'object') {
+				for (const [key, value] of Object.entries(entities)) {
+					req.checkBody(`entities.${key}`).isArray().withMessage(`${key} should be an array`)
+				}
+			}
+			if (req.query.organizations === 'true') {
+				req.checkBody('organizations')
+					.exists()
+					.withMessage('Organizations field is required when organizations=true in query')
+					.isArray()
+					.withMessage('Organizations must be an array')
+			}
 		},
 		verifySolution: function () {
 			req.checkParams('_id')

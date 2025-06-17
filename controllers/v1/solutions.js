@@ -291,13 +291,18 @@ module.exports = class Solutions extends Abstract {
 	 * @param {Object} req - requested data.
 	 * @param {String} req.params._id - solution id.
 	 * @param {Array} req.body.roles - Roles to be added.
+	 * @param {Object} req.userDetails - User details
 	 * @returns {Array} solution scope roles.
 	 */
 
 	async addRolesInScope(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let solutionUpdated = await solutionsHelper.addRolesInScope(req.params._id, req.body.roles)
+				let solutionUpdated = await solutionsHelper.addRolesInScope(
+					req.params._id,
+					req.body.roles,
+					req.userDetails
+				)
 
 				return resolve(solutionUpdated)
 			} catch (error) {
@@ -402,13 +407,18 @@ module.exports = class Solutions extends Abstract {
 	 * @param {Object} req - requested data.
 	 * @param {String} req.params._id - solution id.
 	 * @param {Array} req.body.roles - Roles to be added.
+	 * @param {Object} req.userDetails - User details
 	 * @returns {Array} Removed solution scope roles.
 	 */
 
 	async removeRolesInScope(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let solutionUpdated = await solutionsHelper.removeRolesInScope(req.params._id, req.body.roles)
+				let solutionUpdated = await solutionsHelper.removeRolesInScope(
+					req.params._id,
+					req.body.roles,
+					req.userDetails
+				)
 
 				return resolve(solutionUpdated)
 			} catch (error) {
@@ -555,14 +565,21 @@ module.exports = class Solutions extends Abstract {
 	 * @name addEntitiesInScope
 	 * @param {Object} req - requested data.
 	 * @param {String} req.params._id - solution id.
-	 * @param {Array} req.body.entities - Entities to be added.
+	 * @param {Object} req.body - data to be added.
+	 * @param {Object} req.userDetails - User details
+	 * @param {Boolean} req.query.organizations - True if we want to update organizations details.
 	 * @returns {Array} Solution scope entities updation.
 	 */
 
 	async addEntitiesInScope(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let solutionUpdated = await solutionsHelper.addEntitiesInScope(req.params._id, req.body.entities)
+				let solutionUpdated = await solutionsHelper.addEntitiesInScope(
+					req.params._id,
+					req.body,
+					req.userDetails,
+					req.query.organizations ? req.query.organizations : false
+				)
 
 				return resolve(solutionUpdated)
 			} catch (error) {
@@ -601,14 +618,21 @@ module.exports = class Solutions extends Abstract {
 	 * @name removeEntitiesInScope
 	 * @param {Object} req - requested data.
 	 * @param {String} req.params._id - solution id.
-	 * @param {Array} req.body.entities - Entities to be added.
+	 * @param {Object} req.body - data to be removed.
+	 * @param {Object} req.userDetails - User details
+	 * @param {Boolean} req.query.organizations - True if we want to update organizations details.
 	 * @returns {Array} Program scope roles.
 	 */
 
 	async removeEntitiesInScope(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let solutionUpdated = await solutionsHelper.removeEntitiesInScope(req.params._id, req.body.entities)
+				let solutionUpdated = await solutionsHelper.removeEntitiesInScope(
+					req.params._id,
+					req.body,
+					req.userDetails,
+					req.query.organizations ? req.query.organizations : false
+				)
 
 				return resolve(solutionUpdated)
 			} catch (error) {

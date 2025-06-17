@@ -39,8 +39,12 @@ module.exports = (req) => {
 					req.checkBody(`entities.${key}`).isArray().withMessage(`${key} should be an array`)
 				}
 			}
-			if (req.body.organizations !== undefined) {
-				req.checkBody('organizations').isArray().withMessage('Organizations must be an array')
+			if (req.query.organizations === 'true') {
+				req.checkBody('organizations')
+					.exists()
+					.withMessage('Organizations field is required when organizations=true in query')
+					.isArray()
+					.withMessage('Organizations must be an array')
 			}
 		},
 		removeRolesInScope: function () {
@@ -65,8 +69,12 @@ module.exports = (req) => {
 					req.checkBody(`entities.${key}`).isArray().withMessage(`${key} should be an array`)
 				}
 			}
-			if (req.body.organizations !== undefined) {
-				req.checkBody('organizations').isArray().withMessage('Organizations must be an array')
+			if (req.query.organizations === 'true') {
+				req.checkBody('organizations')
+					.exists()
+					.withMessage('Organizations field is required when organizations=true in query')
+					.isArray()
+					.withMessage('Organizations must be an array')
 			}
 		},
 		join: function () {

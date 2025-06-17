@@ -164,8 +164,8 @@ module.exports = class SolutionsHelper {
 		programData.endDate = endDate
 		programData.language = language
 		programData.source = source
-		;(programData.tenantId = userDetails.userInformation.tenantId),
-			(programData.orgId = userDetails.userInformation.organizationId)
+		programData.tenantId = userDetails.userInformation.tenantId
+		programData.orgId = userDetails.userInformation.organizationId
 		return programData
 	}
 

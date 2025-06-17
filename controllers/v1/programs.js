@@ -266,13 +266,18 @@ module.exports = class Programs extends Abstract {
 	 * @param {Object} req - requested data.
 	 * @param {String} req.params._id - program id.
 	 * @param {Array} req.body.roles - Roles to be added.
+	 * @param {Object} req.userDetails - User details
 	 * @returns {Array} Program scope roles.
 	 */
 
 	async addRolesInScope(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let programUpdated = await programsHelper.addRolesInScope(req.params._id, req.body.roles)
+				let programUpdated = await programsHelper.addRolesInScope(
+					req.params._id,
+					req.body.roles,
+					req.userDetails
+				)
 
 				return resolve(programUpdated)
 			} catch (error) {
@@ -310,14 +315,21 @@ module.exports = class Programs extends Abstract {
 	 * @name addEntitiesInScope
 	 * @param {Object} req - requested data.
 	 * @param {String} req.params._id - program id.
-	 * @param {Array} req.body.entities - Entities to be added.
+	 * @param {Object} req.body - data to be added.
+	 * @param {Object} req.userDetails - User details
+	 * @param {Boolean} req.query.organizations - True if we want to update organizations details.
 	 * @returns {Array} Program scope roles.
 	 */
 
 	async addEntitiesInScope(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let programUpdated = await programsHelper.addEntitiesInScope(req.params._id, req.body.entities)
+				let programUpdated = await programsHelper.addEntitiesInScope(
+					req.params._id,
+					req.body,
+					req.userDetails,
+					req.query.organizations ? req.query.organizations : false
+				)
 
 				return resolve(programUpdated)
 			} catch (error) {
@@ -357,6 +369,7 @@ module.exports = class Programs extends Abstract {
 	 * @param {Object} req - requested data.
 	 * @param {String} req.params._id - program id.
 	 * @param {Array} req.body.roles - Roles to be added.
+	 * @param {Object} req.userDetails - User details
 	 * @returns {Array} Program scope roles.
 	 */
 
@@ -402,14 +415,21 @@ module.exports = class Programs extends Abstract {
 	 * @name removeEntitiesInScope
 	 * @param {Object} req - requested data.
 	 * @param {String} req.params._id - program id.
-	 * @param {Array} req.body.entities - Entities to be added.
+	 * @param {Object} req.body - data to be removed.
+	 * @param {Object} req.userDetails - User details
+	 * @param {Boolean} req.query.organizations - True if we want to update organizations details.
 	 * @returns {Array} Program scope roles.
 	 */
 
 	async removeEntitiesInScope(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let programUpdated = await programsHelper.removeEntitiesInScope(req.params._id, req.body.entities)
+				let programUpdated = await programsHelper.removeEntitiesInScope(
+					req.params._id,
+					req.body,
+					req.userDetails,
+					req.query.organizations ? req.query.organizations : false
+				)
 
 				return resolve(programUpdated)
 			} catch (error) {

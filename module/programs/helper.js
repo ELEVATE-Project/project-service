@@ -408,17 +408,21 @@ module.exports = class ProgramsHelper {
 	 * @name addRolesInScope
 	 * @param {String} programId - Program Id.
 	 * @param {Array} roles - roles data.
+	 * @param {Object} userDetails - User Details
 	 * @returns {JSON} - Added roles data.
 	 */
 
-	static addRolesInScope(programId, roles) {
+	static addRolesInScope(programId, roles, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				let tenantId = userDetails.tenantAndOrgInfo.tenantId
+				let orgId = userDetails.tenantAndOrgInfo.orgId[0]
 				let programData = await programsQueries.programsDocument(
 					{
 						_id: programId,
 						scope: { $exists: true },
 						isAPrivateProgram: false,
+						tenantId: tenantId,
 					},
 					['_id']
 				)
@@ -433,7 +437,9 @@ module.exports = class ProgramsHelper {
 				let updateQuery = {}
 
 				if (Array.isArray(roles) && roles.length > 0) {
-					let currentRoles = await programsQueries.programsDocument({ _id: programId }, ['scope.roles'])
+					let currentRoles = await programsQueries.programsDocument({ _id: programId, tenantId: tenantId }, [
+						'scope.roles',
+					])
 					currentRoles = currentRoles[0].scope.roles
 
 					let currentRolesSet = new Set(currentRoles)
@@ -457,6 +463,7 @@ module.exports = class ProgramsHelper {
 				let updateProgram = await programsQueries.findAndUpdate(
 					{
 						_id: programId,
+						tenantId: tenantId,
 					},
 					updateQuery,
 					{ new: true }
@@ -487,20 +494,26 @@ module.exports = class ProgramsHelper {
 	 * @method
 	 * @name addEntitiesInScope
 	 * @param {String} programId - Program Id.
-	 * @param {Array} entities - entities data.
-	 * @returns {JSON} - Added entities data.
+	 * @param {Object} bodyData - body data.
+	 * @param {Object} userDetails - User Details
+	 * @param {Boolean} organizations - If organizations is Present.
+	 * @returns {JSON} - Added scope data.
 	 */
 
-	static addEntitiesInScope(programId, entities) {
+	static addEntitiesInScope(programId, bodyData, userDetails, organizations) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				let tenantId = userDetails.tenantAndOrgInfo.tenantId
+				let orgId = userDetails.tenantAndOrgInfo.orgId[0]
+
 				let programData = await programsQueries.programsDocument(
 					{
 						_id: programId,
 						scope: { $exists: true },
 						isAPrivateProgram: false,
+						tenantId: tenantId,
 					},
-					['_id', 'scope.entityType']
+					['_id', 'scope']
 				)
 
 				if (!programData.length > 0) {
@@ -508,13 +521,15 @@ module.exports = class ProgramsHelper {
 						message: CONSTANTS.apiResponses.PROGRAM_NOT_FOUND,
 					}
 				}
-
+				let entities = bodyData.entities
+				let entitiesKeys = Object.keys(entities)
+				const entitiesValue = entitiesKeys.flatMap((key) => entities[key])
 				let entitiesData = await entitiesService.entityDocuments(
 					{
-						_id: { $in: entities },
-						entityType: programData[0].scope.entityType,
+						_id: { $in: entitiesValue },
+						tenantId: tenantId,
 					},
-					['_id']
+					['_id', 'entityType']
 				)
 
 				if (!entitiesData.success || !entitiesData.data.length > 0) {
@@ -523,19 +538,37 @@ module.exports = class ProgramsHelper {
 					}
 				}
 				entitiesData = entitiesData.data
-				let entityIds = []
+				let groupedEntities = {}
 
-				entitiesData.forEach((entity) => {
-					entityIds.push(entity._id)
-				})
-				let updateObject = {
-					$addToSet: {},
+				// Group IDs by entityType
+				for (const entity of entitiesData) {
+					if (!groupedEntities[entity.entityType]) {
+						groupedEntities[entity.entityType] = []
+					}
+					groupedEntities[entity.entityType].push(entity._id)
 				}
-				updateObject['$addToSet'][`scope.${programData[0].scope.entityType}`] = { $each: entityIds }
+
+				// Build the $addToSet updateObject
+				let updateObject = { $addToSet: {} }
+
+				for (const [type, ids] of Object.entries(groupedEntities)) {
+					updateObject.$addToSet[`scope.${type}`] = { $each: ids }
+				}
+
+				if (organizations && userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
+					let tenantDetails = await userService.fetchTenantDetails(tenantId, userDetails.userToken)
+					const validOrgCodes = tenantDetails.data.organizations.map((org) => org.code)
+
+					const isValid = bodyData.organizations.every((orgCode) => validOrgCodes.includes(orgCode))
+					if (isValid) {
+						updateObject.$addToSet[`scope.organizations`] = { $each: bodyData.organizations }
+					}
+				}
 
 				let updateProgram = await programsQueries.findAndUpdate(
 					{
 						_id: programId,
+						tenantId: tenantId,
 					},
 					updateObject,
 					{ new: true }
@@ -567,17 +600,22 @@ module.exports = class ProgramsHelper {
 	 * @name removeRolesInScope
 	 * @param {String} programId - Program Id.
 	 * @param {Array} roles - roles data.
+	 * @param {Object} userDetails - User Details
 	 * @returns {JSON} - Added roles data.
 	 */
 
-	static removeRolesInScope(programId, roles) {
+	static removeRolesInScope(programId, roles, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				let tenantId = userDetails.tenantAndOrgInfo.tenantId
+				let orgId = userDetails.tenantAndOrgInfo.orgId[0]
+
 				let programData = await programsQueries.programsDocument(
 					{
 						_id: programId,
 						scope: { $exists: true },
 						isAPrivateProgram: false,
+						tenantId: tenantId,
 					},
 					['_id']
 				)
@@ -593,6 +631,7 @@ module.exports = class ProgramsHelper {
 					let updateProgram = await programsQueries.findAndUpdate(
 						{
 							_id: programId,
+							tenantId: tenantId,
 						},
 						{
 							$pull: { 'scope.roles': { $in: roles } },
@@ -630,19 +669,24 @@ module.exports = class ProgramsHelper {
 	 * remove entities in program scope.
 	 * @method
 	 * @name removeEntitiesInScope
-	 * @param {String} programId - Program Id.
-	 * @param {Array} entities - entities.
-	 * @returns {JSON} - Removed entities data.
+	 * @param {Object} bodyData - body data.
+	 * @param {Object} userDetails - User Details
+	 * @param {Boolean} organizations - If organizations is Present.
+	 * @returns {JSON} - Removed scope data.
 	 */
 
-	static removeEntitiesInScope(programId, entities) {
+	static removeEntitiesInScope(programId, bodyData, userDetails, organizations) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				let tenantId = userDetails.tenantAndOrgInfo.tenantId
+				let orgId = userDetails.tenantAndOrgInfo.orgId[0]
+
 				let programData = await programsQueries.programsDocument(
 					{
 						_id: programId,
 						scope: { $exists: true },
 						isAPrivateProgram: false,
+						tenantId: tenantId,
 					},
 					['_id', 'scope.entityType']
 				)
@@ -652,12 +696,15 @@ module.exports = class ProgramsHelper {
 						message: CONSTANTS.apiResponses.PROGRAM_NOT_FOUND,
 					}
 				}
+				let entities = bodyData.entities
+				let entitiesKeys = Object.keys(entities)
+				const entitiesValue = entitiesKeys.flatMap((key) => entities[key])
 				let entitiesData = await entitiesService.entityDocuments(
 					{
-						_id: { $in: entities },
-						entityType: programData[0].scope.entityType,
+						_id: { $in: entitiesValue },
+						tenantId: tenantId,
 					},
-					['_id']
+					['_id', 'entityType']
 				)
 
 				if (!entitiesData.success || !entitiesData.data.length > 0) {
@@ -666,18 +713,36 @@ module.exports = class ProgramsHelper {
 					}
 				}
 				entitiesData = entitiesData.data
-				let entityIds = []
+				let groupedEntities = {}
 
-				entitiesData.forEach((entity) => {
-					entityIds.push(entity._id)
-				})
-				let updateObject = {
-					$pull: {},
+				// Group IDs by entityType
+				for (const entity of entitiesData) {
+					if (!groupedEntities[entity.entityType]) {
+						groupedEntities[entity.entityType] = []
+					}
+					groupedEntities[entity.entityType].push(entity._id)
 				}
-				updateObject['$pull'][`scope.${programData[0].scope.entityType}`] = { $in: entityIds }
+
+				// Build the $addToSet updateObject
+				let updateObject = { $pull: {} }
+
+				for (const [type, ids] of Object.entries(groupedEntities)) {
+					updateObject['$pull'][`scope.${type}`] = { $in: ids }
+				}
+
+				if (organizations && userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
+					let tenantDetails = await userService.fetchTenantDetails(tenantId, userDetails.userToken)
+					const validOrgCodes = tenantDetails.data.organizations.map((org) => org.code)
+
+					const isValid = bodyData.organizations.every((orgCode) => validOrgCodes.includes(orgCode))
+					if (isValid) {
+						updateObject['$pull'][`scope.organizations`] = { $in: bodyData.organizations }
+					}
+				}
 				let updateProgram = await programsQueries.findAndUpdate(
 					{
 						_id: programId,
+						tenantId: tenantId,
 					},
 					updateObject,
 					{ new: true }

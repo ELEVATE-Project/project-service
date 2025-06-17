@@ -89,6 +89,10 @@ module.exports = async function (req, res, next, token = '') {
 		'/certificateTemplates/createSvg',
 		'/solutions/getDetails',
 		'/userProjects/deleteUserPIIData',
+		'/programs/addEntitiesInScope',
+		'/programs/removeRolesInScope',
+		'/programs/removeEntitiesInScope',
+		'/programs/addRolesInScope',
 	]
 	let performInternalAccessTokenCheck = false
 	let adminHeader = false

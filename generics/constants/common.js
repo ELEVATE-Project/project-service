@@ -151,7 +151,6 @@ module.exports = {
 	DELETE_EVENT_TYPE: 'delete',
 	OBJECT: 'object',
 	STRING: 'string',
-	ADMIN_TENANTID: 'tenantidforadmin',
 	ALL: 'all',
 	NONE: 'none',
 	ALL_SCOPE_VALUE: 'ALL',

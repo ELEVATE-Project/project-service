@@ -3209,7 +3209,10 @@ module.exports = class SolutionsHelper {
 						)
 
 						if (!duplicateTemplateDocument._id) {
-							throw new Error(CONSTANTS.apiResponses.PROJECT_TEMPLATES_NOT_CREATED)
+							throw {
+								status: HTTP_STATUS_CODE.bad_request.status,
+								message: CONSTANTS.apiResponses.PROJECT_TEMPLATES_NOT_CREATED,
+							}
 						}
 						let tasksIds
 

@@ -1120,9 +1120,6 @@ module.exports = class ProjectTemplatesHelper {
 					userDetails,
 					taskType
 				)
-				if (typeof importSolutionsResponse === CONSTANTS.common.STRING) {
-					importSolutionsResponse = JSON.parse(importSolutionsResponse)
-				}
 				if (
 					importSolutionsResponse.status != HTTP_STATUS_CODE['ok'].status ||
 					!importSolutionsResponse?.result?.solutionExternalId

@@ -13,6 +13,7 @@ const USER_DELETE_TOPIC = process.env.USER_DELETE_TOPIC
 const USER_DELETE_ON_OFF = process.env.USER_DELETE_ON_OFF
 const projectCertificateConsumer = require(GENERICS_FILES_PATH + '/kafka/consumers/projectCertificate')
 const userDeleteConsumer = require(GENERICS_FILES_PATH + '/kafka/consumers/userDelete')
+const submissionsConsumer = require(GENERICS_FILES_PATH + '/kafka/consumers/submissions')
 
 /**
  * Kafka configurations.

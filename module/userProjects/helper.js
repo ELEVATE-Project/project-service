@@ -3079,7 +3079,7 @@ module.exports = class UserProjectsHelper {
 
 				let taskReport = {}
 				// If template contains project task process the task data
-				if (libraryProjects.data.tasks && libraryProjects.data.tasks.length > 0) {
+				if (libraryProjects?.data?.tasks && libraryProjects?.data?.tasks?.length > 0) {
 					libraryProjects.data.tasks = await _projectTask(
 						libraryProjects.data.tasks,
 						isATargetedSolution === false ? false : true,

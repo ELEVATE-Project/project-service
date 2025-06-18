@@ -52,21 +52,15 @@ const importTemplateToSolution = function (token, solutionId, programId = '', pa
 				json: payload,
 			}
 			//pass the user Token only for admin and orgAdmin
-			if (
-				userDetails?.userInformation?.roles &&
-				(userDetails.userInformation.roles.includes(CONSTANTS.common.ORG_ADMIN) ||
-					userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE))
-			) {
+			let roles = userDetails?.userInformation?.roles ?? []
+			if (roles && (roles.includes(CONSTANTS.common.ORG_ADMIN) || roles.includes(CONSTANTS.common.ADMIN_ROLE))) {
 				_.assign(options.headers, {
 					'x-auth-token': token,
 				})
 			}
 
 			// Admin need extra headers
-			if (
-				userDetails?.userInformation?.roles &&
-				userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)
-			) {
+			if (roles && roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
 				_.assign(options.headers, {
 					'admin-auth-token': process.env.ADMIN_AUTH_TOKEN,
 					tenantId: userDetails.tenantAndOrgInfo.tenantId,
@@ -169,11 +163,9 @@ const listSolutions = function (solutionIds, token, userDetails) {
 				},
 				json: solutionIds,
 			}
+			let roles = userDetails?.userInformation?.roles ?? []
 			// pass admin and tenant info in header  if user superAdmin
-			if (
-				userDetails?.userInformation?.roles &&
-				!userDetails?.userInformation?.roles.includes(CONSTANTS.common.ORG_ADMIN)
-			) {
+			if (roles && roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
 				_.assign(options.headers, {
 					'admin-auth-token': process.env.ADMIN_AUTH_TOKEN,
 					tenantId: userDetails.tenantAndOrgInfo.tenantId,
@@ -230,10 +222,8 @@ const updateSolution = function (token, updateData, solutionExternalId, userDeta
 			}
 
 			// pass admin and tenant info in header  if user superAdmin
-			if (
-				userDetails?.userInformation?.roles &&
-				!userDetails?.userInformation?.roles.includes(CONSTANTS.common.ORG_ADMIN)
-			) {
+			let roles = userDetails?.userInformation?.roles ?? []
+			if (roles && roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
 				_.assign(options.headers, {
 					'admin-auth-token': process.env.ADMIN_AUTH_TOKEN,
 					tenantId: userDetails.tenantAndOrgInfo.tenantId,

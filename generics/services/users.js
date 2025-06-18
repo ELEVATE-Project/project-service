@@ -484,7 +484,7 @@ const fetchPublicTenantDetails = function (tenantId) {
  * @returns {Promise} A promise that resolves with the organization details or rejects with an error.
  */
 
-const fetchProfileById = function (tenantId, userId = null, username) {
+const fetchProfileBasedOnUserIdOrName = function (tenantId, userId = null, username) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			let params
@@ -495,7 +495,10 @@ const fetchProfileById = function (tenantId, userId = null, username) {
 			}
 
 			let url =
-				interfaceServiceUrl + process.env.USER_SERVICE_BASE_URL + CONSTANTS.endpoints.PROFILE_BY_ID + params
+				interfaceServiceUrl +
+				process.env.USER_SERVICE_BASE_URL +
+				CONSTANTS.endpoints.FETCH_USER_PROFILE_INFO +
+				params
 
 			const options = {
 				headers: {
@@ -544,5 +547,5 @@ module.exports = {
 	fetchDefaultOrgDetails: fetchDefaultOrgDetails,
 	fetchTenantDetails: fetchTenantDetails,
 	fetchPublicTenantDetails: fetchPublicTenantDetails,
-	fetchProfileById: fetchProfileById,
+	fetchProfileBasedOnUserIdOrName: fetchProfileBasedOnUserIdOrName,
 }

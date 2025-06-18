@@ -198,7 +198,7 @@ let enviromentVariables = {
 	PROGRAM_USER_MAPPING_TOPIC: {
 		message: 'Required program operation kafka topic',
 		optional: true,
-		default: 'elevate_program_operation_event',
+		default: CONSTANTS.common.DEFAULT_PROGRAM_USER_MAPPING_TOPIC,
 	},
 }
 

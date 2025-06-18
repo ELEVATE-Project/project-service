@@ -12,6 +12,20 @@ module.exports = {
 			type: String,
 			required: true,
 		},
+		wishlist: [
+			{
+				_id: {
+					type: String,
+				},
+				title: String,
+				description: String,
+				referenceFrom: String,
+				metaInformation: Object,
+				createdAt: {
+					type: Date,
+				},
+			},
+		],
 		userId: {
 			type: String,
 			required: true,
@@ -35,6 +49,22 @@ module.exports = {
 			type: Boolean,
 			default: false,
 		},
-		platformRoles: Array,
+		programRoleMapping: Array,
+		orgIds: {
+			type: Array,
+			require: true,
+			index: true,
+		},
+		tenantId: {
+			type: String,
+			require: true,
+			index: true,
+		},
 	},
+	compoundIndex: [
+		{
+			name: { userId: 1, tenantId: 1 },
+			indexType: { unique: true },
+		},
+	],
 }

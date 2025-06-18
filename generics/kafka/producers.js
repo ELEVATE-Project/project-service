@@ -19,7 +19,7 @@ const userProjectActivityTopic =
 const programOperationKafkaTopic =
 	process.env.PROGRAM_USER_MAPPING_TOPIC && process.env.PROGRAM_USER_MAPPING_TOPIC != 'OFF'
 		? process.env.PROGRAM_USER_MAPPING_TOPIC
-		: 'elevate_program_operation_dev'
+		: 'elevate_program_operation'
 
 /**
  * Push improvement projects to kafka.

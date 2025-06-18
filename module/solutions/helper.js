@@ -2014,10 +2014,18 @@ module.exports = class SolutionsHelper {
 				// Build the $addToSet updateObject
 				let updateObject = { $addToSet: {} }
 				let validationExcludedEntitiesKeys = []
-				if (organizations && userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
+				if (
+					organizations &&
+					(userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE) ||
+						userDetails.userInformation.roles.includes(CONSTANTS.common.TENANT_ADMIN))
+				) {
 					// Fetch tenant details to validate organization codes
 					let tenantDetails = await userService.fetchTenantDetails(tenantId, userDetails.userToken)
-					if (tenantDetails.data.meta.validationExcludedScopeKeys) {
+					if (
+						tenantDetails.data.meta.validationExcludedScopeKeys &&
+						Array.isArray(tenantDetails.data.meta.validationExcludedScopeKeys) &&
+						tenantDetails.data.meta.validationExcludedScopeKeys.length > 0
+					) {
 						// Fetch tenant details (will include valid org codes & validationExcludedScopeKeys)
 						validationExcludedEntitiesKeys.push(...tenantDetails.data.meta.validationExcludedScopeKeys)
 					}
@@ -2178,12 +2186,20 @@ module.exports = class SolutionsHelper {
 				let validationExcludedEntitiesKeys = []
 
 				// If user is admin and "organizations" param is passed
-				if (organizations && userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
+				if (
+					organizations &&
+					(userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE) ||
+						userDetails.userInformation.roles.includes(CONSTANTS.common.TENANT_ADMIN))
+				) {
 					// Fetch tenant details (will include valid org codes & validationExcludedScopeKeys)
 					let tenantDetails = await userService.fetchTenantDetails(tenantId, userDetails.userToken)
 
 					// Fetch excluded scope keys from config (e.g., gender, language etc.)
-					if (tenantDetails.data.meta.validationExcludedScopeKeys) {
+					if (
+						tenantDetails.data.meta.validationExcludedScopeKeys &&
+						Array.isArray(tenantDetails.data.meta.validationExcludedScopeKeys) &&
+						tenantDetails.data.meta.validationExcludedScopeKeys.length > 0
+					) {
 						validationExcludedEntitiesKeys.push(...tenantDetails.data.meta.validationExcludedScopeKeys)
 					}
 

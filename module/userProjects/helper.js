@@ -4741,7 +4741,7 @@ async function _projectTask(
 					//updating programComponents
 					await programsQueries.findAndUpdate(
 						{
-							_id: surveyData.programId,
+							_id: programId,
 						},
 						{
 							$addToSet: { components: importSolutionsResponse.result._id },
@@ -4776,7 +4776,7 @@ async function _projectTask(
 					//updating programComponents
 					await programsQueries.findAndUpdate(
 						{
-							_id: surveyData.programId,
+							_id: programId,
 						},
 						{
 							$addToSet: { components: importSolutionsResponse.result.solutionId },

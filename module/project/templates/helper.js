@@ -1140,6 +1140,8 @@ module.exports = class ProjectTemplatesHelper {
 					wishlistData = await userExtensionQueries.findOne({
 						userId: userId,
 						'wishlist._id': String(templateData[0]._id),
+						tenantId,
+						orgIds: { $in: [orgId] },
 					})
 				}
 				if (wishlistData !== null) {

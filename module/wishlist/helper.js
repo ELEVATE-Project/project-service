@@ -27,7 +27,11 @@ module.exports = class UserExtensioHelper {
 			}
 
 			// Find the userExtension document for the given userId
-			let userExtensionDocument = await userExtensionQueries.userExtensionDocument({ userId, tenantId, orgId })
+			let userExtensionDocument = await userExtensionQueries.userExtensionDocument({
+				userId,
+				tenantId,
+				orgIds: { $in: [orgId] },
+			})
 
 			let updateuserExtensionDocument
 			if (userExtensionDocument && userExtensionDocument.length > 0) {
@@ -44,7 +48,7 @@ module.exports = class UserExtensioHelper {
 				}
 				// If the document exists, update the wishlist by appending the new item
 				updateuserExtensionDocument = await userExtensionQueries.findAndUpdate(
-					{ userId, tenantId, orgId },
+					{ userId, tenantId, orgIds: { $in: [orgId] } },
 					{ $addToSet: { wishlist: wishlistItem } }
 				)
 			} else {
@@ -53,7 +57,7 @@ module.exports = class UserExtensioHelper {
 					userId,
 					wishlist: [wishlistItem],
 					tenantId,
-					orgId,
+					orgIds: [orgId],
 				}
 				updateuserExtensionDocument = await userExtensionQueries.createUserExtension(newUserExtension)
 			}
@@ -91,7 +95,11 @@ module.exports = class UserExtensioHelper {
 			let tenantId = userDetails.userInformation.tenantId
 			let orgId = userDetails.userInformation.organizationId
 			// Find the userExtension document for the given userId
-			let userExtensionDocument = await userExtensionQueries.userExtensionDocument({ userId, tenantId, orgId })
+			let userExtensionDocument = await userExtensionQueries.userExtensionDocument({
+				userId,
+				tenantId,
+				orgIds: { $in: [orgId] },
+			})
 
 			if (!userExtensionDocument || userExtensionDocument.length === 0) {
 				throw {
@@ -114,7 +122,7 @@ module.exports = class UserExtensioHelper {
 
 			// If the document exists, update the wishlist by removing the specified item
 			let updatedDocument = await userExtensionQueries.findAndUpdate(
-				{ userId, wishlist: { $elemMatch: { _id: projectTempleteId } }, tenantId, orgId },
+				{ userId, wishlist: { $elemMatch: { _id: projectTempleteId } }, tenantId, orgIds: { $in: [orgId] } },
 				{ $pull: { wishlist: { _id: projectTempleteId } } },
 				{ new: true }
 			)
@@ -155,7 +163,11 @@ module.exports = class UserExtensioHelper {
 			let tenantId = userDetails.userInformation.tenantId
 			let orgId = userDetails.userInformation.organizationId
 			// Find user's wishlist projectTemplateIds
-			let userExtensionDocument = await userExtensionQueries.userExtensionDocument({ userId, tenantId, orgId })
+			let userExtensionDocument = await userExtensionQueries.userExtensionDocument({
+				userId,
+				tenantId,
+				orgIds: { $in: [orgId] },
+			})
 			// If no user extension document is found or if it's empty
 			if (!userExtensionDocument || userExtensionDocument.length === 0) {
 				return {

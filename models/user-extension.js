@@ -33,8 +33,8 @@ module.exports = {
 			index: true,
 			required: true,
 		},
-		orgId: {
-			type: String,
+		orgIds: {
+			type: Array,
 			required: true,
 			index: true,
 		},

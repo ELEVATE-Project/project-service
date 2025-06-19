@@ -528,7 +528,7 @@ module.exports = class ProgramsHelper {
 				) {
 					// Fetch tenant details to validate organization codes
 					let tenantDetails = await userService.fetchTenantDetails(tenantId, userDetails.userToken)
-					if (!tenantDetails.data || !tenantDetails.data.meta || tenantDetails.success !== true) {
+					if (tenantDetails.success !== true || !tenantDetails.data || !tenantDetails.data.meta) {
 						return resolve({
 							success: false,
 							message: CONSTANTS.apiResponses.FAILED_TO_FETCH_TENANT_DETAILS,
@@ -764,7 +764,7 @@ module.exports = class ProgramsHelper {
 				) {
 					// Fetch tenant details (will include valid org codes & validationExcludedScopeKeys)
 					let tenantDetails = await userService.fetchTenantDetails(tenantId, userDetails.userToken)
-					if (!tenantDetails.data || !tenantDetails.data.meta || tenantDetails.success !== true) {
+					if (tenantDetails.success !== true || !tenantDetails.data || !tenantDetails.data.meta) {
 						return resolve({
 							success: false,
 							message: CONSTANTS.apiResponses.FAILED_TO_FETCH_TENANT_DETAILS,

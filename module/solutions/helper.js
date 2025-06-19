@@ -2020,6 +2020,12 @@ module.exports = class SolutionsHelper {
 				) {
 					// Fetch tenant details to validate organization codes
 					let tenantDetails = await userService.fetchTenantDetails(tenantId, userDetails.userToken)
+					if (!tenantDetails.data || !tenantDetails.data.meta || tenantDetails.success !== true) {
+						return resolve({
+							success: false,
+							message: CONSTANTS.apiResponses.FAILED_TO_FETCH_TENANT_DETAILS,
+						})
+					}
 					if (
 						tenantDetails.data.meta.validationExcludedScopeKeys &&
 						Array.isArray(tenantDetails.data.meta.validationExcludedScopeKeys) &&
@@ -2196,6 +2202,12 @@ module.exports = class SolutionsHelper {
 				) {
 					// Fetch tenant details (will include valid org codes & validationExcludedScopeKeys)
 					let tenantDetails = await userService.fetchTenantDetails(tenantId, userDetails.userToken)
+					if (!tenantDetails.data || !tenantDetails.data.meta || tenantDetails.success !== true) {
+						return resolve({
+							success: false,
+							message: CONSTANTS.apiResponses.FAILED_TO_FETCH_TENANT_DETAILS,
+						})
+					}
 
 					// Fetch excluded scope keys from config (e.g., gender, language etc.)
 					if (

@@ -9,6 +9,49 @@ const kafkaProducersHelper = require(GENERICS_FILES_PATH + '/kafka/producers')
 
 module.exports = class UserExtensionHelper {
 	/**
+	 * Create a Kafka event payload for a user-program-role mapping operation.
+	 * @method
+	 * @name createKafkaEvent
+	 * @param {Object} userProfile - The user profile object containing `id` and `username`.
+	 * @param {String} programId - The ID of the program being mapped.
+	 * @param {String} role - The role being assigned or removed.
+	 * @param {String} eventType - The type of event ('create' or 'delete').
+	 * @returns {Object} - Kafka event payload.
+	 */
+	static createKafkaEvent(userProfile, programId, role, eventType) {
+		return {
+			userId: userProfile.id,
+			username: userProfile.username,
+			programId: programId,
+			role,
+			eventType,
+		}
+	}
+	/**
+	 * Add a new program-role mapping to a user's profile and populate Kafka events.
+	 * @method
+	 * @name addNewProgramEntry
+	 * @param {Object} userProfile - The user profile object containing `id` and `username`.
+	 * @param {String} programId - The ID of the new program being added.
+	 * @param {Array<String>} newRoles - The list of roles to assign under the new program.
+	 * @param {Array<Object>} existingUserProgramRoleMapping - Current program-role mappings to be updated.
+	 * @param {Array<Object>} kafkaEventPayloads - Array to which Kafka event payloads will be pushed.
+	 * @returns {void}
+	 */
+	static addNewProgramEntry(userProfile, programId, newRoles, existingUserProgramRoleMapping, kafkaEventPayloads) {
+		existingUserProgramRoleMapping.push({
+			programId: programId,
+			roles: [...newRoles],
+		})
+		// All roles are new, emit create events
+		for (const role of newRoles) {
+			kafkaEventPayloads.push(
+				this.createKafkaEvent(userProfile, programId, role, messageConstants.common.CREATE_EVENT_TYPE)
+			)
+		}
+	}
+
+	/**
 	 * Bulk create or update user.
 	 * @method
 	 * @name bulkCreateOrUpdate
@@ -163,88 +206,102 @@ module.exports = class UserExtensionHelper {
 						const kafkaEventPayloads = []
 
 						if (!existingUser) {
-							// Create new user extension
-							const userInformation = {
-								userId: userProfile.id,
-								externalId: userRole.user,
-								status: CONSTANTS.common.ACTIVE_STATUS,
-								updatedBy: userDetails.userId,
-								createdBy: userDetails.userId,
-								programRoleMapping: [],
-								tenantId: tenantAndOrgInfo.tenantId,
-								orgIds: Array.isArray(userProfile.organizations)
-									? userProfile.organizations
-											.filter((org) => org && typeof org.code === 'string')
-											.map((org) => org.code)
-									: [],
-							}
+							if (
+								[
+									CONSTANTS.common.OVERRIDE_OPERATION,
+									CONSTANTS.common.ADD_OPERATION,
+									CONSTANTS.common.APPEND_OPERATION,
+								].includes(userRole.programOperation)
+							) {
+								// Create new user extension
+								const userInformation = {
+									userId: userProfile.id,
+									externalId: userRole.user,
+									status: CONSTANTS.common.ACTIVE_STATUS,
+									updatedBy: userDetails.userId,
+									createdBy: userDetails.userId,
+									programRoleMapping: [],
+									tenantId: tenantAndOrgInfo.tenantId,
+									orgIds: Array.isArray(userProfile.organizations)
+										? userProfile.organizations
+												.filter((org) => org && typeof org.code === 'string')
+												.map((org) => org.code)
+										: [],
+								}
 
-							//if both programOperation and programs are present, we will process the roles for each program
-							if (userRole.programOperation && userRole.programs) {
-								// Check if programs exist in the programIdMap
-								for (const program of userRole.programs) {
-									const programId = programIdMap[program]
+								//if both programOperation and programs are present, we will process the roles for each program
+								if (userRole.programOperation && userRole.programs) {
+									// Check if programs exist in the programIdMap
+									for (const program of userRole.programs) {
+										const programId = programIdMap[program]
 
-									if (!programId) {
-										userRole.status = CONSTANTS.apiResponses.PROGRAM_NOT_FOUND
-										userRolesUploadedData.push(userRole)
-										continue outerloop
-									}
+										if (!programId) {
+											userRole.status = CONSTANTS.apiResponses.PROGRAM_NOT_FOUND
+											userRolesUploadedData.push(userRole)
+											continue outerloop
+										}
 
-									const roles = platform_role_array
-									let entry = userInformation.programRoleMapping.find(
-										(pr) => pr.programId.toString() === programId.toString()
-									)
+										const roles = platform_role_array
+										let entry = userInformation.programRoleMapping.find(
+											(pr) => pr.programId.toString() === programId.toString()
+										)
 
-									if (!entry) {
-										entry = { programId: programId, roles: [] }
-										userInformation.programRoleMapping.push(entry)
-									}
+										if (!entry) {
+											entry = { programId: programId, roles: [] }
+											userInformation.programRoleMapping.push(entry)
+										}
 
-									for (const role of roles) {
-										if (!entry.roles.includes(role)) {
-											entry.roles.push(role)
-											// Emit create event for new role
-											kafkaEventPayloads.push({
-												userId: userProfile.id,
-												username: userProfile.username,
-												programId: programId,
-												role,
-												eventType: CONSTANTS.common.CREATE_EVENT_TYPE,
-											})
+										for (const role of roles) {
+											if (!entry.roles.includes(role)) {
+												entry.roles.push(role)
+												// Emit create event for new role
+												kafkaEventPayloads.push(
+													this.createKafkaEvent(
+														userProfile,
+														programId,
+														role,
+														CONSTANTS.common.CREATE_EVENT_TYPE
+													)
+												)
+											}
 										}
 									}
 								}
+
+								user = await userExtensionsQueries.createUserExtension(userInformation)
+								userExtensionMap[user.userId.toString()] = user
+
+								userRole['_SYSTEM_ID'] = user?._id || ''
+								userRole.status = user ? 'Success' : 'Failed to create the user role.'
+								userRole._kafkaEventPayloads = kafkaEventPayloads
+								aggregateKafkaEventPayloads.push(...kafkaEventPayloads)
 							}
-
-							user = await userExtensionsQueries.createUserExtension(userInformation)
-							userExtensionMap[user.userId.toString()] = user
-
-							userRole['_SYSTEM_ID'] = user?._id || ''
-							userRole.status = user ? 'Success' : 'Failed to create the user role.'
-							userRole._kafkaEventPayloads = kafkaEventPayloads
-							aggregateKafkaEventPayloads.push(...kafkaEventPayloads)
 						} else {
 							// Update existing user
 							let existingUserProgramRoleMapping = [...(existingUser.programRoleMapping || [])]
 
 							if (userRole.programOperation && userRole.programs) {
+								//iterating through userRole.programs to process each program
 								for (const program of userRole.programs) {
 									const programId = programIdMap[program]
-
+									// Check if program exists in the programIdMap, if not continue to next iteration
 									if (!programId) {
 										userRole.status = CONSTANTS.apiResponses.PROGRAM_NOT_FOUND
 										userRolesUploadedData.push(userRole)
 										continue outerloop
 									}
 
+									// Check if program already exists in user's programRoleMapping
+									// Find the index of the program in existingUserProgramRoleMapping
+									// This will help us determine if we need to add, remove, or update roles
 									const currentRoleInfoIndex = existingUserProgramRoleMapping.findIndex(
 										(pr) => pr.programId.toString() === programId.toString()
 									)
 
 									const newRoles = platform_role_array
-
+									// Check if the userRole.programOperation is valid
 									if (userRole.programOperation === CONSTANTS.common.OVERRIDE_OPERATION) {
+										// If program exists, update roles
 										if (currentRoleInfoIndex !== -1) {
 											const currentRoles =
 												existingUserProgramRoleMapping[currentRoleInfoIndex].roles
@@ -254,46 +311,40 @@ module.exports = class UserExtensionHelper {
 												(role) => !newRoles.includes(role)
 											)
 											for (const role of rolesToRemove) {
-												kafkaEventPayloads.push({
-													userId: userProfile.id,
-													username: userProfile.username,
-													programId: programId,
-													role,
-													eventType: CONSTANTS.common.DELETE_EVENT_TYPE,
-												})
+												kafkaEventPayloads.push(
+													this.createKafkaEvent(
+														userProfile,
+														programId,
+														role,
+														CONSTANTS.common.DELETE_EVENT_TYPE
+													)
+												)
 											}
 
 											// Find roles to add (exist in new but not in current)
 											const rolesToAdd = newRoles.filter((role) => !currentRoles.includes(role))
 											for (const role of rolesToAdd) {
-												kafkaEventPayloads.push({
-													userId: userProfile.id,
-													username: userProfile.username,
-													programId: programId,
-													role,
-													eventType: CONSTANTS.common.CREATE_EVENT_TYPE,
-												})
+												kafkaEventPayloads.push(
+													this.createKafkaEvent(
+														userProfile,
+														programId,
+														role,
+														CONSTANTS.common.CREATE_EVENT_TYPE
+													)
+												)
 											}
 
 											// Override the roles
 											existingUserProgramRoleMapping[currentRoleInfoIndex].roles = [...newRoles]
 										} else {
 											// Create new program entry
-											existingUserProgramRoleMapping.push({
-												programId: programId,
-												roles: [...newRoles],
-											})
-
-											// All roles are new, emit create events
-											for (const role of newRoles) {
-												kafkaEventPayloads.push({
-													userId: userProfile.id,
-													username: userProfile.username,
-													programId: programId,
-													role,
-													eventType: CONSTANTS.common.CREATE_EVENT_TYPE,
-												})
-											}
+											this.addNewProgramEntry(
+												userProfile,
+												programId,
+												newRoles,
+												existingUserProgramRoleMapping,
+												kafkaEventPayloads
+											)
 										}
 									} else if (
 										userRole.programOperation === CONSTANTS.common.ADD_OPERATION ||
@@ -303,38 +354,33 @@ module.exports = class UserExtensionHelper {
 											// Add roles to existing program entry
 											const currentRoles =
 												existingUserProgramRoleMapping[currentRoleInfoIndex].roles
-
+											//iterates through newRoles to add them to existing roles
+											// Check if new roles are already present
+											// If not, add them
+											// If they are present, do nothing
 											for (const role of newRoles) {
 												if (!currentRoles.includes(role)) {
 													existingUserProgramRoleMapping[currentRoleInfoIndex].roles.push(
 														role
 													)
-													kafkaEventPayloads.push({
-														userId: userProfile.id,
-														username: userProfile.username,
-														programId: programId,
-														role,
-														eventType: CONSTANTS.common.CREATE_EVENT_TYPE,
-													})
+													kafkaEventPayloads.push(
+														this.createKafkaEvent(
+															userProfile,
+															programId,
+															role,
+															CONSTANTS.common.CREATE_EVENT_TYPE
+														)
+													)
 												}
 											}
 										} else {
 											// Create new program entry
-											existingUserProgramRoleMapping.push({
-												programId: programId,
-												roles: [...newRoles],
-											})
-
-											// All roles are new, emit create events
-											for (const role of newRoles) {
-												kafkaEventPayloads.push({
-													userId: userProfile.id,
-													username: userProfile.username,
-													programId: programId,
-													role,
-													eventType: CONSTANTS.common.CREATE_EVENT_TYPE,
-												})
-											}
+											this.addNewProgramEntry(
+												userProfile,
+												programId,
+												newRoles,
+												kafkaEventPayloads
+											)
 										}
 									} else if (userRole.programOperation === CONSTANTS.common.REMOVE_OPERATION) {
 										if (currentRoleInfoIndex !== -1) {
@@ -347,13 +393,14 @@ module.exports = class UserExtensionHelper {
 											// Emit delete events for removed roles
 											const rolesToRemove = currentRoles.filter((role) => newRoles.includes(role))
 											for (const role of rolesToRemove) {
-												kafkaEventPayloads.push({
-													userId: userProfile.id,
-													username: userProfile.username,
-													programId: programId,
-													role,
-													eventType: CONSTANTS.common.DELETE_EVENT_TYPE,
-												})
+												kafkaEventPayloads.push(
+													this.createKafkaEvent(
+														userProfile,
+														programId,
+														role,
+														CONSTANTS.common.DELETE_EVENT_TYPE
+													)
+												)
 											}
 
 											if (rolesToKeep.length === 0) {
@@ -414,43 +461,6 @@ module.exports = class UserExtensionHelper {
 				}
 
 				return resolve(userRolesUploadedData)
-			} catch (error) {
-				return reject(error)
-			}
-		})
-	}
-	/**
-	 * find userExtensions
-	 * @method
-	 * @name userExtensionDocuments
-	 * @param {Array} [userExtensionFilter = "all"] - userId ids.
-	 * @param {Array} [fieldsArray = "all"] - projected fields.
-	 * @param {Array} [skipFields = "none"] - field not to include
-	 * @returns {Array} List of Users.
-	 */
-
-	static userExtensionDocuments(userExtensionFilter = 'all', fieldsArray = 'all', skipFields = 'none') {
-		return new Promise(async (resolve, reject) => {
-			try {
-				let queryObject = userExtensionFilter != 'all' ? userExtensionFilter : {}
-
-				let projection = {}
-
-				if (fieldsArray != 'all') {
-					fieldsArray.forEach((field) => {
-						projection[field] = 1
-					})
-				}
-
-				if (skipFields !== 'none') {
-					skipFields.forEach((field) => {
-						projection[field] = 0
-					})
-				}
-
-				let userDocuments = await database.models.userExtension.find(queryObject, projection).lean()
-
-				return resolve(userDocuments)
 			} catch (error) {
 				return reject(error)
 			}

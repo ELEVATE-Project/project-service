@@ -523,9 +523,8 @@ module.exports = class ProgramsHelper {
 				let updateObject = { $addToSet: {} }
 				let validationExcludedEntitiesKeys = []
 				if (
-					organizations &&
-					(userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE) ||
-						userDetails.userInformation.roles.includes(CONSTANTS.common.TENANT_ADMIN))
+					userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE) ||
+					userDetails.userInformation.roles.includes(CONSTANTS.common.TENANT_ADMIN)
 				) {
 					// Fetch tenant details to validate organization codes
 					let tenantDetails = await userService.fetchTenantDetails(tenantId, userDetails.userToken)
@@ -538,14 +537,16 @@ module.exports = class ProgramsHelper {
 						validationExcludedEntitiesKeys.push(...tenantDetails.data.meta.validationExcludedScopeKeys)
 					}
 
-					// Extract all valid organization codes from the tenant's config
-					const validOrgCodes = tenantDetails.data.organizations.map((org) => org.code)
+					if (organizations) {
+						// Extract all valid organization codes from the tenant's config
+						const validOrgCodes = tenantDetails.data.organizations.map((org) => org.code)
 
-					// Check if all provided organization codes are valid
-					const isValid = bodyData.organizations.every((orgCode) => validOrgCodes.includes(orgCode))
-					// If valid, include them in the update object under scope.organizations
-					if (isValid) {
-						updateObject.$addToSet[`scope.organizations`] = { $each: bodyData.organizations }
+						// Check if all provided organization codes are valid
+						const isValid = bodyData.organizations.every((orgCode) => validOrgCodes.includes(orgCode))
+						// If valid, include them in the update object under scope.organizations
+						if (isValid) {
+							updateObject.$addToSet[`scope.organizations`] = { $each: bodyData.organizations }
+						}
 					}
 				}
 
@@ -560,13 +561,18 @@ module.exports = class ProgramsHelper {
 				let keysExcluded = []
 
 				// Classify keys based on whether they are in the validationExcludedEntitiesKeys list
-				entitiesKeys.forEach((key) => {
-					if (validationExcludedEntitiesKeys.includes(key)) {
-						keysExcluded.push(key)
-					} else {
-						keysForValidation.push(key)
-					}
-				})
+
+				if (validationExcludedEntitiesKeys && validationExcludedEntitiesKeys.length > 0) {
+					entitiesKeys.forEach((key) => {
+						if (validationExcludedEntitiesKeys.includes(key)) {
+							keysExcluded.push(key)
+						} else {
+							keysForValidation.push(key)
+						}
+					})
+				} else {
+					keysForValidation.push(entitiesKeys)
+				}
 
 				// Flatten entity IDs to validate (only the ones that need validation)
 				const entitiesToValidate = keysForValidation.flatMap((key) => entities[key])
@@ -747,9 +753,8 @@ module.exports = class ProgramsHelper {
 
 				// If user is admin and "organizations" param is passed
 				if (
-					organizations &&
-					(userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE) ||
-						userDetails.userInformation.roles.includes(CONSTANTS.common.TENANT_ADMIN))
+					userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE) ||
+					userDetails.userInformation.roles.includes(CONSTANTS.common.TENANT_ADMIN)
 				) {
 					// Fetch tenant details (will include valid org codes & validationExcludedScopeKeys)
 					let tenantDetails = await userService.fetchTenantDetails(tenantId, userDetails.userToken)
@@ -763,15 +768,17 @@ module.exports = class ProgramsHelper {
 						validationExcludedEntitiesKeys.push(...tenantDetails.data.meta.validationExcludedScopeKeys)
 					}
 
-					// Fetch all valid organization codes for this tenant
-					const validOrgCodes = tenantDetails.data.organizations.map((org) => org.code)
+					if (organizations) {
+						// Fetch all valid organization codes for this tenant
+						const validOrgCodes = tenantDetails.data.organizations.map((org) => org.code)
 
-					// Check if all incoming org codes are valid
-					const isValid = bodyData.organizations.every((orgCode) => validOrgCodes.includes(orgCode))
+						// Check if all incoming org codes are valid
+						const isValid = bodyData.organizations.every((orgCode) => validOrgCodes.includes(orgCode))
 
-					// If valid, add them to $pull updateObject
-					if (isValid) {
-						updateObject.$pull[`scope.organizations`] = { $in: bodyData.organizations }
+						// If valid, add them to $pull updateObject
+						if (isValid) {
+							updateObject.$pull[`scope.organizations`] = { $in: bodyData.organizations }
+						}
 					}
 				}
 
@@ -784,10 +791,14 @@ module.exports = class ProgramsHelper {
 				let keysExcluded = []
 
 				for (const key of Object.keys(entities)) {
-					if (validationExcludedEntitiesKeys.includes(key)) {
-						keysExcluded.push(key) // These will skip DB validation
+					if (validationExcludedEntitiesKeys && validationExcludedEntitiesKeys.length > 0) {
+						if (validationExcludedEntitiesKeys.includes(key)) {
+							keysExcluded.push(key) // These will skip DB validation
+						} else {
+							keysForValidation.push(key) // These need validation via entityDocuments
+						}
 					} else {
-						keysForValidation.push(key) // These need validation via entityDocuments
+						keysForValidation.push(key)
 					}
 				}
 

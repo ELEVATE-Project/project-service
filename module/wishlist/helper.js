@@ -6,7 +6,7 @@ module.exports = class UserExtensioHelper {
 	 * add wishlist
 	 * @method
 	 * @name add
-	 * @param {String} projectTemplateId - projectTempleteId
+	 * @param {String} projectTemplateId - project template id
 	 * @param {Object} userDetails -       loggedin users info
 	 * @param {Object} bodyData - 			request body data
 	 * @returns {Object} .
@@ -48,7 +48,7 @@ module.exports = class UserExtensioHelper {
 				}
 				// If the document exists, update the wishlist by appending the new item
 				updateuserExtensionDocument = await userExtensionQueries.findAndUpdate(
-					{ userId, tenantId, orgIds: { $in: [orgId] } },
+					{ userId, tenantId },
 					{ $addToSet: { wishlist: wishlistItem } }
 				)
 			} else {

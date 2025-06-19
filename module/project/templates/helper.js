@@ -1141,7 +1141,6 @@ module.exports = class ProjectTemplatesHelper {
 						userId: userId,
 						'wishlist._id': String(templateData[0]._id),
 						tenantId,
-						orgIds: { $in: [orgId] },
 					})
 				}
 				if (wishlistData !== null) {

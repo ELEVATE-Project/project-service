@@ -16,6 +16,8 @@ module.exports = class ProjectAttributesHelper {
 			const tenantId = userDetails.tenantAndOrgInfo.tenantId
 			const orgId = userDetails.tenantAndOrgInfo.orgId[0]
 			//Getting roles from the entity service
+
+			// the below piece of query is temporary, changes are expected once org policies are brought into picture
 			let userRoleInformation = await entitiesService.getUserRoleExtensionDocuments(
 				{
 					status: CONSTANTS.common.ACTIVE_STATUS.toUpperCase(),

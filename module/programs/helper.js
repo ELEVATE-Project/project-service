@@ -287,7 +287,6 @@ module.exports = class ProgramsHelper {
 					result: program,
 				})
 			} catch (error) {
-				console.log(error, 'error in create program')
 				return reject(error)
 			}
 		})

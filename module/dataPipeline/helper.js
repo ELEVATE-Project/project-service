@@ -52,6 +52,7 @@ module.exports = class dataPipelineHelper {
 					})
 				}
 
+				await UserProjectsHelper.attachEntityInformationIfExists(projectDetails.data)
 				const kafkaPushedProject = await kafkaProducersHelper.pushProjectToKafka(projectDetails.data)
 				console.log('kafkaPushedProject', kafkaPushedProject)
 				projectDetails.data = projectDetails.data._id

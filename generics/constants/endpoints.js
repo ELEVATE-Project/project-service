@@ -64,4 +64,5 @@ module.exports = {
 	TENANT_READ: '/v1/tenant/read',
 	PUBLIC_BRANDING: '/v1/public/branding',
 	FETCH_USER_PROFILE_INFO: '/v1/user/profileById',
+	FIND_ENTITY_DETAILS: '/v1/entities/details',
 }

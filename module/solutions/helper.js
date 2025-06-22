@@ -535,7 +535,6 @@ module.exports = class SolutionsHelper {
 						{
 							_id: solutionDocument[0].programId,
 							tenantId: userDetails.tenantAndOrgInfo.tenantId,
-							orgId: { $in: ['ALL', ...userDetails.tenantAndOrgInfo.orgId] },
 						},
 						['_id', 'endDate', 'startDate']
 					)
@@ -586,7 +585,6 @@ module.exports = class SolutionsHelper {
 					{
 						_id: solutionDocument[0]._id,
 						tenantId: userDetails.tenantAndOrgInfo.tenantId,
-						orgId: { $in: ['ALL', ...userDetails.tenantAndOrgInfo.orgId] },
 					},
 					updateObject,
 					{ new: true }
@@ -664,7 +662,6 @@ module.exports = class SolutionsHelper {
 
 				// modify query to fetch documents accordingly
 				matchQuery['tenantId'] = userDetails.userInformation.tenantId
-				matchQuery['orgId'] = userDetails.userInformation.organizationId
 				if (currentOrgOnly) {
 					matchQuery['orgId'] = { $in: [userDetails.userInformation.organizationId] }
 				}
@@ -1271,7 +1268,6 @@ module.exports = class SolutionsHelper {
 				}
 				queryData.data['_id'] = solutionId
 				queryData.data['tenantId'] = tenantId
-				queryData.data['orgId'] = { $in: [orgId] }
 				let matchQuery = queryData.data
 				let solutionData = await solutionsQueries.solutionsDocument(matchQuery, [
 					'_id',
@@ -1391,7 +1387,6 @@ module.exports = class SolutionsHelper {
 					let filterQuery = {
 						_id: data.programId,
 						tenantId: tenantId,
-						orgId: orgId,
 					}
 
 					if (createADuplicateSolution === false) {
@@ -1487,7 +1482,6 @@ module.exports = class SolutionsHelper {
 						{
 							_id: data.solutionId,
 							tenantId: userDetails.userInformation.tenantId,
-							orgId: userDetails.userInformation.organizationId,
 						},
 						[
 							'name',
@@ -1601,7 +1595,6 @@ module.exports = class SolutionsHelper {
 						{
 							_id: userPrivateProgram._id,
 							tenantId: userDetails.userInformation.tenantId,
-							orgId: userDetails.userInformation.organizationId,
 						},
 						{
 							$addToSet: { components: ObjectId(solution._id) },
@@ -1859,7 +1852,6 @@ module.exports = class SolutionsHelper {
 							$ne: CONSTANTS.common.INACTIVE,
 						},
 						tenantId: tenantId,
-						orgId: { $in: ['ALL', userDetails.userInformation.organizationId] },
 					},
 					['type', 'status', 'endDate']
 				)
@@ -2956,7 +2948,6 @@ module.exports = class SolutionsHelper {
 							{
 								_id: { $in: programIds },
 								tenantId: userDetails.userInformation.tenantId,
-								orgId: { $in: [userDetails.userInformation.organizationId] },
 							},
 							['name']
 						)
@@ -3421,10 +3412,11 @@ module.exports = class SolutionsHelper {
 			try {
 				let tenantId = userDetails.userInformation.tenantId
 				let orgId = userDetails.userInformation.organizationId
-				let solutionData = await solutionsQueries.solutionsDocument(
-					{ _id: solutionId, tenantId: tenantId, orgId: { $in: [orgId] } },
-					['type', 'projectTemplateId', 'programId']
-				)
+				let solutionData = await solutionsQueries.solutionsDocument({ _id: solutionId, tenantId: tenantId }, [
+					'type',
+					'projectTemplateId',
+					'programId',
+				])
 
 				if (!Array.isArray(solutionData) || solutionData.length < 1) {
 					return resolve({

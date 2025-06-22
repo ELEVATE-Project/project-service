@@ -30,7 +30,6 @@ module.exports = class UserExtensioHelper {
 			let userExtensionDocument = await userExtensionQueries.userExtensionDocument({
 				userId,
 				tenantId,
-				orgIds: { $in: [orgId] },
 			})
 
 			let updateuserExtensionDocument
@@ -98,7 +97,6 @@ module.exports = class UserExtensioHelper {
 			let userExtensionDocument = await userExtensionQueries.userExtensionDocument({
 				userId,
 				tenantId,
-				orgIds: { $in: [orgId] },
 			})
 
 			if (!userExtensionDocument || userExtensionDocument.length === 0) {
@@ -122,7 +120,7 @@ module.exports = class UserExtensioHelper {
 
 			// If the document exists, update the wishlist by removing the specified item
 			let updatedDocument = await userExtensionQueries.findAndUpdate(
-				{ userId, wishlist: { $elemMatch: { _id: projectTempleteId } }, tenantId, orgIds: { $in: [orgId] } },
+				{ userId, wishlist: { $elemMatch: { _id: projectTempleteId } }, tenantId },
 				{ $pull: { wishlist: { _id: projectTempleteId } } },
 				{ new: true }
 			)
@@ -166,7 +164,6 @@ module.exports = class UserExtensioHelper {
 			let userExtensionDocument = await userExtensionQueries.userExtensionDocument({
 				userId,
 				tenantId,
-				orgIds: { $in: [orgId] },
 			})
 			// If no user extension document is found or if it's empty
 			if (!userExtensionDocument || userExtensionDocument.length === 0) {
@@ -215,7 +212,6 @@ module.exports = class UserExtensioHelper {
 				$match: {
 					_id: { $in: projectTemplateIDs },
 					tenantId,
-					orgId,
 				},
 			}
 			aggregateData.push(matchQuery)

@@ -806,7 +806,6 @@ module.exports = class ProjectTemplateTasksHelper {
 				const orgId = userDetails.tenantAndOrgInfo.orgId[0]
 
 				findQuery['tenantId'] = tenantId
-				findQuery['orgId'] = orgId
 
 				let validateTaskId = UTILS.isValidMongoId(taskId)
 
@@ -844,7 +843,6 @@ module.exports = class ProjectTemplateTasksHelper {
 					{
 						_id: taskDocument[0]._id,
 						tenantId,
-						orgId,
 					},
 					updateObject,
 					{ new: true }

@@ -67,7 +67,6 @@ module.exports = class ReportsHelper {
 				}
 				query['isDeleted'] = { $ne: true }
 				query['tenantId'] = userDetails.userInformation.tenantId
-				query['orgId'] = userDetails.userInformation.organizationId
 
 				query['$or'] = [
 					{ syncedAt: { $gte: new Date(startFrom), $lte: new Date(endOf) } },
@@ -357,7 +356,6 @@ module.exports = class ReportsHelper {
 						$exists: true,
 					},
 					tenantId: userDetails.userInformation.tenantId,
-					orgId: userDetails.userInformation.organizationId,
 				}
 
 				if (entityId != '') {

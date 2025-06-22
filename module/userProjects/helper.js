@@ -126,7 +126,6 @@ module.exports = class UserProjectsHelper {
 					{
 						_id: projectId,
 						tenantId: tenantId,
-						orgId: orgId,
 					},
 					[
 						'_id',
@@ -185,7 +184,6 @@ module.exports = class UserProjectsHelper {
 						let matchQuery = {}
 						matchQuery = queryData.data
 						matchQuery['tenantId'] = tenantId
-						matchQuery['orgId'] = orgId
 						let projects = await projectQueries.projectDocument(matchQuery, 'all')
 						if (!Array.isArray(projects) || projects.length < 1) {
 							throw {
@@ -242,7 +240,6 @@ module.exports = class UserProjectsHelper {
 						{
 							_id: userProject[0]._id,
 							tenantId: tenantId,
-							orgId: orgId,
 						},
 						{
 							$set: {
@@ -279,7 +276,6 @@ module.exports = class UserProjectsHelper {
 					const solutionInformation = await solutionsQueries.solutionsDocument({
 						_id: data.solutionId,
 						tenantId: tenantId,
-						orgId: { $in: [orgId] },
 					})
 					if (solutionInformation.length > 0) {
 						updateProject.solutionInformation = solutionInformation[0]
@@ -289,7 +285,6 @@ module.exports = class UserProjectsHelper {
 					const programInformation = await programQueries.programsDocument({
 						_id: data.programId,
 						tenantId: tenantId,
-						orgId: { $in: [orgId] },
 					})
 					if (programInformation.length > 0) {
 						updateProject.programInformation = programInformation[0]
@@ -493,7 +488,6 @@ module.exports = class UserProjectsHelper {
 					{
 						_id: userProject[0]._id,
 						tenantId: tenantId,
-						orgId: orgId,
 					},
 					{
 						$set: updateProject,
@@ -681,7 +675,6 @@ module.exports = class UserProjectsHelper {
 						{
 							_id: programData._id,
 							tenantId: userDetails.userInformation.tenantId,
-							orgId: userDetails.userInformation.organizationId,
 						},
 						'all'
 					)
@@ -736,7 +729,6 @@ module.exports = class UserProjectsHelper {
 					{
 						_id: userPrivateProgram._id,
 						tenantId: userDetails.userInformation.tenantId,
-						orgId: userDetails.userInformation.organizationId,
 					},
 					{
 						$addToSet: { components: solutionIds },
@@ -782,7 +774,6 @@ module.exports = class UserProjectsHelper {
 				let queryObject = {
 					_id: projectId,
 					tenantId: tenantId,
-					orgId: orgId,
 				}
 				if (process.env.SUBMISSION_LEVEL == 'USER') {
 					queryObject['userId'] = userId
@@ -823,7 +814,6 @@ module.exports = class UserProjectsHelper {
 							{
 								_id: projectId,
 								tenantId: tenantId,
-								orgId: orgId,
 							},
 							{
 								$set: { userRoleInformation: userRoleInformation },
@@ -987,7 +977,6 @@ module.exports = class UserProjectsHelper {
 						$match: {
 							_id: ObjectId(projectId),
 							tenantId: tenantId,
-							orgId: orgId,
 						},
 					},
 				]
@@ -1408,7 +1397,6 @@ module.exports = class UserProjectsHelper {
 						externalId: templateId,
 						isReusable: false,
 						tenantId: tenantId,
-						orgId: { $in: [orgId] },
 					})
 
 					if (!templateDocuments.length > 0) {
@@ -1451,7 +1439,6 @@ module.exports = class UserProjectsHelper {
 							userId: userId,
 							isAPrivateProgram: targetedSolutionId.result.isATargetedSolution ? false : true,
 							tenantId: tenantId,
-							orgId: orgId,
 						},
 						['_id']
 					)
@@ -1470,7 +1457,6 @@ module.exports = class UserProjectsHelper {
 										_id: solutionId,
 										isAPrivateProgram: true,
 										tenantId: tenantId,
-										orgId: { $in: [orgId] },
 									},
 									[
 										'name',
@@ -1532,7 +1518,6 @@ module.exports = class UserProjectsHelper {
 							solutionDetails = await solutionsQueries.solutionsDocument({
 								_id: solutionId,
 								tenantId: tenantId,
-								orgId: { $in: [orgId] },
 							})
 							solutionDetails = solutionDetails[0]
 							// if( !solutionDetails.success ) {
@@ -1676,7 +1661,6 @@ module.exports = class UserProjectsHelper {
 								await certificateTemplateQueries.certificateTemplateDocument({
 									_id: solutionDetails.certificateTemplateId,
 									tenantId: tenantId,
-									orgId: { $in: [orgId] },
 								})
 
 							// create certificate object and add data if certificate template is present.
@@ -1935,7 +1919,6 @@ module.exports = class UserProjectsHelper {
 						isDeleted: false,
 						userId: userId,
 						tenantId,
-						orgId,
 					},
 					['all']
 				)
@@ -1970,7 +1953,6 @@ module.exports = class UserProjectsHelper {
 					{
 						_id: ObjectId(projectId),
 						tenantId,
-						orgId,
 					},
 					{ $set: { attachments: projectDeatils[0].attachments, ...storyData } }
 				)
@@ -2009,7 +1991,6 @@ module.exports = class UserProjectsHelper {
 						_id: templateId,
 						isReusable: false,
 						tenantId: tenantId,
-						orgId: { $in: [orgId] },
 					},
 					'all',
 					['ratings', 'noOfRatings', 'averageRating']
@@ -2137,7 +2118,6 @@ module.exports = class UserProjectsHelper {
 						{
 							_id: ObjectId(data.program._id),
 							tenantId: userDetails.userInformation.tenantId,
-							orgId: userDetails.userInformation.organizationId,
 						},
 						'all'
 					)
@@ -2281,7 +2261,6 @@ module.exports = class UserProjectsHelper {
 						{
 							externalId: { $in: project.category },
 							tenantId: userDetails.userInformation.tenantId,
-							orgId: userDetails.userInformation.organizationId,
 						},
 						['_id', 'name', 'externalId', 'evidences']
 					)
@@ -2404,7 +2383,6 @@ module.exports = class UserProjectsHelper {
 					_id: projectId,
 					isDeleted: false,
 					tenantId: tenantId,
-					orgId: orgId,
 				}
 
 				if (!taskIds.length) {
@@ -2429,7 +2407,7 @@ module.exports = class UserProjectsHelper {
 					projectPdf = false
 
 					let aggregateData = [
-						{ $match: { _id: ObjectId(projectId), isDeleted: false, tenantId: tenantId, orgId: orgId } },
+						{ $match: { _id: ObjectId(projectId), isDeleted: false, tenantId: tenantId } },
 						{
 							$project: {
 								status: 1,
@@ -2854,7 +2832,6 @@ module.exports = class UserProjectsHelper {
 				const orgId = userDetails.userInformation.organizationId
 
 				matchQuery['$match']['tenantId'] = tenantId
-				matchQuery['$match']['orgId'] = orgId
 
 				// pass matchQuery based on reflection
 				if (process.env.ENABLE_REFLECTION === 'true') {
@@ -2947,7 +2924,6 @@ module.exports = class UserProjectsHelper {
 					programData = await programQueries.programsDocument({
 						_id: ObjectId(programId),
 						tenantId,
-						orgId,
 					})
 					if (!(programData.length > 0)) {
 						throw {
@@ -3217,7 +3193,6 @@ module.exports = class UserProjectsHelper {
 						{
 							_id: projectTemplateId,
 							tenantId: userDetails.userInformation.tenantId,
-							orgId: userDetails.userInformation.organizationId,
 						},
 						{
 							$set: { importCount: updateProjectTemplateImportCount },
@@ -3796,7 +3771,6 @@ module.exports = class UserProjectsHelper {
 						status: CONSTANTS.common.SUBMITTED_STATUS,
 						certificate: { $exists: true },
 						tenantId: userDetails.userInformation.tenantId,
-						orgId: userDetails.userInformation.organizationId,
 					},
 					[
 						'_id',
@@ -4042,7 +4016,6 @@ module.exports = class UserProjectsHelper {
 				let projectDetails = await projectQueries.projectDocument({
 					_id: projectId,
 					tenantId: userDetails.userInformation.tenantId,
-					orgId: userDetails.userInformation.organizationId,
 				})
 
 				// Check if project details are not found
@@ -4166,7 +4139,6 @@ module.exports = class UserProjectsHelper {
 					{
 						_id: projectId,
 						tenantId: userDetails.userInformation.tenantId,
-						orgId: userDetails.userInformation.organizationId,
 					},
 					['_id', 'reflection', 'tasks']
 				)
@@ -4786,7 +4758,6 @@ function _projectCategories(categories, tenantId, orgId) {
 					{
 						_id: { $in: categoryIds },
 						tenantId: tenantId,
-						orgId: { $in: [orgId] },
 					},
 					['name', 'externalId']
 				)

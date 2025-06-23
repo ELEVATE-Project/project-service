@@ -9,49 +9,6 @@ const kafkaProducersHelper = require(GENERICS_FILES_PATH + '/kafka/producers')
 
 module.exports = class UserExtensionHelper {
 	/**
-	 * Create a Kafka event payload for a user-program-role mapping operation.
-	 * @method
-	 * @name createKafkaPayload
-	 * @param {Object} userProfile - The user profile object containing `id` and `username`.
-	 * @param {String} programId - The ID of the program being mapped.
-	 * @param {String} role - The role being assigned or removed.
-	 * @param {String} eventType - The type of event ('create' or 'delete').
-	 * @returns {Object} - Kafka event payload.
-	 */
-	static createKafkaPayload(userProfile, programId, role, eventType) {
-		return {
-			userId: userProfile.id,
-			username: userProfile.username,
-			programId: programId,
-			role,
-			eventType,
-		}
-	}
-	/**
-	 * Add a new program-role mapping to a user's profile and populate Kafka events.
-	 * @method
-	 * @name addNewProgramEntry
-	 * @param {Object} userProfile - The user profile object containing `id` and `username`.
-	 * @param {String} programId - The ID of the new program being added.
-	 * @param {Array<String>} newRoles - The list of roles to assign under the new program.
-	 * @param {Array<Object>} existingUserProgramRoleMapping - Current program-role mappings to be updated.
-	 * @param {Array<Object>} kafkaEventPayloads - Array to which Kafka event payloads will be pushed.
-	 * @returns {void}
-	 */
-	static addNewProgramEntry(userProfile, programId, newRoles, existingUserProgramRoleMapping, kafkaEventPayloads) {
-		existingUserProgramRoleMapping.push({
-			programId: programId,
-			roles: [...newRoles],
-		})
-		// All roles are new, emit create events
-		for (const role of newRoles) {
-			kafkaEventPayloads.push(
-				this.createKafkaPayload(userProfile, programId, role, CONSTANTS.common.CREATE_EVENT_TYPE)
-			)
-		}
-	}
-
-	/**
 	 * Bulk create or update user.
 	 * @method
 	 * @name bulkCreateOrUpdate
@@ -81,6 +38,13 @@ module.exports = class UserExtensionHelper {
 
 					if (userRole.user) {
 						allUserIds.add(userRole.user)
+					}
+				}
+
+				if (Array.from(allProgramIds).length == 0) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.PROGRAM_NOT_FOUND,
 					}
 				}
 
@@ -271,7 +235,7 @@ module.exports = class UserExtensionHelper {
 												entry.roles.push(role)
 												// Emit create event for new role
 												kafkaEventPayloads.push(
-													this.createKafkaPayload(
+													createKafkaPayload(
 														userProfile,
 														programId,
 														role,
@@ -327,7 +291,7 @@ module.exports = class UserExtensionHelper {
 											)
 											for (const role of rolesToRemove) {
 												kafkaEventPayloads.push(
-													this.createKafkaPayload(
+													createKafkaPayload(
 														userProfile,
 														programId,
 														role,
@@ -340,7 +304,7 @@ module.exports = class UserExtensionHelper {
 											const rolesToAdd = newRoles.filter((role) => !currentRoles.includes(role))
 											for (const role of rolesToAdd) {
 												kafkaEventPayloads.push(
-													this.createKafkaPayload(
+													createKafkaPayload(
 														userProfile,
 														programId,
 														role,
@@ -353,7 +317,7 @@ module.exports = class UserExtensionHelper {
 											existingUserProgramRoleMapping[currentRoleInfoIndex].roles = [...newRoles]
 										} else {
 											// Create new program entry
-											this.addNewProgramEntry(
+											addNewProgramEntry(
 												userProfile,
 												programId,
 												newRoles,
@@ -379,7 +343,7 @@ module.exports = class UserExtensionHelper {
 														role
 													)
 													kafkaEventPayloads.push(
-														this.createKafkaPayload(
+														createKafkaPayload(
 															userProfile,
 															programId,
 															role,
@@ -390,7 +354,7 @@ module.exports = class UserExtensionHelper {
 											}
 										} else {
 											// Create new program entry
-											this.addNewProgramEntry(
+											addNewProgramEntry(
 												userProfile,
 												programId,
 												newRoles,
@@ -410,7 +374,7 @@ module.exports = class UserExtensionHelper {
 											const rolesToRemove = currentRoles.filter((role) => newRoles.includes(role))
 											for (const role of rolesToRemove) {
 												kafkaEventPayloads.push(
-													this.createKafkaPayload(
+													createKafkaPayload(
 														userProfile,
 														programId,
 														role,
@@ -481,5 +445,46 @@ module.exports = class UserExtensionHelper {
 				return reject(error)
 			}
 		})
+	}
+}
+
+/**
+ * Create a Kafka event payload for a user-program-role mapping operation.
+ * @method
+ * @name createKafkaPayload
+ * @param {Object} userProfile - The user profile object containing `id` and `username`.
+ * @param {String} programId - The ID of the program being mapped.
+ * @param {String} role - The role being assigned or removed.
+ * @param {String} eventType - The type of event ('create' or 'delete').
+ * @returns {Object} - Kafka event payload.
+ */
+function createKafkaPayload(userProfile, programId, role, eventType) {
+	return {
+		userId: userProfile.id,
+		username: userProfile.username,
+		programId: programId,
+		role,
+		eventType,
+	}
+}
+/**
+ * Add a new program-role mapping to a user's profile and populate Kafka events.
+ * @method
+ * @name addNewProgramEntry
+ * @param {Object} userProfile - The user profile object containing `id` and `username`.
+ * @param {String} programId - The ID of the new program being added.
+ * @param {Array<String>} newRoles - The list of roles to assign under the new program.
+ * @param {Array<Object>} existingUserProgramRoleMapping - Current program-role mappings to be updated.
+ * @param {Array<Object>} kafkaEventPayloads - Array to which Kafka event payloads will be pushed.
+ * @returns {void}
+ */
+function addNewProgramEntry(userProfile, programId, newRoles, existingUserProgramRoleMapping, kafkaEventPayloads) {
+	existingUserProgramRoleMapping.push({
+		programId: programId,
+		roles: [...newRoles],
+	})
+	// All roles are new, emit create events
+	for (const role of newRoles) {
+		kafkaEventPayloads.push(createKafkaPayload(userProfile, programId, role, CONSTANTS.common.CREATE_EVENT_TYPE))
 	}
 }

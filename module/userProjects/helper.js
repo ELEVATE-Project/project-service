@@ -1775,11 +1775,10 @@ module.exports = class UserProjectsHelper {
 									}
 								}
 								if (entityDetails && entityDetails?.data.length > 0) {
-									projectCreation.data['entityInformation'] = _.pick(entityDetails.data[0], [
-										'_id',
-										'entityType',
-										'entityTypeId',
-									])
+									projectCreation.data['entityInformation'] = {
+										..._.pick(entityDetails.data[0], ['_id', 'entityType', 'entityTypeId']),
+										externalId: entityDetails.data[0]?.metaInformation?.externalId,
+									}
 								}
 							}
 						}

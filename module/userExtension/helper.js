@@ -11,14 +11,14 @@ module.exports = class UserExtensionHelper {
 	/**
 	 * Create a Kafka event payload for a user-program-role mapping operation.
 	 * @method
-	 * @name createKafkaEvent
+	 * @name createKafkaPayload
 	 * @param {Object} userProfile - The user profile object containing `id` and `username`.
 	 * @param {String} programId - The ID of the program being mapped.
 	 * @param {String} role - The role being assigned or removed.
 	 * @param {String} eventType - The type of event ('create' or 'delete').
 	 * @returns {Object} - Kafka event payload.
 	 */
-	static createKafkaEvent(userProfile, programId, role, eventType) {
+	static createKafkaPayload(userProfile, programId, role, eventType) {
 		return {
 			userId: userProfile.id,
 			username: userProfile.username,
@@ -46,7 +46,7 @@ module.exports = class UserExtensionHelper {
 		// All roles are new, emit create events
 		for (const role of newRoles) {
 			kafkaEventPayloads.push(
-				this.createKafkaEvent(userProfile, programId, role, messageConstants.common.CREATE_EVENT_TYPE)
+				this.createKafkaPayload(userProfile, programId, role, CONSTANTS.common.CREATE_EVENT_TYPE)
 			)
 		}
 	}
@@ -86,14 +86,14 @@ module.exports = class UserExtensionHelper {
 
 				// Fetch program data
 				/*
-			arguments passed to programsHelper.list() are:
-			- filter: { externalId: { $in: Array.from(allProgramIds) } }
-			- projection: ['_id', 'externalId']
-			- sort: ''
-			- skip: ''
-			- limit: ''
-			- tenantAndOrgInfo: tenant and organization information passed from req.headers
-			*/
+				arguments passed to programsHelper.list() are:
+				- filter: { externalId: { $in: Array.from(allProgramIds) } }
+				- projection: ['_id', 'externalId']
+				- sort: ''
+				- skip: ''
+				- limit: ''
+				- tenantAndOrgInfo: tenant and organization information passed from req.headers
+				*/
 				//fetching all programs data based on externalId
 				// this is done to avoid multiple database calls for each program
 				const allProgramsData = await programsHelper.list(
@@ -117,6 +117,21 @@ module.exports = class UserExtensionHelper {
 				const programIdMap = {}
 				const programInfoMap = {}
 				const programs = allProgramsData?.data?.data || []
+
+				if (programs.length === 0) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.PROGRAM_NOT_FOUND,
+					}
+				}
+
+				if (Array.from(allUserIds).length === 0) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.USER_NOT_FOUND,
+					}
+				}
+
 				for (const program of programs) {
 					programIdMap[program.externalId] = program._id
 					programInfoMap[program._id.toString()] = program
@@ -151,15 +166,15 @@ module.exports = class UserExtensionHelper {
 
 				const userExtensionDocs = await userExtensionsQueries.userExtensionDocument(
 					{
-						userId: { $in: Object.values(userProfileMap).map((u) => u.id) },
+						userId: { $in: Object.values(userProfileMap).map((user) => user.id) },
 						tenantId: tenantAndOrgInfo.tenantId,
 					},
 					['userId', 'programRoleMapping']
 				)
 
 				const userExtensionMap = {}
-				for (const doc of userExtensionDocs) {
-					userExtensionMap[doc.userId] = doc
+				for (const userExtension of userExtensionDocs) {
+					userExtensionMap[userExtension.userId] = userExtension
 				}
 
 				// Process each CSV row
@@ -256,7 +271,7 @@ module.exports = class UserExtensionHelper {
 												entry.roles.push(role)
 												// Emit create event for new role
 												kafkaEventPayloads.push(
-													this.createKafkaEvent(
+													this.createKafkaPayload(
 														userProfile,
 														programId,
 														role,
@@ -312,7 +327,7 @@ module.exports = class UserExtensionHelper {
 											)
 											for (const role of rolesToRemove) {
 												kafkaEventPayloads.push(
-													this.createKafkaEvent(
+													this.createKafkaPayload(
 														userProfile,
 														programId,
 														role,
@@ -325,7 +340,7 @@ module.exports = class UserExtensionHelper {
 											const rolesToAdd = newRoles.filter((role) => !currentRoles.includes(role))
 											for (const role of rolesToAdd) {
 												kafkaEventPayloads.push(
-													this.createKafkaEvent(
+													this.createKafkaPayload(
 														userProfile,
 														programId,
 														role,
@@ -364,7 +379,7 @@ module.exports = class UserExtensionHelper {
 														role
 													)
 													kafkaEventPayloads.push(
-														this.createKafkaEvent(
+														this.createKafkaPayload(
 															userProfile,
 															programId,
 															role,
@@ -379,6 +394,7 @@ module.exports = class UserExtensionHelper {
 												userProfile,
 												programId,
 												newRoles,
+												existingUserProgramRoleMapping,
 												kafkaEventPayloads
 											)
 										}
@@ -394,7 +410,7 @@ module.exports = class UserExtensionHelper {
 											const rolesToRemove = currentRoles.filter((role) => newRoles.includes(role))
 											for (const role of rolesToRemove) {
 												kafkaEventPayloads.push(
-													this.createKafkaEvent(
+													this.createKafkaPayload(
 														userProfile,
 														programId,
 														role,
@@ -443,7 +459,7 @@ module.exports = class UserExtensionHelper {
 
 				for (let kafkaEventPayload of aggregateKafkaEventPayloads) {
 					let eventObj = {
-						entity: 'program',
+						entity: CONSTANTS.common.PROGRAM_EVENT_ENTITY,
 						eventType: kafkaEventPayload.eventType,
 						username: kafkaEventPayload.username,
 						userId: kafkaEventPayload.userId,

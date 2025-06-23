@@ -32,7 +32,10 @@ module.exports = class UserExtension extends Abstract {
 				let userRolesCSVData = await csv().fromString(req.files.userRoles.data.toString())
 
 				if (!userRolesCSVData || userRolesCSVData.length < 1) {
-					throw CONSTANTS.apiResponses.FILE_DATA_MISSING
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.FILE_DATA_MISSING,
+					}
 				}
 
 				let tenantAndOrgInfo = req.userDetails.tenantAndOrgInfo
@@ -64,7 +67,10 @@ module.exports = class UserExtension extends Abstract {
 
 					input.push(null)
 				} else {
-					throw CONSTANTS.apiResponses.SOMETHING_WENT_WRONG
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.USER_ROLES_PROCESSING_FAILED,
+					}
 				}
 			} catch (error) {
 				return reject({

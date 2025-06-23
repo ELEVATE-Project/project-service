@@ -4278,10 +4278,11 @@ module.exports = class UserProjectsHelper {
 		})
 	}
 	/**
-	 * Adds parent entity info to the project if an external entity ID exists.
-	 *
+	 * Adds parent entity info to the project if an entityIdentifier exists in projectsInfo.
+	 * @method
+	 * @name attachEntityInformationIfExists
 	 * @param {Object} projectsInfo - Project object with optional entity info.
-	 * @returns {Promise<void>}
+	 * @returns {Promise<void>} - attaches parent entity information if it exists to projectsInfo variable
 	 */
 	static async attachEntityInformationIfExists(projectsInfo) {
 		try {

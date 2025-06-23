@@ -257,29 +257,6 @@ module.exports = class ProgramsHelper {
 					}
 				}
 
-				let userInfoCall = await userService.fetchProfileById(
-					userDetails.userInformation.tenantId,
-					userDetails.userInformation.userId
-				)
-
-				if (userInfoCall.success) {
-					let eventObj = {
-						entity: 'program',
-						eventType: 'create',
-						username: userInfoCall.data.username,
-						userId: userInfoCall.data.id,
-						meta: {
-							programInformation: {
-								name: data.name,
-								externalId: data.externalId,
-								id: program._id,
-							},
-						},
-					}
-
-					let event = await kafkaProducersHelper.pushProgramOperationEvent(eventObj)
-				}
-
 				return resolve({
 					success: true,
 					message: CONSTANTS.apiResponses.PROGRAMS_CREATED,

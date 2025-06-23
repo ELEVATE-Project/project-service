@@ -30,7 +30,6 @@ module.exports = {
 			type: String,
 			required: true,
 			index: true,
-			unique: true,
 		},
 		createdBy: {
 			type: String,
@@ -43,7 +42,6 @@ module.exports = {
 		status: {
 			type: String,
 			default: 'active',
-			index: true,
 		},
 		isDeleted: {
 			type: Boolean,

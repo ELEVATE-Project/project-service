@@ -278,4 +278,5 @@ module.exports = {
 	USER_NOT_FOUND: 'User not found',
 	SOMETHING_WENT_WRONG: 'Something went wrong!',
 	FILE_DATA_MISSING: 'File or data is missing.',
+	USER_ROLES_PROCESSING_FAILED: 'User roles processing failed. Please check the content.',
 }

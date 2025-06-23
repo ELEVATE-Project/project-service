@@ -976,7 +976,7 @@
 			"service": "project"
 		},
 		{
-			"sourceRoute": "/project/v1/programs/getProgramDetails",
+			"sourceRoute": "/project/v1/programs/read",
 			"type": "GET",
 			"priority": "MUST_HAVE",
 			"inSequence": false,
@@ -990,7 +990,7 @@
 			"service": "project"
 		},
 		{
-			"sourceRoute": "/project/v1/programs/getProgramDetails/:id",
+			"sourceRoute": "/project/v1/programs/read/:id",
 			"type": "GET",
 			"priority": "MUST_HAVE",
 			"inSequence": false,

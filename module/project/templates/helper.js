@@ -32,6 +32,7 @@ const filesHelpers = require(MODULES_BASE_PATH + '/cloud-services/files/helper')
 const testimonialsHelper = require(MODULES_BASE_PATH + '/testimonials/helper')
 const surveyService = require(SERVICES_BASE_PATH + '/survey')
 const solutionsHelper = require(MODULES_BASE_PATH + '/solutions/helper')
+const entitiesService = require(GENERICS_FILES_PATH + '/services/entity-management')
 
 module.exports = class ProjectTemplatesHelper {
 	/**
@@ -49,8 +50,8 @@ module.exports = class ProjectTemplatesHelper {
 				let categoryIds = []
 				let roleIds = []
 				let tasksIds = []
-				// <- Entitytype validation removed {release-5.0.0} - entity generalisation
-				// let entityTypes = [];
+				// <- Entitytype added for observation as a task-->
+				let entityTypes = []
 
 				csvData.forEach((template) => {
 					let parsedData = UTILS.valueParser(template)
@@ -66,10 +67,10 @@ module.exports = class ProjectTemplatesHelper {
 
 						roleIds = _.concat(roleIds, parsedData.recommendedFor)
 					}
-					// <- Entitytype validation removed {release-5.0.0} - entity generalisation
-					// if( parsedData.entityType ) {
-					//     entityTypes.push(parsedData.entityType);
-					// }
+					// <- Entitytype added for observation as a task-->
+					if (parsedData.entityType) {
+						entityTypes.push(parsedData.entityType)
+					}
 				})
 
 				let categoriesData = {}
@@ -127,38 +128,39 @@ module.exports = class ProjectTemplatesHelper {
 				//         }
 				//     }),{});
 				// }
-				// <- Entitytype validation removed {release-5.0.0} - entity generalisation
-				// let entityTypesData = {};
+				// <- Entitytype added for observation as a task-->
+				let entityTypesData = {}
 
-				// if( entityTypes.length > 0 ) {
+				if (entityTypes.length > 0) {
+					let entityTypesDocument = await entitiesService.entityTypeDocuments({
+						name: { $in: entityTypes },
+						tenantId: userDetails.tenantAndOrgInfo.tenantId,
+					})
 
-				//     let entityTypesDocument =
-				//     await coreService.entityTypesDocuments();
-
-				//     if( !entityTypesDocument.success ) {
-				//         throw {
-				//             message : CONSTANTS.apiResponses.ENTITY_TYPES_NOT_FOUND,
-				//             status : HTTP_STATUS_CODE.bad_request.status
-				//         }
-				//     }
-
-				//     entityTypesData = entityTypesDocument.data.reduce((ac,entityType)=> ({
-				//         ...ac,
-				//         [entityType.name] : {
-				//             _id : ObjectId(entityType._id),
-				//             name : entityType.name
-				//         }
-				//     }),{});
-
-				// }
-
+					if (!entityTypesDocument.success) {
+						throw {
+							message: CONSTANTS.apiResponses.ENTITY_TYPES_NOT_FOUND,
+							status: HTTP_STATUS_CODE.bad_request.status,
+						}
+					}
+					entityTypesData = entityTypesDocument.data.reduce(
+						(ac, entityType) => ({
+							...ac,
+							[entityType.name]: {
+								_id: ObjectId(entityType._id),
+								name: entityType.name,
+							},
+						}),
+						{}
+					)
+				}
 				return resolve({
 					success: true,
 					data: {
 						categories: categoriesData,
 						// roles : recommendedFor,
 						// <- Entitytype validation removed {release-5.0.0} - entity generalisation
-						// entityTypes : entityTypesData
+						entityTypes: entityTypesData,
 					},
 				})
 			} catch (error) {
@@ -214,11 +216,10 @@ module.exports = class ProjectTemplatesHelper {
 				// }
 
 				// parsedData.recommendedFor = recommendedFor;
-				// <- Entitytype validation removed {release-5.0.0} - entity generalisation
-				// if( parsedData.entityType && parsedData.entityType !== "" ) {
-				//     parsedData.entityType = csvInformation.entityTypes[parsedData.entityType].name;
-				// }
-
+				// <- Entitytype added for observation as a task-->
+				if (parsedData.entityType && parsedData.entityType !== '') {
+					parsedData.entityType = csvInformation.entityTypes[parsedData.entityType].name
+				}
 				// duration has sent as a string we have to convert it into days
 				if (parsedData.duration && parsedData.duration !== '') {
 					parsedData.durationInDays = UTILS.convertDurationToDays(parsedData.duration)
@@ -1060,7 +1061,10 @@ module.exports = class ProjectTemplatesHelper {
 				)
 
 				duplicateTemplateTaskId = await createTemplateTask()
-			} else if (taskType === CONSTANTS.common.OBSERVATION && newProjectTemplateTask.solutionDetails.isReusable) {
+			} else if (
+				taskType === CONSTANTS.common.OBSERVATION &&
+				newProjectTemplateTask?.solutionDetails?.isReusable
+			) {
 				const timestamp = UTILS.epochTime()
 				//Create child solutions for solutiontype obs
 				const importSolutionsResponse = await surveyService.importTemplateToSolution(
@@ -1110,7 +1114,7 @@ module.exports = class ProjectTemplatesHelper {
 						$addToSet: { components: newProjectTemplateTask.solutionDetails._id },
 					}
 				)
-			} else if (taskType === CONSTANTS.common.SURVEY && newProjectTemplateTask.solutionDetails.isReusable) {
+			} else if (taskType === CONSTANTS.common.SURVEY && newProjectTemplateTask?.solutionDetails?.isReusable) {
 				//Create child solutions for solutiontype survey
 				let importSolutionsResponse = await surveyService.importTemplateToSolution(
 					userToken,

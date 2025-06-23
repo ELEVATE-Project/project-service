@@ -245,13 +245,13 @@ module.exports = class Programs extends Abstract {
 	}
 
 	/**
-    * @api {post} /project/v1/programs/getProgramDetails/:programId
+    * @api {post} /project/v1/programs/read/:programId
     * @apiVersion 1.0.0
     * @apiName 
     * @apiGroup Programs
     * @apiParamExample {json} Request-Body:
     * @apiHeader {String} X-auth-token Authenticity token
-    * @apiSampleRequest /project/v1/programs/getProgramDetails/66254d3dd07c5713b46d17c1
+    * @apiSampleRequest /project/v1/programs/read/66254d3dd07c5713b46d17c1
     * @apiUse successBody
     * @apiUse errorBody
     * @apiParamExample {json} Response:
@@ -300,38 +300,24 @@ module.exports = class Programs extends Abstract {
     }
   */
 	/**
-	 * getProgramDetails for internalApi
+	 * read for internalApi
 	 * @method
-	 * @name getProgramDetails
+	 * @name read
 	 * @param {Object} req - requested data.
 	 * @param {String} req.params._id - program id.
 	 * @returns {Promise<Object>} The helper’s response, either program data or an error object.
 	 */
 
-	async getProgramDetails(req) {
+	async read(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				// check req.userDetails is available or not if not get tenantAndorg Info from req body
-				if (!req.userDetails && !req.body) {
-					let responseMessage = CONSTANTS.apiResponses.BODY_NOT_EMPTY
-					return resolve({
-						status: HTTP_STATUS_CODE.internal_server_error.status,
-						message: responseMessage,
-					})
-				} else if (!req.userDetails && req?.body?.tenantData) {
-					req.userDetails = {
-						tenantAndOrgInfo: req.body.tenantData,
-						userInformation: {}, //  Initialize to avoid later errors
-					}
-				}
-				//Map tenant / org IDs into the shape expected by programsHelper.
-				req.userDetails.userInformation.tenantId = req.userDetails.tenantAndOrgInfo.tenantId
-				req.userDetails.userInformation.organizationId = req.userDetails.tenantAndOrgInfo.orgId[0]
-				let programData = await programsHelper.details(
+				// Extract tenantId from either userDetails or tenantData in the body
+				let tenantId = req.userDetails?.tenantAndOrgInfo?.tenantId || req.body?.tenantData?.tenantId
+				let programData = await programsHelper.read(
 					req.params._id,
 					CONSTANTS.common.ALL, //projections
 					CONSTANTS.common.NONE, //skipFields
-					req.userDetails
+					tenantId
 				)
 
 				return resolve(programData)

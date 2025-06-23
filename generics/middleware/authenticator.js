@@ -77,7 +77,7 @@ module.exports = async function (req, res, next, token = '') {
 		'/library/categories/update',
 		'/programs/create',
 		'/programs/update',
-		'/programs/getProgramDetails',
+		'/programs/read',
 		'/admin/createIndex',
 		'/solutions/create',
 		'/solutions/update',

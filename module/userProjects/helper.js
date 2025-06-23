@@ -1313,7 +1313,7 @@ module.exports = class UserProjectsHelper {
 							assignedAssessmentOrObservation.data
 						)
 
-						if (!currentTask.solutionDetails.isReusable) {
+						if (!currentTask?.solutionDetails?.isReusable) {
 							assessmentOrObservationData['programId'] = project[0].programInformation._id
 						}
 						let fieldToUpdate = `tasks.$.${solutionDetails.type}Information`
@@ -4698,7 +4698,7 @@ async function _projectTask(
 			}
 			let importSolutionsResponse
 			// create a child solution if solutionDetails has isReusable true solution details
-			if (singleTask.solutionDetails.isReusable) {
+			if (singleTask?.solutionDetails?.isReusable) {
 				userDetails.tenantAndOrgInfo = {
 					tenantId: userDetails.userInformation.tenantId,
 					orgId: [userDetails.userInformation.organizationId],

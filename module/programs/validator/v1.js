@@ -64,12 +64,19 @@ module.exports = (req) => {
 				.isMongoId()
 				.withMessage('Invalid program ID')
 		},
-		getProgramDetails: function () {
+		read: function () {
 			req.checkParams('_id')
 				.exists()
 				.withMessage('required program id')
 				.isMongoId()
 				.withMessage('Invalid program ID')
+			if (!req.userDetails) {
+				req.checkBody('tenantData.tenantId')
+					.exists()
+					.withMessage('tenantId is required')
+					.notEmpty()
+					.withMessage('tenantId cannot be empty')
+			}
 		},
 	}
 

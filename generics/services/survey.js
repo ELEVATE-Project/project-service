@@ -143,6 +143,9 @@ const surveyDetails = function (token, solutionId, bodyData, programId) {
 }
 
 /**
+ * Fetches solution details based on a list of external solution IDs.
+ * This is typically called after creating solutions, to populate the `solutionDetails`
+ * key in task objects.
  * List of solutions
  * @function
  * @name listSolutions

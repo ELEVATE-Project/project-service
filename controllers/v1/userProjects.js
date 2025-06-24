@@ -495,10 +495,11 @@ module.exports = class UserProjects extends Abstract {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let solutionDetails = await userProjectsHelper.solutionDetails(
-					req.userDetails.userToken,
 					req.params._id,
 					req.query.taskId,
-					req.body
+					req.body,
+					req.userDetails.userToken,
+					req.userDetails.userInformation.userId
 				)
 
 				solutionDetails.result = solutionDetails.data
@@ -1343,6 +1344,39 @@ module.exports = class UserProjects extends Abstract {
 			}
 		})
 	}
+
+	/**
+	 * @api {post} /project/v1/pushSubmissionToTask/:_projectid
+	 * Push task Submission status
+	 * @apiVersion 1.0.0
+	 * @apiGroup User Projects
+	 * @apiSampleRequest /project/v1/userProjects/pushSubmissionToTask/66ac9949227504a96d8dce1c
+	 **/
+	/**
+	 * pushSubmissionTo project Task
+	 * @method
+	 * @name pushSubmissionToTask
+	 * @param {Object} req .
+	 * @returns {JSON}  Success body.
+	 */
+	async pushSubmissionToTask(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				const pushSubmissionToTask = await userProjectsHelper.pushSubmissionToTask(
+					req.params._id,
+					req.query.taskId,
+					req.body
+				)
+				return resolve(pushSubmissionToTask)
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
+				})
+			}
+		})
+	}
 	/**
     * @api {post} /project/v1/userProjects/update/:projectId
     * ReIssue project certificate
@@ -1380,7 +1414,6 @@ module.exports = class UserProjects extends Abstract {
 				)
 				return resolve(updateData)
 			} catch (error) {
-				console.log(error)
 				return reject({
 					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
 					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,

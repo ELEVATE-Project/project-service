@@ -195,6 +195,11 @@ let enviromentVariables = {
 		optional: true,
 		default: 'config.json',
 	},
+	SUBMISSION_TOPIC: {
+		message: 'Required SUBMISSION_TOPIC',
+		optional: true,
+		default: 'elevate-improvement-project-submission-dev',
+	},
 }
 
 let success = true

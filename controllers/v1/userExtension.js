@@ -38,40 +38,40 @@ module.exports = class UserExtension extends Abstract {
 					}
 				}
 
-				let tenantAndOrgInfo = req.userDetails.tenantAndOrgInfo
+				const { tenantAndOrgInfo, userInformation } = req.userDetails
 
 				let newUserRoleData = await userExtensionHelper.bulkCreateOrUpdate(
 					userRolesCSVData,
-					req.userDetails.userInformation,
+					userInformation,
 					tenantAndOrgInfo
 				)
 
-				if (newUserRoleData.length > 0) {
-					const fileName = `UserRole-Upload`
-					let fileStream = new CSV_FILE_STREAM(fileName)
-					let input = fileStream.initStream()
-
-					;(async function () {
-						await fileStream.getProcessorPromise()
-						return resolve({
-							isResponseAStream: true,
-							fileNameWithPath: fileStream.fileNameWithPath(),
-						})
-					})()
-
-					await Promise.all(
-						newUserRoleData.map(async (userRole) => {
-							input.push(userRole)
-						})
-					)
-
-					input.push(null)
-				} else {
+				if (!newUserRoleData?.length) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.USER_ROLES_PROCESSING_FAILED,
 					}
 				}
+
+				const fileName = `UserRole-Upload`
+				let fileStream = new CSV_FILE_STREAM(fileName)
+				let input = fileStream.initStream()
+
+				;(async function () {
+					await fileStream.getProcessorPromise()
+					return resolve({
+						isResponseAStream: true,
+						fileNameWithPath: fileStream.fileNameWithPath(),
+					})
+				})()
+
+				await Promise.all(
+					newUserRoleData.map(async (userRole) => {
+						input.push(userRole)
+					})
+				)
+
+				input.push(null)
 			} catch (error) {
 				return reject({
 					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,

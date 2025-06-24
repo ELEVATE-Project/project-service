@@ -63,6 +63,6 @@ module.exports = {
 	AUTO_DOWNLOAD: '/v1/cloud-services/files/download',
 	TENANT_READ: '/v1/tenant/read',
 	PUBLIC_BRANDING: '/v1/public/branding',
-	FETCH_USER_PROFILE_INFO: '/v1/user/profileById',
+	PROFILE_READ_BY_ID: '/v1/user/profileById',
 	FIND_ENTITY_DETAILS: '/v1/entities/details',
 }

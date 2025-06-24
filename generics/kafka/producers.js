@@ -16,7 +16,7 @@ const userProjectActivityTopic =
 	process.env.USER_ACTIVITY_TOPIC && process.env.USER_ACTIVITY_TOPIC != 'OFF'
 		? process.env.USER_ACTIVITY_TOPIC
 		: 'user-activities'
-const programOperationKafkaTopic =
+const programOperationTopic =
 	process.env.PROGRAM_USER_MAPPING_TOPIC && process.env.PROGRAM_USER_MAPPING_TOPIC != 'OFF'
 		? process.env.PROGRAM_USER_MAPPING_TOPIC
 		: 'elevate_program_operation'
@@ -119,7 +119,7 @@ const pushProgramOperationEvent = function (message) {
 		try {
 			let kafkaPushStatus = await pushMessageToKafka([
 				{
-					topic: programOperationKafkaTopic,
+					topic: programOperationTopic,
 					messages: JSON.stringify(message),
 				},
 			])

@@ -35,6 +35,8 @@ const gotenbergService = require(SERVICES_BASE_PATH + '/gotenberg')
 const projectService = require(SERVICES_BASE_PATH + '/projects')
 const defaultUserProfileConfig = require('@config/defaultUserProfileDeleteConfig')
 const configFilePath = process.env.AUTH_CONFIG_FILE_PATH
+const surveyService = require(SERVICES_BASE_PATH + '/survey')
+
 /**
  * UserProjectsHelper
  * @class
@@ -570,7 +572,6 @@ module.exports = class UserProjectsHelper {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let result = {}
-
 				let programAndSolutionData = {
 					type: CONSTANTS.common.IMPROVEMENT_PROJECT,
 					subType: CONSTANTS.common.IMPROVEMENT_PROJECT,
@@ -590,6 +591,7 @@ module.exports = class UserProjectsHelper {
 				let solutionAndProgramCreation = await solutionsHelper.createProgramAndSolution(
 					userId,
 					programAndSolutionData,
+					userDetails.userToken,
 					isATargetedSolution,
 					userDetails
 				)
@@ -893,7 +895,6 @@ module.exports = class UserProjectsHelper {
 				let matchQuery = {
 					$match: query,
 				}
-
 				if (searchQuery && searchQuery.length > 0) {
 					matchQuery['$match']['$or'] = searchQuery
 				}
@@ -1062,8 +1063,12 @@ module.exports = class UserProjectsHelper {
 					}
 
 					if (
-						currentTask.type === CONSTANTS.common.ASSESSMENT ||
-						currentTask.type === CONSTANTS.common.OBSERVATION
+						[
+							CONSTANTS.common.ASSESSMENT,
+							CONSTANTS.common.OBSERVATION,
+							CONSTANTS.common.SURVEY,
+							CONSTANTS.common.IMPROVEMENT_PROJECT,
+						].includes(currentTask.type)
 					) {
 						let completedSubmissionCount = 0
 
@@ -1074,8 +1079,10 @@ module.exports = class UserProjectsHelper {
 						data['submissionStatus'] = CONSTANTS.common.STARTED
 
 						let submissionDetails = {}
-						if (currentTask.observationInformation) {
-							submissionDetails = currentTask.observationInformation
+						//Getting information of dynamic solutions like surveyInformation observationInformation
+						let dynamicTaskInfromation = `${currentTask.type}Information`
+						if (currentTask[dynamicTaskInfromation]) {
+							submissionDetails = currentTask[dynamicTaskInfromation]
 						} else if (currentTask.submissionDetails) {
 							submissionDetails = currentTask.submissionDetails
 						}
@@ -1180,7 +1187,10 @@ module.exports = class UserProjectsHelper {
 					}
 				)
 
-				return resolve(tasksUpdated)
+				return resolve({
+					success: true,
+					data: tasksUpdated,
+				})
 			} catch (error) {
 				return reject(error)
 			}
@@ -1191,13 +1201,15 @@ module.exports = class UserProjectsHelper {
 	 * Solutions details
 	 * @method
 	 * @name solutionDetails
-	 * @param {String} userToken - Logged in user token.
 	 * @param {String} projectId - Project id.
 	 * @param {Array} taskId - Tasks id.
+	 * @param {Object} bodyData - Req body data
+	 * @param {String} userToken - Logged in user token.
+	 * @param {String} userId - userId
 	 * @returns {Object}
 	 */
 
-	static solutionDetails(userToken, projectId, taskId, bodyData = {}) {
+	static solutionDetails(projectId, taskId, bodyData = {}, userToken, userId) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let project = await projectQueries.projectDocument(
@@ -1213,6 +1225,8 @@ module.exports = class UserProjectsHelper {
 						'tasks.solutionDetails',
 						'tasks.submissions',
 						'tasks.observationInformation',
+						'tasks.surveyInformation',
+						'tasks.improvementProjectInformation',
 						'tasks.externalId',
 						'programInformation._id',
 						'projectTemplateId',
@@ -1228,27 +1242,30 @@ module.exports = class UserProjectsHelper {
 				let currentTask = project[0].tasks.find((task) => task._id == taskId)
 
 				let solutionDetails = currentTask.solutionDetails
-
 				let assessmentOrObservationData = {}
 
 				if (
-					project[0].entityInformation &&
-					project[0].entityInformation._id &&
+					// project[0].entityInformation &&
+					// project[0].entityInformation.entityType &&
 					project[0].programInformation &&
 					project[0].programInformation._id
 				) {
 					assessmentOrObservationData = {
-						entityId: project[0].entityInformation._id,
+						// entityType: project[0].entityInformation.entityType,
 						programId: project[0].programInformation._id,
 					}
-
-					if (currentTask.observationInformation) {
-						assessmentOrObservationData = currentTask.observationInformation
+					if (project[0]?.entityInformation && project[0]?.entityInformation?.entityType) {
+						assessmentOrObservationData['entityType'] = project[0].entityInformation.entityType
+						assessmentOrObservationData['entityId'] = project[0].entityInformation._id
+					}
+					let dynamicTaskInfromation = `${solutionDetails.type}Information`
+					if (currentTask[dynamicTaskInfromation]) {
+						assessmentOrObservationData = currentTask[dynamicTaskInfromation]
 					} else {
 						let assessmentOrObservation = {
 							token: userToken,
 							solutionDetails: solutionDetails,
-							entityId: assessmentOrObservationData.entityId,
+							entityType: assessmentOrObservationData.entityType,
 							programId: assessmentOrObservationData.programId,
 							project: {
 								_id: projectId,
@@ -1256,10 +1273,37 @@ module.exports = class UserProjectsHelper {
 							},
 						}
 
-						let assignedAssessmentOrObservation =
-							solutionDetails.type === CONSTANTS.common.ASSESSMENT
-								? await _assessmentDetails(assessmentOrObservation)
-								: await _observationDetails(assessmentOrObservation, bodyData)
+						// get solutions details based on solutionTypes
+						/*
+						******Sample response*************
+		                       {
+                                  "success": true,
+								   data:{
+                                     "programId": "685140cbf891ccf74e05baf9",
+                                     "observationId": "685146542054fe175c7150c8",
+                                    "solutionId": "685140d1ffc25f705c56e99e",
+					               } 
+                               }
+
+						*/
+						const getSolutionDetails = {
+							[CONSTANTS.common.ASSESSMENT]: () => _assessmentDetails(assessmentOrObservation),
+							[CONSTANTS.common.OBSERVATION]: () =>
+								_observationDetails(assessmentOrObservation, bodyData),
+							[CONSTANTS.common.IMPROVEMENT_PROJECT]: () =>
+								this._improvementProjectDetails(assessmentOrObservation, bodyData, userToken, userId),
+							[CONSTANTS.common.SURVEY]: () => _surveyDetails(assessmentOrObservation, bodyData),
+						}
+						let fetchSolutions = getSolutionDetails[solutionDetails.type]
+
+						if (!fetchSolutions) {
+							throw {
+								status: HTTP_STATUS_CODE.bad_request.status,
+								message: CONSTANTS.apiResponses.SOLUTION_TYPE_INVALID,
+							}
+						}
+
+						let assignedAssessmentOrObservation = await fetchSolutions()
 
 						if (!assignedAssessmentOrObservation.success) {
 							return resolve(assignedAssessmentOrObservation)
@@ -1270,9 +1314,10 @@ module.exports = class UserProjectsHelper {
 							assignedAssessmentOrObservation.data
 						)
 
-						if (!currentTask.solutionDetails.isReusable) {
-							assessmentOrObservationData['programId'] = currentTask.solutionDetails.programId
+						if (!currentTask?.solutionDetails?.isReusable) {
+							assessmentOrObservationData['programId'] = project[0].programInformation._id
 						}
+						let fieldToUpdate = `tasks.$.${solutionDetails.type}Information`
 
 						await projectQueries.findOneAndUpdate(
 							{
@@ -1281,13 +1326,13 @@ module.exports = class UserProjectsHelper {
 							},
 							{
 								$set: {
-									'tasks.$.observationInformation': assessmentOrObservationData,
+									[fieldToUpdate]: assessmentOrObservationData,
 								},
 							}
 						)
 					}
 
-					assessmentOrObservationData['entityType'] = project[0].entityInformation.entityType
+					// assessmentOrObservationData['entityType'] = project[0].entityInformation.entityType
 				}
 
 				if (currentTask.solutionDetails && !_.isEmpty(currentTask.solutionDetails)) {
@@ -1427,14 +1472,12 @@ module.exports = class UserProjectsHelper {
 						userRoleInformation,
 						userDetails
 					)
-
 					if (!targetedSolutionId.success) {
 						throw {
 							success: false,
 							message: targetedSolutionId.message,
 						}
 					}
-
 					//based on above api will check for projects wether its is private project or public project
 					const projectDetails = await projectQueries.projectDocument(
 						{
@@ -1616,6 +1659,8 @@ module.exports = class UserProjectsHelper {
 									? solutionDetails.submissionLevel
 									: process.env.SUBMISSION_LEVEL,
 								scope: solutionDetails.scope,
+								// referenceFrom: solutionDetails.referenceFrom ? solutionDetails.referenceFrom : '', // added for project as a task
+								// project: solutionDetails.project ? solutionDetails.project : '',
 							}
 
 							projectCreation.data['programId'] = projectCreation.data.programInformation._id
@@ -1716,32 +1761,27 @@ module.exports = class UserProjectsHelper {
 							if (bodyData.role) {
 								projectCreation.data['userRole'] = bodyData.role
 							}
+							// Adding entityInformation in Project
+							if (solutionDetails.entityType && bodyData[solutionDetails.entityType]) {
+								let entityDetails = await entitiesService.entityDocuments({
+									_id: bodyData[solutionDetails.entityType],
+									tenantId: tenantId,
+									orgIds: { $in: ['ALL', orgId] },
+								})
 
-							// if (solutionDetails.entityType && bodyData[solutionDetails.entityType]) {
-							// 	let entityInformation = await entitiesService.entityTypeDocuments(
-							// 		{ name: bodyData[solutionDetails.entityType] },
-							// 		'all'
-							// 	)
-
-							// 	// if( !entityInformation.success ) {
-							// 	//     throw {
-							// 	//         message : CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
-							// 	//         status : HTTP_STATUS_CODE.bad_request.status
-							// 	//     }
-							// 	// }
-
-							// 	// let entityDetails = await entitiesService.entityDocuments(
-							// 	//     entityInformation.data
-							// 	// );
-
-							// 	// if ( entityDetails && entityDetails.length > 0 ) {
-							// 	//     projectCreation.data["entityInformation"] = entityDetails[0];
-							// 	// }
-
-							// 	if (entityInformation.success && entityInformation.data.length > 0) {
-							// 		projectCreation.data.entityType = entityInformation.data[0]._id
-							// 	}
-							// }
+								if (!entityDetails.success || !entityDetails?.data.length > 0) {
+									throw {
+										message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
+										status: HTTP_STATUS_CODE.bad_request.status,
+									}
+								}
+								if (entityDetails && entityDetails?.data.length > 0) {
+									projectCreation.data['entityInformation'] = {
+										..._.pick(entityDetails.data[0], ['_id', 'entityType', 'entityTypeId']),
+										externalId: entityDetails.data[0]?.metaInformation?.externalId,
+									}
+								}
+							}
 						}
 
 						projectCreation.data.status = CONSTANTS.common.STARTED
@@ -2026,9 +2066,8 @@ module.exports = class UserProjectsHelper {
 						tenantId,
 						orgId
 					)
-
 					if (tasksAndSubTasks.length > 0) {
-						result.tasks = _projectTask(tasksAndSubTasks)
+						result.tasks = await _projectTask(tasksAndSubTasks)
 						result.tasks.forEach((task) => {
 							if (
 								task &&
@@ -2951,7 +2990,6 @@ module.exports = class UserProjectsHelper {
 				isATargetedSolution = UTILS.convertStringToBoolean(isATargetedSolution)
 				let tenantId = userDetails.userInformation.tenantId
 				let orgId = userDetails.userInformation.organizationId
-
 				// Fetch project template details based on thr projectTemplate ID
 				// Will fetch matched projectTemplate if isDeleted = false && status = published
 				let libraryProjects = await libraryCategoriesHelper.projectDetails(
@@ -2961,7 +2999,6 @@ module.exports = class UserProjectsHelper {
 					language,
 					userDetails
 				)
-
 				// If template data is not found throw error
 				if (libraryProjects.data && !Object.keys(libraryProjects.data).length > 0) {
 					throw {
@@ -2969,49 +3006,23 @@ module.exports = class UserProjectsHelper {
 						status: HTTP_STATUS_CODE.bad_request.status,
 					}
 				}
-				let taskReport = {}
-
-				// If template contains project task process the task data
-				if (libraryProjects.data.tasks && libraryProjects.data.tasks.length > 0) {
-					libraryProjects.data.tasks = await _projectTask(
-						libraryProjects.data.tasks,
-						isATargetedSolution === false ? false : true
-					)
-
-					taskReport.total = libraryProjects.data.tasks.length
-
-					libraryProjects.data.tasks.forEach((task) => {
-						if (task.isDeleted == false) {
-							if (!taskReport[task.status]) {
-								taskReport[task.status] = 1
-							} else {
-								taskReport[task.status] += 1
-							}
-						} else {
-							//reduce total count if task is deleted.
-							taskReport.total = taskReport.total - 1
-						}
-					})
-
-					libraryProjects.data['taskReport'] = taskReport
-				}
 
 				// If an entityId is passed in body data. we need to varify if it is a valid entity
 				// If not a valid entity throw error
 				// If it is valid make sure we add those data to newly creating projects
-				// if (requestedData.entityId && requestedData.entityId !== '') {
-				// 	let entityInformation = await entitiesService.entityDocuments(
-				// 		{ _id: requestedData.entityId },
-				// 		'all'
-				// 	)
+				if (requestedData.entityId && requestedData.entityId !== '') {
+					let entityInformation = await entitiesService.entityDocuments(
+						{ _id: requestedData.entityId },
+						CONSTANTS.common.ALL
+					)
 
-				// 	if (!entityInformation.success) {
-				// 		return resolve(entityInformation)
-				// 	}
+					if (!entityInformation?.success || !entityInformation?.data?.length > 0) {
+						return resolve(entityInformation)
+					}
 
-				// 	libraryProjects.data['entityInformation'] = entityInformation.data[0]
-				// 	libraryProjects.data.entityId = entityInformation.data[0]._id
-				// }
+					libraryProjects.data['entityInformation'] = entityInformation.data[0]
+					libraryProjects.data.entityId = entityInformation.data[0]._id
+				}
 
 				if (requestedData.solutionId && requestedData.solutionId !== '' && isATargetedSolution === false) {
 					let programAndSolutionInformation = await this.createProgramAndSolution(
@@ -3051,7 +3062,8 @@ module.exports = class UserProjectsHelper {
 
 					if (
 						libraryProjects.data['entityInformation'] &&
-						libraryProjects.data['entityInformation'].entityType !==
+						libraryProjects.data.entityType &&
+						libraryProjects.data.entityType !==
 							programAndSolutionInformation.data.solutionInformation.entityType
 					) {
 						throw {
@@ -3065,6 +3077,35 @@ module.exports = class UserProjectsHelper {
 
 				if (requestedData.referenceFrom && requestedData.referenceFrom !== '') {
 					libraryProjects.data.referenceFrom = requestedData.referenceFrom
+				}
+
+				let taskReport = {}
+				// If template contains project task process the task data
+				if (libraryProjects?.data?.tasks && libraryProjects?.data?.tasks?.length > 0) {
+					libraryProjects.data.tasks = await _projectTask(
+						libraryProjects.data.tasks,
+						isATargetedSolution === false ? false : true,
+						'',
+						userToken,
+						libraryProjects.data.programId,
+						userDetails
+					)
+					taskReport.total = libraryProjects.data.tasks.length
+
+					libraryProjects.data.tasks.forEach((task) => {
+						if (task.isDeleted == false) {
+							if (!taskReport[task.status]) {
+								taskReport[task.status] = 1
+							} else {
+								taskReport[task.status] += 1
+							}
+						} else {
+							//reduce total count if task is deleted.
+							taskReport.total = taskReport.total - 1
+						}
+					})
+
+					libraryProjects.data['taskReport'] = taskReport
 				}
 				//  <- Add certificate template data
 				// if (libraryProjects.data.certificateTemplateId && libraryProjects.data.certificateTemplateId !== '') {
@@ -3123,11 +3164,11 @@ module.exports = class UserProjectsHelper {
 				if (requestedData.hasAcceptedTAndC) {
 					libraryProjects.data.hasAcceptedTAndC = true
 				}
-
 				libraryProjects.data.projectTemplateId = libraryProjects.data._id
 				libraryProjects.data.projectTemplateExternalId = libraryProjects.data.externalId
 				libraryProjects.data['tenantId'] = userDetails.userInformation.tenantId
-				libraryProjects.data['orgId'] = userDetails.userInformation.organizationId
+				libraryProjects.data['orgId'] = userDetails.userInformation.organizationId // libraryProjects.data.entityType =libraryProjects.data.entityType
+				libraryProjects.data.entityInformation = { entityType: libraryProjects.data.entityType }
 				let projectCreation = await projectQueries.createProject(_.omit(libraryProjects.data, ['_id']))
 
 				// if (addReportInfoToSolution && projectCreation._doc.solutionId) {
@@ -3663,7 +3704,6 @@ module.exports = class UserProjectsHelper {
 
 				// Handle errors during the request stream
 				requestObject.on('error', async () => {
-					console.log('Error generating PDF', error)
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.CERTIFICATE_GENERATION_FAILED,
@@ -4101,7 +4141,7 @@ module.exports = class UserProjectsHelper {
 	}
 
 	/**
-	 * update project infromation
+	 * update project Information
 	 * @method
 	 * @name update
 	 * @param {Object} filter - filter to search project to be updated.
@@ -4296,6 +4336,65 @@ module.exports = class UserProjectsHelper {
 				}
 			}
 		} catch (err) {}
+	}
+	/*
+	 * Get project  infromation when project as a task
+	 * @method
+	 * @name _improvementProjectDetails
+	 * @param {Object} projectData - Task data of project
+	 * @param {Object} userRoleAndProfileInformation -
+	 * @param {String} userToken - filter to search project to be updated.
+	 * @param {String} userId - Logged in user Id.
+	 * @param {String} [appName = ""] - App Name.
+	 * @param {String} [appVersion = ""] - App Version.
+	 * @returns {Object} status of update project
+	 */
+	static _improvementProjectDetails(projectData, userRoleAndProfileInformation = {}, userToken, userId) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let result = {}
+				let matchQuery = {
+					solutionId: new ObjectId(projectData.solutionDetails.solutionId),
+				}
+
+				let projectIdFromsolutionId = await projectTemplateQueries.templateDocument(matchQuery)
+				if (!projectIdFromsolutionId.length > 0) {
+					throw {
+						message: CONSTANTS.apiResponses.PROJECT_TEMPLATE_NOT_FOUND,
+						status: HTTP_STATUS_CODE.bad_request.status,
+					}
+				}
+
+				projectIdFromsolutionId = projectIdFromsolutionId[0].externalId
+
+				// create survey using details api
+				let projectDetails = await this.detailsV2(
+					'',
+					projectData.solutionDetails._id,
+					userId,
+					userToken,
+					userRoleAndProfileInformation,
+					'',
+					'',
+					projectIdFromsolutionId ? projectIdFromsolutionId : ''
+				)
+				if (projectDetails.success) {
+					result['projectId'] = projectDetails.data._id
+				}
+				result['solutionId'] = projectData.solutionDetails._id
+
+				return resolve({
+					success: true,
+					data: result,
+				})
+			} catch (error) {
+				return resolve({
+					message: error.message,
+					success: false,
+					status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
+				})
+			}
+		})
 	}
 }
 
@@ -4573,11 +4672,22 @@ function _attachmentInformation(
  * @name _projectTask
  * @param {Array} tasks - tasks data.
  * @param {String} userId - logged in user id.
+ * @param {String} parentTaskId
+ * @param {String} userToken-user auth token
+ * @param {String}programId -ProgramId
+ * @param {Object} userDetails - userinformation
  * @returns {Object} Project task.
  */
 
-function _projectTask(tasks, isImportedFromLibrary = false, parentTaskId = '') {
-	tasks.forEach((singleTask) => {
+async function _projectTask(
+	tasks,
+	isImportedFromLibrary = false,
+	parentTaskId = '',
+	userToken,
+	programId,
+	userDetails
+) {
+	for (const singleTask of tasks) {
 		if (singleTask) {
 			singleTask.externalId = singleTask.externalId ? singleTask.externalId : singleTask.name.toLowerCase()
 			singleTask.type = singleTask.type ? singleTask.type : CONSTANTS.common.SIMPLE_TASK_TYPE
@@ -4611,18 +4721,104 @@ function _projectTask(tasks, isImportedFromLibrary = false, parentTaskId = '') {
 					})
 				}
 			}
+			let importSolutionsResponse
+			// create a child solution if solutionDetails has isReusable true solution details
+			if (singleTask?.solutionDetails?.isReusable) {
+				userDetails.tenantAndOrgInfo = {
+					tenantId: userDetails.userInformation.tenantId,
+					orgId: [userDetails.userInformation.organizationId],
+				}
+				if (singleTask.solutionDetails.type === CONSTANTS.common.OBSERVATION) {
+					const timestamp = UTILS.epochTime()
+					// Creating child observation solution
+					importSolutionsResponse = await surveyService.importTemplateToSolution(
+						userToken,
+						singleTask.solutionDetails._id,
+						'',
+						{
+							name: `${singleTask.solutionDetails.name}-${timestamp}`,
+							externalId: `${singleTask.solutionDetails.externalId}-${timestamp}`,
+							description: `${singleTask.solutionDetails.name}-${timestamp}`,
+							programExternalId: programId,
+							status: CONSTANTS.common.PUBLISHED_STATUS,
+							tenantData: userDetails.tenantAndOrgInfo,
+							userId: userDetails.userInformation.userId,
+						},
+						userDetails,
+						singleTask.solutionDetails.type
+					)
 
+					if (
+						importSolutionsResponse.status != HTTP_STATUS_CODE['ok'].status ||
+						!importSolutionsResponse?.data?.externalId
+					) {
+						throw {
+							message: CONSTANTS.apiResponses.SOLUTION_NOT_CREATED,
+							status: HTTP_STATUS_CODE.bad_request.status,
+						}
+					}
+					// Assinging the new solution  values to task solutionDetails
+					singleTask.solutionDetails._id = importSolutionsResponse.result._id
+					singleTask.solutionDetails.externalId = importSolutionsResponse.result.externalId
+					singleTask.solutionDetails.isReusable = CONSTANTS.common.FALSE
+
+					//updating programComponents
+					await programsQueries.findAndUpdate(
+						{
+							_id: programId,
+						},
+						{
+							$addToSet: { components: importSolutionsResponse.result._id },
+						}
+					)
+				} else if (singleTask.solutionDetails.type === CONSTANTS.common.SURVEY) {
+					// Creating child survey solution
+					importSolutionsResponse = await surveyService.importTemplateToSolution(
+						userToken,
+						singleTask.solutionDetails._id,
+						programId,
+						{
+							tenantData: userDetails.tenantAndOrgInfo,
+							userId: userDetails.userInformation.userId,
+						},
+						userDetails,
+						singleTask.solutionDetails.type
+					)
+
+					if (
+						importSolutionsResponse.status != HTTP_STATUS_CODE['ok'].status ||
+						!importSolutionsResponse?.result?.solutionExternalId
+					) {
+						throw {
+							message: CONSTANTS.apiResponses.SOLUTION_NOT_CREATED,
+							status: HTTP_STATUS_CODE.bad_request.status,
+						}
+					}
+					singleTask.solutionDetails._id = importSolutionsResponse.result.solutionId
+					singleTask.solutionDetails.externalId = importSolutionsResponse.result.solutionExternalId
+					singleTask.solutionDetails.isReusable = CONSTANTS.common.FALSE
+					//updating programComponents
+					await programsQueries.findAndUpdate(
+						{
+							_id: programId,
+						},
+						{
+							$addToSet: { components: importSolutionsResponse.result.solutionId },
+						}
+					)
+				}
+			}
 			removeFieldsFromRequest.forEach((removeField) => {
 				delete singleTask[removeField]
 			})
 
 			if (singleTask.children) {
-				_projectTask(singleTask.children, isImportedFromLibrary, singleTask._id)
+				await _projectTask(singleTask.children, isImportedFromLibrary, singleTask._id)
 			} else {
 				singleTask.children = []
 			}
 		}
-	})
+	}
 
 	return tasks
 }
@@ -5000,6 +5196,7 @@ function _assessmentDetails(assessmentData) {
  * @method
  * @name _observationDetails
  * @param {Object} observationData - Observation data.
+ * @param {Object} userRoleAndProfileInformation -req body Data
  * @returns {Object}
  */
 
@@ -5021,62 +5218,98 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 				}
 			}
 
-			if (observationData.solutionDetails.isReusable) {
-				let observationCreatedFromTemplate = await surveyService.createObservationFromSolutionTemplate(
-					observationData.token,
-					observationData.solutionDetails._id,
-					{
-						name: observationData.solutionDetails.name + '-' + UTILS.epochTime(),
-						description: observationData.solutionDetails.name + '-' + UTILS.epochTime(),
-						program: {
-							_id: observationData.programId,
-							name: '',
-						},
-						status: CONSTANTS.common.PUBLISHED_STATUS,
-						entities: [observationData.entityId],
-						project: observationData.project,
-					}
-				)
-
-				if (!observationCreatedFromTemplate.success) {
-					throw {
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: CONSTANTS.apiResponses.OBSERVATION_NOT_CREATED,
-					}
-				}
-
-				result['solutionId'] = observationCreatedFromTemplate.data._id
-				result['observationId'] = observationCreatedFromTemplate.data.observationId
-			} else {
-				let startDate = new Date()
-				let endDate = new Date()
-				endDate.setFullYear(endDate.getFullYear() + 1)
-
-				let observation = {
-					name: observationData.solutionDetails.name,
-					description: observationData.solutionDetails.name,
-					status: CONSTANTS.common.PUBLISHED_STATUS,
-					startDate: startDate,
-					endDate: endDate,
-					entities: [observationData.entityId],
-					project: observationData.project,
-				}
-
-				let observationCreated = await surveyService.createObservation(
-					observationData.token,
-					observationData.solutionDetails._id,
-					observation,
-					userRoleAndProfileInformation && Object.keys(userRoleAndProfileInformation).length > 0
-						? userRoleAndProfileInformation
-						: {}
-				)
-
-				if (observationCreated.success) {
-					result['observationId'] = observationCreated.data._id
-				}
-
-				result['solutionId'] = observationData.solutionDetails._id
+			let startDate = new Date()
+			let endDate = new Date()
+			endDate.setFullYear(endDate.getFullYear() + 1)
+			let observationPayload = {
+				name: observationData.solutionDetails.name,
+				description: observationData.solutionDetails.name,
+				status: CONSTANTS.common.PUBLISHED_STATUS,
+				startDate: startDate,
+				endDate: endDate,
+				...(userRoleAndProfileInformation[observationData.solutionDetails.subType] && {
+					entities: observationData.entityId
+						? [observationData.entityId]
+						: [userRoleAndProfileInformation[observationData.solutionDetails.subType]],
+				}),
+				project: observationData.project,
 			}
+
+			let observationCreated = await surveyService.createObservation(
+				observationData.token,
+				observationData.solutionDetails._id,
+				observationPayload,
+				userRoleAndProfileInformation && Object.keys(userRoleAndProfileInformation).length > 0
+					? userRoleAndProfileInformation
+					: {},
+				observationData.programId
+			)
+			if (!observationCreated.success || !observationCreated?.data?._id) {
+				throw {
+					status: HTTP_STATUS_CODE.bad_request.status,
+					message: CONSTANTS.apiResponses.OBSERVATION_NOT_CREATED,
+				}
+			} else {
+				result['observationId'] = observationCreated.data._id
+			}
+
+			result['solutionId'] = observationData.solutionDetails._id
+
+			return resolve({
+				success: true,
+				data: result,
+			})
+		} catch (error) {
+			return resolve({
+				message: error.message,
+				success: false,
+				status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
+			})
+		}
+	})
+}
+/**
+ * Survey details
+ * @method
+ * @name _surveyDetails
+ * @param {Object} surveyData - survey data.
+ * @param {Object} userRoleAndProfileInformation -req body Data
+ * @returns {Object}
+ */
+function _surveyDetails(surveyData, userRoleAndProfileInformation = {}) {
+	return new Promise(async (resolve, reject) => {
+		try {
+			let result = {}
+			if (surveyData.project) {
+				let templateTasks = await projectTemplateTaskQueries.taskDocuments(
+					{
+						externalId: surveyData.project.taskId,
+					},
+					['_id']
+				)
+
+				if (templateTasks.length > 0) {
+					surveyData.project.taskId = templateTasks[0]._id
+				}
+			}
+			let surveyCreated
+			userRoleAndProfileInformation['project'] = surveyData.project
+			// create survey using details api
+			surveyCreated = await surveyService.surveyDetails(
+				surveyData.token,
+				surveyData.solutionDetails._id,
+				userRoleAndProfileInformation
+			)
+			if (!surveyCreated.success || !surveyCreated?.data?.assessment?.submissionId) {
+				throw {
+					status: HTTP_STATUS_CODE.bad_request.status,
+					message: CONSTANTS.apiResponses.SURVEY_NOT_CREATED,
+				}
+			}
+
+			result['surveySubmissionId'] = surveyCreated.data.assessment.submissionId
+
+			result['solutionId'] = surveyData.solutionDetails._id
 
 			return resolve({
 				success: true,

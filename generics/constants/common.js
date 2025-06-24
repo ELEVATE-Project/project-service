@@ -151,6 +151,9 @@ module.exports = {
 	DELETE_EVENT_TYPE: 'delete',
 	CREATE_EVENT_TYPE: 'create',
 	OBJECT: 'object',
+	STRING: 'string',
+	ALL: 'all',
+	NONE: 'none',
 	ALL_SCOPE_VALUE: 'ALL',
 	ADD_OPERATION: 'ADD',
 	APPEND_OPERATION: 'APPEND',
@@ -159,4 +162,5 @@ module.exports = {
 	PROMISE_FULFILLED: 'fulfilled',
 	DEFAULT_PROGRAM_USER_MAPPING_TOPIC: 'elevate_program_operation',
 	PROGRAM_EVENT_ENTITY: 'program',
+	FALSE: 'false',
 }

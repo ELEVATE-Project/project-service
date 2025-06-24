@@ -165,7 +165,8 @@ module.exports = class ProjectTemplates extends Abstract {
 					req.userDetails.userInformation.userId,
 					req.userDetails.userToken,
 					req.query.solutionId ? req.query.solutionId : '',
-					req.body
+					req.body,
+					req.userDetails
 				)
 
 				projectTemplates.result = projectTemplates.data

@@ -1268,6 +1268,7 @@ module.exports = class SolutionsHelper {
 				}
 				queryData.data['_id'] = solutionId
 				queryData.data['tenantId'] = tenantId
+
 				let matchQuery = queryData.data
 				let solutionData = await solutionsQueries.solutionsDocument(matchQuery, [
 					'_id',
@@ -1428,6 +1429,11 @@ module.exports = class SolutionsHelper {
 						if (checkforProgramExist[0].hasOwnProperty('requestForPIIConsent')) {
 							duplicateProgram.requestForPIIConsent = checkforProgramExist[0].requestForPIIConsent
 						}
+						//Adding tenantOrgInfoFor program create
+						userDetails.tenantAndOrgInfo = {
+							tenantId: userDetails.userInformation.tenantId,
+							orgId: [userDetails.userInformation.organizationId],
+						}
 						userPrivateProgram = await programsHelper.create(
 							_.omit(duplicateProgram, ['_id', 'components', 'scope']),
 							userDetails.userInformation.userId,
@@ -1519,7 +1525,7 @@ module.exports = class SolutionsHelper {
 							duplicateSolution.type,
 							duplicateSolution.subType,
 							userId,
-							duplicateSolution.projectTemplateId,
+							duplicateSolution.projectTemplateId ? duplicateSolution.projectTemplateId : ''
 							null,
 							null,
 							userDetails
@@ -2138,7 +2144,7 @@ module.exports = class SolutionsHelper {
 					response.programId = solutionDetails[0].programId
 					response.programName = solutionDetails[0].programName
 					response.status = solutionDetails[0].status
-
+					response.projectTemplateId = solutionDetails[0].projectTemplateId
 					return resolve({
 						success: true,
 						message: CONSTANTS.apiResponses.SOLUTION_NOT_FOUND_OR_NOT_A_TARGETED,
@@ -3120,6 +3126,72 @@ module.exports = class SolutionsHelper {
 							message: CONSTANTS.apiResponses.SOLUTION_PROGRAMS_NOT_CREATED,
 						}
 					}
+					let duplicateSolutionData = solutionAndProgramCreation.result.solution
+					// Create duplicate Tempalte and template Task for privateProgram and solution
+					if (solutionData.projectTemplateId) {
+						let projectTemplateData = await projectTemplateQueries.templateDocument({
+							_id: solutionData.projectTemplateId,
+						})
+
+						if (!projectTemplateData.length > 0) {
+							throw {
+								status: HTTP_STATUS_CODE.bad_request.status,
+								message: CONSTANTS.apiResponses.PROJECT_TEMPLATE_NOT_FOUND,
+							}
+						}
+
+						let newProjectTemplate = { ...projectTemplateData[0] }
+						newProjectTemplate.externalId = projectTemplateData[0].externalId + '-' + UTILS.epochTime()
+						newProjectTemplate.createdBy = newProjectTemplate.updatedBy = userId
+						newProjectTemplate.solutionId = duplicateSolutionData._id
+						newProjectTemplate.solutionExternalId = duplicateSolutionData.externalId
+						newProjectTemplate.programId = duplicateSolutionData.programId
+						newProjectTemplate.programExternalId = duplicateSolutionData.programExternalId
+
+						let programDetails = {
+							programId: duplicateSolutionData.programId,
+							programName: duplicateSolutionData.programName,
+							programDescription: duplicateSolutionData.programDescription,
+						}
+						let duplicateTemplateDocument = await projectTemplateQueries.createTemplate(
+							_.omit(newProjectTemplate, ['_id'])
+						)
+
+						if (!duplicateTemplateDocument._id) {
+							throw {
+								status: HTTP_STATUS_CODE.bad_request.status,
+								message: CONSTANTS.apiResponses.PROJECT_TEMPLATES_NOT_CREATED,
+							}
+						}
+						let tasksIds
+
+						if (projectTemplateData[0].tasks) {
+							tasksIds = projectTemplateData[0].tasks
+						}
+						//duplicate task
+						if (Array.isArray(tasksIds) && tasksIds.length > 0) {
+							await projectTemplatesHelper.duplicateTemplateTasks(
+								tasksIds,
+								duplicateTemplateDocument._id,
+								duplicateTemplateDocument.externalId,
+								programDetails,
+								userToken,
+								duplicateTemplateDocument.taskSequence,
+								userDetails
+							)
+						}
+
+						if (duplicateSolutionData._id) {
+							await solutionsQueries.updateSolutionDocument(
+								{ _id: duplicateSolutionData._id },
+								{
+									projectTemplateId: duplicateTemplateDocument._id,
+									name: duplicateTemplateDocument.title,
+								}
+							)
+						}
+					}
+
 					return resolve({
 						success: true,
 						result: solutionAndProgramCreation.result.solution._id,

@@ -400,7 +400,51 @@ module.exports = class ProgramsHelper {
 			}
 		})
 	}
+	/**
+	 * Program details.
+	 * @method
+	 * @name read
+	 * @param {String} programId - Program Id.
+	 * @param {Array} projections - Projections.
+	 * @param {Array} skipFields - Skip fields
+	 * @param {Object} tenantId -  tenantId of the user
+	 * @returns {Object} - Details of the program.
+	 */
 
+	static read(programId, projections = 'all', skipFields = 'none', tenantId) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let programData = await programsQueries.programsDocument(
+					{
+						_id: programId,
+						tenantId: tenantId,
+					},
+					projections,
+					skipFields
+				)
+
+				if (!programData.length > 0) {
+					return resolve({
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.PROGRAM_NOT_FOUND,
+					})
+				}
+
+				return resolve({
+					message: CONSTANTS.apiResponses.PROGRAMS_FETCHED,
+					success: true,
+					data: programData[0],
+					result: programData[0],
+				})
+			} catch (error) {
+				return resolve({
+					success: false,
+					status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message,
+				})
+			}
+		})
+	}
 	/**
 	 * Add roles in program.
 	 * @method

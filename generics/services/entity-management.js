@@ -92,7 +92,6 @@ const entityTypeDocuments = function (filterData = 'all', projection = 'all', us
 				headers: {
 					'content-type': 'application/json',
 					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
-					'x-authenticated-token': userToken,
 				},
 				json: {
 					query: filterData,

@@ -92,7 +92,6 @@ module.exports = class UserExtensioHelper {
 		try {
 			let userId = userDetails.userInformation.userId
 			let tenantId = userDetails.userInformation.tenantId
-			let orgId = userDetails.userInformation.organizationId
 			// Find the userExtension document for the given userId
 			let userExtensionDocument = await userExtensionQueries.userExtensionDocument({
 				userId,
@@ -159,7 +158,6 @@ module.exports = class UserExtensioHelper {
 		try {
 			let userId = userDetails.userInformation.userId
 			let tenantId = userDetails.userInformation.tenantId
-			let orgId = userDetails.userInformation.organizationId
 			// Find user's wishlist projectTemplateIds
 			let userExtensionDocument = await userExtensionQueries.userExtensionDocument({
 				userId,

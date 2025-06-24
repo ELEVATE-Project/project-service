@@ -930,7 +930,6 @@ module.exports = class ProjectTemplatesHelper {
 		return new Promise(async (resolve, reject) => {
 			try {
 				const tenantId = userDetails.userInformation.tenantId
-				const orgId = userDetails.userInformation.organizationId
 				let templateData = await projectTemplateQueries.templateDocument(
 					{
 						externalId: { $in: externalIds },

@@ -803,7 +803,6 @@ module.exports = class ProjectTemplateTasksHelper {
 				let findQuery = {}
 				const userId = userDetails.userInformation.userId
 				const tenantId = userDetails.tenantAndOrgInfo.tenantId
-				const orgId = userDetails.tenantAndOrgInfo.orgId[0]
 
 				findQuery['tenantId'] = tenantId
 

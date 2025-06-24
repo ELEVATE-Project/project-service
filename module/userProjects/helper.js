@@ -1910,7 +1910,6 @@ module.exports = class UserProjectsHelper {
 			try {
 				const userId = userDetails.userInformation.userId
 				const tenantId = userDetails.userInformation.tenantId
-				const orgId = userDetails.userInformation.organizationId
 				// Fetch project details from the database
 				const projectDeatils = await projectQueries.projectDocument(
 					{

@@ -312,7 +312,7 @@ module.exports = class Programs extends Abstract {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Extract tenantId from either userDetails or tenantData in the body
-				let tenantId = req.userDetails?.tenantAndOrgInfo?.tenantId || req.body?.tenantData?.tenantId
+				let tenantId = req.userDetails?.tenantAndOrgInfo?.tenantId ?? req.body?.tenantData?.tenantId
 				let programData = await programsHelper.read(
 					req.params._id,
 					CONSTANTS.common.ALL, //projections

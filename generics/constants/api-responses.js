@@ -277,5 +277,4 @@ module.exports = {
 	TENANTID_REQUIRED_IN_SOLUTION: 'TenantId required in solution',
 	SURVEY_NOT_CREATED: 'Could not create survey',
 	SURVEY_CREATED: 'Survey created successfully',
-	BODY_NOT_EMPTY: 'Body should not be empty.',
 }

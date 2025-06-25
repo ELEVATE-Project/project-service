@@ -706,6 +706,7 @@ module.exports = class ProjectTemplatesHelper {
 					message: CONSTANTS.apiResponses.DUPLICATE_PROJECT_TEMPLATES_CREATED,
 					data: {
 						_id: duplicateTemplateDocument._id,
+						externalId: newProjectTemplate.externalId,
 					},
 				})
 			} catch (error) {
@@ -995,26 +996,48 @@ module.exports = class ProjectTemplatesHelper {
 				externalId: solution.externalId,
 				name: solution.name,
 				isReusable: solution.isReusable,
-				minNoOfSubmissionsRequired: newProjectTemplateTask.solutionDetails.minNoOfSubmissionsRequired,
+				minNoOfSubmissionsRequired: newProjectTemplateTask?.solutionDetails?.minNoOfSubmissionsRequired
+					? newProjectTemplateTask.solutionDetails.minNoOfSubmissionsRequired
+					: CONSTANTS.common.DEFAULT_SUBMISSION_REQUIRED,
 			})
 
-			//fetchSolution from external service
+			//fetchSolution details
 			const fetchSolutionByExternalId = async (externalId) => {
-				const result = await surveyService.listSolutions(
-					{ externalId: { $in: [externalId] } },
-					userToken,
-					userDetails
-				)
-				if (!result?.success || !result?.data?.length) {
-					throw {
-						message: CONSTANTS.apiResponses.SOLUTION_NOT_FOUND,
-						status: HTTP_STATUS_CODE.bad_request.status,
+				let result = {}
+				let validateTemplateId = UTILS.isValidMongoId(externalId.toString())
+				if (validateTemplateId) {
+					//Query project service to get prject solutionDetails
+					result = await solutionsQueries.getAggregate([
+						{ $match: { _id: externalId } },
+						{ $project: { type: 1, entityType: 1, _id: 1, externalId: 1, name: 1, isReusable: 1 } },
+					])
+					result.data = result
+					if (!result?.data?.length > 0) {
+						throw {
+							message: CONSTANTS.apiResponses.SOLUTION_NOT_FOUND,
+							status: HTTP_STATUS_CODE.bad_request.status,
+						}
+					}
+				} else {
+					//Query samiksha service to get obs/survey solutionDetails
+					result = await surveyService.listSolutions(
+						{ externalId: { $in: [externalId] } },
+						userToken,
+						userDetails
+					)
+					if (!result?.success || !result?.data?.length) {
+						throw {
+							message: CONSTANTS.apiResponses.SOLUTION_NOT_FOUND,
+							status: HTTP_STATUS_CODE.bad_request.status,
+						}
 					}
 				}
 				return fetchSolutionDetails(result.data[0])
 			}
 			//update  duplicate template and duplicateTemplate task in child solutions
 			const updateSolutionReferenceForProject = async (templateId, taskId, solutionId) => {
+				let validateMongoId = UTILS.isValidMongoId(solutionId.toString())
+
 				let updateSolutionObj = {
 					referenceFrom: CONSTANTS.common.PROJECT,
 					project: {
@@ -1022,13 +1045,17 @@ module.exports = class ProjectTemplatesHelper {
 						taskId: taskId.toString(),
 					},
 				}
-
-				const solutionUpdated = await surveyService.updateSolution(
-					userToken,
-					updateSolutionObj,
-					solutionId,
-					userDetails
-				)
+				let solutionUpdated
+				if (validateMongoId) {
+					solutionUpdated = await solutionsHelper.update(solutionId, updateSolutionObj, userDetails)
+				} else {
+					solutionUpdated = await surveyService.updateSolution(
+						userToken,
+						updateSolutionObj,
+						solutionId,
+						userDetails
+					)
+				}
 				if (!solutionUpdated.success) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
@@ -1042,6 +1069,7 @@ module.exports = class ProjectTemplatesHelper {
 				let solutionData = {
 					programExternalId: newProjectTemplateTask.programExternalId,
 					externalId: newProjectTemplateTask.projectTemplateExternalId + '-' + UTILS.epochTime(),
+					excludeScope: true,
 				}
 				let newSolution = await solutionsHelper.createSolution(solutionData, false, userDetails)
 				if (newSolution?.data && !newSolution?.data?._id) {
@@ -1060,7 +1088,27 @@ module.exports = class ProjectTemplatesHelper {
 					userDetails
 				)
 
+				if (!createChildTemplateforTask.success || !createChildTemplateforTask?.data?._id) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.DUPLICATE_PROJECT_TEMPLATES_NOT_CREATED,
+					}
+				}
+				//replacing projectTemplateDetails with child projectTemplate Details
+				newProjectTemplateTask.projectTemplateDetails._id = createChildTemplateforTask.data._id
+				newProjectTemplateTask.projectTemplateDetails.externalId = createChildTemplateforTask.data.externalId
+				newProjectTemplateTask.projectTemplateDetails.isReusable = false
+
+				//fetch solution details based on created child solutionexternalId
+				newProjectTemplateTask.solutionDetails = await fetchSolutionByExternalId(newSolution.data._id)
+
 				duplicateTemplateTaskId = await createTemplateTask()
+				updateTaskSequence()
+				await updateSolutionReferenceForProject(
+					newProjectTemplateTask.projectTemplateId,
+					duplicateTemplateTaskId,
+					newSolution.data._id
+				)
 			} else if (
 				taskType === CONSTANTS.common.OBSERVATION &&
 				newProjectTemplateTask?.solutionDetails?.isReusable

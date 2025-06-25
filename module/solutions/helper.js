@@ -474,9 +474,8 @@ module.exports = class SolutionsHelper {
 				let updateProgram = await programQueries.findAndUpdate(programMatchQuery, {
 					$addToSet: { components: solutionCreation._id },
 				})
-
-				solutionData.scope['organizations'] = userDetails.tenantAndOrgInfo.orgId
 				if (!solutionData.excludeScope && programData[0].scope) {
+					solutionData.scope['organizations'] = userDetails.tenantAndOrgInfo.orgId
 					await this.setScope(solutionCreation._id, solutionData.scope ? solutionData.scope : {})
 				}
 

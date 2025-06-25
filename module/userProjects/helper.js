@@ -866,6 +866,7 @@ module.exports = class UserProjectsHelper {
 					data: result.data,
 				})
 			} catch (error) {
+				console.log(error)
 				return resolve({
 					status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
 					success: false,

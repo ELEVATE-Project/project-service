@@ -11,7 +11,6 @@ const healthCheckConfig = require('./health.config')
 
 let health_check = async function (req, res) {
 	let response = await healthCheckHandler(healthCheckConfig)
-	console.log(response)
 	res.status(200).json(response)
 }
 

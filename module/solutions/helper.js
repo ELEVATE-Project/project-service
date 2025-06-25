@@ -172,13 +172,11 @@ module.exports = class SolutionsHelper {
 	 * @name setScope
 	 * @param {String} solutionId - solution id.
 	 * @param {Object} scopeData - scope data.
-	 * @param {String} scopeData.entityType - scope entity type
-	 * @param {Array} scopeData.entities - scope entities
-	 * @param {Array} scopeData.roles - roles in scope
+	 * @param {Array} userOrgIds - userDetails.tenantAndOrgInfo.orgId
 	 * @returns {JSON} - scope in solution.
 	 */
 
-	static setScope(solutionId, scopeData) {
+	static setScope(solutionId, scopeData, userOrgIds) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let solutionData = await solutionsQueries.solutionsDocument({ _id: solutionId }, ['_id'])
@@ -188,6 +186,21 @@ module.exports = class SolutionsHelper {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.SOLUTION_NOT_FOUND,
 					})
+				}
+
+				// populate scopeData.organizations data
+
+				if (scopeData.organizations && scopeData.organizations.length > 0) {
+					scopeData.organizations = scopeData.organizations.filter(
+						(id) => userOrgIds.includes(id) || id.toLowerCase() == CONSTANTS.common.ALL
+					)
+				} else {
+					scopeData['organizations'] = userOrgIds
+				}
+				for (let index = 0; index < scopeData.organizations.length; index++) {
+					if (scopeData.organizations[index].toLowerCase() == CONSTANTS.common.ALL) {
+						scopeData.organizations[index] = 'ALL'
+					}
 				}
 
 				// let currentSolutionScope = {};
@@ -475,9 +488,12 @@ module.exports = class SolutionsHelper {
 					$addToSet: { components: solutionCreation._id },
 				})
 
-				solutionData.scope['organizations'] = userDetails.tenantAndOrgInfo.orgId
 				if (!solutionData.excludeScope && programData[0].scope) {
-					await this.setScope(solutionCreation._id, solutionData.scope ? solutionData.scope : {})
+					await this.setScope(
+						solutionCreation._id,
+						solutionData.scope ? solutionData.scope : {},
+						userDetails.tenantAndOrgInfo.orgId
+					)
 				}
 
 				return resolve({

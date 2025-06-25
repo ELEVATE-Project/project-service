@@ -25,13 +25,11 @@ module.exports = class ProgramsHelper {
 	 * @name setScope
 	 * @param {String} programId - program id.
 	 * @param {Object} scopeData - scope data.
-	 * @param {String} scopeData.entityType - scope entity type
-	 * @param {Array} scopeData.entities - scope entities
-	 * @param {Array} scopeData.roles - roles in scope
+	 * @param {Array} userOrgIds - userDetails.tenantAndOrgInfo.orgId
 	 * @returns {JSON} - scope in programs.
 	 */
 
-	static setScope(programId, scopeData) {
+	static setScope(programId, scopeData, userOrgIds) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let programData = await programsQueries.programsDocument({ _id: programId }, ['_id'])
@@ -41,6 +39,21 @@ module.exports = class ProgramsHelper {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.PROGRAM_NOT_FOUND,
 					})
+				}
+
+				// populate scopeData.organizations data
+
+				if (scopeData.organizations && scopeData.organizations.length > 0) {
+					scopeData.organizations = scopeData.organizations.filter(
+						(id) => userOrgIds.includes(id) || id.toLowerCase() == CONSTANTS.common.ALL
+					)
+				} else {
+					scopeData['organizations'] = userOrgIds
+				}
+				for (let index = 0; index < scopeData.organizations.length; index++) {
+					if (scopeData.organizations[index].toLowerCase() == CONSTANTS.common.ALL) {
+						scopeData.organizations[index] = 'ALL'
+					}
 				}
 
 				let scopeKeys = Object.keys(scopeData).map((key) => {
@@ -245,10 +258,13 @@ module.exports = class ProgramsHelper {
 						message: CONSTANTS.apiResponses.PROGRAM_NOT_CREATED,
 					}
 				}
-				data.scope['organizations'] = userDetails.tenantAndOrgInfo.orgId
 
 				if (data.scope) {
-					let programScopeUpdated = await this.setScope(program._id, data.scope)
+					let programScopeUpdated = await this.setScope(
+						program._id,
+						data.scope,
+						userDetails.tenantAndOrgInfo.orgId
+					)
 
 					if (!programScopeUpdated.success) {
 						throw {

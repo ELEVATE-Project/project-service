@@ -90,6 +90,7 @@ module.exports = async function (req, res, next, token = '') {
 		'/certificateTemplates/createSvg',
 		'/solutions/getDetails',
 		'/userProjects/deleteUserPIIData',
+		'/userExtension/bulkUpload',
 		'/userProjects/pushSubmissionToTask',
 		'/templates/importProjectTemplate',
 	]

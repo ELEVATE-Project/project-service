@@ -516,6 +516,7 @@ module.exports = class UserProjectsHelper {
 					projects: projectUpdated,
 				}
 				//  push project details to kafka
+				await this.attachEntityInformationIfExists(projectUpdated)
 				const kafkaPushedProject = await kafkaProducersHelper.pushProjectToKafka(projectUpdated)
 				const kafkaPushedUserProjects = await kafkaProducersHelper.pushUserActivitiesToKafka(kafkaUserProject)
 
@@ -1891,6 +1892,7 @@ module.exports = class UserProjectsHelper {
 							userId: userId,
 							projects: project,
 						}
+						await this.attachEntityInformationIfExists(project)
 						await kafkaProducersHelper.pushProjectToKafka(project)
 						await kafkaProducersHelper.pushUserActivitiesToKafka(kafkaUserProject)
 
@@ -2345,6 +2347,7 @@ module.exports = class UserProjectsHelper {
 						projects: userProject,
 					}
 					// Push the project to kafka
+					await this.attachEntityInformationIfExists(userProject)
 					await kafkaProducersHelper.pushProjectToKafka(userProject)
 					await kafkaProducersHelper.pushUserActivitiesToKafka(kafkaUserProject)
 				}
@@ -3178,6 +3181,7 @@ module.exports = class UserProjectsHelper {
 					userId: userId,
 					projects: projectCreation,
 				}
+				await this.attachEntityInformationIfExists(projectCreation)
 				await kafkaProducersHelper.pushProjectToKafka(projectCreation)
 				await kafkaProducersHelper.pushUserActivitiesToKafka(kafkaUserProject)
 
@@ -3683,6 +3687,7 @@ module.exports = class UserProjectsHelper {
 							projects: updatedProject,
 						}
 						// Push the updated project details to Kafka
+						await this.attachEntityInformationIfExists(updatedProject)
 						await kafkaProducersHelper.pushProjectToKafka(updatedProject)
 						await kafkaProducersHelper.pushUserActivitiesToKafka(kafkaUserProject)
 					}
@@ -4313,6 +4318,26 @@ module.exports = class UserProjectsHelper {
 		})
 	}
 	/**
+	 * Adds parent entity info to the project if an entityIdentifier exists in projectsInfo.
+	 * @method
+	 * @name attachEntityInformationIfExists
+	 * @param {Object} projectsInfo - Project object with optional entity info.
+	 * @returns {Promise<void>} - attaches parent entity information if it exists to projectsInfo variable
+	 */
+	static async attachEntityInformationIfExists(projectsInfo) {
+		try {
+			if (projectsInfo?.entityInformation?.externalId) {
+				let entityInfoCall = await entitiesService.findEntityDetails(
+					projectsInfo.tenantId,
+					projectsInfo.entityInformation.externalId
+				)
+				if (entityInfoCall?.success && entityInfoCall.data?.length > 0) {
+					projectsInfo.entityInformation.parentInformation = entityInfoCall.data[0].parentInformation
+				}
+			}
+		} catch (err) {}
+	}
+	/*
 	 * Get project  infromation when project as a task
 	 * @method
 	 * @name _improvementProjectDetails

@@ -93,6 +93,7 @@ module.exports = async function (req, res, next, token = '') {
 		'/templateTasks/update',
 		'/projectAttributes/create',
 		'/projectAttributes/update',
+		'/userExtension/bulkUpload',
 		'/userProjects/pushSubmissionToTask',
 		'/templates/importProjectTemplate',
 	]

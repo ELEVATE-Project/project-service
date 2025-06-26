@@ -16,6 +16,10 @@ const userProjectActivityTopic =
 	process.env.USER_ACTIVITY_TOPIC && process.env.USER_ACTIVITY_TOPIC != 'OFF'
 		? process.env.USER_ACTIVITY_TOPIC
 		: 'user-activities'
+const programOperationTopic =
+	process.env.PROGRAM_USER_MAPPING_TOPIC && process.env.PROGRAM_USER_MAPPING_TOPIC != 'OFF'
+		? process.env.PROGRAM_USER_MAPPING_TOPIC
+		: 'elevate_program_operation'
 
 /**
  * Push improvement projects to kafka.
@@ -103,8 +107,32 @@ const pushMessageToKafka = function (payload) {
 			}
 		})
 }
+/**
+ * Push program operation event to Kafka.
+ * @function
+ * @name pushProgramOperationEvent
+ * @param {Object} message - The message payload to be pushed to Kafka.
+ * @returns {Promise<Object>} Kafka push status response.
+ */
+const pushProgramOperationEvent = function (message) {
+	return new Promise(async (resolve, reject) => {
+		try {
+			let kafkaPushStatus = await pushMessageToKafka([
+				{
+					topic: programOperationTopic,
+					messages: JSON.stringify(message),
+				},
+			])
+
+			return resolve(kafkaPushStatus)
+		} catch (error) {
+			return reject(error)
+		}
+	})
+}
 
 module.exports = {
 	pushProjectToKafka: pushProjectToKafka,
 	pushUserActivitiesToKafka: pushUserActivitiesToKafka,
+	pushProgramOperationEvent: pushProgramOperationEvent,
 }

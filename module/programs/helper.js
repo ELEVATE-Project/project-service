@@ -26,11 +26,13 @@ module.exports = class ProgramsHelper {
 	 * @param {String} programId - program id.
 	 * @param {Object} scopeData - scope data.
 	 * @param {Array} userOrgIds - userDetails.tenantAndOrgInfo.orgId
+	 * @param {String} userToken - user token
+	 * @param {String} tenantId - user tenant id
 	 * @param {Boolean} updateOrganizations - indicates if the scope.organizations should be updated or not
 	 * @returns {JSON} - scope in programs.
 	 */
 
-	static setScope(programId, scopeData, userOrgIds, updateOrganizations = false) {
+	static setScope(programId, scopeData, userOrgIds, userToken, tenantId, updateOrganizations = false) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let programData = await programsQueries.programsDocument({ _id: programId }, ['_id'])
@@ -43,14 +45,23 @@ module.exports = class ProgramsHelper {
 				}
 
 				// populate scopeData.organizations data
-
 				if (scopeData.organizations && scopeData.organizations.length > 0) {
+					let validOrgs = await fetchValidOrgs(tenantId, userToken)
+					if (!validOrgs.success) {
+						throw {
+							success: false,
+							status: HTTP_STATUS_CODE['bad_request'].status,
+							message: CONSTANTS.apiResponses.ORG_DETAILS_FETCH_UNSUCCESSFUL_MESSAGE,
+						}
+					}
+					validOrgs = validOrgs.data
 					scopeData.organizations = scopeData.organizations.filter(
-						(id) => userOrgIds.includes(id) || id.toLowerCase() == CONSTANTS.common.ALL
+						(id) => validOrgs.includes(id) || id.toLowerCase() == CONSTANTS.common.ALL
 					)
 				} else if (updateOrganizations == true) {
 					scopeData['organizations'] = userOrgIds
 				}
+
 				for (let index = 0; index < scopeData.organizations.length; index++) {
 					if (scopeData.organizations[index].toLowerCase() == CONSTANTS.common.ALL) {
 						scopeData.organizations[index] = 'ALL'
@@ -265,6 +276,8 @@ module.exports = class ProgramsHelper {
 						program._id,
 						data.scope,
 						userDetails.tenantAndOrgInfo.orgId,
+						userDetails.userToken,
+						userDetails.tenantAndOrgInfo.tenantId,
 						true // indicates scope.organizations should be updated
 					)
 
@@ -342,8 +355,10 @@ module.exports = class ProgramsHelper {
 						programId,
 						data.scope,
 						userDetails.tenantAndOrgInfo.orgId,
-						false
-					) // false value indicates not to update organizations if scope.organizations is not present
+						userDetails.userToken,
+						userDetails.tenantAndOrgInfo.tenantId,
+						false // false value indicates not to update organizations if scope.organizations is not present
+					)
 
 					if (!programScopeUpdated.success) {
 						throw {
@@ -1440,5 +1455,38 @@ module.exports = class ProgramsHelper {
 				})
 			}
 		})
+	}
+}
+
+async function fetchValidOrgs(tenantId, token) {
+	try {
+		let orgDetails = await userService.fetchTenantDetails(tenantId, token)
+		if (
+			!orgDetails ||
+			!orgDetails.success ||
+			!orgDetails.data ||
+			!(Object.keys(orgDetails.data).length > 0) ||
+			!orgDetails.data.organizations ||
+			!(orgDetails.data.organizations.length > 0)
+		) {
+			return { success: false, errorObj: errorObj }
+		}
+
+		// convert the types of items to string
+		orgDetails.data.related_orgs = orgDetails.data.organizations.map((data) => {
+			return data.code.toString()
+		})
+
+		// aggregate valid orgids
+		let validOrgs = orgDetails.data.related_orgs
+		return {
+			success: true,
+			data: validOrgs,
+		}
+	} catch (err) {
+		return {
+			success: false,
+			message: err.message,
+		}
 	}
 }

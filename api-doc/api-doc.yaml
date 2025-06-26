@@ -11114,3 +11114,67 @@ paths:
                       - location: params
                         param: _id
                         msg: Invalid projectTemplete ID
+  /v1/userExtension/bulkUpload:
+    post:
+      tags:
+        - userExtension
+      summary: >-
+        Bulk processes CSV data to assign/update user roles across programs
+        with         validation and event notifications.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                userRoles:
+                  type: string
+                  format: binary
+                  description: The CSV file to upload
+              required:
+                - translationFiles
+                - userRoles
+      parameters:
+        - in: header
+          name: admin-auth-token
+          description: 'required to authenticate the admin user'
+          schema:
+            type: string
+        - in: header
+          name: tenantId
+          description: 'required to identify the tenant'
+        - in: header
+          name: orgId
+          description: 'required orgId'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            text:
+              examples:
+                SuccessResponse:
+                  value: >-
+                    "user","role","entity","entityOperation","keycloak-userId","acl_school","acl_cluster","programOperation","platform_role","programs","_arrayFields","_SYSTEM_ID","status","_kafkaEventPayloads"
+
+                    "adithya_akq63rteo5zkj2","","","","creatorKeyCloakId","","","ADD","mentee","[""Survey_Program_newma_15_05_2025_Finl""]","programs","68528d8c80d184d5ced4c6e1","Success","[{""userId"":50,""username"":""adithya_akq63rteo5zkj2"",""programId"":""6826620348360500140764da"",""role"":""mentee"",""eventType"":""create""}]"
+
+                    "adithya_akq63rteo5zkj2","","","","1","","","ADD","mentee","[""Survey_Program_newma_15_05_2025_Finl""]","programs","68528d8c80d184d5ced4c6e1","Success","[]"
+
+                    "adithya_akq63rteo5zkj2","","","","1","","","ADD","mentee","[""Survey_Program_newma_15_05_2025_Finl""]","programs","68528d8c80d184d5ced4c6e1","Success","[]"
+
+                    "adithya_akq63rteo5zkj2","","","","1","","","APPEND","learner","[""Survey_Program_newma_15_05_2025_Finl""]","programs","68528d8c80d184d5ced4c6e1","Success","[]"
+        '400':
+          description: 'Bad response '
+          content:
+            application/json:
+              examples:
+                FailureResponse:
+                  value:
+                    message: User not found
+                    status: 400
+      description: >-
+        Bulk user role management API that processes CSV data to create or
+        update user-program role assignments with support for multiple
+        operations (add, remove, override) and real-time event notifications via
+        Kafka.

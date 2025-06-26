@@ -169,6 +169,62 @@
 			"service": "project"
 		},
 		{
+			"sourceRoute": "/project/v1/userProjects/pushSubmissionToTask/:id",
+			"type": "POST",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "elevate-project"
+				}
+			],
+			"service": "project"
+		},
+		{
+			"sourceRoute": "/project/v1/userProjects/pushSubmissionToTask",
+			"type": "POST",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "elevate-project"
+				}
+			],
+			"service": "project"
+		},
+		{
+			"sourceRoute": "/project/v1/userProjects/solutionDetails/:id",
+			"type": "POST",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "elevate-project"
+				}
+			],
+			"service": "project"
+		},
+		{
+			"sourceRoute": "/project/v1/userProjects/solutionDetails",
+			"type": "POST",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "elevate-project"
+				}
+			],
+			"service": "project"
+		},
+		{
 			"sourceRoute": "/project/v1/certificateBaseTemplates/createOrUpdate",
 			"type": "POST",
 			"priority": "MUST_HAVE",
@@ -907,6 +963,34 @@
 		},
 		{
 			"sourceRoute": "/project/v1/programs/details/:id",
+			"type": "GET",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "elevate-project"
+				}
+			],
+			"service": "project"
+		},
+		{
+			"sourceRoute": "/project/v1/programs/read",
+			"type": "GET",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "elevate-project"
+				}
+			],
+			"service": "project"
+		},
+		{
+			"sourceRoute": "/project/v1/programs/read/:id",
 			"type": "GET",
 			"priority": "MUST_HAVE",
 			"inSequence": false,
@@ -3824,6 +3908,20 @@
 		},
 		{
 			"sourceRoute": "/project/v1/userProjects/deleteUserPIIData",
+			"type": "POST",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "elevate-project"
+				}
+			],
+			"service": "project"
+		},
+		{
+			"sourceRoute": "/project/v1/userExtension/bulkUpload",
 			"type": "POST",
 			"priority": "MUST_HAVE",
 			"inSequence": false,

@@ -216,7 +216,6 @@ module.exports = class ProgramsHelper {
 					result: result,
 				})
 			} catch (error) {
-				console.log(error)
 				return resolve({
 					message: error.message,
 					success: false,

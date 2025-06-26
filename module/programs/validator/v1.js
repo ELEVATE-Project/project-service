@@ -45,6 +45,12 @@ module.exports = (req) => {
 					.withMessage('Organizations field is required when organizations=true in query')
 					.isArray()
 					.withMessage('Organizations must be an array')
+					.custom((value) => {
+						if (Array.isArray(value) && value.length === 0) {
+							throw new Error('Organizations array cannot be empty when organizations=true in query')
+						}
+						return true
+					})
 			}
 		},
 		removeRolesInScope: function () {

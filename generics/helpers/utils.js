@@ -876,6 +876,15 @@ const convertResources = (resources) =>
 			id: resource.url.split('/').pop(), // Extract the last part of the URL
 		}))
 
+/**
+ * Checks if the user has admin-level roles.
+ * @param {Object} userDetails - The user details object.
+ * @param {string[]} userDetails.roles - Array of user role strings.
+ * @returns {boolean} True if user has ADMIN or TENANT_ADMIN role, else false.
+ */
+function validateRoles(roles, roleToCheck) {
+	return roles.some((role) => roleToCheck.includes(role))
+}
 module.exports = {
 	camelCaseToTitleCase: camelCaseToTitleCase,
 	lowerCase: lowerCase,
@@ -917,4 +926,5 @@ module.exports = {
 	convertResources,
 	convertDurationToDays,
 	factorQuery,
+	validateRoles,
 }

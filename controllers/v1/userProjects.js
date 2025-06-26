@@ -359,11 +359,7 @@ module.exports = class UserProjects extends Abstract {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Call helper function to add the story to the specified project
-				let userStoryDetails = await userProjectsHelper.addStory(
-					req.body,
-					req.params._id,
-					req.userDetails.userInformation.userId
-				)
+				let userStoryDetails = await userProjectsHelper.addStory(req.body, req.params._id, req.userDetails)
 
 				// Resolve with the result from the helper function
 				return resolve(userStoryDetails)
@@ -612,7 +608,8 @@ module.exports = class UserProjects extends Abstract {
 						? req.headers['x-app-ver']
 						: req.headers.appversion
 						? req.headers.appversion
-						: ''
+						: '',
+					req.userDetails
 				)
 
 				return resolve(createdProject)
@@ -1088,7 +1085,7 @@ module.exports = class UserProjects extends Abstract {
 					req.body,
 					req.userDetails.userToken,
 					req.userDetails.userInformation.userId,
-					req.query.isATargetedSolution ? req.query.isATargetedSolution : '',
+					req.query.isATargetedSolution ? req.query.isATargetedSolution : false,
 					req.query.language ? req.query.language : '',
 					req.userDetails
 				)
@@ -1404,13 +1401,13 @@ module.exports = class UserProjects extends Abstract {
 					req.params._id,
 					req.body,
 					req.userDetails.userInformation.userId,
-					req.userDetails.userToken,
 					req.headers['x-app-id'] ? req.headers['x-app-id'] : req.headers.appname ? req.headers.appname : '',
 					req.headers['x-app-ver']
 						? req.headers['x-app-ver']
 						: req.headers.appversion
 						? req.headers.appversion
-						: ''
+						: '',
+					req.userDetails
 				)
 				return resolve(updateData)
 			} catch (error) {

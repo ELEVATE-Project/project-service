@@ -372,7 +372,6 @@ module.exports = class ProgramsHelper {
 					{
 						_id: programId,
 						tenantId: tenantId,
-						orgId: { $in: [orgId] },
 					},
 					projections,
 					skipFields
@@ -1136,7 +1135,6 @@ module.exports = class ProgramsHelper {
 						isAPrivateProgram: true,
 						isDeleted: false,
 						tenantId: tenantId,
-						orgId: { $in: [orgId] },
 					},
 					['name', 'externalId', 'description', '_id', 'isAPrivateProgram', 'translations'],
 					'none',
@@ -1162,7 +1160,6 @@ module.exports = class ProgramsHelper {
 							$match: {
 								programId: { $in: userProgramIds },
 								tenantId: tenantId,
-								orgId: orgId,
 							},
 						},
 						{

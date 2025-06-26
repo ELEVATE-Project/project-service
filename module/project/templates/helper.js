@@ -1170,15 +1170,18 @@ module.exports = class ProjectTemplatesHelper {
 	 * @method
 	 * @name listByIds
 	 * @param {Array} externalIds - External ids
+	 * @param {Object} userDetails - loggedin user info
 	 * @returns {Array} List of templates data.
 	 */
 
-	static listByIds(externalIds) {
+	static listByIds(externalIds, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				const tenantId = userDetails.userInformation.tenantId
 				let templateData = await projectTemplateQueries.templateDocument(
 					{
 						externalId: { $in: externalIds },
+						tenantId,
 					},
 					['title', 'metaInformation.goal', 'externalId']
 				)
@@ -1234,7 +1237,6 @@ module.exports = class ProjectTemplatesHelper {
 					let queryData = {}
 					queryData['link'] = link
 					queryData['tenantId'] = tenantId
-					queryData['orgId'] = { $in: [orgId] }
 
 					//   fetch solution details based on the link
 					let solutionDocument = await solutionsQueries.solutionsDocument(queryData, [
@@ -1275,7 +1277,6 @@ module.exports = class ProjectTemplatesHelper {
 				}
 
 				findQuery['tenantId'] = tenantId
-				findQuery['orgId'] = { $in: [orgId] }
 				//getting template data using templateId
 				let templateData = await projectTemplateQueries.templateDocument(findQuery, 'all', [
 					'ratings',
@@ -1383,6 +1384,7 @@ module.exports = class ProjectTemplatesHelper {
 					wishlistData = await userExtensionQueries.findOne({
 						userId: userId,
 						'wishlist._id': String(templateData[0]._id),
+						tenantId,
 					})
 				}
 				if (wishlistData !== null) {
@@ -1404,7 +1406,6 @@ module.exports = class ProjectTemplatesHelper {
 						{
 							_id: templateData[0].certificateTemplateId,
 							tenantId: tenantId,
-							orgId: { $in: ['ALL', orgId] },
 						},
 						['criteria']
 					)
@@ -1433,7 +1434,6 @@ module.exports = class ProjectTemplatesHelper {
 						userId: userId,
 						projectTemplateId: templateData[0]._id,
 						tenantId: tenantId,
-						orgId: orgId,
 					}
 
 					if (isAPrivateProgram !== '') {
@@ -1492,7 +1492,6 @@ module.exports = class ProjectTemplatesHelper {
 						_id: templateId,
 						status: CONSTANTS.common.PUBLISHED,
 						tenantId: tenantId,
-						orgId: { $in: [orgId] },
 					},
 					['tasks', 'taskSequence']
 				)
@@ -1635,7 +1634,6 @@ module.exports = class ProjectTemplatesHelper {
 				currentOrgOnly = UTILS.convertStringToBoolean(currentOrgOnly)
 
 				queryObject['tenantId'] = userDetails.userInformation.tenantId
-				queryObject['orgId'] = { $in: ['ALL', userDetails.userInformation.organizationId] }
 
 				// handle currentOrgOnly filter
 				if (currentOrgOnly) {

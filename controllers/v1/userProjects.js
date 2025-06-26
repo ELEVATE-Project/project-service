@@ -359,11 +359,7 @@ module.exports = class UserProjects extends Abstract {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Call helper function to add the story to the specified project
-				let userStoryDetails = await userProjectsHelper.addStory(
-					req.body,
-					req.params._id,
-					req.userDetails.userInformation.userId
-				)
+				let userStoryDetails = await userProjectsHelper.addStory(req.body, req.params._id, req.userDetails)
 
 				// Resolve with the result from the helper function
 				return resolve(userStoryDetails)
@@ -495,10 +491,11 @@ module.exports = class UserProjects extends Abstract {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let solutionDetails = await userProjectsHelper.solutionDetails(
-					req.userDetails.userToken,
 					req.params._id,
 					req.query.taskId,
-					req.body
+					req.body,
+					req.userDetails.userToken,
+					req.userDetails.userInformation.userId
 				)
 
 				solutionDetails.result = solutionDetails.data
@@ -611,7 +608,8 @@ module.exports = class UserProjects extends Abstract {
 						? req.headers['x-app-ver']
 						: req.headers.appversion
 						? req.headers.appversion
-						: ''
+						: '',
+					req.userDetails
 				)
 
 				return resolve(createdProject)
@@ -1087,7 +1085,7 @@ module.exports = class UserProjects extends Abstract {
 					req.body,
 					req.userDetails.userToken,
 					req.userDetails.userInformation.userId,
-					req.query.isATargetedSolution ? req.query.isATargetedSolution : '',
+					req.query.isATargetedSolution ? req.query.isATargetedSolution : false,
 					req.query.language ? req.query.language : '',
 					req.userDetails
 				)
@@ -1343,6 +1341,39 @@ module.exports = class UserProjects extends Abstract {
 			}
 		})
 	}
+
+	/**
+	 * @api {post} /project/v1/pushSubmissionToTask/:_projectid
+	 * Push task Submission status
+	 * @apiVersion 1.0.0
+	 * @apiGroup User Projects
+	 * @apiSampleRequest /project/v1/userProjects/pushSubmissionToTask/66ac9949227504a96d8dce1c
+	 **/
+	/**
+	 * pushSubmissionTo project Task
+	 * @method
+	 * @name pushSubmissionToTask
+	 * @param {Object} req .
+	 * @returns {JSON}  Success body.
+	 */
+	async pushSubmissionToTask(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				const pushSubmissionToTask = await userProjectsHelper.pushSubmissionToTask(
+					req.params._id,
+					req.query.taskId,
+					req.body
+				)
+				return resolve(pushSubmissionToTask)
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
+				})
+			}
+		})
+	}
 	/**
     * @api {post} /project/v1/userProjects/update/:projectId
     * ReIssue project certificate
@@ -1370,17 +1401,16 @@ module.exports = class UserProjects extends Abstract {
 					req.params._id,
 					req.body,
 					req.userDetails.userInformation.userId,
-					req.userDetails.userToken,
 					req.headers['x-app-id'] ? req.headers['x-app-id'] : req.headers.appname ? req.headers.appname : '',
 					req.headers['x-app-ver']
 						? req.headers['x-app-ver']
 						: req.headers.appversion
 						? req.headers.appversion
-						: ''
+						: '',
+					req.userDetails
 				)
 				return resolve(updateData)
 			} catch (error) {
-				console.log(error)
 				return reject({
 					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
 					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,

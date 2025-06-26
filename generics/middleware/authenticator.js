@@ -77,6 +77,7 @@ module.exports = async function (req, res, next, token = '') {
 		'/library/categories/update',
 		'/programs/create',
 		'/programs/update',
+		'/programs/read',
 		'/admin/createIndex',
 		'/solutions/create',
 		'/solutions/update',
@@ -89,6 +90,12 @@ module.exports = async function (req, res, next, token = '') {
 		'/certificateTemplates/createSvg',
 		'/solutions/getDetails',
 		'/userProjects/deleteUserPIIData',
+		'/templateTasks/update',
+		'/projectAttributes/create',
+		'/projectAttributes/update',
+		'/userExtension/bulkUpload',
+		'/userProjects/pushSubmissionToTask',
+		'/templates/importProjectTemplate',
 	]
 	let performInternalAccessTokenCheck = false
 	let adminHeader = false
@@ -483,7 +490,6 @@ module.exports = async function (req, res, next, token = '') {
 					rspObj.responseCode = HTTP_STATUS_CODE['unauthorized'].status
 					return res.status(HTTP_STATUS_CODE['unauthorized'].status).send(respUtil(rspObj))
 				}
-
 				req.headers['tenantid'] = result.tenantId
 				req.headers['orgid'] = result.orgId
 

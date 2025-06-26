@@ -13,7 +13,6 @@ const projectQueries = require(DB_QUERY_BASE_PATH + '/projects')
 const entitiesService = require(GENERICS_FILES_PATH + '/services/entity-management')
 const validateEntity = process.env.VALIDATE_ENTITIES
 const userService = require(GENERICS_FILES_PATH + '/services/users')
-
 /**
  * ProgramsHelper
  * @class
@@ -373,7 +372,6 @@ module.exports = class ProgramsHelper {
 					{
 						_id: programId,
 						tenantId: tenantId,
-						orgId: { $in: [orgId] },
 					},
 					projections,
 					skipFields
@@ -401,7 +399,51 @@ module.exports = class ProgramsHelper {
 			}
 		})
 	}
+	/**
+	 * Program details.
+	 * @method
+	 * @name read
+	 * @param {String} programId - Program Id.
+	 * @param {Array} projections - Projections.
+	 * @param {Array} skipFields - Skip fields
+	 * @param {Object} tenantId -  tenantId of the user
+	 * @returns {Object} - Details of the program.
+	 */
 
+	static read(programId, projections = 'all', skipFields = 'none', tenantId) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let programData = await programsQueries.programsDocument(
+					{
+						_id: programId,
+						tenantId: tenantId,
+					},
+					projections,
+					skipFields
+				)
+
+				if (!programData.length > 0) {
+					return resolve({
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.PROGRAM_NOT_FOUND,
+					})
+				}
+
+				return resolve({
+					message: CONSTANTS.apiResponses.PROGRAMS_FETCHED,
+					success: true,
+					data: programData[0],
+					result: programData[0],
+				})
+			} catch (error) {
+				return resolve({
+					success: false,
+					status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message,
+				})
+			}
+		})
+	}
 	/**
 	 * Add roles in program.
 	 * @method
@@ -1093,7 +1135,6 @@ module.exports = class ProgramsHelper {
 						isAPrivateProgram: true,
 						isDeleted: false,
 						tenantId: tenantId,
-						orgId: { $in: [orgId] },
 					},
 					['name', 'externalId', 'description', '_id', 'isAPrivateProgram', 'translations'],
 					'none',
@@ -1119,7 +1160,6 @@ module.exports = class ProgramsHelper {
 							$match: {
 								programId: { $in: userProgramIds },
 								tenantId: tenantId,
-								orgId: orgId,
 							},
 						},
 						{

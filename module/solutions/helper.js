@@ -173,10 +173,11 @@ module.exports = class SolutionsHelper {
 	 * @param {String} solutionId - solution id.
 	 * @param {Object} scopeData - scope data.
 	 * @param {Array} userOrgIds - userDetails.tenantAndOrgInfo.orgId
+	 * @param {Boolean} updateOrganizations - indicates if the scope.organizations should be updated or not
 	 * @returns {JSON} - scope in solution.
 	 */
 
-	static setScope(solutionId, scopeData, userOrgIds) {
+	static setScope(solutionId, scopeData, userOrgIds, updateOrganizations = false) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let solutionData = await solutionsQueries.solutionsDocument({ _id: solutionId }, ['_id'])
@@ -194,7 +195,7 @@ module.exports = class SolutionsHelper {
 					scopeData.organizations = scopeData.organizations.filter(
 						(id) => userOrgIds.includes(id) || id.toLowerCase() == CONSTANTS.common.ALL
 					)
-				} else {
+				} else if (updateOrganizations == true) {
 					scopeData['organizations'] = userOrgIds
 				}
 				for (let index = 0; index < scopeData.organizations.length; index++) {
@@ -492,7 +493,8 @@ module.exports = class SolutionsHelper {
 					await this.setScope(
 						solutionCreation._id,
 						solutionData.scope ? solutionData.scope : {},
-						userDetails.tenantAndOrgInfo.orgId
+						userDetails.tenantAndOrgInfo.orgId,
+						true // indicates scope.organizations should be updated or not
 					)
 				}
 
@@ -611,11 +613,12 @@ module.exports = class SolutionsHelper {
 					}
 				}
 				if (solutionData.scope && Object.keys(solutionData.scope).length > 0) {
-					if (!solutionData.scope.organizations) {
-						solutionData.scope.organizations = userDetails.tenantAndOrgInfo.orgId
-					}
-					let solutionScope = await this.setScope(solutionUpdatedData._id, solutionData.scope)
-
+					let solutionScope = await this.setScope(
+						solutionUpdatedData._id,
+						solutionData.scope,
+						userDetails.tenantAndOrgInfo.orgId,
+						false
+					) // false value indicates not to update organizations if scope.organizations is not present
 					if (!solutionScope.success) {
 						throw {
 							message: CONSTANTS.apiResponses.COULD_NOT_UPDATE_SCOPE,

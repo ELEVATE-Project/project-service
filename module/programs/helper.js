@@ -26,10 +26,11 @@ module.exports = class ProgramsHelper {
 	 * @param {String} programId - program id.
 	 * @param {Object} scopeData - scope data.
 	 * @param {Array} userOrgIds - userDetails.tenantAndOrgInfo.orgId
+	 * @param {Boolean} updateOrganizations - indicates if the scope.organizations should be updated or not
 	 * @returns {JSON} - scope in programs.
 	 */
 
-	static setScope(programId, scopeData, userOrgIds) {
+	static setScope(programId, scopeData, userOrgIds, updateOrganizations = false) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let programData = await programsQueries.programsDocument({ _id: programId }, ['_id'])
@@ -47,7 +48,7 @@ module.exports = class ProgramsHelper {
 					scopeData.organizations = scopeData.organizations.filter(
 						(id) => userOrgIds.includes(id) || id.toLowerCase() == CONSTANTS.common.ALL
 					)
-				} else {
+				} else if (updateOrganizations == true) {
 					scopeData['organizations'] = userOrgIds
 				}
 				for (let index = 0; index < scopeData.organizations.length; index++) {
@@ -263,7 +264,8 @@ module.exports = class ProgramsHelper {
 					let programScopeUpdated = await this.setScope(
 						program._id,
 						data.scope,
-						userDetails.tenantAndOrgInfo.orgId
+						userDetails.tenantAndOrgInfo.orgId,
+						true // indicates if scope.organizations should be updated or not
 					)
 
 					if (!programScopeUpdated.success) {
@@ -336,10 +338,12 @@ module.exports = class ProgramsHelper {
 				}
 
 				if (data.scope) {
-					if (!data.scope.organizations) {
-						data.scope.organizations = userDetails.tenantAndOrgInfo.orgId
-					}
-					let programScopeUpdated = await this.setScope(programId, data.scope)
+					let programScopeUpdated = await this.setScope(
+						programId,
+						data.scope,
+						userDetails.tenantAndOrgInfo.orgId,
+						false
+					) // false value indicates not to update organizations if scope.organizations is not present
 
 					if (!programScopeUpdated.success) {
 						throw {

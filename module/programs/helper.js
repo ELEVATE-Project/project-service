@@ -1275,28 +1275,18 @@ module.exports = class ProgramsHelper {
 							message: CONSTANTS.apiResponses.FAILED_TO_FETCH_TENANT_DETAILS,
 						})
 					}
-					// factors = [ 'professional_role', 'professional_subroles' ]
-					let factors
-					if (
-						tenantDetails.data.meta.hasOwnProperty('factors') &&
-						tenantDetails.data.meta.factors.length > 0
-					) {
-						factors = tenantDetails.data.meta.factors
-						let queryFilter = UTILS.factorQuery(factors, userRoleInfo)
-						filterQuery['$and'] = queryFilter
+
+					let tenantPublicDetailsMetaField = tenantDetails.data.meta
+
+					filterQuery = {
+						...filterQuery,
+						...UTILS.targetingQuery(
+							userRoleInfo,
+							tenantPublicDetailsMetaField,
+							CONSTANTS.common.MANDATORY_SCOPE_FIELD,
+							CONSTANTS.common.OPTIONAL_SCOPE_FIELD
+						),
 					}
-
-					let dataToOmit = ['filter', 'role', 'factors', 'type', 'tenantId', 'orgId', 'organizations']
-					// factors.append(dataToOmit)
-
-					const finalKeysToRemove = [...new Set([...dataToOmit, ...factors])]
-
-					filterQuery.$or = []
-					Object.keys(_.omit(data, finalKeysToRemove)).forEach((key) => {
-						filterQuery.$or.push({
-							[`scope.${key}`]: { $in: data[key] },
-						})
-					})
 				} else {
 					// Obtain userInfo
 					let userRoleInfo = _.omit(data, ['filter', 'factors', 'role', 'type', 'tenantId', 'orgId'])

@@ -876,6 +876,75 @@ const convertResources = (resources) =>
 			id: resource.url.split('/').pop(), // Extract the last part of the URL
 		}))
 
+/**
+ * Extracts mandatory and optional scope factors from tenant metadata.
+ *
+ * @param {Object} tenantMeta - Metadata object containing scope configuration fields.
+ * @param {string} mandatoryKey - Key name in tenantMeta for mandatory scope fields.
+ * @param {string} optionalKey - Key name in tenantMeta for optional scope fields.
+ * @returns {{ mandatoryFactors: string[], optionalFactors: string[] }}
+ *          An object containing arrays of mandatory and optional factors.
+ */
+function extractScopeFactors(tenantMeta, mandatoryKey, optionalKey) {
+	const factors = []
+	const optionalFactors = []
+
+	if (
+		tenantMeta.hasOwnProperty(mandatoryKey) &&
+		Array.isArray(tenantMeta[mandatoryKey]) &&
+		tenantMeta[mandatoryKey].length > 0
+	) {
+		factors.push(...tenantMeta[mandatoryKey])
+	}
+
+	if (
+		tenantMeta.hasOwnProperty(optionalKey) &&
+		Array.isArray(tenantMeta[optionalKey]) &&
+		tenantMeta[optionalKey].length > 0
+	) {
+		optionalFactors.push(...tenantMeta[optionalKey])
+	}
+
+	return {
+		mandatoryFactors: factors,
+		optionalFactors: optionalFactors,
+	}
+}
+/**
+ * Generates a MongoDB filter query with optional conditions ($or) always nested inside $and.
+ *
+ * @param {Object} bodyData - The data to evaluate against factors.
+ * @param {Object} tenantMeta - Metadata containing scope definitions.
+ * @param {Array<string>} mandatoryField - List of mandatory scope fields.
+ * @param {Array<string>} optionalField - List of optional scope fields.
+ * @returns {Object} MongoDB filter query.
+ */
+function targetingQuery(bodyData, tenantMeta, mandatoryField, optionalField) {
+	let { mandatoryFactors, optionalFactors } = extractScopeFactors(tenantMeta, mandatoryField, optionalField)
+
+	const andClauses = []
+
+	// Add mandatory conditions if any
+	if (Array.isArray(mandatoryFactors) && mandatoryFactors.length > 0) {
+		const mandatoryQuery = UTILS.factorQuery(mandatoryFactors, bodyData)
+		if (Array.isArray(mandatoryQuery) && mandatoryQuery.length > 0) {
+			andClauses.push(...mandatoryQuery)
+		}
+	}
+
+	// Add optional conditions as $or inside $and
+	if (Array.isArray(optionalFactors) && optionalFactors.length > 0) {
+		const optionalQuery = UTILS.factorQuery(optionalFactors, bodyData)
+		if (Array.isArray(optionalQuery) && optionalQuery.length > 0) {
+			andClauses.push({ $or: optionalQuery })
+		}
+	}
+
+	let filterQuery = andClauses.length > 0 ? { $and: andClauses } : {}
+
+	return filterQuery
+}
+
 module.exports = {
 	camelCaseToTitleCase: camelCaseToTitleCase,
 	lowerCase: lowerCase,
@@ -917,4 +986,5 @@ module.exports = {
 	convertResources,
 	convertDurationToDays,
 	factorQuery,
+	targetingQuery,
 }

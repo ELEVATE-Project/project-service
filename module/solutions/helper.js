@@ -494,7 +494,7 @@ module.exports = class SolutionsHelper {
 						solutionCreation._id,
 						solutionData.scope ? solutionData.scope : {},
 						userDetails.tenantAndOrgInfo.orgId,
-						true // indicates scope.organizations should be updated or not
+						true // indicates scope.organizations should be updated
 					)
 				}
 

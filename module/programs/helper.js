@@ -265,7 +265,7 @@ module.exports = class ProgramsHelper {
 						program._id,
 						data.scope,
 						userDetails.tenantAndOrgInfo.orgId,
-						true // indicates if scope.organizations should be updated or not
+						true // indicates scope.organizations should be updated
 					)
 
 					if (!programScopeUpdated.success) {

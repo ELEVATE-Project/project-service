@@ -172,14 +172,11 @@ module.exports = class SolutionsHelper {
 	 * @name setScope
 	 * @param {String} solutionId - solution id.
 	 * @param {Object} scopeData - scope data.
-	 * @param {Array} userOrgIds - userDetails.tenantAndOrgInfo.orgId
-	 * @param {String} userToken - user token
-	 * @param {String} tenantId - user tenant id
-	 * @param {Boolean} updateOrganizations - indicates if the scope.organizations should be updated or not
+	 * @param {Object} userDetails - loggedin user info
 	 * @returns {JSON} - scope in solution.
 	 */
 
-	static setScope(solutionId, scopeData, userOrgIds, userToken, tenantId, updateOrganizations = false) {
+	static setScope(solutionId, scopeData, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let solutionData = await solutionsQueries.solutionsDocument({ _id: solutionId }, ['_id'])
@@ -192,8 +189,16 @@ module.exports = class SolutionsHelper {
 				}
 
 				// populate scopeData.organizations data
-				if (scopeData.organizations && scopeData.organizations.length > 0) {
-					let validOrgs = await fetchValidOrgs(tenantId, userToken)
+				if (
+					scopeData.organizations &&
+					scopeData.organizations.length > 0 &&
+					userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)
+				) {
+					let validOrgs = await userService.fetchTenantDetails(
+						userDetails.tenantAndOrgInfo.tenantId,
+						userDetails.userToken,
+						true
+					)
 					if (!validOrgs.success) {
 						throw {
 							success: false,
@@ -205,11 +210,11 @@ module.exports = class SolutionsHelper {
 					scopeData.organizations = scopeData.organizations.filter(
 						(id) => validOrgs.includes(id) || id.toLowerCase() == CONSTANTS.common.ALL
 					)
-				} else if (updateOrganizations == true) {
-					scopeData['organizations'] = userOrgIds
+				} else {
+					scopeData['organizations'] = userDetails.tenantAndOrgInfo.orgId
 				}
 
-				for (let index = 0; index < scopeData.organizations.length; index++) {
+				for (let index = 0; scopeData.organizations && index < scopeData.organizations.length; index++) {
 					if (scopeData.organizations[index].toLowerCase() == CONSTANTS.common.ALL) {
 						scopeData.organizations[index] = 'ALL'
 					}
@@ -501,14 +506,7 @@ module.exports = class SolutionsHelper {
 				})
 
 				if (!solutionData.excludeScope && programData[0].scope) {
-					await this.setScope(
-						solutionCreation._id,
-						solutionData.scope ? solutionData.scope : {},
-						userDetails.tenantAndOrgInfo.orgId,
-						userDetails.userToken,
-						userDetails.tenantAndOrgInfo.tenantId,
-						true // indicates scope.organizations should be updated
-					)
+					await this.setScope(solutionCreation._id, solutionData.scope ? solutionData.scope : {}, userDetails)
 				}
 
 				return resolve({
@@ -626,14 +624,7 @@ module.exports = class SolutionsHelper {
 					}
 				}
 				if (solutionData.scope && Object.keys(solutionData.scope).length > 0) {
-					let solutionScope = await this.setScope(
-						solutionUpdatedData._id,
-						solutionData.scope,
-						userDetails.tenantAndOrgInfo.orgId,
-						userDetails.userToken,
-						userDetails.tenantAndOrgInfo.tenantId,
-						false // false value indicates not to update organizations if scope.organizations is not present
-					)
+					let solutionScope = await this.setScope(solutionUpdatedData._id, solutionData.scope, userDetails)
 					if (!solutionScope.success) {
 						throw {
 							message: CONSTANTS.apiResponses.COULD_NOT_UPDATE_SCOPE,
@@ -3741,38 +3732,5 @@ module.exports = class SolutionsHelper {
 				})
 			}
 		})
-	}
-}
-
-async function fetchValidOrgs(tenantId, token) {
-	try {
-		let orgDetails = await userService.fetchTenantDetails(tenantId, token)
-		if (
-			!orgDetails ||
-			!orgDetails.success ||
-			!orgDetails.data ||
-			!(Object.keys(orgDetails.data).length > 0) ||
-			!orgDetails.data.organizations ||
-			!(orgDetails.data.organizations.length > 0)
-		) {
-			return { success: false, errorObj: errorObj }
-		}
-
-		// convert the types of items to string
-		orgDetails.data.related_orgs = orgDetails.data.organizations.map((data) => {
-			return data.code.toString()
-		})
-
-		// aggregate valid orgids
-		let validOrgs = orgDetails.data.related_orgs
-		return {
-			success: true,
-			data: validOrgs,
-		}
-	} catch (err) {
-		return {
-			success: false,
-			message: err.message,
-		}
 	}
 }

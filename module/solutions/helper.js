@@ -1525,7 +1525,7 @@ module.exports = class SolutionsHelper {
 							duplicateSolution.type,
 							duplicateSolution.subType,
 							userId,
-							duplicateSolution.projectTemplateId ? duplicateSolution.projectTemplateId : ''
+							duplicateSolution.projectTemplateId ? duplicateSolution.projectTemplateId : '',
 							null,
 							null,
 							userDetails

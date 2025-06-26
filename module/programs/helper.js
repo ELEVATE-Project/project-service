@@ -46,6 +46,7 @@ module.exports = class ProgramsHelper {
 					scopeData.organizations.length > 0 &&
 					userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)
 				) {
+					// call user-service to fetch related orgs
 					let validOrgs = await userService.fetchTenantDetails(
 						userDetails.tenantAndOrgInfo.tenantId,
 						userDetails.userToken,
@@ -59,6 +60,8 @@ module.exports = class ProgramsHelper {
 						}
 					}
 					validOrgs = validOrgs.data
+
+					// filter valid orgs
 					scopeData.organizations = scopeData.organizations.filter(
 						(id) => validOrgs.includes(id) || id.toLowerCase() == CONSTANTS.common.ALL
 					)

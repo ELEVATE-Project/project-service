@@ -496,7 +496,7 @@ const getUserProfileByIdentifier = function (tenantId, userId = null, username) 
 			const options = {
 				headers: {
 					'content-type': 'application/json',
-					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
+					internal_access_token: process.env.INTERNAL_ACCESS_TOKEN,
 				},
 			}
 

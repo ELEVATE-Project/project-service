@@ -300,6 +300,8 @@ module.exports = class Solutions extends Abstract {
 	 * @returns {Array} solution scope roles.
 	 */
 
+	// Role-based logic has been removed from the current implementation, so this API is currently not in use.
+	//  It may be revisited in the future based on requirements.
 	async addRolesInScope(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
@@ -421,6 +423,8 @@ module.exports = class Solutions extends Abstract {
 	 * @returns {Array} Removed solution scope roles.
 	 */
 
+	// Role-based logic has been removed from the current implementation, so this API is currently not in use.
+	//  It may be revisited in the future based on requirements.
 	async removeRolesInScope(req) {
 		return new Promise(async (resolve, reject) => {
 			try {

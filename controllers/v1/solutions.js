@@ -559,8 +559,37 @@ module.exports = class Solutions extends Abstract {
     * @apiName Add entities in solutions
     * @apiGroup Solutions
     * @apiParamExample {json} Request-Body:
-    * {
-      "entities" : ["5f33c3d85f637784791cd830"]
+    * 
+      {
+        "entities": {
+            "district": [
+                "ALL"
+            ],
+            "professional_subroles": [
+                "ALL",
+                "682301604e2812081f342674",
+                "682303044e2812081f3426fb"
+            ],
+            "professional_role": [
+                "ALL",
+                "681b07b49c57cdcf03c79ae3",
+                "681b0800f21c88cef9517e0e"
+            ],
+            "school": [
+                "ALL",
+                "67c82d9553812588916410d3"
+            ],
+            "language": [
+                "681b0800f21c88cef951890e"
+            ],
+            "gender": [
+                "67c82d955381258891642345"
+            ]
+        },
+        "organizations": [
+            "blr"
+        ]
+      } 
     }
     * @apiHeader {String} X-authenticated-user-token Authenticity token
     * @apiHeader {String} internal-access-token
@@ -586,7 +615,6 @@ module.exports = class Solutions extends Abstract {
 	 * @param {String} req.params._id - solution id.
 	 * @param {Object} req.body - data to be added.
 	 * @param {Object} req.userDetails - User details
-	 * @param {Boolean} req.query.organizations - True if we want to update organizations details.
 	 * @returns {Array} Solution scope entities updation.
 	 */
 
@@ -617,7 +645,22 @@ module.exports = class Solutions extends Abstract {
     * @apiGroup Solutions
     * @apiParamExample {json} Request-Body:
     * {
-      "entities" : ["5f33c3d85f637784791cd830"]
+        "entities": {
+            "professional_subroles": [
+                "682301254e2812081f34266c",
+                "682303044e2812081f3426fb",
+                "ALL",
+                "682301604e2812081f342674"
+            ],
+            "professional_role": [
+                "ALL",
+                "681b07b49c57cdcf03c79ae3",
+                "681b0800f21c88cef9517e0e"
+            ]
+        },
+        "organizations": [
+            "ALL"
+        ]
     }
     * @apiHeader {String} X-authenticated-user-token Authenticity token
     * @apiHeader {String} internal-access-token
@@ -643,7 +686,6 @@ module.exports = class Solutions extends Abstract {
 	 * @param {String} req.params._id - solution id.
 	 * @param {Object} req.body - data to be removed.
 	 * @param {Object} req.userDetails - User details
-	 * @param {Boolean} req.query.organizations - True if we want to update organizations details.
 	 * @returns {Array} Program scope roles.
 	 */
 
@@ -653,8 +695,7 @@ module.exports = class Solutions extends Abstract {
 				let solutionUpdated = await solutionsHelper.removeEntitiesInScope(
 					req.params._id,
 					req.body,
-					req.userDetails,
-					req.query.organizations ? req.query.organizations : false
+					req.userDetails
 				)
 
 				return resolve(solutionUpdated)

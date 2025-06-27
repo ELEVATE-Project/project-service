@@ -537,7 +537,6 @@ module.exports = class ProgramsHelper {
 	 * @param {String} programId - Program Id.
 	 * @param {Object} bodyData - body data.
 	 * @param {Object} userDetails - User Details
-	 * @param {Boolean} organizations - If organizations is Present.
 	 * @returns {JSON} - Added scope data.
 	 */
 
@@ -768,11 +767,10 @@ module.exports = class ProgramsHelper {
 	 * @name removeEntitiesInScope
 	 * @param {Object} bodyData - body data.
 	 * @param {Object} userDetails - User Details
-	 * @param {Boolean} organizations - If organizations is Present.
 	 * @returns {JSON} - Removed scope data.
 	 */
 
-	static removeEntitiesInScope(programId, bodyData, userDetails, organizations) {
+	static removeEntitiesInScope(programId, bodyData, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Extract tenant and org IDs from userDetails
@@ -800,57 +798,53 @@ module.exports = class ProgramsHelper {
 
 				// Initialize the update object to be used in MongoDB update query
 				const currentScope = programData[0].scope || {}
-				let updateObject = { $pull: {} }
-				let updateObjectForALL = { $addToSet: {} }
-				// Check roles to fetch tenantDetails for validationExcludedScopeKeys
+				// Deep copy to avoid mutation
+				let updatedScope = JSON.parse(JSON.stringify(currentScope))
+
+				// Fetch tenant details if role is admin/tenant admin
 				let adminTenantAdminRole = [CONSTANTS.common.ADMIN_ROLE, CONSTANTS.common.TENANT_ADMIN]
 				let tenantDetails
-				if (organizations) {
-					if (UTILS.validateRoles(userDetails.userInformation.roles, adminTenantAdminRole)) {
-						tenantDetails = await userService.fetchTenantDetails(tenantId, userDetails.userToken)
-						if (!tenantDetails?.success || !tenantDetails?.data?.meta) {
-							throw {
-								message: CONSTANTS.apiResponses.FAILED_TO_FETCH_TENANT_DETAILS,
-								status: HTTP_STATUS_CODE.bad_request.status,
-							}
+				if (UTILS.validateRoles(userDetails.userInformation.roles, adminTenantAdminRole)) {
+					// Fetch tenant meta details if user is admin/tenant admin
+					tenantDetails = await userService.fetchTenantDetails(tenantId, userDetails.userToken)
+					if (!tenantDetails?.success || !tenantDetails?.data?.meta) {
+						throw {
+							message: CONSTANTS.apiResponses.FAILED_TO_FETCH_TENANT_DETAILS,
+							status: HTTP_STATUS_CODE.bad_request.status,
 						}
-						// Prepare $pull clause for organizations
-						updateObject.$pull[`scope.organizations`] = { $in: bodyData.organizations }
 					}
 				}
 
-				for (const [key, value] of Object.entries(currentScope)) {
-					if (value.includes(ALL_SCOPE_VALUE))
-						updateObjectForALL.$addToSet[`scope.${key}`] = { $each: [ALL_SCOPE_VALUE] }
-				}
-				// Handle entity removal
-				const entities = bodyData.entities || {}
-				for (const [key, values] of Object.entries(entities)) {
-					// Check if the key is present in current program scope
-					const currentScopeValues = currentScope[key] || []
-					if (!Array.isArray(currentScopeValues) || currentScopeValues.length === 0) {
+				// Remove entity values from current scope
+				const entitiesToRemove = bodyData.entities || {}
+				for (const [key, valuesToRemove] of Object.entries(entitiesToRemove)) {
+					const currentValues = updatedScope[key] || []
+					// If current scope does not contain an array for the key, throw error
+					if (!Array.isArray(currentValues)) {
 						throw {
 							message: `${key} is not present in program scope`,
 							status: HTTP_STATUS_CODE.bad_request.status,
 						}
 					}
-					// Prepare $pull clause to remove provided entity IDs from scope
-					updateObject.$pull[`scope.${key}`] = { $in: values }
+					// Remove matching values
+					updatedScope[key] = currentValues.filter((val) => !valuesToRemove.includes(val))
 				}
-				let updateProgram = await programsQueries.findAndUpdate(
-					{
-						_id: programId,
+
+				// Fill with ALL for empty keys listed in tenant meta.factors
+				const factorKeys = tenantDetails?.data?.meta?.factors || []
+				for (const factorKey of factorKeys) {
+					if (!Array.isArray(updatedScope[factorKey]) || updatedScope[factorKey].length === 0) {
+						updatedScope[factorKey] = [ALL_SCOPE_VALUE]
+					}
+				}
+
+				// Prepare update object
+				let updateObject = {
+					$set: {
+						scope: updatedScope,
 					},
-					updateObject,
-					{ new: true }
-				)
-				let updateProgramToAddALL = await programsQueries.findAndUpdate(
-					{
-						_id: programId,
-					},
-					updateObjectForALL,
-					{ new: true }
-				)
+				}
+				let updateProgram = await programsQueries.findAndUpdate({ _id: programId }, updateObject, { new: true })
 				if (!updateProgram || !updateProgram._id) {
 					throw {
 						message: CONSTANTS.apiResponses.PROGRAM_NOT_UPDATED,

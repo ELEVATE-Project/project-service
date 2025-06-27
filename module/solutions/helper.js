@@ -217,10 +217,10 @@ module.exports = class SolutionsHelper {
 					scopeData['organizations'] = userDetails.tenantAndOrgInfo.orgId
 				}
 
-				for (let index = 0; scopeData.organizations && index < scopeData.organizations.length; index++) {
-					if (scopeData.organizations[index].toLowerCase() == CONSTANTS.common.ALL) {
-						scopeData.organizations[index] = 'ALL'
-					}
+				if (Array.isArray(scopeData.organizations)) {
+					scopeData.organizations = scopeData.organizations.map((orgId) =>
+						orgId === CONSTANTS.common.ALL ? 'ALL' : orgId
+					)
 				}
 
 				// let currentSolutionScope = {};

@@ -596,8 +596,7 @@ module.exports = class Solutions extends Abstract {
 				let solutionUpdated = await solutionsHelper.addEntitiesInScope(
 					req.params._id,
 					req.body,
-					req.userDetails,
-					req.query.organizations ? req.query.organizations : false
+					req.userDetails
 				)
 
 				return resolve(solutionUpdated)

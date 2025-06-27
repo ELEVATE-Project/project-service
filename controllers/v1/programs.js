@@ -427,12 +427,7 @@ module.exports = class Programs extends Abstract {
 	async addEntitiesInScope(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let programUpdated = await programsHelper.addEntitiesInScope(
-					req.params._id,
-					req.body,
-					req.userDetails,
-					req.query.organizations ? req.query.organizations : false
-				)
+				let programUpdated = await programsHelper.addEntitiesInScope(req.params._id, req.body, req.userDetails)
 
 				return resolve(programUpdated)
 			} catch (error) {

@@ -1935,7 +1935,7 @@ module.exports = class SolutionsHelper {
 	 * @returns {JSON} - Added entities data.
 	 */
 
-	static addEntitiesInScope(solutionId, bodyData, userDetails, organizations) {
+	static addEntitiesInScope(solutionId, bodyData, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Extract tenant and org IDs from user details
@@ -2003,7 +2003,7 @@ module.exports = class SolutionsHelper {
 					}
 
 					// Handle organization values if passed
-					if (organizations) {
+					if (bodyData.organizations) {
 						if (Array.isArray(bodyData.organizations)) {
 							if (bodyData.organizations.includes(ALL_SCOPE_VALUE)) {
 								// Add "ALL" if specified
@@ -2016,7 +2016,7 @@ module.exports = class SolutionsHelper {
 								if (!isValid) {
 									throw {
 										message: CONSTANTS.apiResponses.INVALID_ORGANIZATION,
-										status: CONSTANTS.bad_request.status,
+										status: HTTP_STATUS_CODE.bad_request.status,
 									}
 								}
 								updateObject.$addToSet[`scope.organizations`] = { $each: bodyData.organizations }
@@ -2136,7 +2136,7 @@ module.exports = class SolutionsHelper {
 			try {
 				let tenantId = userDetails.tenantAndOrgInfo.tenantId
 				let orgId = userDetails.tenantAndOrgInfo.orgId[0]
-
+				const ALL_SCOPE_VALUE = CONSTANTS.common.ALL_SCOPE_VALUE
 				let solutionData = await solutionsQueries.solutionsDocument(
 					{
 						_id: solutionId,
@@ -2159,14 +2159,28 @@ module.exports = class SolutionsHelper {
 				// Initialize the update object to be used in MongoDB update query
 				const currentScope = solutionData[0].scope || {}
 				let updateObject = { $pull: {} }
-				// Check if user has Admin or Tenant Admin roles to allow org scope modification
+				let updateObjectForALL = { $addToSet: {} }
+				// Check roles to fetch tenantDetails for validationExcludedScopeKeys
 				let adminTenantAdminRole = [CONSTANTS.common.ADMIN_ROLE, CONSTANTS.common.TENANT_ADMIN]
+				let tenantDetails
 				if (organizations) {
 					if (UTILS.validateRoles(userDetails.userInformation.roles, adminTenantAdminRole)) {
+						tenantDetails = await userService.fetchTenantDetails(tenantId, userDetails.userToken)
+						if (!tenantDetails?.success || !tenantDetails?.data?.meta) {
+							throw {
+								message: CONSTANTS.apiResponses.FAILED_TO_FETCH_TENANT_DETAILS,
+								status: HTTP_STATUS_CODE.bad_request.status,
+							}
+						}
+						// Prepare $pull clause for organizations
 						updateObject.$pull[`scope.organizations`] = { $in: bodyData.organizations }
 					}
 				}
 
+				for (const [key, value] of Object.entries(currentScope)) {
+					if (value.includes(ALL_SCOPE_VALUE))
+						updateObjectForALL.$addToSet[`scope.${key}`] = { $each: [ALL_SCOPE_VALUE] }
+				}
 				// Handle entity removal
 				const entities = bodyData.entities || {}
 				for (const [key, values] of Object.entries(entities)) {
@@ -2175,7 +2189,7 @@ module.exports = class SolutionsHelper {
 					if (!Array.isArray(currentScopeValues) || currentScopeValues.length === 0) {
 						throw {
 							message: `${key} is not present in solution scope`,
-							status: CONSTANTS.bad_request.status,
+							status: HTTP_STATUS_CODE.bad_request.status,
 						}
 					}
 					// Prepare $pull clause to remove provided entity IDs from scope
@@ -2186,6 +2200,13 @@ module.exports = class SolutionsHelper {
 						_id: solutionId,
 					},
 					updateObject,
+					{ new: true }
+				)
+				let updateSolutionToALL = await solutionsQueries.updateSolutionDocument(
+					{
+						_id: solutionId,
+					},
+					updateObjectForALL,
 					{ new: true }
 				)
 

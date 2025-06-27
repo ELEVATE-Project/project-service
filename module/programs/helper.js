@@ -541,7 +541,7 @@ module.exports = class ProgramsHelper {
 	 * @returns {JSON} - Added scope data.
 	 */
 
-	static addEntitiesInScope(programId, bodyData, userDetails, organizations) {
+	static addEntitiesInScope(programId, bodyData, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Extract tenant and org IDs from user details
@@ -593,7 +593,7 @@ module.exports = class ProgramsHelper {
 					}
 
 					// Handle organization values if passed
-					if (organizations) {
+					if (bodyData.organizations) {
 						if (Array.isArray(bodyData.organizations)) {
 							if (bodyData.organizations.includes(ALL_SCOPE_VALUE)) {
 								// Add "ALL" if specified
@@ -778,7 +778,7 @@ module.exports = class ProgramsHelper {
 				// Extract tenant and org IDs from userDetails
 				let tenantId = userDetails.tenantAndOrgInfo.tenantId
 				let orgId = userDetails.tenantAndOrgInfo.orgId[0]
-
+				const ALL_SCOPE_VALUE = CONSTANTS.common.ALL_SCOPE_VALUE
 				// Fetch the program to verify it exists and has a scope field
 				let programData = await programsQueries.programsDocument(
 					{
@@ -801,13 +801,27 @@ module.exports = class ProgramsHelper {
 				// Initialize the update object to be used in MongoDB update query
 				const currentScope = programData[0].scope || {}
 				let updateObject = { $pull: {} }
+				let updateObjectForALL = { $addToSet: {} }
 				// Check roles to fetch tenantDetails for validationExcludedScopeKeys
 				let adminTenantAdminRole = [CONSTANTS.common.ADMIN_ROLE, CONSTANTS.common.TENANT_ADMIN]
+				let tenantDetails
 				if (organizations) {
 					if (UTILS.validateRoles(userDetails.userInformation.roles, adminTenantAdminRole)) {
+						tenantDetails = await userService.fetchTenantDetails(tenantId, userDetails.userToken)
+						if (!tenantDetails?.success || !tenantDetails?.data?.meta) {
+							throw {
+								message: CONSTANTS.apiResponses.FAILED_TO_FETCH_TENANT_DETAILS,
+								status: HTTP_STATUS_CODE.bad_request.status,
+							}
+						}
 						// Prepare $pull clause for organizations
 						updateObject.$pull[`scope.organizations`] = { $in: bodyData.organizations }
 					}
+				}
+
+				for (const [key, value] of Object.entries(currentScope)) {
+					if (value.includes(ALL_SCOPE_VALUE))
+						updateObjectForALL.$addToSet[`scope.${key}`] = { $each: [ALL_SCOPE_VALUE] }
 				}
 				// Handle entity removal
 				const entities = bodyData.entities || {}
@@ -828,6 +842,13 @@ module.exports = class ProgramsHelper {
 						_id: programId,
 					},
 					updateObject,
+					{ new: true }
+				)
+				let updateProgramToAddALL = await programsQueries.findAndUpdate(
+					{
+						_id: programId,
+					},
+					updateObjectForALL,
 					{ new: true }
 				)
 				if (!updateProgram || !updateProgram._id) {

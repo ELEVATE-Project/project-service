@@ -39,7 +39,7 @@ module.exports = (req) => {
 					req.checkBody(`entities.${key}`).isArray().withMessage(`${key} should be an array`)
 				}
 			}
-			if (req.query.organizations === 'true') {
+			if (req.body.organizations) {
 				req.checkBody('organizations')
 					.exists()
 					.withMessage('Organizations field is required when organizations=true in query')
@@ -47,7 +47,7 @@ module.exports = (req) => {
 					.withMessage('Organizations must be an array')
 					.custom((value) => {
 						if (Array.isArray(value) && value.length === 0) {
-							throw new Error('Organizations array cannot be empty when organizations=true in query')
+							throw new Error('Organizations array cannot be empty')
 						}
 						return true
 					})
@@ -75,12 +75,8 @@ module.exports = (req) => {
 					req.checkBody(`entities.${key}`).isArray().withMessage(`${key} should be an array`)
 				}
 			}
-			if (req.query.organizations === 'true') {
-				req.checkBody('organizations')
-					.exists()
-					.withMessage('Organizations field is required when organizations=true in query')
-					.isArray()
-					.withMessage('Organizations must be an array')
+			if (req.body.organizations) {
+				req.checkBody('organizations').isArray().withMessage('Organizations must be an array')
 			}
 		},
 		join: function () {

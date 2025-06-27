@@ -11,106 +11,63 @@ const request = require('request')
 const SURVEY_SERVICE_URL = process.env.SURVEY_SERVICE_URL
 
 /**
- * Create Child solutions for survey
+ * Create Child solutions for survey and observation
  * @function
- * @name importSurveyTemplateToSolution
+ * @name importTemplateToSolution
  * @param {String} token - logged in user token.
  * @param {String} solutionId - parent solution id.
- * @param {String} programId -programId
- * @param {Object} data - Body data
+ * @param {String} programId- 	programId
+ * @param {Object} payload - Body data
+ * @param {Object} userDetails - user info
+ * @param {String} solutionType -type of solution
  * @returns {JSON} - Create child solution from parent  solution.
  */
-const importSurveyTemplateToSolution = function (token, solutionId, programId, data = {}, userDetails) {
+const importTemplateToSolution = function (token, solutionId, programId = '', payload = {}, userDetails, solutionType) {
 	return new Promise(async (resolve, reject) => {
 		try {
-			let surveyCreateUrl =
-				SURVEY_SERVICE_URL +
-				CONSTANTS.endpoints.IMPORT_SURVEY_TEMPLATE +
-				'/' +
-				solutionId +
-				'?appName=elevate' +
-				'&programId=' +
-				programId
-			let options = {
-				headers: {
-					'content-type': 'application/json',
-					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
-					'x-auth-token': token,
-				},
-				json: { data: data },
-			}
-			if (
-				userDetails?.userInformation?.roles &&
-				!userDetails.userInformation?.roles.includes(CONSTANTS.common.ORG_ADMIN)
-			) {
-				_.assign(options.headers, {
-					'admin-auth-token': process.env.SURVEY_ADMIN_AUTH_TOKEN,
-					tenantId: userDetails.tenantAndOrgInfo.tenantId,
-					orgId: userDetails.tenantAndOrgInfo.orgId.join(','),
-				})
-			}
-			request.post(surveyCreateUrl, options, assessmentCallback)
+			//Build the endpoint and query
+			let endpoint
+			let url
+			switch (solutionType) {
+				case CONSTANTS.common.SURVEY:
+					endpoint = CONSTANTS.endpoints.IMPORT_SURVEY_TEMPLATE
+					url = `${SURVEY_SERVICE_URL}${endpoint}/${solutionId}` + `?appName=elevate&programId=${programId}`
+					// Survey service expects payload inside `{ data: … }`
+					break
 
-			function assessmentCallback(err, data) {
-				let result = {
-					success: true,
-				}
-				if (err) {
-					result.success = false
-				} else {
-					let response = data.body
-					result = response
-					if (result.status === HTTP_STATUS_CODE['ok'].status) {
-						result['data'] = response.result
-						result.success = true
-					} else {
-						result.success = false
-					}
-				}
-				return resolve(result)
+				case CONSTANTS.common.OBSERVATION:
+					endpoint = CONSTANTS.endpoints.CREATE_CHILD_OBSERVATION_SOLUTION
+					url = `${SURVEY_SERVICE_URL}${endpoint}` + `?solutionId=${solutionId}`
+					// Observation already wants the raw body
+					break
+
+				default:
+					throw new Error('Invalid solutionType: use "survey" or "observation".')
 			}
-		} catch (error) {
-			return reject(error)
-		}
-	})
-}
-
-/**
- * Create Child solutions for survey
- * @function
- * @name importObservationTemplateToSolution
- * @param {String} token - logged in user token.
- * @param {String} solutionId - parent solution id.
- * @param {Object} bodyData - Body data
- * @returns {JSON} - Create child solution from parent  solution.
- */
-const importObservationTemplateToSolution = function (token, solutionId, bodyData, userDetails) {
-	return new Promise(async (resolve, reject) => {
-		try {
-			let observationCreateUrl =
-				SURVEY_SERVICE_URL + CONSTANTS.endpoints.CREATE_CHILD_OBSERVATION_SOLUTION + '?solutionId=' + solutionId
-
 			const options = {
 				headers: {
 					'content-type': 'application/json',
 					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
-					'x-auth-token': token,
 				},
-				json: bodyData,
+				json: payload,
+			}
+			//pass the user Token only for admin and orgAdmin
+			let roles = userDetails?.userInformation?.roles ?? []
+			if (roles && (roles.includes(CONSTANTS.common.ORG_ADMIN) || roles.includes(CONSTANTS.common.ADMIN_ROLE))) {
+				_.assign(options.headers, {
+					'x-auth-token': token,
+				})
 			}
 
-			if (
-				userDetails?.userInformation?.roles &&
-				!userDetails.userInformation?.roles.includes(CONSTANTS.common.ORG_ADMIN)
-			) {
+			// Admin need extra headers
+			if (roles && roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
 				_.assign(options.headers, {
-					'admin-auth-token': process.env.SURVEY_ADMIN_AUTH_TOKEN,
+					'admin-auth-token': process.env.ADMIN_AUTH_TOKEN,
 					tenantId: userDetails.tenantAndOrgInfo.tenantId,
 					orgId: userDetails.tenantAndOrgInfo.orgId.join(','),
 				})
 			}
-
-			request.post(observationCreateUrl, options, assessmentCallback)
+			request.post(url, options, assessmentCallback)
 
 			function assessmentCallback(err, data) {
 				let result = {
@@ -120,7 +77,11 @@ const importObservationTemplateToSolution = function (token, solutionId, bodyDat
 					result.success = false
 				} else {
 					let response = data.body
-					result = response
+					if (typeof response === CONSTANTS.common.OBJECT) {
+						result = response
+					} else {
+						result = JSON.parse(response)
+					}
 					if (result.status === HTTP_STATUS_CODE['ok'].status) {
 						result['data'] = response.result
 					} else {
@@ -134,7 +95,6 @@ const importObservationTemplateToSolution = function (token, solutionId, bodyDat
 		}
 	})
 }
-
 /**
  * Create get or create surveyDetails
  * @function
@@ -183,54 +143,9 @@ const surveyDetails = function (token, solutionId, bodyData, programId) {
 }
 
 /**
- * Details observation
- * @function
- * @name observationDetails
- * @param {String} token - logged in user token.
- * @param {String} observationId - observation id.
- * @returns {JSON} - Add entity to observation.
- */
-
-const observationDetails = function (token, observationId) {
-	return new Promise(async (resolve, reject) => {
-		try {
-			let url = SURVEY_SERVICE_URL + CONSTANTS.endpoints.OBSERVATION_DETAILS + '/' + observationId
-
-			const options = {
-				headers: {
-					'content-type': 'application/json',
-					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
-					'x-auth-token': token,
-				},
-			}
-
-			request.get(url, options, assessmentCallback)
-
-			function assessmentCallback(err, data) {
-				let result = {
-					success: true,
-				}
-
-				if (err) {
-					result.success = false
-				} else {
-					let response = JSON.parse(data.body)
-					if (response.status === HTTP_STATUS_CODE['ok'].status) {
-						result['data'] = response.result
-					} else {
-						result.success = false
-					}
-				}
-
-				return resolve(result)
-			}
-		} catch (error) {
-			return reject(error)
-		}
-	})
-}
-
-/**
+ * Fetches solution details based on a list of external solution IDs.
+ * This is typically called after creating solutions, to populate the `solutionDetails`
+ * key in task objects.
  * List of solutions
  * @function
  * @name listSolutions
@@ -251,13 +166,11 @@ const listSolutions = function (solutionIds, token, userDetails) {
 				},
 				json: solutionIds,
 			}
+			let roles = userDetails?.userInformation?.roles ?? []
 			// pass admin and tenant info in header  if user superAdmin
-			if (
-				userDetails?.userInformation?.roles &&
-				!userDetails?.userInformation?.roles.includes(CONSTANTS.common.ORG_ADMIN)
-			) {
+			if (roles && roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
 				_.assign(options.headers, {
-					'admin-auth-token': process.env.SURVEY_ADMIN_AUTH_TOKEN,
+					'admin-auth-token': process.env.ADMIN_AUTH_TOKEN,
 					tenantId: userDetails.tenantAndOrgInfo.tenantId,
 					orgId: userDetails.tenantAndOrgInfo.orgId.join(','),
 				})
@@ -312,12 +225,10 @@ const updateSolution = function (token, updateData, solutionExternalId, userDeta
 			}
 
 			// pass admin and tenant info in header  if user superAdmin
-			if (
-				userDetails?.userInformation?.roles &&
-				!userDetails?.userInformation?.roles.includes(CONSTANTS.common.ORG_ADMIN)
-			) {
+			let roles = userDetails?.userInformation?.roles ?? []
+			if (roles && roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
 				_.assign(options.headers, {
-					'admin-auth-token': process.env.SURVEY_ADMIN_AUTH_TOKEN,
+					'admin-auth-token': process.env.ADMIN_AUTH_TOKEN,
 					tenantId: userDetails.tenantAndOrgInfo.tenantId,
 					orgId: userDetails.tenantAndOrgInfo.orgId.join(','),
 				})
@@ -413,209 +324,10 @@ const createObservation = function (token, solutionId, data, userRoleAndProfileI
 	})
 }
 
-/**
- * List Programs based on ids.
- * @function
- * @name listProgramsBasedOnIds
- * @param {Array} programIds - Array of program ids.
- * @returns {JSON} - List programs based on ids.
- */
-
-const listProgramsBasedOnIds = function (programIds) {
-	return new Promise(async (resolve, reject) => {
-		try {
-			const url = SURVEY_SERVICE_URL + CONSTANTS.endpoints.LIST_PROGRAMS_BY_IDS
-
-			const options = {
-				headers: {
-					'content-type': 'application/json',
-					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
-				},
-				json: {
-					programIds: programIds,
-				},
-			}
-
-			request.post(url, options, kendraCallback)
-
-			function kendraCallback(err, data) {
-				let result = {
-					success: true,
-				}
-
-				if (err) {
-					result.success = false
-				} else {
-					let response = data.body
-					if (response.status === HTTP_STATUS_CODE['ok'].status) {
-						result['data'] = response.result
-					} else {
-						result.success = false
-					}
-				}
-
-				return resolve(result)
-			}
-		} catch (error) {
-			return reject(error)
-		}
-	})
-}
-
-/**
- * Remove solutions from program.
- * @function
- * @name removeSolutionsFromProgram
- * @param {String} programId - Program id.
- * @param {Array} solutionIds - Array of solutions ids.
- * @returns {JSON} - updated program.
- */
-
-const removeSolutionsFromProgram = function (token, programId, solutionIds) {
-	return new Promise(async (resolve, reject) => {
-		try {
-			const url = SURVEY_SERVICE_URL + CONSTANTS.endpoints.REMOVE_SOLUTIONS_FROM_PROGRAM + '/' + programId
-
-			const options = {
-				headers: {
-					'content-type': 'application/json',
-					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
-					'x-auth-token': token,
-				},
-				json: {
-					solutionIds: solutionIds,
-				},
-			}
-
-			request.post(url, options, kendraCallback)
-
-			function kendraCallback(err, data) {
-				let result = {
-					success: true,
-				}
-
-				if (err) {
-					result.success = false
-				} else {
-					result['data'] = data.body.result
-				}
-
-				return resolve(result)
-			}
-		} catch (error) {
-			return reject(error)
-		}
-	})
-}
-
-/**
- * Remove solutions from program.
- * @function
- * @name removeEntitiesFromSolution
- * @param {String} solutionId - Program id.
- * @param {Array} entities - Array of solutions ids.
- * @returns {JSON} - updated program.
- */
-
-const removeEntitiesFromSolution = function (token, solutionId, entities) {
-	return new Promise(async (resolve, reject) => {
-		try {
-			const url = SURVEY_SERVICE_URL + CONSTANTS.endpoints.REMOVE_ENTITY_FROM_SOLUTION + '/' + solutionId
-
-			const options = {
-				headers: {
-					'content-type': 'application/json',
-					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
-					'x-auth-token': token,
-				},
-				json: {
-					entities: entities,
-				},
-			}
-
-			request.post(url, options, kendraCallback)
-
-			function kendraCallback(err, data) {
-				let result = {
-					success: true,
-				}
-
-				if (err) {
-					result.success = false
-				} else {
-					result['data'] = data.body.result
-				}
-
-				return resolve(result)
-			}
-		} catch (error) {
-			return reject(error)
-		}
-	})
-}
-
-/**
- * User targetted solutions.
- * @function
- * @name listEntitiesByLocationIds
- * @param {String} token - User token.
- * @param {Object} locationIds - Requested body data.
- * @returns {JSON} - List of entities by location ids.
- */
-
-const listEntitiesByLocationIds = function (token, locationIds) {
-	return new Promise(async (resolve, reject) => {
-		try {
-			const url = SURVEY_SERVICE_URL + CONSTANTS.endpoints.LIST_ENTITIES_BY_LOCATION_IDS
-
-			const options = {
-				headers: {
-					'content-type': 'application/json',
-					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
-					'x-auth-token': token,
-				},
-				json: {
-					locationIds: locationIds,
-				},
-			}
-
-			request.post(url, options, assessmentCallback)
-
-			function assessmentCallback(err, data) {
-				let result = {
-					success: true,
-				}
-
-				if (err) {
-					result.success = false
-				} else {
-					let response = data.body
-
-					if (response.status === HTTP_STATUS_CODE['ok'].status && response.result) {
-						result['data'] = response.result
-					} else {
-						result.success = false
-					}
-				}
-
-				return resolve(result)
-			}
-		} catch (error) {
-			return reject(error)
-		}
-	})
-}
-
 module.exports = {
-	observationDetails: observationDetails,
 	listSolutions: listSolutions,
 	updateSolution: updateSolution,
 	createObservation: createObservation,
-	listProgramsBasedOnIds: listProgramsBasedOnIds,
-	removeSolutionsFromProgram: removeSolutionsFromProgram,
-	removeEntitiesFromSolution: removeEntitiesFromSolution,
-	listEntitiesByLocationIds: listEntitiesByLocationIds,
-	importSurveyTemplateToSolution: importSurveyTemplateToSolution,
 	surveyDetails: surveyDetails,
-	importObservationTemplateToSolution: importObservationTemplateToSolution,
+	importTemplateToSolution: importTemplateToSolution,
 }

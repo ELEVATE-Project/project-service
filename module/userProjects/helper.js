@@ -1273,6 +1273,18 @@ module.exports = class UserProjectsHelper {
 						}
 
 						// get solutions details based on solutionTypes
+						/*
+						******Sample response*************
+		                       {
+                                  "success": true,
+								   data:{
+                                     "programId": "685140cbf891ccf74e05baf9",
+                                     "observationId": "685146542054fe175c7150c8",
+                                    "solutionId": "685140d1ffc25f705c56e99e",
+					               } 
+                               }
+
+						*/
 						const getSolutionDetails = {
 							[CONSTANTS.common.ASSESSMENT]: () => _assessmentDetails(assessmentOrObservation),
 							[CONSTANTS.common.OBSERVATION]: () =>
@@ -1301,7 +1313,7 @@ module.exports = class UserProjectsHelper {
 							assignedAssessmentOrObservation.data
 						)
 
-						if (!currentTask.solutionDetails.isReusable) {
+						if (!currentTask?.solutionDetails?.isReusable) {
 							assessmentOrObservationData['programId'] = project[0].programInformation._id
 						}
 						let fieldToUpdate = `tasks.$.${solutionDetails.type}Information`
@@ -1763,11 +1775,10 @@ module.exports = class UserProjectsHelper {
 									}
 								}
 								if (entityDetails && entityDetails?.data.length > 0) {
-									projectCreation.data['entityInformation'] = _.pick(entityDetails.data[0], [
-										'_id',
-										'entityType',
-										'entityTypeId',
-									])
+									projectCreation.data['entityInformation'] = {
+										..._.pick(entityDetails.data[0], ['_id', 'entityType', 'entityTypeId']),
+										externalId: entityDetails.data[0]?.metaInformation?.externalId,
+									}
 								}
 							}
 						}
@@ -2053,9 +2064,8 @@ module.exports = class UserProjectsHelper {
 						tenantId,
 						orgId
 					)
-
 					if (tasksAndSubTasks.length > 0) {
-						result.tasks = _projectTask(tasksAndSubTasks)
+						result.tasks = await _projectTask(tasksAndSubTasks)
 						result.tasks.forEach((task) => {
 							if (
 								task &&
@@ -2993,32 +3003,6 @@ module.exports = class UserProjectsHelper {
 						status: HTTP_STATUS_CODE.bad_request.status,
 					}
 				}
-				let taskReport = {}
-
-				// If template contains project task process the task data
-				if (libraryProjects.data.tasks && libraryProjects.data.tasks.length > 0) {
-					libraryProjects.data.tasks = await _projectTask(
-						libraryProjects.data.tasks,
-						isATargetedSolution === false ? false : true
-					)
-
-					taskReport.total = libraryProjects.data.tasks.length
-
-					libraryProjects.data.tasks.forEach((task) => {
-						if (task.isDeleted == false) {
-							if (!taskReport[task.status]) {
-								taskReport[task.status] = 1
-							} else {
-								taskReport[task.status] += 1
-							}
-						} else {
-							//reduce total count if task is deleted.
-							taskReport.total = taskReport.total - 1
-						}
-					})
-
-					libraryProjects.data['taskReport'] = taskReport
-				}
 
 				// If an entityId is passed in body data. we need to varify if it is a valid entity
 				// If not a valid entity throw error
@@ -3090,6 +3074,35 @@ module.exports = class UserProjectsHelper {
 
 				if (requestedData.referenceFrom && requestedData.referenceFrom !== '') {
 					libraryProjects.data.referenceFrom = requestedData.referenceFrom
+				}
+
+				let taskReport = {}
+				// If template contains project task process the task data
+				if (libraryProjects?.data?.tasks && libraryProjects?.data?.tasks?.length > 0) {
+					libraryProjects.data.tasks = await _projectTask(
+						libraryProjects.data.tasks,
+						isATargetedSolution === false ? false : true,
+						'',
+						userToken,
+						libraryProjects.data.programId,
+						userDetails
+					)
+					taskReport.total = libraryProjects.data.tasks.length
+
+					libraryProjects.data.tasks.forEach((task) => {
+						if (task.isDeleted == false) {
+							if (!taskReport[task.status]) {
+								taskReport[task.status] = 1
+							} else {
+								taskReport[task.status] += 1
+							}
+						} else {
+							//reduce total count if task is deleted.
+							taskReport.total = taskReport.total - 1
+						}
+					})
+
+					libraryProjects.data['taskReport'] = taskReport
 				}
 				//  <- Add certificate template data
 				// if (libraryProjects.data.certificateTemplateId && libraryProjects.data.certificateTemplateId !== '') {
@@ -4634,11 +4647,22 @@ function _attachmentInformation(
  * @name _projectTask
  * @param {Array} tasks - tasks data.
  * @param {String} userId - logged in user id.
+ * @param {String} parentTaskId
+ * @param {String} userToken-user auth token
+ * @param {String}programId -ProgramId
+ * @param {Object} userDetails - userinformation
  * @returns {Object} Project task.
  */
 
-function _projectTask(tasks, isImportedFromLibrary = false, parentTaskId = '') {
-	tasks.forEach((singleTask) => {
+async function _projectTask(
+	tasks,
+	isImportedFromLibrary = false,
+	parentTaskId = '',
+	userToken,
+	programId,
+	userDetails
+) {
+	for (const singleTask of tasks) {
 		if (singleTask) {
 			singleTask.externalId = singleTask.externalId ? singleTask.externalId : singleTask.name.toLowerCase()
 			singleTask.type = singleTask.type ? singleTask.type : CONSTANTS.common.SIMPLE_TASK_TYPE
@@ -4672,18 +4696,104 @@ function _projectTask(tasks, isImportedFromLibrary = false, parentTaskId = '') {
 					})
 				}
 			}
+			let importSolutionsResponse
+			// create a child solution if solutionDetails has isReusable true solution details
+			if (singleTask?.solutionDetails?.isReusable) {
+				userDetails.tenantAndOrgInfo = {
+					tenantId: userDetails.userInformation.tenantId,
+					orgId: [userDetails.userInformation.organizationId],
+				}
+				if (singleTask.solutionDetails.type === CONSTANTS.common.OBSERVATION) {
+					const timestamp = UTILS.epochTime()
+					// Creating child observation solution
+					importSolutionsResponse = await surveyService.importTemplateToSolution(
+						userToken,
+						singleTask.solutionDetails._id,
+						'',
+						{
+							name: `${singleTask.solutionDetails.name}-${timestamp}`,
+							externalId: `${singleTask.solutionDetails.externalId}-${timestamp}`,
+							description: `${singleTask.solutionDetails.name}-${timestamp}`,
+							programExternalId: programId,
+							status: CONSTANTS.common.PUBLISHED_STATUS,
+							tenantData: userDetails.tenantAndOrgInfo,
+							userId: userDetails.userInformation.userId,
+						},
+						userDetails,
+						singleTask.solutionDetails.type
+					)
 
+					if (
+						importSolutionsResponse.status != HTTP_STATUS_CODE['ok'].status ||
+						!importSolutionsResponse?.data?.externalId
+					) {
+						throw {
+							message: CONSTANTS.apiResponses.SOLUTION_NOT_CREATED,
+							status: HTTP_STATUS_CODE.bad_request.status,
+						}
+					}
+					// Assinging the new solution  values to task solutionDetails
+					singleTask.solutionDetails._id = importSolutionsResponse.result._id
+					singleTask.solutionDetails.externalId = importSolutionsResponse.result.externalId
+					singleTask.solutionDetails.isReusable = CONSTANTS.common.FALSE
+
+					//updating programComponents
+					await programsQueries.findAndUpdate(
+						{
+							_id: programId,
+						},
+						{
+							$addToSet: { components: importSolutionsResponse.result._id },
+						}
+					)
+				} else if (singleTask.solutionDetails.type === CONSTANTS.common.SURVEY) {
+					// Creating child survey solution
+					importSolutionsResponse = await surveyService.importTemplateToSolution(
+						userToken,
+						singleTask.solutionDetails._id,
+						programId,
+						{
+							tenantData: userDetails.tenantAndOrgInfo,
+							userId: userDetails.userInformation.userId,
+						},
+						userDetails,
+						singleTask.solutionDetails.type
+					)
+
+					if (
+						importSolutionsResponse.status != HTTP_STATUS_CODE['ok'].status ||
+						!importSolutionsResponse?.result?.solutionExternalId
+					) {
+						throw {
+							message: CONSTANTS.apiResponses.SOLUTION_NOT_CREATED,
+							status: HTTP_STATUS_CODE.bad_request.status,
+						}
+					}
+					singleTask.solutionDetails._id = importSolutionsResponse.result.solutionId
+					singleTask.solutionDetails.externalId = importSolutionsResponse.result.solutionExternalId
+					singleTask.solutionDetails.isReusable = CONSTANTS.common.FALSE
+					//updating programComponents
+					await programsQueries.findAndUpdate(
+						{
+							_id: programId,
+						},
+						{
+							$addToSet: { components: importSolutionsResponse.result.solutionId },
+						}
+					)
+				}
+			}
 			removeFieldsFromRequest.forEach((removeField) => {
 				delete singleTask[removeField]
 			})
 
 			if (singleTask.children) {
-				_projectTask(singleTask.children, isImportedFromLibrary, singleTask._id)
+				await _projectTask(singleTask.children, isImportedFromLibrary, singleTask._id)
 			} else {
 				singleTask.children = []
 			}
 		}
-	})
+	}
 
 	return tasks
 }
@@ -5082,97 +5192,43 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 					observationData.project.taskId = templateTasks[0]._id
 				}
 			}
-			if (observationData.solutionDetails.isReusable) {
-				let observationCreatedFromTemplate = await surveyService.createObservation(
-					observationData.token,
-					observationData.solutionDetails._id,
-					// userRoleAndProfileInformation,
-					{
-						name: observationData.solutionDetails.name + '-' + UTILS.epochTime(),
-						description: observationData.solutionDetails.name + '-' + UTILS.epochTime(),
-						program: {
-							_id: observationData.programId,
-							name: '',
-						},
-						status: CONSTANTS.common.PUBLISHED_STATUS,
-						...(userRoleAndProfileInformation[observationData.solutionDetails.subType] && {
-							entities: [userRoleAndProfileInformation[observationData.solutionDetails.subType]],
-						}),
-						project: observationData.project,
-					},
-					userRoleAndProfileInformation && Object.keys(userRoleAndProfileInformation).length > 0
-						? userRoleAndProfileInformation
-						: {},
-					observationData.programId
-				)
 
-				if (!observationCreatedFromTemplate.success || !observationCreatedFromTemplate?.data?._id) {
-					throw {
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: CONSTANTS.apiResponses.OBSERVATION_NOT_CREATED,
-					}
-				}
-				result['solutionId'] = observationCreatedFromTemplate.data.solutionId
-				result['observationId'] = observationCreatedFromTemplate.data._id
-
-				await projectQueries.findOneAndUpdate(
-					{
-						_id: new ObjectId(observationData.project._id),
-						'tasks._id': observationData.project.taskId,
-					},
-					{
-						$set: {
-							'tasks.$.solutionDetails': observationCreatedFromTemplate.data.solutionDetails,
-						},
-					}
-				)
-				//updating programComponents
-				await programsQueries.findAndUpdate(
-					{
-						_id: observationData.programId,
-					},
-					{
-						$addToSet: { components: observationCreatedFromTemplate.data.solutionId },
-					}
-				)
-			} else {
-				let startDate = new Date()
-				let endDate = new Date()
-				endDate.setFullYear(endDate.getFullYear() + 1)
-				let observationPayload = {
-					name: observationData.solutionDetails.name,
-					description: observationData.solutionDetails.name,
-					status: CONSTANTS.common.PUBLISHED_STATUS,
-					startDate: startDate,
-					endDate: endDate,
-					...(userRoleAndProfileInformation[observationData.solutionDetails.subType] && {
-						entities: observationData.entityId
-							? [observationData.entityId]
-							: [userRoleAndProfileInformation[observationData.solutionDetails.subType]],
-					}),
-					project: observationData.project,
-				}
-
-				let observationCreated = await surveyService.createObservation(
-					observationData.token,
-					observationData.solutionDetails._id,
-					observationPayload,
-					userRoleAndProfileInformation && Object.keys(userRoleAndProfileInformation).length > 0
-						? userRoleAndProfileInformation
-						: {},
-					observationData.programId
-				)
-				if (!observationCreated.success || !observationCreated?.data?._id) {
-					throw {
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: CONSTANTS.apiResponses.OBSERVATION_NOT_CREATED,
-					}
-				} else {
-					result['observationId'] = observationCreated.data._id
-				}
-
-				result['solutionId'] = observationData.solutionDetails._id
+			let startDate = new Date()
+			let endDate = new Date()
+			endDate.setFullYear(endDate.getFullYear() + 1)
+			let observationPayload = {
+				name: observationData.solutionDetails.name,
+				description: observationData.solutionDetails.name,
+				status: CONSTANTS.common.PUBLISHED_STATUS,
+				startDate: startDate,
+				endDate: endDate,
+				...(userRoleAndProfileInformation[observationData.solutionDetails.subType] && {
+					entities: observationData.entityId
+						? [observationData.entityId]
+						: [userRoleAndProfileInformation[observationData.solutionDetails.subType]],
+				}),
+				project: observationData.project,
 			}
+
+			let observationCreated = await surveyService.createObservation(
+				observationData.token,
+				observationData.solutionDetails._id,
+				observationPayload,
+				userRoleAndProfileInformation && Object.keys(userRoleAndProfileInformation).length > 0
+					? userRoleAndProfileInformation
+					: {},
+				observationData.programId
+			)
+			if (!observationCreated.success || !observationCreated?.data?._id) {
+				throw {
+					status: HTTP_STATUS_CODE.bad_request.status,
+					message: CONSTANTS.apiResponses.OBSERVATION_NOT_CREATED,
+				}
+			} else {
+				result['observationId'] = observationCreated.data._id
+			}
+
+			result['solutionId'] = observationData.solutionDetails._id
 
 			return resolve({
 				success: true,
@@ -5212,70 +5268,20 @@ function _surveyDetails(surveyData, userRoleAndProfileInformation = {}) {
 				}
 			}
 			let surveyCreated
-			if (surveyData.solutionDetails.isReusable) {
-				// Creating child solution
-				surveyCreated = await surveyService.surveyDetails(surveyData.token, surveyData.solutionDetails._id, {
-					name: surveyData.solutionDetails.name + '-' + UTILS.epochTime(),
-					description: surveyData.solutionDetails.name + '-' + UTILS.epochTime(),
-					project: surveyData.project,
-					programExternalId: surveyData.programId,
-				})
-				if (!surveyCreated.success || !surveyCreated?.data?.solution) {
-					throw {
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: CONSTANTS.apiResponses.SURVEY_NOT_CREATED,
-					}
-				}
-				surveyCreated.data = surveyCreated.data.solution
-				surveyData.solutionDetails._id = surveyCreated.data.solutionId
-				surveyData.solutionDetails.externalId = surveyCreated.data.solutionExternalId
-				let solutionDetails = {
-					subType: surveyCreated.data.entityType,
-					type: surveyCreated.data.type,
-					_id: surveyCreated.data._id,
-					externalId: surveyCreated.data.externalId,
-					name: surveyCreated.data.name,
-					isReusable: surveyCreated.data.isReusable,
-					minNoOfSubmissionsRequired: surveyCreated.data.minNoOfSubmissionsRequired,
-				}
-
-				// Updating task solutionDetails with child solution data
-				await projectQueries.findOneAndUpdate(
-					{
-						_id: new ObjectId(surveyData.project._id),
-						'tasks._id': surveyData.project.taskId,
-					},
-					{
-						$set: {
-							'tasks.$.solutionDetails': solutionDetails,
-						},
-					}
-				)
-
-				//updating programComponents
-				await programsQueries.findAndUpdate(
-					{
-						_id: surveyData.programId,
-					},
-					{
-						$addToSet: { components: surveyCreated.data.solutionId },
-					}
-				)
-			} else {
-				userRoleAndProfileInformation['project'] = surveyData.project
-				// create survey using details api
-				surveyCreated = await surveyService.surveyDetails(
-					surveyData.token,
-					surveyData.solutionDetails._id,
-					userRoleAndProfileInformation
-				)
-				if (!surveyCreated.success || !surveyCreated?.data?.assessment?.submissionId) {
-					throw {
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: CONSTANTS.apiResponses.SURVEY_NOT_CREATED,
-					}
+			userRoleAndProfileInformation['project'] = surveyData.project
+			// create survey using details api
+			surveyCreated = await surveyService.surveyDetails(
+				surveyData.token,
+				surveyData.solutionDetails._id,
+				userRoleAndProfileInformation
+			)
+			if (!surveyCreated.success || !surveyCreated?.data?.assessment?.submissionId) {
+				throw {
+					status: HTTP_STATUS_CODE.bad_request.status,
+					message: CONSTANTS.apiResponses.SURVEY_NOT_CREATED,
 				}
 			}
+
 			result['surveySubmissionId'] = surveyCreated.data.assessment.submissionId
 
 			result['solutionId'] = surveyData.solutionDetails._id

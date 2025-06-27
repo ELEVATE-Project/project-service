@@ -124,6 +124,7 @@ module.exports = {
 			type: String,
 			index: true,
 		},
+		project: Object,
 		submissions: Object,
 		link: {
 			type: String,

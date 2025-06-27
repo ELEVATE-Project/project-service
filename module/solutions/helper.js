@@ -79,7 +79,8 @@ module.exports = class SolutionsHelper {
 		updatedBy = '',
 		projectTemplateId = '',
 		startDate = '',
-		endDate = ''
+		endDate = '',
+		userDetails = {}
 	) {
 		let solutionData = {}
 		solutionData.name = name
@@ -113,6 +114,8 @@ module.exports = class SolutionsHelper {
 		if (endDate) {
 			solutionData.endDate = endDate
 		}
+		solutionData['tenantId'] = userDetails.userInformation.tenantId
+		solutionData['orgId'] = userDetails.userInformation.organizationId
 
 		return solutionData
 	}
@@ -531,7 +534,6 @@ module.exports = class SolutionsHelper {
 						{
 							_id: solutionDocument[0].programId,
 							tenantId: userDetails.tenantAndOrgInfo.tenantId,
-							orgId: { $in: ['ALL', ...userDetails.tenantAndOrgInfo.orgId] },
 						},
 						['_id', 'endDate', 'startDate']
 					)
@@ -582,7 +584,6 @@ module.exports = class SolutionsHelper {
 					{
 						_id: solutionDocument[0]._id,
 						tenantId: userDetails.tenantAndOrgInfo.tenantId,
-						orgId: { $in: ['ALL', ...userDetails.tenantAndOrgInfo.orgId] },
 					},
 					updateObject,
 					{ new: true }
@@ -1063,81 +1064,122 @@ module.exports = class SolutionsHelper {
 					isReusable: false,
 					isDeleted: false,
 				}
-				Object.keys(
-					_.omit(data, ['role', 'filter', 'factors', 'type', 'tenantId', 'orgId', 'organizations'])
-				).forEach((key) => {
-					data[key] = data[key].split(',')
-				})
-				// If validate entity set to ON . strict scoping should be applied
-				if (validateEntity !== CONSTANTS.common.OFF) {
+				//skipping scope related query if its from projectAsaTask flow
+				if (!data.project) {
 					Object.keys(
-						_.omit(data, ['filter', 'role', 'factors', 'type', 'tenantId', 'orgId', 'organizations'])
-					).forEach((requestedDataKey) => {
-						registryIds.push(...data[requestedDataKey])
-						entityTypes.push(requestedDataKey)
+						_.omit(data, ['role', 'filter', 'factors', 'type', 'tenantId', 'orgId', 'organizations'])
+					).forEach((key) => {
+						data[key] = data[key].split(',')
 					})
-					if (!registryIds.length > 0) {
-						throw {
-							message: CONSTANTS.apiResponses.NO_LOCATION_ID_FOUND_IN_DATA,
-						}
-					}
-
-					let userRoleInfo = _.omit(data, ['filter', 'factors', 'role', 'type', 'tenantId', 'orgId'])
-					let tenantDetails = await userService.fetchPublicTenantDetails(data.tenantId)
-					if (!tenantDetails.success || !tenantDetails.data || !tenantDetails.data.meta) {
-						return resolve({
-							success: false,
-							message: CONSTANTS.apiResponses.FAILED_TO_FETCH_TENANT_DETAILS,
+					// If validate entity set to ON . strict scoping should be applied
+					if (validateEntity !== CONSTANTS.common.OFF) {
+						Object.keys(
+							_.omit(data, ['filter', 'role', 'factors', 'type', 'tenantId', 'orgId', 'organizations'])
+						).forEach((requestedDataKey) => {
+							registryIds.push(...data[requestedDataKey])
+							entityTypes.push(requestedDataKey)
 						})
-					}
-					// factors = [ 'professional_role', 'professional_subroles' ]
-					let factors
-					if (
-						tenantDetails.data.meta.hasOwnProperty('factors') &&
-						tenantDetails.data.meta.factors.length > 0
-					) {
-						factors = tenantDetails.data.meta.factors
-						let queryFilter = UTILS.factorQuery(factors, userRoleInfo)
-						filterQuery['$and'] = queryFilter
-					}
-					let dataToOmit = ['filter', 'role', 'factors', 'type', 'tenantId', 'orgId', 'organizations']
-					// factors.append(dataToOmit)
+						if (!registryIds.length > 0) {
+							throw {
+								message: CONSTANTS.apiResponses.NO_LOCATION_ID_FOUND_IN_DATA,
+							}
+						}
 
-					const finalKeysToRemove = [...new Set([...dataToOmit, ...factors])]
-
-					filterQuery.$or = []
-					Object.keys(_.omit(data, finalKeysToRemove)).forEach((key) => {
-						// If prefix is given use it to form query
-						if (prefix != '') {
-							filterQuery.$or.push({
-								[`${prefix}.scope.${key}`]: { $in: data[key] },
-							})
-						} else {
-							filterQuery.$or.push({
-								[`scope.${key}`]: { $in: data[key] },
+						let userRoleInfo = _.omit(data, ['filter', 'factors', 'role', 'type', 'tenantId', 'orgId'])
+						let tenantDetails = await userService.fetchPublicTenantDetails(data.tenantId)
+						if (!tenantDetails.success || !tenantDetails.data || !tenantDetails.data.meta) {
+							return resolve({
+								success: false,
+								message: CONSTANTS.apiResponses.FAILED_TO_FETCH_TENANT_DETAILS,
 							})
 						}
-					})
-				} else {
-					// Obtain userInfo
-					let userRoleInfo = _.omit(data, ['filter', 'factors', 'role', 'type', 'tenantId', 'orgId'])
-					let userRoleKeys = Object.keys(userRoleInfo)
-					let queryFilter = []
+						// factors = [ 'professional_role', 'professional_subroles' ]
+						let factors
+						if (
+							tenantDetails.data.meta.hasOwnProperty('factors') &&
+							tenantDetails.data.meta.factors.length > 0
+						) {
+							factors = tenantDetails.data.meta.factors
+							let queryFilter = UTILS.factorQuery(factors, userRoleInfo)
+							filterQuery['$and'] = queryFilter
+						}
+						let dataToOmit = ['filter', 'role', 'factors', 'type', 'tenantId', 'orgId', 'organizations']
+						// factors.append(dataToOmit)
 
-					// factors = [ 'professional_role', 'professional_subroles' ]
-					// if factors are passed or query has to be build based on the keys passed
-					if (data.hasOwnProperty('factors') && data.factors.length > 0) {
-						let factors = data.factors
-						// Build query based on each key
-						factors.forEach((factor) => {
-							let scope = 'scope.' + factor
+						const finalKeysToRemove = [...new Set([...dataToOmit, ...factors])]
 
+						filterQuery.$or = []
+						Object.keys(_.omit(data, finalKeysToRemove)).forEach((key) => {
 							// If prefix is given use it to form query
 							if (prefix != '') {
-								scope = `${prefix}.scope.${factor}`
+								filterQuery.$or.push({
+									[`${prefix}.scope.${key}`]: { $in: data[key] },
+								})
+							} else {
+								filterQuery.$or.push({
+									[`scope.${key}`]: { $in: data[key] },
+								})
 							}
-							let values = userRoleInfo[factor]
-							if (factor === 'role') {
+						})
+					} else {
+						// Obtain userInfo
+						let userRoleInfo = _.omit(data, ['filter', 'factors', 'role', 'type', 'tenantId', 'orgId'])
+						let userRoleKeys = Object.keys(userRoleInfo)
+						let queryFilter = []
+
+						// factors = [ 'professional_role', 'professional_subroles' ]
+						// if factors are passed or query has to be build based on the keys passed
+						if (data.hasOwnProperty('factors') && data.factors.length > 0) {
+							let factors = data.factors
+							// Build query based on each key
+							factors.forEach((factor) => {
+								let scope = 'scope.' + factor
+
+								// If prefix is given use it to form query
+								if (prefix != '') {
+									scope = `${prefix}.scope.${factor}`
+								}
+								let values = userRoleInfo[factor]
+								if (factor === 'role') {
+									// If prefix is given use it to form query
+									if (prefix != '') {
+										queryFilter.push({
+											[`${prefix}.scope.roles`]: {
+												$in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')],
+											},
+										})
+									} else {
+										queryFilter.push({
+											['scope.roles']: {
+												$in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')],
+											},
+										})
+									}
+								} else if (!Array.isArray(values)) {
+									queryFilter.push({ [scope]: { $in: values.split(',') } })
+								} else {
+									queryFilter.push({ [scope]: { $in: [...values] } })
+								}
+							})
+							// append query filter
+							filterQuery['$or'] = queryFilter
+						} else {
+							userRoleKeys.forEach((key) => {
+								let scope = 'scope.' + key
+
+								// If prefix is given use it to form query
+								if (prefix != '') {
+									scope = `${prefix}.scope.${key}`
+								}
+								let values = userRoleInfo[key]
+								if (!Array.isArray(values)) {
+									queryFilter.push({ [scope]: { $in: values.split(',') } })
+								} else {
+									queryFilter.push({ [scope]: { $in: [...values] } })
+								}
+							})
+
+							if (data.role) {
 								// If prefix is given use it to form query
 								if (prefix != '') {
 									queryFilter.push({
@@ -1150,50 +1192,13 @@ module.exports = class SolutionsHelper {
 										['scope.roles']: { $in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')] },
 									})
 								}
-							} else if (!Array.isArray(values)) {
-								queryFilter.push({ [scope]: { $in: values.split(',') } })
-							} else {
-								queryFilter.push({ [scope]: { $in: [...values] } })
 							}
-						})
-						// append query filter
-						filterQuery['$or'] = queryFilter
-					} else {
-						userRoleKeys.forEach((key) => {
-							let scope = 'scope.' + key
 
-							// If prefix is given use it to form query
-							if (prefix != '') {
-								scope = `${prefix}.scope.${key}`
-							}
-							let values = userRoleInfo[key]
-							if (!Array.isArray(values)) {
-								queryFilter.push({ [scope]: { $in: values.split(',') } })
-							} else {
-								queryFilter.push({ [scope]: { $in: [...values] } })
-							}
-						})
-
-						if (data.role) {
-							// If prefix is given use it to form query
-							if (prefix != '') {
-								queryFilter.push({
-									[`${prefix}.scope.roles`]: {
-										$in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')],
-									},
-								})
-							} else {
-								queryFilter.push({
-									['scope.roles']: { $in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')] },
-								})
-							}
+							// append query filter
+							filterQuery['$and'] = queryFilter
 						}
-
-						// append query filter
-						filterQuery['$and'] = queryFilter
 					}
 				}
-
 				filterQuery.status = CONSTANTS.common.ACTIVE_STATUS
 				if (type != '') {
 					filterQuery.type = type
@@ -1266,7 +1271,7 @@ module.exports = class SolutionsHelper {
 				}
 				queryData.data['_id'] = solutionId
 				queryData.data['tenantId'] = tenantId
-				// queryData.data['orgId'] = { $in: [orgId] }
+
 				let matchQuery = queryData.data
 				let solutionData = await solutionsQueries.solutionsDocument(matchQuery, [
 					'_id',
@@ -1371,7 +1376,7 @@ module.exports = class SolutionsHelper {
 	 * @returns {Array} - Created user program and solution.
 	 */
 
-	static createProgramAndSolution(userId, data, userToken, createADuplicateSolution = '', userDetails) {
+	static createProgramAndSolution(userId, data, createADuplicateSolution = '', userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let userPrivateProgram = {}
@@ -1386,7 +1391,6 @@ module.exports = class SolutionsHelper {
 					let filterQuery = {
 						_id: data.programId,
 						tenantId: tenantId,
-						orgId: { $in: [orgId] },
 					}
 
 					if (createADuplicateSolution === false) {
@@ -1417,7 +1421,7 @@ module.exports = class SolutionsHelper {
 							duplicateProgram.startDate,
 							duplicateProgram.endDate,
 							'',
-							'',
+							[], // the function definition is accepting empty array instead of empty string hence replaced it with []
 							{},
 							userDetails
 						)
@@ -1445,7 +1449,7 @@ module.exports = class SolutionsHelper {
 					}
 				} else {
 					/* If the programId is not passed from the front end, we will enter this else block. 
-          In this block, we need to provide the necessary basic details to create a new program, Including startDate and endDate.*/
+          			In this block, we need to provide the necessary basic details to create a new program, Including startDate and endDate.*/
 					// Current date
 					let startDate = new Date()
 					// Add one year to the current date
@@ -1461,8 +1465,8 @@ module.exports = class SolutionsHelper {
 						startDate,
 						endDate,
 						userId,
-						'', //language
-						{}, //source- Additional source metadata related to the program
+						[], // pass empty array for translation data
+						{}, // pass empty object for source data
 						userDetails
 					)
 
@@ -1480,60 +1484,6 @@ module.exports = class SolutionsHelper {
 					isAPrivateProgram: userPrivateProgram.isAPrivateProgram,
 				}
 
-				//entities
-				// if (Array.isArray(data.entities) && data.entities && data.entities.length > 0) {
-				// 	let entitiesData = []
-				// 	let bodyData = {}
-
-				// 	let locationData = UTILS.filterLocationIdandCode(data.entities)
-
-				// 	if (locationData.ids.length > 0) {
-				// 		bodyData = {
-				// 			id: locationData.ids,
-				// 		}
-				// 		let entityData = await entitiesService.entityDocuments(bodyData, 'all')
-
-				// 		if (!entityData.success) {
-				// 			return resolve({
-				// 				status: HTTP_STATUS_CODE.bad_request.status,
-				// 				message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
-				// 				result: {},
-				// 			})
-				// 		}
-
-				// 		entityData.data.forEach((entity) => {
-				// 			entitiesData.push(entity._id)
-				// 		})
-
-				// 		solutionDataToBeUpdated['entityType'] = entityData.data[0].type
-				// 	}
-
-				// 	if (locationData.codes.length > 0) {
-				// 		let filterData = {
-				// 			'registryDetails.code': { $in: locationData.codes },
-				// 		}
-				// 		let entityDetails = await entitiesService.entityDocuments(filterData, 'all')
-				// 		if (!entityDetails.success || !entityDetails.data || !entityDetails.data.length > 0) {
-				// 			return resolve({
-				// 				status: HTTP_STATUS_CODE.bad_request.status,
-				// 				message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
-				// 				result: {},
-				// 			})
-				// 		}
-				// 		let entityDocuments = entityDetails.data
-
-				// 		entityDocuments.forEach((entity) => {
-				// 			entitiesData.push(entity._id)
-				// 		})
-
-				// 		solutionDataToBeUpdated['entityType'] = CONSTANTS.common.SCHOOL
-				// 	}
-
-				// 	if (data.type && data.type !== CONSTANTS.common.IMPROVEMENT_PROJECT) {
-				// 		solutionDataToBeUpdated['entities'] = entitiesData
-				// 	}
-				// }
-
 				//solution part
 				let solution = ''
 				if (data.solutionId && data.solutionId !== '') {
@@ -1541,7 +1491,6 @@ module.exports = class SolutionsHelper {
 						{
 							_id: data.solutionId,
 							tenantId: userDetails.userInformation.tenantId,
-							orgId: { $in: [userDetails.userInformation.organizationId] },
 						},
 						[
 							'name',
@@ -1579,7 +1528,10 @@ module.exports = class SolutionsHelper {
 							duplicateSolution.type,
 							duplicateSolution.subType,
 							userId,
-							duplicateSolution.projectTemplateId ? duplicateSolution.projectTemplateId : ''
+							duplicateSolution.projectTemplateId ? duplicateSolution.projectTemplateId : '',
+							null,
+							null,
+							userDetails
 						)
 
 						_.merge(duplicateSolution, solutionCreationData)
@@ -1631,11 +1583,15 @@ module.exports = class SolutionsHelper {
 						CONSTANTS.common.ACTIVE_STATUS,
 						description,
 						userId,
-						'',
 						false,
 						'',
 						data.type ? data.type : CONSTANTS.common.ASSESSMENT,
-						data.subType ? data.subType : CONSTANTS.common.INSTITUTIONAL
+						data.subType ? data.subType : CONSTANTS.common.INSTITUTIONAL,
+						userId,
+						'',
+						'',
+						'',
+						userDetails
 					)
 					createSolutionData['tenantId'] = userDetails.userInformation.tenantId
 					createSolutionData['orgId'] = userDetails.userInformation.organizationId
@@ -1905,7 +1861,6 @@ module.exports = class SolutionsHelper {
 							$ne: CONSTANTS.common.INACTIVE,
 						},
 						tenantId: tenantId,
-						orgId: { $in: ['ALL', userDetails.userInformation.organizationId] },
 					},
 					['type', 'status', 'endDate']
 				)
@@ -3002,7 +2957,6 @@ module.exports = class SolutionsHelper {
 							{
 								_id: { $in: programIds },
 								tenantId: userDetails.userInformation.tenantId,
-								orgId: { $in: [userDetails.userInformation.organizationId] },
 							},
 							['name']
 						)
@@ -3166,7 +3120,6 @@ module.exports = class SolutionsHelper {
 					let solutionAndProgramCreation = await this.createProgramAndSolution(
 						userId,
 						programAndSolutionData,
-						userToken,
 						true, // create duplicate solution
 						userDetails
 					)
@@ -3534,10 +3487,11 @@ module.exports = class SolutionsHelper {
 			try {
 				let tenantId = userDetails.userInformation.tenantId
 				let orgId = userDetails.userInformation.organizationId
-				let solutionData = await solutionsQueries.solutionsDocument(
-					{ _id: solutionId, tenantId: tenantId, orgId: { $in: [orgId] } },
-					['type', 'projectTemplateId', 'programId']
-				)
+				let solutionData = await solutionsQueries.solutionsDocument({ _id: solutionId, tenantId: tenantId }, [
+					'type',
+					'projectTemplateId',
+					'programId',
+				])
 
 				if (!Array.isArray(solutionData) || solutionData.length < 1) {
 					return resolve({
@@ -3557,6 +3511,7 @@ module.exports = class SolutionsHelper {
 							message: CONSTANTS.apiResponses.PROJECT_TEMPLATE_ID_NOT_FOUND,
 						}
 					}
+					// const projectTemplatesHelper = require(MODULES_BASE_PATH + '/project/templates/helper')
 					templateOrQuestionDetails = await projectTemplatesHelper.details(
 						solutionData.projectTemplateId,
 						'',

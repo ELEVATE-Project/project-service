@@ -128,7 +128,6 @@ module.exports = class UserProjectsHelper {
 					{
 						_id: projectId,
 						tenantId: tenantId,
-						orgId: orgId,
 					},
 					[
 						'_id',
@@ -187,7 +186,6 @@ module.exports = class UserProjectsHelper {
 						let matchQuery = {}
 						matchQuery = queryData.data
 						matchQuery['tenantId'] = tenantId
-						matchQuery['orgId'] = orgId
 						let projects = await projectQueries.projectDocument(matchQuery, 'all')
 						if (!Array.isArray(projects) || projects.length < 1) {
 							throw {
@@ -244,7 +242,6 @@ module.exports = class UserProjectsHelper {
 						{
 							_id: userProject[0]._id,
 							tenantId: tenantId,
-							orgId: orgId,
 						},
 						{
 							$set: {
@@ -281,7 +278,6 @@ module.exports = class UserProjectsHelper {
 					const solutionInformation = await solutionsQueries.solutionsDocument({
 						_id: data.solutionId,
 						tenantId: tenantId,
-						orgId: { $in: [orgId] },
 					})
 					if (solutionInformation.length > 0) {
 						updateProject.solutionInformation = solutionInformation[0]
@@ -291,7 +287,6 @@ module.exports = class UserProjectsHelper {
 					const programInformation = await programQueries.programsDocument({
 						_id: data.programId,
 						tenantId: tenantId,
-						orgId: { $in: [orgId] },
 					})
 					if (programInformation.length > 0) {
 						updateProject.programInformation = programInformation[0]
@@ -495,7 +490,6 @@ module.exports = class UserProjectsHelper {
 					{
 						_id: userProject[0]._id,
 						tenantId: tenantId,
-						orgId: orgId,
 					},
 					{
 						$set: updateProject,
@@ -516,6 +510,7 @@ module.exports = class UserProjectsHelper {
 					projects: projectUpdated,
 				}
 				//  push project details to kafka
+				await this.attachEntityInformationIfExists(projectUpdated)
 				const kafkaPushedProject = await kafkaProducersHelper.pushProjectToKafka(projectUpdated)
 				const kafkaPushedUserProjects = await kafkaProducersHelper.pushUserActivitiesToKafka(kafkaUserProject)
 
@@ -659,13 +654,19 @@ module.exports = class UserProjectsHelper {
 	 * @param {Array} solutionData - solutions data
 	 * @param {String} userId - user id
 	 * @param {Boolean} isAPrivateProgram - isAPrivateProgram
+	 * @param {Object} userDetails - loggedin user's info
 	 * @returns {Object} Created program and solution data.
 	 */
 
-	static createProgramAndMultipleSolutions(programData, solutionData, userId, isAPrivateProgram = false) {
+	static createProgramAndMultipleSolutions(
+		programData,
+		solutionData,
+		userId,
+		isAPrivateProgram = false,
+		userDetails
+	) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				const dateFormat = UTILS.epochTime()
 				let startDate = new Date()
 				let endDate = new Date()
 				endDate.setFullYear(endDate.getFullYear() + 1)
@@ -676,6 +677,7 @@ module.exports = class UserProjectsHelper {
 					userPrivateProgram = await programQueries.programsDocument(
 						{
 							_id: programData._id,
+							tenantId: userDetails.userInformation.tenantId,
 						},
 						'all'
 					)
@@ -684,7 +686,7 @@ module.exports = class UserProjectsHelper {
 					// Create a program if program id is not passed
 					let program = await solutionsHelper._createProgramData(
 						programData.name,
-						programData.externalId ? programData.externalId : programData.name + '-' + dateFormat,
+						programData.externalId ? programData.externalId : programData.name + '-' + UTILS.epochTime(),
 						isAPrivateProgram,
 						CONSTANTS.common.ACTIVE_STATUS,
 						programData.description ? programData.description : programData.name,
@@ -693,18 +695,17 @@ module.exports = class UserProjectsHelper {
 						programData.endDate ? programData.endDate : endDate,
 						userId,
 						programData.language ? programData.language : [],
-						[],
-						programData.source ? programData.source : {}
+						programData.source ? programData.source : {},
+						userDetails
 					)
 					userPrivateProgram = await programQueries.createProgram(program)
 				}
-
 				let solutionsCreated = []
 				for (const item of solutionData) {
 					// Create a solution if solutions
 					let solution = await solutionsHelper._createSolutionData(
 						item.name ? item.name : programData.name,
-						item.externalId ? item.externalId : programData.name + '-' + dateFormat,
+						item.externalId ? item.externalId : programData.name + '-' + UTILS.epochTime(),
 						isAPrivateProgram,
 						CONSTANTS.common.ACTIVE_STATUS,
 						item.description != '' ? item.description : programData.name,
@@ -716,7 +717,8 @@ module.exports = class UserProjectsHelper {
 						userId,
 						'',
 						item.startDate ? item.startDate : startDate,
-						item.endDate ? item.endDate : endDate
+						item.endDate ? item.endDate : endDate,
+						userDetails
 					)
 					solution = await solutionsQueries.createSolution(solution)
 					solutionsCreated.push(solution)
@@ -729,6 +731,7 @@ module.exports = class UserProjectsHelper {
 				const updateProgram = await programsQueries.findAndUpdate(
 					{
 						_id: userPrivateProgram._id,
+						tenantId: userDetails.userInformation.tenantId,
 					},
 					{
 						$addToSet: { components: solutionIds },
@@ -774,7 +777,6 @@ module.exports = class UserProjectsHelper {
 				let queryObject = {
 					_id: projectId,
 					tenantId: tenantId,
-					orgId: orgId,
 				}
 				if (process.env.SUBMISSION_LEVEL == 'USER') {
 					queryObject['userId'] = userId
@@ -815,7 +817,6 @@ module.exports = class UserProjectsHelper {
 							{
 								_id: projectId,
 								tenantId: tenantId,
-								orgId: orgId,
 							},
 							{
 								$set: { userRoleInformation: userRoleInformation },
@@ -978,7 +979,6 @@ module.exports = class UserProjectsHelper {
 						$match: {
 							_id: ObjectId(projectId),
 							tenantId: tenantId,
-							orgId: orgId,
 						},
 					},
 				]
@@ -1443,7 +1443,6 @@ module.exports = class UserProjectsHelper {
 						externalId: templateId,
 						isReusable: false,
 						tenantId: tenantId,
-						orgId: { $in: [orgId] },
 					})
 
 					if (!templateDocuments.length > 0) {
@@ -1484,7 +1483,6 @@ module.exports = class UserProjectsHelper {
 							userId: userId,
 							isAPrivateProgram: targetedSolutionId.result.isATargetedSolution ? false : true,
 							tenantId: tenantId,
-							orgId: orgId,
 						},
 						['_id']
 					)
@@ -1503,7 +1501,6 @@ module.exports = class UserProjectsHelper {
 										_id: solutionId,
 										isAPrivateProgram: true,
 										tenantId: tenantId,
-										orgId: { $in: [orgId] },
 									},
 									[
 										'name',
@@ -1565,7 +1562,6 @@ module.exports = class UserProjectsHelper {
 							solutionDetails = await solutionsQueries.solutionsDocument({
 								_id: solutionId,
 								tenantId: tenantId,
-								orgId: { $in: [orgId] },
 							})
 							solutionDetails = solutionDetails[0]
 							// if( !solutionDetails.success ) {
@@ -1711,7 +1707,6 @@ module.exports = class UserProjectsHelper {
 								await certificateTemplateQueries.certificateTemplateDocument({
 									_id: solutionDetails.certificateTemplateId,
 									tenantId: tenantId,
-									orgId: { $in: [orgId] },
 								})
 
 							// create certificate object and add data if certificate template is present.
@@ -1891,6 +1886,7 @@ module.exports = class UserProjectsHelper {
 							userId: userId,
 							projects: project,
 						}
+						await this.attachEntityInformationIfExists(project)
 						await kafkaProducersHelper.pushProjectToKafka(project)
 						await kafkaProducersHelper.pushUserActivitiesToKafka(kafkaUserProject)
 
@@ -1948,11 +1944,14 @@ module.exports = class UserProjectsHelper {
 	 * @name addStory
 	 * @param {Object} storyData - The data of the story to be added, including its attachments.
 	 * @param {String} projectId - The unique identifier of the project to which the story will be added.
+	 * @param {Object} userDetails - loggedin user info
 	 * @returns {Promise<Object>} - A promise resolving to a success or failure response.
 	 */
-	static addStory(storyData, projectId, userId) {
+	static addStory(storyData, projectId, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				const userId = userDetails.userInformation.userId
+				const tenantId = userDetails.userInformation.tenantId
 				// Fetch project details from the database
 				const projectDeatils = await projectQueries.projectDocument(
 					{
@@ -1960,6 +1959,7 @@ module.exports = class UserProjectsHelper {
 						status: CONSTANTS.common.SUBMITTED_STATUS,
 						isDeleted: false,
 						userId: userId,
+						tenantId,
 					},
 					['all']
 				)
@@ -1993,6 +1993,7 @@ module.exports = class UserProjectsHelper {
 				const UpdatedProject = await projectQueries.findOneAndUpdate(
 					{
 						_id: ObjectId(projectId),
+						tenantId,
 					},
 					{ $set: { attachments: projectDeatils[0].attachments, ...storyData } }
 				)
@@ -2031,7 +2032,6 @@ module.exports = class UserProjectsHelper {
 						_id: templateId,
 						isReusable: false,
 						tenantId: tenantId,
-						orgId: { $in: [orgId] },
 					},
 					'all',
 					['ratings', 'noOfRatings', 'averageRating']
@@ -2124,10 +2124,11 @@ module.exports = class UserProjectsHelper {
 	 * @param {String} userToken - User token.
 	 * @param {String} [appName = ""] - App Name.
 	 * @param {String} [appVersion = ""] - App Version.
+	 * @param {Object} userDetails - loggedin user's info
 	 * @returns {Object} Project created information.
 	 */
 
-	static add(data, userId, userToken, appName = '', appVersion = '') {
+	static add(data, userId, userToken, appName = '', appVersion = '', userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				const projectsModel = Object.keys(schemas['projects'].schema)
@@ -2155,7 +2156,8 @@ module.exports = class UserProjectsHelper {
 				if (!createNewProgram) {
 					const program = await programQueries.programsDocument(
 						{
-							_id: data.program._id,
+							_id: ObjectId(data.program._id),
+							tenantId: userDetails.userInformation.tenantId,
 						},
 						'all'
 					)
@@ -2218,7 +2220,8 @@ module.exports = class UserProjectsHelper {
 					data.program,
 					solutionsData,
 					userId,
-					true
+					true,
+					userDetails
 				)
 				if (
 					!programAndMultipleSolutionsData.success ||
@@ -2297,6 +2300,7 @@ module.exports = class UserProjectsHelper {
 					const categories = await projectCategoriesQueries.categoryDocuments(
 						{
 							externalId: { $in: project.category },
+							tenantId: userDetails.userInformation.tenantId,
 						},
 						['_id', 'name', 'externalId', 'evidences']
 					)
@@ -2337,6 +2341,8 @@ module.exports = class UserProjectsHelper {
 
 					// Attach userProfile to each project
 					project['userProfile'] = userProfile.data
+					project['tenantId'] = userDetails.userInformation.tenantId
+					project['orgId'] = userDetails.userInformation.organizationId
 					let userProject = await projectQueries.createProject(project)
 					userCreatedProjects.push(userProject)
 
@@ -2345,6 +2351,7 @@ module.exports = class UserProjectsHelper {
 						projects: userProject,
 					}
 					// Push the project to kafka
+					await this.attachEntityInformationIfExists(userProject)
 					await kafkaProducersHelper.pushProjectToKafka(userProject)
 					await kafkaProducersHelper.pushUserActivitiesToKafka(kafkaUserProject)
 				}
@@ -2417,7 +2424,6 @@ module.exports = class UserProjectsHelper {
 					_id: projectId,
 					isDeleted: false,
 					tenantId: tenantId,
-					orgId: orgId,
 				}
 
 				if (!taskIds.length) {
@@ -2442,7 +2448,7 @@ module.exports = class UserProjectsHelper {
 					projectPdf = false
 
 					let aggregateData = [
-						{ $match: { _id: ObjectId(projectId), isDeleted: false, tenantId: tenantId, orgId: orgId } },
+						{ $match: { _id: ObjectId(projectId), isDeleted: false, tenantId: tenantId } },
 						{
 							$project: {
 								status: 1,
@@ -2863,8 +2869,10 @@ module.exports = class UserProjectsHelper {
 					},
 				}
 
-				matchQuery['$match']['tenantId'] = userDetails.userInformation.tenantId
-				matchQuery['$match']['orgId'] = userDetails.userInformation.organizationId
+				const tenantId = userDetails.userInformation.tenantId
+				const orgId = userDetails.userInformation.organizationId
+
+				matchQuery['$match']['tenantId'] = tenantId
 
 				// pass matchQuery based on reflection
 				if (process.env.ENABLE_REFLECTION === 'true') {
@@ -2881,6 +2889,18 @@ module.exports = class UserProjectsHelper {
 						status === CONSTANTS.common.COMPLETED_STATUS
 							? { $eq: CONSTANTS.common.SUBMITTED_STATUS } // Completed
 							: { $ne: CONSTANTS.common.SUBMITTED_STATUS }
+				}
+				let searchData = [
+					{
+						title: new RegExp(searchText, 'i'),
+					},
+				]
+				if (searchText !== '') {
+					if (matchQuery['$match']['$and']) {
+						matchQuery['$match']['$and'].push({ $or: searchData })
+					} else {
+						matchQuery['$match']['$or'] = searchData
+					}
 				}
 				aggregateData.push(matchQuery)
 				// Projection aggregate for multilingual
@@ -2944,7 +2964,15 @@ module.exports = class UserProjectsHelper {
 				if (programId != '' && UTILS.isValidMongoId(programId)) {
 					programData = await programQueries.programsDocument({
 						_id: ObjectId(programId),
+						tenantId,
 					})
+					if (!(programData.length > 0)) {
+						throw {
+							success: false,
+							status: HTTP_STATUS_CODE.not_found.status,
+							message: CONSTANTS.apiResponses.PROGRAM_NOT_FOUND,
+						}
+					}
 					projects[0]['programName'] = programData[0].name
 				}
 
@@ -2978,7 +3006,7 @@ module.exports = class UserProjectsHelper {
 		requestedData,
 		userToken,
 		userId,
-		isATargetedSolution = '',
+		isATargetedSolution = false,
 		language,
 		userDetails
 	) {
@@ -3178,6 +3206,7 @@ module.exports = class UserProjectsHelper {
 					userId: userId,
 					projects: projectCreation,
 				}
+				await this.attachEntityInformationIfExists(projectCreation)
 				await kafkaProducersHelper.pushProjectToKafka(projectCreation)
 				await kafkaProducersHelper.pushUserActivitiesToKafka(kafkaUserProject)
 
@@ -3208,7 +3237,6 @@ module.exports = class UserProjectsHelper {
 						{
 							_id: projectTemplateId,
 							tenantId: userDetails.userInformation.tenantId,
-							orgId: { $in: [userDetails.userInformation.organizationId] },
 						},
 						{
 							$set: { importCount: updateProjectTemplateImportCount },
@@ -3683,6 +3711,7 @@ module.exports = class UserProjectsHelper {
 							projects: updatedProject,
 						}
 						// Push the updated project details to Kafka
+						await this.attachEntityInformationIfExists(updatedProject)
 						await kafkaProducersHelper.pushProjectToKafka(updatedProject)
 						await kafkaProducersHelper.pushUserActivitiesToKafka(kafkaUserProject)
 					}
@@ -3786,7 +3815,6 @@ module.exports = class UserProjectsHelper {
 						status: CONSTANTS.common.SUBMITTED_STATUS,
 						certificate: { $exists: true },
 						tenantId: userDetails.userInformation.tenantId,
-						orgId: userDetails.userInformation.organizationId,
 					},
 					[
 						'_id',
@@ -4032,7 +4060,6 @@ module.exports = class UserProjectsHelper {
 				let projectDetails = await projectQueries.projectDocument({
 					_id: projectId,
 					tenantId: userDetails.userInformation.tenantId,
-					orgId: userDetails.userInformation.organizationId,
 				})
 
 				// Check if project details are not found
@@ -4145,17 +4172,20 @@ module.exports = class UserProjectsHelper {
 	 * @param {String} userToken - filter to search project to be updated.
 	 * @param {String} [appName = ""] - App Name.
 	 * @param {String} [appVersion = ""] - App Version.
+	 * @param {Object} userDetails - loggedin user's info
 	 * @returns {Object} status of update project
 	 */
 
-	static update(projectId, updateData, userId, userToken, appName = '', appVersion = '') {
+	static update(projectId, updateData, userId, appName = '', appVersion = '', userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				const userProject = await projectQueries.projectDocument({ _id: projectId }, [
-					'_id',
-					'reflection',
-					'tasks',
-				])
+				const userProject = await projectQueries.projectDocument(
+					{
+						_id: projectId,
+						tenantId: userDetails.userInformation.tenantId,
+					},
+					['_id', 'reflection', 'tasks']
+				)
 
 				if (!(userProject.length > 0)) {
 					throw {
@@ -4185,7 +4215,7 @@ module.exports = class UserProjectsHelper {
 					'',
 					updateData,
 					userId,
-					userToken,
+					userDetails,
 					appName,
 					appVersion,
 					true
@@ -4313,6 +4343,26 @@ module.exports = class UserProjectsHelper {
 		})
 	}
 	/**
+	 * Adds parent entity info to the project if an entityIdentifier exists in projectsInfo.
+	 * @method
+	 * @name attachEntityInformationIfExists
+	 * @param {Object} projectsInfo - Project object with optional entity info.
+	 * @returns {Promise<void>} - attaches parent entity information if it exists to projectsInfo variable
+	 */
+	static async attachEntityInformationIfExists(projectsInfo) {
+		try {
+			if (projectsInfo?.entityInformation?.externalId) {
+				let entityInfoCall = await entitiesService.findEntityDetails(
+					projectsInfo.tenantId,
+					projectsInfo.entityInformation.externalId
+				)
+				if (entityInfoCall?.success && entityInfoCall.data?.length > 0) {
+					projectsInfo.entityInformation.parentInformation = entityInfoCall.data[0].parentInformation
+				}
+			}
+		} catch (err) {}
+	}
+	/*
 	 * Get project  infromation when project as a task
 	 * @method
 	 * @name _improvementProjectDetails
@@ -4928,7 +4978,6 @@ function _projectCategories(categories, tenantId, orgId) {
 					{
 						_id: { $in: categoryIds },
 						tenantId: tenantId,
-						orgId: { $in: [orgId] },
 					},
 					['name', 'externalId']
 				)

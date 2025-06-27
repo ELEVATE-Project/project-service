@@ -65,7 +65,6 @@ module.exports = class LibraryCategoriesHelper {
 				}
 
 				matchQuery['$match']['tenantId'] = userDetails.userInformation.tenantId
-				matchQuery['$match']['orgId'] = { $in: ['ALL', userDetails.userInformation.organizationId] }
 
 				if (categoryId && categoryId !== '') {
 					matchQuery['$match']['categories.externalId'] = categoryId
@@ -301,7 +300,6 @@ module.exports = class LibraryCategoriesHelper {
 				let allCategoryInfo = await projectCategoriesQueries.categoryDocuments({
 					_id: { $in: allCategoryId },
 					tenantId: userDetails.userInformation.tenantId,
-					orgId: { $in: [userDetails.userInformation.organizationId] },
 				})
 				for (let singleCategoryInfo of allCategoryInfo) {
 					if (singleCategoryInfo.evidences && singleCategoryInfo.evidences.length > 0) {
@@ -513,7 +511,6 @@ module.exports = class LibraryCategoriesHelper {
 						status: CONSTANTS.common.PUBLISHED,
 						isDeleted: false,
 						tenantId: tenantId,
-						orgId: { $in: ['ALL', orgId] },
 					},
 					'all',
 					['__v']
@@ -668,12 +665,7 @@ module.exports = class LibraryCategoriesHelper {
 				let query = {}
 
 				// create query to fetch assets
-				query['tenantId'] = req.userDetails.tenantAndOrgInfo
-					? req.userDetails.tenantAndOrgInfo.tenantId
-					: req.userDetails.userInformation.tenantId
-				query['orgId'] = req.userDetails.tenantAndOrgInfo
-					? { $in: req.userDetails.tenantAndOrgInfo.orgId }
-					: { $in: ['ALL', req.userDetails.userInformation.organizationId] }
+				query['tenantId'] = req.userDetails.userInformation.tenantId
 
 				// handle currentOrgOnly filter
 				if (req.query['currentOrgOnly']) {

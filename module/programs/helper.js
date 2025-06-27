@@ -13,7 +13,6 @@ const projectQueries = require(DB_QUERY_BASE_PATH + '/projects')
 const entitiesService = require(GENERICS_FILES_PATH + '/services/entity-management')
 const validateEntity = process.env.VALIDATE_ENTITIES
 const userService = require(GENERICS_FILES_PATH + '/services/users')
-
 /**
  * ProgramsHelper
  * @class
@@ -373,7 +372,6 @@ module.exports = class ProgramsHelper {
 					{
 						_id: programId,
 						tenantId: tenantId,
-						orgId: { $in: [orgId] },
 					},
 					projections,
 					skipFields
@@ -1137,7 +1135,6 @@ module.exports = class ProgramsHelper {
 						isAPrivateProgram: true,
 						isDeleted: false,
 						tenantId: tenantId,
-						orgId: { $in: [orgId] },
 					},
 					['name', 'externalId', 'description', '_id', 'isAPrivateProgram', 'translations'],
 					'none',
@@ -1163,7 +1160,6 @@ module.exports = class ProgramsHelper {
 							$match: {
 								programId: { $in: userProgramIds },
 								tenantId: tenantId,
-								orgId: orgId,
 							},
 						},
 						{

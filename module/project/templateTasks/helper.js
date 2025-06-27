@@ -119,7 +119,7 @@ module.exports = class ProjectTemplateTasksHelper {
 					let solutions = []
 
 					if (projectSolutionIds && projectSolutionIds.length > 0) {
-						solutions = await solutionsQueries.solutionsDocument({
+						solutions = await projectTemplateQueries.templateDocument({
 							externalId: { $in: projectSolutionIds },
 						})
 					}
@@ -240,14 +240,16 @@ module.exports = class ProjectTemplateTasksHelper {
 							}
 							if (
 								!(solutionData[parsedData.solutionId].type === CONSTANTS.common.SURVEY) &&
-								solutionData[parsedData.solutionId].entityType !== allValues.solutionDetails.subType
+								solutionData[parsedData.solutionId].entityType !== allValues.solutionDetails.subType &&
+								!(solutionData[parsedData.solutionId].type === CONSTANTS.common.IMPROVEMENT_PROJECT)
 							) {
 								parsedData.STATUS = CONSTANTS.apiResponses.SOLUTION_SUB_TYPE_MIS_MATCH
 							}
 							if (
 								template.entityType &&
 								!(solutionData[parsedData.solutionId].type === CONSTANTS.common.SURVEY) &&
-								template.entityType !== solutionData[parsedData.solutionId].entityType
+								template.entityType !== solutionData[parsedData.solutionId].entityType &&
+								!(solutionData[parsedData.solutionId].type === CONSTANTS.common.IMPROVEMENT_PROJECT)
 							) {
 								parsedData.STATUS = CONSTANTS.apiResponses.MIS_MATCHED_PROJECT_AND_TASK_ENTITY_TYPE
 							} else {
@@ -285,17 +287,32 @@ module.exports = class ProjectTemplateTasksHelper {
 					} else {
 						parsedData.STATUS = CONSTANTS.apiResponses.REQUIRED_SOLUTION_ID
 					}
-					// adding solutionDetails for task
-					let solutionDetails = {
-						subType: parsedData.solutionSubType,
-						type: parsedData.solutionType,
-						_id: solutionData[parsedData.solutionId]._id,
-						externalId: parsedData.solutionId,
-						name: solutionData[parsedData.solutionId].name,
-						isReusable: solutionData[parsedData.solutionId].isReusable,
-						minNoOfSubmissionsRequired: parsedData.minNoOfSubmissionsRequired,
+					if (solutionData[parsedData.solutionId].type === CONSTANTS.common.IMPROVEMENT_PROJECT) {
+						// adding projectTemplateDetails for task
+						let projectTemplateDetails = {
+							subType: parsedData.solutionSubType,
+							type: parsedData.solutionType,
+							_id: solutionData[parsedData.solutionId]._id,
+							externalId: parsedData.solutionId,
+							name: solutionData[parsedData.solutionId].name,
+							isReusable: solutionData[parsedData.solutionId].isReusable,
+							minNoOfSubmissionsRequired: parsedData.minNoOfSubmissionsRequired,
+						}
+						allValues.projectTemplateDetails = projectTemplateDetails
+						delete allValues.solutionDetails
+					} else {
+						// adding solutionDetails for task
+						let solutionDetails = {
+							subType: parsedData.solutionSubType,
+							type: parsedData.solutionType,
+							_id: solutionData[parsedData.solutionId]._id,
+							externalId: parsedData.solutionId,
+							name: solutionData[parsedData.solutionId].name,
+							isReusable: solutionData[parsedData.solutionId].isReusable,
+							minNoOfSubmissionsRequired: parsedData.minNoOfSubmissionsRequired,
+						}
+						allValues.solutionDetails = solutionDetails
 					}
-					allValues.solutionDetails = solutionDetails
 				}
 
 				allValues.projectTemplateId = template._id

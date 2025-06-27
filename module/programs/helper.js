@@ -28,10 +28,11 @@ module.exports = class ProgramsHelper {
 	 * @param {String} scopeData.entityType - scope entity type
 	 * @param {Array} scopeData.entities - scope entities
 	 * @param {Array} scopeData.roles - roles in scope
+	 * @param {Object} tenantData - tenant data will store tenantId and orgId
 	 * @returns {JSON} - scope in programs.
 	 */
 
-	static setScope(programId, scopeData) {
+	static setScope(programId, scopeData, tenantData) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let programData = await programsQueries.programsDocument({ _id: programId }, ['_id'])
@@ -149,12 +150,22 @@ module.exports = class ProgramsHelper {
 					scopeData = _.omit(scopeData, keysCannotBeAdded)
 				}
 
+				let tenantDetails = await userService.fetchPublicTenantDetails(tenantData.tenantId)
+				if (!tenantDetails.data || !tenantDetails.data.meta || tenantDetails.success !== true) {
+					throw {
+						message: CONSTANTS.apiResponses.FAILED_TO_FETCH_TENANT_DETAILS,
+					}
+				}
+				let tenantPublicDetailsMetaField = tenantDetails.data.meta
+
+				let filteredScope = UTILS.getFilteredScope(scopeData, tenantPublicDetailsMetaField)
+
 				const updateObject = {
 					$set: {},
 				}
 
 				// Set the scope in updateObject to the updated scopeData
-				updateObject['$set']['scope'] = scopeData
+				updateObject['$set']['scope'] = filteredScope
 
 				// Find and update the program with the specified programId
 				let updateProgram = await programsQueries.findAndUpdate(
@@ -248,7 +259,7 @@ module.exports = class ProgramsHelper {
 				data.scope['organizations'] = userDetails.tenantAndOrgInfo.orgId
 
 				if (data.scope) {
-					let programScopeUpdated = await this.setScope(program._id, data.scope)
+					let programScopeUpdated = await this.setScope(program._id, data.scope, userDetails.tenantAndOrgInfo)
 
 					if (!programScopeUpdated.success) {
 						throw {
@@ -323,7 +334,7 @@ module.exports = class ProgramsHelper {
 					if (!data.scope.organizations) {
 						data.scope.organizations = userDetails.tenantAndOrgInfo.orgId
 					}
-					let programScopeUpdated = await this.setScope(programId, data.scope)
+					let programScopeUpdated = await this.setScope(programId, data.scope, userDetails.tenantAndOrgInfo)
 
 					if (!programScopeUpdated.success) {
 						throw {
@@ -1277,15 +1288,15 @@ module.exports = class ProgramsHelper {
 					}
 
 					let tenantPublicDetailsMetaField = tenantDetails.data.meta
-
+					let builtQuery = UTILS.targetingQuery(
+						userRoleInfo,
+						tenantPublicDetailsMetaField,
+						CONSTANTS.common.MANDATORY_SCOPE_FIELD,
+						CONSTANTS.common.OPTIONAL_SCOPE_FIELD
+					)
 					filterQuery = {
 						...filterQuery,
-						...UTILS.targetingQuery(
-							userRoleInfo,
-							tenantPublicDetailsMetaField,
-							CONSTANTS.common.MANDATORY_SCOPE_FIELD,
-							CONSTANTS.common.OPTIONAL_SCOPE_FIELD
-						),
+						...builtQuery,
 					}
 				} else {
 					// Obtain userInfo

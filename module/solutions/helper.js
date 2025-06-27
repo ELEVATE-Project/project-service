@@ -175,10 +175,11 @@ module.exports = class SolutionsHelper {
 	 * @param {String} scopeData.entityType - scope entity type
 	 * @param {Array} scopeData.entities - scope entities
 	 * @param {Array} scopeData.roles - roles in scope
+	 * @param {Object} tenantData - tenant data will store tenantId and orgId
 	 * @returns {JSON} - scope in solution.
 	 */
 
-	static setScope(solutionId, scopeData) {
+	static setScope(solutionId, scopeData, tenantData) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let solutionData = await solutionsQueries.solutionsDocument({ _id: solutionId }, ['_id'])
@@ -296,12 +297,23 @@ module.exports = class SolutionsHelper {
 					scopeData = _.omit(scopeData, keysCannotBeAdded)
 				}
 
+				let tenantDetails = await userService.fetchPublicTenantDetails(tenantData.tenantId)
+				if (!tenantDetails.data || !tenantDetails.data.meta || tenantDetails.success !== true) {
+					throw {
+						message: CONSTANTS.apiResponses.FAILED_TO_FETCH_TENANT_DETAILS,
+					}
+				}
+
+				let tenantPublicDetailsMetaField = tenantDetails.data.meta
+
+				let filteredScope = UTILS.getFilteredScope(scopeData, tenantPublicDetailsMetaField)
+
 				const updateObject = {
 					$set: {},
 				}
 
 				// Assign the scopeData to the scope field in updateObject
-				updateObject['$set']['scope'] = scopeData
+				updateObject['$set']['scope'] = filteredScope
 
 				// Update the solution document with the updateObject
 				let updateSolution = await solutionsQueries.updateSolutionDocument(
@@ -477,7 +489,11 @@ module.exports = class SolutionsHelper {
 
 				solutionData.scope['organizations'] = userDetails.tenantAndOrgInfo.orgId
 				if (!solutionData.excludeScope && programData[0].scope) {
-					await this.setScope(solutionCreation._id, solutionData.scope ? solutionData.scope : {})
+					await this.setScope(
+						solutionCreation._id,
+						solutionData.scope ? solutionData.scope : {},
+						userDetails.tenantAndOrgInfo
+					)
 				}
 
 				return resolve({
@@ -598,7 +614,11 @@ module.exports = class SolutionsHelper {
 					if (!solutionData.scope.organizations) {
 						solutionData.scope.organizations = userDetails.tenantAndOrgInfo.orgId
 					}
-					let solutionScope = await this.setScope(solutionUpdatedData._id, solutionData.scope)
+					let solutionScope = await this.setScope(
+						solutionUpdatedData._id,
+						solutionData.scope,
+						userDetails.tenantAndOrgInfo
+					)
 
 					if (!solutionScope.success) {
 						throw {
@@ -1092,15 +1112,15 @@ module.exports = class SolutionsHelper {
 						})
 					}
 					let tenantPublicDetailsMetaField = tenantDetails.data.meta
-
+					let builtQuery = UTILS.targetingQuery(
+						userRoleInfo,
+						tenantPublicDetailsMetaField,
+						CONSTANTS.common.MANDATORY_SCOPE_FIELD,
+						CONSTANTS.common.OPTIONAL_SCOPE_FIELD
+					)
 					filterQuery = {
 						...filterQuery,
-						...UTILS.targetingQuery(
-							userRoleInfo,
-							tenantPublicDetailsMetaField,
-							CONSTANTS.common.MANDATORY_SCOPE_FIELD,
-							CONSTANTS.common.OPTIONAL_SCOPE_FIELD
-						),
+						...builtQuery,
 					}
 				} else {
 					// Obtain userInfo

@@ -78,7 +78,8 @@ module.exports = class UserExtensionHelper {
 						},
 					},
 					false,
-					{ externalId: { $in: Array.from(allProgramIds) } }
+					{ externalId: { $in: Array.from(allProgramIds) } },
+					['_id', 'externalId', 'name']
 				)
 
 				// Create maps for program IDs and program information
@@ -460,7 +461,7 @@ function createKafkaPayload(userProfile, programId, role, eventType, programInfo
 		entity: CONSTANTS.common.PROGRAM_EVENT_ENTITY,
 		meta: {
 			programInformation: {
-				name: programInfoMap[programId].externalId,
+				name: programInfoMap[programId].name,
 				externalId: programInfoMap[programId].externalId,
 				id: programId.toString(),
 			},

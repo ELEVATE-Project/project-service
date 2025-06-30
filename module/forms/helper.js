@@ -150,7 +150,6 @@ module.exports = class FormsHelper {
 				}
 
 				filter['tenantId'] = userDetails.userInformation.tenantId
-				filter['orgId'] = { $in: ['ALL', userDetails.userInformation.organizationId] }
 
 				const form = await formQueries.findOneForm(filter)
 				let defaultOrgForm

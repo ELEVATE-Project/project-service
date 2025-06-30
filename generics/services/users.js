@@ -381,10 +381,11 @@ const fetchDefaultOrgDetails = function (organisationIdentifier, userToken) {
  * Fetches the tenant details for a given tenant ID along with org it is associated with.
  * @param {string} tenantId - The code/id of the organization.
  * @param {String} userToken - user token
+ * @param {Boolean} aggregateValidOrgs - boolean value to populate valid orgs from response
  * @returns {Promise} A promise that resolves with the organization details or rejects with an error.
  */
 
-const fetchTenantDetails = function (tenantId, userToken) {
+const fetchTenantDetails = function (tenantId, userToken, aggregateValidOrgs = false) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			let url =
@@ -410,7 +411,19 @@ const fetchTenantDetails = function (tenantId, userToken) {
 				} else {
 					let response = JSON.parse(data.body)
 					if (response.responseCode === HTTP_STATUS_CODE['ok'].code) {
-						result['data'] = response.result
+						if (aggregateValidOrgs == true) {
+							if (response.result.organizations && response.result.organizations.length) {
+								// convert the types of items to string
+								let validOrgs = response.result.organizations.map((data) => {
+									return data.code.toString()
+								})
+								result['data'] = validOrgs
+							} else {
+								result['data'] = []
+							}
+						} else {
+							result['data'] = response.result
+						}
 					} else {
 						result.success = false
 					}
@@ -476,7 +489,60 @@ const fetchPublicTenantDetails = function (tenantId) {
 		}
 	})
 }
+/**
+ * Fetches user profile by userId/username and tenantId.
+ * @param {String} tenantId - tenantId details
+ * @param {String} userId - userId details
+ * @param {String} username - username details
+ * @returns {Promise} A promise that resolves with the organization details or rejects with an error.
+ */
 
+const getUserProfileByIdentifier = function (tenantId, userId = null, username) {
+	return new Promise(async (resolve, reject) => {
+		try {
+			const params = userId
+				? `/${userId}?tenant_code=${tenantId}`
+				: `?tenant_code=${tenantId}&username=${username}`
+
+			let url = `${interfaceServiceUrl}${process.env.USER_SERVICE_BASE_URL}${CONSTANTS.endpoints.PROFILE_READ_BY_ID}${params}`
+
+			const options = {
+				headers: {
+					'content-type': 'application/json',
+					internal_access_token: process.env.INTERNAL_ACCESS_TOKEN,
+				},
+			}
+
+			request.get(url, options, publicBranding)
+			let result = {
+				success: true,
+			}
+			function publicBranding(err, data) {
+				if (err) {
+					result.success = false
+				} else {
+					let response = JSON.parse(data.body)
+					if (response.responseCode === HTTP_STATUS_CODE['ok'].code) {
+						result['data'] = response.result
+					} else {
+						result.success = false
+					}
+				}
+
+				return resolve(result)
+			}
+			setTimeout(function () {
+				return resolve(
+					(result = {
+						success: false,
+					})
+				)
+			}, CONSTANTS.common.SERVER_TIME_OUT)
+		} catch (error) {
+			return reject(error)
+		}
+	})
+}
 module.exports = {
 	profile: profile,
 	// locationSearch : locationSearch,
@@ -487,4 +553,5 @@ module.exports = {
 	fetchDefaultOrgDetails: fetchDefaultOrgDetails,
 	fetchTenantDetails: fetchTenantDetails,
 	fetchPublicTenantDetails: fetchPublicTenantDetails,
+	getUserProfileByIdentifier: getUserProfileByIdentifier,
 }

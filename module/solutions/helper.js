@@ -79,7 +79,8 @@ module.exports = class SolutionsHelper {
 		updatedBy = '',
 		projectTemplateId = '',
 		startDate = '',
-		endDate = ''
+		endDate = '',
+		userDetails = {}
 	) {
 		let solutionData = {}
 		solutionData.name = name
@@ -113,6 +114,8 @@ module.exports = class SolutionsHelper {
 		if (endDate) {
 			solutionData.endDate = endDate
 		}
+		solutionData['tenantId'] = userDetails.userInformation.tenantId
+		solutionData['orgId'] = userDetails.userInformation.organizationId
 
 		return solutionData
 	}
@@ -172,14 +175,11 @@ module.exports = class SolutionsHelper {
 	 * @name setScope
 	 * @param {String} solutionId - solution id.
 	 * @param {Object} scopeData - scope data.
-	 * @param {String} scopeData.entityType - scope entity type
-	 * @param {Array} scopeData.entities - scope entities
-	 * @param {Array} scopeData.roles - roles in scope
-	 * @param {Object} tenantData - tenant data will store tenantId and orgId
+	 * @param {Object} userDetails - loggedin user info
 	 * @returns {JSON} - scope in solution.
 	 */
 
-	static setScope(solutionId, scopeData, tenantData) {
+	static setScope(solutionId, scopeData, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let solutionData = await solutionsQueries.solutionsDocument({ _id: solutionId }, ['_id'])
@@ -189,6 +189,41 @@ module.exports = class SolutionsHelper {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.SOLUTION_NOT_FOUND,
 					})
+				}
+
+				// populate scopeData.organizations data
+				if (
+					scopeData.organizations &&
+					scopeData.organizations.length > 0 &&
+					userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)
+				) {
+					// call user-service to fetch related orgs
+					let validOrgs = await userService.fetchTenantDetails(
+						userDetails.tenantAndOrgInfo.tenantId,
+						userDetails.userToken,
+						true
+					)
+					if (!validOrgs.success) {
+						throw {
+							success: false,
+							status: HTTP_STATUS_CODE['bad_request'].status,
+							message: CONSTANTS.apiResponses.ORG_DETAILS_FETCH_UNSUCCESSFUL_MESSAGE,
+						}
+					}
+					validOrgs = validOrgs.data
+
+					// filter valid orgs
+					scopeData.organizations = scopeData.organizations.filter(
+						(id) => validOrgs.includes(id) || id.toLowerCase() == CONSTANTS.common.ALL
+					)
+				} else {
+					scopeData['organizations'] = userDetails.tenantAndOrgInfo.orgId
+				}
+
+				if (Array.isArray(scopeData.organizations)) {
+					scopeData.organizations = scopeData.organizations.map((orgId) =>
+						orgId === CONSTANTS.common.ALL ? 'ALL' : orgId
+					)
 				}
 
 				// let currentSolutionScope = {};
@@ -297,9 +332,10 @@ module.exports = class SolutionsHelper {
 					scopeData = _.omit(scopeData, keysCannotBeAdded)
 				}
 
-				let tenantDetails = await userService.fetchPublicTenantDetails(tenantData.tenantId)
-				if (!tenantDetails.data || !tenantDetails.data.meta || tenantDetails.success !== true) {
+				let tenantDetails = await userService.fetchPublicTenantDetails(userDetails.tenantAndOrgInfo.tenantId)
+				if (!tenantDetails?.success || !tenantDetails?.data?.meta) {
 					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.FAILED_TO_FETCH_TENANT_DETAILS,
 					}
 				}
@@ -487,13 +523,8 @@ module.exports = class SolutionsHelper {
 					$addToSet: { components: solutionCreation._id },
 				})
 
-				solutionData.scope['organizations'] = userDetails.tenantAndOrgInfo.orgId
 				if (!solutionData.excludeScope && programData[0].scope) {
-					await this.setScope(
-						solutionCreation._id,
-						solutionData.scope ? solutionData.scope : {},
-						userDetails.tenantAndOrgInfo
-					)
+					await this.setScope(solutionCreation._id, solutionData.scope ? solutionData.scope : {}, userDetails)
 				}
 
 				return resolve({
@@ -548,7 +579,6 @@ module.exports = class SolutionsHelper {
 						{
 							_id: solutionDocument[0].programId,
 							tenantId: userDetails.tenantAndOrgInfo.tenantId,
-							orgId: { $in: ['ALL', ...userDetails.tenantAndOrgInfo.orgId] },
 						},
 						['_id', 'endDate', 'startDate']
 					)
@@ -599,7 +629,6 @@ module.exports = class SolutionsHelper {
 					{
 						_id: solutionDocument[0]._id,
 						tenantId: userDetails.tenantAndOrgInfo.tenantId,
-						orgId: { $in: ['ALL', ...userDetails.tenantAndOrgInfo.orgId] },
 					},
 					updateObject,
 					{ new: true }
@@ -611,15 +640,7 @@ module.exports = class SolutionsHelper {
 					}
 				}
 				if (solutionData.scope && Object.keys(solutionData.scope).length > 0) {
-					if (!solutionData.scope.organizations) {
-						solutionData.scope.organizations = userDetails.tenantAndOrgInfo.orgId
-					}
-					let solutionScope = await this.setScope(
-						solutionUpdatedData._id,
-						solutionData.scope,
-						userDetails.tenantAndOrgInfo
-					)
-
+					let solutionScope = await this.setScope(solutionUpdatedData._id, solutionData.scope, userDetails)
 					if (!solutionScope.success) {
 						throw {
 							message: CONSTANTS.apiResponses.COULD_NOT_UPDATE_SCOPE,
@@ -1270,7 +1291,7 @@ module.exports = class SolutionsHelper {
 				}
 				queryData.data['_id'] = solutionId
 				queryData.data['tenantId'] = tenantId
-				// queryData.data['orgId'] = { $in: [orgId] }
+
 				let matchQuery = queryData.data
 				let solutionData = await solutionsQueries.solutionsDocument(matchQuery, [
 					'_id',
@@ -1375,7 +1396,7 @@ module.exports = class SolutionsHelper {
 	 * @returns {Array} - Created user program and solution.
 	 */
 
-	static createProgramAndSolution(userId, data, userToken, createADuplicateSolution = '', userDetails) {
+	static createProgramAndSolution(userId, data, createADuplicateSolution = '', userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let userPrivateProgram = {}
@@ -1390,7 +1411,6 @@ module.exports = class SolutionsHelper {
 					let filterQuery = {
 						_id: data.programId,
 						tenantId: tenantId,
-						orgId: { $in: [orgId] },
 					}
 
 					if (createADuplicateSolution === false) {
@@ -1421,7 +1441,7 @@ module.exports = class SolutionsHelper {
 							duplicateProgram.startDate,
 							duplicateProgram.endDate,
 							'',
-							'',
+							[], // the function definition is accepting empty array instead of empty string hence replaced it with []
 							{},
 							userDetails
 						)
@@ -1449,7 +1469,7 @@ module.exports = class SolutionsHelper {
 					}
 				} else {
 					/* If the programId is not passed from the front end, we will enter this else block. 
-          In this block, we need to provide the necessary basic details to create a new program, Including startDate and endDate.*/
+          			In this block, we need to provide the necessary basic details to create a new program, Including startDate and endDate.*/
 					// Current date
 					let startDate = new Date()
 					// Add one year to the current date
@@ -1465,8 +1485,8 @@ module.exports = class SolutionsHelper {
 						startDate,
 						endDate,
 						userId,
-						'', //language
-						{}, //source- Additional source metadata related to the program
+						[], // pass empty array for translation data
+						{}, // pass empty object for source data
 						userDetails
 					)
 
@@ -1484,60 +1504,6 @@ module.exports = class SolutionsHelper {
 					isAPrivateProgram: userPrivateProgram.isAPrivateProgram,
 				}
 
-				//entities
-				// if (Array.isArray(data.entities) && data.entities && data.entities.length > 0) {
-				// 	let entitiesData = []
-				// 	let bodyData = {}
-
-				// 	let locationData = UTILS.filterLocationIdandCode(data.entities)
-
-				// 	if (locationData.ids.length > 0) {
-				// 		bodyData = {
-				// 			id: locationData.ids,
-				// 		}
-				// 		let entityData = await entitiesService.entityDocuments(bodyData, 'all')
-
-				// 		if (!entityData.success) {
-				// 			return resolve({
-				// 				status: HTTP_STATUS_CODE.bad_request.status,
-				// 				message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
-				// 				result: {},
-				// 			})
-				// 		}
-
-				// 		entityData.data.forEach((entity) => {
-				// 			entitiesData.push(entity._id)
-				// 		})
-
-				// 		solutionDataToBeUpdated['entityType'] = entityData.data[0].type
-				// 	}
-
-				// 	if (locationData.codes.length > 0) {
-				// 		let filterData = {
-				// 			'registryDetails.code': { $in: locationData.codes },
-				// 		}
-				// 		let entityDetails = await entitiesService.entityDocuments(filterData, 'all')
-				// 		if (!entityDetails.success || !entityDetails.data || !entityDetails.data.length > 0) {
-				// 			return resolve({
-				// 				status: HTTP_STATUS_CODE.bad_request.status,
-				// 				message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
-				// 				result: {},
-				// 			})
-				// 		}
-				// 		let entityDocuments = entityDetails.data
-
-				// 		entityDocuments.forEach((entity) => {
-				// 			entitiesData.push(entity._id)
-				// 		})
-
-				// 		solutionDataToBeUpdated['entityType'] = CONSTANTS.common.SCHOOL
-				// 	}
-
-				// 	if (data.type && data.type !== CONSTANTS.common.IMPROVEMENT_PROJECT) {
-				// 		solutionDataToBeUpdated['entities'] = entitiesData
-				// 	}
-				// }
-
 				//solution part
 				let solution = ''
 				if (data.solutionId && data.solutionId !== '') {
@@ -1545,7 +1511,6 @@ module.exports = class SolutionsHelper {
 						{
 							_id: data.solutionId,
 							tenantId: userDetails.userInformation.tenantId,
-							orgId: { $in: [userDetails.userInformation.organizationId] },
 						},
 						[
 							'name',
@@ -1583,7 +1548,10 @@ module.exports = class SolutionsHelper {
 							duplicateSolution.type,
 							duplicateSolution.subType,
 							userId,
-							duplicateSolution.projectTemplateId ? duplicateSolution.projectTemplateId : ''
+							duplicateSolution.projectTemplateId ? duplicateSolution.projectTemplateId : '',
+							null,
+							null,
+							userDetails
 						)
 
 						_.merge(duplicateSolution, solutionCreationData)
@@ -1635,11 +1603,15 @@ module.exports = class SolutionsHelper {
 						CONSTANTS.common.ACTIVE_STATUS,
 						description,
 						userId,
-						'',
 						false,
 						'',
 						data.type ? data.type : CONSTANTS.common.ASSESSMENT,
-						data.subType ? data.subType : CONSTANTS.common.INSTITUTIONAL
+						data.subType ? data.subType : CONSTANTS.common.INSTITUTIONAL,
+						userId,
+						'',
+						'',
+						'',
+						userDetails
 					)
 					createSolutionData['tenantId'] = userDetails.userInformation.tenantId
 					createSolutionData['orgId'] = userDetails.userInformation.organizationId
@@ -1909,7 +1881,6 @@ module.exports = class SolutionsHelper {
 							$ne: CONSTANTS.common.INACTIVE,
 						},
 						tenantId: tenantId,
-						orgId: { $in: ['ALL', userDetails.userInformation.organizationId] },
 					},
 					['type', 'status', 'endDate']
 				)
@@ -3006,7 +2977,6 @@ module.exports = class SolutionsHelper {
 							{
 								_id: { $in: programIds },
 								tenantId: userDetails.userInformation.tenantId,
-								orgId: { $in: [userDetails.userInformation.organizationId] },
 							},
 							['name']
 						)
@@ -3170,7 +3140,6 @@ module.exports = class SolutionsHelper {
 					let solutionAndProgramCreation = await this.createProgramAndSolution(
 						userId,
 						programAndSolutionData,
-						userToken,
 						true, // create duplicate solution
 						userDetails
 					)
@@ -3538,10 +3507,11 @@ module.exports = class SolutionsHelper {
 			try {
 				let tenantId = userDetails.userInformation.tenantId
 				let orgId = userDetails.userInformation.organizationId
-				let solutionData = await solutionsQueries.solutionsDocument(
-					{ _id: solutionId, tenantId: tenantId, orgId: { $in: [orgId] } },
-					['type', 'projectTemplateId', 'programId']
-				)
+				let solutionData = await solutionsQueries.solutionsDocument({ _id: solutionId, tenantId: tenantId }, [
+					'type',
+					'projectTemplateId',
+					'programId',
+				])
 
 				if (!Array.isArray(solutionData) || solutionData.length < 1) {
 					return resolve({
@@ -3561,6 +3531,7 @@ module.exports = class SolutionsHelper {
 							message: CONSTANTS.apiResponses.PROJECT_TEMPLATE_ID_NOT_FOUND,
 						}
 					}
+					const projectTemplatesHelper = require(MODULES_BASE_PATH + '/project/templates/helper')
 					templateOrQuestionDetails = await projectTemplatesHelper.details(
 						solutionData.projectTemplateId,
 						'',

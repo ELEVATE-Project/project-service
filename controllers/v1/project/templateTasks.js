@@ -154,7 +154,7 @@ module.exports = class ProjectTemplateTasks extends Abstract {
 				let projectTemplateTask = await projectTemplateTasksHelper.update(
 					req.params._id,
 					req.body,
-					req.userDetails.userInformation.userId
+					req.userDetails
 				)
 
 				projectTemplateTask.result = projectTemplateTask.data

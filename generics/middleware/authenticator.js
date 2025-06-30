@@ -90,6 +90,10 @@ module.exports = async function (req, res, next, token = '') {
 		'/certificateTemplates/createSvg',
 		'/solutions/getDetails',
 		'/userProjects/deleteUserPIIData',
+		'/templateTasks/update',
+		'/projectAttributes/create',
+		'/projectAttributes/update',
+		'/userExtension/bulkUpload',
 		'/userProjects/pushSubmissionToTask',
 		'/templates/importProjectTemplate',
 	]
@@ -353,39 +357,35 @@ module.exports = async function (req, res, next, token = '') {
 			let orgDetails = await userService.fetchTenantDetails(tenantId, token)
 			let validOrgIds = null
 
-			if (orgIdArr.includes('ALL') || orgIdArr.includes('all')) {
-				validOrgIds = ['ALL']
-			} else {
-				if (
-					!orgDetails ||
-					!orgDetails.success ||
-					!orgDetails.data ||
-					!(Object.keys(orgDetails.data).length > 0) ||
-					!orgDetails.data.organizations ||
-					!(orgDetails.data.organizations.length > 0)
-				) {
-					let errorObj = {}
-					errorObj.errCode = CONSTANTS.apiResponses.ORG_DETAILS_FETCH_UNSUCCESSFUL_CODE
-					errorObj.errMsg = CONSTANTS.apiResponses.ORG_DETAILS_FETCH_UNSUCCESSFUL_MESSAGE
-					errorObj.responseCode = HTTP_STATUS_CODE['bad_request'].status
-					return { success: false, errorObj: errorObj }
-				}
+			if (
+				!orgDetails ||
+				!orgDetails.success ||
+				!orgDetails.data ||
+				!(Object.keys(orgDetails.data).length > 0) ||
+				!orgDetails.data.organizations ||
+				!(orgDetails.data.organizations.length > 0)
+			) {
+				let errorObj = {}
+				errorObj.errCode = CONSTANTS.apiResponses.ORG_DETAILS_FETCH_UNSUCCESSFUL_CODE
+				errorObj.errMsg = CONSTANTS.apiResponses.ORG_DETAILS_FETCH_UNSUCCESSFUL_MESSAGE
+				errorObj.responseCode = HTTP_STATUS_CODE['bad_request'].status
+				return { success: false, errorObj: errorObj }
+			}
 
-				// convert the types of items to string
-				orgDetails.data.related_orgs = orgDetails.data.organizations.map((data) => {
-					return data.code.toString()
-				})
-				// aggregate valid orgids
+			// convert the types of items to string
+			orgDetails.data.related_orgs = orgDetails.data.organizations.map((data) => {
+				return data.code.toString()
+			})
+			// aggregate valid orgids
 
-				let relatedOrgIds = orgDetails.data.related_orgs
-				validOrgIds = orgIdArr.filter((id) => relatedOrgIds.includes(id))
+			let relatedOrgIds = orgDetails.data.related_orgs
+			validOrgIds = orgIdArr.filter((id) => relatedOrgIds.includes(id))
 
-				if (!(validOrgIds.length > 0)) {
-					rspObj.errCode = CONSTANTS.apiResponses.TENANTID_AND_ORGID_REQUIRED_IN_TOKEN_CODE
-					rspObj.errMsg = CONSTANTS.apiResponses.TENANTID_AND_ORGID_REQUIRED_IN_TOKEN_MESSAGE
-					rspObj.responseCode = HTTP_STATUS_CODE['bad_request'].status
-					return res.status(HTTP_STATUS_CODE['bad_request'].status).send(respUtil(rspObj))
-				}
+			if (!(validOrgIds.length > 0)) {
+				rspObj.errCode = CONSTANTS.apiResponses.TENANTID_AND_ORGID_REQUIRED_IN_TOKEN_CODE
+				rspObj.errMsg = CONSTANTS.apiResponses.TENANTID_AND_ORGID_REQUIRED_IN_TOKEN_MESSAGE
+				rspObj.responseCode = HTTP_STATUS_CODE['bad_request'].status
+				return res.status(HTTP_STATUS_CODE['bad_request'].status).send(respUtil(rspObj))
 			}
 
 			return { success: true, validOrgIds: validOrgIds }
@@ -481,8 +481,8 @@ module.exports = async function (req, res, next, token = '') {
 
 				let result = getTenantIdAndOrgIdFromTheTheReqIntoHeaders(req, decodedToken.data)
 				if (!result.success) {
-					rspObj.errCode = reqMsg.ADMIN_TOKEN.MISSING_CODE
-					rspObj.errMsg = reqMsg.ADMIN_TOKEN.MISSING_MESSAGE
+					rspObj.errCode = CONSTANTS.apiResponses.ADMIN_TOKEN_MISSING_CODE
+					rspObj.errMsg = CONSTANTS.apiResponses.ADMIN_TOKEN_MISSING_MESSAGE
 					rspObj.responseCode = HTTP_STATUS_CODE['unauthorized'].status
 					return res.status(HTTP_STATUS_CODE['unauthorized'].status).send(respUtil(rspObj))
 				}

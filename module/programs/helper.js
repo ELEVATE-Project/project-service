@@ -180,12 +180,23 @@ module.exports = class ProgramsHelper {
 					scopeData = _.omit(scopeData, keysCannotBeAdded)
 				}
 
+				let tenantDetails = await userService.fetchPublicTenantDetails(userDetails.tenantAndOrgInfo.tenantId)
+				if (!tenantDetails?.success || !tenantDetails?.data?.meta) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.FAILED_TO_FETCH_TENANT_DETAILS,
+					}
+				}
+				let tenantPublicDetailsMetaField = tenantDetails.data.meta
+
+				let filteredScope = UTILS.getFilteredScope(scopeData, tenantPublicDetailsMetaField)
+
 				const updateObject = {
 					$set: {},
 				}
 
 				// Set the scope in updateObject to the updated scopeData
-				updateObject['$set']['scope'] = scopeData
+				updateObject['$set']['scope'] = filteredScope
 
 				// Find and update the program with the specified programId
 				let updateProgram = await programsQueries.findAndUpdate(
@@ -1299,28 +1310,18 @@ module.exports = class ProgramsHelper {
 							message: CONSTANTS.apiResponses.FAILED_TO_FETCH_TENANT_DETAILS,
 						})
 					}
-					// factors = [ 'professional_role', 'professional_subroles' ]
-					let factors
-					if (
-						tenantDetails.data.meta.hasOwnProperty('factors') &&
-						tenantDetails.data.meta.factors.length > 0
-					) {
-						factors = tenantDetails.data.meta.factors
-						let queryFilter = UTILS.factorQuery(factors, userRoleInfo)
-						filterQuery['$and'] = queryFilter
+
+					let tenantPublicDetailsMetaField = tenantDetails.data.meta
+					let builtQuery = UTILS.targetingQuery(
+						userRoleInfo,
+						tenantPublicDetailsMetaField,
+						CONSTANTS.common.MANDATORY_SCOPE_FIELD,
+						CONSTANTS.common.OPTIONAL_SCOPE_FIELD
+					)
+					filterQuery = {
+						...filterQuery,
+						...builtQuery,
 					}
-
-					let dataToOmit = ['filter', 'role', 'factors', 'type', 'tenantId', 'orgId', 'organizations']
-					// factors.append(dataToOmit)
-
-					const finalKeysToRemove = [...new Set([...dataToOmit, ...factors])]
-
-					filterQuery.$or = []
-					Object.keys(_.omit(data, finalKeysToRemove)).forEach((key) => {
-						filterQuery.$or.push({
-							[`scope.${key}`]: { $in: data[key] },
-						})
-					})
 				} else {
 					// Obtain userInfo
 					let userRoleInfo = _.omit(data, ['filter', 'factors', 'role', 'type', 'tenantId', 'orgId'])

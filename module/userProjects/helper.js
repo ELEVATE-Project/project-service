@@ -598,7 +598,7 @@ module.exports = class UserProjectsHelper {
 				let solutionAndProgramCreation = await solutionsHelper.createProgramAndSolution(
 					userId,
 					programAndSolutionData,
-					userDetails.userToken,
+					// userDetails.userToken,
 					isATargetedSolution,
 					userDetails
 				)
@@ -4745,7 +4745,7 @@ async function _projectTask(
 	programId,
 	userDetails
 ) {
-	for (const singleTask of tasks) {
+	for (let singleTask of tasks) {
 		if (singleTask) {
 			singleTask.externalId = singleTask.externalId ? singleTask.externalId : singleTask.name.toLowerCase()
 			singleTask.type = singleTask.type ? singleTask.type : CONSTANTS.common.SIMPLE_TASK_TYPE
@@ -4779,92 +4779,9 @@ async function _projectTask(
 					})
 				}
 			}
-			let importSolutionsResponse
-			// create a child solution if solutionDetails has isReusable true solution details
-			if (singleTask?.solutionDetails?.isReusable) {
-				userDetails.tenantAndOrgInfo = {
-					tenantId: userDetails.userInformation.tenantId,
-					orgId: [userDetails.userInformation.organizationId],
-				}
-				if (singleTask.solutionDetails.type === CONSTANTS.common.OBSERVATION) {
-					const timestamp = UTILS.epochTime()
-					// Creating child observation solution
-					importSolutionsResponse = await surveyService.importTemplateToSolution(
-						userToken,
-						singleTask.solutionDetails._id,
-						'',
-						{
-							name: `${singleTask.solutionDetails.name}-${timestamp}`,
-							externalId: `${singleTask.solutionDetails.externalId}-${timestamp}`,
-							description: `${singleTask.solutionDetails.name}-${timestamp}`,
-							programExternalId: programId,
-							status: CONSTANTS.common.PUBLISHED_STATUS,
-							tenantData: userDetails.tenantAndOrgInfo,
-							userId: userDetails.userInformation.userId,
-						},
-						userDetails,
-						singleTask.solutionDetails.type
-					)
-
-					if (
-						importSolutionsResponse.status != HTTP_STATUS_CODE['ok'].status ||
-						!importSolutionsResponse?.data?.externalId
-					) {
-						throw {
-							message: CONSTANTS.apiResponses.SOLUTION_NOT_CREATED,
-							status: HTTP_STATUS_CODE.bad_request.status,
-						}
-					}
-					// Assinging the new solution  values to task solutionDetails
-					singleTask.solutionDetails._id = importSolutionsResponse.result._id
-					singleTask.solutionDetails.externalId = importSolutionsResponse.result.externalId
-					singleTask.solutionDetails.isReusable = CONSTANTS.common.FALSE
-
-					//updating programComponents
-					await programsQueries.findAndUpdate(
-						{
-							_id: programId,
-						},
-						{
-							$addToSet: { components: importSolutionsResponse.result._id },
-						}
-					)
-				} else if (singleTask.solutionDetails.type === CONSTANTS.common.SURVEY) {
-					// Creating child survey solution
-					importSolutionsResponse = await surveyService.importTemplateToSolution(
-						userToken,
-						singleTask.solutionDetails._id,
-						programId,
-						{
-							tenantData: userDetails.tenantAndOrgInfo,
-							userId: userDetails.userInformation.userId,
-						},
-						userDetails,
-						singleTask.solutionDetails.type
-					)
-
-					if (
-						importSolutionsResponse.status != HTTP_STATUS_CODE['ok'].status ||
-						!importSolutionsResponse?.result?.solutionExternalId
-					) {
-						throw {
-							message: CONSTANTS.apiResponses.SOLUTION_NOT_CREATED,
-							status: HTTP_STATUS_CODE.bad_request.status,
-						}
-					}
-					singleTask.solutionDetails._id = importSolutionsResponse.result.solutionId
-					singleTask.solutionDetails.externalId = importSolutionsResponse.result.solutionExternalId
-					singleTask.solutionDetails.isReusable = CONSTANTS.common.FALSE
-					//updating programComponents
-					await programsQueries.findAndUpdate(
-						{
-							_id: programId,
-						},
-						{
-							$addToSet: { components: importSolutionsResponse.result.solutionId },
-						}
-					)
-				}
+			// create a child solution or project for a task
+			if (singleTask?.solutionDetails?.isReusable || singleTask?.projectTemplateDetails?.isReusable) {
+				singleTask = await importTaskForLibrary(singleTask, programId, userDetails, userToken)
 			}
 			removeFieldsFromRequest.forEach((removeField) => {
 				delete singleTask[removeField]
@@ -4880,6 +4797,154 @@ async function _projectTask(
 
 	return tasks
 }
+
+/**
+ * Create child solutions or project for a task.
+ * @method
+ * @name importTaskForLibrary
+ * @param {Array} task -  each task.
+ * @param {String}privateProgramId -ProgramId
+ * @param {Object} userDetails - userinformation
+ * @param {String} userToken-user auth token
+ * @returns {Object} Project task.
+ */
+async function importTaskForLibrary(task, privateProgramId, userDetails, userToken) {
+	let importSolutionsResponse
+
+	userDetails.tenantAndOrgInfo = {
+		tenantId: userDetails.userInformation.tenantId,
+		orgId: [userDetails.userInformation.organizationId],
+	}
+
+	if (task?.solutionDetails?.isReusable) {
+		const timestamp = UTILS.epochTime()
+
+		if (task?.solutionDetails?.type === CONSTANTS.common.OBSERVATION) {
+			importSolutionsResponse = await surveyService.importTemplateToSolution(
+				userToken,
+				task.solutionDetails._id,
+				'',
+				{
+					name: `${task.solutionDetails.name}-${timestamp}`,
+					externalId: `${task.solutionDetails.externalId}-${timestamp}`,
+					description: `${task.solutionDetails.name}-${timestamp}`,
+					programExternalId: privateProgramId,
+					status: CONSTANTS.common.PUBLISHED_STATUS,
+					tenantData: userDetails.tenantAndOrgInfo,
+					userId: userDetails.userInformation.userId,
+				},
+				userDetails,
+				task.solutionDetails.type
+			)
+
+			if (
+				importSolutionsResponse.status != HTTP_STATUS_CODE['ok'].status ||
+				!importSolutionsResponse?.data?.externalId
+			) {
+				throw {
+					message: CONSTANTS.apiResponses.SOLUTION_NOT_CREATED,
+					status: HTTP_STATUS_CODE.bad_request.status,
+				}
+			}
+
+			task.solutionDetails._id = importSolutionsResponse.result._id
+			task.solutionDetails.externalId = importSolutionsResponse.result.externalId
+			task.solutionDetails.isReusable = CONSTANTS.common.FALSE
+
+			await programsQueries.findAndUpdate(
+				{ _id: privateProgramId },
+				{ $addToSet: { components: importSolutionsResponse.result._id } }
+			)
+		} else if (task?.solutionDetails?.type === CONSTANTS.common.SURVEY) {
+			importSolutionsResponse = await surveyService.importTemplateToSolution(
+				userToken,
+				task.solutionDetails._id,
+				privateProgramId,
+				{
+					tenantData: userDetails.tenantAndOrgInfo,
+					userId: userDetails.userInformation.userId,
+				},
+				userDetails,
+				task.solutionDetails.type
+			)
+
+			if (
+				importSolutionsResponse.status != HTTP_STATUS_CODE['ok'].status ||
+				!importSolutionsResponse?.result?.solutionExternalId
+			) {
+				throw {
+					message: CONSTANTS.apiResponses.SOLUTION_NOT_CREATED,
+					status: HTTP_STATUS_CODE.bad_request.status,
+				}
+			}
+
+			task.solutionDetails._id = importSolutionsResponse.result.solutionId
+			task.solutionDetails.externalId = importSolutionsResponse.result.solutionExternalId
+			task.solutionDetails.isReusable = CONSTANTS.common.FALSE
+
+			await programsQueries.findAndUpdate(
+				{ _id: privateProgramId },
+				{ $addToSet: { components: importSolutionsResponse.result.solutionId } }
+			)
+		}
+	} else if (
+		task?.projectTemplateDetails?.isReusable &&
+		task?.projectTemplateDetails?.type === CONSTANTS.common.IMPROVEMENT_PROJECT
+	) {
+		let programAndSolutionData = {
+			type: CONSTANTS.common.IMPROVEMENT_PROJECT,
+			subType: CONSTANTS.common.IMPROVEMENT_PROJECT,
+			isReusable: false,
+		}
+		if (privateProgramId !== '') {
+			programAndSolutionData['programId'] = privateProgramId
+		}
+		const UserProjectsHelper = require(MODULES_BASE_PATH + '/userProjects/helper')
+		let projectCreation = await UserProjectsHelper.importFromLibrary(
+			task?.projectTemplateDetails?._id,
+			programAndSolutionData,
+			userToken,
+			userDetails.userInformation.userId,
+			false, // isAtargetedSolution
+			'', //language
+			userDetails
+		)
+
+		if (!projectCreation.success || !projectCreation?.data?._id) {
+			throw {
+				status: HTTP_STATUS_CODE.bad_request.status,
+				message: CONSTANTS.apiResponses.SOLUTION_PROGRAMS_NOT_CREATED,
+			}
+		}
+		const { programId, _id, solutionId, solutionExternalId } = projectCreation.data
+		//updating improvementprojectDetails for task
+		task.improvementProjectInformation = {
+			programId: programId,
+			_id: _id,
+			solutionId: solutionId,
+		}
+		//Adding solutionDetails for task
+		task.solutionDetails = {
+			_id: solutionId,
+			externalId: solutionExternalId,
+			type: task?.projectTemplateDetails.type,
+			isReusable: CONSTANTS.common.FALSE,
+			minNoOfSubmissionsRequired: task?.projectTemplateDetails.minNoOfSubmissionsRequired
+				? task?.projectTemplateDetails.minNoOfSubmissionsRequired
+				: CONSTANTS.common.DEFAULT_SUBMISSION_REQUIRED,
+		}
+		//Adding submissions for task
+		task.submissions = [
+			{
+				_id: _id,
+				status: CONSTANTS.common.STARTED,
+				completedDate: '',
+			},
+		]
+	}
+	return task
+}
+
 /**
  * Validates that all tasks in the provided array contain required fields.
  * @function

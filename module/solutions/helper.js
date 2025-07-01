@@ -1999,6 +1999,21 @@ module.exports = class SolutionsHelper {
 						message: CONSTANTS.apiResponses.PROGRAM_NOT_FOUND,
 					}
 				}
+				// This logic we need to re-look --------------------------------------------
+				// if (solutionData[0].scope !== programData[0].scope) {
+				// 	let checkEntityInParent = await entitiesService.entityDocuments(
+				// 		{
+				// 			_id: programData[0].scope.entities,- state
+				// 			[`groups.${solutionData[0].scope.entityType}`]: entities,- district
+				// 		},
+				// 		['_id']
+				// 	)
+				// 	if (!checkEntityInParent.success) {
+				// 		throw {
+				// 			message: messageConstants.apiResponses.ENTITY_NOT_EXISTS_IN_PARENT,
+				// 		}
+				// 	}
+				// }
 
 				let updateObjectData = await programSolutionUtility.getUpdateObjectTOAddScope(
 					bodyData,

@@ -598,7 +598,6 @@ module.exports = class UserProjectsHelper {
 				let solutionAndProgramCreation = await solutionsHelper.createProgramAndSolution(
 					userId,
 					programAndSolutionData,
-					// userDetails.userToken,
 					isATargetedSolution,
 					userDetails
 				)
@@ -4417,29 +4416,98 @@ module.exports = class UserProjectsHelper {
 			try {
 				let result = {}
 				userRoleAndProfileInformation.project = projectData.project
-				// create project using details function
-				let projectDetails = await this.detailsV2(
-					'', //projectId
-					projectData.solutionDetails._id,
-					userId,
-					userToken,
-					userRoleAndProfileInformation,
-					'', //appName
-					'', //appversion
-					projectData.projectTemplateDetails.externalId,
-					'', //language
-					userDetails
-				)
-				//throw error if project not created
-				if (!projectDetails.success || !projectDetails?.data?._id) {
-					throw {
-						message: CONSTANTS.apiResponses.PROJECT_NOT_CREATED,
-						status: HTTP_STATUS_CODE.bad_request.status,
-					}
-				}
 
-				result['projectId'] = projectDetails.data._id
-				result['solutionId'] = projectData.solutionDetails._id
+				if (projectData.projectTemplateDetails.isReusable) {
+					let programAndSolutionData = {
+						type: CONSTANTS.common.IMPROVEMENT_PROJECT,
+						subType: CONSTANTS.common.IMPROVEMENT_PROJECT,
+						isReusable: false,
+						project: projectData.project,
+					}
+					if (privateProgramId !== '') {
+						programAndSolutionData['programId'] = projectData.programId
+					}
+					let projectCreation = await this.importFromLibrary(
+						projectData?.projectTemplateDetails?._id,
+						programAndSolutionData,
+						userToken,
+						userId,
+						false, // isAtargetedSolution
+						'', //language
+						userDetails
+					)
+					if (!projectCreation.success || !projectCreation?.data?._id) {
+						throw {
+							status: HTTP_STATUS_CODE.bad_request.status,
+							message: CONSTANTS.apiResponses.SOLUTION_PROGRAMS_NOT_CREATED,
+						}
+					}
+					const { programId, _id, solutionId, solutionExternalId } = projectCreation.data
+
+					//Adding solutionDetails for task
+					let solutionDetails = {
+						_id: solutionId,
+						externalId: solutionExternalId,
+						type: task?.projectTemplateDetails.type,
+						isReusable: CONSTANTS.common.FALSE,
+						minNoOfSubmissionsRequired: task?.projectTemplateDetails.minNoOfSubmissionsRequired
+							? task?.projectTemplateDetails.minNoOfSubmissionsRequired
+							: CONSTANTS.common.DEFAULT_SUBMISSION_REQUIRED,
+					}
+					//Adding submissions for task
+					let submissions = [
+						{
+							_id: _id,
+							status: CONSTANTS.common.STARTED,
+							completedDate: '',
+						},
+					]
+
+					let projectUpdated = await projectQueries.findOneAndUpdate(
+						{
+							_id: _id,
+						},
+						{
+							$set: {
+								solutionDetails: solutionDetails,
+								submissions: submissions,
+							},
+						}
+					)
+
+					if (!projectUpdated._id) {
+						throw {
+							message: CONSTANTS.apiResponses.USER_PROJECT_NOT_UPDATED,
+							status: HTTP_STATUS_CODE.bad_request.status,
+						}
+					}
+					result['projectId'] = _id
+					result['solutionId'] = solutionId
+					result['programId'] = programId
+				} else {
+					// create project using details function
+					let projectDetails = await this.detailsV2(
+						'', //projectId
+						projectData.solutionDetails._id,
+						userId,
+						userToken,
+						userRoleAndProfileInformation,
+						'', //appName
+						'', //appversion
+						projectData.projectTemplateDetails.externalId,
+						'', //language
+						userDetails
+					)
+					//throw error if project not created
+					if (!projectDetails.success || !projectDetails?.data?._id) {
+						throw {
+							message: CONSTANTS.apiResponses.PROJECT_NOT_CREATED,
+							status: HTTP_STATUS_CODE.bad_request.status,
+						}
+					}
+					result['projectId'] = projectDetails.data._id
+					result['solutionId'] = projectData.solutionDetails._id
+				}
 
 				return resolve({
 					success: true,

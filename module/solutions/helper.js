@@ -2937,6 +2937,13 @@ module.exports = class SolutionsHelper {
 						message: userCreatedProjects.message,
 					}
 				}
+				// Remove project solutions which for project tasks.
+				_.remove(userCreatedProjects?.data?.data, function (solution) {
+					return (
+						solution.referenceFrom == messageConstants.common.PROJECT &&
+						solution.type == messageConstants.common.IMPROVEMENT_PROJECT
+					)
+				})
 
 				if (process.env.SUBMISSION_LEVEL == 'ENTITY' && requestedData.hasOwnProperty('entityId')) {
 					mergedData = userCreatedProjects.data.data

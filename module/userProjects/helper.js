@@ -598,7 +598,7 @@ module.exports = class UserProjectsHelper {
 				let solutionAndProgramCreation = await solutionsHelper.createProgramAndSolution(
 					userId,
 					programAndSolutionData,
-					userDetails.userToken,
+					// userDetails.userToken,
 					isATargetedSolution,
 					userDetails
 				)

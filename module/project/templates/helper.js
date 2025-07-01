@@ -996,21 +996,20 @@ module.exports = class ProjectTemplatesHelper {
 				externalId: solution.externalId,
 				name: solution.name,
 				isReusable: solution.isReusable,
-				minNoOfSubmissionsRequired: newProjectTemplateTask?.solutionDetails?.minNoOfSubmissionsRequired
-					? newProjectTemplateTask.solutionDetails.minNoOfSubmissionsRequired
-					: CONSTANTS.common.DEFAULT_SUBMISSION_REQUIRED,
+				minNoOfSubmissionsRequired:
+					newProjectTemplateTask?.solutionDetails?.minNoOfSubmissionsRequired ??
+					CONSTANTS.common.DEFAULT_SUBMISSION_REQUIRED,
 			})
 
 			//fetchSolution details
 			const fetchSolutionByExternalId = async (externalId) => {
 				let result = {}
+				// For project service solutionDetails we will get objectId in externalId param and for samiksha we will get externalId so using that to fetch the solution data
 				let validateTemplateId = UTILS.isValidMongoId(externalId.toString())
 				if (validateTemplateId) {
-					//Query project service to get prject solutionDetails
-					result = await solutionsQueries.getAggregate([
-						{ $match: { _id: externalId } },
-						{ $project: { type: 1, entityType: 1, _id: 1, externalId: 1, name: 1, isReusable: 1 } },
-					])
+					//Query project service to get project solutionDetails
+					let projection = ['type', 'entityType', '_id', 'externalId', 'name', 'isReusable']
+					result = await solutionsQueries.solutionsDocument({ _id: externalId }, projection)
 					result.data = result
 					if (!result?.data?.length > 0) {
 						throw {
@@ -1069,7 +1068,7 @@ module.exports = class ProjectTemplatesHelper {
 				let solutionData = {
 					programExternalId: newProjectTemplateTask.programExternalId,
 					externalId: newProjectTemplateTask.projectTemplateExternalId + '-' + UTILS.epochTime(),
-					excludeScope: true,
+					excludeScope: true, // excluding scope for creation
 				}
 				let newSolution = await solutionsHelper.createSolution(solutionData, false, userDetails)
 				if (newSolution?.data && !newSolution?.data?._id) {

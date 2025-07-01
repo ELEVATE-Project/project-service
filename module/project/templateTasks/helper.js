@@ -239,17 +239,19 @@ module.exports = class ProjectTemplateTasksHelper {
 								parsedData.STATUS = CONSTANTS.apiResponses.SOLUTION_TYPE_MIS_MATCH
 							}
 							if (
-								!(solutionData[parsedData.solutionId].type === CONSTANTS.common.SURVEY) &&
-								solutionData[parsedData.solutionId].entityType !== allValues.solutionDetails.subType &&
-								!(solutionData[parsedData.solutionId].type === CONSTANTS.common.IMPROVEMENT_PROJECT)
+								![CONSTANTS.common.SURVEY, CONSTANTS.common.IMPROVEMENT_PROJECT].includes(
+									solutionData[parsedData.solutionId].type
+								) &&
+								solutionData[parsedData.solutionId].entityType !== allValues.solutionDetails.subType
 							) {
 								parsedData.STATUS = CONSTANTS.apiResponses.SOLUTION_SUB_TYPE_MIS_MATCH
 							}
 							if (
 								template.entityType &&
-								!(solutionData[parsedData.solutionId].type === CONSTANTS.common.SURVEY) &&
-								template.entityType !== solutionData[parsedData.solutionId].entityType &&
-								!(solutionData[parsedData.solutionId].type === CONSTANTS.common.IMPROVEMENT_PROJECT)
+								![CONSTANTS.common.SURVEY, CONSTANTS.common.IMPROVEMENT_PROJECT].includes(
+									solutionData[parsedData.solutionId].type
+								) &&
+								template.entityType !== solutionData[parsedData.solutionId].entityType
 							) {
 								parsedData.STATUS = CONSTANTS.apiResponses.MIS_MATCHED_PROJECT_AND_TASK_ENTITY_TYPE
 							} else {

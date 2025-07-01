@@ -1922,6 +1922,7 @@ module.exports = class UserProjectsHelper {
 								status: project.status,
 								completedDate: project.completedDate ? project.completedDate : '',
 							}
+							// For observation and survey we will be using kafka to update task submission status But for project as a task calling the function directly
 							await this.pushSubmissionToTask(
 								project.project._id,
 								project.project.taskId,

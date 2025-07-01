@@ -1,12 +1,9 @@
 /**
- * name : program-solution-utility.js
+ * name : programSolutionUtilities.js
  * author : Mallanagouda R Biradar
  * Date : 30-June-2025
  * Description : Program Solution Utility Function
  */
-
-const { reject } = require('lodash')
-const { resolve } = require('path')
 
 const userService = require(GENERICS_FILES_PATH + '/services/users')
 const entitiesService = require(GENERICS_FILES_PATH + '/services/entity-management')
@@ -93,7 +90,6 @@ function getUpdateObjectTOAddScope(bodyData, tenantId, orgId, userDetails) {
 					{
 						_id: { $in: entitiesToValidate },
 						tenantId: tenantId,
-						orgId: orgId,
 					},
 					['_id', 'entityType']
 				)
@@ -110,17 +106,21 @@ function getUpdateObjectTOAddScope(bodyData, tenantId, orgId, userDetails) {
 					validEntitiesMap.set(key, true)
 				}
 
+				// Iterate through each entityType and its corresponding IDs in the request body
 				for (const [entityType, ids] of Object.entries(entities)) {
 					if (!keysForValidation.includes(entityType)) continue
 
+					// Skip validation for entityTypes that are either excluded or already marked as ALL
 					for (const id of ids) {
 						const key = `${id}-${entityType}`
+						// If the current id-entityType pair is not found in the validated entity map, throw an error
 						if (!validEntitiesMap.has(key)) {
 							throw {
 								message: `${entityType} with id ${id} is invalid or not found`,
 								status: HTTP_STATUS_CODE.bad_request.status,
 							}
 						}
+						// Initialize the array for this entityType in groupedEntities if it doesn't exist
 						if (!groupedEntities[entityType]) {
 							groupedEntities[entityType] = []
 						}

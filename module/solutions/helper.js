@@ -21,7 +21,7 @@ const projectTemplateQueries = require(DB_QUERY_BASE_PATH + '/projectTemplates')
 const projectTemplatesHelper = require(MODULES_BASE_PATH + '/project/templates/helper')
 const programUsersHelper = require(MODULES_BASE_PATH + '/programUsers/helper')
 const userService = require(GENERICS_FILES_PATH + '/services/users')
-const programSolutionUtility = require(GENERICS_FILES_PATH + '/helpers/program-solution-utility')
+const programSolutionUtility = require(GENERICS_FILES_PATH + '/helpers/programSolutionUtilities')
 const timeZoneDifference = process.env.TIMEZONE_DIFFRENECE_BETWEEN_LOCAL_TIME_AND_UTC
 
 /**

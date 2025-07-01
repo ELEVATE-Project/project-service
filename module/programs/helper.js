@@ -13,7 +13,7 @@ const projectQueries = require(DB_QUERY_BASE_PATH + '/projects')
 const entitiesService = require(GENERICS_FILES_PATH + '/services/entity-management')
 const validateEntity = process.env.VALIDATE_ENTITIES
 const userService = require(GENERICS_FILES_PATH + '/services/users')
-const programSolutionUtility = require(GENERICS_FILES_PATH + '/helpers/program-solution-utility')
+const programSolutionUtility = require(GENERICS_FILES_PATH + '/helpers/programSolutionUtilities')
 /**
  * ProgramsHelper
  * @class

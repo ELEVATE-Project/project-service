@@ -176,13 +176,11 @@ module.exports = class SolutionsHelper {
 	 * @name setScope
 	 * @param {String} solutionId - solution id.
 	 * @param {Object} scopeData - scope data.
-	 * @param {String} scopeData.entityType - scope entity type
-	 * @param {Array} scopeData.entities - scope entities
-	 * @param {Array} scopeData.roles - roles in scope
+	 * @param {Object} userDetails - loggedin user info
 	 * @returns {JSON} - scope in solution.
 	 */
 
-	static setScope(solutionId, scopeData) {
+	static setScope(solutionId, scopeData, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let solutionData = await solutionsQueries.solutionsDocument({ _id: solutionId }, ['_id'])
@@ -192,6 +190,41 @@ module.exports = class SolutionsHelper {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.SOLUTION_NOT_FOUND,
 					})
+				}
+
+				// populate scopeData.organizations data
+				if (
+					scopeData.organizations &&
+					scopeData.organizations.length > 0 &&
+					userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)
+				) {
+					// call user-service to fetch related orgs
+					let validOrgs = await userService.fetchTenantDetails(
+						userDetails.tenantAndOrgInfo.tenantId,
+						userDetails.userToken,
+						true
+					)
+					if (!validOrgs.success) {
+						throw {
+							success: false,
+							status: HTTP_STATUS_CODE['bad_request'].status,
+							message: CONSTANTS.apiResponses.ORG_DETAILS_FETCH_UNSUCCESSFUL_MESSAGE,
+						}
+					}
+					validOrgs = validOrgs.data
+
+					// filter valid orgs
+					scopeData.organizations = scopeData.organizations.filter(
+						(id) => validOrgs.includes(id) || id.toLowerCase() == CONSTANTS.common.ALL
+					)
+				} else {
+					scopeData['organizations'] = userDetails.tenantAndOrgInfo.orgId
+				}
+
+				if (Array.isArray(scopeData.organizations)) {
+					scopeData.organizations = scopeData.organizations.map((orgId) =>
+						orgId === CONSTANTS.common.ALL ? 'ALL' : orgId
+					)
 				}
 
 				// let currentSolutionScope = {};
@@ -300,12 +333,24 @@ module.exports = class SolutionsHelper {
 					scopeData = _.omit(scopeData, keysCannotBeAdded)
 				}
 
+				let tenantDetails = await userService.fetchPublicTenantDetails(userDetails.tenantAndOrgInfo.tenantId)
+				if (!tenantDetails?.success || !tenantDetails?.data?.meta) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.FAILED_TO_FETCH_TENANT_DETAILS,
+					}
+				}
+
+				let tenantPublicDetailsMetaField = tenantDetails.data.meta
+
+				let filteredScope = UTILS.getFilteredScope(scopeData, tenantPublicDetailsMetaField)
+
 				const updateObject = {
 					$set: {},
 				}
 
 				// Assign the scopeData to the scope field in updateObject
-				updateObject['$set']['scope'] = scopeData
+				updateObject['$set']['scope'] = filteredScope
 
 				// Update the solution document with the updateObject
 				let updateSolution = await solutionsQueries.updateSolutionDocument(
@@ -479,9 +524,8 @@ module.exports = class SolutionsHelper {
 					$addToSet: { components: solutionCreation._id },
 				})
 
-				solutionData.scope['organizations'] = userDetails.tenantAndOrgInfo.orgId
 				if (!solutionData.excludeScope && programData[0].scope) {
-					await this.setScope(solutionCreation._id, solutionData.scope ? solutionData.scope : {})
+					await this.setScope(solutionCreation._id, solutionData.scope ? solutionData.scope : {}, userDetails)
 				}
 
 				return resolve({
@@ -597,11 +641,7 @@ module.exports = class SolutionsHelper {
 					}
 				}
 				if (solutionData.scope && Object.keys(solutionData.scope).length > 0) {
-					if (!solutionData.scope.organizations) {
-						solutionData.scope.organizations = userDetails.tenantAndOrgInfo.orgId
-					}
-					let solutionScope = await this.setScope(solutionUpdatedData._id, solutionData.scope)
-
+					let solutionScope = await this.setScope(solutionUpdatedData._id, solutionData.scope, userDetails)
 					if (!solutionScope.success) {
 						throw {
 							message: CONSTANTS.apiResponses.COULD_NOT_UPDATE_SCOPE,
@@ -1100,34 +1140,17 @@ module.exports = class SolutionsHelper {
 							message: CONSTANTS.apiResponses.FAILED_TO_FETCH_TENANT_DETAILS,
 						})
 					}
-					// factors = [ 'professional_role', 'professional_subroles' ]
-					let factors
-					if (
-						tenantDetails.data.meta.hasOwnProperty('factors') &&
-						tenantDetails.data.meta.factors.length > 0
-					) {
-						factors = tenantDetails.data.meta.factors
-						let queryFilter = UTILS.factorQuery(factors, userRoleInfo)
-						filterQuery['$and'] = queryFilter
+					let tenantPublicDetailsMetaField = tenantDetails.data.meta
+					let builtQuery = UTILS.targetingQuery(
+						userRoleInfo,
+						tenantPublicDetailsMetaField,
+						CONSTANTS.common.MANDATORY_SCOPE_FIELD,
+						CONSTANTS.common.OPTIONAL_SCOPE_FIELD
+					)
+					filterQuery = {
+						...filterQuery,
+						...builtQuery,
 					}
-					let dataToOmit = ['filter', 'role', 'factors', 'type', 'tenantId', 'orgId', 'organizations']
-					// factors.append(dataToOmit)
-
-					const finalKeysToRemove = [...new Set([...dataToOmit, ...factors])]
-
-					filterQuery.$or = []
-					Object.keys(_.omit(data, finalKeysToRemove)).forEach((key) => {
-						// If prefix is given use it to form query
-						if (prefix != '') {
-							filterQuery.$or.push({
-								[`${prefix}.scope.${key}`]: { $in: data[key] },
-							})
-						} else {
-							filterQuery.$or.push({
-								[`scope.${key}`]: { $in: data[key] },
-							})
-						}
-					})
 				} else {
 					// Obtain userInfo
 					let userRoleInfo = _.omit(data, ['filter', 'factors', 'role', 'type', 'tenantId', 'orgId'])
@@ -3509,6 +3532,7 @@ module.exports = class SolutionsHelper {
 							message: CONSTANTS.apiResponses.PROJECT_TEMPLATE_ID_NOT_FOUND,
 						}
 					}
+					const projectTemplatesHelper = require(MODULES_BASE_PATH + '/project/templates/helper')
 					templateOrQuestionDetails = await projectTemplatesHelper.details(
 						solutionData.projectTemplateId,
 						'',

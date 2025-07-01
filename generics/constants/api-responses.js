@@ -282,4 +282,6 @@ module.exports = {
 	SURVEY_CREATED: 'Survey created successfully',
 	UPDATE_OBJECT_FAILED: 'Failed to generate update object',
 	UPDATE_OBJECT_SUCCESSFULLY: 'Successfully generate update object',
+	ADMIN_TOKEN_MISSING_CODE: 'ERR_ADMIN_TOKEN_MISSING',
+	ADMIN_TOKEN_MISSING_MESSAGE: 'Admin token is missing',
 }

@@ -163,4 +163,6 @@ module.exports = {
 	DEFAULT_PROGRAM_USER_MAPPING_TOPIC: 'elevate_program_operation',
 	PROGRAM_EVENT_ENTITY: 'program',
 	FALSE: 'false',
+	OPTIONAL_SCOPE_FIELD: 'optional_factors',
+	MANDATORY_SCOPE_FIELD: 'factors',
 }

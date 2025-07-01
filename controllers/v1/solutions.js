@@ -563,20 +563,17 @@ module.exports = class Solutions extends Abstract {
       {
         "entities": {
             "district": [
-                "ALL"
+                "67c82d9553812588916410d3"
             ],
             "professional_subroles": [
-                "ALL",
                 "682301604e2812081f342674",
                 "682303044e2812081f3426fb"
             ],
             "professional_role": [
-                "ALL",
                 "681b07b49c57cdcf03c79ae3",
                 "681b0800f21c88cef9517e0e"
             ],
             "school": [
-                "ALL",
                 "67c82d9553812588916410d3"
             ],
             "language": [
@@ -649,11 +646,9 @@ module.exports = class Solutions extends Abstract {
             "professional_subroles": [
                 "682301254e2812081f34266c",
                 "682303044e2812081f3426fb",
-                "ALL",
                 "682301604e2812081f342674"
             ],
             "professional_role": [
-                "ALL",
                 "681b07b49c57cdcf03c79ae3",
                 "681b0800f21c88cef9517e0e"
             ]

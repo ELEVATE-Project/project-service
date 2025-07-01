@@ -13,6 +13,7 @@ const projectQueries = require(DB_QUERY_BASE_PATH + '/projects')
 const entitiesService = require(GENERICS_FILES_PATH + '/services/entity-management')
 const validateEntity = process.env.VALIDATE_ENTITIES
 const userService = require(GENERICS_FILES_PATH + '/services/users')
+const programSolutionUtility = require(GENERICS_FILES_PATH + '/helpers/program-solution-utility')
 /**
  * ProgramsHelper
  * @class
@@ -546,7 +547,6 @@ module.exports = class ProgramsHelper {
 				// Extract tenant and org IDs from user details
 				let tenantId = userDetails.tenantAndOrgInfo.tenantId
 				let orgId = userDetails.tenantAndOrgInfo.orgId[0]
-				const ALL_SCOPE_VALUE = CONSTANTS.common.ALL_SCOPE_VALUE
 
 				// Fetch the program document to ensure it exists and has a scope
 				let programData = await programsQueries.programsDocument(
@@ -567,103 +567,23 @@ module.exports = class ProgramsHelper {
 					}
 				}
 
-				// Setup for MongoDB update operation using $addToSet
-				let updateObject = { $addToSet: {} }
-				let validationExcludedEntitiesKeys = []
-				let tenantDetails
-				let adminTenantAdminRole = [CONSTANTS.common.ADMIN_ROLE, CONSTANTS.common.TENANT_ADMIN]
-				// Check if user is Admin or Tenant Admin
-				if (UTILS.validateRoles(userDetails.userInformation.roles, adminTenantAdminRole)) {
-					// Fetch tenant details to validate organization codes
-					tenantDetails = await userService.fetchTenantDetails(tenantId, userDetails.userToken)
-					if (!tenantDetails?.success || !tenantDetails?.data?.meta) {
-						throw {
-							message: CONSTANTS.apiResponses.FAILED_TO_FETCH_TENANT_DETAILS,
-							status: HTTP_STATUS_CODE.bad_request.status,
-						}
+				let updateObjectData = await programSolutionUtility.getUpdateObjectTOAddScope(
+					bodyData,
+					tenantId,
+					orgId,
+					userDetails
+				)
+				if (!updateObjectData?.success) {
+					throw {
+						message: CONSTANTS.apiResponses.UPDATE_OBJECT_FAILED,
+						status: HTTP_STATUS_CODE.bad_request.status,
 					}
-					// Store validation-excluded scope keys if present
-					if (
-						Array.isArray(tenantDetails?.data?.meta?.validationExcludedScopeKeys) &&
-						tenantDetails.data.meta.validationExcludedScopeKeys.length > 0
-					) {
-						// Fetch tenant details (will include valid org codes & validationExcludedScopeKeys)
-						validationExcludedEntitiesKeys.push(...tenantDetails.data.meta.validationExcludedScopeKeys)
-					}
-
-					// Handle organization values if passed
-					if (bodyData.organizations) {
-						if (Array.isArray(bodyData.organizations)) {
-							if (bodyData.organizations.includes(ALL_SCOPE_VALUE)) {
-								// Add "ALL" if specified
-								updateObject.$addToSet[`scope.organizations`] = { $each: [ALL_SCOPE_VALUE] }
-							} else {
-								const validOrgCodes = tenantDetails.data.organizations.map((org) => org.code)
-								const isValid = bodyData.organizations.every((orgCode) =>
-									validOrgCodes.includes(orgCode)
-								)
-								if (!isValid) {
-									throw {
-										message: CONSTANTS.apiResponses.INVALID_ORGANIZATION,
-										status: HTTP_STATUS_CODE.bad_request.status,
-									}
-								}
-								updateObject.$addToSet[`scope.organizations`] = { $each: bodyData.organizations }
-							}
-						}
-					}
-				}
-				// Extract entities from the request body
-				let entities = bodyData.entities
-				let groupedEntities = {}
-				let keysForValidation = []
-				// Classify keys based on ALL presence or validationExcludedEntitiesKeys
-				for (const [entityType, values] of Object.entries(entities)) {
-					if (Array.isArray(values) && values.includes(ALL_SCOPE_VALUE)) {
-						// If "ALL" present, skip validation and directly assign
-						groupedEntities[entityType] = [ALL_SCOPE_VALUE]
-					} else if (validationExcludedEntitiesKeys.includes(entityType)) {
-						// Excluded from validation
-						groupedEntities[entityType] = values
-					} else {
-						// Needs validation
-						keysForValidation.push(entityType)
-					}
-				}
-				// Validate only if needed
-				let entitiesToValidate = keysForValidation.flatMap((key) => entities[key])
-				if (entitiesToValidate.length > 0) {
-					let entitiesData = await entitiesService.entityDocuments(
-						{
-							_id: { $in: entitiesToValidate },
-							tenantId: tenantId,
-							orgId: orgId,
-						},
-						['_id', 'entityType']
-					)
-					if (!entitiesData.success || !entitiesData.data.length > 0) {
-						throw {
-							message: CONSTANTS.apiResponses.ENTITIES_NOT_FOUND,
-							status: HTTP_STATUS_CODE.bad_request.status,
-						}
-					}
-					entitiesData = entitiesData.data
-					for (const entity of entitiesData) {
-						if (!groupedEntities[entity.entityType]) {
-							groupedEntities[entity.entityType] = []
-						}
-						groupedEntities[entity.entityType].push(entity._id)
-					}
-				}
-				// Construct $addToSet object
-				for (const [type, ids] of Object.entries(groupedEntities)) {
-					updateObject.$addToSet[`scope.${type}`] = { $each: ids }
 				}
 				let updateProgram = await programsQueries.findAndUpdate(
 					{
 						_id: programId,
 					},
-					updateObject,
+					updateObjectData.updateObject,
 					{ new: true }
 				)
 
@@ -776,7 +696,6 @@ module.exports = class ProgramsHelper {
 				// Extract tenant and org IDs from userDetails
 				let tenantId = userDetails.tenantAndOrgInfo.tenantId
 				let orgId = userDetails.tenantAndOrgInfo.orgId[0]
-				const ALL_SCOPE_VALUE = CONSTANTS.common.ALL_SCOPE_VALUE
 				// Fetch the program to verify it exists and has a scope field
 				let programData = await programsQueries.programsDocument(
 					{
@@ -798,50 +717,23 @@ module.exports = class ProgramsHelper {
 
 				// Initialize the update object to be used in MongoDB update query
 				const currentScope = programData[0].scope || {}
-				// Deep copy to avoid mutation
-				let updatedScope = JSON.parse(JSON.stringify(currentScope))
 
-				// Fetch tenant details if role is admin/tenant admin
-				let adminTenantAdminRole = [CONSTANTS.common.ADMIN_ROLE, CONSTANTS.common.TENANT_ADMIN]
-				let tenantDetails
-				if (UTILS.validateRoles(userDetails.userInformation.roles, adminTenantAdminRole)) {
-					// Fetch tenant meta details if user is admin/tenant admin
-					tenantDetails = await userService.fetchTenantDetails(tenantId, userDetails.userToken)
-					if (!tenantDetails?.success || !tenantDetails?.data?.meta) {
-						throw {
-							message: CONSTANTS.apiResponses.FAILED_TO_FETCH_TENANT_DETAILS,
-							status: HTTP_STATUS_CODE.bad_request.status,
-						}
+				let updateObjectData = await programSolutionUtility.getUpdateObjectToRemoveScope(
+					currentScope,
+					bodyData,
+					tenantId,
+					userDetails
+				)
+				if (!updateObjectData?.success) {
+					throw {
+						message: CONSTANTS.apiResponses.UPDATE_OBJECT_FAILED,
+						status: HTTP_STATUS_CODE.bad_request.status,
 					}
 				}
-
-				// Remove entity values from current scope
-				const entitiesToRemove = bodyData.entities || {}
-				for (const [key, valuesToRemove] of Object.entries(entitiesToRemove)) {
-					const currentValues = updatedScope[key] || []
-					// If current scope does not contain an array for the key, throw error
-					if (!Array.isArray(currentValues)) {
-						throw {
-							message: `${key} is not present in program scope`,
-							status: HTTP_STATUS_CODE.bad_request.status,
-						}
-					}
-					// Remove matching values
-					updatedScope[key] = currentValues.filter((val) => !valuesToRemove.includes(val))
-				}
-
-				// Fill with ALL for empty keys listed in tenant meta.factors
-				const factorKeys = tenantDetails?.data?.meta?.factors || []
-				for (const factorKey of factorKeys) {
-					if (!Array.isArray(updatedScope[factorKey]) || updatedScope[factorKey].length === 0) {
-						updatedScope[factorKey] = [ALL_SCOPE_VALUE]
-					}
-				}
-
 				// Prepare update object
 				let updateObject = {
 					$set: {
-						scope: updatedScope,
+						scope: updateObjectData.updatedScope,
 					},
 				}
 				let updateProgram = await programsQueries.findAndUpdate({ _id: programId }, updateObject, { new: true })

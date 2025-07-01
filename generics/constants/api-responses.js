@@ -280,4 +280,6 @@ module.exports = {
 	USER_ROLES_PROCESSING_FAILED: 'User roles processing failed. Please check the content.',
 	SURVEY_NOT_CREATED: 'Could not create survey',
 	SURVEY_CREATED: 'Survey created successfully',
+	UPDATE_OBJECT_FAILED: 'Failed to generate update object',
+	UPDATE_OBJECT_SUCCESSFULLY: 'Successfully generate update object',
 }

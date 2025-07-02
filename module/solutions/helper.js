@@ -21,6 +21,7 @@ const projectTemplateQueries = require(DB_QUERY_BASE_PATH + '/projectTemplates')
 const projectTemplatesHelper = require(MODULES_BASE_PATH + '/project/templates/helper')
 const programUsersHelper = require(MODULES_BASE_PATH + '/programUsers/helper')
 const userService = require(GENERICS_FILES_PATH + '/services/users')
+const programSolutionUtility = require(GENERICS_FILES_PATH + '/helpers/programSolutionUtilities')
 const timeZoneDifference = process.env.TIMEZONE_DIFFRENECE_BETWEEN_LOCAL_TIME_AND_UTC
 
 /**
@@ -1010,20 +1011,28 @@ module.exports = class SolutionsHelper {
 	 * @name addRolesInScope
 	 * @param {String} solutionId - Solution Id.
 	 * @param {Array} roles - roles data.
+	 * @param {Object} userDetails - User Details
 	 * @returns {JSON} - Added roles data.
 	 */
 
-	static addRolesInScope(solutionId, roles) {
+	// Role-based logic has been removed from the current implementation, so this API is currently not in use.
+	//  It may be revisited in the future based on requirements.
+	static addRolesInScope(solutionId, roles, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				let tenantId = userDetails.tenantAndOrgInfo.tenantId
+				let orgId = userDetails.tenantAndOrgInfo.orgId[0]
+
 				let solutionData = await solutionsQueries.solutionsDocument(
 					{
 						_id: solutionId,
 						scope: { $exists: true },
 						isReusable: false,
 						isDeleted: false,
+						tenantId: tenantId,
+						orgId: orgId,
 					},
-					['_id']
+					['_id', 'scope.roles']
 				)
 
 				if (!solutionData.length > 0) {
@@ -1036,8 +1045,7 @@ module.exports = class SolutionsHelper {
 				let updateQuery = {}
 
 				if (Array.isArray(roles) && roles.length > 0) {
-					let currentRoles = await solutionsQueries.solutionsDocument({ _id: solutionId }, ['scope.roles'])
-					currentRoles = currentRoles[0].scope.roles
+					let currentRoles = solutionData[0].scope.roles
 
 					let currentRolesSet = new Set(currentRoles)
 					let rolesSet = new Set(roles)
@@ -1659,18 +1667,26 @@ module.exports = class SolutionsHelper {
 	 * @name removeRolesInScope
 	 * @param {String} solutionId - Solution Id.
 	 * @param {Array} roles - roles data.
+	 * @param {Object} userDetails - User Details
 	 * @returns {JSON} - Removed solution roles.
 	 */
 
-	static removeRolesInScope(solutionId, roles) {
+	// Role-based logic has been removed from the current implementation, so this API is currently not in use.
+	//  It may be revisited in the future based on requirements.
+	static removeRolesInScope(solutionId, roles, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				let tenantId = userDetails.tenantAndOrgInfo.tenantId
+				let orgId = userDetails.tenantAndOrgInfo.orgId[0]
+
 				let solutionData = await solutionsQueries.solutionsDocument(
 					{
 						_id: solutionId,
 						scope: { $exists: true },
 						isReusable: false,
 						isDeleted: false,
+						tenantId: tenantId,
+						orgId: orgId,
 					},
 					['_id']
 				)
@@ -1941,88 +1957,85 @@ module.exports = class SolutionsHelper {
 	 * @method
 	 * @name addEntitiesInScope
 	 * @param {String} solutionId - solution Id.
-	 * @param {Array} entities - entities data.
+	 * @param {Object} bodyData - body data.
+	 * @param {Object} userDetails - User Details
 	 * @returns {JSON} - Added entities data.
 	 */
 
-	static addEntitiesInScope(solutionId, entities) {
+	static addEntitiesInScope(solutionId, bodyData, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				// Extract tenant and org IDs from user details
+				let tenantId = userDetails.tenantAndOrgInfo.tenantId
+				let orgId = userDetails.tenantAndOrgInfo.orgId[0]
+				// Fetch the solution document to ensure it exists and has a scope
 				let solutionData = await solutionsQueries.solutionsDocument(
 					{
 						_id: solutionId,
 						scope: { $exists: true },
 						isReusable: false,
 						isDeleted: false,
+						tenantId: tenantId,
+						orgId: orgId,
 					},
-					['_id', 'programId', 'scope.entityType']
+					['_id', 'programId', 'scope']
 				)
 
 				if (!solutionData.length > 0) {
-					return resolve({
+					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.SOLUTION_NOT_FOUND,
-					})
+					}
 				}
 
 				let programData = await programQueries.programsDocument(
 					{
 						_id: solutionData[0].programId,
+						tenantId: tenantId,
+						orgId: orgId,
 					},
-					['scope.entities', 'scope.entityType']
+					['scope']
 				)
 
 				if (!programData.length > 0) {
-					return resolve({
+					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.PROGRAM_NOT_FOUND,
-					})
-				}
-
-				if (solutionData[0].scope.entityType !== programData[0].scope.entityType) {
-					let checkEntityInParent = await entitiesService.entityDocuments(
-						{
-							_id: programData[0].scope.entities,
-							[`groups.${solutionData[0].scope.entityType}`]: entities,
-						},
-						['_id']
-					)
-					if (!checkEntityInParent.success) {
-						throw {
-							message: CONSTANTS.apiResponses.ENTITY_NOT_EXISTS_IN_PARENT,
-						}
 					}
 				}
+				// This logic we need to re-look --------------------------------------------
+				// if (solutionData[0].scope !== programData[0].scope) {
+				// 	let checkEntityInParent = await entitiesService.entityDocuments(
+				// 		{
+				// 			_id: programData[0].scope.entities,- state
+				// 			[`groups.${solutionData[0].scope.entityType}`]: entities,- district
+				// 		},
+				// 		['_id']
+				// 	)
+				// 	if (!checkEntityInParent.success) {
+				// 		throw {
+				// 			message: messageConstants.apiResponses.ENTITY_NOT_EXISTS_IN_PARENT,
+				// 		}
+				// 	}
+				// }
 
-				let entitiesData = await entitiesService.entityDocuments(
-					{
-						_id: { $in: entities },
-						entityType: solutionData[0].scope.entityType,
-					},
-					['_id']
+				let updateObjectData = await programSolutionUtility.getUpdateObjectTOAddScope(
+					bodyData,
+					tenantId,
+					orgId,
+					userDetails
 				)
-
-				if (!entitiesData.success || !entitiesData.data.length > 0) {
+				if (!updateObjectData?.success) {
 					throw {
-						message: CONSTANTS.apiResponses.ENTITIES_NOT_FOUND,
+						message: CONSTANTS.apiResponses.UPDATE_OBJECT_FAILED,
+						status: HTTP_STATUS_CODE.bad_request.status,
 					}
 				}
-				entitiesData = entitiesData.data
-				let entityIds = []
-
-				entitiesData.forEach((entity) => {
-					entityIds.push(entity._id)
-				})
-				let updateObject = {
-					$addToSet: {},
-				}
-				updateObject['$addToSet'][`scope.${solutionData[0].scope.entityType}`] = { $each: entityIds }
-
 				let updateSolution = await solutionsQueries.updateSolutionDocument(
 					{
 						_id: solutionId,
 					},
-					updateObject,
+					updateObjectData.updateObject,
 					{ new: true }
 				)
 
@@ -2051,53 +2064,56 @@ module.exports = class SolutionsHelper {
 	 * @method
 	 * @name removeEntitiesInScope
 	 * @param {String} solutionId - Program Id.
-	 * @param {Array} entities - entities.
+	 * @param {Object} bodyData - body data.
+	 * @param {Object} userDetails - User Details
 	 * @returns {JSON} - Removed entities from solution scope.
 	 */
 
-	static removeEntitiesInScope(solutionId, entities) {
+	static removeEntitiesInScope(solutionId, bodyData, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				let tenantId = userDetails.tenantAndOrgInfo.tenantId
+				let orgId = userDetails.tenantAndOrgInfo.orgId[0]
 				let solutionData = await solutionsQueries.solutionsDocument(
 					{
 						_id: solutionId,
 						scope: { $exists: true },
 						isReusable: false,
 						isDeleted: false,
+						tenantId: tenantId,
+						orgId: orgId,
 					},
-					['_id', 'scope.entityType']
+					['_id', 'scope']
 				)
 
 				if (!solutionData.length > 0) {
-					return resolve({
+					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.SOLUTION_NOT_FOUND,
-					})
-				}
-
-				let entitiesData = await entitiesService.entityDocuments(
-					{
-						_id: { $in: entities },
-						entityType: solutionData[0].scope.entityType,
-					},
-					['_id']
-				)
-
-				if (!entitiesData.success || !entitiesData.data.length > 0) {
-					throw {
-						message: CONSTANTS.apiResponses.ENTITIES_NOT_FOUND,
 					}
 				}
-				entitiesData = entitiesData.data
-				let entityIds = []
 
-				entitiesData.forEach((entity) => {
-					entityIds.push(entity._id)
-				})
-				let updateObject = {
-					$pull: {},
+				// Initialize the update object to be used in MongoDB update query
+				const currentScope = solutionData[0].scope || {}
+
+				let updateObjectData = await programSolutionUtility.getUpdateObjectToRemoveScope(
+					currentScope,
+					bodyData,
+					tenantId,
+					userDetails
+				)
+				if (!updateObjectData?.success) {
+					throw {
+						message: CONSTANTS.apiResponses.UPDATE_OBJECT_FAILED,
+						status: HTTP_STATUS_CODE.bad_request.status,
+					}
 				}
-				updateObject['$pull'][`scope.${solutionData[0].scope.entityType}`] = { $in: entityIds }
+				// Prepare update object
+				let updateObject = {
+					$set: {
+						scope: updateObjectData.updatedScope,
+					},
+				}
 				let updateSolution = await solutionsQueries.updateSolutionDocument(
 					{
 						_id: solutionId,
@@ -2105,10 +2121,10 @@ module.exports = class SolutionsHelper {
 					updateObject,
 					{ new: true }
 				)
-
 				if (!updateSolution || !updateSolution._id) {
 					throw {
 						message: CONSTANTS.apiResponses.SOLUTION_NOT_UPDATED,
+						status: HTTP_STATUS_CODE.bad_request.status,
 					}
 				}
 

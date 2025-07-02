@@ -877,6 +877,16 @@ const convertResources = (resources) =>
 		}))
 
 /**
+ * Checks if the user has admin-level roles.
+ * @param {string[]} roles - Array of user role strings.
+ * @param {string[]} roleToCheck - Array of user role to validate strings.
+ * @returns {boolean} True if user has ADMIN or TENANT_ADMIN role, else false.
+ */
+function validateRoles(roles, roleToCheck) {
+	return roles.some((role) => roleToCheck.includes(role))
+}
+
+/**
  * Extracts mandatory and optional scope factors from tenant metadata.
  *
  * @param {Object} tenantMeta - Metadata object containing scope configuration fields.
@@ -1018,6 +1028,7 @@ module.exports = {
 	convertResources,
 	convertDurationToDays,
 	factorQuery,
+	validateRoles,
 	targetingQuery,
 	getFilteredScope,
 }

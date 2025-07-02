@@ -1318,7 +1318,6 @@ module.exports = class UserProjectsHelper {
 							},
 							[CONSTANTS.common.SURVEY]: () => _surveyDetails(assessmentOrObservation, bodyData),
 						}
-						console.log(solutionDetails?.type ?? currentTask.projectTemplateDetails.task)
 						let fetchSolutions = getSolutionDetails[taskSolutionType]
 
 						if (!fetchSolutions) {

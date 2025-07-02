@@ -276,10 +276,13 @@ module.exports = {
 	FAILED_TO_FETCH_TENANT_DETAILS: 'Failed to fetch tenant details',
 	DOMAIN_FETCH_FAILED: 'Tenants domain fetch failed',
 	TENANTID_REQUIRED_IN_SOLUTION: 'TenantId required in solution',
+	INVALID_ORGANIZATION: 'Invalid Organization Passed',
 	FILE_DATA_MISSING: 'File or data is missing.',
 	USER_ROLES_PROCESSING_FAILED: 'User roles processing failed. Please check the content.',
 	SURVEY_NOT_CREATED: 'Could not create survey',
 	SURVEY_CREATED: 'Survey created successfully',
+	UPDATE_OBJECT_FAILED: 'Failed to generate update object',
+	UPDATE_OBJECT_SUCCESSFULLY: 'Successfully generate update object',
 	ADMIN_TOKEN_MISSING_CODE: 'ERR_ADMIN_TOKEN_MISSING',
 	ADMIN_TOKEN_MISSING_MESSAGE: 'Admin token is missing',
 }

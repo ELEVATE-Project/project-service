@@ -1271,7 +1271,9 @@ module.exports = class UserProjectsHelper {
 						assessmentOrObservationData['entityType'] = project[0].entityInformation.entityType
 						assessmentOrObservationData['entityId'] = project[0].entityInformation._id
 					}
-					let dynamicTaskInfromation = `${solutionDetails.type}Information`
+					//get task solutionType from solutionDetails if solutionDetails not exist from projectTemplateDetails
+					let taskSolutionType = solutionDetails?.type ?? currentTask.projectTemplateDetails.type
+					let dynamicTaskInfromation = `${taskSolutionType}Information`
 					if (currentTask[dynamicTaskInfromation]) {
 						assessmentOrObservationData = currentTask[dynamicTaskInfromation]
 					} else {
@@ -1316,7 +1318,8 @@ module.exports = class UserProjectsHelper {
 							},
 							[CONSTANTS.common.SURVEY]: () => _surveyDetails(assessmentOrObservation, bodyData),
 						}
-						let fetchSolutions = getSolutionDetails[solutionDetails.type]
+						console.log(solutionDetails?.type ?? currentTask.projectTemplateDetails.task)
+						let fetchSolutions = getSolutionDetails[taskSolutionType]
 
 						if (!fetchSolutions) {
 							throw {
@@ -1338,7 +1341,7 @@ module.exports = class UserProjectsHelper {
 						if (!currentTask?.solutionDetails?.isReusable) {
 							assessmentOrObservationData['programId'] = project[0].programInformation._id
 						}
-						let fieldToUpdate = `tasks.$.${solutionDetails.type}Information`
+						let fieldToUpdate = `tasks.$.${taskSolutionType}Information`
 
 						await projectQueries.findOneAndUpdate(
 							{
@@ -3226,6 +3229,10 @@ module.exports = class UserProjectsHelper {
 				if (requestedData.hasAcceptedTAndC) {
 					libraryProjects.data.hasAcceptedTAndC = true
 				}
+				if (requestedData.project) {
+					libraryProjects.data['project'] = requestedData.project
+					libraryProjects.data['referenceFrom'] = CONSTANTS.common.PROJECT
+				}
 				libraryProjects.data.projectTemplateId = libraryProjects.data._id
 				libraryProjects.data.projectTemplateExternalId = libraryProjects.data.externalId
 				libraryProjects.data['tenantId'] = userDetails.userInformation.tenantId
@@ -3246,6 +3253,20 @@ module.exports = class UserProjectsHelper {
 				await this.attachEntityInformationIfExists(projectCreation)
 				await kafkaProducersHelper.pushProjectToKafka(projectCreation)
 				await kafkaProducersHelper.pushUserActivitiesToKafka(kafkaUserProject)
+
+				// update submission data for project as task
+				if (projectCreation.project && projectCreation.referenceFrom === CONSTANTS.common.PROJECT) {
+					let updateTaskSubmissionData = {
+						_id: projectCreation._id,
+						status: projectCreation.status,
+						completedDate: projectCreation.completedDate ? projectCreation.completedDate : '',
+					}
+					await this.pushSubmissionToTask(
+						projectCreation.project._id,
+						projectCreation.project.taskId,
+						updateTaskSubmissionData
+					)
+				}
 
 				if (requestedData.rating && requestedData.rating > 0) {
 					await projectTemplatesHelper.ratings(projectTemplateId, requestedData.rating, userToken)
@@ -4424,7 +4445,7 @@ module.exports = class UserProjectsHelper {
 						isReusable: false,
 						project: projectData.project,
 					}
-					if (privateProgramId !== '') {
+					if (projectData.programId !== '') {
 						programAndSolutionData['programId'] = projectData.programId
 					}
 					let projectCreation = await this.importFromLibrary(
@@ -4448,29 +4469,21 @@ module.exports = class UserProjectsHelper {
 					let solutionDetails = {
 						_id: solutionId,
 						externalId: solutionExternalId,
-						type: task?.projectTemplateDetails.type,
+						type: projectData?.projectTemplateDetails.type,
 						isReusable: CONSTANTS.common.FALSE,
-						minNoOfSubmissionsRequired: task?.projectTemplateDetails.minNoOfSubmissionsRequired
-							? task?.projectTemplateDetails.minNoOfSubmissionsRequired
+						minNoOfSubmissionsRequired: projectData?.projectTemplateDetails.minNoOfSubmissionsRequired
+							? projectData?.projectTemplateDetails.minNoOfSubmissionsRequired
 							: CONSTANTS.common.DEFAULT_SUBMISSION_REQUIRED,
 					}
-					//Adding submissions for task
-					let submissions = [
-						{
-							_id: _id,
-							status: CONSTANTS.common.STARTED,
-							completedDate: '',
-						},
-					]
 
 					let projectUpdated = await projectQueries.findOneAndUpdate(
 						{
-							_id: _id,
+							_id: projectData.project._id,
+							'tasks._id': projectData.project.taskId,
 						},
 						{
 							$set: {
 								solutionDetails: solutionDetails,
-								submissions: submissions,
 							},
 						}
 					)
@@ -4484,6 +4497,7 @@ module.exports = class UserProjectsHelper {
 					result['projectId'] = _id
 					result['solutionId'] = solutionId
 					result['programId'] = programId
+					result['solutionDetails'] = solutionDetails
 				} else {
 					// create project using details function
 					let projectDetails = await this.detailsV2(

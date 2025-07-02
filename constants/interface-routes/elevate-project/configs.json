@@ -3921,7 +3921,7 @@
 			"service": "project"
 		},
 		{
-			"sourceRoute": "/health",
+			"sourceRoute": "project/health",
 			"type": "GET",
 			"priority": "MUST_HAVE",
 			"inSequence": false,
@@ -3935,7 +3935,7 @@
 			"service": "project"
 		},
 		{
-			"sourceRoute": "/health",
+			"sourceRoute": "entity/health",
 			"type": "GET",
 			"priority": "MUST_HAVE",
 			"inSequence": false,

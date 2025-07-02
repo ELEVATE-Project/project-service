@@ -1907,7 +1907,13 @@ module.exports = class SolutionsHelper {
 							{
 								status: CONSTANTS.common.INACTIVE,
 							},
-							userDetails
+							{
+								...userDetails,
+								tenantAndOrgInfo: {
+									tenantId: userDetails.userInformation.tenantId,
+									orgId: [userDetails.userInformation.organizationId],
+								},
+							}
 						)
 					}
 

@@ -340,6 +340,11 @@ module.exports = class Programs extends Abstract {
     * "roles" : ["head_master","distrct_education_officer"]
     }
     * @apiHeader {String} X-authenticated-user-token Authenticity token
+    * @apiHeader {String} internal-access-token
+    * If you are a System Admin use below headers.
+    * @apiHeader {String} admin-auth-token
+    * @apiHeader {String} tenantId
+    * @apiHeader {String} orgid
     * @apiSampleRequest /project/v1/programs/addRolesInScope/5ffbf8909259097d48017bbf
     * @apiUse successBody
     * @apiUse errorBody
@@ -357,13 +362,20 @@ module.exports = class Programs extends Abstract {
 	 * @param {Object} req - requested data.
 	 * @param {String} req.params._id - program id.
 	 * @param {Array} req.body.roles - Roles to be added.
+	 * @param {Object} req.userDetails - User details
 	 * @returns {Array} Program scope roles.
 	 */
 
+	// Role-based logic has been removed from the current implementation, so this API is currently not in use.
+	//  It may be revisited in the future based on requirements.
 	async addRolesInScope(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let programUpdated = await programsHelper.addRolesInScope(req.params._id, req.body.roles)
+				let programUpdated = await programsHelper.addRolesInScope(
+					req.params._id,
+					req.body.roles,
+					req.userDetails
+				)
 
 				return resolve(programUpdated)
 			} catch (error) {
@@ -382,9 +394,39 @@ module.exports = class Programs extends Abstract {
     * @apiGroup Programs
     * @apiParamExample {json} Request-Body:
     * {
-      "entities" : ["5f33c3d85f637784791cd830"]
+        "entities": {
+            "district": [
+                "682303044e2812081f3426fb"
+            ],
+            "professional_subroles": [
+                "682301604e2812081f342674",
+                "682303044e2812081f3426fb"
+            ],
+            "professional_role": [
+                "681b07b49c57cdcf03c79ae3",
+                "681b0800f21c88cef9517e0e"
+            ],
+            "school": [
+                "67c82d9553812588916410d3"
+            ],
+            "language": [
+                "681b0800f21c88cef951890e"
+            ],
+            "gender": [
+                "67c82d955381258891642345"
+            ]
+        },
+        "organizations": [
+            "blr"
+        ]
+      } 
     }
     * @apiHeader {String} X-authenticated-user-token Authenticity token
+    * @apiHeader {String} internal-access-token
+    * If you are a System Admin use below headers.
+    * @apiHeader {String} admin-auth-token
+    * @apiHeader {String} tenantId
+    * @apiHeader {String} orgid
     * @apiSampleRequest /project/v1/programs/addEntitiesInScope/5ffbf8909259097d48017bbf
     * @apiUse successBody
     * @apiUse errorBody
@@ -401,14 +443,15 @@ module.exports = class Programs extends Abstract {
 	 * @name addEntitiesInScope
 	 * @param {Object} req - requested data.
 	 * @param {String} req.params._id - program id.
-	 * @param {Array} req.body.entities - Entities to be added.
+	 * @param {Object} req.body - data to be added.
+	 * @param {Object} req.userDetails - User details
 	 * @returns {Array} Program scope roles.
 	 */
 
 	async addEntitiesInScope(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let programUpdated = await programsHelper.addEntitiesInScope(req.params._id, req.body.entities)
+				let programUpdated = await programsHelper.addEntitiesInScope(req.params._id, req.body, req.userDetails)
 
 				return resolve(programUpdated)
 			} catch (error) {
@@ -431,6 +474,11 @@ module.exports = class Programs extends Abstract {
     * "roles" : ["head_master","distrct_education_officer"]
     }
     * @apiHeader {String} X-authenticated-user-token Authenticity token
+    * @apiHeader {String} internal-access-token
+    * If you are a System Admin use below headers.
+    * @apiHeader {String} admin-auth-token
+    * @apiHeader {String} tenantId
+    * @apiHeader {String} orgid
     * @apiSampleRequest /project/v1/programs/removeRolesInScope/5ffbf8909259097d48017bbf
     * @apiUse successBody
     * @apiUse errorBody
@@ -448,13 +496,20 @@ module.exports = class Programs extends Abstract {
 	 * @param {Object} req - requested data.
 	 * @param {String} req.params._id - program id.
 	 * @param {Array} req.body.roles - Roles to be added.
+	 * @param {Object} req.userDetails - User details
 	 * @returns {Array} Program scope roles.
 	 */
 
+	// Role-based logic has been removed from the current implementation, so this API is currently not in use.
+	//  It may be revisited in the future based on requirements.
 	async removeRolesInScope(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let programUpdated = await programsHelper.removeRolesInScope(req.params._id, req.body.roles)
+				let programUpdated = await programsHelper.removeRolesInScope(
+					req.params._id,
+					req.body.roles,
+					req.userDetails
+				)
 
 				return resolve(programUpdated)
 			} catch (error) {
@@ -474,9 +529,27 @@ module.exports = class Programs extends Abstract {
     * @apiGroup Programs
     * @apiParamExample {json} Request-Body:
     * {
-        "entities" : ["5f33c3d85f637784791cd830"]
-      }
+        "entities": {
+            "professional_subroles": [
+                "682301254e2812081f34266c",
+                "682303044e2812081f3426fb",
+                "682301604e2812081f342674"
+            ],
+            "professional_role": [
+                "681b07b49c57cdcf03c79ae3",
+                "681b0800f21c88cef9517e0e"
+            ]
+        },
+        "organizations": [
+            "ALL"
+        ]
+    }
     * @apiHeader {String} X-authenticated-user-token Authenticity token
+    * @apiHeader {String} internal-access-token
+    * If you are a System Admin use below headers.
+    * @apiHeader {String} admin-auth-token
+    * @apiHeader {String} tenantId
+    * @apiHeader {String} orgid
     * @apiSampleRequest /project/v1/programs/removeEntitiesInScope/5ffbf8909259097d48017bbf
     * @apiUse successBody
     * @apiUse errorBody
@@ -493,14 +566,19 @@ module.exports = class Programs extends Abstract {
 	 * @name removeEntitiesInScope
 	 * @param {Object} req - requested data.
 	 * @param {String} req.params._id - program id.
-	 * @param {Array} req.body.entities - Entities to be added.
+	 * @param {Object} req.body - data to be removed.
+	 * @param {Object} req.userDetails - User details
 	 * @returns {Array} Program scope roles.
 	 */
 
 	async removeEntitiesInScope(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let programUpdated = await programsHelper.removeEntitiesInScope(req.params._id, req.body.entities)
+				let programUpdated = await programsHelper.removeEntitiesInScope(
+					req.params._id,
+					req.body,
+					req.userDetails
+				)
 
 				return resolve(programUpdated)
 			} catch (error) {

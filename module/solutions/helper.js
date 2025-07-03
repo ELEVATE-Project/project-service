@@ -421,7 +421,6 @@ module.exports = class SolutionsHelper {
 					'endDate',
 					'startDate',
 				])
-				console.log(programData, 'this is data')
 				if (!programData.length > 0) {
 					throw {
 						message: CONSTANTS.apiResponses.PROGRAM_NOT_FOUND,

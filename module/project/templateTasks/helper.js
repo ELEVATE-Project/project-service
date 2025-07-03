@@ -224,10 +224,12 @@ module.exports = class ProjectTemplateTasksHelper {
 						parsedData.STATUS = CONSTANTS.apiResponses.REQUIRED_SOLUTION_TYPE
 					}
 
-					if (parsedData.solutionSubType && parsedData.solutionSubType !== '') {
-						allValues.solutionDetails.subType = parsedData.solutionSubType
-					} else {
-						parsedData.STATUS = CONSTANTS.apiResponses.REQUIRED_SOLUTION_SUB_TYPE
+					if (solutionData[parsedData.solutionId].type === CONSTANTS.common.OBSERVATION) {
+						if (parsedData.solutionSubType && parsedData.solutionSubType !== '') {
+							allValues.solutionDetails.subType = parsedData.solutionSubType
+						} else {
+							parsedData.STATUS = CONSTANTS.apiResponses.REQUIRED_SOLUTION_SUB_TYPE
+						}
 					}
 
 					if (parsedData.solutionId && parsedData.solutionId !== '') {
@@ -235,22 +237,21 @@ module.exports = class ProjectTemplateTasksHelper {
 							parsedData.STATUS = CONSTANTS.apiResponses.SOLUTION_NOT_FOUND
 						} else {
 							//Match type of solutionData and csv data
-							if (solutionData[parsedData.solutionId].type !== allValues.solutionDetails.type) {
+							if (
+								solutionData[parsedData.solutionId].type !== allValues.solutionDetails.type &&
+								!parsedData.solutionType
+							) {
 								parsedData.STATUS = CONSTANTS.apiResponses.SOLUTION_TYPE_MIS_MATCH
 							}
 							if (
-								![CONSTANTS.common.SURVEY, CONSTANTS.common.IMPROVEMENT_PROJECT].includes(
-									solutionData[parsedData.solutionId].type
-								) &&
+								parsedData.solutionType === CONSTANTS.common.OBSERVATION &&
 								solutionData[parsedData.solutionId].entityType !== allValues.solutionDetails.subType
 							) {
 								parsedData.STATUS = CONSTANTS.apiResponses.SOLUTION_SUB_TYPE_MIS_MATCH
 							}
 							if (
 								template.entityType &&
-								![CONSTANTS.common.SURVEY, CONSTANTS.common.IMPROVEMENT_PROJECT].includes(
-									solutionData[parsedData.solutionId].type
-								) &&
+								parsedData.solutionType === CONSTANTS.common.OBSERVATION &&
 								template.entityType !== solutionData[parsedData.solutionId].entityType
 							) {
 								parsedData.STATUS = CONSTANTS.apiResponses.MIS_MATCHED_PROJECT_AND_TASK_ENTITY_TYPE
@@ -266,7 +267,8 @@ module.exports = class ProjectTemplateTasksHelper {
 									// minNoOfSubmissionsRequired present in csv
 									if (
 										parsedData.minNoOfSubmissionsRequired >
-										CONSTANTS.common.DEFAULT_SUBMISSION_REQUIRED
+											CONSTANTS.common.DEFAULT_SUBMISSION_REQUIRED &&
+										solutionData[parsedData.solutionId].type === CONSTANTS.common.OBSERVATION
 									) {
 										if (solutionData[parsedData.solutionId].allowMultipleAssessemts) {
 											allValues.solutionDetails['minNoOfSubmissionsRequired'] =
@@ -289,7 +291,7 @@ module.exports = class ProjectTemplateTasksHelper {
 					} else {
 						parsedData.STATUS = CONSTANTS.apiResponses.REQUIRED_SOLUTION_ID
 					}
-					if (solutionData[parsedData.solutionId].type === CONSTANTS.common.IMPROVEMENT_PROJECT) {
+					if (parsedData.solutionType === CONSTANTS.common.IMPROVEMENT_PROJECT) {
 						// adding projectTemplateDetails for task
 						let projectTemplateDetails = {
 							subType: parsedData.solutionSubType,
@@ -298,7 +300,6 @@ module.exports = class ProjectTemplateTasksHelper {
 							externalId: parsedData.solutionId,
 							name: solutionData[parsedData.solutionId].name,
 							isReusable: solutionData[parsedData.solutionId].isReusable,
-							minNoOfSubmissionsRequired: parsedData.minNoOfSubmissionsRequired,
 						}
 						allValues.projectTemplateDetails = projectTemplateDetails
 						delete allValues.solutionDetails
@@ -311,7 +312,10 @@ module.exports = class ProjectTemplateTasksHelper {
 							externalId: parsedData.solutionId,
 							name: solutionData[parsedData.solutionId].name,
 							isReusable: solutionData[parsedData.solutionId].isReusable,
-							minNoOfSubmissionsRequired: parsedData.minNoOfSubmissionsRequired,
+						}
+						//Adding minNumberOfSubmission only for observation
+						if (parsedData.solutionType === CONSTANTS.common.OBSERVATION) {
+							solutionDetails.minNoOfSubmissionsRequired = parsedData.minNoOfSubmissionsRequired
 						}
 						allValues.solutionDetails = solutionDetails
 					}

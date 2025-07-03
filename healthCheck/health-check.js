@@ -1,42 +1,62 @@
 /**
- * name : health.js.
+ * name : health-check.js.
  * author : Vishnu.
  * created-date : 25-June-2025.
  * Description : Health check helper functionality.
  */
 
-// Dependencies
 const { healthCheckHandler } = require('elevate-services-health-check')
 const healthCheckConfig = require('./health.config')
+// const { v1: uuidv1 } = require("uuid");
 
-let health_check = async function (req, res) {
-	let response = await healthCheckHandler(healthCheckConfig)
-	res.status(200).json(response)
+async function health_check(req, res) {
+	try {
+		const response = await healthCheckHandler(healthCheckConfig, req.query.serviceName)
+		res.status(200).json(response)
+	} catch (err) {
+		console.error('Health check failed:', err)
+
+		res.status(500).json({
+			id: 'Project.service.Health.API',
+			ver: '1.0',
+			ts: new Date(),
+			params: {
+				resmsgid: uuidv1(),
+				msgid: req.headers['msgid'] || uuidv1(),
+				status: 'failed',
+				err: err.name || 'INTERNAL_ERROR',
+				errMsg: err.message || 'Something went wrong',
+			},
+			status: 500,
+			result: { healthy: false },
+		})
+	}
 }
 
-let healthCheckStatus = function (req, res) {
-	let responseData = response(req)
+function healthCheckStatus(req, res) {
+	const result = { healthy: true } // or whatever your default logic is
+	const responseData = buildResponse(req, result)
 	res.status(200).json(responseData)
 }
 
-let response = function (req, result) {
+function buildResponse(req, result) {
 	return {
 		id: 'Project.service.Health.API',
 		ver: '1.0',
 		ts: new Date(),
 		params: {
 			resmsgid: uuidv1(),
-			msgid: req.headers['msgid'] || req.headers.msgid || uuidv1(),
+			msgid: req.headers['msgid'] || uuidv1(),
 			status: 'successful',
-			err: 'null',
-			errMsg: 'null',
+			err: null,
+			errMsg: null,
 		},
 		status: 200,
-		result: result,
+		result,
 	}
 }
 
 module.exports = {
-	health_check: health_check,
-	healthCheckStatus: healthCheckStatus,
+	health_check,
+	healthCheckStatus,
 }

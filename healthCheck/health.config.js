@@ -1,5 +1,5 @@
 module.exports = {
-	name: 'Project Service',
+	name: 'ProjectService',
 	version: '1.0.0',
 	checks: {
 		mongodb: {
@@ -10,12 +10,52 @@ module.exports = {
 			enabled: true,
 			url: process.env.KAFKA_URL,
 		},
+		gotenberg: {
+			enabled: true,
+			url: process.env.GOTENBERG_URL,
+		},
 		microservices: [
 			{
-				name: 'Survey Service',
-				url: 'http://localhost:4301/healthCheckStatus', // Replace with actual URL - use environment variable if needed
+				name: 'SamikshaService',
+				url: 'http://localhost:3569/survey/health?serviceName=ProjectService',
 				enabled: true,
+				request: {
+					method: 'GET',
+					header: {
+						'internal-access-token': process.env.INTERNAL_TOKEN,
+					},
+					body: {
+						'service Name': 'Project Service',
+					},
+				},
 
+				expectedResponse: {
+					status: 200,
+					'params.status': 'successful',
+				},
+			},
+			{
+				name: 'EntityManagementService',
+				url: 'http://localhost:3569/entity/health?serviceName=ProjectService',
+				enabled: true,
+				timeout: 15000,
+				request: {
+					method: 'GET',
+					header: {
+						'internal-access-token': process.env.INTERNAL_TOKEN,
+					},
+					body: {},
+				},
+
+				expectedResponse: {
+					status: 200,
+					'params.status': 'successful',
+				},
+			},
+			{
+				name: 'UserService',
+				url: 'http://localhost:3001/user/health?serviceName=ProjectService', // Replace with actual URL - use environment variable if needed
+				enabled: true,
 				request: {
 					method: 'GET',
 					header: {

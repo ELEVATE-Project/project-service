@@ -996,9 +996,11 @@ module.exports = class ProjectTemplatesHelper {
 				externalId: solution.externalId,
 				name: solution.name,
 				isReusable: solution.isReusable,
-				minNoOfSubmissionsRequired:
-					newProjectTemplateTask?.solutionDetails?.minNoOfSubmissionsRequired ??
-					CONSTANTS.common.DEFAULT_SUBMISSION_REQUIRED,
+				...(solution.type === CONSTANTS.common.OBSERVATION && {
+					minNoOfSubmissionsRequired:
+						newProjectTemplateTask?.solutionDetails?.minNoOfSubmissionsRequired ??
+						CONSTANTS.common.DEFAULT_SUBMISSION_REQUIRED,
+				}),
 			})
 
 			//fetchSolution details

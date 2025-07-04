@@ -421,7 +421,6 @@ module.exports = class SolutionsHelper {
 					'endDate',
 					'startDate',
 				])
-
 				if (!programData.length > 0) {
 					throw {
 						message: CONSTANTS.apiResponses.PROGRAM_NOT_FOUND,
@@ -1121,114 +1120,36 @@ module.exports = class SolutionsHelper {
 						data[key] = data[key].split(',')
 					})
 					// If validate entity set to ON . strict scoping should be applied
-					if (validateEntity !== CONSTANTS.common.OFF) {
-						Object.keys(
-							_.omit(data, ['filter', 'role', 'factors', 'type', 'tenantId', 'orgId', 'organizations'])
-						).forEach((requestedDataKey) => {
-							registryIds.push(...data[requestedDataKey])
-							entityTypes.push(requestedDataKey)
+					Object.keys(
+						_.omit(data, ['filter', 'role', 'factors', 'type', 'tenantId', 'orgId', 'organizations'])
+					).forEach((requestedDataKey) => {
+						registryIds.push(...data[requestedDataKey])
+						entityTypes.push(requestedDataKey)
+					})
+					if (!registryIds.length > 0) {
+						throw {
+							message: CONSTANTS.apiResponses.NO_LOCATION_ID_FOUND_IN_DATA,
+						}
+					}
+
+					let userRoleInfo = _.omit(data, ['filter', 'factors', 'role', 'type', 'tenantId', 'orgId'])
+					let tenantDetails = await userService.fetchPublicTenantDetails(data.tenantId)
+					if (!tenantDetails.success || !tenantDetails.data || !tenantDetails.data.meta) {
+						return resolve({
+							success: false,
+							message: CONSTANTS.apiResponses.FAILED_TO_FETCH_TENANT_DETAILS,
 						})
-						if (!registryIds.length > 0) {
-							throw {
-								message: CONSTANTS.apiResponses.NO_LOCATION_ID_FOUND_IN_DATA,
-							}
-						}
-
-						let userRoleInfo = _.omit(data, ['filter', 'factors', 'role', 'type', 'tenantId', 'orgId'])
-						let tenantDetails = await userService.fetchPublicTenantDetails(data.tenantId)
-						if (!tenantDetails.success || !tenantDetails.data || !tenantDetails.data.meta) {
-							return resolve({
-								success: false,
-								message: CONSTANTS.apiResponses.FAILED_TO_FETCH_TENANT_DETAILS,
-							})
-						}
-						let tenantPublicDetailsMetaField = tenantDetails.data.meta
-						let builtQuery = UTILS.targetingQuery(
-							userRoleInfo,
-							tenantPublicDetailsMetaField,
-							CONSTANTS.common.MANDATORY_SCOPE_FIELD,
-							CONSTANTS.common.OPTIONAL_SCOPE_FIELD
-						)
-						filterQuery = {
-							...filterQuery,
-							...builtQuery,
-						}
-					} else {
-						// Obtain userInfo
-						let userRoleInfo = _.omit(data, ['filter', 'factors', 'role', 'type', 'tenantId', 'orgId'])
-						let userRoleKeys = Object.keys(userRoleInfo)
-						let queryFilter = []
-
-						// factors = [ 'professional_role', 'professional_subroles' ]
-						// if factors are passed or query has to be build based on the keys passed
-						if (data.hasOwnProperty('factors') && data.factors.length > 0) {
-							let factors = data.factors
-							// Build query based on each key
-							factors.forEach((factor) => {
-								let scope = 'scope.' + factor
-
-								// If prefix is given use it to form query
-								if (prefix != '') {
-									scope = `${prefix}.scope.${factor}`
-								}
-								let values = userRoleInfo[factor]
-								if (factor === 'role') {
-									// If prefix is given use it to form query
-									if (prefix != '') {
-										queryFilter.push({
-											[`${prefix}.scope.roles`]: {
-												$in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')],
-											},
-										})
-									} else {
-										queryFilter.push({
-											['scope.roles']: {
-												$in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')],
-											},
-										})
-									}
-								} else if (!Array.isArray(values)) {
-									queryFilter.push({ [scope]: { $in: values.split(',') } })
-								} else {
-									queryFilter.push({ [scope]: { $in: [...values] } })
-								}
-							})
-							// append query filter
-							filterQuery['$or'] = queryFilter
-						} else {
-							userRoleKeys.forEach((key) => {
-								let scope = 'scope.' + key
-
-								// If prefix is given use it to form query
-								if (prefix != '') {
-									scope = `${prefix}.scope.${key}`
-								}
-								let values = userRoleInfo[key]
-								if (!Array.isArray(values)) {
-									queryFilter.push({ [scope]: { $in: values.split(',') } })
-								} else {
-									queryFilter.push({ [scope]: { $in: [...values] } })
-								}
-							})
-
-							if (data.role) {
-								// If prefix is given use it to form query
-								if (prefix != '') {
-									queryFilter.push({
-										[`${prefix}.scope.roles`]: {
-											$in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')],
-										},
-									})
-								} else {
-									queryFilter.push({
-										['scope.roles']: { $in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')] },
-									})
-								}
-							}
-
-							// append query filter
-							filterQuery['$and'] = queryFilter
-						}
+					}
+					let tenantPublicDetailsMetaField = tenantDetails.data.meta
+					let builtQuery = UTILS.targetingQuery(
+						userRoleInfo,
+						tenantPublicDetailsMetaField,
+						CONSTANTS.common.MANDATORY_SCOPE_FIELD,
+						CONSTANTS.common.OPTIONAL_SCOPE_FIELD
+					)
+					filterQuery = {
+						...filterQuery,
+						...builtQuery,
 					}
 				}
 				filterQuery.status = CONSTANTS.common.ACTIVE_STATUS

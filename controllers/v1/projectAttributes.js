@@ -34,7 +34,7 @@ module.exports = class ProjectAttributes extends Abstract {
 
 	async create(req) {
 		try {
-			let projectAttributes = await projectAttributesHelper.create()
+			let projectAttributes = await projectAttributesHelper.create(req.userDetails)
 			if (projectAttributes.success) {
 				return {
 					success: true,
@@ -86,7 +86,8 @@ module.exports = class ProjectAttributes extends Abstract {
 	async find(req) {
 		try {
 			const projectAttributesData = await projectAttributesHelper.find(
-				req.query.language ? req.query.language : ''
+				req.query.language ? req.query.language : '',
+				req.userDetails
 			)
 			return projectAttributesData
 		} catch (error) {
@@ -135,7 +136,8 @@ module.exports = class ProjectAttributes extends Abstract {
 			const projectAttributesData = await projectAttributesHelper.update(
 				req.query.code,
 				req.query.language ? req.query.language : '',
-				req.body
+				req.body,
+				req.userDetails
 			)
 
 			return projectAttributesData

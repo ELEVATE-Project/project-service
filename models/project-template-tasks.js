@@ -40,6 +40,10 @@ module.exports = {
 			type: Object,
 			default: {},
 		},
+		projectTemplateDetails: {
+			type: Object,
+			default: {},
+		},
 		parentId: 'ObjectId',
 		projectTemplateId: {
 			type: 'ObjectId',

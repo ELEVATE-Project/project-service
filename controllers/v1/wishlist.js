@@ -38,11 +38,7 @@ module.exports = class Wishlist extends Abstract {
 */
 	async add(req) {
 		try {
-			let addProjectTempleteToWishlist = await wishlistHelper.add(
-				req.params._id,
-				req.userDetails ? req.userDetails.userInformation.userId : '',
-				req.body
-			)
+			let addProjectTempleteToWishlist = await wishlistHelper.add(req.params._id, req.userDetails, req.body)
 			if (addProjectTempleteToWishlist.success) {
 				return {
 					success: true,
@@ -81,10 +77,7 @@ module.exports = class Wishlist extends Abstract {
 */
 	async remove(req) {
 		try {
-			let removeProjectTempleteToWishlist = await wishlistHelper.remove(
-				req.params._id,
-				req.userDetails ? req.userDetails.userInformation.userId : ''
-			)
+			let removeProjectTempleteToWishlist = await wishlistHelper.remove(req.params._id, req.userDetails)
 			if (removeProjectTempleteToWishlist.success) {
 				return {
 					success: true,
@@ -185,7 +178,7 @@ module.exports = class Wishlist extends Abstract {
 		try {
 			let userExtensionDocuments = await wishlistHelper.list(
 				req.query.language ? req.query.language : '',
-				req.userDetails ? req.userDetails.userInformation.userId : '',
+				req.userDetails,
 				req.pageSize,
 				req.pageNo
 			)

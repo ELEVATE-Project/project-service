@@ -195,6 +195,11 @@ let enviromentVariables = {
 		optional: true,
 		default: 'config.json',
 	},
+	PROGRAM_USER_MAPPING_TOPIC: {
+		message: 'Required program operation kafka topic',
+		optional: true,
+		default: CONSTANTS.common.DEFAULT_PROGRAM_USER_MAPPING_TOPIC,
+	},
 	SUBMISSION_TOPIC: {
 		message: 'Required SUBMISSION_TOPIC',
 		optional: true,

@@ -219,7 +219,7 @@ module.exports = class ProjectTemplates extends Abstract {
 	async listByIds(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let projectTemplates = await projectTemplatesHelper.listByIds(req.body.externalIds)
+				let projectTemplates = await projectTemplatesHelper.listByIds(req.body.externalIds, req.userDetails)
 
 				projectTemplates.result = projectTemplates.data
 

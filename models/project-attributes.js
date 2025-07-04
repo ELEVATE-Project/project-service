@@ -34,5 +34,21 @@ module.exports = {
 			type: Object,
 			default: {},
 		},
+		tenantId: {
+			type: String,
+			index: true,
+			required: true,
+		},
+		orgId: {
+			type: String,
+			required: true,
+			index: true,
+		},
 	},
+	compoundIndex: [
+		{
+			name: { code: 1, tenantId: 1 },
+			indexType: { unique: true },
+		},
+	],
 }

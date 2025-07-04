@@ -21,6 +21,7 @@ const projectTemplateQueries = require(DB_QUERY_BASE_PATH + '/projectTemplates')
 const projectTemplatesHelper = require(MODULES_BASE_PATH + '/project/templates/helper')
 const programUsersHelper = require(MODULES_BASE_PATH + '/programUsers/helper')
 const userService = require(GENERICS_FILES_PATH + '/services/users')
+const programSolutionUtility = require(GENERICS_FILES_PATH + '/helpers/programSolutionUtilities')
 const timeZoneDifference = process.env.TIMEZONE_DIFFRENECE_BETWEEN_LOCAL_TIME_AND_UTC
 
 /**
@@ -79,7 +80,8 @@ module.exports = class SolutionsHelper {
 		updatedBy = '',
 		projectTemplateId = '',
 		startDate = '',
-		endDate = ''
+		endDate = '',
+		userDetails = {}
 	) {
 		let solutionData = {}
 		solutionData.name = name
@@ -113,6 +115,8 @@ module.exports = class SolutionsHelper {
 		if (endDate) {
 			solutionData.endDate = endDate
 		}
+		solutionData['tenantId'] = userDetails.userInformation.tenantId
+		solutionData['orgId'] = userDetails.userInformation.organizationId
 
 		return solutionData
 	}
@@ -172,13 +176,11 @@ module.exports = class SolutionsHelper {
 	 * @name setScope
 	 * @param {String} solutionId - solution id.
 	 * @param {Object} scopeData - scope data.
-	 * @param {String} scopeData.entityType - scope entity type
-	 * @param {Array} scopeData.entities - scope entities
-	 * @param {Array} scopeData.roles - roles in scope
+	 * @param {Object} userDetails - loggedin user info
 	 * @returns {JSON} - scope in solution.
 	 */
 
-	static setScope(solutionId, scopeData) {
+	static setScope(solutionId, scopeData, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let solutionData = await solutionsQueries.solutionsDocument({ _id: solutionId }, ['_id'])
@@ -188,6 +190,41 @@ module.exports = class SolutionsHelper {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.SOLUTION_NOT_FOUND,
 					})
+				}
+
+				// populate scopeData.organizations data
+				if (
+					scopeData.organizations &&
+					scopeData.organizations.length > 0 &&
+					userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)
+				) {
+					// call user-service to fetch related orgs
+					let validOrgs = await userService.fetchTenantDetails(
+						userDetails.tenantAndOrgInfo.tenantId,
+						userDetails.userToken,
+						true
+					)
+					if (!validOrgs.success) {
+						throw {
+							success: false,
+							status: HTTP_STATUS_CODE['bad_request'].status,
+							message: CONSTANTS.apiResponses.ORG_DETAILS_FETCH_UNSUCCESSFUL_MESSAGE,
+						}
+					}
+					validOrgs = validOrgs.data
+
+					// filter valid orgs
+					scopeData.organizations = scopeData.organizations.filter(
+						(id) => validOrgs.includes(id) || id.toLowerCase() == CONSTANTS.common.ALL
+					)
+				} else {
+					scopeData['organizations'] = userDetails.tenantAndOrgInfo.orgId
+				}
+
+				if (Array.isArray(scopeData.organizations)) {
+					scopeData.organizations = scopeData.organizations.map((orgId) =>
+						orgId === CONSTANTS.common.ALL ? 'ALL' : orgId
+					)
 				}
 
 				// let currentSolutionScope = {};
@@ -296,12 +333,24 @@ module.exports = class SolutionsHelper {
 					scopeData = _.omit(scopeData, keysCannotBeAdded)
 				}
 
+				let tenantDetails = await userService.fetchPublicTenantDetails(userDetails.tenantAndOrgInfo.tenantId)
+				if (!tenantDetails?.success || !tenantDetails?.data?.meta) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.FAILED_TO_FETCH_TENANT_DETAILS,
+					}
+				}
+
+				let tenantPublicDetailsMetaField = tenantDetails.data.meta
+
+				let filteredScope = UTILS.getFilteredScope(scopeData, tenantPublicDetailsMetaField)
+
 				const updateObject = {
 					$set: {},
 				}
 
 				// Assign the scopeData to the scope field in updateObject
-				updateObject['$set']['scope'] = scopeData
+				updateObject['$set']['scope'] = filteredScope
 
 				// Update the solution document with the updateObject
 				let updateSolution = await solutionsQueries.updateSolutionDocument(
@@ -372,7 +421,6 @@ module.exports = class SolutionsHelper {
 					'endDate',
 					'startDate',
 				])
-
 				if (!programData.length > 0) {
 					throw {
 						message: CONSTANTS.apiResponses.PROGRAM_NOT_FOUND,
@@ -475,9 +523,8 @@ module.exports = class SolutionsHelper {
 					$addToSet: { components: solutionCreation._id },
 				})
 
-				solutionData.scope['organizations'] = userDetails.tenantAndOrgInfo.orgId
 				if (!solutionData.excludeScope && programData[0].scope) {
-					await this.setScope(solutionCreation._id, solutionData.scope ? solutionData.scope : {})
+					await this.setScope(solutionCreation._id, solutionData.scope ? solutionData.scope : {}, userDetails)
 				}
 
 				return resolve({
@@ -532,7 +579,6 @@ module.exports = class SolutionsHelper {
 						{
 							_id: solutionDocument[0].programId,
 							tenantId: userDetails.tenantAndOrgInfo.tenantId,
-							orgId: { $in: ['ALL', ...userDetails.tenantAndOrgInfo.orgId] },
 						},
 						['_id', 'endDate', 'startDate']
 					)
@@ -583,7 +629,6 @@ module.exports = class SolutionsHelper {
 					{
 						_id: solutionDocument[0]._id,
 						tenantId: userDetails.tenantAndOrgInfo.tenantId,
-						orgId: { $in: ['ALL', ...userDetails.tenantAndOrgInfo.orgId] },
 					},
 					updateObject,
 					{ new: true }
@@ -595,11 +640,7 @@ module.exports = class SolutionsHelper {
 					}
 				}
 				if (solutionData.scope && Object.keys(solutionData.scope).length > 0) {
-					if (!solutionData.scope.organizations) {
-						solutionData.scope.organizations = userDetails.tenantAndOrgInfo.orgId
-					}
-					let solutionScope = await this.setScope(solutionUpdatedData._id, solutionData.scope)
-
+					let solutionScope = await this.setScope(solutionUpdatedData._id, solutionData.scope, userDetails)
 					if (!solutionScope.success) {
 						throw {
 							message: CONSTANTS.apiResponses.COULD_NOT_UPDATE_SCOPE,
@@ -969,20 +1010,28 @@ module.exports = class SolutionsHelper {
 	 * @name addRolesInScope
 	 * @param {String} solutionId - Solution Id.
 	 * @param {Array} roles - roles data.
+	 * @param {Object} userDetails - User Details
 	 * @returns {JSON} - Added roles data.
 	 */
 
-	static addRolesInScope(solutionId, roles) {
+	// Role-based logic has been removed from the current implementation, so this API is currently not in use.
+	//  It may be revisited in the future based on requirements.
+	static addRolesInScope(solutionId, roles, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				let tenantId = userDetails.tenantAndOrgInfo.tenantId
+				let orgId = userDetails.tenantAndOrgInfo.orgId[0]
+
 				let solutionData = await solutionsQueries.solutionsDocument(
 					{
 						_id: solutionId,
 						scope: { $exists: true },
 						isReusable: false,
 						isDeleted: false,
+						tenantId: tenantId,
+						orgId: orgId,
 					},
-					['_id']
+					['_id', 'scope.roles']
 				)
 
 				if (!solutionData.length > 0) {
@@ -995,8 +1044,7 @@ module.exports = class SolutionsHelper {
 				let updateQuery = {}
 
 				if (Array.isArray(roles) && roles.length > 0) {
-					let currentRoles = await solutionsQueries.solutionsDocument({ _id: solutionId }, ['scope.roles'])
-					currentRoles = currentRoles[0].scope.roles
+					let currentRoles = solutionData[0].scope.roles
 
 					let currentRolesSet = new Set(currentRoles)
 					let rolesSet = new Set(roles)
@@ -1064,13 +1112,14 @@ module.exports = class SolutionsHelper {
 					isReusable: false,
 					isDeleted: false,
 				}
-				Object.keys(
-					_.omit(data, ['role', 'filter', 'factors', 'type', 'tenantId', 'orgId', 'organizations'])
-				).forEach((key) => {
-					data[key] = data[key].split(',')
-				})
-				// If validate entity set to ON . strict scoping should be applied
-				if (validateEntity !== CONSTANTS.common.OFF) {
+				//skipping scope related query if its from projectAsaTask flow
+				if (!data.project) {
+					Object.keys(
+						_.omit(data, ['role', 'filter', 'factors', 'type', 'tenantId', 'orgId', 'organizations'])
+					).forEach((key) => {
+						data[key] = data[key].split(',')
+					})
+					// If validate entity set to ON . strict scoping should be applied
 					Object.keys(
 						_.omit(data, ['filter', 'role', 'factors', 'type', 'tenantId', 'orgId', 'organizations'])
 					).forEach((requestedDataKey) => {
@@ -1091,110 +1140,18 @@ module.exports = class SolutionsHelper {
 							message: CONSTANTS.apiResponses.FAILED_TO_FETCH_TENANT_DETAILS,
 						})
 					}
-					// factors = [ 'professional_role', 'professional_subroles' ]
-					let factors
-					if (
-						tenantDetails.data.meta.hasOwnProperty('factors') &&
-						tenantDetails.data.meta.factors.length > 0
-					) {
-						factors = tenantDetails.data.meta.factors
-						let queryFilter = UTILS.factorQuery(factors, userRoleInfo)
-						filterQuery['$and'] = queryFilter
-					}
-					let dataToOmit = ['filter', 'role', 'factors', 'type', 'tenantId', 'orgId', 'organizations']
-					// factors.append(dataToOmit)
-
-					const finalKeysToRemove = [...new Set([...dataToOmit, ...factors])]
-
-					filterQuery.$or = []
-					Object.keys(_.omit(data, finalKeysToRemove)).forEach((key) => {
-						// If prefix is given use it to form query
-						if (prefix != '') {
-							filterQuery.$or.push({
-								[`${prefix}.scope.${key}`]: { $in: data[key] },
-							})
-						} else {
-							filterQuery.$or.push({
-								[`scope.${key}`]: { $in: data[key] },
-							})
-						}
-					})
-				} else {
-					// Obtain userInfo
-					let userRoleInfo = _.omit(data, ['filter', 'factors', 'role', 'type', 'tenantId', 'orgId'])
-					let userRoleKeys = Object.keys(userRoleInfo)
-					let queryFilter = []
-
-					// factors = [ 'professional_role', 'professional_subroles' ]
-					// if factors are passed or query has to be build based on the keys passed
-					if (data.hasOwnProperty('factors') && data.factors.length > 0) {
-						let factors = data.factors
-						// Build query based on each key
-						factors.forEach((factor) => {
-							let scope = 'scope.' + factor
-
-							// If prefix is given use it to form query
-							if (prefix != '') {
-								scope = `${prefix}.scope.${factor}`
-							}
-							let values = userRoleInfo[factor]
-							if (factor === 'role') {
-								// If prefix is given use it to form query
-								if (prefix != '') {
-									queryFilter.push({
-										[`${prefix}.scope.roles`]: {
-											$in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')],
-										},
-									})
-								} else {
-									queryFilter.push({
-										['scope.roles']: { $in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')] },
-									})
-								}
-							} else if (!Array.isArray(values)) {
-								queryFilter.push({ [scope]: { $in: values.split(',') } })
-							} else {
-								queryFilter.push({ [scope]: { $in: [...values] } })
-							}
-						})
-						// append query filter
-						filterQuery['$or'] = queryFilter
-					} else {
-						userRoleKeys.forEach((key) => {
-							let scope = 'scope.' + key
-
-							// If prefix is given use it to form query
-							if (prefix != '') {
-								scope = `${prefix}.scope.${key}`
-							}
-							let values = userRoleInfo[key]
-							if (!Array.isArray(values)) {
-								queryFilter.push({ [scope]: { $in: values.split(',') } })
-							} else {
-								queryFilter.push({ [scope]: { $in: [...values] } })
-							}
-						})
-
-						if (data.role) {
-							// If prefix is given use it to form query
-							if (prefix != '') {
-								queryFilter.push({
-									[`${prefix}.scope.roles`]: {
-										$in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')],
-									},
-								})
-							} else {
-								queryFilter.push({
-									['scope.roles']: { $in: [CONSTANTS.common.ALL_ROLES, ...data.role.split(',')] },
-								})
-							}
-						}
-
-						// append query filter
-						filterQuery['$and'] = queryFilter
+					let tenantPublicDetailsMetaField = tenantDetails.data.meta
+					let builtQuery = UTILS.targetingQuery(
+						userRoleInfo,
+						tenantPublicDetailsMetaField,
+						CONSTANTS.common.MANDATORY_SCOPE_FIELD,
+						CONSTANTS.common.OPTIONAL_SCOPE_FIELD
+					)
+					filterQuery = {
+						...filterQuery,
+						...builtQuery,
 					}
 				}
-
 				filterQuery.status = CONSTANTS.common.ACTIVE_STATUS
 				if (type != '') {
 					filterQuery.type = type
@@ -1267,7 +1224,7 @@ module.exports = class SolutionsHelper {
 				}
 				queryData.data['_id'] = solutionId
 				queryData.data['tenantId'] = tenantId
-				// queryData.data['orgId'] = { $in: [orgId] }
+
 				let matchQuery = queryData.data
 				let solutionData = await solutionsQueries.solutionsDocument(matchQuery, [
 					'_id',
@@ -1372,7 +1329,7 @@ module.exports = class SolutionsHelper {
 	 * @returns {Array} - Created user program and solution.
 	 */
 
-	static createProgramAndSolution(userId, data, userToken, createADuplicateSolution = '', userDetails) {
+	static createProgramAndSolution(userId, data, createADuplicateSolution = '', userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let userPrivateProgram = {}
@@ -1387,7 +1344,6 @@ module.exports = class SolutionsHelper {
 					let filterQuery = {
 						_id: data.programId,
 						tenantId: tenantId,
-						orgId: { $in: [orgId] },
 					}
 
 					if (createADuplicateSolution === false) {
@@ -1418,7 +1374,7 @@ module.exports = class SolutionsHelper {
 							duplicateProgram.startDate,
 							duplicateProgram.endDate,
 							'',
-							'',
+							[], // the function definition is accepting empty array instead of empty string hence replaced it with []
 							{},
 							userDetails
 						)
@@ -1446,7 +1402,7 @@ module.exports = class SolutionsHelper {
 					}
 				} else {
 					/* If the programId is not passed from the front end, we will enter this else block. 
-          In this block, we need to provide the necessary basic details to create a new program, Including startDate and endDate.*/
+          			In this block, we need to provide the necessary basic details to create a new program, Including startDate and endDate.*/
 					// Current date
 					let startDate = new Date()
 					// Add one year to the current date
@@ -1462,8 +1418,8 @@ module.exports = class SolutionsHelper {
 						startDate,
 						endDate,
 						userId,
-						'', //language
-						{}, //source- Additional source metadata related to the program
+						[], // pass empty array for translation data
+						{}, // pass empty object for source data
 						userDetails
 					)
 
@@ -1481,60 +1437,6 @@ module.exports = class SolutionsHelper {
 					isAPrivateProgram: userPrivateProgram.isAPrivateProgram,
 				}
 
-				//entities
-				// if (Array.isArray(data.entities) && data.entities && data.entities.length > 0) {
-				// 	let entitiesData = []
-				// 	let bodyData = {}
-
-				// 	let locationData = UTILS.filterLocationIdandCode(data.entities)
-
-				// 	if (locationData.ids.length > 0) {
-				// 		bodyData = {
-				// 			id: locationData.ids,
-				// 		}
-				// 		let entityData = await entitiesService.entityDocuments(bodyData, 'all')
-
-				// 		if (!entityData.success) {
-				// 			return resolve({
-				// 				status: HTTP_STATUS_CODE.bad_request.status,
-				// 				message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
-				// 				result: {},
-				// 			})
-				// 		}
-
-				// 		entityData.data.forEach((entity) => {
-				// 			entitiesData.push(entity._id)
-				// 		})
-
-				// 		solutionDataToBeUpdated['entityType'] = entityData.data[0].type
-				// 	}
-
-				// 	if (locationData.codes.length > 0) {
-				// 		let filterData = {
-				// 			'registryDetails.code': { $in: locationData.codes },
-				// 		}
-				// 		let entityDetails = await entitiesService.entityDocuments(filterData, 'all')
-				// 		if (!entityDetails.success || !entityDetails.data || !entityDetails.data.length > 0) {
-				// 			return resolve({
-				// 				status: HTTP_STATUS_CODE.bad_request.status,
-				// 				message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
-				// 				result: {},
-				// 			})
-				// 		}
-				// 		let entityDocuments = entityDetails.data
-
-				// 		entityDocuments.forEach((entity) => {
-				// 			entitiesData.push(entity._id)
-				// 		})
-
-				// 		solutionDataToBeUpdated['entityType'] = CONSTANTS.common.SCHOOL
-				// 	}
-
-				// 	if (data.type && data.type !== CONSTANTS.common.IMPROVEMENT_PROJECT) {
-				// 		solutionDataToBeUpdated['entities'] = entitiesData
-				// 	}
-				// }
-
 				//solution part
 				let solution = ''
 				if (data.solutionId && data.solutionId !== '') {
@@ -1542,7 +1444,6 @@ module.exports = class SolutionsHelper {
 						{
 							_id: data.solutionId,
 							tenantId: userDetails.userInformation.tenantId,
-							orgId: { $in: [userDetails.userInformation.organizationId] },
 						},
 						[
 							'name',
@@ -1580,7 +1481,10 @@ module.exports = class SolutionsHelper {
 							duplicateSolution.type,
 							duplicateSolution.subType,
 							userId,
-							duplicateSolution.projectTemplateId ? duplicateSolution.projectTemplateId : ''
+							duplicateSolution.projectTemplateId ? duplicateSolution.projectTemplateId : '',
+							null,
+							null,
+							userDetails
 						)
 
 						_.merge(duplicateSolution, solutionCreationData)
@@ -1632,11 +1536,15 @@ module.exports = class SolutionsHelper {
 						CONSTANTS.common.ACTIVE_STATUS,
 						description,
 						userId,
-						'',
 						false,
 						'',
 						data.type ? data.type : CONSTANTS.common.ASSESSMENT,
-						data.subType ? data.subType : CONSTANTS.common.INSTITUTIONAL
+						data.subType ? data.subType : CONSTANTS.common.INSTITUTIONAL,
+						userId,
+						'',
+						'',
+						'',
+						userDetails
 					)
 					createSolutionData['tenantId'] = userDetails.userInformation.tenantId
 					createSolutionData['orgId'] = userDetails.userInformation.organizationId
@@ -1680,18 +1588,26 @@ module.exports = class SolutionsHelper {
 	 * @name removeRolesInScope
 	 * @param {String} solutionId - Solution Id.
 	 * @param {Array} roles - roles data.
+	 * @param {Object} userDetails - User Details
 	 * @returns {JSON} - Removed solution roles.
 	 */
 
-	static removeRolesInScope(solutionId, roles) {
+	// Role-based logic has been removed from the current implementation, so this API is currently not in use.
+	//  It may be revisited in the future based on requirements.
+	static removeRolesInScope(solutionId, roles, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				let tenantId = userDetails.tenantAndOrgInfo.tenantId
+				let orgId = userDetails.tenantAndOrgInfo.orgId[0]
+
 				let solutionData = await solutionsQueries.solutionsDocument(
 					{
 						_id: solutionId,
 						scope: { $exists: true },
 						isReusable: false,
 						isDeleted: false,
+						tenantId: tenantId,
+						orgId: orgId,
 					},
 					['_id']
 				)
@@ -1906,7 +1822,6 @@ module.exports = class SolutionsHelper {
 							$ne: CONSTANTS.common.INACTIVE,
 						},
 						tenantId: tenantId,
-						orgId: { $in: ['ALL', userDetails.userInformation.organizationId] },
 					},
 					['type', 'status', 'endDate']
 				)
@@ -1963,88 +1878,85 @@ module.exports = class SolutionsHelper {
 	 * @method
 	 * @name addEntitiesInScope
 	 * @param {String} solutionId - solution Id.
-	 * @param {Array} entities - entities data.
+	 * @param {Object} bodyData - body data.
+	 * @param {Object} userDetails - User Details
 	 * @returns {JSON} - Added entities data.
 	 */
 
-	static addEntitiesInScope(solutionId, entities) {
+	static addEntitiesInScope(solutionId, bodyData, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				// Extract tenant and org IDs from user details
+				let tenantId = userDetails.tenantAndOrgInfo.tenantId
+				let orgId = userDetails.tenantAndOrgInfo.orgId[0]
+				// Fetch the solution document to ensure it exists and has a scope
 				let solutionData = await solutionsQueries.solutionsDocument(
 					{
 						_id: solutionId,
 						scope: { $exists: true },
 						isReusable: false,
 						isDeleted: false,
+						tenantId: tenantId,
+						orgId: orgId,
 					},
-					['_id', 'programId', 'scope.entityType']
+					['_id', 'programId', 'scope']
 				)
 
 				if (!solutionData.length > 0) {
-					return resolve({
+					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.SOLUTION_NOT_FOUND,
-					})
+					}
 				}
 
 				let programData = await programQueries.programsDocument(
 					{
 						_id: solutionData[0].programId,
+						tenantId: tenantId,
+						orgId: orgId,
 					},
-					['scope.entities', 'scope.entityType']
+					['scope']
 				)
 
 				if (!programData.length > 0) {
-					return resolve({
+					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.PROGRAM_NOT_FOUND,
-					})
-				}
-
-				if (solutionData[0].scope.entityType !== programData[0].scope.entityType) {
-					let checkEntityInParent = await entitiesService.entityDocuments(
-						{
-							_id: programData[0].scope.entities,
-							[`groups.${solutionData[0].scope.entityType}`]: entities,
-						},
-						['_id']
-					)
-					if (!checkEntityInParent.success) {
-						throw {
-							message: CONSTANTS.apiResponses.ENTITY_NOT_EXISTS_IN_PARENT,
-						}
 					}
 				}
+				// This logic we need to re-look --------------------------------------------
+				// if (solutionData[0].scope !== programData[0].scope) {
+				// 	let checkEntityInParent = await entitiesService.entityDocuments(
+				// 		{
+				// 			_id: programData[0].scope.entities,- state
+				// 			[`groups.${solutionData[0].scope.entityType}`]: entities,- district
+				// 		},
+				// 		['_id']
+				// 	)
+				// 	if (!checkEntityInParent.success) {
+				// 		throw {
+				// 			message: messageConstants.apiResponses.ENTITY_NOT_EXISTS_IN_PARENT,
+				// 		}
+				// 	}
+				// }
 
-				let entitiesData = await entitiesService.entityDocuments(
-					{
-						_id: { $in: entities },
-						entityType: solutionData[0].scope.entityType,
-					},
-					['_id']
+				let updateObjectData = await programSolutionUtility.getUpdateObjectTOAddScope(
+					bodyData,
+					tenantId,
+					orgId,
+					userDetails
 				)
-
-				if (!entitiesData.success || !entitiesData.data.length > 0) {
+				if (!updateObjectData?.success) {
 					throw {
-						message: CONSTANTS.apiResponses.ENTITIES_NOT_FOUND,
+						message: CONSTANTS.apiResponses.UPDATE_OBJECT_FAILED,
+						status: HTTP_STATUS_CODE.bad_request.status,
 					}
 				}
-				entitiesData = entitiesData.data
-				let entityIds = []
-
-				entitiesData.forEach((entity) => {
-					entityIds.push(entity._id)
-				})
-				let updateObject = {
-					$addToSet: {},
-				}
-				updateObject['$addToSet'][`scope.${solutionData[0].scope.entityType}`] = { $each: entityIds }
-
 				let updateSolution = await solutionsQueries.updateSolutionDocument(
 					{
 						_id: solutionId,
 					},
-					updateObject,
+					updateObjectData.updateObject,
 					{ new: true }
 				)
 
@@ -2073,53 +1985,56 @@ module.exports = class SolutionsHelper {
 	 * @method
 	 * @name removeEntitiesInScope
 	 * @param {String} solutionId - Program Id.
-	 * @param {Array} entities - entities.
+	 * @param {Object} bodyData - body data.
+	 * @param {Object} userDetails - User Details
 	 * @returns {JSON} - Removed entities from solution scope.
 	 */
 
-	static removeEntitiesInScope(solutionId, entities) {
+	static removeEntitiesInScope(solutionId, bodyData, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				let tenantId = userDetails.tenantAndOrgInfo.tenantId
+				let orgId = userDetails.tenantAndOrgInfo.orgId[0]
 				let solutionData = await solutionsQueries.solutionsDocument(
 					{
 						_id: solutionId,
 						scope: { $exists: true },
 						isReusable: false,
 						isDeleted: false,
+						tenantId: tenantId,
+						orgId: orgId,
 					},
-					['_id', 'scope.entityType']
+					['_id', 'scope']
 				)
 
 				if (!solutionData.length > 0) {
-					return resolve({
+					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.SOLUTION_NOT_FOUND,
-					})
-				}
-
-				let entitiesData = await entitiesService.entityDocuments(
-					{
-						_id: { $in: entities },
-						entityType: solutionData[0].scope.entityType,
-					},
-					['_id']
-				)
-
-				if (!entitiesData.success || !entitiesData.data.length > 0) {
-					throw {
-						message: CONSTANTS.apiResponses.ENTITIES_NOT_FOUND,
 					}
 				}
-				entitiesData = entitiesData.data
-				let entityIds = []
 
-				entitiesData.forEach((entity) => {
-					entityIds.push(entity._id)
-				})
-				let updateObject = {
-					$pull: {},
+				// Initialize the update object to be used in MongoDB update query
+				const currentScope = solutionData[0].scope || {}
+
+				let updateObjectData = await programSolutionUtility.getUpdateObjectToRemoveScope(
+					currentScope,
+					bodyData,
+					tenantId,
+					userDetails
+				)
+				if (!updateObjectData?.success) {
+					throw {
+						message: CONSTANTS.apiResponses.UPDATE_OBJECT_FAILED,
+						status: HTTP_STATUS_CODE.bad_request.status,
+					}
 				}
-				updateObject['$pull'][`scope.${solutionData[0].scope.entityType}`] = { $in: entityIds }
+				// Prepare update object
+				let updateObject = {
+					$set: {
+						scope: updateObjectData.updatedScope,
+					},
+				}
 				let updateSolution = await solutionsQueries.updateSolutionDocument(
 					{
 						_id: solutionId,
@@ -2127,10 +2042,10 @@ module.exports = class SolutionsHelper {
 					updateObject,
 					{ new: true }
 				)
-
 				if (!updateSolution || !updateSolution._id) {
 					throw {
 						message: CONSTANTS.apiResponses.SOLUTION_NOT_UPDATED,
+						status: HTTP_STATUS_CODE.bad_request.status,
 					}
 				}
 
@@ -2959,6 +2874,13 @@ module.exports = class SolutionsHelper {
 						message: userCreatedProjects.message,
 					}
 				}
+				// Remove project solutions which for project tasks.
+				_.remove(userCreatedProjects?.data?.data, function (solution) {
+					return (
+						solution.referenceFrom == messageConstants.common.PROJECT &&
+						solution.type == messageConstants.common.IMPROVEMENT_PROJECT
+					)
+				})
 
 				if (process.env.SUBMISSION_LEVEL == 'ENTITY' && requestedData.hasOwnProperty('entityId')) {
 					mergedData = userCreatedProjects.data.data
@@ -3003,7 +2925,6 @@ module.exports = class SolutionsHelper {
 							{
 								_id: { $in: programIds },
 								tenantId: userDetails.userInformation.tenantId,
-								orgId: { $in: [userDetails.userInformation.organizationId] },
 							},
 							['name']
 						)
@@ -3167,7 +3088,6 @@ module.exports = class SolutionsHelper {
 					let solutionAndProgramCreation = await this.createProgramAndSolution(
 						userId,
 						programAndSolutionData,
-						userToken,
 						true, // create duplicate solution
 						userDetails
 					)
@@ -3535,10 +3455,11 @@ module.exports = class SolutionsHelper {
 			try {
 				let tenantId = userDetails.userInformation.tenantId
 				let orgId = userDetails.userInformation.organizationId
-				let solutionData = await solutionsQueries.solutionsDocument(
-					{ _id: solutionId, tenantId: tenantId, orgId: { $in: [orgId] } },
-					['type', 'projectTemplateId', 'programId']
-				)
+				let solutionData = await solutionsQueries.solutionsDocument({ _id: solutionId, tenantId: tenantId }, [
+					'type',
+					'projectTemplateId',
+					'programId',
+				])
 
 				if (!Array.isArray(solutionData) || solutionData.length < 1) {
 					return resolve({
@@ -3558,6 +3479,7 @@ module.exports = class SolutionsHelper {
 							message: CONSTANTS.apiResponses.PROJECT_TEMPLATE_ID_NOT_FOUND,
 						}
 					}
+					const projectTemplatesHelper = require(MODULES_BASE_PATH + '/project/templates/helper')
 					templateOrQuestionDetails = await projectTemplatesHelper.details(
 						solutionData.projectTemplateId,
 						'',

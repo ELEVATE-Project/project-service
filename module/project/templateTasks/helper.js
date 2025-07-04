@@ -119,7 +119,7 @@ module.exports = class ProjectTemplateTasksHelper {
 					let solutions = []
 
 					if (projectSolutionIds && projectSolutionIds.length > 0) {
-						solutions = await solutionsQueries.solutionsDocument({
+						solutions = await projectTemplateQueries.templateDocument({
 							externalId: { $in: projectSolutionIds },
 						})
 					}
@@ -224,10 +224,12 @@ module.exports = class ProjectTemplateTasksHelper {
 						parsedData.STATUS = CONSTANTS.apiResponses.REQUIRED_SOLUTION_TYPE
 					}
 
-					if (parsedData.solutionSubType && parsedData.solutionSubType !== '') {
-						allValues.solutionDetails.subType = parsedData.solutionSubType
-					} else {
-						parsedData.STATUS = CONSTANTS.apiResponses.REQUIRED_SOLUTION_SUB_TYPE
+					if (solutionData[parsedData.solutionId].type === CONSTANTS.common.OBSERVATION) {
+						if (parsedData.solutionSubType && parsedData.solutionSubType !== '') {
+							allValues.solutionDetails.subType = parsedData.solutionSubType
+						} else {
+							parsedData.STATUS = CONSTANTS.apiResponses.REQUIRED_SOLUTION_SUB_TYPE
+						}
 					}
 
 					if (parsedData.solutionId && parsedData.solutionId !== '') {
@@ -235,18 +237,21 @@ module.exports = class ProjectTemplateTasksHelper {
 							parsedData.STATUS = CONSTANTS.apiResponses.SOLUTION_NOT_FOUND
 						} else {
 							//Match type of solutionData and csv data
-							if (solutionData[parsedData.solutionId].type !== allValues.solutionDetails.type) {
+							if (
+								solutionData[parsedData.solutionId].type !== allValues.solutionDetails.type &&
+								!parsedData.solutionType
+							) {
 								parsedData.STATUS = CONSTANTS.apiResponses.SOLUTION_TYPE_MIS_MATCH
 							}
 							if (
-								!(solutionData[parsedData.solutionId].type === CONSTANTS.common.SURVEY) &&
+								parsedData.solutionType === CONSTANTS.common.OBSERVATION &&
 								solutionData[parsedData.solutionId].entityType !== allValues.solutionDetails.subType
 							) {
 								parsedData.STATUS = CONSTANTS.apiResponses.SOLUTION_SUB_TYPE_MIS_MATCH
 							}
 							if (
 								template.entityType &&
-								!(solutionData[parsedData.solutionId].type === CONSTANTS.common.SURVEY) &&
+								parsedData.solutionType === CONSTANTS.common.OBSERVATION &&
 								template.entityType !== solutionData[parsedData.solutionId].entityType
 							) {
 								parsedData.STATUS = CONSTANTS.apiResponses.MIS_MATCHED_PROJECT_AND_TASK_ENTITY_TYPE
@@ -262,7 +267,8 @@ module.exports = class ProjectTemplateTasksHelper {
 									// minNoOfSubmissionsRequired present in csv
 									if (
 										parsedData.minNoOfSubmissionsRequired >
-										CONSTANTS.common.DEFAULT_SUBMISSION_REQUIRED
+											CONSTANTS.common.DEFAULT_SUBMISSION_REQUIRED &&
+										solutionData[parsedData.solutionId].type === CONSTANTS.common.OBSERVATION
 									) {
 										if (solutionData[parsedData.solutionId].allowMultipleAssessemts) {
 											allValues.solutionDetails['minNoOfSubmissionsRequired'] =
@@ -285,17 +291,34 @@ module.exports = class ProjectTemplateTasksHelper {
 					} else {
 						parsedData.STATUS = CONSTANTS.apiResponses.REQUIRED_SOLUTION_ID
 					}
-					// adding solutionDetails for task
-					let solutionDetails = {
-						subType: parsedData.solutionSubType,
-						type: parsedData.solutionType,
-						_id: solutionData[parsedData.solutionId]._id,
-						externalId: parsedData.solutionId,
-						name: solutionData[parsedData.solutionId].name,
-						isReusable: solutionData[parsedData.solutionId].isReusable,
-						minNoOfSubmissionsRequired: parsedData.minNoOfSubmissionsRequired,
+					if (parsedData.solutionType === CONSTANTS.common.IMPROVEMENT_PROJECT) {
+						// adding projectTemplateDetails for task
+						let projectTemplateDetails = {
+							subType: parsedData.solutionSubType,
+							type: parsedData.solutionType,
+							_id: solutionData[parsedData.solutionId]._id,
+							externalId: parsedData.solutionId,
+							name: solutionData[parsedData.solutionId].name,
+							isReusable: solutionData[parsedData.solutionId].isReusable,
+						}
+						allValues.projectTemplateDetails = projectTemplateDetails
+						delete allValues.solutionDetails
+					} else {
+						// adding solutionDetails for task
+						let solutionDetails = {
+							subType: parsedData.solutionSubType,
+							type: parsedData.solutionType,
+							_id: solutionData[parsedData.solutionId]._id,
+							externalId: parsedData.solutionId,
+							name: solutionData[parsedData.solutionId].name,
+							isReusable: solutionData[parsedData.solutionId].isReusable,
+						}
+						//Adding minNumberOfSubmission only for observation
+						if (parsedData.solutionType === CONSTANTS.common.OBSERVATION) {
+							solutionDetails.minNoOfSubmissionsRequired = parsedData.minNoOfSubmissionsRequired
+						}
+						allValues.solutionDetails = solutionDetails
 					}
-					allValues.solutionDetails = solutionDetails
 				}
 
 				allValues.projectTemplateId = template._id
@@ -866,14 +889,18 @@ module.exports = class ProjectTemplateTasksHelper {
 	 * @name update
 	 * @param {String} taskId - Task id.
 	 * @param {Object} taskData - template task updation data
-	 * @param {String} userId - logged in user id.
+	 * @param {Object} userDetails - logged in user id.
 	 * @returns {Array} Project templates task data.
 	 */
 
-	static update(taskId, taskData, userId) {
+	static update(taskId, taskData, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let findQuery = {}
+				const userId = userDetails.userInformation.userId
+				const tenantId = userDetails.tenantAndOrgInfo.tenantId
+
+				findQuery['tenantId'] = tenantId
 
 				let validateTaskId = UTILS.isValidMongoId(taskId)
 
@@ -896,6 +923,9 @@ module.exports = class ProjectTemplateTasksHelper {
 					$set: {},
 				}
 
+				delete taskData['tenantId']
+				delete taskData['orgId']
+
 				let taskUpdateData = taskData
 
 				Object.keys(taskUpdateData).forEach((updationData) => {
@@ -907,6 +937,7 @@ module.exports = class ProjectTemplateTasksHelper {
 				let taskUpdatedData = await projectTemplateTaskQueries.findOneAndUpdate(
 					{
 						_id: taskDocument[0]._id,
+						tenantId,
 					},
 					updateObject,
 					{ new: true }

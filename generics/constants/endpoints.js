@@ -66,4 +66,6 @@ module.exports = {
 	CREATE_CHILD_OBSERVATION_SOLUTION: '/v1/solutions/importFromSolution',
 	SURVEY_DETAILS: '/v1/surveys/details',
 	PUBLIC_BRANDING: '/v1/public/branding',
+	PROFILE_READ_BY_ID: '/v1/user/profileById',
+	FIND_ENTITY_DETAILS: '/v1/entities/details',
 }

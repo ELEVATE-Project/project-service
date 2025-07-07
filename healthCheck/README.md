@@ -1,6 +1,6 @@
 # Health Check Configuration Guide
 
-This project uses the `elevate-services-health-check` package to perform health checks for internal components like MongoDB, Kafka, and dependent microservices.
+This project uses the `elevate-project-services-health-check` package to perform health checks for internal components like MongoDB, Kafka, and dependent microservices.
 
 To enable this, create a configuration file (`health.config.js`) that defines what to check and how.
 
@@ -10,7 +10,7 @@ To enable this, create a configuration file (`health.config.js`) that defines wh
 
 ```js
 module.exports = {
-	name: 'Project Service', // 🔹 Service name shown in health check response
+	name: 'ProjectService', // 🔹 Service name shown in health check response
 	version: '1.0.0', // 🔹 Service version shown in response
 
 	checks: {
@@ -18,7 +18,10 @@ module.exports = {
 			enabled: true, // ✅ Required if MongoDB is used
 			url: process.env.MONGODB_URL, // 🔐 Recommended: use env variable
 		},
-
+		gotenberg: {
+			enabled: true, // ✅ Required if Gotenberg is used
+			url: process.env.GOTENBERG_URL, // 🔐 Recommended: use env variable
+		},
 		kafka: {
 			enabled: true, // ✅ Required if Kafka is used
 			url: process.env.KAFKA_URL,
@@ -27,15 +30,13 @@ module.exports = {
 		microservices: [
 			{
 				name: 'Survey Service', // ✅ Required: Unique name
-				url: 'http://localhost:4301/healthCheckStatus', // ✅ Required: Health check endpoint
+				url: `${process.env.INTERFACE_SERVICE_URL}/survey/health?serviceName=${process.env.SERVICE_NAME}`, // ✅ Required: Health check endpoint
 				enabled: true, // ✅ Required: Set to true to activate
 
 				// 🧾 Optional - If the service needs headers/body/method
 				request: {
 					method: 'GET', // 🔄 HTTP method (GET or POST)
-					header: {
-						'internal-access-token': process.env.INTERNAL_TOKEN,
-					},
+					header: {},
 					body: {}, // 🧾 Only needed for POST requests
 				},
 
@@ -43,6 +44,39 @@ module.exports = {
 				expectedResponse: {
 					status: 200, // HTTP status code to expect
 					'params.status': 'successful', // ✅ Deep keys allowed
+					'result.healthy': true, // ✅ Result if True
+				},
+			},
+			{
+				name: 'EntityManagementService', // ✅ Required: Unique name
+				url: `${process.env.INTERFACE_SERVICE_URL}/entity/health?serviceName=${process.env.SERVICE_NAME}`, // ✅ Required: Health check endpoint
+				enabled: true, // ✅ Required: Set to true to activate
+				request: {
+					method: 'GET', // 🔄 HTTP method (GET or POST)
+					header: {},
+					body: {}, //🧾 Only needed for POST requests
+				},
+
+				expectedResponse: {
+					status: 200, // HTTP status code to expect
+					'params.status': 'successful', // ✅ Deep keys allowed
+					'result.healthy': true, // ✅ Result if True
+				},
+			},
+			{
+				name: 'UserService',
+				url: `${process.env.USER_SERVICE_URL}/user/health?serviceName=${process.env.SERVICE_NAME}`,
+				enabled: true,
+				request: {
+					method: 'GET',
+					header: {},
+					body: {},
+				},
+
+				expectedResponse: {
+					status: 200,
+					'params.status': 'successful',
+					'result.healthy': true,
 				},
 			},
 		],

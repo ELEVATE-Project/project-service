@@ -8,11 +8,11 @@ module.exports = {
 		},
 		kafka: {
 			enabled: true,
-			// url: process.env.KAFKA_URL,
+			url: process.env.KAFKA_URL,
 		},
 		gotenberg: {
 			enabled: true,
-			// url: process.env.GOTENBERG_URL,
+			url: process.env.GOTENBERG_URL,
 		},
 		microservices: [
 			{

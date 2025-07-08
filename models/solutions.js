@@ -110,6 +110,10 @@ module.exports = {
 			index: true,
 			required: true,
 		},
+		availableForPrivateConsumption: {
+			type: Boolean,
+			default: true,
+		},
 	},
 	compoundIndex: [
 		{

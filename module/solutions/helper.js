@@ -2189,7 +2189,6 @@ module.exports = class SolutionsHelper {
 					'programId',
 					'name',
 					'projectTemplateId',
-					'availableForPrivateConsumption',
 				])
 
 				if (!Array.isArray(solutionData) || solutionData.length < 1) {

@@ -51,7 +51,7 @@
 		"ejs": "^3.1.10",
 		"elevate-cloud-storage": "^2.1.0",
 		"elevate-logger": "^3.1.0",
-		"elevate-services-health-check": "^0.0.2",
+		"elevate-services-health-check": "^0.0.3",
 		"express": "^4.17.1",
 		"express-fileupload": "^1.1.6",
 		"express-validator": "^5.3.1",

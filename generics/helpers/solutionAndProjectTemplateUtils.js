@@ -1,6 +1,16 @@
-/*
-Files to remove circular dependencies
-**/
+/**
+ * name : solutionAndProjectTemplateUtils.js
+ * author : Praveen Dass
+ * Date : 10-July-2025
+ * Description:
+ * This file contains solution helper functions that were extracted
+ * from solution module to resolve circular dependency issues.
+ *
+ * Only use this file for shared logic that leads to
+ * circular dependencies when placed in the solution module.
+ */
+
+// Dependencies
 const solutionsQueries = require(DB_QUERY_BASE_PATH + '/solutions')
 const programQueries = require(DB_QUERY_BASE_PATH + '/programs')
 const userService = require(GENERICS_FILES_PATH + '/services/users')
@@ -57,45 +67,6 @@ function createSolution(solutionData, checkDate = false, userDetails) {
 					message: CONSTANTS.apiResponses.COURSE_LINK_REQUIRED,
 				})
 			}
-
-			// if (solutionData.entities && solutionData.entities.length > 0) {
-			// 	let entityIds = []
-			// 	let locationData = UTILS.filterLocationIdandCode(solutionData.entities)
-
-			// 	if (locationData.ids.length > 0) {
-			// 		let bodyData = {
-			// 			id: locationData.ids,
-			// 		}
-			// 		let entityData = await entitiesService.entityDocuments(bodyData, 'all')
-			// 		if (entityData.success) {
-			// 			entityData.data.forEach((entity) => {
-			// 				entityIds.push(entity._id)
-			// 			})
-			// 		}
-			// 	}
-
-			// 	  if (locationData.codes.length > 0) {
-			// 	    let filterData = {
-			// 	      externalId: locationData.codes,
-			// 	    };
-			// 	    let schoolDetails = await userService.orgSchoolSearch(filterData);
-
-			// 	    if (schoolDetails.success) {
-			// 	      let schoolData = schoolDetails.data;
-			// 	      schoolData.forEach((entity) => {
-			// 	        entityIds.push(entity.externalId);
-			// 	      });
-			// 	    }
-			// 	  }
-
-			// 	  if (!entityIds.length > 0) {
-			// 	    throw {
-			// 	      message: CONSTANTS.apiResponses.ENTITIES_NOT_FOUND,
-			// 	    };
-			// 	  }
-
-			// 	solutionData.entities = entityIds
-			// }
 
 			if (
 				solutionData.minNoOfSubmissionsRequired &&
@@ -354,94 +325,6 @@ function setScope(solutionId, scopeData, userDetails) {
 				return Object.keys(indexedKeys.key)[0]
 			})
 			let keysNotIndexed = _.differenceWith(scopeKeys, indexes)
-			// if (Object.keys(scopeData).length > 0) {
-			//   if (scopeData.entityType) {
-			//     let bodyData = { name: scopeData.entityType };
-			//     let entityTypeData = await entityTypesHelper.list(bodyData);
-			//     if (entityTypeData.length > 0) {
-			//       currentSolutionScope.entityType = entityTypeData[0].name;
-			//     }
-			//   }
-
-			//   if (scopeData.entities && scopeData.entities.length > 0) {
-			//     //call learners api for search
-			//     let entityIds = [];
-			//     let locationData = gen.utils.filterLocationIdandCode(scopeData.entities);
-
-			//     if (locationData.codes.length > 0) {
-			//       let filterData = {
-			//         'registryDetails.code': locationData.codes,
-			//         entityType: currentSolutionScope.entityType,
-			//       };
-			//       let entityDetails = await entitiesHelper.entitiesDocument(filterData);
-
-			//       if (entityDetails.success) {
-			//         entityDetails.data.forEach((entity) => {
-			//           entityIds.push(entity.id);
-			//         });
-			//       }
-			//     }
-			//     entityIds = [...locationData.ids, ...locationData.codes];
-
-			//     if (!entityIds.length > 0) {
-			//       return resolve({
-			//         status: HTTP_STATUS_CODE.bad_request.status,
-			//         message: CONSTANTS.apiResponses.ENTITIES_NOT_FOUND,
-			//       });
-			//     }
-
-			//     let entitiesData = [];
-
-			//     // if( currentSolutionScope.entityType !== programData[0].scope.entityType ) {
-			//     //   let result = [];
-			//     //   let childEntities = await userService.getSubEntitiesBasedOnEntityType(currentSolutionScope.entities, currentSolutionScope.entityType, result);
-			//     //   if( childEntities.length > 0 ) {
-			//     //     entitiesData = entityIds.filter(element => childEntities.includes(element));
-			//     //   }
-			//     // } else {
-			//     entitiesData = entityIds;
-			//     // }
-
-			//     if (!entitiesData.length > 0) {
-			//       return resolve({
-			//         status: HTTP_STATUS_CODE.bad_request.status,
-			//         message: CONSTANTS.apiResponses.SCOPE_ENTITY_INVALID,
-			//       });
-			//     }
-
-			//     currentSolutionScope.entities = entitiesData;
-			//   }
-
-			//   // currentSolutionScope.recommendedFor = scopeData.recommendedFor;
-
-			//   // if (scopeData.roles) {
-			//   //   if (Array.isArray(scopeData.roles) && scopeData.roles.length > 0) {
-			//   //     let userRoles = await userRolesHelper.list(
-			//   //       {
-			//   //         code: { $in: scopeData.roles },
-			//   //       },
-			//   //       ['_id', 'code'],
-			//   //     );
-
-			//   //     if (!userRoles.length > 0) {
-			//   //       return resolve({
-			//   //         status: HTTP_STATUS_CODE.bad_request.status,
-			//   //         message: CONSTANTS.apiResponses.INVALID_ROLE_CODE,
-			//   //       });
-			//   //     }
-
-			//   //     currentSolutionScope['roles'] = userRoles;
-			//   //   } else {
-			//   //     if (scopeData.roles === CONSTANTS.common.ALL_ROLES) {
-			//   //       currentSolutionScope['roles'] = [
-			//   //         {
-			//   //           code: CONSTANTS.common.ALL_ROLES,
-			//   //         },
-			//   //       ];
-			//   //     }
-			//   //   }
-			//   // }
-			// }
 			if (keysNotIndexed.length > 0) {
 				// Map the keysNotIndexed array to get the second part after splitting by '.'
 				let keysCannotBeAdded = keysNotIndexed.map((keys) => {

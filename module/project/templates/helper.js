@@ -31,7 +31,7 @@ const userExtensionQueries = require(DB_QUERY_BASE_PATH + '/userExtension')
 const filesHelpers = require(MODULES_BASE_PATH + '/cloud-services/files/helper')
 const testimonialsHelper = require(MODULES_BASE_PATH + '/testimonials/helper')
 const surveyService = require(SERVICES_BASE_PATH + '/survey')
-const solutionsUtils = require(GENERICS_FILES_PATH + '/helpers/remove-dependencies')
+const solutionsUtils = require(GENERICS_FILES_PATH + '/helpers/solutionAndProjectTemplateUtils')
 const entitiesService = require(GENERICS_FILES_PATH + '/services/entity-management')
 
 module.exports = class ProjectTemplatesHelper {

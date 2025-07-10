@@ -23,7 +23,7 @@ const programUsersHelper = require(MODULES_BASE_PATH + '/programUsers/helper')
 const userService = require(GENERICS_FILES_PATH + '/services/users')
 const programSolutionUtility = require(GENERICS_FILES_PATH + '/helpers/programSolutionUtilities')
 const timeZoneDifference = process.env.TIMEZONE_DIFFRENECE_BETWEEN_LOCAL_TIME_AND_UTC
-const solutionsUtils = require(GENERICS_FILES_PATH + '/helpers/remove-dependencies')
+const solutionsUtils = require(GENERICS_FILES_PATH + '/helpers/solutionAndProjectTemplateUtils')
 
 /**
  * SolutionsHelper

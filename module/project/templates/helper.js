@@ -31,7 +31,7 @@ const userExtensionQueries = require(DB_QUERY_BASE_PATH + '/userExtension')
 const filesHelpers = require(MODULES_BASE_PATH + '/cloud-services/files/helper')
 const testimonialsHelper = require(MODULES_BASE_PATH + '/testimonials/helper')
 const surveyService = require(SERVICES_BASE_PATH + '/survey')
-const solutionsHelper = require(MODULES_BASE_PATH + '/solutions/helper')
+const solutionsUtils = require(GENERICS_FILES_PATH + '/helpers/remove-dependencies')
 const entitiesService = require(GENERICS_FILES_PATH + '/services/entity-management')
 
 module.exports = class ProjectTemplatesHelper {
@@ -1048,7 +1048,7 @@ module.exports = class ProjectTemplatesHelper {
 				}
 				let solutionUpdated
 				if (validateMongoId) {
-					solutionUpdated = await solutionsHelper.update(solutionId, updateSolutionObj, userDetails)
+					solutionUpdated = await solutionsUtils.update(solutionId, updateSolutionObj, userDetails)
 				} else {
 					solutionUpdated = await surveyService.updateSolution(
 						userToken,
@@ -1065,14 +1065,18 @@ module.exports = class ProjectTemplatesHelper {
 				}
 			}
 
-			if (taskType === CONSTANTS.common.IMPROVEMENT_PROJECT) {
+			if (
+				taskType === CONSTANTS.common.IMPROVEMENT_PROJECT &&
+				(newProjectTemplateTask?.solutionDetails?.isReusable ||
+					newProjectTemplateTask?.projectTemplateDetails?.isReusable)
+			) {
 				//create new solution for project as a task template under same program as project's program
 				let solutionData = {
 					programExternalId: newProjectTemplateTask.programExternalId,
 					externalId: newProjectTemplateTask.projectTemplateExternalId + '-' + UTILS.epochTime(),
 					excludeScope: true, // excluding scope for creation
 				}
-				let newSolution = await solutionsHelper.createSolution(solutionData, false, userDetails)
+				let newSolution = await solutionsUtils.createSolution(solutionData, false, userDetails)
 				if (newSolution?.data && !newSolution?.data?._id) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,

@@ -140,6 +140,7 @@ function createSolution(solutionData, checkDate = false, userDetails) {
  * @param {String} solutionId - solution id.
  * @param {Object} solutionData - solution creation data.
  * @param {Object} userDetails - user related info
+ * @param {Boolean} checkDate -  Optional flag to validate startDate/endDate
  * @returns {JSON} solution creation data.
  */
 
@@ -160,7 +161,7 @@ function update(solutionId, solutionData, userDetails, checkDate = false) {
 					message: CONSTANTS.apiResponses.SOLUTION_NOT_FOUND,
 				})
 			}
-
+			// If checkDate flag is true, validate dates against  program startDate and endDate
 			if (
 				checkDate &&
 				(solutionData.hasOwnProperty(CONSTANTS.common.END_DATE) ||
@@ -216,6 +217,7 @@ function update(solutionId, solutionData, userDetails, checkDate = false) {
 				updateObject['$set'][updationData] = solutionUpdateData[updationData]
 			})
 			updateObject['$set']['updatedBy'] = userDetails.userInformation.userId
+			//Perform the  update operation
 			let solutionUpdatedData = await solutionsQueries.updateSolutionDocument(
 				{
 					_id: solutionDocument[0]._id,
@@ -230,6 +232,7 @@ function update(solutionId, solutionData, userDetails, checkDate = false) {
 					message: CONSTANTS.apiResponses.SOLUTION_NOT_CREATED,
 				}
 			}
+			//If scope data is provided, update it separately
 			if (solutionData.scope && Object.keys(solutionData.scope).length > 0) {
 				let solutionScope = await setScope(solutionUpdatedData._id, solutionData.scope, userDetails)
 				if (!solutionScope.success) {

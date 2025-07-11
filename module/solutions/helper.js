@@ -2722,7 +2722,6 @@ module.exports = class SolutionsHelper {
 						}
 						//duplicate task
 						if (Array.isArray(tasksIds) && tasksIds.length > 0) {
-							const projectTemplatesHelper = require(MODULES_BASE_PATH + '/project/templates/helper')
 							await projectTemplatesHelper.duplicateTemplateTasks(
 								tasksIds,
 								duplicateTemplateDocument._id,

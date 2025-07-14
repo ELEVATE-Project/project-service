@@ -1413,7 +1413,13 @@ module.exports = class SolutionsHelper {
 							{
 								status: CONSTANTS.common.INACTIVE,
 							},
-							userDetails
+							{
+								...userDetails,
+								tenantAndOrgInfo: {
+									tenantId: userDetails.userInformation.tenantId,
+									orgId: [userDetails.userInformation.organizationId],
+								},
+							}
 						)
 					}
 
@@ -1646,7 +1652,16 @@ module.exports = class SolutionsHelper {
 
 				let solutionDetails = await solutionsQueries.solutionsDocument(
 					{ link: link, tenantId: userDetails.userInformation.tenantId },
-					['type', '_id', 'programId', 'name', 'projectTemplateId', 'programName', 'status']
+					[
+						'type',
+						'_id',
+						'programId',
+						'name',
+						'projectTemplateId',
+						'programName',
+						'status',
+						'availableForPrivateConsumption',
+					]
 				)
 
 				let queryData = await this.queryBasedOnRoleAndLocation(bodyData)
@@ -1674,6 +1689,7 @@ module.exports = class SolutionsHelper {
 					response.programName = solutionDetails[0].programName
 					response.status = solutionDetails[0].status
 					response.projectTemplateId = solutionDetails[0].projectTemplateId
+					response.availableForPrivateConsumption = solutionDetails[0].availableForPrivateConsumption ?? true //projects will be available for private consumption by default
 					return resolve({
 						success: true,
 						message: CONSTANTS.apiResponses.SOLUTION_NOT_FOUND_OR_NOT_A_TARGETED,
@@ -2887,7 +2903,7 @@ module.exports = class SolutionsHelper {
 						} else if (!isSolutionActive) {
 							throw new Error(CONSTANTS.apiResponses.LINK_IS_EXPIRED)
 						}
-					} else {
+					} else if (checkForTargetedSolution.result.availableForPrivateConsumption) {
 						if (!isSolutionActive) {
 							throw new Error(CONSTANTS.apiResponses.LINK_IS_EXPIRED)
 						}
@@ -2939,6 +2955,12 @@ module.exports = class SolutionsHelper {
 							if (privateProgramAndSolutionDetails.result != '') {
 								checkForTargetedSolution.result['solutionId'] = privateProgramAndSolutionDetails.result
 							}
+						}
+					} else {
+						// Not targeted solution and not available for private consumption
+						throw {
+							status: HTTP_STATUS_CODE.bad_request.status,
+							message: CONSTANTS.apiResponses.SOLUTION_NOT_ALLOWED_TO_BE_CONSUMED,
 						}
 					}
 				} else {

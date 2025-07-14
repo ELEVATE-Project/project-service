@@ -513,6 +513,19 @@ module.exports = class UserProjectsHelper {
 				await this.attachEntityInformationIfExists(projectUpdated)
 				const kafkaPushedProject = await kafkaProducersHelper.pushProjectToKafka(projectUpdated)
 				const kafkaPushedUserProjects = await kafkaProducersHelper.pushUserActivitiesToKafka(kafkaUserProject)
+				// update submission data for project as task
+				if (updateProject.project && updateProject.referenceFrom === CONSTANTS.common.PROJECT) {
+					let updateTaskSubmissionData = {
+						_id: projectUpdated._id,
+						status: data.status,
+						completedDate: updateProject.completedDate ? updateProject.completedDate : '',
+					}
+					await this.pushSubmissionToTask(
+						updateProject.project._id,
+						updateProject.project.taskId,
+						updateTaskSubmissionData
+					)
+				}
 
 				return resolve({
 					success: true,
@@ -585,7 +598,6 @@ module.exports = class UserProjectsHelper {
 				let solutionAndProgramCreation = await solutionsHelper.createProgramAndSolution(
 					userId,
 					programAndSolutionData,
-					userDetails.userToken,
 					isATargetedSolution,
 					userDetails
 				)
@@ -1205,10 +1217,11 @@ module.exports = class UserProjectsHelper {
 	 * @param {Object} bodyData - Req body data
 	 * @param {String} userToken - Logged in user token.
 	 * @param {String} userId - userId
+	 * @param {Object} userDetails - logged in userDetails to get tenantAndOrgId
 	 * @returns {Object}
 	 */
 
-	static solutionDetails(projectId, taskId, bodyData = {}, userToken, userId) {
+	static solutionDetails(projectId, taskId, bodyData = {}, userToken, userId, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let project = await projectQueries.projectDocument(
@@ -1222,6 +1235,7 @@ module.exports = class UserProjectsHelper {
 						'tasks.type',
 						'tasks._id',
 						'tasks.solutionDetails',
+						'tasks.projectTemplateDetails',
 						'tasks.submissions',
 						'tasks.observationInformation',
 						'tasks.surveyInformation',
@@ -1257,7 +1271,9 @@ module.exports = class UserProjectsHelper {
 						assessmentOrObservationData['entityType'] = project[0].entityInformation.entityType
 						assessmentOrObservationData['entityId'] = project[0].entityInformation._id
 					}
-					let dynamicTaskInfromation = `${solutionDetails.type}Information`
+					//get task solutionType from solutionDetails if solutionDetails not exist from projectTemplateDetails
+					let taskSolutionType = solutionDetails?.type ?? currentTask.projectTemplateDetails.type
+					let dynamicTaskInfromation = `${taskSolutionType}Information`
 					if (currentTask[dynamicTaskInfromation]) {
 						assessmentOrObservationData = currentTask[dynamicTaskInfromation]
 					} else {
@@ -1289,11 +1305,20 @@ module.exports = class UserProjectsHelper {
 							[CONSTANTS.common.ASSESSMENT]: () => _assessmentDetails(assessmentOrObservation),
 							[CONSTANTS.common.OBSERVATION]: () =>
 								_observationDetails(assessmentOrObservation, bodyData),
-							[CONSTANTS.common.IMPROVEMENT_PROJECT]: () =>
-								this._improvementProjectDetails(assessmentOrObservation, bodyData, userToken, userId),
+							[CONSTANTS.common.IMPROVEMENT_PROJECT]: async () => {
+								// get programTempalteDetails aliong with solutionDetils if task type is improvementProject
+								assessmentOrObservation.projectTemplateDetails = currentTask.projectTemplateDetails
+								return await this.improvementProjectDetails(
+									assessmentOrObservation,
+									bodyData,
+									userToken,
+									userId,
+									userDetails
+								)
+							},
 							[CONSTANTS.common.SURVEY]: () => _surveyDetails(assessmentOrObservation, bodyData),
 						}
-						let fetchSolutions = getSolutionDetails[solutionDetails.type]
+						let fetchSolutions = getSolutionDetails[taskSolutionType]
 
 						if (!fetchSolutions) {
 							throw {
@@ -1303,7 +1328,6 @@ module.exports = class UserProjectsHelper {
 						}
 
 						let assignedAssessmentOrObservation = await fetchSolutions()
-
 						if (!assignedAssessmentOrObservation.success) {
 							return resolve(assignedAssessmentOrObservation)
 						}
@@ -1316,7 +1340,7 @@ module.exports = class UserProjectsHelper {
 						if (!currentTask?.solutionDetails?.isReusable) {
 							assessmentOrObservationData['programId'] = project[0].programInformation._id
 						}
-						let fieldToUpdate = `tasks.$.${solutionDetails.type}Information`
+						let fieldToUpdate = `tasks.$.${taskSolutionType}Information`
 
 						await projectQueries.findOneAndUpdate(
 							{
@@ -1444,7 +1468,6 @@ module.exports = class UserProjectsHelper {
 						isReusable: false,
 						tenantId: tenantId,
 					})
-
 					if (!templateDocuments.length > 0) {
 						throw {
 							message: CONSTANTS.apiResponses.PROJECT_TEMPLATE_NOT_FOUND,
@@ -1486,7 +1509,6 @@ module.exports = class UserProjectsHelper {
 						},
 						['_id']
 					)
-
 					if (projectDetails.length > 0) {
 						projectId = projectDetails[0]._id
 					} else {
@@ -1763,7 +1785,7 @@ module.exports = class UserProjectsHelper {
 									orgIds: { $in: ['ALL', orgId] },
 								})
 
-								if (!entityDetails.success || !entityDetails?.data.length > 0) {
+								if (!entityDetails?.success || !entityDetails?.data.length > 0) {
 									throw {
 										message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
 										status: HTTP_STATUS_CODE.bad_request.status,
@@ -1872,8 +1894,13 @@ module.exports = class UserProjectsHelper {
 						if (bodyData.entityId !== '') {
 							projectCreation.data['entityId'] = bodyData.entityId
 						}
+						if (bodyData.project) {
+							projectCreation.data['project'] = bodyData.project
+							projectCreation.data['referenceFrom'] = CONSTANTS.common.PROJECT
+						}
 						projectCreation.data['tenantId'] = tenantId
 						projectCreation.data['orgId'] = orgId
+
 						let project = await projectQueries.createProject(projectCreation.data)
 
 						// if ( addReportInfoToSolution && project.solutionId ) {
@@ -1889,7 +1916,20 @@ module.exports = class UserProjectsHelper {
 						await this.attachEntityInformationIfExists(project)
 						await kafkaProducersHelper.pushProjectToKafka(project)
 						await kafkaProducersHelper.pushUserActivitiesToKafka(kafkaUserProject)
-
+						// update submission data for project as task
+						if (project.project && project.referenceFrom === CONSTANTS.common.PROJECT) {
+							let updateTaskSubmissionData = {
+								_id: project._id,
+								status: project.status,
+								completedDate: project.completedDate ? project.completedDate : '',
+							}
+							// For observation and survey we will be using kafka to update task submission status But for project as a task calling the function directly
+							await this.pushSubmissionToTask(
+								project.project._id,
+								project.project.taskId,
+								updateTaskSubmissionData
+							)
+						}
 						projectId = project._id
 					}
 				}
@@ -3189,6 +3229,10 @@ module.exports = class UserProjectsHelper {
 				if (requestedData.hasAcceptedTAndC) {
 					libraryProjects.data.hasAcceptedTAndC = true
 				}
+				if (requestedData.project) {
+					libraryProjects.data['project'] = requestedData.project
+					libraryProjects.data['referenceFrom'] = CONSTANTS.common.PROJECT
+				}
 				libraryProjects.data.projectTemplateId = libraryProjects.data._id
 				libraryProjects.data.projectTemplateExternalId = libraryProjects.data.externalId
 				libraryProjects.data['tenantId'] = userDetails.userInformation.tenantId
@@ -3209,6 +3253,20 @@ module.exports = class UserProjectsHelper {
 				await this.attachEntityInformationIfExists(projectCreation)
 				await kafkaProducersHelper.pushProjectToKafka(projectCreation)
 				await kafkaProducersHelper.pushUserActivitiesToKafka(kafkaUserProject)
+
+				// update submission data for project as task
+				if (projectCreation.project && projectCreation.referenceFrom === CONSTANTS.common.PROJECT) {
+					let updateTaskSubmissionData = {
+						_id: projectCreation._id,
+						status: projectCreation.status,
+						completedDate: projectCreation.completedDate ? projectCreation.completedDate : '',
+					}
+					await this.pushSubmissionToTask(
+						projectCreation.project._id,
+						projectCreation.project.taskId,
+						updateTaskSubmissionData
+					)
+				}
 
 				if (requestedData.rating && requestedData.rating > 0) {
 					await projectTemplatesHelper.ratings(projectTemplateId, requestedData.rating, userToken)
@@ -4362,51 +4420,108 @@ module.exports = class UserProjectsHelper {
 			}
 		} catch (err) {}
 	}
-	/*
+
+	/**
 	 * Get project  infromation when project as a task
 	 * @method
-	 * @name _improvementProjectDetails
+	 * @name improvementProjectDetails
 	 * @param {Object} projectData - Task data of project
 	 * @param {Object} userRoleAndProfileInformation -
 	 * @param {String} userToken - filter to search project to be updated.
 	 * @param {String} userId - Logged in user Id.
-	 * @param {String} [appName = ""] - App Name.
-	 * @param {String} [appVersion = ""] - App Version.
-	 * @returns {Object} status of update project
+	 * @param {Object} userDetails - to get user tenant and orgInfo
+	 * @returns {Object} solutionDetails of  project
 	 */
-	static _improvementProjectDetails(projectData, userRoleAndProfileInformation = {}, userToken, userId) {
+	static improvementProjectDetails(projectData, userRoleAndProfileInformation = {}, userToken, userId, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let result = {}
-				let matchQuery = {
-					solutionId: new ObjectId(projectData.solutionDetails.solutionId),
-				}
+				userRoleAndProfileInformation.project = projectData.project
 
-				let projectIdFromsolutionId = await projectTemplateQueries.templateDocument(matchQuery)
-				if (!projectIdFromsolutionId.length > 0) {
-					throw {
-						message: CONSTANTS.apiResponses.PROJECT_TEMPLATE_NOT_FOUND,
-						status: HTTP_STATUS_CODE.bad_request.status,
+				if (projectData.projectTemplateDetails.isReusable) {
+					let programAndSolutionData = {
+						type: CONSTANTS.common.IMPROVEMENT_PROJECT,
+						subType: CONSTANTS.common.IMPROVEMENT_PROJECT,
+						isReusable: false,
+						project: projectData.project,
 					}
-				}
+					if (projectData.programId !== '') {
+						programAndSolutionData['programId'] = projectData.programId
+					}
+					let projectCreation = await this.importFromLibrary(
+						projectData?.projectTemplateDetails?._id,
+						programAndSolutionData,
+						userToken,
+						userId,
+						false, // isAtargetedSolution
+						'', //language
+						userDetails
+					)
+					if (!projectCreation.success || !projectCreation?.data?._id) {
+						throw {
+							status: HTTP_STATUS_CODE.bad_request.status,
+							message: CONSTANTS.apiResponses.SOLUTION_PROGRAMS_NOT_CREATED,
+						}
+					}
+					const { programId, _id, solutionId, solutionExternalId } = projectCreation.data
 
-				projectIdFromsolutionId = projectIdFromsolutionId[0].externalId
+					//Adding solutionDetails for task
+					let solutionDetails = {
+						_id: solutionId,
+						externalId: solutionExternalId,
+						type: projectData?.projectTemplateDetails.type,
+						isReusable: CONSTANTS.common.FALSE,
+						minNoOfSubmissionsRequired: projectData?.projectTemplateDetails.minNoOfSubmissionsRequired
+							? projectData?.projectTemplateDetails.minNoOfSubmissionsRequired
+							: CONSTANTS.common.DEFAULT_SUBMISSION_REQUIRED,
+					}
 
-				// create survey using details api
-				let projectDetails = await this.detailsV2(
-					'',
-					projectData.solutionDetails._id,
-					userId,
-					userToken,
-					userRoleAndProfileInformation,
-					'',
-					'',
-					projectIdFromsolutionId ? projectIdFromsolutionId : ''
-				)
-				if (projectDetails.success) {
+					let projectUpdated = await projectQueries.findOneAndUpdate(
+						{
+							_id: projectData.project._id,
+							'tasks._id': projectData.project.taskId,
+						},
+						{
+							$set: {
+								solutionDetails: solutionDetails,
+							},
+						}
+					)
+
+					if (!projectUpdated._id) {
+						throw {
+							message: CONSTANTS.apiResponses.USER_PROJECT_NOT_UPDATED,
+							status: HTTP_STATUS_CODE.bad_request.status,
+						}
+					}
+					result['projectId'] = _id
+					result['solutionId'] = solutionId
+					result['programId'] = programId
+					result['solutionDetails'] = solutionDetails
+				} else {
+					// create project using details function
+					let projectDetails = await this.detailsV2(
+						'', //projectId
+						projectData.solutionDetails._id,
+						userId,
+						userToken,
+						userRoleAndProfileInformation,
+						'', //appName
+						'', //appversion
+						projectData.projectTemplateDetails.externalId,
+						'', //language
+						userDetails
+					)
+					//throw error if project not created
+					if (!projectDetails.success || !projectDetails?.data?._id) {
+						throw {
+							message: CONSTANTS.apiResponses.PROJECT_NOT_CREATED,
+							status: HTTP_STATUS_CODE.bad_request.status,
+						}
+					}
 					result['projectId'] = projectDetails.data._id
+					result['solutionId'] = projectData.solutionDetails._id
 				}
-				result['solutionId'] = projectData.solutionDetails._id
 
 				return resolve({
 					success: true,

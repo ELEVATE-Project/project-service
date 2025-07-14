@@ -24,6 +24,7 @@ module.exports = {
 	PROJECT_TEMPLATE_TASKS_NOT_CREATED: 'Could not create project templates task',
 	PROJECT_TEMPLATES_NOT_CREATED: 'Could not create project templates',
 	DUPLICATE_PROJECT_TEMPLATES_CREATED: 'Successfully created duplicate project templates',
+	DUPLICATE_PROJECT_TEMPLATES_NOT_CREATED: 'Could not create duplicate project templates',
 	INVALID_TASK_ID: 'Invalid project template task id',
 	PROJECT_TEMPLATE_TASK_EXISTS: 'Project template tasks already exists',
 	SUCCESS: 'Success',
@@ -284,4 +285,5 @@ module.exports = {
 	UPDATE_OBJECT_SUCCESSFULLY: 'Successfully generate update object',
 	ADMIN_TOKEN_MISSING_CODE: 'ERR_ADMIN_TOKEN_MISSING',
 	ADMIN_TOKEN_MISSING_MESSAGE: 'Admin token is missing',
+	SOLUTION_NOT_ALLOWED_TO_BE_CONSUMED: 'This solution is not allowed to be consumed privately',
 }

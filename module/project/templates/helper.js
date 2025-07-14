@@ -31,7 +31,7 @@ const userExtensionQueries = require(DB_QUERY_BASE_PATH + '/userExtension')
 const filesHelpers = require(MODULES_BASE_PATH + '/cloud-services/files/helper')
 const testimonialsHelper = require(MODULES_BASE_PATH + '/testimonials/helper')
 const surveyService = require(SERVICES_BASE_PATH + '/survey')
-const solutionsHelper = require(MODULES_BASE_PATH + '/solutions/helper')
+const solutionsUtils = require(GENERICS_FILES_PATH + '/helpers/solutionAndProjectTemplateUtils')
 const entitiesService = require(GENERICS_FILES_PATH + '/services/entity-management')
 
 module.exports = class ProjectTemplatesHelper {
@@ -706,6 +706,7 @@ module.exports = class ProjectTemplatesHelper {
 					message: CONSTANTS.apiResponses.DUPLICATE_PROJECT_TEMPLATES_CREATED,
 					data: {
 						_id: duplicateTemplateDocument._id,
+						externalId: newProjectTemplate.externalId,
 					},
 				})
 			} catch (error) {
@@ -995,26 +996,49 @@ module.exports = class ProjectTemplatesHelper {
 				externalId: solution.externalId,
 				name: solution.name,
 				isReusable: solution.isReusable,
-				minNoOfSubmissionsRequired: newProjectTemplateTask.solutionDetails.minNoOfSubmissionsRequired,
+				...(solution.type === CONSTANTS.common.OBSERVATION && {
+					minNoOfSubmissionsRequired:
+						newProjectTemplateTask?.solutionDetails?.minNoOfSubmissionsRequired ??
+						CONSTANTS.common.DEFAULT_SUBMISSION_REQUIRED,
+				}),
 			})
 
-			//fetchSolution from external service
+			//fetchSolution details
 			const fetchSolutionByExternalId = async (externalId) => {
-				const result = await surveyService.listSolutions(
-					{ externalId: { $in: [externalId] } },
-					userToken,
-					userDetails
-				)
-				if (!result?.success || !result?.data?.length) {
-					throw {
-						message: CONSTANTS.apiResponses.SOLUTION_NOT_FOUND,
-						status: HTTP_STATUS_CODE.bad_request.status,
+				let result = {}
+				// For project service solutionDetails we will get objectId in externalId param and for samiksha we will get externalId so using that to fetch the solution data
+				let validateTemplateId = UTILS.isValidMongoId(externalId.toString())
+				if (validateTemplateId) {
+					//Query project service to get project solutionDetails
+					let projection = ['type', 'entityType', '_id', 'externalId', 'name', 'isReusable']
+					result = await solutionsQueries.solutionsDocument({ _id: externalId }, projection)
+					result.data = result
+					if (!result?.data?.length > 0) {
+						throw {
+							message: CONSTANTS.apiResponses.SOLUTION_NOT_FOUND,
+							status: HTTP_STATUS_CODE.bad_request.status,
+						}
+					}
+				} else {
+					//Query samiksha service to get obs/survey solutionDetails
+					result = await surveyService.listSolutions(
+						{ externalId: { $in: [externalId] } },
+						userToken,
+						userDetails
+					)
+					if (!result?.success || !result?.data?.length) {
+						throw {
+							message: CONSTANTS.apiResponses.SOLUTION_NOT_FOUND,
+							status: HTTP_STATUS_CODE.bad_request.status,
+						}
 					}
 				}
 				return fetchSolutionDetails(result.data[0])
 			}
 			//update  duplicate template and duplicateTemplate task in child solutions
 			const updateSolutionReferenceForProject = async (templateId, taskId, solutionId) => {
+				let validateMongoId = UTILS.isValidMongoId(solutionId.toString())
+
 				let updateSolutionObj = {
 					referenceFrom: CONSTANTS.common.PROJECT,
 					project: {
@@ -1022,13 +1046,17 @@ module.exports = class ProjectTemplatesHelper {
 						taskId: taskId.toString(),
 					},
 				}
-
-				const solutionUpdated = await surveyService.updateSolution(
-					userToken,
-					updateSolutionObj,
-					solutionId,
-					userDetails
-				)
+				let solutionUpdated
+				if (validateMongoId) {
+					solutionUpdated = await solutionsUtils.update(solutionId, updateSolutionObj, userDetails)
+				} else {
+					solutionUpdated = await surveyService.updateSolution(
+						userToken,
+						updateSolutionObj,
+						solutionId,
+						userDetails
+					)
+				}
 				if (!solutionUpdated.success) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
@@ -1037,13 +1065,18 @@ module.exports = class ProjectTemplatesHelper {
 				}
 			}
 
-			if (taskType === CONSTANTS.common.IMPROVEMENT_PROJECT) {
+			if (
+				taskType === CONSTANTS.common.IMPROVEMENT_PROJECT &&
+				(newProjectTemplateTask?.solutionDetails?.isReusable ||
+					newProjectTemplateTask?.projectTemplateDetails?.isReusable)
+			) {
 				//create new solution for project as a task template under same program as project's program
 				let solutionData = {
 					programExternalId: newProjectTemplateTask.programExternalId,
 					externalId: newProjectTemplateTask.projectTemplateExternalId + '-' + UTILS.epochTime(),
+					excludeScope: true, // excluding scope for creation
 				}
-				let newSolution = await solutionsHelper.createSolution(solutionData, false, userDetails)
+				let newSolution = await solutionsUtils.createSolution(solutionData, false, userDetails)
 				if (newSolution?.data && !newSolution?.data?._id) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
@@ -1060,7 +1093,27 @@ module.exports = class ProjectTemplatesHelper {
 					userDetails
 				)
 
+				if (!createChildTemplateforTask.success || !createChildTemplateforTask?.data?._id) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.DUPLICATE_PROJECT_TEMPLATES_NOT_CREATED,
+					}
+				}
+				//replacing projectTemplateDetails with child projectTemplate Details
+				newProjectTemplateTask.projectTemplateDetails._id = createChildTemplateforTask.data._id
+				newProjectTemplateTask.projectTemplateDetails.externalId = createChildTemplateforTask.data.externalId
+				newProjectTemplateTask.projectTemplateDetails.isReusable = false
+
+				//fetch solution details based on created child solutionexternalId
+				newProjectTemplateTask.solutionDetails = await fetchSolutionByExternalId(newSolution.data._id)
+
 				duplicateTemplateTaskId = await createTemplateTask()
+				updateTaskSequence()
+				await updateSolutionReferenceForProject(
+					newProjectTemplateTask.projectTemplateId,
+					duplicateTemplateTaskId,
+					newSolution.data._id
+				)
 			} else if (
 				taskType === CONSTANTS.common.OBSERVATION &&
 				newProjectTemplateTask?.solutionDetails?.isReusable

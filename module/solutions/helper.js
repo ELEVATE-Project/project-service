@@ -2458,8 +2458,8 @@ module.exports = class SolutionsHelper {
 				// Remove project solutions which for project tasks.
 				_.remove(userCreatedProjects?.data?.data, function (solution) {
 					return (
-						solution.referenceFrom == messageConstants.common.PROJECT &&
-						solution.type == messageConstants.common.IMPROVEMENT_PROJECT
+						solution.referenceFrom == CONSTANTS.common.PROJECT &&
+						solution.type == CONSTANTS.common.IMPROVEMENT_PROJECT
 					)
 				})
 

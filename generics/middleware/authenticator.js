@@ -104,6 +104,7 @@ module.exports = async function (req, res, next, token = '') {
 		'/userExtension/bulkUpload',
 		'/userProjects/pushSubmissionToTask',
 		'/templates/importProjectTemplate',
+		'/templates/listByIds',
 	]
 	let performInternalAccessTokenCheck = false
 	let adminHeader = false

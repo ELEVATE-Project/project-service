@@ -31,7 +31,10 @@ module.exports = {
 		programName: String,
 		programDescription: String,
 		entityProfileFieldsPerEntityTypes: Object,
-		startDate: Date,
+		startDate: {
+			type: Date,
+			index: true,
+		},
 		endDate: {
 			type: Date,
 			index: true,
@@ -109,6 +112,10 @@ module.exports = {
 			type: String,
 			index: true,
 			required: true,
+		},
+		availableForPrivateConsumption: {
+			type: Boolean,
+			default: true,
 		},
 	},
 	compoundIndex: [

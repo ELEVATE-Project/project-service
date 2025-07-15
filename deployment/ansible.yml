@@ -17,8 +17,7 @@
 
     - name: Get gcp credentials
       shell: "curl --location --request GET '{{ vaultAddress }}gcp' --header 'X-Vault-Token: {{ slurpfile['content'] | b64decode }}' | jq '.data.data' > '{{ project_path }}/gcp.json'"
-    - name: Get config.json
-      shell: "curl --location --request GET '{{ vaultAddress }}projectSurveyEntityConfig' --header 'X-Vault-Token: {{ slurpfile['content'] | b64decode }}' | jq '.data.data' > '{{ project_path }}/config.json'"
+
     - name: Set some variable
       set_fact:
         release_path: "{{ project_path }}/releases/{{ lookup('pipe','date +%Y%m%d%H%M%S') }}"
@@ -43,7 +42,8 @@
         version: '{{ gitBranch }}'
     - name: Update npm
       shell: cd {{release_path}} && npm i && npm i redoc-cli
-
+    - name: Get config.json
+      shell: "curl --location --request GET '{{ vaultAddress }}projectSurveyEntityConfig' --header 'X-Vault-Token: {{ slurpfile['content'] | b64decode }}' | jq '.data.data' > '{{ release_path }}/config.json'"
     - name: Delete Old Folder
       shell: rm -rf {{ current_path }} &&  cd {{ project_path }} && mkdir elevate-project-service
 

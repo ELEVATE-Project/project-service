@@ -285,4 +285,5 @@ module.exports = {
 	UPDATE_OBJECT_SUCCESSFULLY: 'Successfully generate update object',
 	ADMIN_TOKEN_MISSING_CODE: 'ERR_ADMIN_TOKEN_MISSING',
 	ADMIN_TOKEN_MISSING_MESSAGE: 'Admin token is missing',
+	SOLUTION_NOT_ALLOWED_TO_BE_CONSUMED: 'This solution is not allowed to be consumed privately',
 }

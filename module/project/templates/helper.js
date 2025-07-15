@@ -1230,13 +1230,13 @@ module.exports = class ProjectTemplatesHelper {
 	static listByIds(externalIds, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				const tenantId = userDetails.userInformation.tenantId
+				const tenantId = userDetails.tenantAndOrgInfo.tenantId
 				let templateData = await projectTemplateQueries.templateDocument(
 					{
 						externalId: { $in: externalIds },
 						tenantId,
 					},
-					['title', 'metaInformation.goal', 'externalId']
+					['title', 'metaInformation.goal', 'externalId', 'solutionId']
 				)
 
 				if (!templateData.length > 0) {
@@ -1256,7 +1256,7 @@ module.exports = class ProjectTemplatesHelper {
 				})
 
 				return resolve({
-					success: false,
+					success: true,
 					data: templateData,
 					message: CONSTANTS.apiResponses.PROJECT_TEMPLATES_FETCHED,
 				})

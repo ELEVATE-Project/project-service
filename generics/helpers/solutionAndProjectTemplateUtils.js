@@ -31,7 +31,10 @@ const timeZoneDifference = process.env.TIMEZONE_DIFFRENECE_BETWEEN_LOCAL_TIME_AN
 function createSolution(solutionData, checkDate = false, userDetails) {
 	return new Promise(async (resolve, reject) => {
 		try {
-			solutionData.type = solutionData.subType = CONSTANTS.common.IMPROVEMENT_PROJECT
+			solutionData.type = solutionData.subType =
+				solutionData?.type === CONSTANTS.common.COURSE
+					? CONSTANTS.common.COURSE
+					: CONSTANTS.common.IMPROVEMENT_PROJECT
 			solutionData.resourceType = [CONSTANTS.common.RESOURCE_TYPE]
 			solutionData.language = [CONSTANTS.common.ENGLISH_LANGUAGE]
 			solutionData.keywords = [CONSTANTS.common.KEYWORDS]
@@ -114,7 +117,7 @@ function createSolution(solutionData, checkDate = false, userDetails) {
 				$addToSet: { components: solutionCreation._id },
 			})
 
-			if (!solutionData.excludeScope && programData[0].scope) {
+			if (!solutionData?.excludeScope && programData[0].scope) {
 				await setScope(solutionCreation._id, solutionData.scope ? solutionData.scope : {}, userDetails)
 			}
 

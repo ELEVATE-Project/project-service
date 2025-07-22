@@ -1316,29 +1316,35 @@ module.exports = class SolutionsHelper {
 					}
 				}
 
-				// fetch tenant domain by calling  tenant details API
-				let tenantDetailsResponse = await userService.fetchTenantDetails(solution.tenantId, token)
-				const domains = tenantDetailsResponse?.data?.domains || []
+				let links
+				if (solution.type === CONSTANTS.common.COURSE) {
+					links = [solution.link]
+				} else {
+					// fetch tenant domain by calling  tenant details API
+					let tenantDetailsResponse = await userService.fetchTenantDetails(solution.tenantId, token)
+					const domains = tenantDetailsResponse?.data?.domains || []
 
-				// Error handling if API failed or no domains found
-				if (!tenantDetailsResponse.success || !Array.isArray(domains) || domains.length === 0) {
-					throw {
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: CONSTANTS.apiResponses.DOMAIN_FETCH_FAILED,
+					// Error handling if API failed or no domains found
+					if (!tenantDetailsResponse.success || !Array.isArray(domains) || domains.length === 0) {
+						throw {
+							status: HTTP_STATUS_CODE.bad_request.status,
+							message: CONSTANTS.apiResponses.DOMAIN_FETCH_FAILED,
+						}
 					}
+					// Collect all verified domains into an array
+					let allDomains = domains
+						.filter((domainObj) => domainObj.verified)
+						.map((domainObj) => domainObj.domain)
+					// Generate link for each domain
+					links = allDomains.map((domain) => {
+						return this._generateLink(
+							`https://${domain}${process.env.APP_PORTAL_DIRECTORY}`,
+							prefix,
+							solutionLink,
+							solution.type
+						)
+					})
 				}
-				// Collect all verified domains into an array
-				let allDomains = domains.filter((domainObj) => domainObj.verified).map((domainObj) => domainObj.domain)
-				// Generate link for each domain
-				let links = allDomains.map((domain) => {
-					return this._generateLink(
-						`https://${domain}${process.env.APP_PORTAL_DIRECTORY}`,
-						prefix,
-						solutionLink,
-						solution.type
-					)
-				})
-
 				return resolve({
 					success: true,
 					message: CONSTANTS.apiResponses.LINK_GENERATED,

@@ -8,7 +8,6 @@
 const axios = require('axios')
 const path = require('path')
 const _ = require('lodash')
-const { MongoClient, ObjectId } = require('mongodb')
 require('dotenv').config({ path: path.join(__dirname, '../../.env') })
 
 // Command-line args
@@ -17,15 +16,12 @@ const DOMAIN = args[0] // e.g., https://saas-qa.tekdinext.com
 const ORIGIN = args[1] // e.g., default-qa.tekdinext.com
 const IDENTIFIER = args[2] // e.g., nevil@tunerlabs.com
 const PASSWORD = args[3] // e.g., your password
+const LIMIT = parseInt(args[4] || '10')
 
 if (!DOMAIN || !ORIGIN || !IDENTIFIER || !PASSWORD) {
 	console.error('Usage: node pushProjectToKafka.js <domain> <origin> <identifier> <password>')
 	process.exit(1)
 }
-
-const mongoUrl = process.env.MONGODB_URL
-const dbName = mongoUrl.split('/').pop()
-const mongoHost = mongoUrl.split(dbName)[0]
 
 async function loginAndGetToken() {
 	try {
@@ -50,8 +46,28 @@ async function loginAndGetToken() {
 	}
 }
 
-async function fetchProjectIds(db) {
-	return await db.collection('projects').find({ isDeleted: false }).project({ _id: 1 }).toArray()
+async function fetchProjectIds(token) {
+	try {
+		const response = await axios.post(
+			`${DOMAIN}/project/v1/admin/dbFind/projects`,
+			{
+				query: { isDeleted: false },
+				projection: ['_id'],
+				limit: LIMIT,
+			},
+			{
+				headers: {
+					'Content-Type': 'application/json',
+					'X-auth-token': token,
+				},
+			}
+		)
+		console.log(`[Info] Fetched ${response.data.result.length} project IDs via DB API.`)
+		return response.data.result
+	} catch (err) {
+		console.error('[Error] Failed to fetch project IDs from DB API:', err.response?.data || err.message)
+		throw err
+	}
 }
 
 async function pushToKafka(projectId, token) {
@@ -68,32 +84,39 @@ async function pushToKafka(projectId, token) {
 			}
 		)
 
-		console.log(`[Success] Project ${projectId} pushed to Kafka.`, response)
+		console.log(`[Success] Project ${projectId} pushed to Kafka.`)
 	} catch (err) {
 		console.error(`[Failed] Project ${projectId} failed to push:`, err.response?.data || err.message)
 	}
 }
 
 ;(async () => {
-	const client = await MongoClient.connect(mongoHost, { useNewUrlParser: true, useUnifiedTopology: true })
-	const db = client.db(dbName)
-
 	try {
 		const token = await loginAndGetToken()
 		console.log('[Info] Logged in successfully.')
 
-		const projectDocs = await fetchProjectIds(db)
+		const projectDocs = await fetchProjectIds(token)
 		const projectChunks = _.chunk(projectDocs, 5)
+		console.log('projectChunks', projectChunks)
+		function delay(ms) {
+			return new Promise((resolve) => setTimeout(resolve, ms))
+		}
 
-		for (let chunk of projectChunks) {
+		for (let i = 0; i < projectChunks.length; i++) {
+			const chunk = projectChunks[i]
+			console.log(`[Processing] Chunk ${i + 1} of ${projectChunks.length}`)
 			await Promise.all(chunk.map((project) => pushToKafka(project._id, token)))
+
+			// Wait 3 seconds before the next chunk
+			if (i < projectChunks.length - 1) {
+				console.log(`[Waiting] Delaying before next chunk...`)
+				await delay(3000) // delay in milliseconds
+			}
 		}
 
 		console.log(`[Done] Processed ${projectDocs.length} projects.`)
 	} catch (error) {
 		console.error('[Error] Script execution failed:', error.message)
-	} finally {
-		client.close()
 	}
 })()
 // command sample : node pushProjectsToKafka.js   https://saas-qa.tekdinext.com   default-qa.tekdinext.com   nevil@tunerlabs.com   'PASSword###11'

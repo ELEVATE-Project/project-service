@@ -23,7 +23,7 @@ if (!DOMAIN || !ORIGIN || !IDENTIFIER || !PASSWORD) {
 	process.exit(1)
 }
 
-const mongoUrl = 'mongodb://13.127.166.58/qa-saas-project' //process.env.MONGODB_URL;
+const mongoUrl = process.env.MONGODB_URL
 const dbName = mongoUrl.split('/').pop()
 const mongoHost = mongoUrl.split(dbName)[0]
 

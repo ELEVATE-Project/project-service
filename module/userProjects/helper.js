@@ -1678,6 +1678,8 @@ module.exports = class UserProjectsHelper {
 								scope: solutionDetails.scope,
 								// referenceFrom: solutionDetails.referenceFrom ? solutionDetails.referenceFrom : '', // added for project as a task
 								// project: solutionDetails.project ? solutionDetails.project : '',
+								entityType: solutionDetails.entityType,
+								parentEntityKey: solutionDetails.parentEntityKey,
 							}
 
 							projectCreation.data['programId'] = projectCreation.data.programInformation._id
@@ -1778,7 +1780,25 @@ module.exports = class UserProjectsHelper {
 								projectCreation.data['userRole'] = bodyData.role
 							}
 							// Adding entityInformation in Project
-							if (solutionDetails.entityType && bodyData[solutionDetails.entityType]) {
+							if (solutionDetails.entityType && bodyData.entityId) {
+								let entityDetails = await entitiesService.entityDocuments({
+									_id: bodyData.entityId,
+									tenantId: tenantId,
+								})
+
+								if (!entityDetails?.success || !entityDetails?.data.length > 0) {
+									throw {
+										message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
+										status: HTTP_STATUS_CODE.bad_request.status,
+									}
+								}
+								if (entityDetails && entityDetails?.data.length > 0) {
+									projectCreation.data['entityInformation'] = {
+										..._.pick(entityDetails.data[0], ['_id', 'entityType', 'entityTypeId']),
+										externalId: entityDetails.data[0]?.metaInformation?.externalId,
+									}
+								}
+							} else if (solutionDetails.entityType && bodyData[solutionDetails.entityType]) {
 								let entityDetails = await entitiesService.entityDocuments({
 									_id: bodyData[solutionDetails.entityType],
 									tenantId: tenantId,
@@ -4237,6 +4257,7 @@ module.exports = class UserProjectsHelper {
 	static update(projectId, updateData, userId, appName = '', appVersion = '', userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				const tenantId = userDetails.userInformation.tenantId
 				const userProject = await projectQueries.projectDocument(
 					{
 						_id: projectId,
@@ -4266,6 +4287,55 @@ module.exports = class UserProjectsHelper {
 					}
 
 					validateAllTasks(allTasksFalttened)
+				}
+				// Update the entities in project
+				else if (updateData.data && updateData.data.length > 0) {
+					let entityDetails = await entitiesService.entityDocuments({
+						_id: { $in: updateData.data },
+						tenantId: tenantId,
+					})
+
+					if (!entityDetails?.success || !entityDetails?.data.length > 0) {
+						throw {
+							message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
+							status: HTTP_STATUS_CODE.bad_request.status,
+						}
+					}
+					let projectUpdateData = {}
+					if (entityDetails && entityDetails?.data.length > 0) {
+						projectUpdateData['entityInformation'] = {
+							..._.pick(entityDetails.data[0], ['_id', 'entityType', 'entityTypeId']),
+							externalId: entityDetails.data[0]?.metaInformation?.externalId,
+						}
+					}
+
+					const updateProject = await projectQueries.findOneAndUpdate(
+						{
+							_id: projectId,
+							tenantId: userDetails.userInformation.tenantId,
+						},
+						{
+							$set: projectUpdateData,
+						},
+						{
+							new: true,
+						}
+					)
+
+					if (!updateProject._id) {
+						throw {
+							message: CONSTANTS.apiResponses.USER_PROJECT_NOT_UPDATED,
+							status: HTTP_STATUS_CODE.bad_request.status,
+						}
+					} else {
+						return resolve({
+							message: CONSTANTS.apiResponses.USER_PROJECT_UPDATED,
+							success: true,
+							result: {
+								_id: projectId,
+							},
+						})
+					}
 				}
 
 				let updateResult = await this.sync(

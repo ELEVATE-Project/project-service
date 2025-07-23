@@ -42,7 +42,7 @@ async function loginAndGetToken() {
 				},
 			}
 		)
-		console.log('[Auth Success] Token fetched successfully.', response)
+		console.log('[Auth Success] Token fetched successfully.')
 		return response.data.result.access_token
 	} catch (err) {
 		console.error('[Auth Error] Failed to login and fetch token:', err.response?.data || err.message)

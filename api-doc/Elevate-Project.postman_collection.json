@@ -54,7 +54,7 @@
 							]
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/project/templates/bulkUpdate",
+							"raw": "{{baseUrl}}project/v1/project/templates/bulkCreate",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "project", "templates", "bulkUpdate", "bulkCreate"]
 						}

@@ -54,7 +54,7 @@
 							]
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/project/templates/bulkUpdate/bulkCreate",
+							"raw": "{{baseUrl}}project/v1/project/templates/bulkUpdate/bulkCreate",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "project", "templates", "bulkUpdate", "bulkCreate"]
 						}
@@ -86,7 +86,7 @@
 							]
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/project/templates/bulkUpdate",
+							"raw": "{{baseUrl}}project/v1/project/templates/bulkUpdate",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "project", "templates", "bulkUpdate"]
 						}
@@ -137,7 +137,7 @@
 							"raw": "{\n    \"description\" : \"शिक्षकों को कक्षा में मापन - लंबाई , भार एवं धारिता के शिक्षण कौशलों का संवर्धन करना । updated\"\n\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/project/templates/update/64b534d32bf17aea84b3862f",
+							"raw": "{{baseUrl}}project/v1/project/templates/update/64b534d32bf17aea84b3862f",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "project", "templates", "update", "64b534d32bf17aea84b3862f"]
 						}
@@ -174,7 +174,7 @@
 							"raw": "{\n    \"externalIds\" : [\"TSCSLHAR02-1710148664591\"]\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/project/templates/listByIds",
+							"raw": "{{baseUrl}}project/v1/project/templates/listByIds",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "project", "templates", "listByIds"]
 						}
@@ -207,7 +207,7 @@
 							}
 						],
 						"url": {
-							"raw": "http://{{baseUrl}}/project/v1/project/templates/importProjectTemplate/TSCSLHAR02-1710148664591=",
+							"raw": "{{baseUrl}}project/v1/project/templates/importProjectTemplate/TSCSLHAR02-1710148664591=",
 							"protocol": "http",
 							"host": ["{{baseUrl}}"],
 							"path": [
@@ -252,7 +252,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/project/templates/details/TSCSLHAR02-1710148664591",
+							"raw": "{{baseUrl}}project/v1/project/templates/details/TSCSLHAR02-1710148664591",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "project", "templates", "details", "TSCSLHAR02-1710148664591"]
 						}
@@ -271,7 +271,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/project/templates/list",
+							"raw": "{{baseUrl}}project/v1/project/templates/list",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "project", "templates", "list"]
 						}
@@ -344,7 +344,7 @@
 							]
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/library/categories/create",
+							"raw": "{{baseUrl}}project/v1/library/categories/create",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "library", "categories", "create"]
 						}
@@ -411,7 +411,7 @@
 							]
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/library/categories/update/665ea7cccbf5d12ba8827223",
+							"raw": "{{baseUrl}}project/v1/library/categories/update/665ea7cccbf5d12ba8827223",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "library", "categories", "update", "665ea7cccbf5d12ba8827223"]
 						}
@@ -447,7 +447,7 @@
 							"raw": "{\n    // \"name\" : \"Teachers\",\n    // \"externalId\" : \"teachers\",\n    // \"icon\" : \"static/projectCategories/teacher.png\"\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/library/categories/list",
+							"raw": "{{baseUrl}}project/v1/library/categories/list",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "library", "categories", "list"]
 						}
@@ -466,7 +466,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/library/categories/projects/:categoryExternalId",
+							"raw": "{{baseUrl}}project/v1/library/categories/projects/:categoryExternalId",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "library", "categories", "projects", ":categoryExternalId"],
 							"variable": [
@@ -529,7 +529,7 @@
 							]
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/project/templateTasks/bulkCreate/665430eb8f2943842b2ae46b",
+							"raw": "{{baseUrl}}project/v1/project/templateTasks/bulkCreate/665430eb8f2943842b2ae46b",
 							"host": ["{{baseUrl}}"],
 							"path": [
 								"project",
@@ -615,7 +615,7 @@
 							"raw": "{\n \"programId\" : \"6752aee1c1438653af10d613\"\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/userProjects/importFromLibrary/5fcf9954546a92494f2e587c?isATargetedSolution=false",
+							"raw": "{{baseUrl}}project/v1/userProjects/importFromLibrary/5fcf9954546a92494f2e587c?isATargetedSolution=false",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "userProjects", "importFromLibrary", "5fcf9954546a92494f2e587c"],
 							"query": [
@@ -658,7 +658,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/userProjects/importedProjects",
+							"raw": "{{baseUrl}}project/v1/userProjects/importedProjects",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "userProjects", "importedProjects"]
 						}
@@ -694,7 +694,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/userProjects/list?page=1&limit=10&search=&language=hi&status=completed",
+							"raw": "{{baseUrl}}project/v1/userProjects/list?page=1&limit=10&search=&language=hi&status=completed",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "userProjects", "list"],
 							"query": [
@@ -838,7 +838,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/userProjects/add",
+							"raw": "{{baseUrl}}project/v1/userProjects/add",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "userProjects", "add"]
 						}
@@ -869,7 +869,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/userProjects/update/66ceec390c9cad9f3e066de7",
+							"raw": "{{baseUrl}}project/v1/userProjects/update/66ceec390c9cad9f3e066de7",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "userProjects", "update", "66ceec390c9cad9f3e066de7"]
 						}
@@ -900,7 +900,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/userProjects/addStory/665ea7cccbf5d12ba8827223",
+							"raw": "{{baseUrl}}project/v1/userProjects/addStory/665ea7cccbf5d12ba8827223",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "userProjects", "addStory", "665ea7cccbf5d12ba8827223"]
 						}
@@ -933,7 +933,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/userProjects/tasksStatus",
+							"raw": "{{baseUrl}}project/v1/userProjects/tasksStatus",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "userProjects", "tasksStatus"]
 						}
@@ -964,7 +964,7 @@
 							"formdata": []
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/userProjects/share/6018e75f14969a4cfd76f52c",
+							"raw": "{{baseUrl}}project/v1/userProjects/share/6018e75f14969a4cfd76f52c",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "userProjects", "share", "6018e75f14969a4cfd76f52c"]
 						}
@@ -983,7 +983,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/userProjects/certificateReIssue/66cedfd0c9c3f0714de096c1",
+							"raw": "{{baseUrl}}project/v1/userProjects/certificateReIssue/66cedfd0c9c3f0714de096c1",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "userProjects", "certificateReIssue", "66cedfd0c9c3f0714de096c1"]
 						}
@@ -1002,7 +1002,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/userProjects/verifyCertificate/:_id",
+							"raw": "{{baseUrl}}project/v1/userProjects/verifyCertificate/:_id",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "userProjects", "verifyCertificate", ":_id"],
 							"variable": [
@@ -1138,7 +1138,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/programs/create",
+							"raw": "{{baseUrl}}project/v1/programs/create",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "programs", "create"]
 						}
@@ -1186,7 +1186,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/programs/update/667953639a5223446315e011",
+							"raw": "{{baseUrl}}project/v1/programs/update/667953639a5223446315e011",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "programs", "update", "667953639a5223446315e011"]
 						}
@@ -1210,7 +1210,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/programs/details/667954289a5223446315e01c",
+							"raw": "{{baseUrl}}project/v1/programs/details/667954289a5223446315e01c",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "programs", "details", "667954289a5223446315e01c"]
 						}
@@ -1243,7 +1243,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/programs/addRolesInScope/667954289a5223446315e01c",
+							"raw": "{{baseUrl}}project/v1/programs/addRolesInScope/667954289a5223446315e01c",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "programs", "addRolesInScope", "667954289a5223446315e01c"]
 						}
@@ -1276,7 +1276,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/programs/addEntitiesInScope/667954289a5223446315e01c",
+							"raw": "{{baseUrl}}project/v1/programs/addEntitiesInScope/667954289a5223446315e01c",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "programs", "addEntitiesInScope", "667954289a5223446315e01c"]
 						}
@@ -1309,7 +1309,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/programs/removeRolesInScope/665eb764cbf5d12ba882722f",
+							"raw": "{{baseUrl}}project/v1/programs/removeRolesInScope/665eb764cbf5d12ba882722f",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "programs", "removeRolesInScope", "665eb764cbf5d12ba882722f"]
 						}
@@ -1333,7 +1333,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/programs/list?page=1&limit=5&search=",
+							"raw": "{{baseUrl}}project/v1/programs/list?page=1&limit=5&search=",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "programs", "list"],
 							"query": [
@@ -1381,7 +1381,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/programs/join/665eb764cbf5d12ba882722f",
+							"raw": "{{baseUrl}}project/v1/programs/join/665eb764cbf5d12ba882722f",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "programs", "join", "665eb764cbf5d12ba882722f"]
 						}
@@ -1411,7 +1411,7 @@
 							"raw": "{\n    \"roles\": [\n                \"HM\",\n                \"BEO\"\n            ]\n}"
 						},
 						"url": {
-							"raw": "http://{{baseUrl}}/project/v1/programs/removeEntitiesInScope/665eb764cbf5d12ba882722f",
+							"raw": "{{baseUrl}}project/v1/programs/removeEntitiesInScope/665eb764cbf5d12ba882722f",
 							"protocol": "http",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "programs", "removeEntitiesInScope", "665eb764cbf5d12ba882722f"]
@@ -1465,7 +1465,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/solutions/create",
+							"raw": "{{baseUrl}}project/v1/solutions/create",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "solutions", "create"]
 						}
@@ -1513,7 +1513,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/solutions/update/667957bbc9d3d7c5740dafb7",
+							"raw": "{{baseUrl}}project/v1/solutions/update/667957bbc9d3d7c5740dafb7",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "solutions", "update", "667957bbc9d3d7c5740dafb7"]
 						}
@@ -1546,7 +1546,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/solutions/addRolesInScope/665ec2f8cbf5d12ba8827253",
+							"raw": "{{baseUrl}}project/v1/solutions/addRolesInScope/665ec2f8cbf5d12ba8827253",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "solutions", "addRolesInScope", "665ec2f8cbf5d12ba8827253"]
 						}
@@ -1579,7 +1579,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/solutions/detailsBasedOnRoleAndLocation",
+							"raw": "{{baseUrl}}project/v1/solutions/detailsBasedOnRoleAndLocation",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "solutions", "detailsBasedOnRoleAndLocation"]
 						}
@@ -1612,7 +1612,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/solutions/removeRolesInScope/665ec2f8cbf5d12ba8827253",
+							"raw": "{{baseUrl}}project/v1/solutions/removeRolesInScope/665ec2f8cbf5d12ba8827253",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "solutions", "removeRolesInScope", "665ec2f8cbf5d12ba8827253"]
 						}
@@ -1648,7 +1648,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/solutions/fetchLink/:solutionId",
+							"raw": "{{baseUrl}}project/v1/solutions/fetchLink/:solutionId",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "solutions", "fetchLink", ":solutionId"],
 							"variable": [
@@ -1687,7 +1687,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/solutions/addEntitiesInScope/665ec2f8cbf5d12ba8827253",
+							"raw": "{{baseUrl}}project/v1/solutions/addEntitiesInScope/665ec2f8cbf5d12ba8827253",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "solutions", "addEntitiesInScope", "665ec2f8cbf5d12ba8827253"]
 						}
@@ -1720,7 +1720,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/solutions/removeEntitiesInScope/665ec2f8cbf5d12ba8827253",
+							"raw": "{{baseUrl}}project/v1/solutions/removeEntitiesInScope/665ec2f8cbf5d12ba8827253",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "solutions", "removeEntitiesInScope", "665ec2f8cbf5d12ba8827253"]
 						}
@@ -1753,7 +1753,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/solutions/forUserRoleAndLocation?programId=5ff840ce383ae437eb02b96c&type=improvementProject&subType=improvementProject&page=1&limit=100&search=create solutio",
+							"raw": "{{baseUrl}}project/v1/solutions/forUserRoleAndLocation?programId=5ff840ce383ae437eb02b96c&type=improvementProject&subType=improvementProject&page=1&limit=100&search=create solutio",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "solutions", "forUserRoleAndLocation"],
 							"query": [
@@ -1812,7 +1812,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/solutions/targetedSolutions?type=improvementProject&page=1&limit=10&search=&filter=",
+							"raw": "{{baseUrl}}project/v1/solutions/targetedSolutions?type=improvementProject&page=1&limit=10&search=&filter=",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "solutions", "targetedSolutions"],
 							"query": [
@@ -1867,7 +1867,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/solutions/verifyLink",
+							"raw": "{{baseUrl}}project/v1/solutions/verifyLink",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "solutions", "verifyLink"]
 						}
@@ -1900,7 +1900,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/solutions/verifySolution/:solutionId",
+							"raw": "{{baseUrl}}project/v1/solutions/verifySolution/:solutionId",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "solutions", "verifySolution", ":solutionId"],
 							"variable": [
@@ -1939,7 +1939,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/solutions/list?page=1&limit=100&search=&type=improvementProject&subType",
+							"raw": "{{baseUrl}}project/v1/solutions/list?page=1&limit=100&search=&type=improvementProject&subType",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "solutions", "list"],
 							"query": [
@@ -1995,7 +1995,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/solutions/getDetails/66727b63cf0222d7ec1fa7e0",
+							"raw": "{{baseUrl}}project/v1/solutions/getDetails/66727b63cf0222d7ec1fa7e0",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "solutions", "getDetails", "66727b63cf0222d7ec1fa7e0"]
 						}
@@ -2022,7 +2022,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/solutions/details/:_id",
+							"raw": "{{baseUrl}}project/v1/solutions/details/:_id",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "solutions", "details", ":_id"],
 							"variable": [
@@ -2066,7 +2066,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/admin/createIndex/:collectionName",
+							"raw": "{{baseUrl}}project/v1/admin/createIndex/:collectionName",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "admin", "createIndex", ":collectionName"],
 							"variable": [
@@ -2102,7 +2102,7 @@
 							"raw": "{\n    \"query\": {\n       \"_id\":\"66975a4a4999c205ea017da9\"\n    },\n    \"mongoIdKeys\": [\n        \"_id\"\n    ],\n    \"limit\":2000\n}"
 						},
 						"url": {
-							"raw": "http://{{baseUrl}}/project/v1/admin/dbFind/:collectionName",
+							"raw": "{{baseUrl}}project/v1/admin/dbFind/:collectionName",
 							"protocol": "http",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "admin", "dbFind", ":collectionName"],
@@ -2134,7 +2134,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/cloud-services/files/download",
+							"raw": "{{baseUrl}}project/v1/cloud-services/files/download",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "cloud-services", "files", "download"],
 							"query": [
@@ -2174,7 +2174,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/cloud-services/files/preSignedUrls",
+							"raw": "{{baseUrl}}project/v1/cloud-services/files/preSignedUrls",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "cloud-services", "files", "preSignedUrls"]
 						}
@@ -2205,7 +2205,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/cloud-services/files/getDownloadableUrl",
+							"raw": "{{baseUrl}}project/v1/cloud-services/files/getDownloadableUrl",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "cloud-services", "files", "getDownloadableUrl"]
 						}
@@ -2232,7 +2232,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/forms/read/:_id",
+							"raw": "{{baseUrl}}project/v1/forms/read/:_id",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "forms", "read", ":_id"],
 							"variable": [
@@ -2284,7 +2284,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/forms/create",
+							"raw": "{{baseUrl}}project/v1/forms/create",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "forms", "create"]
 						}
@@ -2330,7 +2330,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/forms/update/",
+							"raw": "{{baseUrl}}project/v1/forms/update/",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "forms", "update", ""]
 						}
@@ -2748,7 +2748,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/profile/read",
+							"raw": "{{baseUrl}}project/v1/profile/read",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "profile", "read"]
 						}

@@ -1459,9 +1459,13 @@ module.exports = class UserProjectsHelper {
 			try {
 				let solutionExternalId = ''
 				let templateDocuments
-				let defaultACL = CONSTANTS.common.DEFAULT_ACL
+				let defaultACL = _.cloneDeep(CONSTANTS.common.DEFAULT_ACL)
 				let tenantId = userDetails.userInformation.tenantId
 				let orgId = userDetails.userInformation.organizationId
+
+				console.log('==========================>userId', userId, '\n')
+				console.log('==========================>defaultAcl', defaultACL, '\n')
+
 				if (templateId !== '') {
 					templateDocuments = await projectTemplateQueries.templateDocument({
 						externalId: templateId,
@@ -1702,6 +1706,7 @@ module.exports = class UserProjectsHelper {
 								defaultACL.users.push(userId)
 								defaultACL.scope = solutionDetails.scope
 								projectCreation.data['acl'] = defaultACL
+								console.log('=========================>', projectCreation.data.acl, '\n')
 							}
 							projectCreation.data['updateHistory'] = [
 								{

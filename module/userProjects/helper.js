@@ -486,6 +486,29 @@ module.exports = class UserProjectsHelper {
 					})
 					updateProject['updateHistory'] = userProject[0].updateHistory
 				}
+
+				// Update Entities in project
+				if (data.entityId && data.entityId !== '') {
+					let entityDetails = await entitiesService.entityDocuments({
+						_id: data.entityId,
+						tenantId: tenantId,
+					})
+
+					if (!entityDetails?.success || !entityDetails?.data.length > 0) {
+						throw {
+							message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
+							status: HTTP_STATUS_CODE.bad_request.status,
+						}
+					}
+
+					if (entityDetails && entityDetails?.data.length > 0) {
+						updateProject['entityInformation'] = {
+							..._.pick(entityDetails.data[0], ['_id', 'entityType', 'entityTypeId']),
+							externalId: entityDetails.data[0]?.metaInformation?.externalId,
+						}
+					}
+				}
+
 				let projectUpdated = await projectQueries.findOneAndUpdate(
 					{
 						_id: userProject[0]._id,
@@ -4287,55 +4310,6 @@ module.exports = class UserProjectsHelper {
 					}
 
 					validateAllTasks(allTasksFalttened)
-				}
-				// Update the entities in project
-				else if (updateData.data && updateData.data.length > 0) {
-					let entityDetails = await entitiesService.entityDocuments({
-						_id: { $in: updateData.data },
-						tenantId: tenantId,
-					})
-
-					if (!entityDetails?.success || !entityDetails?.data.length > 0) {
-						throw {
-							message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
-							status: HTTP_STATUS_CODE.bad_request.status,
-						}
-					}
-					let projectUpdateData = {}
-					if (entityDetails && entityDetails?.data.length > 0) {
-						projectUpdateData['entityInformation'] = {
-							..._.pick(entityDetails.data[0], ['_id', 'entityType', 'entityTypeId']),
-							externalId: entityDetails.data[0]?.metaInformation?.externalId,
-						}
-					}
-
-					const updateProject = await projectQueries.findOneAndUpdate(
-						{
-							_id: projectId,
-							tenantId: userDetails.userInformation.tenantId,
-						},
-						{
-							$set: projectUpdateData,
-						},
-						{
-							new: true,
-						}
-					)
-
-					if (!updateProject._id) {
-						throw {
-							message: CONSTANTS.apiResponses.USER_PROJECT_NOT_UPDATED,
-							status: HTTP_STATUS_CODE.bad_request.status,
-						}
-					} else {
-						return resolve({
-							message: CONSTANTS.apiResponses.USER_PROJECT_UPDATED,
-							success: true,
-							result: {
-								_id: projectId,
-							},
-						})
-					}
 				}
 
 				let updateResult = await this.sync(

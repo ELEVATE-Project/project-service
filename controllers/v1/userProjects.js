@@ -7,6 +7,7 @@
 
 // Dependencies
 const userProjectsHelper = require(MODULES_BASE_PATH + '/userProjects/helper')
+const entitiesHelper = require(MODULES_BASE_PATH + '/entities/helper')
 
 /**
  * UserProjects
@@ -1439,6 +1440,57 @@ module.exports = class UserProjects extends Abstract {
 			try {
 				const result = await userProjectsHelper.deleteUserPIIData(req.body)
 				return resolve(result)
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
+				})
+			}
+		})
+	}
+
+	/**
+     * @api {get} /v1/userProjects/searchEntities/:solutionId?search=:searchText&limit=1&page=1
+     * @apiVersion 1.0.0
+     * @apiName Search Entities
+     * @apiHeader {String} X-auth-token Authenticity token
+     * @apiSampleRequest /v1/userProjects/searchEntities/5d1a002d2dfd8135bc8e1615?search=&limit=100&page=1
+     * @apiUse successBody
+     * @apiUse errorBody
+     * @apiParamExample {json} Response:
+        {
+            "message": "Entities fetched successfully",
+            "status": 200,
+            "result": [
+                {
+                    "data": [
+                        {
+                           "_id": "6852c9207248c20014b38dd3",
+                            "externalId": "16030100406",
+                            "name": "BALARAM BAZAR J. B. SCHOOL",
+                            "entityType": "school",
+                            "selected": false
+                        }
+                    ],
+                    "count": 1
+                }
+            ]
+        }
+    */
+
+	/**
+	 * Search entities in project.
+	 * @method
+	 * @name searchEntities
+	 * @param {Object} req - request Data.
+	 * @returns {JSON} List of entities in observations.
+	 */
+	async searchEntities(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let searchEntitiesResult = await entitiesHelper.searchEntitiesHelper(req)
+				resolve(searchEntitiesResult)
 			} catch (error) {
 				return reject({
 					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,

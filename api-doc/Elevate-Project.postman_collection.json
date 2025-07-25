@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "c9964b04-92c9-4e57-8613-3bd331773fca",
+		"_postman_id": "d18ae027-0585-44ec-978e-31d42db0afe2",
 		"name": "Elevate-Project",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "33513401"
+		"_exporter_id": "28589818"
 	},
 	"item": [
 		{
@@ -21,6 +21,21 @@
 							{
 								"key": "internal-access-token",
 								"value": "{{internal_access_token}}"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -94,12 +109,26 @@
 							},
 							{
 								"key": "internal-access-token",
-								"value": "{{internal_access_token}}",
-								"disabled": true
+								"value": "{{internal_access_token}}"
 							},
 							{
 								"key": "Content-Type",
 								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
 								"type": "text"
 							}
 						],
@@ -277,6 +306,21 @@
 								"key": "Content-Type",
 								"value": "application/json",
 								"type": "text"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -328,6 +372,21 @@
 							{
 								"key": "Content-Type",
 								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
 								"type": "text"
 							}
 						],
@@ -437,6 +496,21 @@
 							{
 								"key": "internal-access-token",
 								"value": "{{internal_access_token}}"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -620,7 +694,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/userProjects/list?page=1&limit=2&search=&filter=",
+							"raw": "{{baseUrl}}project/v1/userProjects/list?page=1&limit=10&search=&language=hi&status=completed",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "userProjects", "list"],
 							"query": [
@@ -1037,6 +1111,21 @@
 								"key": "internal-access-token",
 								"value": "{{internal_access_token}}",
 								"type": "text"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -1069,6 +1158,21 @@
 							{
 								"key": "internal-access-token",
 								"value": "{{internal_access_token}}",
+								"type": "text"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
 								"type": "text"
 							}
 						],
@@ -1334,6 +1438,21 @@
 								"key": "internal-access-token",
 								"value": "{{internal_access_token}}",
 								"type": "text"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -1366,6 +1485,21 @@
 							{
 								"key": "internal-access-token",
 								"value": "{{internal_access_token}}",
+								"type": "text"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
 								"type": "text"
 							}
 						],
@@ -1845,8 +1979,18 @@
 								"type": "text"
 							},
 							{
-								"key": "internal-access-token",
-								"value": "{{internal_access_token}}",
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
 								"type": "text"
 							}
 						],
@@ -2113,6 +2257,21 @@
 							{
 								"key": "internal-access-token",
 								"value": "{{internal_access_token}}"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -2144,6 +2303,21 @@
 							{
 								"key": "internal-access-token",
 								"value": "{{internal_access_token}}"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -2180,6 +2354,21 @@
 							{
 								"key": "internal-access-token",
 								"value": "{{internal_access_token}}"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -2222,6 +2411,21 @@
 							{
 								"key": "internal-access-token",
 								"value": "{{internal_access_token}}"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -2269,6 +2473,21 @@
 							{
 								"key": "internal-access-token",
 								"value": "{{devInternalAccessToken}}"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -2300,6 +2519,21 @@
 							{
 								"key": "internal-access-token",
 								"value": "{{devInternalAccessToken}}"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -2331,6 +2565,21 @@
 							{
 								"key": "internal-access-token",
 								"value": "{{internal_access_token}}"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -2371,6 +2620,26 @@
 							{
 								"key": "X-auth-token",
 								"value": "{{userToken}}"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal-access-token}}",
+								"type": "text"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -2512,7 +2781,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/users/programs?isAPrivateProgram=false&page=1&limit=&search=",
+							"raw": "{{baseUrl}}project/v1/users/programs?isAPrivateProgram=true&page=1&limit=100&search=&language=&getProjectsCount=true",
 							"host": ["{{baseUrl}}project"],
 							"path": ["v1", "users", "programs"],
 							"query": [
@@ -2663,6 +2932,26 @@
 								"key": "X-auth-token",
 								"value": "{{devToken}}",
 								"type": "text"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal-access-token}}",
+								"type": "text"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
+								"type": "text"
 							}
 						],
 						"url": {
@@ -2686,6 +2975,21 @@
 							{
 								"key": "internal-access-token",
 								"value": "{{internal_access_token}}",
+								"type": "text"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
 								"type": "text"
 							}
 						],
@@ -2842,11 +3146,28 @@
 								}
 							]
 						},
-						"url": "{{baseUrl}}/v1/userExtension/bulkUpload"
+						"url": {
+							"raw": "{{baseUrl}}/v1/userExtension/bulkUpload",
+							"host": ["{{baseUrl}}"],
+							"path": ["v1", "userExtension", "bulkUpload"]
+						}
 					},
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "healthCheck",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}project/health",
+					"host": ["{{baseUrl}}project"],
+					"path": ["health"]
+				}
+			},
+			"response": []
 		}
 	]
 }

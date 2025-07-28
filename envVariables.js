@@ -205,6 +205,11 @@ let enviromentVariables = {
 		optional: true,
 		default: 'elevate-improvement-project-submission-dev',
 	},
+	RESOURCE_DELETION_TOPIC: {
+		message: 'Required mobile application app type value',
+		optional: false,
+		default: 'resource-deletion-topic',
+	},
 }
 
 let success = true

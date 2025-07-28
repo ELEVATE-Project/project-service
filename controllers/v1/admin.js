@@ -123,4 +123,51 @@ module.exports = class Admin {
 			}
 		})
 	}
+
+	/**
+	 * Deletes a resource (program/solution) after validating admin access.
+	 *
+	 * @param {Object} req - Express request object containing user details, params, and query.
+	 * @param {Object} req.params - Contains route parameters, specifically `_id` of the resource.
+	 * @param {Object} req.query - Contains query parameters, specifically `type` (program/solution).
+	 * @param {Object} req.userDetails - Contains user roles and tenant/org info.
+	 * @returns {Promise<Object>} - Returns a success or failure response from the adminHelper.
+	 * @throws {Object} - Throws an error object with status, message, and error details if validation or deletion fails.
+	 */
+	async deleteResource(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let deletedEntity
+				// Check if user is authenticated and has 'admin' role
+				if (
+					req.userDetails &&
+					req.userDetails.userInformation &&
+					req.userDetails.userInformation.roles &&
+					req.userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)
+				) {
+					// Call adminHelper's deleteResource with required identifiers
+					deletedEntity = await adminHelper.deleteResource(
+						req.params._id,
+						req.query.type,
+						req.userDetails.tenantAndOrgInfo.tenantId,
+						req.userDetails.tenantAndOrgInfo.orgId,
+						req.userDetails.userInformation.userId,
+						req.userDetails.userToken
+					)
+				} else {
+					throw {
+						status: HTTP_STATUS_CODE.forbidden.status,
+						message: CONSTANTS.apiResponses.ADMIN_TOKEN_MISSING_MESSAGE,
+					}
+				}
+				return resolve(deletedEntity)
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
+				})
+			}
+		})
+	}
 }

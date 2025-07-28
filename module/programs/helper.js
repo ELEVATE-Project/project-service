@@ -1459,4 +1459,40 @@ module.exports = class ProgramsHelper {
 			}
 		})
 	}
+
+	/**
+	 * Helper function to remove a solution ID from all program documents that reference it.
+	 *
+	 * @param {String} solutionId - The string form of the solution ObjectId to be removed from programs.
+	 * @returns {Promise<Object>} - Contains the number of modified documents and a success message.
+	 */
+	static pullSolutionId(solutionId) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				// Convert the string ID to MongoDB ObjectId
+				let solutionToObjectId = UTILS.convertStringToObjectId(solutionId)
+
+				// Call DB query to pull (remove) the solutionId from all program documents' components
+				let programData = await programsQueries.pullSolutionsFromComponents(solutionToObjectId)
+				let result
+				if (programData) {
+					// Construct a result object with number of modified records
+					result = {
+						dataModified: programData.nModified,
+						success: true,
+					}
+				}
+				return resolve({
+					result: result,
+					message: CONSTANTS.apiResponses.SOLUTION_RESOURCE_DELETED,
+				})
+			} catch (error) {
+				return resolve({
+					success: false,
+					message: error.message,
+					data: {},
+				})
+			}
+		})
+	}
 }

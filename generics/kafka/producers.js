@@ -20,6 +20,10 @@ const programOperationTopic =
 	process.env.PROGRAM_USER_MAPPING_TOPIC && process.env.PROGRAM_USER_MAPPING_TOPIC != 'OFF'
 		? process.env.PROGRAM_USER_MAPPING_TOPIC
 		: 'elevate_program_operation'
+const pushDeletedResourceTopic =
+	process.env.RESOURCE_DELETION_TOPIC && process.env.RESOURCE_DELETION_TOPIC != 'OFF'
+		? process.env.RESOURCE_DELETION_TOPIC
+		: 'resource-deletion-topic'
 
 /**
  * Push improvement projects to kafka.
@@ -53,6 +57,30 @@ const pushUserActivitiesToKafka = function (message) {
 			let kafkaPushStatus = await pushMessageToKafka([
 				{
 					topic: userProjectActivityTopic,
+					messages: JSON.stringify(message),
+				},
+			])
+
+			return resolve(kafkaPushStatus)
+		} catch (error) {
+			return reject(error)
+		}
+	})
+}
+
+/**
+ * Push resource deleted data to kafka.
+ * @function
+ * @name pushResourceDeleteKafkaEvent
+ * @param {Object} message - Message data.
+ */
+
+const pushResourceDeleteKafkaEvent = function (message) {
+	return new Promise(async (resolve, reject) => {
+		try {
+			let kafkaPushStatus = await pushMessageToKafka([
+				{
+					topic: pushDeletedResourceTopic,
 					messages: JSON.stringify(message),
 				},
 			])
@@ -135,4 +163,5 @@ module.exports = {
 	pushProjectToKafka: pushProjectToKafka,
 	pushUserActivitiesToKafka: pushUserActivitiesToKafka,
 	pushProgramOperationEvent: pushProgramOperationEvent,
+	pushResourceDeleteKafkaEvent: pushResourceDeleteKafkaEvent,
 }

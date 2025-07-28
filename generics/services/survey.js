@@ -324,10 +324,68 @@ const createObservation = function (token, solutionId, data, userRoleAndProfileI
 	})
 }
 
+/**
+ * Calls the Survey Service to delete a survey or observation resource linked to a solution.
+ *
+ * @param {String} token - The user authentication token.
+ * @param {String} solutionId - The ID of the solution (survey/observation) to be deleted.
+ * @param {String} resourceType - Type of the resource being deleted ('solution', 'program', etc.).
+ * @param {String} tenantId - Tenant identifier (used for multi-tenancy).
+ * @param {String} orgId - Organization ID from where the deletion is triggered.
+ *
+ * @returns {Promise<Object>} - Result indicating success/failure and optional response data.
+ */
+const surevyDeleteResource = function (token, solutionId, resourceType, tenantId, orgId) {
+	return new Promise(async (resolve, reject) => {
+		try {
+			// Construct the API URL to call the delete endpoint on the Survey Service
+			let surevyDeleteResourceUrl =
+				SURVEY_SERVICE_URL + CONSTANTS.endpoints.DELETE_RESOURCE + solutionId + '?type=' + resourceType
+			// Prepare request headers with tokens and tenant info
+			let options = {
+				headers: {
+					'content-type': 'application/json',
+					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
+					'x-auth-token': token,
+					'admin-auth-token': process.env.ADMIN_ACCESS_TOKEN,
+					tenantId: tenantId,
+					orgid: orgId,
+				},
+			}
+			// Send a POST request to the Survey Service to delete the resource
+			request.post(surevyDeleteResourceUrl, options, assessmentCallback)
+			// Callback function to handle the response from the Survey Service
+			function assessmentCallback(err, data) {
+				let result = {
+					success: true,
+				}
+
+				if (err) {
+					result.success = false
+				} else {
+					let response = data.body
+					result = JSON.parse(response)
+					// Check if the result status is HTTP 200 OK
+					if (result.status === HTTP_STATUS_CODE['ok'].status) {
+						result['data'] = result.result
+					} else {
+						result.success = false
+					}
+				}
+
+				return resolve(result)
+			}
+		} catch (error) {
+			return reject(error)
+		}
+	})
+}
+
 module.exports = {
 	listSolutions: listSolutions,
 	updateSolution: updateSolution,
 	createObservation: createObservation,
 	surveyDetails: surveyDetails,
 	importTemplateToSolution: importTemplateToSolution,
+	surevyDeleteResource: surevyDeleteResource,
 }

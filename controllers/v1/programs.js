@@ -7,6 +7,7 @@
 
 // Dependencies
 const programsHelper = require(MODULES_BASE_PATH + '/programs/helper')
+const programsQueries = require(DB_QUERY_BASE_PATH + '/programs')
 
 module.exports = class Programs extends Abstract {
 	constructor() {
@@ -728,6 +729,29 @@ module.exports = class Programs extends Abstract {
 					req.headers['internal-access-token'] ? true : req.headers.internalAccessToken ? true : false
 				)
 				return resolve(programJoin)
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
+				})
+			}
+		})
+	}
+
+	/**
+	 * Controller method to remove a solution ID from all program documents where it exists.
+	 * Delegates the actual logic to `programsHelper.pullSolutionId()`.
+	 *
+	 * @param {Object} req - Express request object containing `params._id` (solutionId).
+	 * @returns {Promise<Object>} - Result of the operation from the helper function.
+	 */
+	async pullSolutionId(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				// Call helper method to perform the $pull operation on programs collection
+				let programData = await programsHelper.pullSolutionId(req.params._id)
+				return resolve(programData)
 			} catch (error) {
 				return reject({
 					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,

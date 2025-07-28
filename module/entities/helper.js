@@ -9,6 +9,7 @@
 const entityManagementService = require(SERVICES_BASE_PATH + '/entity-management')
 const userProjectQueries = require(DB_QUERY_BASE_PATH + '/projects')
 const solutionsQueries = require(DB_QUERY_BASE_PATH + '/solutions')
+
 /**
  * EntitiesHelper
  * @class
@@ -28,9 +29,9 @@ module.exports = class EntitiesHelper {
 
 				let userId = req.userDetails.userInformation.userId
 				let result
-
 				let projection = []
 
+				// Ensure at least one of projectId or solutionId is provided
 				if (!req.query.projectId && !req.query.solutionId) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
@@ -38,6 +39,7 @@ module.exports = class EntitiesHelper {
 					}
 				}
 
+				// If projectId is provided, fetch the project details
 				if (req.query.projectId) {
 					let findObject = {
 						_id: ObjectId(req.query.projectId),
@@ -45,12 +47,18 @@ module.exports = class EntitiesHelper {
 						tenantId: req.userDetails.userInformation.tenantId,
 					}
 					projection.push('solutionInformation.entityType')
+
+					// Fetch project document
 					let projectInformation = await userProjectQueries.projectDocument(findObject, projection)
 					result = projectInformation[0]
+
+					// Add entityType from solutionInformation to result
 					if (result.solutionInformation && result.solutionInformation.entityType) {
 						result['entityType'] = result.solutionInformation.entityType
 					}
 				}
+
+				// If solutionId is provided, fetch the solution details
 				if (req.query.solutionId) {
 					let findQuery = {
 						_id: ObjectId(req.query.solutionId),
@@ -58,19 +66,25 @@ module.exports = class EntitiesHelper {
 					}
 					projection.push('entityType')
 
+					// Fetch solution document
 					let solutionDocument = await solutionsQueries.solutionsDocument(findQuery, projection)
 					result = _.merge(solutionDocument[0])
 				}
 
+				// Fields to include while fetching entity data
 				let entityProjections = ['entityType', 'metaInformation.externalId', 'metaInformation.name', 'groups']
 
+				// If parentEntityId is given, fetch specific entity first
 				if (req.query.parentEntityId) {
 					let filterData = {
 						_id: req.query.parentEntityId,
 						tenantId: req.userDetails.userInformation.tenantId,
 					}
 
+					// Get parent entity details
 					let entitiesDetails = await entityManagementService.entityDocuments(filterData, entityProjections)
+
+					// If entity not found
 					if (!entitiesDetails.success) {
 						return resolve({
 							message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
@@ -85,6 +99,7 @@ module.exports = class EntitiesHelper {
 
 					let entitiesData = entitiesDetails.data
 
+					// Prepare response structure for entities
 					entitiesData = entitiesData.map((item) => ({
 						_id: item._id,
 						externalId: item.metaInformation?.externalId || null,
@@ -92,7 +107,10 @@ module.exports = class EntitiesHelper {
 						entityType: item.entityType,
 						selected: false,
 					}))
+
 					response.result = []
+
+					// If parent entity's type matches result entityType, return directly
 					if (entitiesData && entitiesData[0].entityType === result.entityType) {
 						response['message'] = CONSTANTS.apiResponses.ENTITY_FETCHED
 						response.result.push({
@@ -101,20 +119,22 @@ module.exports = class EntitiesHelper {
 						})
 						return resolve(response)
 					} else {
-						// Fetch data from entity service
+						// Fetch related entities from the entity service using aggregation
 						let projections = ['_id', 'entityType', 'metaInformation.externalId', 'metaInformation.name']
+
 						entitiesDetails = await entityManagementService.entityDocuments(
-							filterData, // MongoDB filter criteria to find matching entities
-							[], // Empty projection array default fields will be returned
-							req.pageNo, // Current page number for pagination
-							req.pageSize, // Number of records to fetch per page
-							req.searchText, // Optional search keyword for text-based filtering (e.g., entity name)
-							`$groups.${result.entityType}`, // Aggregate path to group IDs (e.g., 'groups.school' or 'groups.district')
-							true, // Enable aggregation pipeline staging
-							false, // Disable sorting inside aggregation pipeline
-							projections // Fields to include/exclude in aggregation projection
+							filterData, // Filter object
+							[], // Empty projections array (default fields)
+							req.pageNo, // Page number for pagination
+							req.pageSize, // Page size
+							req.searchText, // Optional search keyword
+							`$groups.${result.entityType}`, // Aggregate group path
+							true, // Enable aggregation staging
+							false, // Disable sorting
+							projections // Final fields to project
 						)
 
+						// If no related entities found
 						if (!entitiesDetails.success || !(entitiesDetails.data.length > 0)) {
 							return resolve({
 								message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
@@ -126,8 +146,10 @@ module.exports = class EntitiesHelper {
 								],
 							})
 						}
+
 						let entityDocuments = entitiesDetails.data
 
+						// Prepare entity response structure
 						entityDocuments = entityDocuments.map((entity) => ({
 							_id: entity._id,
 							externalId: entity.metaInformation?.externalId || null,
@@ -135,6 +157,7 @@ module.exports = class EntitiesHelper {
 							entityType: entity.entityType,
 							selected: false,
 						}))
+
 						response.result.push({
 							data: entityDocuments,
 							count: entityDocuments.length,
@@ -143,14 +166,20 @@ module.exports = class EntitiesHelper {
 						return resolve(response)
 					}
 				} else {
+					// When parentEntityId is not present, filter using entityType
 					response.result = []
+
 					let filterData = {
 						entityType: result.entityType,
 						tenantId: req.userDetails.userInformation.tenantId,
 					}
+
+					// If result contains entities, narrow down by _id
 					if (result.entities && result.entities.length > 0) {
 						filterData['_id'] = result.entities
 					}
+
+					// Fetch entities using filter
 					let entitiesDetails = await entityManagementService.entityDocuments(
 						filterData,
 						entityProjections,
@@ -158,6 +187,8 @@ module.exports = class EntitiesHelper {
 						req.pageSize,
 						req.searchText
 					)
+
+					// If no entities found
 					if (!entitiesDetails.success) {
 						return resolve({
 							message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
@@ -172,6 +203,7 @@ module.exports = class EntitiesHelper {
 
 					let entityDocuments = entitiesDetails.data
 
+					// Map entities into final response format
 					entityDocuments = entityDocuments.map((item) => ({
 						_id: item._id,
 						externalId: item.metaInformation?.externalId || null,
@@ -187,8 +219,10 @@ module.exports = class EntitiesHelper {
 					response['message'] = CONSTANTS.apiResponses.ENTITY_FETCHED
 				}
 
+				// Final successful response
 				return resolve(response)
 			} catch (error) {
+				// Handle any unexpected error
 				return reject({
 					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
 					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,

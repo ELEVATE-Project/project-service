@@ -11738,7 +11738,8 @@ paths:
     get:
       description: ''
       operationId: ''
-      tags: ['healthCheck']
+      tags:
+        - healthCheck
       parameters: []
       responses:
         '200':
@@ -11884,3 +11885,110 @@ paths:
                       errMsg: "Missing 'url' for enabled service: mongodb"
                     status: 400
                     result: {}
+  /v1/userProjects/searchEntities:
+    get:
+      description: ''
+      operationId: ''
+      tags:
+        - userProjects
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: number
+                  result:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        data:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              _id:
+                                type: string
+                              externalId:
+                                type: string
+                              name:
+                                type: string
+                              entityType:
+                                type: string
+                              selected:
+                                type: boolean
+                            required:
+                              - _id
+                              - externalId
+                              - name
+                              - entityType
+                              - selected
+                        count:
+                          type: number
+              examples:
+                example1:
+                  value:
+                    message: Entities fetched successfully
+                    status: 200
+                    result:
+                      - data:
+                          - _id: 6852c9207248c20014b38dd3
+                            externalId: '16030100406'
+                            name: BALARAM BAZAR J. B. SCHOOL
+                            entityType: school
+                            selected: false
+                          - _id: 6852c9207248c20014b38dd4
+                            externalId: '16030100405'
+                            name: BALARAM HIGH SCHOOL
+                            entityType: school
+                            selected: false
+                          - _id: 6852c9207248c20014b38dd5
+                            externalId: '16030103101'
+                            name: JARMANJOY CHOWDHURY PARA SB SCHOOL
+                            entityType: school
+                            selected: false
+                          - _id: 6852c9207248c20014b38dd6
+                            externalId: '16030100407'
+                            name: JITENDRA ROAJA PARA JB SCHOOL
+                            entityType: school
+                            selected: false
+                          - _id: 6852c9207248c20014b38dd7
+                            externalId: '16030100403'
+                            name: LATIACHARA JB SCHOOL
+                            entityType: school
+                            selected: false
+                        count: 5
+    parameters:
+      - in: query
+        name: solutionId
+        description: solution id
+        schema: &ref_66
+          type: string
+      - in: query
+        name: page
+        description: page number
+        schema: &ref_65
+          type: number
+      - in: query
+        name: limit
+        description: page size
+        schema: *ref_65
+      - in: query
+        name: projectId
+        description: project id
+        schema: *ref_66
+      - in: query
+        name: parentEntityId
+        description: parent entity id
+        schema: *ref_66
+      - in: header
+        name: x-auth-token
+        description: authenticated user token
+        schema: *ref_66

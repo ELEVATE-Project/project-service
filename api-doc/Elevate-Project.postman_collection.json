@@ -1014,6 +1014,39 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "searchEntities",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{userToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}project/v1/userProjects/searchEntities?solutionId=6880adeee1b9e76a809cd9db&page=10&limit=5",
+							"host": ["{{baseUrl}}project"],
+							"path": ["v1", "userProjects", "searchEntities"],
+							"query": [
+								{
+									"key": "solutionId",
+									"value": "6880adeee1b9e76a809cd9db"
+								},
+								{
+									"key": "page",
+									"value": "10"
+								},
+								{
+									"key": "limit",
+									"value": "5"
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},

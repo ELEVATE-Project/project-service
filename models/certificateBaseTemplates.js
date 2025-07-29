@@ -19,5 +19,15 @@ module.exports = {
 		url: {
 			type: String,
 		},
+		tenantId: {
+			type: String,
+			index: true,
+			required: true,
+		},
+		orgId: {
+			type: String,
+			index: true,
+			required: true,
+		},
 	},
 }

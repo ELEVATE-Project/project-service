@@ -124,6 +124,7 @@ module.exports = {
 			type: String,
 			index: true,
 		},
+		project: Object,
 		submissions: Object,
 		link: {
 			type: String,
@@ -209,6 +210,16 @@ module.exports = {
 		},
 		duration: String,
 		conversation: Array,
+		tenantId: {
+			type: String,
+			index: true,
+			required: true,
+		},
+		orgId: {
+			type: String,
+			index: true,
+			required: true,
+		},
 	},
 	compoundIndex: [
 		{

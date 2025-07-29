@@ -11,7 +11,7 @@ module.exports = class ProfileHelper {
 	 * @returns {Promise<Object>} - A promise that resolves with the processed user profile data or an error object.
 	 * @throws {Error} - Throws an error if the user details cannot be fetched or processed.
 	 **/
-	static read(userId, userToken) {
+	static read(userId, userToken, reqUserDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Fetch user profile details using userService.profile function
@@ -43,6 +43,10 @@ module.exports = class ProfileHelper {
 							$in: locationIds,
 						},
 					}
+					let tenantId = reqUserDetails.userInformation.tenantId
+					let orgId = reqUserDetails.userInformation.organizationId
+
+					filterData['tenantId'] = tenantId
 					// Define the fields to be projected in the entity documents
 					const projection = ['_id', 'metaInformation.name', 'metaInformation.externalId']
 					// Use the entityDocuments function to fetch entity details

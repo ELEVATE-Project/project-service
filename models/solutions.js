@@ -31,7 +31,10 @@ module.exports = {
 		programName: String,
 		programDescription: String,
 		entityProfileFieldsPerEntityTypes: Object,
-		startDate: Date,
+		startDate: {
+			type: Date,
+			index: true,
+		},
 		endDate: {
 			type: Date,
 			index: true,
@@ -100,5 +103,25 @@ module.exports = {
 		},
 		translations: Object,
 		reflectionEnabled: Boolean,
+		tenantId: {
+			type: String,
+			index: true,
+			required: true,
+		},
+		orgId: {
+			type: String,
+			index: true,
+			required: true,
+		},
+		availableForPrivateConsumption: {
+			type: Boolean,
+			default: true,
+		},
 	},
+	compoundIndex: [
+		{
+			name: { externalId: 1, tenantId: 1 },
+			indexType: { unique: true },
+		},
+	],
 }

@@ -11,7 +11,6 @@ const SUBMISSION_TOPIC = process.env.SUBMISSION_TOPIC
 const CERTIFICATE_TOPIC = process.env.PROJECT_SUBMISSION_TOPIC
 const USER_DELETE_TOPIC = process.env.USER_DELETE_TOPIC
 const USER_DELETE_ON_OFF = process.env.USER_DELETE_ON_OFF
-const projectCertificateConsumer = require(GENERICS_FILES_PATH + '/kafka/consumers/projectCertificate')
 
 /**
  * Kafka configurations.
@@ -82,18 +81,18 @@ var _sendToKafkaConsumers = function (topic, host) {
 			console.log('Message: ', JSON.stringify(message))
 			console.log('-------Kafka consumer log ends here------------------')
 
-			// if (message && message.topic === SUBMISSION_TOPIC) {
-			// 	submissionsConsumer.messageReceived(message)
-			// }
+			if (message && message.topic === SUBMISSION_TOPIC) {
+				submissionsConsumer.messageReceived(message)
+			}
 			// call projectCertificateConsumer
 			if (message && message.topic === CERTIFICATE_TOPIC) {
 				projectCertificateConsumer.messageReceived(message)
 			}
 
 			// call userDelete consumer
-			// if (message && message.topic === USER_DELETE_TOPIC) {
-			//   userDeleteConsumer.messageReceived(message);
-			// }
+			if (message && message.topic === USER_DELETE_TOPIC) {
+				userDeleteConsumer.messageReceived(message)
+			}
 		})
 
 		consumer.on('error', async function (error) {
@@ -104,9 +103,9 @@ var _sendToKafkaConsumers = function (topic, host) {
 				projectCertificateConsumer.errorTriggered(error)
 			}
 
-			// if (error.topics && error.topics[0] === USER_DELETE_TOPIC) {
-			//   userDeleteConsumer.errorTriggered(error);
-			// }
+			if (error.topics && error.topics[0] === USER_DELETE_TOPIC) {
+				userDeleteConsumer.errorTriggered(error)
+			}
 		})
 	}
 }

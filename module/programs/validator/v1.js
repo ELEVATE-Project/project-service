@@ -24,6 +24,7 @@ module.exports = (req) => {
 				.isMongoId()
 				.withMessage('Invalid program ID')
 			req.checkBody('roles').exists().withMessage('required program roles to be added')
+			req.checkBody('roles').isArray().withMessage('roles must be an array')
 		},
 		addEntitiesInScope: function () {
 			req.checkParams('_id')
@@ -32,6 +33,25 @@ module.exports = (req) => {
 				.isMongoId()
 				.withMessage('Invalid program ID')
 			req.checkBody('entities').exists().withMessage('required entities to be added')
+			const entities = req.body.entities
+			if (entities && typeof entities === 'object') {
+				for (const [key, value] of Object.entries(entities)) {
+					req.checkBody(`entities.${key}`).isArray().withMessage(`${key} should be an array`)
+				}
+			}
+			if (req.body.organizations) {
+				req.checkBody('organizations')
+					.exists()
+					.withMessage('Organizations field is required when organizations=true in query')
+					.isArray()
+					.withMessage('Organizations must be an array')
+					.custom((value) => {
+						if (Array.isArray(value) && value.length === 0) {
+							throw new Error('Organizations array cannot be empty')
+						}
+						return true
+					})
+			}
 		},
 		removeRolesInScope: function () {
 			req.checkParams('_id')
@@ -40,6 +60,7 @@ module.exports = (req) => {
 				.isMongoId()
 				.withMessage('Invalid program ID')
 			req.checkBody('roles').exists().withMessage('required program roles to be added')
+			req.checkBody('roles').isArray().withMessage('roles must be an array')
 		},
 		removeEntitiesInScope: function () {
 			req.checkParams('_id')
@@ -48,6 +69,15 @@ module.exports = (req) => {
 				.isMongoId()
 				.withMessage('Invalid program ID')
 			req.checkBody('entities').exists().withMessage('required entities to be added')
+			const entities = req.body.entities
+			if (entities && typeof entities === 'object') {
+				for (const [key, value] of Object.entries(entities)) {
+					req.checkBody(`entities.${key}`).isArray().withMessage(`${key} should be an array`)
+				}
+			}
+			if (req.body.organizations) {
+				req.checkBody('organizations').isArray().withMessage('Organizations must be an array')
+			}
 		},
 		join: function () {
 			req.checkParams('_id')
@@ -63,6 +93,20 @@ module.exports = (req) => {
 				.withMessage('required program id')
 				.isMongoId()
 				.withMessage('Invalid program ID')
+		},
+		read: function () {
+			req.checkParams('_id')
+				.exists()
+				.withMessage('required program id')
+				.isMongoId()
+				.withMessage('Invalid program ID')
+			if (!req.userDetails) {
+				req.checkBody('tenantData.tenantId')
+					.exists()
+					.withMessage('tenantId is required')
+					.notEmpty()
+					.withMessage('tenantId cannot be empty')
+			}
 		},
 	}
 

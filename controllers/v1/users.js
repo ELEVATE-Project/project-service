@@ -78,7 +78,8 @@ module.exports = class Users {
 					req.pageSize,
 					req.pageNo,
 					req.searchText,
-					req.userDetails.userInformation.userId
+					req.userDetails.userInformation.userId,
+					req.userDetails
 				)
 
 				return resolve(targetedSolutions)
@@ -151,14 +152,14 @@ module.exports = class Users {
 			try {
 				let isAPrivateProgram = UTILS.convertStringToBoolean(req.query.isAPrivateProgram)
 				req.query.getProjectsCount = UTILS.convertStringToBoolean(req.query.getProjectsCount)
-
 				if (isAPrivateProgram) {
 					let programsData = await usersHelper.privatePrograms(
 						req.userDetails.userInformation.userId,
 						req.query.language ? req.query.language : '',
 						req.query.getProjectsCount ? req.query.getProjectsCount : false,
 						req.pageNo,
-						req.pageSize
+						req.pageSize,
+						req.userDetails
 					)
 					return resolve(programsData)
 				} else {
@@ -167,7 +168,8 @@ module.exports = class Users {
 						req.pageNo,
 						req.pageSize,
 						req.searchText,
-						req.userDetails.userInformation.userId
+						req.userDetails.userInformation.userId,
+						req.userDetails
 					)
 
 					programs.result = programs.data

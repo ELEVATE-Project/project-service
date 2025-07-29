@@ -827,6 +827,40 @@ function convertDurationToDays(duration) {
 }
 
 /**
+ * Generates a MongoDB query filter based on factor scopes and user role information.
+ *
+ * @param {string[]} factors - An array of factor names used to construct scoped keys.
+ * @param {Object.<string, string|string[]>} userRoleInfo - An object where keys are factor names and values are either comma-separated strings or arrays of values.
+ * @returns {Object[]} An array of query filter objects for MongoDB.
+ */
+function factorQuery(factors, userRoleInfo) {
+	let queryFilter = []
+
+	for (let idx = 0; idx < factors.length; idx++) {
+		let factor = factors[idx]
+		let scope = 'scope.' + factor
+		let rawValues = userRoleInfo[factor]
+		let valueArray
+
+		if (rawValues === undefined || rawValues === null) {
+			valueArray = [CONSTANTS.common.ALL_SCOPE_VALUE]
+		} else if (Array.isArray(rawValues)) {
+			valueArray = [...rawValues, CONSTANTS.common.ALL_SCOPE_VALUE]
+		} else if (typeof rawValues === 'string') {
+			const splitValues = rawValues
+				.split(',')
+				.map((v) => v.trim())
+				.filter(Boolean)
+			valueArray = [...splitValues, CONSTANTS.common.ALL_SCOPE_VALUE]
+		}
+
+		queryFilter.push({ [scope]: { $in: valueArray } })
+	}
+
+	return queryFilter
+}
+
+/**
  * Convert Learning Resource
  * @name convertResources
  * @param {Array} resources - learning resource data
@@ -841,6 +875,117 @@ const convertResources = (resources) =>
 			app: CONSTANTS.common.APP_ELEVATE_PROJECT,
 			id: resource.url.split('/').pop(), // Extract the last part of the URL
 		}))
+
+/**
+ * Checks if the user has admin-level roles.
+ * @param {string[]} roles - Array of user role strings.
+ * @param {string[]} roleToCheck - Array of user role to validate strings.
+ * @returns {boolean} True if user has ADMIN or TENANT_ADMIN role, else false.
+ */
+function validateRoles(roles, roleToCheck) {
+	return roles.some((role) => roleToCheck.includes(role))
+}
+
+/**
+ * Extracts mandatory and optional scope factors from tenant metadata.
+ *
+ * @param {Object} tenantMeta - Metadata object containing scope configuration fields.
+ * @param {string} mandatoryKey - Key name in tenantMeta for mandatory scope fields.
+ * @param {string} optionalKey - Key name in tenantMeta for optional scope fields.
+ * @returns {{ mandatoryFactors: string[], optionalFactors: string[] }}
+ *          An object containing arrays of mandatory and optional factors.
+ */
+function extractScopeFactors(tenantMeta, mandatoryKey, optionalKey) {
+	const factors = []
+	const optionalFactors = []
+
+	if (
+		tenantMeta.hasOwnProperty(mandatoryKey) &&
+		Array.isArray(tenantMeta[mandatoryKey]) &&
+		tenantMeta[mandatoryKey].length > 0
+	) {
+		factors.push(...tenantMeta[mandatoryKey])
+	}
+
+	if (
+		tenantMeta.hasOwnProperty(optionalKey) &&
+		Array.isArray(tenantMeta[optionalKey]) &&
+		tenantMeta[optionalKey].length > 0
+	) {
+		optionalFactors.push(...tenantMeta[optionalKey])
+	}
+
+	return {
+		mandatoryFactors: factors,
+		optionalFactors: optionalFactors,
+	}
+}
+/**
+ * Generates a MongoDB filter query with optional conditions ($or) always nested inside $and.
+ *
+ * @param {Object} bodyData - The data to evaluate against factors.
+ * @param {Object} tenantMeta - Metadata containing scope definitions.
+ * @param {Array<string>} mandatoryField - List of mandatory scope fields.
+ * @param {Array<string>} optionalField - List of optional scope fields.
+ * @returns {Object} MongoDB filter query.
+ */
+function targetingQuery(bodyData, tenantMeta, mandatoryField, optionalField) {
+	let { mandatoryFactors, optionalFactors } = extractScopeFactors(tenantMeta, mandatoryField, optionalField)
+
+	const andClauses = []
+
+	// Add mandatory conditions if any
+	if (Array.isArray(mandatoryFactors) && mandatoryFactors.length > 0) {
+		const mandatoryQuery = UTILS.factorQuery(mandatoryFactors, bodyData)
+		if (Array.isArray(mandatoryQuery) && mandatoryQuery.length > 0) {
+			andClauses.push(...mandatoryQuery)
+		}
+	}
+
+	// Add optional conditions as $or inside $and
+	if (Array.isArray(optionalFactors) && optionalFactors.length > 0) {
+		const optionalQuery = UTILS.factorQuery(optionalFactors, bodyData)
+		if (Array.isArray(optionalQuery) && optionalQuery.length > 0) {
+			andClauses.push({ $or: optionalQuery })
+		}
+	}
+
+	let filterQuery = andClauses.length > 0 ? { $and: andClauses } : {}
+
+	return filterQuery
+}
+
+/**
+ * Filters and formats the scope data based on tenant metadata.
+ *
+ * - Only includes fields defined in mandatory and optional scope fields.
+ * - Mandatory fields are always included: if not present or falsy in scopeData, defaults to ['ALL'].
+ * - Optional fields are included only if present and truthy in scopeData.
+ *
+ * @param {Object} scopeData - The input scope object with field values.
+ * @param {Object} tenantPublicDetailsMetaField - Metadata defining mandatory and optional scope fields.
+ * @param {Object} messageConstants - Constants object containing ALL_SCOPE_VALUE and field keys.
+ * @returns {Object} - The filtered scope object with valid fields and values.
+ */
+function getFilteredScope(scopeData, tenantPublicDetailsMetaField) {
+	const mandatoryFields = tenantPublicDetailsMetaField[CONSTANTS.common.MANDATORY_SCOPE_FIELD] || []
+	const optionalFields = tenantPublicDetailsMetaField[CONSTANTS.common.OPTIONAL_SCOPE_FIELD] || []
+
+	const allAllowedFields = [...mandatoryFields, ...optionalFields]
+	const filteredScope = {}
+
+	for (const field of allAllowedFields) {
+		const value = scopeData[field]
+
+		if (value) {
+			filteredScope[field] = value
+		} else if (mandatoryFields.includes(field)) {
+			filteredScope[field] = [CONSTANTS.common.ALL_SCOPE_VALUE]
+		}
+	}
+
+	return filteredScope
+}
 
 module.exports = {
 	camelCaseToTitleCase: camelCaseToTitleCase,
@@ -882,4 +1027,8 @@ module.exports = {
 	formatMetaInformation,
 	convertResources,
 	convertDurationToDays,
+	factorQuery,
+	validateRoles,
+	targetingQuery,
+	getFilteredScope,
 }

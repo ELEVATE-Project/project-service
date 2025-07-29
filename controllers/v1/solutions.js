@@ -90,7 +90,8 @@ module.exports = class Solutions extends Abstract {
 			try {
 				let solutionData = await solutionsHelper.createSolution(
 					req.body,
-					true //this is true for when its called via API calls
+					true, //this is true for when its called via API calls
+					req.userDetails
 				)
 
 				return resolve(solutionData)
@@ -180,7 +181,7 @@ module.exports = class Solutions extends Abstract {
 				let solutionData = await solutionsHelper.update(
 					req.params._id,
 					req.body,
-					req.userDetails.userInformation.userId,
+					req.userDetails,
 					true //this is true for when its called via API calls
 				)
 
@@ -246,7 +247,10 @@ module.exports = class Solutions extends Abstract {
 					req.body,
 					req.pageNo,
 					req.pageSize,
-					req.searchText
+					req.searchText,
+					[],
+					req.userDetails,
+					req.query.currentOrgOnly ? req.query.currentOrgOnly : false
 				)
 
 				return resolve(solutionData)
@@ -270,6 +274,11 @@ module.exports = class Solutions extends Abstract {
         "roles" : ["head_master"]
       }
     * @apiHeader {String} X-authenticated-user-token Authenticity token
+    * @apiHeader {String} internal-access-token
+    * If you are a System Admin use below headers.
+    * @apiHeader {String} admin-auth-token
+    * @apiHeader {String} tenantId
+    * @apiHeader {String} orgid
     * @apiSampleRequest /project/v1/solutions/addRolesInScope/5ffbf8909259097d48017bbf
     * @apiUse successBody
     * @apiUse errorBody
@@ -287,13 +296,20 @@ module.exports = class Solutions extends Abstract {
 	 * @param {Object} req - requested data.
 	 * @param {String} req.params._id - solution id.
 	 * @param {Array} req.body.roles - Roles to be added.
+	 * @param {Object} req.userDetails - User details
 	 * @returns {Array} solution scope roles.
 	 */
 
+	// Role-based logic has been removed from the current implementation, so this API is currently not in use.
+	//  It may be revisited in the future based on requirements.
 	async addRolesInScope(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let solutionUpdated = await solutionsHelper.addRolesInScope(req.params._id, req.body.roles)
+				let solutionUpdated = await solutionsHelper.addRolesInScope(
+					req.params._id,
+					req.body.roles,
+					req.userDetails
+				)
 
 				return resolve(solutionUpdated)
 			} catch (error) {
@@ -381,6 +397,11 @@ module.exports = class Solutions extends Abstract {
     * "roles" : ["head_master"]
     }
     * @apiHeader {String} X-authenticated-user-token Authenticity token
+    * @apiHeader {String} internal-access-token
+    * If you are a System Admin use below headers.
+    * @apiHeader {String} admin-auth-token
+    * @apiHeader {String} tenantId
+    * @apiHeader {String} orgid
     * @apiSampleRequest /project/v1/solutions/removeRolesInScope/5ffbf8909259097d48017bbf
     * @apiUse successBody
     * @apiUse errorBody
@@ -398,13 +419,20 @@ module.exports = class Solutions extends Abstract {
 	 * @param {Object} req - requested data.
 	 * @param {String} req.params._id - solution id.
 	 * @param {Array} req.body.roles - Roles to be added.
+	 * @param {Object} req.userDetails - User details
 	 * @returns {Array} Removed solution scope roles.
 	 */
 
+	// Role-based logic has been removed from the current implementation, so this API is currently not in use.
+	//  It may be revisited in the future based on requirements.
 	async removeRolesInScope(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let solutionUpdated = await solutionsHelper.removeRolesInScope(req.params._id, req.body.roles)
+				let solutionUpdated = await solutionsHelper.removeRolesInScope(
+					req.params._id,
+					req.body.roles,
+					req.userDetails
+				)
 
 				return resolve(solutionUpdated)
 			} catch (error) {
@@ -448,7 +476,8 @@ module.exports = class Solutions extends Abstract {
 			try {
 				let solutionData = await solutionsHelper.fetchLink(
 					req.params._id,
-					req.userDetails.userInformation.userId
+					req.userDetails,
+					req.userDetails.userToken
 				)
 
 				return resolve(solutionData)
@@ -510,7 +539,8 @@ module.exports = class Solutions extends Abstract {
 					req.userDetails.userToken,
 					req.query.hasOwnProperty('createProject')
 						? UTILS.convertStringToBoolean(req.query.createProject)
-						: true
+						: true,
+					req.userDetails
 				)
 				return resolve(solutionData)
 			} catch (error) {
@@ -529,10 +559,41 @@ module.exports = class Solutions extends Abstract {
     * @apiName Add entities in solutions
     * @apiGroup Solutions
     * @apiParamExample {json} Request-Body:
-    * {
-      "entities" : ["5f33c3d85f637784791cd830"]
+    * 
+      {
+        "entities": {
+            "district": [
+                "67c82d9553812588916410d3"
+            ],
+            "professional_subroles": [
+                "682301604e2812081f342674",
+                "682303044e2812081f3426fb"
+            ],
+            "professional_role": [
+                "681b07b49c57cdcf03c79ae3",
+                "681b0800f21c88cef9517e0e"
+            ],
+            "school": [
+                "67c82d9553812588916410d3"
+            ],
+            "language": [
+                "681b0800f21c88cef951890e"
+            ],
+            "gender": [
+                "67c82d955381258891642345"
+            ]
+        },
+        "organizations": [
+            "blr"
+        ]
+      } 
     }
     * @apiHeader {String} X-authenticated-user-token Authenticity token
+    * @apiHeader {String} internal-access-token
+    * If you are a System Admin use below headers.
+    * @apiHeader {String} admin-auth-token
+    * @apiHeader {String} tenantId
+    * @apiHeader {String} orgid
     * @apiSampleRequest /project/v1/solutions/addEntitiesInScope/5ffbf8909259097d48017bbf
     * @apiUse successBody
     * @apiUse errorBody
@@ -549,14 +610,19 @@ module.exports = class Solutions extends Abstract {
 	 * @name addEntitiesInScope
 	 * @param {Object} req - requested data.
 	 * @param {String} req.params._id - solution id.
-	 * @param {Array} req.body.entities - Entities to be added.
+	 * @param {Object} req.body - data to be added.
+	 * @param {Object} req.userDetails - User details
 	 * @returns {Array} Solution scope entities updation.
 	 */
 
 	async addEntitiesInScope(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let solutionUpdated = await solutionsHelper.addEntitiesInScope(req.params._id, req.body.entities)
+				let solutionUpdated = await solutionsHelper.addEntitiesInScope(
+					req.params._id,
+					req.body,
+					req.userDetails
+				)
 
 				return resolve(solutionUpdated)
 			} catch (error) {
@@ -576,9 +642,27 @@ module.exports = class Solutions extends Abstract {
     * @apiGroup Solutions
     * @apiParamExample {json} Request-Body:
     * {
-      "entities" : ["5f33c3d85f637784791cd830"]
+        "entities": {
+            "professional_subroles": [
+                "682301254e2812081f34266c",
+                "682303044e2812081f3426fb",
+                "682301604e2812081f342674"
+            ],
+            "professional_role": [
+                "681b07b49c57cdcf03c79ae3",
+                "681b0800f21c88cef9517e0e"
+            ]
+        },
+        "organizations": [
+            "ALL"
+        ]
     }
     * @apiHeader {String} X-authenticated-user-token Authenticity token
+    * @apiHeader {String} internal-access-token
+    * If you are a System Admin use below headers.
+    * @apiHeader {String} admin-auth-token
+    * @apiHeader {String} tenantId
+    * @apiHeader {String} orgid
     * @apiSampleRequest /project/v1/solutions/removeEntitiesInScope/5ffbf8909259097d48017bbf
     * @apiUse successBody
     * @apiUse errorBody
@@ -595,14 +679,19 @@ module.exports = class Solutions extends Abstract {
 	 * @name removeEntitiesInScope
 	 * @param {Object} req - requested data.
 	 * @param {String} req.params._id - solution id.
-	 * @param {Array} req.body.entities - Entities to be added.
+	 * @param {Object} req.body - data to be removed.
+	 * @param {Object} req.userDetails - User details
 	 * @returns {Array} Program scope roles.
 	 */
 
 	async removeEntitiesInScope(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let solutionUpdated = await solutionsHelper.removeEntitiesInScope(req.params._id, req.body.entities)
+				let solutionUpdated = await solutionsHelper.removeEntitiesInScope(
+					req.params._id,
+					req.body,
+					req.userDetails
+				)
 
 				return resolve(solutionUpdated)
 			} catch (error) {
@@ -714,7 +803,8 @@ module.exports = class Solutions extends Abstract {
 					req.query.programId ? req.query.programId : '',
 					req.pageSize,
 					req.pageNo,
-					req.searchText
+					req.searchText,
+					req.userDetails
 				)
 
 				return resolve(targetedSolutions)
@@ -851,7 +941,8 @@ module.exports = class Solutions extends Abstract {
 					req.searchText,
 					req.query.filter,
 					req.query.surveyReportPage ? req.query.surveyReportPage : '',
-					req.query.currentScopeOnly ? req.query.currentScopeOnly : false
+					req.query.currentScopeOnly ? req.query.currentScopeOnly : false,
+					req.userDetails
 				)
 
 				return resolve(observations)
@@ -1028,7 +1119,7 @@ module.exports = class Solutions extends Abstract {
 	async getDetails(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let solutionData = await solutionsHelper.getDetails(req.params._id)
+				let solutionData = await solutionsHelper.getDetails(req.params._id, req.userDetails)
 
 				solutionData['result'] = solutionData.data
 
@@ -1145,11 +1236,7 @@ module.exports = class Solutions extends Abstract {
 	async details(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let solutionData = await solutionsHelper.details(
-					req.params._id,
-					req.body,
-					req.userDetails.userInformation.userId
-				)
+				let solutionData = await solutionsHelper.details(req.params._id, req.body, req.userDetails)
 				return resolve(solutionData)
 			} catch (error) {
 				return reject({

@@ -99,6 +99,13 @@ module.exports = (req) => {
 		update: function () {
 			req.checkParams('_id').exists().withMessage('required project id')
 		},
+		deleteUserPIIData: function () {
+			req.checkBody('id').exists().withMessage('required id of the user')
+		},
+		pushSubmissionToTask: function () {
+			req.checkParams('_id').exists().withMessage('required project id'),
+				req.checkQuery('taskId').exists().withMessage('required task id')
+		},
 	}
 
 	if (projectsValidator[req.params.method]) {

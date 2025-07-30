@@ -23,6 +23,24 @@ module.exports = {
 			require: true,
 			index: true,
 		},
+		programId: {
+			type: 'ObjectId',
+			index: true,
+		},
+		programExternalId: {
+			type: String,
+			index: true,
+		},
+		solutionInformation: {
+			type: Object,
+			default: {},
+		},
+		userProfile: Object,
+		isDeleted: {
+			default: false,
+			type: Boolean,
+			index: true,
+		},
 	},
 	compoundIndex: [
 		{

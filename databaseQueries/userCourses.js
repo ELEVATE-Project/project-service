@@ -89,11 +89,11 @@ module.exports = class userCourses {
 	/**
 	 * create userCourses
 	 * @method
-	 * @name createuserCourses
+	 * @name createUserCourses
 	 * @param {Object} courseData - solution data.
 	 * @returns {Object} solution object.
 	 */
-	static createuserCourses(courseData) {
+	static createUserCourses(courseData) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let userCoursesDocument = await database.models.userCourses.create(courseData)

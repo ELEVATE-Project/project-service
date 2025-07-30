@@ -210,6 +210,11 @@ let enviromentVariables = {
 		optional: true,
 		default: 'elevate-user-courses-dev',
 	},
+	USER_COURSES_TOPIC: {
+		message: 'Required USER_COURSES_TOPIC',
+		optional: true,
+		default: 'elevate_user_courses_raw',
+	},
 }
 
 let success = true

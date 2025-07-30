@@ -64,7 +64,7 @@ function createSolution(solutionData, checkDate = false, userDetails) {
 			solutionData.programName = programData[0].name
 			solutionData.programDescription = programData[0].description
 
-			if (solutionData.type == CONSTANTS.common.COURSE && !solutionData.link) {
+			if (solutionData.type == CONSTANTS.common.COURSE && !solutionData.linkUrl) {
 				return resolve({
 					status: HTTP_STATUS_CODE.bad_request.status,
 					message: CONSTANTS.apiResponses.COURSE_LINK_REQUIRED,

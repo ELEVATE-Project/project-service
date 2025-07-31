@@ -87,6 +87,29 @@ module.exports = class userCourses {
 	}
 
 	/**
+	 * Update userCourses
+	 * @method
+	 * @name userCoursesUpdateDocuments
+	 * @param {Object} query
+	 * @param {Object} updateObject
+	 * @param {Object} returnData
+	 * @returns {JSON} - update response
+	 */
+
+	static userCoursesUpdateDocuments(query, updateObject, returnData = { new: false }) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let userCoursesDocuments = await database.models.userCourses
+					.findOneAndUpdate(query, updateObject, returnData)
+					.lean()
+				return resolve(userCoursesDocuments)
+			} catch (error) {
+				return reject(error)
+			}
+		})
+	}
+
+	/**
 	 * create userCourses
 	 * @method
 	 * @name createUserCourses

@@ -15,12 +15,12 @@ module.exports = {
 		},
 		orgId: {
 			type: String,
-			require: true,
+			required: true,
 			index: true,
 		},
 		tenantId: {
 			type: String,
-			require: true,
+			required: true,
 			index: true,
 		},
 		programId: {

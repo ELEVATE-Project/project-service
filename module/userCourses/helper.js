@@ -181,24 +181,24 @@ module.exports = class UserCoursesHelper {
 
 			let updateObject = { $set: updateCourseData }
 
-			let updateCourse = await userCoursesQueries.updateMany(coursesfilter, updateObject, { new: true })
-			if (!updateCourse || updateCourse.nModified === 0) {
+			// Update userCourses document
+			let updateCourse = await userCoursesQueries.userCoursesUpdateDocuments(coursesfilter, updateObject, {
+				new: true,
+			})
+			if (!updateCourse || !updateCourse._id) {
 				return {
 					status: HTTP_STATUS_CODE.bad_request.status,
 					message: CONSTANTS.apiResponses.USER_COURSES_NOT_UPDATED,
 				}
 			}
 
-			// Fetch the latest updated document
-			let updatedCourseDocument = await userCoursesQueries.userCoursesDocuments(coursesfilter)
-
 			// Push to Kafka (Generic function)
-			await kafkaProducersHelper.pushUserCoursesToKafka(updatedCourseDocument[0])
+			await kafkaProducersHelper.pushUserCoursesToKafka(updateCourse)
 
 			return {
 				success: true,
 				message: CONSTANTS.apiResponses.USER_COURSES_UPDATED,
-				data: updatedCourseDocument[0]._id,
+				data: updateCourse,
 			}
 		} catch (error) {
 			throw {

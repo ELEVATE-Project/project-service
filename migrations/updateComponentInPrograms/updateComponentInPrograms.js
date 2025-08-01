@@ -29,7 +29,6 @@ async function modifyProgramsCollection() {
 			components: { $exists: true, $type: 'array' },
 		})
 		.sort({ createdAt: 1 })
-		.limit(10)
 
 	let batch = []
 

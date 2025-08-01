@@ -1239,6 +1239,9 @@ module.exports = class SolutionsHelper {
 			case CONSTANTS.common.IMPROVEMENT_PROJECT:
 				link = appsPortalBaseUrl + prefix + CONSTANTS.common.CREATE_PROJECT + solutionLink
 				break
+			case CONSTANTS.common.COURSE:
+				link = appsPortalBaseUrl + prefix + CONSTANTS.common.CREATE_COURSE + solutionLink
+				break
 			default:
 				link = appsPortalBaseUrl + prefix + CONSTANTS.common.CREATE_SURVEY + solutionLink
 		}

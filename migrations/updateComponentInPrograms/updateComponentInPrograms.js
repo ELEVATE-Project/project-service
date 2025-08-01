@@ -1,5 +1,5 @@
 /**
- * name : fixOrgIdsFromPrograms.js
+ * name : updateComponentInPrograms.js
  * author : Saish R B
  * created-date : 01-Aug-2025
  * Description : Migration script to update components in 'programs' collection in memory-chunks

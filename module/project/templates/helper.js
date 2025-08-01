@@ -975,7 +975,7 @@ module.exports = class ProjectTemplatesHelper {
 				['components']
 			)
 
-			let programsComponentsLength = programs && programs.length > 0 ? programs[0]?.components?.length : []
+			let nextComponentOrder = programs && programs.length > 0 ? programs[0]?.components?.length || 0 : 0
 
 			let duplicateTemplateTaskId
 
@@ -1177,7 +1177,7 @@ module.exports = class ProjectTemplatesHelper {
 						$addToSet: {
 							components: {
 								_id: newProjectTemplateTask.solutionDetails._id,
-								order: ++programsComponentsLength,
+								order: ++nextComponentOrder,
 							},
 						},
 					}
@@ -1222,7 +1222,7 @@ module.exports = class ProjectTemplatesHelper {
 						$addToSet: {
 							components: {
 								_id: newProjectTemplateTask.solutionDetails._id,
-								order: ++programsComponentsLength,
+								order: ++nextComponentOrder,
 							},
 						},
 					}

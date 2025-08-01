@@ -748,7 +748,7 @@ module.exports = class UserProjectsHelper {
 					solutionsCreated.push(solution)
 				}
 
-				let componentLength = userPrivateProgram.components.length
+				let componentLength = userPrivateProgram.components.length || 0
 				const componentArray = solutionsCreated.map((solution) => {
 					return { _id: new ObjectId(solution._id), order: ++componentLength }
 				})

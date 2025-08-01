@@ -7,7 +7,6 @@
 
 // Dependencies
 const programsHelper = require(MODULES_BASE_PATH + '/programs/helper')
-const programsQueries = require(DB_QUERY_BASE_PATH + '/programs')
 
 module.exports = class Programs extends Abstract {
 	constructor() {

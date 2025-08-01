@@ -214,7 +214,7 @@ module.exports = class AdminHelper {
 						}
 						// Extract project template IDs from solutions
 						projectTemplateIds = solutionDetails.map((projectTemplateIds) => {
-							return (projectTemplateIds = projectTemplateIds.projectTemplateId)
+							return projectTemplateIds.projectTemplateId
 						})
 					}
 					// Add main program ID to deletion list
@@ -349,7 +349,7 @@ module.exports = class AdminHelper {
 						}
 					}
 
-					await this.addDeletionLog(resourceIdsWithType, resourceType, deletedBy)
+					await this.addDeletionLog(resourceIdsWithType, deletedBy)
 					return resolve({
 						success: true,
 						message: CONSTANTS.apiResponses.SOLUTION_RESOURCE_DELETED,

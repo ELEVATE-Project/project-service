@@ -286,7 +286,6 @@ module.exports = {
 	ADMIN_TOKEN_MISSING_CODE: 'ERR_ADMIN_TOKEN_MISSING',
 	ADMIN_TOKEN_MISSING_MESSAGE: 'Admin token is missing',
 	SOLUTION_NOT_ALLOWED_TO_BE_CONSUMED: 'This solution is not allowed to be consumed privately',
-	SOLUTION_NOT_FOUND: 'Solution not found',
 	INVALID_RESOURCE_TYPE: 'Invalid resource type provided',
 	SOLUTION_RESOURCE_DELETED: 'Solution and associated resources deleted successfully',
 	PROGRAM_RESOURCE_DELETED: 'Program and associated resources deleted successfully',

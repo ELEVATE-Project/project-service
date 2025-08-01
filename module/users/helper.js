@@ -151,15 +151,16 @@ module.exports = class UsersHelper {
 					})
 
 					// Sort resultData based on the order mapping
-					resultData = resultData.sort((a, b) => {
-						const aIdString = a._id.toString()
-						const bIdString = b._id.toString()
-
-						const aOrder = orderMap.get(aIdString) || Infinity // Items not in components go to end
-						const bOrder = orderMap.get(bIdString) || Infinity
-
-						return aOrder - bOrder
-					})
+					resultData = resultData
+						.map((item) => {
+							const order = orderMap.get(item._id.toString())
+							return { ...item, order: order !== undefined ? order : null }
+						})
+						.sort((a, b) => {
+							const aOrder = a.order !== null ? a.order : Infinity
+							const bOrder = b.order !== null ? b.order : Infinity
+							return aOrder - bOrder
+						})
 
 					// Update the result object with sorted data
 					result.data = resultData

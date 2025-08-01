@@ -106,9 +106,21 @@ async function processBatch(docs, collection) {
 	}
 
 	if (bulkOps.length > 0) {
-		await collection.bulkWrite(bulkOps, { ordered: false })
-		console.log(`Processed batch of ${bulkOps.length} documents`)
-		finalArray.push(bulkOps)
+		try {
+			const result = await collection.bulkWrite(bulkOps, { ordered: false })
+			console.log(
+				`Processed batch of ${bulkOps.length} documents. Modified: ${result.modifiedCount}, Errors: ${
+					result.writeErrors?.length || 0
+				}`
+			)
+			if (result.writeErrors && result.writeErrors.length > 0) {
+				console.error('Bulk write errors:', result.writeErrors)
+			}
+			finalArray.push({ operations: bulkOps, result })
+		} catch (error) {
+			console.error(`Batch processing failed:`, error)
+			finalArray.push({ operations: bulkOps, error: error.message })
+		}
 	}
 }
 

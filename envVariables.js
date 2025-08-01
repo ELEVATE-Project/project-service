@@ -205,6 +205,16 @@ let enviromentVariables = {
 		optional: true,
 		default: 'elevate-improvement-project-submission-dev',
 	},
+	USER_COURSES_SUBMISSION_TOPIC: {
+		message: 'Required USER_COURSES_SUBMISSION_TOPIC',
+		optional: true,
+		default: 'elevate_user_courses_dev',
+	},
+	USER_COURSES_TOPIC: {
+		message: 'Required USER_COURSES_TOPIC',
+		optional: true,
+		default: 'elevate_user_courses_raw',
+	},
 }
 
 let success = true

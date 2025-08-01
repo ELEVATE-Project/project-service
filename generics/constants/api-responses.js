@@ -286,4 +286,10 @@ module.exports = {
 	ADMIN_TOKEN_MISSING_CODE: 'ERR_ADMIN_TOKEN_MISSING',
 	ADMIN_TOKEN_MISSING_MESSAGE: 'Admin token is missing',
 	SOLUTION_NOT_ALLOWED_TO_BE_CONSUMED: 'This solution is not allowed to be consumed privately',
+	MISSING_SOLUTIONID_USERID_STATUS: 'SolutionId or userId or status is not found',
+	USER_COURSES_NOT_CREATED: 'User course not created',
+	USER_COURSES_NOT_UPDATED: 'User course not updated',
+	USER_COURSES_CREATED: 'User course created successfully',
+	USER_COURSES_UPDATED: 'User course updated successfully',
+	INVALID_SOLUTIONID: 'Invalid solutionId',
 }

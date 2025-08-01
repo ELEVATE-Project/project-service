@@ -324,28 +324,39 @@ module.exports = class UserProjectsHelper {
 				//     }
 				// }
 
-				// let addOrUpdateEntityToProject = false
+				let addOrUpdateEntityToProject = false
 
-				// if (data.entityId) {
-				// 	// If entity is not present in project or new entity is updated.
-				// 	if (
-				// 		!userProject[0].entityInformation ||
-				// 		(userProject[0].entityInformation && userProject[0].entityInformation._id !== data.entityId)
-				// 	) {
-				// 		addOrUpdateEntityToProject = true
-				// 	}
-				// }
+				if (data.entityId) {
+					// If entity is not present in project or new entity is updated.
+					if (
+						!userProject[0].entityInformation ||
+						(userProject[0].entityInformation && userProject[0].entityInformation._id !== data.entityId)
+					) {
+						addOrUpdateEntityToProject = true
+					}
+				}
 
-				// if (addOrUpdateEntityToProject) {
-				// 	let entityInformation = await entitiesService.entityDocuments({ _id: entityId }, 'all')
+				if (addOrUpdateEntityToProject) {
+					let entityDetails = await entitiesService.entityDocuments({
+						_id: data.entityId,
+						tenantId: tenantId,
+					})
 
-				// 	if (!entityInformation.success) {
-				// 		return resolve(entityInformation)
-				// 	}
+					if (!entityDetails?.success || !entityDetails?.data.length > 0) {
+						throw {
+							message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
+							status: HTTP_STATUS_CODE.bad_request.status,
+						}
+					}
 
-				// 	updateProject['entityInformation'] = entityInformation.data[0]
-				// 	updateProject.entityId = entityInformation.data[0]._id
-				// }
+					if (entityDetails && entityDetails?.data.length > 0) {
+						updateProject['entityInformation'] = {
+							..._.pick(entityDetails.data[0], ['_id', 'entityType', 'entityTypeId']),
+							externalId: entityDetails.data[0]?.metaInformation?.externalId,
+						}
+						updateProject.entityId = entityDetails.data[0]._id
+					}
+				}
 
 				// if (createNewProgramAndSolution || solutionExists) {
 
@@ -486,6 +497,7 @@ module.exports = class UserProjectsHelper {
 					})
 					updateProject['updateHistory'] = userProject[0].updateHistory
 				}
+
 				let projectUpdated = await projectQueries.findOneAndUpdate(
 					{
 						_id: userProject[0]._id,
@@ -1459,9 +1471,13 @@ module.exports = class UserProjectsHelper {
 			try {
 				let solutionExternalId = ''
 				let templateDocuments
-				let defaultACL = CONSTANTS.common.DEFAULT_ACL
+				let defaultACL = _.cloneDeep(CONSTANTS.common.DEFAULT_ACL)
 				let tenantId = userDetails.userInformation.tenantId
 				let orgId = userDetails.userInformation.organizationId
+
+				console.log('==========================>userId', userId, '\n')
+				console.log('==========================>defaultAcl', defaultACL, '\n')
+
 				if (templateId !== '') {
 					templateDocuments = await projectTemplateQueries.templateDocument({
 						externalId: templateId,
@@ -1678,6 +1694,8 @@ module.exports = class UserProjectsHelper {
 								scope: solutionDetails.scope,
 								// referenceFrom: solutionDetails.referenceFrom ? solutionDetails.referenceFrom : '', // added for project as a task
 								// project: solutionDetails.project ? solutionDetails.project : '',
+								entityType: solutionDetails.entityType,
+								parentEntityKey: solutionDetails.parentEntityKey,
 							}
 
 							projectCreation.data['programId'] = projectCreation.data.programInformation._id
@@ -1702,6 +1720,7 @@ module.exports = class UserProjectsHelper {
 								defaultACL.users.push(userId)
 								defaultACL.scope = solutionDetails.scope
 								projectCreation.data['acl'] = defaultACL
+								console.log('=========================>', projectCreation.data.acl, '\n')
 							}
 							projectCreation.data['updateHistory'] = [
 								{
@@ -1778,7 +1797,25 @@ module.exports = class UserProjectsHelper {
 								projectCreation.data['userRole'] = bodyData.role
 							}
 							// Adding entityInformation in Project
-							if (solutionDetails.entityType && bodyData[solutionDetails.entityType]) {
+							if (solutionDetails.entityType && bodyData.entityId) {
+								let entityDetails = await entitiesService.entityDocuments({
+									_id: bodyData.entityId,
+									tenantId: tenantId,
+								})
+
+								if (!entityDetails?.success || !entityDetails?.data.length > 0) {
+									throw {
+										message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
+										status: HTTP_STATUS_CODE.bad_request.status,
+									}
+								}
+								if (entityDetails && entityDetails?.data.length > 0) {
+									projectCreation.data['entityInformation'] = {
+										..._.pick(entityDetails.data[0], ['_id', 'entityType', 'entityTypeId']),
+										externalId: entityDetails.data[0]?.metaInformation?.externalId,
+									}
+								}
+							} else if (solutionDetails.entityType && bodyData[solutionDetails.entityType]) {
 								let entityDetails = await entitiesService.entityDocuments({
 									_id: bodyData[solutionDetails.entityType],
 									tenantId: tenantId,

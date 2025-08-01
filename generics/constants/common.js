@@ -66,6 +66,7 @@ module.exports = {
 	PREFIX_FOR_SOLUTION_LINK: 'view',
 	CREATE_OBSERVATION: '/create-observation/',
 	CREATE_PROJECT: '/project/',
+	CREATE_COURSE: '/create-course/',
 	CREATE_SURVEY: '/create-survey/',
 	SUBMISSION_STATUS_COMPLETED: 'completed',
 	EXPIRED: 'expired',

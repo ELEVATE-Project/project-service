@@ -11,6 +11,7 @@ const SUBMISSION_TOPIC = process.env.SUBMISSION_TOPIC
 const CERTIFICATE_TOPIC = process.env.PROJECT_SUBMISSION_TOPIC
 const USER_DELETE_TOPIC = process.env.USER_DELETE_TOPIC
 const USER_DELETE_ON_OFF = process.env.USER_DELETE_ON_OFF
+const COURSES_TOPIC = process.env.USER_COURSES_SUBMISSION_TOPIC
 
 /**
  * Kafka configurations.
@@ -49,6 +50,8 @@ const connect = function () {
 	if (USER_DELETE_ON_OFF !== 'OFF') {
 		_sendToKafkaConsumers(USER_DELETE_TOPIC, process.env.KAFKA_URL)
 	}
+
+	_sendToKafkaConsumers(COURSES_TOPIC, process.env.KAFKA_URL)
 
 	return {
 		kafkaProducer: producer,
@@ -93,6 +96,11 @@ var _sendToKafkaConsumers = function (topic, host) {
 			if (message && message.topic === USER_DELETE_TOPIC) {
 				userDeleteConsumer.messageReceived(message)
 			}
+
+			// call userCourses consumer
+			if (message && message.topic === COURSES_TOPIC) {
+				userCoursesConsumer.messageReceived(message)
+			}
 		})
 
 		consumer.on('error', async function (error) {
@@ -105,6 +113,9 @@ var _sendToKafkaConsumers = function (topic, host) {
 
 			if (error.topics && error.topics[0] === USER_DELETE_TOPIC) {
 				userDeleteConsumer.errorTriggered(error)
+			}
+			if (error.topics && error.topics[0] === COURSES_TOPIC) {
+				userCoursesConsumer.errorTriggered(error)
 			}
 		})
 	}

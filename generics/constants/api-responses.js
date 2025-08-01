@@ -292,4 +292,10 @@ module.exports = {
 	PROGRAM_RESOURCE_DELETED: 'Program and associated resources deleted successfully',
 	OBSERVATION_NOT_DELETED: 'Failed to delete Observation',
 	SURVEY_NOT_DELETED: 'Failed to delete Survey',
+	MISSING_SOLUTIONID_USERID_STATUS: 'SolutionId or userId or status is not found',
+	USER_COURSES_NOT_CREATED: 'User course not created',
+	USER_COURSES_NOT_UPDATED: 'User course not updated',
+	USER_COURSES_CREATED: 'User course created successfully',
+	USER_COURSES_UPDATED: 'User course updated successfully',
+	INVALID_SOLUTIONID: 'Invalid solutionId',
 }

@@ -9,8 +9,19 @@ let rootPath = path.join(__dirname, '../../')
 require('dotenv').config({ path: rootPath + '/.env' })
 const { MongoClient, ObjectId } = require('mongodb')
 const MONGODB_URL = process.env.MONGODB_URL
+
+if (!MONGODB_URL) {
+	console.error('MONGODB_URL environment variable is required')
+	process.exit(1)
+}
+
 const DB = MONGODB_URL.split('/').pop()
 const URL = MONGODB_URL.split(DB)[0]
+
+if (!DB || !URL) {
+	console.error('Invalid MONGODB_URL format')
+	process.exit(1)
+}
 
 const BATCH_SIZE = 100 // Tune this based on system capacity
 

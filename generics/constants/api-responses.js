@@ -291,4 +291,5 @@ module.exports = {
 	USER_COURSES_NOT_UPDATED: 'User course not updated',
 	USER_COURSES_CREATED: 'User course created successfully',
 	USER_COURSES_UPDATED: 'User course updated successfully',
+	INVALID_SOLUTIONID: 'Invalid solutionId',
 }

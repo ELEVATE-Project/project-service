@@ -35,6 +35,14 @@ module.exports = class UserCoursesHelper {
 				}
 			}
 
+			if (!UTILS.isValidMongoId(userCoursesData.entityId)) {
+				return {
+					success: false,
+					status: httpStatusCode.bad_request.status,
+					message: CONSTANTS.apiResponses.INVALID_SOLUTIONID,
+				}
+			}
+
 			// get the userCourses document
 			let courseDocument = await userCoursesQueries.userCoursesDocuments({
 				solutionId: new ObjectId(userCoursesData.entityId),

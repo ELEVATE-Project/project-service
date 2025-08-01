@@ -134,7 +134,7 @@ module.exports = class Admin {
 	 * @returns {Promise<Object>} - Returns a success or failure response from the adminHelper.
 	 * @throws {Object} - Throws an error object with status, message, and error details if validation or deletion fails.
 	 */
-	async deleteResource(req) {
+	async deletedResourceDetails(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let deletedEntity
@@ -145,8 +145,8 @@ module.exports = class Admin {
 					req.userDetails.userInformation.roles &&
 					req.userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)
 				) {
-					// Call adminHelper's deleteResource with required identifiers
-					deletedEntity = await adminHelper.deleteResource(
+					// Call adminHelper's deletedResourceDetails with required identifiers
+					deletedEntity = await adminHelper.deletedResourceDetails(
 						req.params._id,
 						req.query.type,
 						req.userDetails.tenantAndOrgInfo.tenantId,

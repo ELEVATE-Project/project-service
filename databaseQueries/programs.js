@@ -140,7 +140,7 @@ module.exports = class Programs {
 	 * @param {Object} filter - MongoDB query filter to match documents for deletion.
 	 * @returns {Promise<Object>} - MongoDB deleteMany result containing deleted count.
 	 */
-	static removeDocuments(filter) {
+	static deletePrograms(filter) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let deleteDocuments = await database.models.programs.deleteMany(filter)
@@ -169,11 +169,17 @@ module.exports = class Programs {
 				// Build the update operation: $pull removes matching solutionId from the components array
 				const updateQuery = {
 					$pull: {
-						[`components`]: solutionId,
+						components: { _id: solutionId },
 					},
 				}
-				// Run updateMany to apply this change to all program docs containing the solutionId
-				const result = await database.models.programs.updateMany({ [`components`]: solutionId }, updateQuery)
+
+				// Filter: Find programs that contain components._id = solutionId
+				const filterQuery = {
+					'components._id': solutionId,
+				}
+
+				// Run updateMany to apply this change to all program docs
+				const result = await database.models.programs.updateMany(filterQuery, updateQuery)
 				return resolve(result)
 			} catch (error) {
 				return reject({

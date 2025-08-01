@@ -741,16 +741,16 @@ module.exports = class Programs extends Abstract {
 
 	/**
 	 * Controller method to remove a solution ID from all program documents where it exists.
-	 * Delegates the actual logic to `programsHelper.pullSolutionId()`.
+	 * Delegates the actual logic to `programsHelper.removeSolutionsFromProgramComponent()`.
 	 *
 	 * @param {Object} req - Express request object containing `params._id` (solutionId).
 	 * @returns {Promise<Object>} - Result of the operation from the helper function.
 	 */
-	async pullSolutionId(req) {
+	async removeSolutionsFromProgramComponent(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Call helper method to perform the $pull operation on programs collection
-				let programData = await programsHelper.pullSolutionId(req.params._id)
+				let programData = await programsHelper.removeSolutionsFromProgramComponent(req.params._id)
 				return resolve(programData)
 			} catch (error) {
 				return reject({

@@ -101,18 +101,14 @@ module.exports = class CertificateTemplates {
 	 * @param {Object} filter - MongoDB query filter to match documents for deletion.
 	 * @returns {Promise<Object>} - MongoDB deleteMany result containing deleted count.
 	 */
-	static removeDocuments(filter) {
+	static deleteCertificateTemplate(filter) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let deleteDocuments = await database.models.certificateTemplates.deleteMany(filter)
 
 				return resolve(deleteDocuments)
 			} catch (error) {
-				return reject({
-					status: error.status || HTTP_STATUS_CODE.bad_request.status,
-					message: error.message || HTTP_STATUS_CODE.bad_request.message,
-					errorObject: error,
-				})
+				return reject(error)
 			}
 		})
 	}

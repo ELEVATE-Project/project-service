@@ -105,8 +105,8 @@ module.exports = async function (req, res, next, token = '') {
 		'/userProjects/pushSubmissionToTask',
 		'/templates/importProjectTemplate',
 		'/templates/listByIds',
-		'/admin/deleteResource',
-		'/programs/pullSolutionId',
+		'/admin/deletedResourceDetails',
+		'/programs/removeSolutionsFromProgramComponent',
 	]
 	let performInternalAccessTokenCheck = false
 	let adminHeader = false

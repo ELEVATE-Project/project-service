@@ -290,4 +290,6 @@ module.exports = {
 	INVALID_RESOURCE_TYPE: 'Invalid resource type provided',
 	SOLUTION_RESOURCE_DELETED: 'Solution and associated resources deleted successfully',
 	PROGRAM_RESOURCE_DELETED: 'Program and associated resources deleted successfully',
+	OBSERVATION_NOT_DELETED: 'Failed to delete Observation',
+	SURVEY_NOT_DELETED: 'Failed to delete Survey',
 }

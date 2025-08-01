@@ -13,14 +13,18 @@ module.exports = {
 			index: true,
 			unique: true,
 		},
+		resourceType: {
+			type: String,
+			index: true,
+		},
 		deletedBy: {
 			type: String,
 			default: 'SYSTEM',
 			index: true,
 		},
 		deletedAt: {
-			type: String,
-			default: 'SYSTEM',
+			type: Date,
+			default: Date.now,
 			index: true,
 		},
 	},

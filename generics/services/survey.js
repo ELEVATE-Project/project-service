@@ -335,12 +335,12 @@ const createObservation = function (token, solutionId, data, userRoleAndProfileI
  *
  * @returns {Promise<Object>} - Result indicating success/failure and optional response data.
  */
-const surevyDeleteResource = function (token, solutionId, resourceType, tenantId, orgId) {
+const deleteSolutionResource = function (token, solutionId, resourceType, tenantId, orgId) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			// Construct the API URL to call the delete endpoint on the Survey Service
-			let surevyDeleteResourceUrl =
-				SURVEY_SERVICE_URL + CONSTANTS.endpoints.DELETE_RESOURCE + solutionId + '?type=' + resourceType
+			let deleteSolutionResourceUrl =
+				SURVEY_SERVICE_URL + CONSTANTS.endpoints.DELETE_RESOURCE + '/' + solutionId + '?type=' + resourceType
 			// Prepare request headers with tokens and tenant info
 			let options = {
 				headers: {
@@ -353,7 +353,7 @@ const surevyDeleteResource = function (token, solutionId, resourceType, tenantId
 				},
 			}
 			// Send a POST request to the Survey Service to delete the resource
-			request.post(surevyDeleteResourceUrl, options, assessmentCallback)
+			request.post(deleteSolutionResourceUrl, options, assessmentCallback)
 			// Callback function to handle the response from the Survey Service
 			function assessmentCallback(err, data) {
 				let result = {
@@ -387,5 +387,5 @@ module.exports = {
 	createObservation: createObservation,
 	surveyDetails: surveyDetails,
 	importTemplateToSolution: importTemplateToSolution,
-	surevyDeleteResource: surevyDeleteResource,
+	deleteSolutionResource: deleteSolutionResource,
 }

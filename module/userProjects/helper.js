@@ -747,8 +747,10 @@ module.exports = class UserProjectsHelper {
 					solution = await solutionsQueries.createSolution(solution)
 					solutionsCreated.push(solution)
 				}
-				const solutionIds = solutionsCreated.map((solution) => {
-					return solution._id
+
+				let componentLength = userPrivateProgram.components.length
+				const componentArray = solutionsCreated.map((solution) => {
+					return { _id: new ObjectId(solution._id), order: ++componentLength }
 				})
 
 				// Update the program components
@@ -758,7 +760,7 @@ module.exports = class UserProjectsHelper {
 						tenantId: userDetails.userInformation.tenantId,
 					},
 					{
-						$addToSet: { components: solutionIds },
+						$addToSet: { components: componentArray },
 					}
 				)
 				const solutionsAndProgramData = {}
@@ -4864,6 +4866,15 @@ async function _projectTask(
 	programId,
 	userDetails
 ) {
+	let programInformation = await programQueries.programsDocument({
+		_id: programId,
+		tenantId: userDetails.userInformation.tenantId,
+	})
+
+	programInformation = programInformation[0]
+
+	let componentLength = programInformation?.components?.length || 0
+
 	for (const singleTask of tasks) {
 		if (singleTask) {
 			singleTask.externalId = singleTask.externalId ? singleTask.externalId : singleTask.name.toLowerCase()
@@ -4945,7 +4956,12 @@ async function _projectTask(
 							_id: programId,
 						},
 						{
-							$addToSet: { components: importSolutionsResponse.result._id },
+							$addToSet: {
+								components: {
+									_id: ObjectId(importSolutionsResponse.result._id),
+									order: ++componentLength,
+								},
+							},
 						}
 					)
 				} else if (singleTask.solutionDetails.type === CONSTANTS.common.SURVEY) {
@@ -4980,7 +4996,12 @@ async function _projectTask(
 							_id: programId,
 						},
 						{
-							$addToSet: { components: importSolutionsResponse.result.solutionId },
+							$addToSet: {
+								components: {
+									_id: ObjectId(importSolutionsResponse.result.solutionId),
+									order: ++componentLength,
+								},
+							},
 						}
 					)
 				}
@@ -4990,7 +5011,14 @@ async function _projectTask(
 			})
 
 			if (singleTask.children) {
-				await _projectTask(singleTask.children, isImportedFromLibrary, singleTask._id)
+				await _projectTask(
+					singleTask.children,
+					isImportedFromLibrary,
+					singleTask._id,
+					userToken,
+					programId,
+					userDetails
+				)
 			} else {
 				singleTask.children = []
 			}

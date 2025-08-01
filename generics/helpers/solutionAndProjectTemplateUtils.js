@@ -50,6 +50,7 @@ function createSolution(solutionData, checkDate = false, userDetails) {
 				'scope',
 				'endDate',
 				'startDate',
+				'components',
 			])
 			if (!programData.length > 0) {
 				throw {
@@ -57,6 +58,7 @@ function createSolution(solutionData, checkDate = false, userDetails) {
 				}
 			}
 
+			let programsComponent = programData[0].components || []
 			solutionData.programId = programData[0]._id
 			solutionData.programName = programData[0].name
 			solutionData.programDescription = programData[0].description
@@ -111,7 +113,7 @@ function createSolution(solutionData, checkDate = false, userDetails) {
 			programMatchQuery['_id'] = solutionData.programId
 
 			let updateProgram = await programQueries.findAndUpdate(programMatchQuery, {
-				$addToSet: { components: solutionCreation._id },
+				$addToSet: { components: { _id: solutionCreation._id, order: programsComponent.length + 1 } },
 			})
 
 			if (!solutionData.excludeScope && programData[0].scope) {

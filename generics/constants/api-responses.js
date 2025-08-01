@@ -286,4 +286,5 @@ module.exports = {
 	ADMIN_TOKEN_MISSING_CODE: 'ERR_ADMIN_TOKEN_MISSING',
 	ADMIN_TOKEN_MISSING_MESSAGE: 'Admin token is missing',
 	SOLUTION_NOT_ALLOWED_TO_BE_CONSUMED: 'This solution is not allowed to be consumed privately',
+	COMPONENT_ORDER_DUPLICATE: 'Component order cannot be duplicate',
 }

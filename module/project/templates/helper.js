@@ -967,6 +967,16 @@ module.exports = class ProjectTemplatesHelper {
 	static async handleDuplicateTemplateTask(userToken, newProjectTemplateTask, taskData, taskSequence, userDetails) {
 		try {
 			const taskType = newProjectTemplateTask.type
+
+			let programs = await programQueries.programsDocument(
+				{
+					_id: newProjectTemplateTask.programId,
+				},
+				['components']
+			)
+
+			let programsComponentsLength = programs && programs.length > 0 ? programs[0]?.components?.length : []
+
 			let duplicateTemplateTaskId
 
 			const updateTaskSequence = () => {
@@ -1164,7 +1174,12 @@ module.exports = class ProjectTemplatesHelper {
 						_id: newProjectTemplateTask.programId,
 					},
 					{
-						$addToSet: { components: newProjectTemplateTask.solutionDetails._id },
+						$addToSet: {
+							components: {
+								_id: newProjectTemplateTask.solutionDetails._id,
+								order: ++programsComponentsLength,
+							},
+						},
 					}
 				)
 			} else if (taskType === CONSTANTS.common.SURVEY && newProjectTemplateTask?.solutionDetails?.isReusable) {
@@ -1204,7 +1219,12 @@ module.exports = class ProjectTemplatesHelper {
 						_id: newProjectTemplateTask.programId,
 					},
 					{
-						$addToSet: { components: newProjectTemplateTask.solutionDetails._id },
+						$addToSet: {
+							components: {
+								_id: newProjectTemplateTask.solutionDetails._id,
+								order: ++programsComponentsLength,
+							},
+						},
 					}
 				)
 			} else {

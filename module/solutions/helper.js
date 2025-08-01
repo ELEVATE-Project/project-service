@@ -479,6 +479,8 @@ module.exports = class SolutionsHelper {
 						'entityType',
 						'certificateTemplateId',
 						'metaInformation',
+						'linkUrl',
+						'linkTitle',
 					],
 					userDetails,
 					currentOrgOnly
@@ -2452,7 +2454,7 @@ module.exports = class SolutionsHelper {
 					requestedData,
 					userDetails
 				)
-				if (!userCreatedProjects.success) {
+				if (!userCreatedProjects.success && solutionType !== CONSTANTS.common.COURSE) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: userCreatedProjects.message,
@@ -2562,6 +2564,8 @@ module.exports = class SolutionsHelper {
 									'programName',
 									'name',
 									'description',
+									'linkUrl',
+									'linkTitle',
 								])
 							)
 							filteredTargetedSolutions.push(newEntry)

@@ -156,9 +156,9 @@ module.exports = class UsersHelper {
 							const order = orderMap.get(item._id.toString())
 							return { ...item, order: order !== undefined ? order : null }
 						})
-						.sort((a, b) => {
-							const aOrder = a.order !== null ? a.order : Infinity
-							const bOrder = b.order !== null ? b.order : Infinity
+						.sort((aSolution, bSolution) => {
+							const aOrder = aSolution.order !== null ? aSolution.order : Infinity
+							const bOrder = bSolution.order !== null ? bSolution.order : Infinity
 							return aOrder - bOrder
 						})
 

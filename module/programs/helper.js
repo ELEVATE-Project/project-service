@@ -329,7 +329,9 @@ module.exports = class ProgramsHelper {
 				data.updatedAt = new Date()
 				//convert components to objectedIds
 				if (data.components && data.components.length > 0) {
-					const componentsWithOrder = data.components.filter((c) => c._id && c.hasOwnProperty('order'))
+					const componentsWithOrder = data.components.filter(
+						(component) => component._id && component.hasOwnProperty('order')
+					)
 					data.components = componentsWithOrder.map((component) => {
 						return { ...component, _id: UTILS.convertStringToObjectId(component._id) }
 					})
@@ -351,7 +353,7 @@ module.exports = class ProgramsHelper {
 
 					if (!programDocumentRecord[0]) {
 						throw {
-							message: CONSTANTS.apiResponses.PROGRAM_NOT_UPDATED,
+							message: CONSTANTS.apiResponses.PROGRAM_NOT_FOUND,
 						}
 					}
 
@@ -360,7 +362,7 @@ module.exports = class ProgramsHelper {
 					// Process each component in data.components
 					for (let component of data.components) {
 						let componentIndex = currentComponents.findIndex(
-							(c) => c._id.toString() === component._id.toString()
+							(currentComponent) => currentComponent._id.toString() === component._id.toString()
 						)
 
 						if (componentIndex !== -1) {
@@ -384,7 +386,7 @@ module.exports = class ProgramsHelper {
 
 					if (hasDuplicateOrders) {
 						throw {
-							message: CONSTANTS.apiResponses.COMPONENT_ORDER_DUPLICATE,
+							message: CONSTANTS.apiResponses.COMPONENT_ORDER_DUPLICATE_FOUND,
 							status: HTTP_STATUS_CODE.bad_request.status,
 						}
 					}

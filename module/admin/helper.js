@@ -171,6 +171,7 @@ module.exports = class AdminHelper {
 
 				// Track all resource IDs deleted for audit logging
 				let resourceIdsWithType = []
+				let surveyIds = []
 
 				// Handle deletion if the resource type is PROGRAM
 				if (resourceType === CONSTANTS.common.PROGRAM) {
@@ -205,6 +206,28 @@ module.exports = class AdminHelper {
 							'projectTemplateId',
 						])
 
+						const foundSolutionIds = solutionDetails.map((doc) => String(doc._id))
+
+						const missingSolutionIds = solutionIds.filter((id) => !foundSolutionIds.includes(String(id)))
+
+						// Push them into surveyIds
+						surveyIds.push(...missingSolutionIds)
+
+						if (surveyIds.length > 0) {
+							const deleteResponse = await surveyService.deleteSolutionResource(
+								surveyIds,
+								CONSTANTS.common.SOLUTION,
+								tenantId,
+								orgId,
+								deletedBy
+							)
+
+							surveyCount += deleteResponse.data.result.surveyCount || 0
+							surveySubmissionCount += deleteResponse.data.result.surveySubmissionCount || 0
+							observationCount += deleteResponse.data.result.observationCount || 0
+							observationSubmissionCount += deleteResponse.data.result.observationSubmissionCount || 0
+						}
+
 						await solutionsQueries.deleteSolutions(solutionFilter)
 						solutionDeletedCount++
 						if (solutionIds && solutionIds.length) {
@@ -223,6 +246,7 @@ module.exports = class AdminHelper {
 					// Delete all projects linked to the solutions
 					let projecFilter = {
 						solutionId: { $in: solutionIds },
+						isAPrivateProgram: false,
 					}
 					let deletedProjectIds = await projectQueries.deleteProjects(projecFilter)
 
@@ -232,7 +256,7 @@ module.exports = class AdminHelper {
 
 					// Remove program ID from user extension's programRoleMapping
 					const programObjectId = typeof resourceId === 'string' ? new ObjectId(resourceId) : resourceId
-					let programRoleMappingId = await userExtensionQueries.pullProgramIdFromTheProgramRoleMapping(
+					let programRoleMappingId = await userExtensionQueries.pullProgramIdFromProgramRoleMapping(
 						programObjectId
 					)
 					// Delete all associated entities tied to projectTemplateIds
@@ -246,7 +270,7 @@ module.exports = class AdminHelper {
 							projectTemplateIds,
 							tenantId,
 							orgId,
-							userToken
+							deletedBy
 						)
 
 						if (result.success) {
@@ -264,6 +288,10 @@ module.exports = class AdminHelper {
 					await programsQueries.deletePrograms(programFilter)
 					programDeletedCount++
 					// Publish Kafka event
+					// {
+					// 	"topic": "RESOURCE_DELETION_TOPIC",
+					// 	"messages": "{\"entity\":\"resource\",\"type\":\"program\",\"eventType\":\"delete\",\"entityId\":\"682c1526ba875600144d93bc\",\"deleted_By\":1,\"tenant_code\":\"shikshagraha\",\"organization_id\":[\"blr\"]}"
+					//   }
 					await this.pushResourceDeleteKafkaEvent(
 						CONSTANTS.common.PROGRAM,
 						resourceId,
@@ -325,6 +353,10 @@ module.exports = class AdminHelper {
 					solutionDeletedCount++
 
 					// Push event to kafka
+					// {
+					// 	"topic": "RESOURCE_DELETION_TOPIC",
+					// 	"messages": "{\"entity\":\"resource\",\"type\":\"solution\",\"eventType\":\"delete\",\"entityId\":\"682c1526ba875600144d93bc\",\"deleted_By\":1,\"tenant_code\":\"shikshagraha\",\"organization_id\":[\"blr\"]}"
+					//   }
 					await this.pushResourceDeleteKafkaEvent('solution', resourceId, deletedBy, tenantId, orgId)
 
 					resourceIdsWithType.push({ id: resourceId, type: CONSTANTS.common.SOLUTION })
@@ -335,7 +367,7 @@ module.exports = class AdminHelper {
 							[solutionDetails[0].projectTemplateId],
 							tenantId,
 							orgId,
-							userToken
+							deletedBy
 						)
 
 						if (result.success) {
@@ -373,7 +405,6 @@ module.exports = class AdminHelper {
 					})
 				}
 			} catch (error) {
-				console.log(error)
 				return resolve({
 					success: false,
 					message: error.message,
@@ -383,7 +414,15 @@ module.exports = class AdminHelper {
 		})
 	}
 
-	static deleteAssociatedResources(projectTemplateIds, tenantId, orgId, userToken) {
+	/**
+	 * Deletes associated resources (project templates, certificates, tasks, surveys, observations) for the given projectTemplateIds.
+	 *
+	 * @param {Array<string>} projectTemplateIds - Array of project template IDs to delete.
+	 * @param {string} tenantId - Tenant identifier.
+	 * @param {string} orgId - Organization identifier.
+	 * @param {string} deletedBy - Auth token for downstream service calls.
+	 */
+	static deleteAssociatedResources(projectTemplateIds, tenantId, orgId, deletedBy) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Initialize counters to track deletions
@@ -407,13 +446,6 @@ module.exports = class AdminHelper {
 					'certificateTemplateId',
 				])
 
-				if (!projectTemplateDetails || !projectTemplateDetails.length) {
-					throw {
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: CONSTANTS.apiResponses.PROJECT_TEMPLATE_NOT_FOUND,
-					}
-				}
-
 				// Extract all certificateTemplateIds used by project templates
 				const certificateTemplateIds = projectTemplateDetails
 					.map((doc) => doc.certificateTemplateId)
@@ -433,19 +465,10 @@ module.exports = class AdminHelper {
 						tenantId: tenantId,
 					}
 
-					const certificateTemplateDetails = await certificateTemplateQueries.certificateTemplateDocument(
+					let certificateTemplateDetails = await certificateTemplateQueries.deleteCertificateTemplate(
 						certificateTemplateFilter
 					)
-
-					if (!certificateTemplateDetails || !certificateTemplateDetails.length) {
-						throw {
-							status: HTTP_STATUS_CODE.bad_request.status,
-							message: CONSTANTS.apiResponses.CERTIFICATE_TEMPLATE_NOT_FOUND,
-						}
-					}
-
-					await certificateTemplateQueries.deleteCertificateTemplate(certificateTemplateFilter)
-					certificateTemplateDeletedCount = certificateTemplateDetails.length
+					certificateTemplateDeletedCount = certificateTemplateDetails.deletedCount
 				}
 
 				// If any tasks exist, fetch and delete them
@@ -459,56 +482,25 @@ module.exports = class AdminHelper {
 						'solutionDetails',
 					])
 
-					if (!taskDetails || !taskDetails.length) {
-						throw {
-							status: HTTP_STATUS_CODE.bad_request.status,
-							message: CONSTANTS.apiResponses.INVALID_TASK_ID,
-						}
+					let surveySolutionIds
+					if (taskDetails[0].solutionDetails) {
+						surveySolutionIds = taskDetails.map((doc) => doc.solutionDetails?._id).filter(Boolean)
 					}
 
 					// Handle SURVEY or OBSERVATION resource deletions via survey service
-					for (const taskType of taskDetails) {
-						// Delete associated survey solution
-						if (taskType.type === CONSTANTS.common.SURVEY && taskType.solutionDetails) {
-							const surveyDeleteResponse = await surveyService.deleteSolutionResource(
-								userToken,
-								taskType.solutionDetails._id,
-								CONSTANTS.common.SOLUTION,
-								tenantId,
-								orgId
-							)
+					if (surveySolutionIds.length > 0) {
+						const deleteResponse = await surveyService.deleteSolutionResource(
+							surveySolutionIds,
+							CONSTANTS.common.SOLUTION,
+							tenantId,
+							orgId,
+							deletedBy
+						)
 
-							if (surveyDeleteResponse.status !== 200) {
-								throw {
-									status: HTTP_STATUS_CODE.bad_request.status,
-									message: CONSTANTS.apiResponses.SURVEY_NOT_DELETED,
-								}
-							}
-
-							// Update counters from the response
-							surveyCount += surveyDeleteResponse.result?.surveyCount || 0
-							surveySubmissionCount += surveyDeleteResponse.result?.surveySubmissionCount || 0
-						} else if (taskType.type === CONSTANTS.common.OBSERVATION && taskType.solutionDetails) {
-							// Delete associated observation solution
-							const observationDeleteResponse = await surveyService.deleteSolutionResource(
-								userToken,
-								taskType.solutionDetails._id,
-								CONSTANTS.common.SOLUTION,
-								tenantId,
-								orgId
-							)
-							if (observationDeleteResponse.status !== 200) {
-								throw {
-									status: HTTP_STATUS_CODE.bad_request.status,
-									message: CONSTANTS.apiResponses.OBSERVATION_NOT_DELETED,
-								}
-							}
-
-							// Update counters from the response
-							observationCount += observationDeleteResponse.result?.observationCount || 0
-							observationSubmissionCount +=
-								observationDeleteResponse.result?.observationSubmissionCount || 0
-						}
+						surveyCount += deleteResponse.data.result.surveyCount || 0
+						surveySubmissionCount += deleteResponse.data.result.surveySubmissionCount || 0
+						observationCount += deleteResponse.data.result.observationCount || 0
+						observationSubmissionCount += deleteResponse.data.result.observationSubmissionCount || 0
 					}
 
 					// Delete the project template tasks

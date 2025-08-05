@@ -208,7 +208,7 @@ let enviromentVariables = {
 	RESOURCE_DELETION_TOPIC: {
 		message: 'Required RESOURCE_DELETION_TOPIC',
 		optional: false,
-		default: 'resource-deletion-topic',
+		default: 'resource_deletion_topic',
 	},
 	USER_COURSES_SUBMISSION_TOPIC: {
 		message: 'Required USER_COURSES_SUBMISSION_TOPIC',

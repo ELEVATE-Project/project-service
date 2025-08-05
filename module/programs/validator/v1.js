@@ -111,7 +111,7 @@ module.exports = (req) => {
 		removeSolutionsFromProgramComponent: function () {
 			req.checkParams('_id')
 				.exists()
-				.withMessage('required program id')
+				.withMessage('Require program id')
 				.isMongoId()
 				.withMessage('Invalid program ID')
 		},

@@ -134,7 +134,7 @@ module.exports = class Admin {
 	 * @returns {Promise<Object>} - Returns a success or failure response from the adminHelper.
 	 * @throws {Object} - Throws an error object with status, message, and error details if validation or deletion fails.
 	 */
-	async deletedResourceDetails(req) {
+	async deleteResource(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let deletedEntity

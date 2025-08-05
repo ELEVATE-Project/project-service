@@ -23,7 +23,7 @@ const programOperationTopic =
 const pushDeletedResourceTopic =
 	process.env.RESOURCE_DELETION_TOPIC && process.env.RESOURCE_DELETION_TOPIC != 'OFF'
 		? process.env.RESOURCE_DELETION_TOPIC
-		: 'resource-deletion-topic'
+		: 'resource_deletion_topic'
 const userCoursesTopic = process.env.USER_COURSES_TOPIC
 
 /**

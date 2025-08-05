@@ -11,7 +11,7 @@ module.exports = (req) => {
 			req.checkParams('_id').exists().withMessage('required collection name')
 			req.checkBody('keys').exists().withMessage('keys required')
 		},
-		deletedResourceDetails: function () {
+		deleteResource: function () {
 			req.checkParams('_id').exists().withMessage('required resource id')
 			req.checkQuery('type')
 				.exists()

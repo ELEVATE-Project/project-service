@@ -335,21 +335,23 @@ const createObservation = function (token, solutionId, data, userRoleAndProfileI
  *
  * @returns {Promise<Object>} - Result indicating success/failure and optional response data.
  */
-const deleteSolutionResource = function (token, solutionId, resourceType, tenantId, orgId) {
+const deleteSolutionResource = function (solutionIds, resourceType, tenantId, orgId, deletedBy) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			// Construct the API URL to call the delete endpoint on the Survey Service
 			let deleteSolutionResourceUrl =
-				SURVEY_SERVICE_URL + CONSTANTS.endpoints.DELETE_RESOURCE + '/' + solutionId + '?type=' + resourceType
+				SURVEY_SERVICE_URL + CONSTANTS.endpoints.DELETE_SOLUTION_RESOURCE + '?type=' + resourceType
 			// Prepare request headers with tokens and tenant info
 			let options = {
 				headers: {
 					'content-type': 'application/json',
 					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
-					'x-auth-token': token,
-					'admin-auth-token': process.env.ADMIN_ACCESS_TOKEN,
+				},
+				json: {
+					solutionIds: solutionIds,
 					tenantId: tenantId,
-					orgid: orgId,
+					orgId: orgId,
+					deletedBy: deletedBy,
 				},
 			}
 			// Send a POST request to the Survey Service to delete the resource
@@ -364,10 +366,9 @@ const deleteSolutionResource = function (token, solutionId, resourceType, tenant
 					result.success = false
 				} else {
 					let response = data.body
-					result = JSON.parse(response)
 					// Check if the result status is HTTP 200 OK
-					if (result.status === HTTP_STATUS_CODE['ok'].status) {
-						result['data'] = result.result
+					if (response.status === HTTP_STATUS_CODE['ok'].status) {
+						result['data'] = response
 					} else {
 						result.success = false
 					}

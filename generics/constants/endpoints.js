@@ -68,5 +68,5 @@ module.exports = {
 	PUBLIC_BRANDING: '/v1/public/branding',
 	PROFILE_READ_BY_ID: '/v1/user/profileById',
 	FIND_ENTITY_DETAILS: '/v1/entities/details',
-	DELETE_RESOURCE: '/v1/admin/deletedResourceDetails',
+	DELETE_SOLUTION_RESOURCE: '/v1/admin/deleteSolutionResource',
 }

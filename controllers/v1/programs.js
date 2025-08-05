@@ -739,12 +739,29 @@ module.exports = class Programs extends Abstract {
 	}
 
 	/**
+     * @api {get} /project/v1/programs/join/:programId 
+     * @apiVersion 1.0.0
+     * @apiName removeSolutionsFromProgramComponent
+     * @apiGroup Programs
+     * @apiHeader {String} internal-access-token
 	 * Controller method to remove a solution ID from all program documents where it exists.
 	 * Delegates the actual logic to `programsHelper.removeSolutionsFromProgramComponent()`.
 	 *
 	 * @param {Object} req - Express request object containing `params._id` (solutionId).
 	 * @returns {Promise<Object>} - Result of the operation from the helper function.
-	 */
+     * 
+     * * @apiUse successBody
+     * @apiUse errorBody
+     * @apiParamExample {json} Response:
+    {
+        "message": "Solution and associated resources deleted successfully",
+        "status": 200,
+        "result": {
+            "dataModified": 0,
+            "success": true
+     }
+    }
+	*/
 	async removeSolutionsFromProgramComponent(req) {
 		return new Promise(async (resolve, reject) => {
 			try {

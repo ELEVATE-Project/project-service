@@ -16,7 +16,7 @@ This document helps support and implementation teams run deletion operations for
 ## 🛠️ API Endpoint
 
 ```
-POST /project/v1/admin/deletedResourceDetails/:id?type={program|solution}
+POST /project/v1/admin/deleteResource/:id?type={program|solution}
 ```
 
 ---
@@ -46,7 +46,7 @@ POST /project/v1/admin/deletedResourceDetails/:id?type={program|solution}
 ### 🔁 Delete a **Program**:
 
 ```bash
-curl --location --request POST 'http://localhost:4301/project/v1/admin/deletedResourceDetails/68260d66b063136922f947c9?type=program' \
+curl --location --request POST 'http://localhost:4301/project/v1/admin/deleteResource/68260d66b063136922f947c9?type=program' \
 --header 'x-auth-token;' \
 --header 'internal-access-token: <internal-access-token>' \
 --header 'Content-Type: application/json' \
@@ -58,7 +58,7 @@ curl --location --request POST 'http://localhost:4301/project/v1/admin/deletedRe
 ### 🔁 Delete a **Solution**:
 
 ```bash
-curl --location --request POST 'http://localhost:4301/project/v1/admin/deletedResourceDetails/68260d66b063136922f947c9?type=solution' \
+curl --location --request POST 'http://localhost:4301/project/v1/admin/deleteResource/68260d66b063136922f947c9?type=solution' \
 --header 'x-auth-token;' \
 --header 'internal-access-token: <internal-access-token>' \
 --header 'Content-Type: application/json' \

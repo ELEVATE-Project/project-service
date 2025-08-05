@@ -1489,7 +1489,7 @@ module.exports = class UserProjects extends Abstract {
 	async searchEntities(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let searchEntitiesResult = await entitiesHelper.searchEntitiesHelper(req)
+				let searchEntitiesResult = await entitiesHelper.fetchEntities(req)
 				resolve(searchEntitiesResult)
 			} catch (error) {
 				return reject({

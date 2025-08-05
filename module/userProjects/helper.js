@@ -4590,7 +4590,6 @@ function _projectInformation(project, language) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			if (project.entityInformation) {
-				project.entityId = project.entityInformation._id
 				project.entityName = project.entityInformation.name
 			}
 

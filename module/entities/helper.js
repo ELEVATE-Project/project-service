@@ -20,7 +20,7 @@ module.exports = class EntitiesHelper {
 	 * @param {Object} req - Request object with query params and user details.
 	 * @returns {Promise<Object>} Promise resolving to search results and metadata.
 	 */
-	static searchEntitiesHelper(req) {
+	static fetchEntities(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let response = {

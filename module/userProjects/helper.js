@@ -1928,8 +1928,10 @@ module.exports = class UserProjectsHelper {
 								projectCreation.data.userProfile = updatedUserProfile.data
 							}
 						}
-						if (bodyData.entityId !== '') {
+						if (bodyData.entityId && bodyData.entityId !== '') {
 							projectCreation.data['entityId'] = bodyData.entityId
+						} else {
+							projectCreation.data['entityId'] = null
 						}
 						if (bodyData.project) {
 							projectCreation.data['project'] = bodyData.project
@@ -4588,7 +4590,6 @@ function _projectInformation(project, language) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			if (project.entityInformation) {
-				project.entityId = project.entityInformation._id
 				project.entityName = project.entityInformation.name
 			}
 
@@ -4724,6 +4725,7 @@ function _projectInformation(project, language) {
 					reflectionEnabled: UTILS.convertStringToBoolean(process.env.ENABLE_REFLECTION),
 				}
 			} else {
+				project['entityType'] = project.solutionInformation.entityType
 				project['solutionInformation'] = {
 					reflectionEnabled: project.solutionInformation.reflectionEnabled,
 				}

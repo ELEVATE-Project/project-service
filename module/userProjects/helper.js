@@ -1928,7 +1928,7 @@ module.exports = class UserProjectsHelper {
 								projectCreation.data.userProfile = updatedUserProfile.data
 							}
 						}
-						if (bodyData.entityId !== '') {
+						if (bodyData.entityId && bodyData.entityId !== '') {
 							projectCreation.data['entityId'] = bodyData.entityId
 						} else {
 							projectCreation.data['entityId'] = null

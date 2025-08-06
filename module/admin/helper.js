@@ -335,6 +335,7 @@ module.exports = class AdminHelper {
 					// Delete projects linked to the solution
 					let projecFilter = {
 						solutionId: { $in: resourceId },
+						isAPrivateProgram: false,
 					}
 					let deletedProjectIds = await projectQueries.deleteProjects(projecFilter)
 					projectDeletedCount = deletedProjectIds.deletedCount

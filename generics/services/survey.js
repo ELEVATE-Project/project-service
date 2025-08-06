@@ -335,7 +335,7 @@ const createObservation = function (token, solutionId, data, userRoleAndProfileI
  *
  * @returns {Promise<Object>} - Result indicating success/failure and optional response data.
  */
-const deleteSolutionResource = function (solutionIds, resourceType, tenantId, orgId, deletedBy) {
+const deleteSolutionResource = function (solutionIds, resourceType, tenantId, orgId, userId) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			// Construct the API URL to call the delete endpoint on the Survey Service
@@ -351,7 +351,7 @@ const deleteSolutionResource = function (solutionIds, resourceType, tenantId, or
 					solutionIds: solutionIds,
 					tenantId: tenantId,
 					orgId: orgId,
-					deletedBy: deletedBy,
+					deletedBy: userId,
 				},
 			}
 			// Send a POST request to the Survey Service to delete the resource

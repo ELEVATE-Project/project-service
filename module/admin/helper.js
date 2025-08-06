@@ -205,13 +205,13 @@ module.exports = class AdminHelper {
 						const solutionDetails = await solutionsQueries.solutionsDocument(solutionFilter, [
 							'projectTemplateId',
 						])
-
-						const foundSolutionIds = solutionDetails.map((doc) => String(doc._id))
-
-						const missingSolutionIds = solutionIds.filter((id) => !foundSolutionIds.includes(String(id)))
+						// Extract missing solutionIds by comparing ObjectIds directly using .equals()
+						const surveySolutionIds = solutionIds.filter((id) => {
+							return !solutionDetails.some((solution) => solution._id.equals(id))
+						})
 
 						// Push them into surveyIds
-						surveyIds.push(...missingSolutionIds)
+						surveyIds.push(...surveySolutionIds)
 
 						if (surveyIds.length > 0) {
 							const deleteResponse = await surveyService.deleteSolutionResource(
@@ -249,10 +249,7 @@ module.exports = class AdminHelper {
 						isAPrivateProgram: false,
 					}
 					let deletedProjectIds = await projectQueries.deleteProjects(projecFilter)
-
-					if (deletedProjectIds.deletedCount > 0) {
-						projectDeletedCount = deletedProjectIds.deletedCount
-					}
+					projectDeletedCount = deletedProjectIds.deletedCount
 
 					// Remove program ID from user extension's programRoleMapping
 					const programObjectId = typeof resourceId === 'string' ? new ObjectId(resourceId) : resourceId
@@ -340,10 +337,7 @@ module.exports = class AdminHelper {
 						solutionId: { $in: resourceId },
 					}
 					let deletedProjectIds = await projectQueries.deleteProjects(projecFilter)
-
-					if (deletedProjectIds.deletedCount > 0) {
-						projectDeletedCount = deletedProjectIds.deletedCount
-					}
+					projectDeletedCount = deletedProjectIds.deletedCount
 
 					// Remove the solution reference from parent program
 					const solutionId = new ObjectId(resourceId)
@@ -448,11 +442,11 @@ module.exports = class AdminHelper {
 
 				// Extract all certificateTemplateIds used by project templates
 				const certificateTemplateIds = projectTemplateDetails
-					.map((doc) => doc.certificateTemplateId)
+					.map((certificateDetails) => certificateDetails.certificateTemplateId)
 					.filter(Boolean)
 
 				// Flatten all task IDs from all project templates
-				const allTaskIds = projectTemplateDetails.flatMap((doc) => doc.tasks || []).filter(Boolean)
+				const allTaskIds = projectTemplateDetails.flatMap((taskId) => taskId.tasks || []).filter(Boolean)
 
 				// Delete all fetched project templates
 				await projectTemplateQueries.deleteProjectTemplates(projectTemplateFilter)
@@ -484,7 +478,9 @@ module.exports = class AdminHelper {
 
 					let surveySolutionIds
 					if (taskDetails[0].solutionDetails) {
-						surveySolutionIds = taskDetails.map((doc) => doc.solutionDetails?._id).filter(Boolean)
+						surveySolutionIds = taskDetails
+							.map((solutionId) => solutionId.solutionDetails?._id)
+							.filter(Boolean)
 					}
 
 					// Handle SURVEY or OBSERVATION resource deletions via survey service

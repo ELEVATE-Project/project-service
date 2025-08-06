@@ -125,6 +125,31 @@ module.exports = class Admin {
 	}
 
 	/**
+   * @api {post} /project/v1/admin/deleteResource/:resourceId?type=solution
+   * Deletes a resource (program/solution) after validating admin access.
+   * @apiVersion 1.0.0
+   * @apiGroup Admin
+   * @apiSampleRequest /project/v1/admin/deleteResource/683867e60f8595db9c1b6c26?type=solution
+    * @apiParamExample {json} Response:
+    {
+    "message": "Solution and associated resources deleted successfully",
+    "status": 200,
+    "result": {
+        "solutionDeletedCount": 1,
+        "projectTemplateDeletedCount": 1,
+        "certificateTemplateDeletedCount": 1,
+        "taskDeletedCount": 0,
+        "surveyCount": 0,
+        "surveySubmissionCount": 0,
+        "observationCount": 0,
+        "observationSubmissionCount": 0,
+        "projectDeletedCount": 2
+    	}
+	}
+    * @apiUse successBody
+    * @apiUse errorBody
+    */
+	/**
 	 * Deletes a resource (program/solution) after validating admin access.
 	 *
 	 * @param {Object} req - Express request object containing user details, params, and query.

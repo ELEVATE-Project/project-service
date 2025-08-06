@@ -228,16 +228,16 @@ module.exports = class AdminHelper {
 							observationSubmissionCount += deleteResponse.data.result.observationSubmissionCount || 0
 						}
 
-						await solutionsQueries.deleteSolutions(solutionFilter)
-						solutionDeletedCount++
+						const deletedSolutions = await solutionsQueries.deleteSolutions(solutionFilter)
+						solutionDeletedCount += deletedSolutions.deletedCount || 0
 						if (solutionIds && solutionIds.length) {
 							for (const Id of solutionIds) {
 								resourceIdsWithType.push({ id: Id, type: CONSTANTS.common.SOLUTION })
 							}
 						}
 						// Extract project template IDs from solutions
-						projectTemplateIds = solutionDetails.map((projectTemplateIds) => {
-							return projectTemplateIds.projectTemplateId
+						projectTemplateIds = solutionDetails.map((solution) => {
+							return solution.projectTemplateId
 						})
 					}
 					// Add main program ID to deletion list
@@ -334,7 +334,7 @@ module.exports = class AdminHelper {
 					}
 					// Delete projects linked to the solution
 					let projecFilter = {
-						solutionId: { $in: resourceId },
+						solutionId: { $in: [resourceId] },
 						isAPrivateProgram: false,
 					}
 					let deletedProjectIds = await projectQueries.deleteProjects(projecFilter)
@@ -344,9 +344,8 @@ module.exports = class AdminHelper {
 					const solutionId = new ObjectId(resourceId)
 					await programsQueries.pullSolutionsFromComponents(solutionId)
 
-					await solutionsQueries.deleteSolutions(solutionFilter)
-					solutionDeletedCount++
-
+					const deletedSolutions = await solutionsQueries.deleteSolutions(solutionFilter)
+					solutionDeletedCount += deletedSolutions.deletedCount || 0
 					// Push event to kafka
 					// {
 					// 	"topic": "RESOURCE_DELETION_TOPIC",
@@ -477,11 +476,9 @@ module.exports = class AdminHelper {
 						'solutionDetails',
 					])
 
-					let surveySolutionIds
-					if (taskDetails[0].solutionDetails) {
-						surveySolutionIds = taskDetails
-							.map((solutionId) => solutionId.solutionDetails?._id)
-							.filter(Boolean)
+					let surveySolutionIds = []
+					if (taskDetails.length > 0) {
+						surveySolutionIds = taskDetails.map((task) => task.solutionDetails?._id).filter(Boolean)
 					}
 
 					// Handle SURVEY or OBSERVATION resource deletions via survey service

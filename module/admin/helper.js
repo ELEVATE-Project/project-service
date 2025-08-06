@@ -153,7 +153,7 @@ module.exports = class AdminHelper {
 	 *
 	 * @returns {Promise<Object>} - Result object summarizing deletion impact.
 	 */
-	static deletedResourceDetails(resourceId, resourceType, tenantId, orgId, deletedBy = 'SYSTEM', userToken) {
+	static deletedResourceDetails(resourceId, resourceType, tenantId, orgId, deletedBy = 'SYSTEM') {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Track deletion counts for all associated resources
@@ -257,9 +257,7 @@ module.exports = class AdminHelper {
 						programObjectId
 					)
 					// Delete all associated entities tied to projectTemplateIds
-					if (programRoleMappingId.nModified > 0) {
-						pullProgramFromUserExtensionCount = programRoleMappingId.nModified
-					}
+					pullProgramFromUserExtensionCount = programRoleMappingId.nModified || 0
 
 					// Delete all associated resources for collected projectTemplateIds
 					if (projectTemplateIds.length > 0) {

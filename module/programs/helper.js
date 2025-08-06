@@ -1478,7 +1478,7 @@ module.exports = class ProgramsHelper {
 				if (programData) {
 					// Construct a result object with number of modified records
 					result = {
-						noSolutionDeleted: programData.nModified,
+						programsModifiedCount: programData.nModified,
 						solutionId: solutionId,
 						success: true,
 					}

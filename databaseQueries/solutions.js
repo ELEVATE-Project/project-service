@@ -150,11 +150,7 @@ module.exports = class Solutions {
 
 				return resolve(deleteDocuments)
 			} catch (error) {
-				return reject({
-					status: error.status || HTTP_STATUS_CODE.bad_request.status,
-					message: error.message || HTTP_STATUS_CODE.bad_request.message,
-					errorObject: error,
-				})
+				return reject(error)
 			}
 		})
 	}

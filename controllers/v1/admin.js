@@ -162,9 +162,8 @@ module.exports = class Admin {
 	async deleteResource(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let deleteResource
 				// Call adminHelper's deletedResourceDetails with required identifiers
-				deleteResource = await adminHelper.deletedResourceDetails(
+				let deleteResource = await adminHelper.deletedResourceDetails(
 					req.params._id,
 					req.query.type,
 					req.userDetails.tenantAndOrgInfo.tenantId,

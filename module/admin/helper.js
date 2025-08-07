@@ -228,7 +228,7 @@ module.exports = class AdminHelper {
 							observationSubmissionCount += deleteResponse.data.result.observationSubmissionCount || 0
 						}
 
-						const deletedSolutions = await solutionsQueries.deleteSolutions(solutionFilter)
+						const deletedSolutions = await solutionsQueries.delete(solutionFilter)
 						solutionDeletedCount += deletedSolutions.deletedCount || 0
 						if (solutionIds && solutionIds.length) {
 							for (const Id of solutionIds) {
@@ -248,7 +248,7 @@ module.exports = class AdminHelper {
 						solutionId: { $in: solutionIds },
 						isAPrivateProgram: false,
 					}
-					let deletedProjectIds = await projectQueries.deleteProjects(projecFilter)
+					let deletedProjectIds = await projectQueries.delete(projecFilter)
 					projectDeletedCount = deletedProjectIds.deletedCount
 
 					// Remove program ID from user extension's programRoleMapping
@@ -280,7 +280,7 @@ module.exports = class AdminHelper {
 					}
 
 					// Delete the program itself
-					await programsQueries.deletePrograms(programFilter)
+					await programsQueries.delete(programFilter)
 					programDeletedCount++
 					// Publish Kafka event
 					// {
@@ -335,14 +335,14 @@ module.exports = class AdminHelper {
 						solutionId: { $in: [resourceId] },
 						isAPrivateProgram: false,
 					}
-					let deletedProjectIds = await projectQueries.deleteProjects(projecFilter)
+					let deletedProjectIds = await projectQueries.delete(projecFilter)
 					projectDeletedCount = deletedProjectIds.deletedCount
 
 					// Remove the solution reference from parent program
 					const solutionId = new ObjectId(resourceId)
 					await programsQueries.pullSolutionsFromComponents(solutionId)
 
-					const deletedSolutions = await solutionsQueries.deleteSolutions(solutionFilter)
+					const deletedSolutions = await solutionsQueries.delete(solutionFilter)
 					solutionDeletedCount += deletedSolutions.deletedCount || 0
 					// Push event to kafka
 					// {
@@ -447,7 +447,7 @@ module.exports = class AdminHelper {
 				const allTaskIds = projectTemplateDetails.flatMap((taskId) => taskId.tasks || []).filter(Boolean)
 
 				// Delete all fetched project templates
-				await projectTemplateQueries.deleteProjectTemplates(projectTemplateFilter)
+				await projectTemplateQueries.delete(projectTemplateFilter)
 				projectTemplateDeletedCount = projectTemplateDetails.length
 
 				// If any certificate templates are associated, delete them
@@ -457,9 +457,7 @@ module.exports = class AdminHelper {
 						tenantId: tenantId,
 					}
 
-					let certificateTemplateDetails = await certificateTemplateQueries.deleteCertificateTemplate(
-						certificateTemplateFilter
-					)
+					let certificateTemplateDetails = await certificateTemplateQueries.delete(certificateTemplateFilter)
 					certificateTemplateDeletedCount = certificateTemplateDetails.deletedCount
 				}
 
@@ -496,7 +494,7 @@ module.exports = class AdminHelper {
 					}
 
 					// Delete the project template tasks
-					await projectTemplateTaskQueries.deleteProjectTemplateTasks(taskFilter)
+					await projectTemplateTaskQueries.delete(taskFilter)
 					taskDeletedCount = taskDetails.length
 				}
 

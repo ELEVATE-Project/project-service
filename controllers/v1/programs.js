@@ -739,14 +739,14 @@ module.exports = class Programs extends Abstract {
 	}
 
 	/**
-     * @api {get} /project/v1/programs/removeSolutionsFromProgramComponent/:_id 
+     * @api {get} /project/v1/programs/removeSolutions/:_id 
      * @apiVersion 1.0.0
-     * @apiName removeSolutionsFromProgramComponent
+     * @apiName removeSolutions
      * @apiGroup Programs
      * @apiHeader {String} internal-access-token
-     * @apiSampleRequest /project/v1/programs/removeSolutionsFromProgramComponent/6825a30dc407a50014b6a73f
+     * @apiSampleRequest /project/v1/programs/removeSolutions/6825a30dc407a50014b6a73f
 	 * Controller method to remove a solution ID from all program documents where it exists.
-	 * Delegates the actual logic to `programsHelper.removeSolutionsFromProgramComponent()`.
+	 * Delegates the actual logic to `programsHelper.removeSolutions()`.
 	 *
 	 * @param {Object} req - Express request object containing `params._id` (solutionId).
 	 * @returns {Promise<Object>} - Result of the operation from the helper function.
@@ -764,11 +764,11 @@ module.exports = class Programs extends Abstract {
      }
     }
 	*/
-	async removeSolutionsFromProgramComponent(req) {
+	async removeSolutions(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Call helper method to perform the $pull operation on programs collection
-				let deletedSolutionDetails = await programsHelper.removeSolutionsFromProgramComponent(req.params._id)
+				let deletedSolutionDetails = await programsHelper.removeSolutions(req.params._id)
 				return resolve(deletedSolutionDetails)
 			} catch (error) {
 				return reject({

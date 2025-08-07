@@ -106,7 +106,7 @@ module.exports = async function (req, res, next, token = '') {
 		'/templates/importProjectTemplate',
 		'/templates/listByIds',
 		'/admin/deleteResource',
-		'/programs/removeSolutionsFromProgramComponent',
+		'/programs/removeSolutions',
 	]
 	let performInternalAccessTokenCheck = false
 	let adminHeader = false

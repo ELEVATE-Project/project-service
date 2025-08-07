@@ -136,7 +136,7 @@ module.exports = class Projects {
 	 * @param {Object} filter - MongoDB query filter to match documents for deletion.
 	 * @returns {Promise<Object>} - MongoDB deleteMany result containing deleted count.
 	 */
-	static deleteProjects(filter) {
+	static delete(filter) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let deleteDocuments = await database.models.projects.deleteMany(filter)

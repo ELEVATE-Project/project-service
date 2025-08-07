@@ -108,7 +108,7 @@ module.exports = (req) => {
 					.withMessage('tenantId cannot be empty')
 			}
 		},
-		removeSolutionsFromProgramComponent: function () {
+		removeSolutions: function () {
 			req.checkParams('_id')
 				.exists()
 				.withMessage('Require program id')

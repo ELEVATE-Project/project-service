@@ -65,10 +65,10 @@ module.exports = async function (req, res, next) {
 			return next()
 		} else {
 			// If not admin, throw forbidden error
-			throw {
-				status: HTTP_STATUS_CODE.forbidden.status,
-				message: CONSTANTS.apiResponses.ADMIN_TOKEN_MISSING_MESSAGE,
-			}
+			return next({
+				status: responseCode.forbidden.status,
+				message: reqMsg.ADMIN_TOKEN_MISSING_MESSAGE,
+			})
 		}
 	}
 

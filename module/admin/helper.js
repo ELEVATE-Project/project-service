@@ -255,7 +255,8 @@ module.exports = class AdminHelper {
 					// Remove program ID from user extension's programRoleMapping
 					const programObjectId = typeof resourceId === 'string' ? new ObjectId(resourceId) : resourceId
 					let programRoleMappingId = await userExtensionQueries.pullProgramIdFromProgramRoleMapping(
-						programObjectId
+						programObjectId,
+						tenantId
 					)
 					// Delete all associated entities tied to projectTemplateIds
 					pullProgramFromUserExtensionCount = programRoleMappingId.nModified || 0
@@ -342,7 +343,7 @@ module.exports = class AdminHelper {
 
 					// Remove the solution reference from parent program
 					const solutionId = new ObjectId(resourceId)
-					await programsQueries.pullSolutionsFromComponents(solutionId)
+					await programsQueries.pullSolutionsFromComponents(solutionId, tenantId)
 
 					const deletedSolutions = await solutionsQueries.delete(solutionFilter)
 					solutionDeletedCount += deletedSolutions.deletedCount || 0

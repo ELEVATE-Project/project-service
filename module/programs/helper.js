@@ -1466,14 +1466,14 @@ module.exports = class ProgramsHelper {
 	 * @param {String} solutionId - The string form of the solution ObjectId to be removed from programs.
 	 * @returns {Promise<Object>} - Contains the number of modified documents and a success message.
 	 */
-	static removeSolutions(solutionId) {
+	static removeSolutions(solutionId, tenantId) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Convert the string ID to MongoDB ObjectId
 				let solutionToObjectId = UTILS.convertStringToObjectId(solutionId)
 
 				// Call DB query to pull (remove) the solutionId from all program documents' components
-				let programData = await programsQueries.pullSolutionsFromComponents(solutionToObjectId)
+				let programData = await programsQueries.pullSolutionsFromComponents(solutionToObjectId, tenantId)
 				let result
 				if (programData) {
 					// Construct a result object with number of modified records

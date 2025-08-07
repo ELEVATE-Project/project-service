@@ -145,7 +145,7 @@ module.exports = class UserExtension {
 	 * @param {String} programId - The programId to be removed from programRoleMapping array.
 	 * @returns {Promise<Object>} - MongoDB update result object.
 	 */
-	static pullProgramIdFromProgramRoleMapping(programId) {
+	static pullProgramIdFromProgramRoleMapping(programId, tenantId) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				const result = await database.models.userExtension.updateMany(
@@ -155,6 +155,7 @@ module.exports = class UserExtension {
 								programId: programId,
 							},
 						},
+						tenantId: tenantId,
 					},
 					{ $pull: { programRoleMapping: { programId: programId } } }
 				)

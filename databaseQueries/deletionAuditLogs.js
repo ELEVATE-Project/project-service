@@ -10,7 +10,7 @@ module.exports = class deletionAuditLogs {
 	 * Inserts deletion audit logs into the deletionAuditLogs collection.
 	 *
 	 * @method
-	 * @name createDeletionLog
+	 * @name create
 	 * @param {Array<Object>} logs - Array of log objects containing:
 	 *  - entityId: ObjectId (ID of the deleted entity)
 	 *  - deletedBy: String | Number (User who deleted the entity)
@@ -18,7 +18,7 @@ module.exports = class deletionAuditLogs {
 	 * @returns {Promise<Array<Object>>} - Inserted log documents on success.
 	 * @throws {Object} - On failure, returns an error object with status and message.
 	 */
-	static createDeletionLog(logs) {
+	static create(logs) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let deletedData = await database.models.deletionAuditLogs.insertMany(logs)

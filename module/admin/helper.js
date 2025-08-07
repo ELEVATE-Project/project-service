@@ -247,6 +247,7 @@ module.exports = class AdminHelper {
 					let projecFilter = {
 						solutionId: { $in: solutionIds },
 						isAPrivateProgram: false,
+						tenantId: tenantId,
 					}
 					let deletedProjectIds = await projectQueries.delete(projecFilter)
 					projectDeletedCount = deletedProjectIds.deletedCount
@@ -334,6 +335,7 @@ module.exports = class AdminHelper {
 					let projecFilter = {
 						solutionId: { $in: [resourceId] },
 						isAPrivateProgram: false,
+						tenantId: tenantId,
 					}
 					let deletedProjectIds = await projectQueries.delete(projecFilter)
 					projectDeletedCount = deletedProjectIds.deletedCount
@@ -465,6 +467,7 @@ module.exports = class AdminHelper {
 				if (allTaskIds.length > 0) {
 					const taskFilter = {
 						_id: { $in: allTaskIds },
+						tenantId: tenantId,
 					}
 					const taskDetails = await projectTemplateTaskQueries.taskDocuments(taskFilter, [
 						'_id',
@@ -540,7 +543,7 @@ module.exports = class AdminHelper {
 					deletedBy: userId,
 					deletedAt: new Date().toISOString(),
 				}))
-				await createDeletionLog.createDeletionLog(logs)
+				await createDeletionLog.create(logs)
 				return resolve({ success: true })
 			} catch (error) {
 				return resolve({

@@ -39,8 +39,75 @@ module.exports = async function (req, res, next) {
 		let decodedToken
 		try {
 			// Decode and verify JWT token using secret key
-			decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
-			// If token is invalid or expired, return unauthorized
+			if (process.env.AUTH_METHOD === CONSTANTS.common.AUTH_METHOD.NATIVE) {
+				try {
+					// If using native authentication, verify the JWT using the secret key
+					decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
+				} catch (err) {
+					// If verification fails, send an unauthorized response
+					rspObj.errCode = CONSTANTS.apiResponses.TOKEN_MISSING_CODE
+					rspObj.errMsg = CONSTANTS.apiResponses.TOKEN_MISSING_MESSAGE
+					rspObj.responseCode = HTTP_STATUS_CODE['unauthorized'].status
+					return res.status(HTTP_STATUS_CODE['unauthorized'].status).send(respUtil(rspObj))
+				}
+			} else if (process.env.AUTH_METHOD === CONSTANTS.common.AUTH_METHOD.KEYCLOAK_PUBLIC_KEY) {
+				// If using Keycloak with a public key for authentication
+				const keycloakPublicKeyPath = `${process.env.KEYCLOAK_PUBLIC_KEY_PATH}/`
+				const PEM_FILE_BEGIN_STRING = '-----BEGIN PUBLIC KEY-----'
+				const PEM_FILE_END_STRING = '-----END PUBLIC KEY-----'
+
+				// Decode the JWT to extract its claims without verifying
+				const tokenClaims = jwt.decode(token, { complete: true })
+
+				if (!tokenClaims || !tokenClaims.header) {
+					// If the token does not contain valid claims or header, send an unauthorized response
+					rspObj.errCode = CONSTANTS.apiResponses.TOKEN_MISSING_CODE
+					rspObj.errMsg = CONSTANTS.apiResponses.TOKEN_MISSING_MESSAGE
+					rspObj.responseCode = HTTP_STATUS_CODE['unauthorized'].status
+					return res.status(HTTP_STATUS_CODE['unauthorized'].status).send(respUtil(rspObj))
+				}
+
+				// Extract the key ID (kid) from the token header
+				const kid = tokenClaims.header.kid
+
+				// Construct the path to the public key file using the key ID
+				let filePath = path.resolve(__dirname, keycloakPublicKeyPath, kid.replace(/\.\.\//g, ''))
+
+				// Read the public key file from the resolved file path
+				const accessKeyFile = await fs.promises.readFile(filePath, 'utf8')
+
+				// Ensure the public key is properly formatted with BEGIN and END markers
+				const cert = accessKeyFile.includes(PEM_FILE_BEGIN_STRING)
+					? accessKeyFile
+					: `${PEM_FILE_BEGIN_STRING}\n${accessKeyFile}\n${PEM_FILE_END_STRING}`
+				let verifiedClaims
+				try {
+					// Verify the JWT using the public key and specified algorithms
+					verifiedClaims = jwt.verify(token, cert, { algorithms: ['sha1', 'RS256', 'HS256'] })
+				} catch (err) {
+					// If the token is expired or any other error occurs during verification
+					if (err.name === 'TokenExpiredError') {
+						rspObj.errCode = CONSTANTS.apiResponses.TOKEN_INVALID_CODE
+						rspObj.errMsg = CONSTANTS.apiResponses.TOKEN_INVALID_MESSAGE
+						rspObj.responseCode = HTTP_STATUS_CODE['unauthorized'].status
+						return res.status(HTTP_STATUS_CODE['unauthorized'].status).send(respUtil(rspObj))
+					}
+				}
+
+				// Extract the external user ID from the verified claims
+				const externalUserId = verifiedClaims.sub.split(':').pop()
+
+				const data = {
+					id: externalUserId,
+					// roles: roles,
+					name: verifiedClaims.name,
+					organization_id: verifiedClaims.org || null,
+				}
+
+				// Ensure decodedToken is initialized as an object
+				decodedToken = decodedToken || {}
+				decodedToken['data'] = data
+			}
 		} catch (error) {
 			return res.status(HTTP_STATUS_CODE.unauthorized.status).send(
 				respUtil({
@@ -49,6 +116,13 @@ module.exports = async function (req, res, next) {
 					responseCode: HTTP_STATUS_CODE['unauthorized'].status,
 				})
 			)
+		}
+
+		if (!decodedToken.data?.organizations?.[0]?.roles) {
+			return next({
+				status: HTTP_STATUS_CODE.forbidden.status,
+				message: CONSTANTS.apiResponses.TOKEN_INVALID_CODE,
+			})
 		}
 
 		// Extract roles from decoded token payload

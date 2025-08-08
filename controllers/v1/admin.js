@@ -135,15 +135,16 @@ module.exports = class Admin {
     "message": "Solution and associated resources deleted successfully",
     "status": 200,
     "result": {
-        "solutionDeletedCount": 1,
-        "projectTemplateDeletedCount": 1,
-        "certificateTemplateDeletedCount": 1,
-        "taskDeletedCount": 0,
-        "surveyCount": 0,
-        "surveySubmissionCount": 0,
-        "observationCount": 0,
-        "observationSubmissionCount": 0,
-        "projectDeletedCount": 2
+        "deletedSolutionsCount": 1,
+        "deletedProjectTemplatesCount": 1,
+        "deletedCertificateTemplatesCount": 1,
+        "deletedProjectTemplateTasksCount": 0,
+        "deletedSurveysCount": 0,
+        "deletedSurveySubmissionsCount": 0,
+        "deletedObservationsCount": 0,
+        "deletedObservationSubmissionsCount": 0,
+        "deletedProjectsCount": 2,
+		"deletedProgramsCount":1
     	}
 	}
     * @apiUse successBody

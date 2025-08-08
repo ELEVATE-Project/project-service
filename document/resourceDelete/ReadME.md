@@ -76,17 +76,17 @@ curl --location --request POST 'http://localhost:4301/project/v1/admin/deleteRes
 	"message": "Solution and associated resources deleted successfully",
 	"status": 200,
 	"result": {
-		"programDeletedCount": 1,
-		"solutionDeletedCount": 1,
-		"projectTemplateDeletedCount": 2,
-		"certificateTemplateDeletedCount": 1,
-		"taskDeletedCount": 15,
-		"surveyCount": 0,
-		"surveySubmissionCount": 0,
-		"observationCount": 0,
-		"observationSubmissionCount": 0,
+		"deletedProgramsCount": 1,
+		"deletedSolutionsCount": 1,
+		"deletedProjectTemplatesCount": 2,
+		"deletedCertificateTemplatesCount": 1,
+		"deletedProjectTemplateTasksCount": 15,
+		"deletedSurveysCount": 0,
+		"deletedSurveySubmissionsCount": 0,
+		"deletedObservationsCount": 0,
+		"deletedObservationSubmissionsCount": 0,
 		"pullProgramFromUserExtensionCount": 0,
-		"projectDeletedCount": 0
+		"deletedProjectsCount": 0
 	}
 }
 ```

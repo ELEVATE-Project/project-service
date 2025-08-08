@@ -157,17 +157,17 @@ module.exports = class AdminHelper {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Track deletion counts for all associated resources
-				let programDeletedCount = 0
-				let solutionDeletedCount = 0
-				let projectTemplateDeletedCount = 0
-				let certificateTemplateDeletedCount = 0
-				let taskDeletedCount = 0
-				let surveyCount = 0
-				let surveySubmissionCount = 0
-				let observationCount = 0
-				let observationSubmissionCount = 0
+				let deletedProgramsCount = 0
+				let deletedSolutionsCount = 0
+				let deletedProjectTemplatesCount = 0
+				let deletedCertificateTemplatesCount = 0
+				let deletedProjectTemplateTasksCount = 0
+				let deletedSurveysCount = 0
+				let deletedSurveySubmissionsCount = 0
+				let deletedObservationsCount = 0
+				let deletedObservationSubmissionsCount = 0
 				let pullProgramFromUserExtensionCount = 0
-				let projectDeletedCount = 0
+				let deletedProjectsCount = 0
 
 				// Track all resource IDs deleted for audit logging
 				let resourceIdsWithType = []
@@ -222,14 +222,16 @@ module.exports = class AdminHelper {
 								deletedBy
 							)
 
-							surveyCount += deleteResponse.data.result.surveyCount || 0
-							surveySubmissionCount += deleteResponse.data.result.surveySubmissionCount || 0
-							observationCount += deleteResponse.data.result.observationCount || 0
-							observationSubmissionCount += deleteResponse.data.result.observationSubmissionCount || 0
+							deletedSurveysCount += deleteResponse.data.result.deletedSurveysCount || 0
+							deletedSurveySubmissionsCount +=
+								deleteResponse.data.result.deletedSurveySubmissionsCount || 0
+							deletedObservationsCount += deleteResponse.data.result.deletedObservationsCount || 0
+							deletedObservationSubmissionsCount +=
+								deleteResponse.data.result.deletedObservationSubmissionsCount || 0
 						}
 
 						const deletedSolutions = await solutionsQueries.delete(solutionFilter)
-						solutionDeletedCount += deletedSolutions.deletedCount || 0
+						deletedSolutionsCount += deletedSolutions.deletedCount || 0
 						if (solutionIds && solutionIds.length) {
 							for (const Id of solutionIds) {
 								resourceIdsWithType.push({ id: Id, type: CONSTANTS.common.SOLUTION })
@@ -250,7 +252,7 @@ module.exports = class AdminHelper {
 						tenantId: tenantId,
 					}
 					let deletedProjectIds = await projectQueries.delete(projecFilter)
-					projectDeletedCount = deletedProjectIds.deletedCount
+					deletedProjectsCount = deletedProjectIds.deletedCount
 
 					// Remove program ID from user extension's programRoleMapping
 					const programObjectId = typeof resourceId === 'string' ? new ObjectId(resourceId) : resourceId
@@ -271,19 +273,19 @@ module.exports = class AdminHelper {
 						)
 
 						if (result.success) {
-							projectTemplateDeletedCount += result.result.projectTemplateDeletedCount
-							certificateTemplateDeletedCount += result.result.certificateTemplateDeletedCount
-							taskDeletedCount += result.result.taskDeletedCount
-							surveyCount += result.result.surveyCount
-							surveySubmissionCount += result.result.surveySubmissionCount
-							observationCount += result.result.observationCount
-							observationSubmissionCount += result.result.observationSubmissionCount
+							deletedProjectTemplatesCount += result.result.deletedProjectTemplatesCount
+							deletedCertificateTemplatesCount += result.result.deletedCertificateTemplatesCount
+							deletedProjectTemplateTasksCount += result.result.deletedProjectTemplateTasksCount
+							deletedSurveysCount += result.result.deletedSurveysCount
+							deletedSurveySubmissionsCount += result.result.deletedSurveySubmissionsCount
+							deletedObservationsCount += result.result.deletedObservationsCount
+							deletedObservationSubmissionsCount += result.result.deletedObservationSubmissionsCount
 						}
 					}
 
 					// Delete the program itself
 					await programsQueries.delete(programFilter)
-					programDeletedCount++
+					deletedProgramsCount++
 					// Publish Kafka event
 					// {
 					// 	"topic": "RESOURCE_DELETION_TOPIC",
@@ -303,17 +305,17 @@ module.exports = class AdminHelper {
 						success: true,
 						message: CONSTANTS.apiResponses.PROGRAM_RESOURCE_DELETED,
 						result: {
-							programDeletedCount,
-							solutionDeletedCount,
-							projectTemplateDeletedCount,
-							certificateTemplateDeletedCount,
-							taskDeletedCount,
-							surveyCount,
-							surveySubmissionCount,
-							observationCount,
-							observationSubmissionCount,
+							deletedProgramsCount,
+							deletedSolutionsCount,
+							deletedProjectTemplatesCount,
+							deletedCertificateTemplatesCount,
+							deletedProjectTemplateTasksCount,
+							deletedSurveysCount,
+							deletedSurveySubmissionsCount,
+							deletedObservationsCount,
+							deletedObservationSubmissionsCount,
 							pullProgramFromUserExtensionCount,
-							projectDeletedCount,
+							deletedProjectsCount,
 						},
 					})
 				} else if (resourceType === CONSTANTS.common.SOLUTION) {
@@ -339,14 +341,14 @@ module.exports = class AdminHelper {
 						tenantId: tenantId,
 					}
 					let deletedProjectIds = await projectQueries.delete(projecFilter)
-					projectDeletedCount = deletedProjectIds.deletedCount
+					deletedProjectsCount = deletedProjectIds.deletedCount
 
 					// Remove the solution reference from parent program
 					const solutionId = new ObjectId(resourceId)
 					await programsQueries.pullSolutionsFromComponents(solutionId, tenantId)
 
 					const deletedSolutions = await solutionsQueries.delete(solutionFilter)
-					solutionDeletedCount += deletedSolutions.deletedCount || 0
+					deletedSolutionsCount += deletedSolutions.deletedCount || 0
 					// Push event to kafka
 					// {
 					// 	"topic": "RESOURCE_DELETION_TOPIC",
@@ -366,13 +368,13 @@ module.exports = class AdminHelper {
 						)
 
 						if (result.success) {
-							projectTemplateDeletedCount += result.result.projectTemplateDeletedCount
-							certificateTemplateDeletedCount += result.result.certificateTemplateDeletedCount
-							taskDeletedCount += result.result.taskDeletedCount
-							surveyCount += result.result.surveyCount
-							surveySubmissionCount += result.result.surveySubmissionCount
-							observationCount += result.result.observationCount
-							observationSubmissionCount += result.result.observationSubmissionCount
+							deletedProjectTemplatesCount += result.result.deletedProjectTemplatesCount
+							deletedCertificateTemplatesCount += result.result.deletedCertificateTemplatesCount
+							deletedProjectTemplateTasksCount += result.result.deletedProjectTemplateTasksCount
+							deletedSurveysCount += result.result.deletedSurveysCount
+							deletedSurveySubmissionsCount += result.result.deletedSurveySubmissionsCount
+							deletedObservationsCount += result.result.deletedObservationsCount
+							deletedObservationSubmissionsCount += result.result.deletedObservationSubmissionsCount
 						}
 					}
 
@@ -381,15 +383,15 @@ module.exports = class AdminHelper {
 						success: true,
 						message: CONSTANTS.apiResponses.SOLUTION_RESOURCE_DELETED,
 						result: {
-							solutionDeletedCount,
-							projectTemplateDeletedCount,
-							certificateTemplateDeletedCount,
-							taskDeletedCount,
-							surveyCount,
-							surveySubmissionCount,
-							observationCount,
-							observationSubmissionCount,
-							projectDeletedCount,
+							deletedSolutionsCount,
+							deletedProjectTemplatesCount,
+							deletedCertificateTemplatesCount,
+							deletedProjectTemplateTasksCount,
+							deletedSurveysCount,
+							deletedSurveySubmissionsCount,
+							deletedObservationsCount,
+							deletedObservationSubmissionsCount,
+							deletedProjectsCount,
 						},
 					})
 				} else {
@@ -421,13 +423,13 @@ module.exports = class AdminHelper {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Initialize counters to track deletions
-				let projectTemplateDeletedCount = 0
-				let certificateTemplateDeletedCount = 0
-				let taskDeletedCount = 0
-				let surveyCount = 0
-				let surveySubmissionCount = 0
-				let observationCount = 0
-				let observationSubmissionCount = 0
+				let deletedProjectTemplatesCount = 0
+				let deletedCertificateTemplatesCount = 0
+				let deletedProjectTemplateTasksCount = 0
+				let deletedSurveysCount = 0
+				let deletedSurveySubmissionsCount = 0
+				let deletedObservationsCount = 0
+				let deletedObservationSubmissionsCount = 0
 
 				// Prepare the filter to fetch matching project templates
 				const projectTemplateFilter = {
@@ -451,7 +453,7 @@ module.exports = class AdminHelper {
 
 				// Delete all fetched project templates
 				await projectTemplateQueries.delete(projectTemplateFilter)
-				projectTemplateDeletedCount = projectTemplateDetails.length
+				deletedProjectTemplatesCount = projectTemplateDetails.length
 
 				// If any certificate templates are associated, delete them
 				if (certificateTemplateIds.length > 0) {
@@ -461,7 +463,7 @@ module.exports = class AdminHelper {
 					}
 
 					let certificateTemplateDetails = await certificateTemplateQueries.delete(certificateTemplateFilter)
-					certificateTemplateDeletedCount = certificateTemplateDetails.deletedCount
+					deletedCertificateTemplatesCount = certificateTemplateDetails.deletedCount
 				}
 
 				// If any tasks exist, fetch and delete them
@@ -491,28 +493,29 @@ module.exports = class AdminHelper {
 							deletedBy
 						)
 
-						surveyCount += deleteResponse.data.result.surveyCount || 0
-						surveySubmissionCount += deleteResponse.data.result.surveySubmissionCount || 0
-						observationCount += deleteResponse.data.result.observationCount || 0
-						observationSubmissionCount += deleteResponse.data.result.observationSubmissionCount || 0
+						deletedSurveysCount += deleteResponse.data.result.deletedSurveysCount || 0
+						deletedSurveySubmissionsCount += deleteResponse.data.result.deletedSurveySubmissionsCount || 0
+						deletedObservationsCount += deleteResponse.data.result.deletedObservationsCount || 0
+						deletedObservationSubmissionsCount +=
+							deleteResponse.data.result.deletedObservationSubmissionsCount || 0
 					}
 
 					// Delete the project template tasks
 					await projectTemplateTaskQueries.delete(taskFilter)
-					taskDeletedCount = taskDetails.length
+					deletedProjectTemplateTasksCount = taskDetails.length
 				}
 
 				return resolve({
 					success: true,
 					message: 'Associated resources deleted successfully',
 					result: {
-						projectTemplateDeletedCount,
-						certificateTemplateDeletedCount,
-						taskDeletedCount,
-						surveyCount,
-						surveySubmissionCount,
-						observationCount,
-						observationSubmissionCount,
+						deletedProjectTemplatesCount,
+						deletedCertificateTemplatesCount,
+						deletedProjectTemplateTasksCount,
+						deletedSurveysCount,
+						deletedSurveySubmissionsCount,
+						deletedObservationsCount,
+						deletedObservationSubmissionsCount,
 					},
 				})
 			} catch (error) {

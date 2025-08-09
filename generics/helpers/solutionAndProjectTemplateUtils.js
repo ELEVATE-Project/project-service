@@ -17,15 +17,14 @@ const userService = require(GENERICS_FILES_PATH + '/services/users')
 const timeZoneDifference = process.env.TIMEZONE_DIFFRENECE_BETWEEN_LOCAL_TIME_AND_UTC
 
 /**
- * Create solution.
- * @method
- * @name createSolution
- * @param {Object} solutionData - solution creation data.
- * @param {Boolean} checkDate
- * @param {Object} userDetails - user related info
- * @param {String} tenantId - tenant id
- * @param {String} orgId - org id
- * @returns {JSON} solution creation data.
+ * Creates a new solution document and associates it with a program.
+ *
+ * Initializes solution fields, validates required data, and ensures solution dates are within program bounds if requested. Associates the solution with the specified program and optionally sets its scope. Returns the created solution's ID on success.
+ *
+ * @param {Object} solutionData - Data for creating the solution.
+ * @param {Boolean} [checkDate=false] - Whether to adjust solution dates to fit within the program's date range.
+ * @param {Object} userDetails - Information about the user performing the operation.
+ * @returns {Promise<Object>} Resolves with the created solution's ID and a success message, or rejects with an error.
  */
 
 function createSolution(solutionData, checkDate = false, userDetails) {

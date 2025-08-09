@@ -69,7 +69,36 @@ services:
       - mongo
     networks:
       - project_net
-
+  survey-project-creation:
+    build: ./survey-project-creation-service
+    ports:
+      - '6001:6001'
+    command: >
+      bash -c "echo 'Waiting for PostgreSQL on citus_master:5432 to accept connections...' &&
+      while ! timeout 1 bash -c 'cat < /dev/null > /dev/tcp/citus_master/5432' 2> /dev/null; do
+        echo 'Waiting for citus_master to be ready...';
+        sleep 1;
+      done;
+      echo 'Database is ready.';
+      npm run db:init &&
+      (echo 'Running nodeee' && nodemon app.js &) &&
+      (while ! curl -sSf http://survey-project-creation:6001 > /dev/null; do
+        sleep 1;
+      done && echo 'Service is up' &&
+      /bin/bash -c 'cd scripts && echo Running survey-project-creation service scripts && node addDefaultEntitiesForEducationSector.js && node -r module-alias/register uploadCertificateBaseTemplate.js');
+      tail -f /dev/null"
+    depends_on:
+      - kafka
+      - citus
+      - redis
+    environment:
+      - DEV_DATABASE_URL=postgres://postgres:postgres@citus_master:5432/scp
+      - KAFKA_URL=kafka:9092
+      - REDIS_HOST=redis://redis:6379
+    networks:
+      - project_net
+    env_file:
+      - ${scp_env}
   user:
     image: shikshalokamqa/elevate-user:3.1.3
     ports:

@@ -57,7 +57,7 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
 > **Caution:** Before proceeding, please ensure that the ports given here are available and open. It is essential to verify their availability prior to moving forward. You can run below command in your terminal to check this
 
 ```
-for port in 3000 3001 3002 6000 5001 4000 9092 5432 7007 2181 2707 3569; do
+for port in 3000 3001 3002 6000 5001 4000 9092 5432 7007 2181 2707 3569 6001; do
     if lsof -iTCP:$port -sTCP:LISTEN &>/dev/null; then
         echo "Port $port is in use"
     else
@@ -67,23 +67,22 @@ done
 ```
 
 1.  **Download and execute main setup script:** Execute the following command in your terminal from the project directory.
-    `    curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/mac-linux/setup_project.sh && chmod +x setup_project.sh && sudo ./setup_project.sh
-   `
+    `   curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/mac-linux/setup_project.sh && chmod +x setup_project.sh && sudo ./setup_project.sh`
 
-        > Note : The script will download all the essential files and launch the services in Docker. Once all services are successfully up and running, you can proceed to the next steps.
+         > Note : The script will download all the essential files and launch the services in Docker. Once all services are successfully up and running, you can proceed to the next steps.
 
-        **General Instructions :**
+         **General Instructions :**
 
-        1. All containers which are part of the docker-compose can be gracefully stopped by pressing Ctrl + c in the same terminal where the services are running.
+         1. All containers which are part of the docker-compose can be gracefully stopped by pressing Ctrl + c in the same terminal where the services are running.
 
-        2. All docker containers can be stopped and removed by using below command.
-            ```
-            sudo ./docker-compose-down.sh
-            ```
-        3. All services and dependencies can be started using below command.
-            ```
-            sudo ./docker-compose-up.sh
-            ```
+         2. All docker containers can be stopped and removed by using below command.
+             ```
+             sudo ./docker-compose-down.sh
+             ```
+         3. All services and dependencies can be started using below command.
+             ```
+             sudo ./docker-compose-up.sh
+             ```
 
     **Keep the current terminal session active, and kindly open a new terminal window within the project directory.**
 
@@ -189,13 +188,20 @@ To enable the Citus extension for user services, follow these steps.
     ```
     mkdir user && curl -o ./user/distributionColumns.sql -JL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/distribution-columns/user/distributionColumns.sql
     ```
-2. Set up the citus_setup file by following the steps given below.
+2. Create a sub-directory named `scp` and download `distributionColumns.sql` into it. (Skip this for linux/macOs)
+    ```
+    mkdir scp && curl -o ./scp/distributionColumns.sql -JL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/distribution-columns/scp/distributionColumns.sql
+    ```
+3. Set up the citus_setup file by following the steps given below.
 
     - **Ubuntu/Linux/Mac**
 
-        1. Enable Citus and set distribution columns for `user` database by running the `citus_setup.sh`with the following arguments.
+        1. Enable Citus and set distribution columns for `user and scp` database by running the `citus_setup.sh`with the following arguments.
             ```
             sudo ./citus_setup.sh user postgres://postgres:postgres@citus_master:5432/user
+            ```
+            ```
+            sudo ./citus_setup.sh scp postgres://postgres:postgres@citus_master:5432/scp
             ```
 
     - **Windows**
@@ -339,6 +345,10 @@ This step inserts configuration forms into MongoDB, enabling or disabling featur
     curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/mac-linux/import_forms_mongo.sh && chmod +x import_forms_mongo.sh && sudo ./import_forms_mongo.sh mongodb://mongo:27017/elevate-project
     ```
 
+    ```
+    curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/mac-linux/import_forms_postgres.sh && chmod +x import_forms_postgres.sh && sudo ./import_forms_postgres.sh postgres://postgres:postgres@citus_master:5432/scp
+    ```
+
 -   **Windows**:
     1. Download the `import_forms_mongo.bat` file:
         ```cmd
@@ -401,7 +411,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         ```
         ./install-dependencies.sh
         ```
-        > Note: Install all missing dependencies and use check-dependencies script to ensure everything is installed and running.
+        > Note: Install all missing dependencies and use check-dependencies script to ensure everything is installed and running. Additionally, if PostgreSQL is already installed on your system, it may be running on the default port 5432. Make sure to verify the active port and update the env configurations for user, SCP, and notification services accordingly.
     4. Uninstall dependencies by running `uninstall-dependencies.sh`:
 
         ```
@@ -604,7 +614,9 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         git clone -b master https://github.com/ELEVATE-Project/notification.git && \
         git clone -b main https://github.com/ELEVATE-Project/interface-service.git && \
         git clone -b master https://github.com/ELEVATE-Project/scheduler.git && \
-        git clone -b main https://github.com/ELEVATE-Project/observation-survey-projects-pwa
+        git clone -b staging https://github.com/ELEVATE-Project/survey-project-creation-service && \
+        git clone -b main https://github.com/ELEVATE-Project/observation-survey-projects-pwa && \
+        git clone -b sprint-5 https://github.com/ELEVATE-Project/self-creation-portal
         ```
 
     -   **Windows**
@@ -630,7 +642,9 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         cd notification/src && npm install && cd ../.. && \
         cd interface-service/src && npm install && cd ../.. && \
         cd scheduler/src && npm install && cd ../.. && \
-        cd observation-survey-projects-pwa && npm install --force && cd ..
+        cd survey-project-creation-service/src && npm install && cd ../.. && \
+        cd observation-survey-projects-pwa && npm install --force && cd .. && \
+        cd self-creation-portal && npm install --force && cd ..
         ```
 
     -   **Windows**
@@ -667,7 +681,8 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         curl -L -o notification/src/.env https://github.com/ELEVATE-Project/project-service/raw/refs/heads/main/documentation/1.0.0/native/envs/notification_env && \
         curl -L -o interface-service/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/interface_env && \
         curl -L -o scheduler/src/.env https://github.com/ELEVATE-Project/project-service/raw/refs/heads/main/documentation/1.0.0/native/envs/scheduler_env && \
-        curl -L -o observation-survey-projects-pwa/src/environments/environment.ts https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/enviroment.ts
+        curl -L -o observation-survey-projects-pwa/src/environments/environment.ts https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/enviroment.ts && \
+        curl -L -o survey-project-creation-service/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/scpDoc/documentation/1.0.0/native/envs/scp_env
         ```
 
     -   **MacOs**
@@ -679,6 +694,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         curl -L -o notification/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/non-citus/notification_env && \
         curl -L -o interface-service/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/interface_env && \
         curl -L -o scheduler/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/scheduler_env && \
+        curl -L -o survey-project-creation-service/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/scp_env && \
         curl -L -o observation-survey-projects-pwa/src/environments/environment.ts https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/enviroment.ts
         ```
 
@@ -694,7 +710,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         curl -L -o observation-survey-projects-pwa\src\environments\environment.ts https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/enviroment.ts
         ```
 
-    > **Note:** Modify the environment files as necessary for your deployment using any text editor, ensuring that the values are appropriate for your environment. The default values provided in the current files are functional and serve as a good starting point. Refer to the sample env files provided at the [Project](https://github.com/ELEVATE-Project/project-service/blob/main/.env.sample), [User](https://github.com/ELEVATE-Project/user/blob/master/src/.env.sample), [Notification](https://github.com/ELEVATE-Project/notification/blob/master/src/.env.sample), [Scheduler](https://github.com/ELEVATE-Project/scheduler/blob/master/src/.env.sample), [Interface](https://github.com/ELEVATE-Project/interface-service/blob/main/src/.env.sample) and [Entity-Management](https://github.com/ELEVATE-Project/entity-management/blob/main/src/.env.sample) repositories for reference.
+    > **Note:** Modify the environment files as necessary for your deployment using any text editor, ensuring that the values are appropriate for your environment. The default values provided in the current files are functional and serve as a good starting point. Refer to the sample env files provided at the [Project](https://github.com/ELEVATE-Project/project-service/blob/main/.env.sample), [User](https://github.com/ELEVATE-Project/user/blob/master/src/.env.sample), [Notification](https://github.com/ELEVATE-Project/notification/blob/master/src/.env.sample), [Scheduler](https://github.com/ELEVATE-Project/scheduler/blob/master/src/.env.sample), [Interface](https://github.com/ELEVATE-Project/interface-service/blob/main/src/.env.sample), [Entity-Management](https://github.com/ELEVATE-Project/entity-management/blob/main/src/.env.sample) and [Survey-Project-Creation-Service](https://github.com/ELEVATE-Project/survey-project-creation-service/blob/staging/src/.env.sample)repositories for reference.
 
     > **Caution:** While the default values in the downloaded environment files enable the ELEVATE-Project Application to operate, certain features may not function correctly or could be impaired unless the adopter-specific environment variables are properly configured.
 
@@ -755,7 +771,8 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         1. Run Migrations:
             ```
             cd user/src && npx sequelize-cli db:migrate && cd ../.. && \
-            cd notification/src && npx sequelize-cli db:migrate && cd ../..
+            cd notification/src && npx sequelize-cli db:migrate && cd ../.. && \
+            cd survey-project-creation-service/src && npx sequelize-cli db:migrate && cd ../..
             ```
 
     -   **Windows**
@@ -774,7 +791,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
     1. Download user `distributionColumns.sql` file.
 
         ```
-        curl -o ./user/distributionColumns.sql -JL https://github.com/ELEVATE-Project/project-service/raw/refs/heads/main/documentation/1.0.0/distribution-columns/user/distributionColumns.sql
+        curl -o ./user/distributionColumns.sql -JL https://github.com/ELEVATE-Project/project-service/raw/refs/heads/main/documentation/1.0.0/distribution-columns/user/distributionColumns.sql && curl -o ./scp/distributionColumns.sql -JL https://github.com/ELEVATE-Project/project-service/raw/refs/heads/main/documentation/1.0.0/distribution-columns/scp/distributionColumns.sql
         ```
 
     2. Set up the `citus_setup` file by following the steps given below.
@@ -795,8 +812,14 @@ Before setting up the following ELEVATE-Project application, dependencies given 
                 ```
 
             3. Enable Citus and set distribution columns for `user` database by running the `citus_setup.sh`with the following arguments.
+
                 ```
                 ./citus_setup.sh user postgres://postgres:postgres@localhost:9700/users
+                ```
+
+            4. Enable Citus and set distribution columns for `scp` database by running the `citus_setup.sh`with the following arguments.
+                ```
+                ./citus_setup.sh scp postgres://postgres:postgres@localhost:9700/scp
                 ```
 
 8.  **Insert Initial Data**
@@ -826,6 +849,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
             ./entity-project-sample-data.sh
             ```
         4.  Run seeders of user service
+
             ```
             cd user/src && npm run db:seed:all && cd ../..
             ```
@@ -857,6 +881,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         1.  Download `import_forms.js` Script File And Make the setup file executable by running the following command:
 
             ```
+            npm install mongoose axios pg &&
             curl -s https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/scripts/linux/import_forms.js | node
             ```
 
@@ -884,7 +909,8 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         (cd user/src && pm2 start app.js --name user && cd -) && \
         (cd notification/src && pm2 start app.js --name notification && cd -) && \
         (cd interface-service/src && pm2 start app.js --name interface && cd -) && \
-        (cd scheduler/src && pm2 start app.js --name scheduler && cd -)
+        (cd scheduler/src && pm2 start app.js --name scheduler && cd -) && \
+        (cd survey-project-creation-service/src && pm2 start app.js --name survey-project-creation-service && cd -)
         ```
 
     -   **MacOs**
@@ -895,7 +921,8 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         cd user/src && npx pm2 start app.js -i 2 --name user && cd ../.. && \
         cd notification/src && npx pm2 start app.js -i 2 --name notification && cd ../.. && \
         cd interface-service/src && npx pm2 start app.js -i 2 --name interface && cd ../.. && \
-        cd scheduler/src && npx pm2 start app.js -i 2 --name scheduler && cd ../..
+        cd scheduler/src && npx pm2 start app.js -i 2 --name scheduler && cd ../.. && \
+        cd survey-project-creation-service/src && npx pm2 start app.js -i 2 --name survey-project-creation-service && cd ../..
         ```
 
     -   **Windows**
@@ -913,9 +940,22 @@ Before setting up the following ELEVATE-Project application, dependencies given 
 
     -   **Ubuntu/Linux/MacOS**
 
-        ```
-        cd user/src/scripts && node insertDefaultOrg.js && node viewsScript.js && cd ../../..
-        ```
+        1. Run the script for adding the default org and generating the materialized view
+
+            ```
+            cd user/src/scripts && node insertDefaultOrg.js && node viewsScript.js && cd ../../..
+            ```
+
+        2. Run entity creation script for education sector of survey-project-creation-service
+            ```
+            cd survey-project-creation-service/src/scripts && node addDefaultEntitiesForEducationSector.js && cd ../../..
+            ```
+        3. Update the cloud env in survey-project-creation-service/src/.env with valid credentials and run the
+           script for upload certificate
+
+            ```
+            cd survey-project-creation-service/src/scripts && node -r module-alias/register uploadCertificateBaseTemplate.js && cd ../../..
+            ```
 
     -   **Windows**
 
@@ -923,9 +963,47 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         cd user\src\scripts && node insertDefaultOrg.js && node viewsScript.js && cd ..\..\..
         ```
 
-12. **Start The Portal**
+12. **Start The Observation-Survey-Projects Portal**
 
     ELEVATE-Project portal utilizes Ionic for building the browser bundle, follow the steps given below to install them and start the portal.
+
+    -   **Ubuntu/Linux/Windows**
+
+            1. Install the Ionic framework:
+
+                ```
+                npm install -g ionic
+                ```
+
+            2. Install the Ionic client:
+
+                ```
+                npm install -g @ionic/cli
+                ```
+
+            3. Navigate to `observation-survey-projects-pwa` directory:
+
+                ```
+                cd observation-survey-projects-pwa
+                ```
+
+            4. Run the project on your local system using the following command:
+
+                ```
+                ionic serve
+                ```
+
+            5. Start the portal
+
+                ```
+                pm2 start pm2.config.json && cd ..
+                ```
+
+        Navigate to http://localhost:8100 to access the ELEVATE-Project Portal.
+
+13. **Start The Self-Creation Portal**
+
+    Self-Creation portal utilizes Ionic for building the browser bundle, follow the steps given below to install them and start the portal.
 
     -   **Ubuntu/Linux/Windows**
 
@@ -941,19 +1019,25 @@ Before setting up the following ELEVATE-Project application, dependencies given 
             npm install -g @ionic/cli
             ```
 
-        3. Navigate to `observation-survey-projects-pwa` directory:
+        3. Navigate to `self-creation-portal` directory:
 
             ```
-            cd observation-survey-projects-pwa
+            cd self-creation-portal
             ```
 
         4. Run the project on your local system using the following command:
 
             ```
-            ionic serve
+            ng build lib-shared-modules && ng build lib-project && ng build program-with-rollout && ng serve
             ```
 
-    Navigate to http://localhost:8100 to access the ELEVATE-Project Portal.
+        5. Start the portal
+
+            ```
+            pm2 start pm2.config.json && cd ..
+            ```
+
+    Navigate to http://localhost:4200 to access the Self-Creation Portal.
 
 ## Sample User Accounts Generation
 
@@ -967,7 +1051,7 @@ In such cases, you can generate sample user accounts using the steps below. This
 
     ```
     curl -o insert_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/native/scripts/linux/insert_sample_data.sh && \
-    chmod +x insert_sample_data.sh && \
+    chmod +x insert_sample_data.sh &&
     ./insert_sample_data.sh
     ```
 
@@ -988,17 +1072,22 @@ In such cases, you can generate sample user accounts using the steps below. This
 
 After successfully running the script mentioned above, the following user accounts will be created and available for login:
 
-| Email ID                 | Password   | Role                      |
-| ------------------------ | ---------- | ------------------------- |
-| aaravpatel@example.com   | Password1@ | State Educational Officer |
-| arunimareddy@example.com | Password1@ | State Educational Officer |
-| devikasingh@example.com  | Password1@ | State Educational Officer |
+| Email ID                 | Password   | Role                             |
+| ------------------------ | ---------- | -------------------------------- |
+| aaravpatel@example.com   | Password1@ | State Educational Officer        |
+| arunimareddy@example.com | Password1@ | State Educational Officer        |
+| devikasingh@example.com  | Password1@ | State Educational Officer        |
+| deepakjoshi@example.com  | Password1@ | Content Creator, Program Manager |
+| ankittiwari@example.com  | Password1@ | Reviewer                         |
+| amitverma@example.com    | Password1@ | Program Designer, Org Admin      |
+| poojaagarwal@example.com | Password1@ | Rollout Manager                  |
 
 </details>
 
 ## Postman Collections
 
 -   [Projects Service](https://github.com/ELEVATE-Project/project-service/tree/main/api-doc)
+-   [SCP](https://github.com/ELEVATE-Project/survey-project-creation-service/tree/staging/src/api-doc)
 
 ## Adding New Projects to the System
 

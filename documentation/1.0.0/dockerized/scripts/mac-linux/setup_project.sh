@@ -19,6 +19,7 @@ curl -L \
     -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/notification_env \
     -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/scheduler_env \
     -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/user_env \
+    -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/scp_env \
     -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/env.js
 log "Environment files downloaded."
 
@@ -54,29 +55,34 @@ log "Creating user directory and downloading distributionColumns.sql..."
 mkdir -p user && curl -o ./user/distributionColumns.sql -JL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/distribution-columns/user/distributionColumns.sql
 log "User directory created and distributionColumns.sql downloaded."
 
-# Step 9: Download and make citus_setup.sh executable
+# Step 9: Create scp directory and download SQL file
+log "Creating user directory and downloading distributionColumns.sql..."
+mkdir -p scp && curl -o ./scp/distributionColumns.sql -JL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/distribution-columns/scp/distributionColumns.sql
+log "SCP directory created and distributionColumns.sql downloaded."
+
+# Step 10: Download and make citus_setup.sh executable
 log "Downloading citus_setup.sh..."
 curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/mac-linux/citus_setup.sh
 chmod +x citus_setup.sh
 
-# Step 10: Create sample-data directory and download SQL file
+# Step 11: Create sample-data directory and download SQL file
 log "Creating sample-data directory and downloading sampleData.sql..."
 mkdir -p sample-data/user && \
 curl -L https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/sample-data/mac-linux/user/sampleData.sql -o sample-data/user/sampleData.sql
 log "Sample-data directory created and sampleData.sql downloaded."
 
-# Step 11: Download and make insert_sample_data.sh executable
+# Step 12: Download and make insert_sample_data.sh executable
 log "Downloading insert_sample_data.sh..."
 curl -L -o insert_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/dockerized/scripts/mac-linux/insert_sample_data.sh && chmod +x insert_sample_data.sh
 log "insert_sample_data.sh downloaded and made executable."
 
-# Step 12: Download and make add_sample_project_entity_data.sh executable
+# Step 13: Download and make add_sample_project_entity_data.sh executable
 log "Downloading add_sample_project_entity_data.sh..."
 curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/mac-linux/add_sample_project_entity_data.sh
 chmod +x add_sample_project_entity_data.sh
 log "add_sample_project_entity_data.sh downloaded and made executable."
 
-# Step 13: Run docker-compose-up.sh script
+# Step 14: Run docker-compose-up.sh script
 log "Running docker-compose-up.sh script..."
 ./docker-compose-up.sh
 log "docker-compose-up.sh script executed."

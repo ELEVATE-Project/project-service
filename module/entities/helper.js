@@ -252,7 +252,7 @@ module.exports = class EntitiesHelper {
 						tenantId,
 						userId,
 					},
-					['_id', 'solutionInformation']
+					['_id', 'solutionInformation', 'entityInformation']
 				)
 
 				// Throw error if the project is not found
@@ -262,6 +262,18 @@ module.exports = class EntitiesHelper {
 						message: CONSTANTS.apiResponses.PROJECT_NOT_FOUND,
 					}
 				}
+				// Throw error if entities are already added against the project
+				if (
+					project[0].hasOwnProperty('entityInformation') &&
+					Object.keys(project[0].entityInformation).length
+				) {
+					throw {
+						success: false,
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.PROJECT_ENTITIES_UPDATE_NOT_ALLOWED,
+					}
+				}
+
 				// Fetch entity details from entity-service
 				const entityDetails = await entityManagementService.entityDocuments({
 					_id: entityId,

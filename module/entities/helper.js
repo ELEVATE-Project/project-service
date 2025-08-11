@@ -246,13 +246,17 @@ module.exports = class EntitiesHelper {
 				const userId = req.userDetails.userInformation.userId
 
 				// Check for the existence of the project
-				const project = await userProjectQueries.projectDocument({
-					_id: projectId,
-					tenantId,
-					userId,
-				})
+				const project = await userProjectQueries.projectDocument(
+					{
+						_id: projectId,
+						tenantId,
+						userId,
+					},
+					['_id', 'solutionInformation']
+				)
+
 				// Throw error if the project is not found
-				if (!project || !(project.length > 0)) {
+				if (!project || project.length === 0 || !project[0].solutionInformation?.entityType) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.PROJECT_NOT_FOUND,
@@ -262,6 +266,7 @@ module.exports = class EntitiesHelper {
 				const entityDetails = await entityManagementService.entityDocuments({
 					_id: entityId,
 					tenantId: tenantId,
+					entityType: project[0].solutionInformation.entityType,
 				})
 				// Throw error if the entity details are not fetched
 				if (!entityDetails?.success || !entityDetails?.data?.length) {

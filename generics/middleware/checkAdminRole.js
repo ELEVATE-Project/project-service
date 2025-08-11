@@ -29,7 +29,7 @@ module.exports = async function (req, res, next) {
 	// If path needs admin check, validate the user's role using JWT token
 	if (checkAdminRole) {
 		// Get token from request headers
-		token = req.headers['x-auth-token']
+		const token = req.headers['x-auth-token']
 		// If no token found, return unauthorized error
 		if (!token) {
 			rspObj.errCode = CONSTANTS.apiResponses.TOKEN_MISSING_CODE
@@ -128,6 +128,7 @@ module.exports = async function (req, res, next) {
 
 		// Initialize variables
 		let configData = {}
+		let defaultRoleExtraction
 		// Check if config.json exists
 		if (fs.existsSync(configFilePath)) {
 			// Read and parse the config.json file

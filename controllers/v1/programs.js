@@ -768,7 +768,10 @@ module.exports = class Programs extends Abstract {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Call helper method to perform the $pull operation on programs collection
-				let deletedSolutionDetails = await programsHelper.removeSolutions(req.params._id, req.query.tenantId)
+				let deletedSolutionDetails = await programsHelper.removeSolutionsFromProgram(
+					req.params._id,
+					req.query.tenantId
+				)
 				return resolve(deletedSolutionDetails)
 			} catch (error) {
 				return reject({

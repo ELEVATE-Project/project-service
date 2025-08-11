@@ -245,15 +245,16 @@ module.exports = class AdminHelper {
 					// Add main program ID to deletion list
 					resourceIdsWithType.push({ id: resourceId, type: CONSTANTS.common.PROGRAM })
 
-					// Delete all projects linked to the solutions
-					let projecFilter = {
-						solutionId: { $in: solutionIds },
-						isAPrivateProgram: false,
-						tenantId: tenantId,
+					if (solutionIds && solutionIds.length > 0) {
+						// Delete all projects linked to the solutions
+						let projecFilter = {
+							solutionId: { $in: solutionIds },
+							isAPrivateProgram: false,
+							tenantId: tenantId,
+						}
+						let deletedProjectIds = await projectQueries.delete(projecFilter)
+						deletedProjectsCount = deletedProjectIds.deletedCount
 					}
-					let deletedProjectIds = await projectQueries.delete(projecFilter)
-					deletedProjectsCount = deletedProjectIds.deletedCount
-
 					// Remove program ID from user extension's programRoleMapping
 					const programObjectId = typeof resourceId === 'string' ? new ObjectId(resourceId) : resourceId
 					let programRoleMappingId = await userExtensionQueries.pullProgramIdFromProgramRoleMapping(

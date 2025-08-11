@@ -1462,11 +1462,11 @@ module.exports = class ProgramsHelper {
 
 	/**
 	 * Helper function to remove a solution ID from all program documents that reference it.
-	 *
+	 * @name removeSolutionsFromProgram
 	 * @param {String} solutionId - The string form of the solution ObjectId to be removed from programs.
 	 * @returns {Promise<Object>} - Contains the number of modified documents and a success message.
 	 */
-	static removeSolutions(solutionId, tenantId) {
+	static removeSolutionsFromProgram(solutionId, tenantId) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Convert the string ID to MongoDB ObjectId

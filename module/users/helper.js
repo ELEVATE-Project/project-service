@@ -38,7 +38,7 @@ module.exports = class UsersHelper {
 				// Fetch program data and verify the validity of program
 				let programData = await programsHelper.details(
 					programId,
-					['name', 'requestForPIIConsent', 'rootOrganisations', 'endDate', 'description'],
+					['name', 'requestForPIIConsent', 'rootOrganisations', 'endDate', 'description', 'components'],
 					'none',
 					userDetails
 				)
@@ -138,6 +138,33 @@ module.exports = class UsersHelper {
 				//   );
 				// result.programJoined = programJoinStatus.joinProgram;
 				// result.consentShared = programJoinStatus.consentShared;
+				let components = programData.components || []
+
+				if (components.length > 0) {
+					// Order solutions based on components order
+					let resultData = result.data
+
+					// Create a mapping of _id to order from components
+					const orderMap = new Map()
+					components.forEach((component) => {
+						orderMap.set(component._id.toString(), component.order)
+					})
+
+					// Sort resultData based on the order mapping
+					resultData = resultData
+						.map((item) => {
+							const order = orderMap.get(item._id.toString())
+							return { ...item, order: order !== undefined ? order : null }
+						})
+						.sort((aSolution, bSolution) => {
+							const aOrder = aSolution.order !== null ? aSolution.order : Infinity
+							const bOrder = bSolution.order !== null ? bSolution.order : Infinity
+							return aOrder - bOrder
+						})
+
+					// Update the result object with sorted data
+					result.data = resultData
+				}
 
 				return resolve({
 					message: CONSTANTS.apiResponses.PROGRAM_SOLUTIONS_FETCHED,

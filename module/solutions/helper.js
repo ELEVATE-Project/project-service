@@ -1120,13 +1120,14 @@ module.exports = class SolutionsHelper {
 				}
 
 				if (solution && solution._id) {
+					let length = userPrivateProgram.components ? userPrivateProgram.components.length : 0
 					let updatedProgram = await programQueries.findAndUpdate(
 						{
 							_id: userPrivateProgram._id,
 							tenantId: userDetails.userInformation.tenantId,
 						},
 						{
-							$addToSet: { components: ObjectId(solution._id) },
+							$addToSet: { components: { _id: new ObjectId(solution._id), order: length + 1 } },
 						},
 						{
 							new: true,

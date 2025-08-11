@@ -1680,7 +1680,7 @@ paths:
           example: 'false'
           required: true
         - in: query
-          name: Id
+          name: id
           description: The user must provide the project template id in the path
           schema: *ref_0
           required: true
@@ -1949,7 +1949,7 @@ paths:
           in: query
           schema:
             type: integer
-          example: '1'
+          example: 1
           required: false
         - name: limit
           in: query
@@ -2116,7 +2116,7 @@ paths:
           required: false
           description: The user need to provide downloaded at
         - in: query
-          name: Id
+          name: id
           description: The user need to provided project id.
           schema: *ref_0
           required: true
@@ -3174,7 +3174,7 @@ paths:
             type: string
           example: '{{internal_access_token}}'
         - in: query
-          name: Id
+          name: id
           description: 'We need to pass valid id within a user project. '
           schema: *ref_0
           required: true
@@ -3262,14 +3262,14 @@ paths:
           in: query
           schema: &ref_5
             type: boolean
-          example: 'true'
+          example: true
           required: true
           description: If we require PDF link then we need to pass it as true else false.
         - name: reportType
           in: query
           schema:
             type: integer
-          example: '1'
+          example: 1
           required: true
           description: >-
             ReportType indicates whether the report is generated weekly,
@@ -3278,7 +3278,7 @@ paths:
           in: query
           schema: &ref_6
             type: integer
-          example: '1'
+          example: 1
           description: We need to pass program id.
           required: true
       responses:
@@ -4230,7 +4230,7 @@ paths:
           in: query
           schema:
             type: integer
-          example: '1'
+          example: 1
         - name: limit
           in: query
           schema:
@@ -5573,7 +5573,7 @@ paths:
           in: query
           schema:
             type: integer
-          example: '1'
+          example: 1
         - name: limit
           in: query
           schema:
@@ -5709,7 +5709,7 @@ paths:
           in: query
           schema:
             type: integer
-          example: '1'
+          example: 1
           description: page refers to the page number to be fetched
         - name: limit
           in: query
@@ -5805,7 +5805,7 @@ paths:
 
         * The endpoint allows a user to retrieves  a list of targeted solutions
         based on specified criteria, including solution type, pagination,
-        search, and filters is `/v1/solutions/targetdSolutions`.
+        search, and filters is `/v1/solutions/targetedSolutions`.
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -6081,7 +6081,7 @@ paths:
           in: query
           schema:
             type: integer
-          example: '1'
+          example: 1
         - name: limit
           in: query
           schema:
@@ -6611,7 +6611,7 @@ paths:
             type: string
           example: '{{internal_access_token}}'
         - in: query
-          name: Id
+          name: id
           description: To read the data we need to match its id
           schema: &ref_1
             type: string
@@ -6856,7 +6856,7 @@ paths:
             type: string
           example: '{{internal_access_token}}'
         - in: query
-          name: Id
+          name: id
           description: To update the data we need to match its id
           schema: *ref_1
           required: true
@@ -7173,7 +7173,7 @@ paths:
         - name: reportType
           in: query
           schema: *ref_6
-          example: '1'
+          example: 1
           required: true
           description: >-
             ReportType indicates whether the report is generated weekly,
@@ -9274,7 +9274,7 @@ paths:
         requires authentication tokens in the headers.
 
 
-        * The endpoint fetch user profile details is `/v1/profile/read`.
+        * Endpoint: `/v1/profile/read`.
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -11240,7 +11240,7 @@ paths:
         update user-program role assignments with support for multiple
         operations (add, remove, override) and real-time event notifications via
         Kafka.
-  /v1/userProjects/addEntity/:_id:
+  /v1/userProjects/addEntity/{_id}:
     post:
       description: ''
       operationId: ''

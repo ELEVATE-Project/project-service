@@ -11,13 +11,13 @@ module.exports = (req) => {
 			req.checkParams('_id').exists().withMessage('required project id')
 			req.checkQuery('lastDownloadedAt').exists().withMessage('required last downloaded at')
 			// Throw error if entityId is passed in the body
-			if (req.body && req.body.entityId !== undefined) {
+			if (req.body && Object.prototype.hasOwnProperty.call(req.body, 'entityId')) {
 				req.checkBody('entityId').custom(() => {
 					throw new Error('entityId is not allowed in this request')
 				})
 			}
 			// Throw error if entityInformation is passed in the body
-			if (req.body && req.body.entityInformation !== undefined) {
+			if (req.body && Object.prototype.hasOwnProperty.call(req.body, 'entityInformation')) {
 				req.checkBody('entityInformation').custom(() => {
 					throw new Error('entityInformation is not allowed in this request')
 				})

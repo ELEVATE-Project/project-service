@@ -1760,26 +1760,26 @@ module.exports = class UserProjectsHelper {
 							}
 							// Adding entityInformation in Project
 							if (solutionDetails.entityType && bodyData[solutionDetails.entityType]) {
-								let entityDetails = await entitiesService.entityDocuments({
+								const res = await entitiesService.entityDocuments({
 									_id: bodyData[solutionDetails.entityType],
-									tenantId: tenantId,
+									tenantId,
 								})
-
-								if (!entityDetails?.success || !entityDetails?.data.length > 0) {
+								const list = Array.isArray(res) ? res : res?.data
+								if (!Array.isArray(list) || list.length === 0) {
 									throw {
 										message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
 										status: HTTP_STATUS_CODE.bad_request.status,
 									}
 								}
-								if (entityDetails && entityDetails?.data.length > 0) {
-									projectCreation.data['entityInformation'] = {
-										..._.pick(entityDetails.data[0], ['entityType', 'entityTypeId']),
-										entityId: entityDetails.data[0]._id,
-										externalId: entityDetails.data[0]?.metaInformation?.externalId,
-										entityName: entityDetails.data[0]?.metaInformation?.name,
-									}
-									projectCreation.data.entityId = entityDetails.data[0]._id
+								const e = list[0]
+								projectCreation.data.entityInformation = {
+									entityType: e.entityType,
+									entityTypeId: e.entityTypeId,
+									entityId: e._id,
+									externalId: e?.metaInformation?.externalId || '',
+									entityName: e?.metaInformation?.name || '',
 								}
+								projectCreation.data.entityId = e._id
 							}
 						}
 

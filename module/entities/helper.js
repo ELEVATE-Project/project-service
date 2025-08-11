@@ -264,7 +264,7 @@ module.exports = class EntitiesHelper {
 					tenantId: tenantId,
 				})
 				// Throw error if the entity details are not fetched
-				if (!entityDetails?.success || !entityDetails?.data.length > 0) {
+				if (!entityDetails?.success || !entityDetails?.data?.length) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND,

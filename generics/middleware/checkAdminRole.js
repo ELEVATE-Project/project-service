@@ -6,6 +6,8 @@
  */
 
 const jwt = require('jsonwebtoken')
+const path = require('path')
+const fs = require('fs')
 
 module.exports = async function (req, res, next) {
 	// Define paths that require admin role validation
@@ -118,18 +120,42 @@ module.exports = async function (req, res, next) {
 			)
 		}
 
-		if (!decodedToken.data?.organizations?.[0]?.roles) {
-			return next({
-				status: HTTP_STATUS_CODE.forbidden.status,
-				message: CONSTANTS.apiResponses.TOKEN_INVALID_CODE,
-			})
+		// Path to config.json
+		let configFilePath
+		if (process.env.AUTH_CONFIG_FILE_PATH) {
+			configFilePath = path.resolve(PROJECT_ROOT_DIRECTORY, process.env.AUTH_CONFIG_FILE_PATH)
 		}
 
-		// Extract roles from decoded token payload
-		let fetchRoleFromToken = decodedToken.data.organizations[0].roles
+		// Initialize variables
+		let configData = {}
+		// Check if config.json exists
+		if (fs.existsSync(configFilePath)) {
+			// Read and parse the config.json file
+			const rawData = fs.readFileSync(configFilePath)
+			try {
+				configData = JSON.parse(rawData)
+				if (!configData.userRolesInformationKey) {
+					defaultRoleExtraction = decodedToken.data.organizations[0].roles
+				} else {
+					defaultRoleExtraction = _.get({ decodedToken }, configData.userRolesInformationKey)
+				}
+			} catch (error) {
+				console.error('Error parsing config.json:', error)
+			}
+		} else {
+			// If file doesn't exist, set defaultRoleExtraction
+			defaultRoleExtraction = decodedToken.data.organizations[0].roles
+		}
+
+		if (!defaultRoleExtraction) {
+			rspObj.errCode = CONSTANTS.apiResponses.TENANTID_AND_ORGID_REQUIRED_IN_TOKEN_CODE
+			rspObj.errMsg = CONSTANTS.apiResponses.TENANTID_AND_ORGID_REQUIRED_IN_TOKEN_MESSAGE
+			rspObj.responseCode = HTTP_STATUS_CODE['unauthorized'].status
+			return res.status(HTTP_STATUS_CODE['unauthorized'].status).send(respUtil(rspObj))
+		}
 
 		// Convert roles array to list of role titles
-		let roles = fetchRoleFromToken.map((roles) => {
+		let roles = defaultRoleExtraction.map((roles) => {
 			return roles.title
 		})
 

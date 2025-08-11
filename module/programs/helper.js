@@ -347,9 +347,10 @@ module.exports = class ProgramsHelper {
 				}
 
 				if (data.components) {
-					let programDocumentRecord = await programsQueries.programsDocument({ _id: programId }, [
-						'components',
-					])
+					let programDocumentRecord = await programsQueries.programsDocument(
+						{ _id: programId, tenantId: userDetails.tenantAndOrgInfo.tenantId },
+						['components']
+					)
 
 					if (!programDocumentRecord[0]) {
 						throw {

@@ -292,4 +292,6 @@ module.exports = {
 	USER_COURSES_CREATED: 'User course created successfully',
 	USER_COURSES_UPDATED: 'User course updated successfully',
 	INVALID_SOLUTIONID: 'Invalid solutionId',
+	FAILED_TO_ADD_ENTITY: 'Failed to add entity to the project',
+	ENTITY_ADDED_TO_PROJECT_SUCCESSFULLY: 'Entity added to project successfully',
 }

@@ -76,11 +76,11 @@ module.exports = class Projects {
 	 * @returns {Object} - Project data.
 	 */
 
-	static findOneAndUpdate(findQuery, UpdateObject, returnData = {}) {
+	static findOneAndUpdate(findQuery, updateObject, returnData = {}) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let projectDocument = await database.models.projects
-					.findOneAndUpdate(findQuery, UpdateObject, returnData)
+					.findOneAndUpdate(findQuery, updateObject, returnData)
 					.lean()
 				return resolve(projectDocument)
 			} catch (error) {

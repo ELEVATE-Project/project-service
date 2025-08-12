@@ -324,40 +324,6 @@ module.exports = class UserProjectsHelper {
 				//     }
 				// }
 
-				let addOrUpdateEntityToProject = false
-
-				if (data.entityId) {
-					// If entity is not present in project or new entity is updated.
-					if (
-						!userProject[0].entityInformation ||
-						(userProject[0].entityInformation && userProject[0].entityInformation._id !== data.entityId)
-					) {
-						addOrUpdateEntityToProject = true
-					}
-				}
-
-				if (addOrUpdateEntityToProject) {
-					let entityDetails = await entitiesService.entityDocuments({
-						_id: data.entityId,
-						tenantId: tenantId,
-					})
-
-					if (!entityDetails?.success || !entityDetails?.data.length > 0) {
-						throw {
-							message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
-							status: HTTP_STATUS_CODE.bad_request.status,
-						}
-					}
-
-					if (entityDetails && entityDetails?.data.length > 0) {
-						updateProject['entityInformation'] = {
-							..._.pick(entityDetails.data[0], ['_id', 'entityType', 'entityTypeId']),
-							externalId: entityDetails.data[0]?.metaInformation?.externalId,
-						}
-						updateProject.entityId = entityDetails.data[0]._id
-					}
-				}
-
 				// if (createNewProgramAndSolution || solutionExists) {
 
 				//     let programAndSolutionInformation =
@@ -1477,9 +1443,6 @@ module.exports = class UserProjectsHelper {
 				let tenantId = userDetails.userInformation.tenantId
 				let orgId = userDetails.userInformation.organizationId
 
-				console.log('==========================>userId', userId, '\n')
-				console.log('==========================>defaultAcl', defaultACL, '\n')
-
 				if (templateId !== '') {
 					templateDocuments = await projectTemplateQueries.templateDocument({
 						externalId: templateId,
@@ -1722,7 +1685,6 @@ module.exports = class UserProjectsHelper {
 								defaultACL.users.push(userId)
 								defaultACL.scope = solutionDetails.scope
 								projectCreation.data['acl'] = defaultACL
-								console.log('=========================>', projectCreation.data.acl, '\n')
 							}
 							projectCreation.data['updateHistory'] = [
 								{
@@ -1799,43 +1761,27 @@ module.exports = class UserProjectsHelper {
 								projectCreation.data['userRole'] = bodyData.role
 							}
 							// Adding entityInformation in Project
-							if (solutionDetails.entityType && bodyData.entityId) {
-								let entityDetails = await entitiesService.entityDocuments({
-									_id: bodyData.entityId,
-									tenantId: tenantId,
-								})
-
-								if (!entityDetails?.success || !entityDetails?.data.length > 0) {
-									throw {
-										message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
-										status: HTTP_STATUS_CODE.bad_request.status,
-									}
-								}
-								if (entityDetails && entityDetails?.data.length > 0) {
-									projectCreation.data['entityInformation'] = {
-										..._.pick(entityDetails.data[0], ['_id', 'entityType', 'entityTypeId']),
-										externalId: entityDetails.data[0]?.metaInformation?.externalId,
-									}
-								}
-							} else if (solutionDetails.entityType && bodyData[solutionDetails.entityType]) {
-								let entityDetails = await entitiesService.entityDocuments({
+							if (solutionDetails.entityType && bodyData[solutionDetails.entityType]) {
+								const res = await entitiesService.entityDocuments({
 									_id: bodyData[solutionDetails.entityType],
-									tenantId: tenantId,
-									orgIds: { $in: ['ALL', orgId] },
+									tenantId,
 								})
-
-								if (!entityDetails?.success || !entityDetails?.data.length > 0) {
+								const entitiesList = Array.isArray(res) ? res : res?.data
+								if (!Array.isArray(entitiesList) || entitiesList.length === 0) {
 									throw {
 										message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
 										status: HTTP_STATUS_CODE.bad_request.status,
 									}
 								}
-								if (entityDetails && entityDetails?.data.length > 0) {
-									projectCreation.data['entityInformation'] = {
-										..._.pick(entityDetails.data[0], ['_id', 'entityType', 'entityTypeId']),
-										externalId: entityDetails.data[0]?.metaInformation?.externalId,
-									}
+								const entity = entitiesList[0]
+								projectCreation.data.entityInformation = {
+									entityType: entity.entityType,
+									entityTypeId: entity.entityTypeId,
+									entityId: entity._id,
+									externalId: entity?.metaInformation?.externalId || '',
+									entityName: entity?.metaInformation?.name || '',
 								}
+								projectCreation.data.entityId = entity._id
 							}
 						}
 
@@ -1930,11 +1876,7 @@ module.exports = class UserProjectsHelper {
 								projectCreation.data.userProfile = updatedUserProfile.data
 							}
 						}
-						if (bodyData.entityId && bodyData.entityId !== '') {
-							projectCreation.data['entityId'] = bodyData.entityId
-						} else {
-							projectCreation.data['entityId'] = null
-						}
+
 						if (bodyData.project) {
 							projectCreation.data['project'] = bodyData.project
 							projectCreation.data['referenceFrom'] = CONSTANTS.common.PROJECT
@@ -4592,6 +4534,7 @@ function _projectInformation(project, language) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			if (project.entityInformation) {
+				project.entityId = project.entityInformation._id
 				project.entityName = project.entityInformation.name
 			}
 
@@ -4727,7 +4670,6 @@ function _projectInformation(project, language) {
 					reflectionEnabled: UTILS.convertStringToBoolean(process.env.ENABLE_REFLECTION),
 				}
 			} else {
-				project['entityType'] = project.solutionInformation.entityType
 				project['solutionInformation'] = {
 					reflectionEnabled: project.solutionInformation.reflectionEnabled,
 				}
@@ -4735,8 +4677,6 @@ function _projectInformation(project, language) {
 
 			delete project.metaInformation
 			delete project.__v
-			delete project.entityInformation
-			// delete project.solutionInformation
 			delete project.programInformation
 
 			return resolve({

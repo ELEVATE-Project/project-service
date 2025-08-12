@@ -10,18 +10,6 @@ module.exports = (req) => {
 		sync: function () {
 			req.checkParams('_id').exists().withMessage('required project id')
 			req.checkQuery('lastDownloadedAt').exists().withMessage('required last downloaded at')
-			// Throw error if entityId is passed in the body
-			if (req.body && Object.prototype.hasOwnProperty.call(req.body, 'entityId')) {
-				req.checkBody('entityId').custom(() => {
-					throw new Error('entityId is not allowed in this request')
-				})
-			}
-			// Throw error if entityInformation is passed in the body
-			if (req.body && Object.prototype.hasOwnProperty.call(req.body, 'entityInformation')) {
-				req.checkBody('entityInformation').custom(() => {
-					throw new Error('entityInformation is not allowed in this request')
-				})
-			}
 		},
 		tasksStatus: function () {
 			req.checkParams('_id').exists().withMessage('required project id')
@@ -110,18 +98,6 @@ module.exports = (req) => {
 		},
 		update: function () {
 			req.checkParams('_id').exists().withMessage('required project id')
-			// Throw error if entityId is passed in the body
-			if (req.body && req.body.entityId !== undefined) {
-				req.checkBody('entityId').custom(() => {
-					throw new Error('entityId is not allowed in this request')
-				})
-			}
-			// Throw error if entityInformation is passed in the body
-			if (req.body && req.body.entityInformation !== undefined) {
-				req.checkBody('entityInformation').custom(() => {
-					throw new Error('entityInformation is not allowed in this request')
-				})
-			}
 		},
 		deleteUserPIIData: function () {
 			req.checkBody('id').exists().withMessage('required id of the user')

@@ -153,6 +153,11 @@ module.exports = class UserProjectsHelper {
 					}
 				}
 
+				// if entityId & entityInformation are passed through payload, ignore them
+				;['entityId', 'entityInformation'].map((payoadItem) => {
+					if (data.hasOwnProperty(payoadItem)) delete data[`${payoadItem}`]
+				})
+
 				if (process.env.SUBMISSION_LEVEL == 'USER') {
 					if (!(userProject[0].userId == userId)) {
 						throw {
@@ -1775,6 +1780,7 @@ module.exports = class UserProjectsHelper {
 								}
 								const entity = entitiesList[0]
 								projectCreation.data.entityInformation = {
+									_id: entity._id,
 									entityType: entity.entityType,
 									entityTypeId: entity.entityTypeId,
 									entityId: entity._id,

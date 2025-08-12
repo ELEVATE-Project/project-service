@@ -291,7 +291,7 @@ module.exports = class EntitiesHelper {
 				let updateProject = {}
 				if (entityDetails && entityDetails?.data.length > 0) {
 					updateProject['entityInformation'] = {
-						..._.pick(entityDetails.data[0], ['entityType', 'entityTypeId']),
+						..._.pick(entityDetails.data[0], ['_id', 'entityType', 'entityTypeId']),
 						entityId: entityDetails.data[0]._id,
 						externalId: entityDetails.data[0]?.metaInformation?.externalId,
 						entityName: entityDetails.data[0]?.metaInformation?.name,

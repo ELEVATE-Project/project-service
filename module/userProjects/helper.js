@@ -154,8 +154,9 @@ module.exports = class UserProjectsHelper {
 				}
 
 				// if entityId & entityInformation are passed through payload, ignore them
-				;['entityId', 'entityInformation'].map((payoadItem) => {
-					if (data.hasOwnProperty(payoadItem)) delete data[`${payoadItem}`]
+				const blackListedPayloadItems = ['entityId', 'entityInformation']
+				blackListedPayloadItems.map((payloadItem) => {
+					if (data.hasOwnProperty(payloadItem)) delete data[payloadItem]
 				})
 
 				if (process.env.SUBMISSION_LEVEL == 'USER') {

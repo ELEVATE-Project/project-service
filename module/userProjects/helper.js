@@ -1764,22 +1764,22 @@ module.exports = class UserProjectsHelper {
 									_id: bodyData[solutionDetails.entityType],
 									tenantId,
 								})
-								const list = Array.isArray(res) ? res : res?.data
-								if (!Array.isArray(list) || list.length === 0) {
+								const entitiesList = Array.isArray(res) ? res : res?.data
+								if (!Array.isArray(entitiesList) || entitiesList.length === 0) {
 									throw {
 										message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
 										status: HTTP_STATUS_CODE.bad_request.status,
 									}
 								}
-								const e = list[0]
+								const entity = entitiesList[0]
 								projectCreation.data.entityInformation = {
-									entityType: e.entityType,
-									entityTypeId: e.entityTypeId,
-									entityId: e._id,
-									externalId: e?.metaInformation?.externalId || '',
-									entityName: e?.metaInformation?.name || '',
+									entityType: entity.entityType,
+									entityTypeId: entity.entityTypeId,
+									entityId: entity._id,
+									externalId: entity?.metaInformation?.externalId || '',
+									entityName: entity?.metaInformation?.name || '',
 								}
-								projectCreation.data.entityId = e._id
+								projectCreation.data.entityId = entity._id
 							}
 						}
 

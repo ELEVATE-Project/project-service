@@ -4808,15 +4808,6 @@ async function _projectTask(
 	programId,
 	userDetails
 ) {
-	let programInformation = await programQueries.programsDocument({
-		_id: programId,
-		tenantId: userDetails.userInformation.tenantId,
-	})
-
-	programInformation = programInformation[0]
-
-	let componentLength = programInformation?.components?.length || 0
-
 	for (const singleTask of tasks) {
 		if (singleTask) {
 			singleTask.externalId = singleTask.externalId ? singleTask.externalId : singleTask.name.toLowerCase()
@@ -4854,6 +4845,14 @@ async function _projectTask(
 			let importSolutionsResponse
 			// create a child solution if solutionDetails has isReusable true solution details
 			if (singleTask?.solutionDetails?.isReusable) {
+				let programInformation = await programQueries.programsDocument({
+					_id: programId,
+					tenantId: userDetails.userInformation.tenantId,
+				})
+
+				programInformation = programInformation[0]
+
+				let componentLength = programInformation?.components?.length || 0
 				userDetails.tenantAndOrgInfo = {
 					tenantId: userDetails.userInformation.tenantId,
 					orgId: [userDetails.userInformation.organizationId],

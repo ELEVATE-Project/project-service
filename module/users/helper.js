@@ -110,6 +110,7 @@ module.exports = class UsersHelper {
 					let endIndex = startIndex + pageSize
 					mergedData = mergedData.slice(startIndex, endIndex)
 				}
+				let components = programData.components || []
 
 				let result = {
 					programName: programData.name,
@@ -125,6 +126,7 @@ module.exports = class UsersHelper {
 					data: mergedData,
 					count: totalCount,
 					programEndDate: programData.endDate,
+					components: components,
 				}
 				if (programData.hasOwnProperty('requestForPIIConsent')) {
 					result.requestForPIIConsent = programData.requestForPIIConsent
@@ -138,8 +140,6 @@ module.exports = class UsersHelper {
 				//   );
 				// result.programJoined = programJoinStatus.joinProgram;
 				// result.consentShared = programJoinStatus.consentShared;
-				let components = programData.components || []
-
 				if (components.length > 0) {
 					// Order solutions based on components order
 					let resultData = result.data

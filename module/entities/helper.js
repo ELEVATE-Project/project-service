@@ -20,7 +20,7 @@ module.exports = class EntitiesHelper {
 	 * @param {Object} req - Request object with query params and user details.
 	 * @returns {Promise<Object>} Promise resolving to search results and metadata.
 	 */
-	static searchEntitiesHelper(req) {
+	static fetchEntities(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let response = {
@@ -221,6 +221,119 @@ module.exports = class EntitiesHelper {
 
 				// Final successful response
 				return resolve(response)
+			} catch (error) {
+				// Handle any unexpected error
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
+				})
+			}
+		})
+	}
+
+	/**
+	 * Add entities to the project.
+	 * @param {Object} req - Request object with path params and entityId details.
+	 * @returns {Promise<Object>} Promise resolving to search results and metadata.
+	 */
+	static addEntity(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				const projectId = req.params._id
+				const tenantId = req.userDetails.userInformation.tenantId
+				const entityId = req.body.entityId
+				const userId = req.userDetails.userInformation.userId
+
+				// Check for the existence of the project
+				const project = await userProjectQueries.projectDocument(
+					{
+						_id: projectId,
+						tenantId,
+						userId,
+					},
+					['_id', 'solutionInformation', 'entityInformation']
+				)
+
+				// Throw error if the project is not found
+				if (!project || project.length === 0 || !project[0].solutionInformation?.entityType) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.PROJECT_NOT_FOUND,
+					}
+				}
+				// Throw error if entities are already added against the project
+				if (
+					project[0].hasOwnProperty('entityInformation') &&
+					Object.keys(project[0].entityInformation).length
+				) {
+					throw {
+						success: false,
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.PROJECT_ENTITIES_UPDATE_NOT_ALLOWED,
+					}
+				}
+
+				// Fetch entity details from entity-service
+				const entityDetails = await entityManagementService.entityDocuments({
+					_id: entityId,
+					tenantId: tenantId,
+					entityType: project[0].solutionInformation.entityType,
+				})
+				// Throw error if the entity details are not fetched
+				if (!entityDetails?.success || !entityDetails?.data?.length) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
+					}
+				}
+				// Populate entityInformation to update project
+				let updateProject = {}
+				if (entityDetails && entityDetails?.data.length > 0) {
+					updateProject['entityInformation'] = {
+						..._.pick(entityDetails.data[0], ['_id', 'entityType', 'entityTypeId']),
+						entityId: entityDetails.data[0]._id,
+						externalId: entityDetails.data[0]?.metaInformation?.externalId,
+						entityName: entityDetails.data[0]?.metaInformation?.name,
+					}
+					updateProject.entityId = entityDetails.data[0]._id
+				}
+				// Update the project
+				updateProject = await userProjectQueries.findOneAndUpdate(
+					{
+						_id: projectId,
+						tenantId,
+						userId,
+					},
+					{
+						$set: updateProject,
+					},
+					{
+						projection: { entityInformation: 1, _id: 1 },
+						new: true, // ensures the returned doc is the updated one
+					}
+				)
+				// Throw error if the project updation failed
+				if (!updateProject._id) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.FAILED_TO_ADD_ENTITY,
+					}
+				}
+
+				return resolve({
+					success: true,
+					status: HTTP_STATUS_CODE.ok.status,
+					message: CONSTANTS.apiResponses.ENTITY_ADDED_TO_PROJECT_SUCCESSFULLY,
+					result: {
+						projectId,
+						entityInformation: updateProject.entityInformation,
+					},
+					data: {
+						projectId,
+						entityInformation: updateProject.entityInformation,
+					},
+				})
 			} catch (error) {
 				// Handle any unexpected error
 				return reject({

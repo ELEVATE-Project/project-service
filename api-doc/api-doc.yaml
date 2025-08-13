@@ -3,7 +3,11 @@ info:
   title: Elevate-Project
   version: 1.0.0
   description: >-
-    The Elevate Project service offers a comprehensive suite of endpoints designed to facilitate the creation of projects, both with and without associated programs and solutions. Additionally, it provides the capability to consume project data and generate various reports based on project consumption.
+    The Elevate Project service offers a comprehensive suite of endpoints
+    designed to facilitate the creation of projects, both with and without
+    associated programs and solutions. Additionally, it provides the capability
+    to consume project data and generate various reports based on project
+    consumption.
 servers:
   - url: http://{{baseurl}}project
 tags:
@@ -363,7 +367,8 @@ paths:
         uploading a csv file containing multiple templates and a json file for
         multiple languages.
 
-        * The API Endpoint for the bulk creation of project templates is `/v1/project/templates/bulkCreate`
+        * The API Endpoint for the bulk creation of project templates is
+        `/v1/project/templates/bulkCreate`
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -441,7 +446,8 @@ paths:
         This endpoint allows for the bulk updating of project templates by
         uploading a csv file containing multiple templates.
 
-        * The API Endpoint for the bulk updating of project templates is `/v1/project/templates/bulkUpdate`
+        * The API Endpoint for the bulk updating of project templates is
+        `/v1/project/templates/bulkUpdate`
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -522,7 +528,8 @@ paths:
         This endpoint allows for updating a specific project template by
         providing template Id in params.
 
-        * The API Endpoint for updating a specific project template is `/v1/project/templates/update`
+        * The API Endpoint for updating a specific project template is
+        `/v1/project/templates/update`
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -605,7 +612,8 @@ paths:
         This endpoint retrieves a list of project templates based on the
         provided external id.
 
-        * The API Endpoint to retrieves a list of project templates is `/v1/project/templates/listByIds`
+        * The API Endpoint to retrieves a list of project templates is
+        `/v1/project/templates/listByIds`
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -636,13 +644,15 @@ paths:
           in: query
           schema:
             type: string
-          description: 'We need to pass the external id of the parent project template.'
+          description: We need to pass the external id of the parent project template.
           required: true
         - name: solutionId
           in: query
           schema:
             type: string
-          description: 'We need to pass the solution id required to create the project template.'
+          description: >-
+            We need to pass the solution id required to create the project
+            template.
           required: true
       responses:
         '200':
@@ -687,10 +697,11 @@ paths:
                         param: _id
                         msg: required project template id
       description: >-
-        This endpoint will help you to create a duplicate projectTemplate
-        in the query you should pass parent projectTemplate externalId and solutionId.
+        This endpoint will help you to create a duplicate projectTemplate in the
+        query you should pass parent projectTemplate externalId and solutionId.
 
-        * The API Endpoint will help you to create a duplicate projectTemplate is `/v1/project/templates/importProjectTemplate`
+        * The API Endpoint will help you to create a duplicate projectTemplate
+        is `/v1/project/templates/importProjectTemplate`
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -721,7 +732,7 @@ paths:
           in: query
           schema:
             type: string
-          description: 'We need to pass the correct id to fetch template details.'
+          description: We need to pass the correct id to fetch template details.
           required: true
       responses:
         '200':
@@ -1225,8 +1236,8 @@ paths:
         This endpoint allows the creation of a new project category in the
         library.
 
-        * The API allows the creation of a new project category in the
-        library is `/v1/project/categories/create`
+        * The API allows the creation of a new project category in the library
+        is `/v1/project/categories/create`
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -1284,7 +1295,7 @@ paths:
           schema:
             type: string
           example: '1234'
-          description: 'To update the data we need to match its id'
+          description: To update the data we need to match its id
           required: true
       responses:
         '200':
@@ -1335,8 +1346,8 @@ paths:
         project category. The user must provide the project category id in the
         params and the updated details in the request body.
 
-        * The API allows the user to update the details of an existing
-        project category is `/v1/project/categories/update`
+        * The API allows the user to update the details of an existing project
+        category is `/v1/project/categories/update`
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -1432,13 +1443,13 @@ paths:
       description: >-
         This endpoint allows the user to fetch a list of all project categories.
 
-        * The API allows the user to fetch a list of all project categories is `/v1/project/categories/list`
+        * The API allows the user to fetch a list of all project categories is
+        `/v1/project/categories/list`
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
 
         * This is a mandatory parameter and cannot be empty or null.
-
   /v1/project/templateTasks/bulkCreate/{_id}:
     post:
       tags:
@@ -1483,7 +1494,7 @@ paths:
           schema:
             type: string
           required: true
-          description: 'The user must provide the project template id in the params.'
+          description: The user must provide the project template id in the params.
           example: 6624c4638932662ff66ae700
       responses:
         '200':
@@ -1533,8 +1544,8 @@ paths:
         project template by uploading a csv file. The user must provide the
         project template id in the params.
 
-        * The API allows the user to bulk create tasks for a specified
-        project template is `/v1/project/templateTasks/bulkCreate`
+        * The API allows the user to bulk create tasks for a specified project
+        template is `/v1/project/templateTasks/bulkCreate`
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -1617,8 +1628,8 @@ paths:
         project template id in the path and the csv file containing the updated
         tasks in the request body.
 
-        * The API allows the user to bulk update tasks for a specified
-        project template is `/v1/project/templateTasks/bulkUpdate`
+        * The API allows the user to bulk update tasks for a specified project
+        template is `/v1/project/templateTasks/bulkUpdate`
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -1669,8 +1680,8 @@ paths:
           example: 'false'
           required: true
         - in: query
-          name: Id
-          description: 'The user must provide the project template id in the path'
+          name: id
+          description: The user must provide the project template id in the path
           schema: *ref_0
           required: true
       responses:
@@ -1809,8 +1820,8 @@ paths:
         project library. The user must provide the project template id in the
         path.
 
-        * The API allows the user to import projects from a specified
-        project library is `/v1/userProjects/importFromLibrary`
+        * The API allows the user to import projects from a specified project
+        library is `/v1/userProjects/importFromLibrary`
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -1846,7 +1857,7 @@ paths:
           schema:
             type: string
           required: true
-          description: 'The user must provide the program id in the path'
+          description: The user must provide the program id in the path
           example: 66254d3dd07c5713b46d17c1
       responses:
         '200':
@@ -1895,8 +1906,8 @@ paths:
         This endpoint retrieves a list of imported projects associated with a
         given program id.
 
-        * The API retrieves a list of imported projects associated with a
-        given program id is `/v1/userProjects/importedProjects`
+        * The API retrieves a list of imported projects associated with a given
+        program id is `/v1/userProjects/importedProjects`
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -1938,7 +1949,7 @@ paths:
           in: query
           schema:
             type: integer
-          example: '1'
+          example: 1
           required: false
         - name: limit
           in: query
@@ -2025,7 +2036,8 @@ paths:
       description: >-
         This endpoint lists projects based on provided query parameters.
 
-        * The API retrieves a lists projects based on provided query parameters is `/v1/userProjects/list`
+        * The API retrieves a lists projects based on provided query parameters
+        is `/v1/userProjects/list`
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -2104,8 +2116,8 @@ paths:
           required: false
           description: The user need to provide downloaded at
         - in: query
-          name: Id
-          description: 'The user need to provided project id.'
+          name: id
+          description: The user need to provided project id.
           schema: *ref_0
           required: true
       responses:
@@ -2161,8 +2173,8 @@ paths:
         This endpoint synchronizes the details of a specific user project based
         on the provided project id.
 
-        * The API retrieves the details of a specific user project based
-        on the provided project id is `/v1/userProjects/sync`.
+        * The API retrieves the details of a specific user project based on the
+        provided project id is `/v1/userProjects/sync`.
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -2272,17 +2284,17 @@ paths:
           schema:
             type: string
           required: true
-          description: 'The user need to provide solution id.'
+          description: The user need to provide solution id.
         - name: templateId
           in: query
           schema:
             type: string
           example: TSCSLHAR02-1710148664591
-          description: 'We need to pass the external id of the parent project template.'
+          description: We need to pass the external id of the parent project template.
           required: true
         - in: query
           name: programId
-          description: 'We need to pass valid program id.'
+          description: We need to pass valid program id.
           schema: *ref_0
       responses:
         '200':
@@ -2724,10 +2736,12 @@ paths:
                     status: 500
       description: >-
         This endpoint allows the retrieval of detailed information about a user
-        project, including project metadata, tasks, and user profile information.
+        project, including project metadata, tasks, and user profile
+        information.
 
-        * The API retrieves the detailed information about a user
-        project, including project metadata, tasks, and user profile information is `/v1/userProjects/details`.
+        * The API retrieves the detailed information about a user project,
+        including project metadata, tasks, and user profile information is
+        `/v1/userProjects/details`.
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -3034,7 +3048,8 @@ paths:
         This endpoint allows for the creation of a new user project, including
         setting project metadata, tasks, and categories.
 
-        * The API allows for the creation of a new user project is `/v1/userProjects/add`.
+        * The API allows for the creation of a new user project is
+        `/v1/userProjects/add`.
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -3065,7 +3080,7 @@ paths:
           in: header
           schema:
             type: string
-          description: 'We need to pass valid project id.'
+          description: We need to pass valid project id.
           required: true
       responses:
         '200':
@@ -3114,7 +3129,8 @@ paths:
       description: >-
         This endpoint generates project data based on project id.
 
-        * The API allows to generates project data based on project id is `/v1/userProjects/share`.
+        * The API allows to generates project data based on project id is
+        `/v1/userProjects/share`.
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -3158,7 +3174,7 @@ paths:
             type: string
           example: '{{internal_access_token}}'
         - in: query
-          name: Id
+          name: id
           description: 'We need to pass valid id within a user project. '
           schema: *ref_0
           required: true
@@ -3215,8 +3231,8 @@ paths:
         a user project. The request requires authentication tokens in the
         headers and the project id in the query parameters.
 
-        * The API allows to fetches the status of tasks identified by their id within
-        a user project is `/v1/userProjects/tasksStatus`.
+        * The API allows to fetches the status of tasks identified by their id
+        within a user project is `/v1/userProjects/tasksStatus`.
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -3246,22 +3262,24 @@ paths:
           in: query
           schema: &ref_5
             type: boolean
-          example: 'true'
+          example: true
           required: true
-          description: 'If we require PDF link then we need to pass it as true else false.'
+          description: If we require PDF link then we need to pass it as true else false.
         - name: reportType
           in: query
           schema:
             type: integer
-          example: '1'
+          example: 1
           required: true
-          description: 'ReportType indicates whether the report is generated weekly, quarterly, or yearly.'
+          description: >-
+            ReportType indicates whether the report is generated weekly,
+            quarterly, or yearly.
         - name: programId
           in: query
           schema: &ref_6
             type: integer
-          example: '1'
-          description: 'We need to pass program id.'
+          example: 1
+          description: We need to pass program id.
           required: true
       responses:
         '200':
@@ -3311,8 +3329,8 @@ paths:
         This endpoint generates report data for a specified entity based on the
         query parameters provided.
 
-        * The API allows to generates report data for a specified entity based on the
-        query parameters provided is `/v1/reports/entity`.
+        * The API allows to generates report data for a specified entity based
+        on the query parameters provided is `/v1/reports/entity`.
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -3595,7 +3613,7 @@ paths:
           schema:
             type: string
           required: true
-          description: 'To update the data we need to match its id'
+          description: To update the data we need to match its id
           example: 66254d3dd07c5713b46d17c1
       responses:
         '200':
@@ -3649,7 +3667,8 @@ paths:
       description: >-
         This endpoint allows updating an existing program identified by its id.
 
-        * The endpoint allows updating an existing program identified by its id is `/v1/programs/update`.
+        * The endpoint allows updating an existing program identified by its id
+        is `/v1/programs/update`.
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -3681,7 +3700,7 @@ paths:
             type: string
           required: true
           example: 66254d3dd07c5713b46d17c1
-          description: 'We need to pass valid programId to fetch details.'
+          description: We need to pass valid programId to fetch details.
       responses:
         '200':
           description: Successful response
@@ -3771,7 +3790,8 @@ paths:
         Retrieves detailed information about a specific program identified by
         its unique program id.
 
-        * The endpoint retrieves detailed information about a specific program is `/v1/programs/details`.
+        * The endpoint retrieves detailed information about a specific program
+        is `/v1/programs/details`.
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -3818,7 +3838,7 @@ paths:
           schema:
             type: string
           required: true
-          description: 'We need to pass valid programId to add roles in scope.'
+          description: We need to pass valid programId to add roles in scope.
           example: 662373e8e45b22cb080f9ac1
       responses:
         '200':
@@ -3874,8 +3894,8 @@ paths:
         Adds specified roles to the scope of a program identified by its unique
         program id.
 
-        * The endpoint to add specified roles to the scope of a program identified by its unique
-        program id is `/v1/programs/addRolesInScope`.
+        * The endpoint to add specified roles to the scope of a program
+        identified by its unique program id is `/v1/programs/addRolesInScope`.
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -3922,7 +3942,7 @@ paths:
           schema:
             type: string
           required: true
-          description: 'We need to pass valid programId to add entities in scope.'
+          description: We need to pass valid programId to add entities in scope.
           example: 66254d3dd07c5713b46d17c1
       responses:
         '200':
@@ -3978,8 +3998,9 @@ paths:
         Adds specified entities to the scope of a program identified by its
         unique program id.
 
-        * The endpoint to add specified entities to the scope of a program identified by its unique
-        program id is `/v1/programs/addEntitiesInScope`.
+        * The endpoint to add specified entities to the scope of a program
+        identified by its unique program id is
+        `/v1/programs/addEntitiesInScope`.
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -4016,7 +4037,7 @@ paths:
           schema:
             type: string
           required: true
-          description: 'We need to pass valid programId to remove roles in scope.'
+          description: We need to pass valid programId to remove roles in scope.
           example: 662373e8e45b22cb080f9ac1
       responses:
         '200':
@@ -4072,8 +4093,9 @@ paths:
         Removes specified roles from the scope of a program identified by its
         unique program id.
 
-        * The endpoint to remove specified roles from the scope of a program identified by its unique
-        program id is `/v1/programs/removeRolesInScope`.
+        * The endpoint to remove specified roles from the scope of a program
+        identified by its unique program id is
+        `/v1/programs/removeRolesInScope`.
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -4120,7 +4142,7 @@ paths:
           schema:
             type: string
           required: true
-          description: 'We need to pass valid programId to remove entities in scope.'
+          description: We need to pass valid programId to remove entities in scope.
           example: 662373e8e45b22cb080f9ac1
       responses:
         '200':
@@ -4176,8 +4198,9 @@ paths:
         Removes specified entities from the scope of a program identified by its
         unique program id.
 
-        * The endpoint to remove specified entities from the scope of a program identified by its unique
-        program id is `/v1/programs/removeEntitiesInScope`.
+        * The endpoint to remove specified entities from the scope of a program
+        identified by its unique program id is
+        `/v1/programs/removeEntitiesInScope`.
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -4207,7 +4230,7 @@ paths:
           in: query
           schema:
             type: integer
-          example: '1'
+          example: 1
         - name: limit
           in: query
           schema:
@@ -4272,8 +4295,8 @@ paths:
         Retrieves a list of programs based on optional pagination and search
         criteria.
 
-        * The endpoint to retrieves a list of programs based on optional pagination and search
-        criteria is `/v1/programs/list`.
+        * The endpoint to retrieves a list of programs based on optional
+        pagination and search criteria is `/v1/programs/list`.
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -4303,7 +4326,9 @@ paths:
           in: path
           schema:
             type: string
-          description: 'We need to pass valid programId to join a specific program identified by its program id.'
+          description: >-
+            We need to pass valid programId to join a specific program
+            identified by its program id.
           required: true
       responses:
         '200':
@@ -4441,7 +4466,8 @@ paths:
       description: >-
         Allows a user to join a specific program identified by its program id.
 
-        * The endpoint allows a user to join a specific program identified by its program id is `/v1/programs/join`.
+        * The endpoint allows a user to join a specific program identified by
+        its program id is `/v1/programs/join`.
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -4635,7 +4661,8 @@ paths:
       description: >-
         Creates a new solution with specified attributes and scope
 
-        * The endpoint allows a user to create a new solution with specified attributes and scope is `/v1/solutions/create`.
+        * The endpoint allows a user to create a new solution with specified
+        attributes and scope is `/v1/solutions/create`.
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -4780,7 +4807,7 @@ paths:
           schema:
             type: string
           required: true
-          description: 'To update the data we need to match its id'
+          description: To update the data we need to match its id
           example: 66254691a9fe19f3514de013
       responses:
         '200':
@@ -4835,8 +4862,9 @@ paths:
         Updates the attributes and scope of an existing solution identified by
         its solution id.
 
-        * The endpoint allows a user to update  the attributes and scope of an existing solution identified by
-        its solution id is `/v1/solutions/update`.
+        * The endpoint allows a user to update  the attributes and scope of an
+        existing solution identified by its solution id is
+        `/v1/solutions/update`.
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -4883,7 +4911,7 @@ paths:
           schema:
             type: string
           required: true
-          description: 'We need to pass valid solution id to add roles in scope.'
+          description: We need to pass valid solution id to add roles in scope.
           example: 66238002c174351b59145572
       responses:
         '200':
@@ -4939,8 +4967,9 @@ paths:
         Adds specified roles to the scope of a solution identified by its
         solution id.
 
-        * The endpoint allows a user to add specified roles to the scope of a solution identified by its
-        solution id is `/v1/project/solutions/addRolesInScope`.
+        * The endpoint allows a user to add specified roles to the scope of a
+        solution identified by its solution id is
+        `/v1/project/solutions/addRolesInScope`.
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -5010,7 +5039,10 @@ paths:
           schema:
             type: string
           required: true
-          description: 'We need to pass valid solution id to fetches the details of a solution based on specified roles and locations, identified by its solution id.'
+          description: >-
+            We need to pass valid solution id to fetches the details of a
+            solution based on specified roles and locations, identified by its
+            solution id.
           example: 660f9383f65100c296372c77
       responses:
         '200':
@@ -5126,7 +5158,7 @@ paths:
           schema:
             type: string
           required: true
-          description: 'We need to pass valid solution id to remove roles in scope.'
+          description: We need to pass valid solution id to remove roles in scope.
           example: 66238002c174351b59145572
       responses:
         '200':
@@ -5187,8 +5219,9 @@ paths:
         Removes specified roles from the scope of a solution identified by its
         solution id.
 
-        * The endpoint allows a user to remove specified roles to the scope of a solution identified by its
-        solution id is `/v1/solutions/removeRolesInScope`.
+        * The endpoint allows a user to remove specified roles to the scope of a
+        solution identified by its solution id is
+        `/v1/solutions/removeRolesInScope`.
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -5219,7 +5252,9 @@ paths:
           schema:
             type: string
           required: true
-          description: 'We need to pass solution id that return deep link for specified solution.'
+          description: >-
+            We need to pass solution id that return deep link for specified
+            solution.
           example: 66254691a9fe19f3514de013
       responses:
         '200':
@@ -5266,7 +5301,8 @@ paths:
       description: >-
         Create and return deep link for specified solution.
 
-        * The endpoint allows a user to create and return deep link for specified solution is `/v1/solutions/fetchLink`.
+        * The endpoint allows a user to create and return deep link for
+        specified solution is `/v1/solutions/fetchLink`.
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -5313,7 +5349,7 @@ paths:
           schema:
             type: string
           required: true
-          description: 'We need to pass valid solution id to add entities in scope.'
+          description: We need to pass valid solution id to add entities in scope.
           example: 66238002c174351b59145572
       responses:
         '200':
@@ -5359,8 +5395,9 @@ paths:
         Adds specified entities to the scope of a solution identified by its
         solution id.
 
-        * The endpoint allows a user to add specified entities to the scope of a solution identified by its
-        solution id is `/v1/solutions/addEntitiesInScope`.
+        * The endpoint allows a user to add specified entities to the scope of a
+        solution identified by its solution id is
+        `/v1/solutions/addEntitiesInScope`.
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -5408,7 +5445,7 @@ paths:
           schema:
             type: string
           required: true
-          description: 'We need to pass valid solution id to remove entities in scope.'
+          description: We need to pass valid solution id to remove entities in scope.
           example: 66238002c174351b59145572
       responses:
         '200':
@@ -5464,8 +5501,9 @@ paths:
         Removes specified entities from the scope of a solution identified by
         its solution id.
 
-        * The endpoint allows a user to remove specified entities to the scope of a solution identified by its
-        solution id is `/v1/solutions/removeEntitiesInScope`.
+        * The endpoint allows a user to remove specified entities to the scope
+        of a solution identified by its solution id is
+        `/v1/solutions/removeEntitiesInScope`.
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -5519,7 +5557,7 @@ paths:
           schema:
             type: string
           example: 5ff840ce383ae437eb02b96c
-          description: 'We need to pass valid program id to retrieves solutions .'
+          description: We need to pass valid program id to retrieves solutions .
           required: true
         - name: type
           in: query
@@ -5535,7 +5573,7 @@ paths:
           in: query
           schema:
             type: integer
-          example: '1'
+          example: 1
         - name: limit
           in: query
           schema:
@@ -5607,8 +5645,9 @@ paths:
         a specified program. This endpoint supports pagination and search
         functionality.
 
-        * The endpoint allows a user to retrieves solutions based on user role, entity type, and entities within
-        a specified program is `/v1/solutions/forUserRoleAndLocation`.
+        * The endpoint allows a user to retrieves solutions based on user role,
+        entity type, and entities within a specified program is
+        `/v1/solutions/forUserRoleAndLocation`.
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -5670,7 +5709,7 @@ paths:
           in: query
           schema:
             type: integer
-          example: '1'
+          example: 1
           description: page refers to the page number to be fetched
         - name: limit
           in: query
@@ -5764,8 +5803,9 @@ paths:
         Retrieves a list of targeted solutions based on specified criteria,
         including solution type, pagination, search, and filters.
 
-        * The endpoint allows a user to retrieves  a list of targeted solutions based on specified criteria,
-        including solution type, pagination, search, and filters is `/v1/solutions/targetdSolutions`.
+        * The endpoint allows a user to retrieves  a list of targeted solutions
+        based on specified criteria, including solution type, pagination,
+        search, and filters is `/v1/solutions/targetedSolutions`.
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -5819,7 +5859,9 @@ paths:
           schema:
             type: string
           required: true
-          description: 'We need to pass valid link that returns details about the targeted solution. '
+          description: >-
+            We need to pass valid link that returns details about the targeted
+            solution.
           example: 2dbfc345a4fee8fa89e8ce0ea492badb
       responses:
         '200':
@@ -5927,7 +5969,9 @@ paths:
           schema:
             type: string
           required: true
-          description: 'We need to pass valid solution id that returns details about the solution.'
+          description: >-
+            We need to pass valid solution id that returns details about the
+            solution.
           example: 66238002c174351b59145572
       responses:
         '200':
@@ -5992,8 +6036,9 @@ paths:
         Verifies if a solution identified by its solution id is targeted and
         returns details about the solution.
 
-        * The endpoint allows a user to verifies if a solution identified by its solution id is targeted and
-        returns details about the solution is `/v1/solutions/verifySolution`.
+        * The endpoint allows a user to verifies if a solution identified by its
+        solution id is targeted and returns details about the solution is
+        `/v1/solutions/verifySolution`.
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -6036,7 +6081,7 @@ paths:
           in: query
           schema:
             type: integer
-          example: '1'
+          example: 1
         - name: limit
           in: query
           schema:
@@ -6112,8 +6157,9 @@ paths:
         Retrieves a list of solutions with optional filters for reusability,
         type, and search criteria, along with pagination support.
 
-        * The endpoint allows a user to retrieves a list of solutions with optional filters for reusability,
-        type, and search criteria, along with pagination support is `/v1/solutions/list`.
+        * The endpoint allows a user to retrieves a list of solutions with
+        optional filters for reusability, type, and search criteria, along with
+        pagination support is `/v1/solutions/list`.
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -6139,7 +6185,9 @@ paths:
           schema:
             type: string
           required: true
-          description: 'We need to pass valid solution id that returns details about the solution.'
+          description: >-
+            We need to pass valid solution id that returns details about the
+            solution.
           example: 66254691a9fe19f3514de013
       responses:
         '200':
@@ -6241,8 +6289,8 @@ paths:
         This endpoint retrieves detailed information about a specific solution
         using its solution id.
 
-        * The endpoint allows a user to retrieves detailed information about a specific solution
-        using its solution id is `/v1/solutions/getDetails`.
+        * The endpoint allows a user to retrieves detailed information about a
+        specific solution using its solution id is `/v1/solutions/getDetails`.
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -6292,7 +6340,9 @@ paths:
           schema:
             type: string
           required: true
-          description: 'We need to pass valid collectionName to create an index for a specified collection.'
+          description: >-
+            We need to pass valid collectionName to create an index for a
+            specified collection.
           example: solutions
       responses:
         '200':
@@ -6339,7 +6389,8 @@ paths:
         collection. The request body should include the keys to be indexed.
 
         * The endpoint allows a user to create an index for a specified
-        collection. The request body should include the keys to be indexed is `/v1/admin/createIndex`.
+        collection. The request body should include the keys to be indexed is
+        `/v1/admin/createIndex`.
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -6452,8 +6503,8 @@ paths:
         This endpoint generates pre-signed URLs for uploading files to cloud
         storage.
 
-        * The endpoint allows a user to generates pre-signed URLs for uploading files to cloud
-        storage is `/v1/cloud-service/files/preSignedUrls`.
+        * The endpoint allows a user to generates pre-signed URLs for uploading
+        files to cloud storage is `/v1/cloud-service/files/preSignedUrls`.
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -6532,7 +6583,8 @@ paths:
       description: >-
         This endpoint generates downloadable URLs for files stored in the cloud.
 
-        * The endpoint allows a user to downloadable URLs for files stored in the cloud is `/v1/cloud-service/files/getDownloadableUrl`.
+        * The endpoint allows a user to downloadable URLs for files stored in
+        the cloud is `/v1/cloud-service/files/getDownloadableUrl`.
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -6559,7 +6611,7 @@ paths:
             type: string
           example: '{{internal_access_token}}'
         - in: query
-          name: Id
+          name: id
           description: To read the data we need to match its id
           schema: &ref_1
             type: string
@@ -6612,7 +6664,8 @@ paths:
       description: >-
         This API retrieves a form based on the provided id.
 
-        * The endpoint allows a user to creates a new form with the specified type, subType, and data is `/v1/forms/read`.
+        * The endpoint allows a user to creates a new form with the specified
+        type, subType, and data is `/v1/forms/read`.
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -6746,7 +6799,8 @@ paths:
       description: >-
         This API creates a new form with the specified type, subType, and data.
 
-        * The endpoint allows a user to creates a new form with the specified type, subType, and data is `/v1/forms/create`.
+        * The endpoint allows a user to creates a new form with the specified
+        type, subType, and data is `/v1/forms/create`.
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -6802,7 +6856,7 @@ paths:
             type: string
           example: '{{internal_access_token}}'
         - in: query
-          name: Id
+          name: id
           description: To update the data we need to match its id
           schema: *ref_1
           required: true
@@ -6877,7 +6931,8 @@ paths:
       description: >-
         This API updates a form based on the provided id with new data.
 
-        * The endpoint allows a user to updates a form based on the provided id with new data is `/v1/forms/update`.
+        * The endpoint allows a user to updates a form based on the provided id
+        with new data is `/v1/forms/update`.
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -7114,13 +7169,15 @@ paths:
           schema: *ref_5
           example: 'false'
           required: false
-          description: 'If we require PDF link then we need to pass it as true else false.'
+          description: If we require PDF link then we need to pass it as true else false.
         - name: reportType
           in: query
           schema: *ref_6
-          example: '1'
+          example: 1
           required: true
-          description: 'ReportType indicates whether the report is generated weekly, quarterly, or yearly.'
+          description: >-
+            ReportType indicates whether the report is generated weekly,
+            quarterly, or yearly.
       responses:
         '200':
           description: Successful response
@@ -7139,7 +7196,8 @@ paths:
       description: >-
         This endpoint will generates a detailed entity report.
 
-        * The API allows to generates a detailed entity report is `/v1/reports/detailView`.
+        * The API allows to generates a detailed entity report is
+        `/v1/reports/detailView`.
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -7169,9 +7227,10 @@ paths:
           schema:
             type: string
           required: true
-          description: 'We need to pass valid collectionName for which we need to search for.'
+          description: >-
+            We need to pass valid collectionName for which we need to search
+            for.
           example: solutions
-
       responses:
         '200':
           description: Successful response
@@ -8874,16 +8933,17 @@ paths:
                         param: _id
                         msg: required certificate templateId
       description: >-
-        This endpoint allows the user to upload certificate template file. The user must provide the
-        project template id in the path and the file containing the template in the request body.
+        This endpoint allows the user to upload certificate template file. The
+        user must provide the project template id in the path and the file
+        containing the template in the request body.
 
         * The API allows the user to upload certificate template file
         `/v1/project/certificateTemplates/uploadTemplate.`
 
-        * It is mandatory to provide values for parameters which are marked as `required`
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
 
         * This is a mandatory parameter and cannot be empty or null.
-
   /v1/project/certificateTemplates/createSvg?{baseTemplateId}:
     post:
       tags: *ref_24
@@ -9210,11 +9270,11 @@ paths:
                     status: 400
                     message: Bad request
       description: >-
-        This endpoint retrieves detailed information about the user.The request requires
-        authentication tokens in the headers.
+        This endpoint retrieves detailed information about the user.The request
+        requires authentication tokens in the headers.
 
 
-        * The endpoint fetch user profile details is `/v1/profile/read`.
+        * Endpoint: `/v1/profile/read`.
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -10530,9 +10590,10 @@ paths:
     post:
       summary: To update project attributes(Filters)
       description: >-
-        This endpoint allows the user to update project attributes(filters).The request
-        requires authentication tokens in the headers and code in the query and you are updating `translation data` then `languagecode` also requried
-        params.
+        This endpoint allows the user to update project attributes(filters).The
+        request requires authentication tokens in the headers and code in the
+        query and you are updating `translation data` then `languagecode` also
+        requried params.
 
 
         * The API allows the user to edit Svg files`v1/projectAttributes/update`
@@ -10542,13 +10603,15 @@ paths:
 
         * This is a mandatory parameter and cannot be empty or null.
 
-        * This API have `two` types of `request body`(added in sample)-one for `translating data` and another for updating the `content configuration`—it's important to clearly define their structure, validation, and processing.
+        * This API have `two` types of `request body`(added in sample)-one for
+        `translating data` and another for updating the `content
+        configuration`—it's important to clearly define their structure,
+        validation, and processing.
 
 
 
         * NOTE:
           `When updating translations data, make sure to provide translations for all the data fields in all supported languages. If any translations are missing, the API will only return the fields you have provided, which may result in incomplete data. When updating the  values for duration please maintain lowercase. If you are updating roles filter the value to be added in the request body should be the code of the user role fetched from userRoleExtension.`
-
       operationId: ''
       tags:
         - projectAttributes
@@ -10669,7 +10732,6 @@ paths:
                       value: 6 week
                     - label: 6 More thann 6 weeks
                       value: More than 6 weeks
-
   /v1/projectAttributes/find?language={code}:
     get:
       summary: To find project attributes(Filters)
@@ -11138,15 +11200,15 @@ paths:
       parameters:
         - in: header
           name: admin-auth-token
-          description: 'required to authenticate the admin user'
+          description: required to authenticate the admin user
           schema:
             type: string
         - in: header
           name: tenantId
-          description: 'required to identify the tenant'
+          description: required to identify the tenant
         - in: header
           name: orgId
-          description: 'required orgId'
+          description: required orgId
       responses:
         '200':
           description: Successful response
@@ -11178,3 +11240,96 @@ paths:
         update user-program role assignments with support for multiple
         operations (add, remove, override) and real-time event notifications via
         Kafka.
+  /v1/userProjects/addEntity/{_id}:
+    post:
+      description: ''
+      operationId: ''
+      tags:
+        - userProjects
+      parameters:
+        - in: header
+          name: x-auth-token
+          description: authenticated user token
+          schema: &ref_59
+            type: string
+          required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: number
+                  result:
+                    type: object
+                    properties:
+                      projectId:
+                        type: string
+                      entityInformation:
+                        type: object
+                        properties:
+                          entityType:
+                            type: string
+                          entityTypeId:
+                            type: string
+                          entityId:
+                            type: string
+                          externalId:
+                            type: string
+                          entityName:
+                            type: string
+              examples:
+                example1:
+                  value:
+                    message: Entity added to project successfully
+                    status: 200
+                    result:
+                      projectId: 6895e60db518cfe2bff79853
+                      entityInformation:
+                        entityType: activity
+                        entityTypeId: 687a6438ece0196b728a4d02
+                        entityId: 687a66c07f4bcd29a40c908d
+                        externalId: activity_18072025
+                        entityName: Activity One
+        '400':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  message:
+                    type: string
+              examples:
+                example1:
+                  value:
+                    status: 400
+                    message: No entity found
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                entityId:
+                  type: string
+              required:
+                - entityId
+            examples:
+              example1:
+                value:
+                  entityId: 687a66c07f4bcd29a40c908d
+    parameters:
+      - in: path
+        name: _id
+        description: Project id
+        schema: *ref_59
+        required: true

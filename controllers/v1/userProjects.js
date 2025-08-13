@@ -1489,8 +1489,30 @@ module.exports = class UserProjects extends Abstract {
 	async searchEntities(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let searchEntitiesResult = await entitiesHelper.searchEntitiesHelper(req)
+				let searchEntitiesResult = await entitiesHelper.fetchEntities(req)
 				resolve(searchEntitiesResult)
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
+				})
+			}
+		})
+	}
+
+	/**
+	 * Add entities in project.
+	 * @method
+	 * @name addEntity
+	 * @param {Object} req - request Data.
+	 * @returns {JSON} Entity Information
+	 */
+	async addEntity(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let addEntityResult = await entitiesHelper.addEntity(req)
+				return resolve(addEntityResult)
 			} catch (error) {
 				return reject({
 					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,

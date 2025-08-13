@@ -737,4 +737,49 @@ module.exports = class Programs extends Abstract {
 			}
 		})
 	}
+
+	/**
+     * @api {get} /project/v1/programs/removeSolutions/:_id 
+     * @apiVersion 1.0.0
+     * @apiName removeSolutions
+     * @apiGroup Programs
+     * @apiHeader {String} internal-access-token
+     * @apiSampleRequest /project/v1/programs/removeSolutions/6825a30dc407a50014b6a73f
+	 * Controller method to remove a solution ID from all program documents where it exists.
+	 * Delegates the actual logic to `programsHelper.removeSolutions()`.
+	 *
+	 * @param {Object} req - Express request object containing `params._id` (solutionId).
+	 * @returns {Promise<Object>} - Result of the operation from the helper function.
+     * 
+     * * @apiUse successBody
+     * @apiUse errorBody
+     * @apiParamExample {json} Response:
+    {
+        "message": "Solution and associated resources deleted successfully",
+        "status": 200,
+        "result": {
+            "noSolutionDeleted": 2,
+            "solutionId": "682c0340ba875600144d8ec5",
+            "success": true
+     }
+    }
+	*/
+	async removeSolutions(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				// Call helper method to perform the $pull operation on programs collection
+				let deletedSolutionDetails = await programsHelper.removeSolutionsFromProgram(
+					req.params._id,
+					req.query.tenantId
+				)
+				return resolve(deletedSolutionDetails)
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
+				})
+			}
+		})
+	}
 }

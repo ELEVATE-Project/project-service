@@ -403,7 +403,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   message:
@@ -483,7 +482,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   message:
@@ -515,7 +513,6 @@ paths:
         content:
           '*/*':
             schema:
-              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 description:
@@ -588,7 +585,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -620,7 +616,6 @@ paths:
         content:
           '*/*':
             schema:
-              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 externalIds:
@@ -672,7 +667,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -748,7 +742,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -1176,7 +1169,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -1221,7 +1213,6 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 cover_image:
@@ -1298,7 +1289,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -1350,7 +1340,6 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 cover_image:
@@ -1437,7 +1426,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -1482,7 +1470,6 @@ paths:
         content:
           '*/*':
             schema:
-              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 name:
@@ -1548,7 +1535,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -1658,7 +1644,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -1753,7 +1738,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   message:
@@ -1942,7 +1926,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   message:
@@ -2033,7 +2016,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -2164,7 +2146,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -2281,7 +2262,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -2332,7 +2312,6 @@ paths:
         content:
           '*/*':
             schema:
-              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 userRole:
@@ -2863,7 +2842,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   message:
@@ -3163,7 +3141,6 @@ paths:
           content:
             application/json:
               schema: &ref_52
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -3245,7 +3222,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -3288,7 +3264,6 @@ paths:
         content:
           application/json:
             schema:
-              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 taskIds:
@@ -3345,7 +3320,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -3444,7 +3418,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -3633,7 +3606,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -3686,7 +3658,6 @@ paths:
         content:
           application/json:
             schema:
-              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 externalId:
@@ -3830,7 +3801,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -3952,7 +3922,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -4003,7 +3972,6 @@ paths:
         content:
           application/json:
             schema:
-              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 roles:
@@ -4053,7 +4021,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -4107,7 +4074,6 @@ paths:
         content:
           application/json:
             schema:
-              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 entities:
@@ -4157,7 +4123,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -4252,7 +4217,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -4307,7 +4271,6 @@ paths:
         content:
           application/json:
             schema:
-              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 entities:
@@ -4357,7 +4320,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -4476,7 +4438,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -4545,7 +4506,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -4581,7 +4541,6 @@ paths:
         content:
           application/json:
             schema:
-              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 externalId:
@@ -4679,7 +4638,6 @@ paths:
         content:
           application/json:
             schema:
-              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 name:
@@ -4843,7 +4801,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -4899,7 +4856,6 @@ paths:
         content:
           application/json:
             schema:
-              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 name:
@@ -5071,7 +5027,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -5123,7 +5078,6 @@ paths:
         content:
           application/json:
             schema:
-              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 roles:
@@ -5173,7 +5127,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -5228,7 +5181,6 @@ paths:
         content:
           application/json:
             schema:
-              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 entityType:
@@ -5315,7 +5267,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -5370,7 +5321,6 @@ paths:
         content:
           application/json:
             schema:
-              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 roles:
@@ -5421,7 +5371,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -5518,7 +5467,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -5561,7 +5509,6 @@ paths:
         content:
           application/json:
             schema:
-              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 entities:
@@ -5611,7 +5558,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -5656,7 +5602,6 @@ paths:
         content:
           application/json:
             schema:
-              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 entities:
@@ -5707,7 +5652,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -5762,7 +5706,6 @@ paths:
         content:
           application/json:
             schema:
-              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 role:
@@ -5850,7 +5793,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -5906,7 +5848,6 @@ paths:
         content:
           application/json:
             schema:
-              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 entityType:
@@ -6009,7 +5950,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -6064,7 +6004,6 @@ paths:
         content:
           application/json:
             schema:
-              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 entityType:
@@ -6130,7 +6069,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -6174,7 +6112,6 @@ paths:
         content:
           application/json:
             schema:
-              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 entityType:
@@ -6236,7 +6173,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -6297,7 +6233,6 @@ paths:
         content:
           application/json:
             schema:
-              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 isReusable:
@@ -6385,7 +6320,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -6520,7 +6454,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -6571,7 +6504,6 @@ paths:
         content:
           application/json:
             schema:
-              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 keys:
@@ -6626,7 +6558,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -6671,7 +6602,6 @@ paths:
         content:
           application/json:
             schema:
-              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 request:
@@ -6741,7 +6671,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -6785,7 +6714,6 @@ paths:
         content:
           application/json:
             schema:
-              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 filePaths:
@@ -6834,7 +6762,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -6915,7 +6842,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -6946,7 +6872,6 @@ paths:
         content:
           application/json:
             schema:
-              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 type:
@@ -7045,7 +6970,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -7104,7 +7028,6 @@ paths:
         content:
           application/json:
             schema:
-              $schema: http://json-schema.org/draft-04/schema#
               type: object
               properties:
                 type:
@@ -7200,7 +7123,6 @@ paths:
           content:
             application/json:
               schema:
-                $schema: http://json-schema.org/draft-04/schema#
                 type: object
                 properties:
                   status:
@@ -11992,3 +11914,144 @@ paths:
         name: x-auth-token
         description: authenticated user token
         schema: *ref_66
+  /project/v1/admin/deleteResource/:resourceId?type=solution:
+    post:
+      description: >-
+        API can be used to delete the solution and program resources based on
+        the id passed.
+
+        * The endpoint allows a user to delete the solution and program
+        resources based on the id passed `/v1/admin/deleteResource`.
+
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
+      operationId: ''
+      tags:
+        - admin
+      parameters:
+        - in: path
+          name: type
+          description: >-
+            Need to pass Resource Type that we need to delete Ex: solution or
+            program
+          schema: &ref_67
+            type: string
+          required: true
+        - in: header
+          name: X-auth-token
+          description: >-
+            Every request to the API requires an x-auth-token in the header for
+            authentication. This token is generated when a user logs in and must
+            be included in each subsequent request to verify the user’s session
+            and permissions.
+          schema: *ref_67
+          required: true
+        - in: header
+          name: internal-access-token
+          description: 'internal-access-token '
+          schema: *ref_67
+          required: true
+        - in: header
+          name: admin-auth-token
+          description: admin-auth-token
+          schema: *ref_67
+          required: true
+        - in: header
+          name: tenantId
+          description: tenantId
+          schema: *ref_67
+          required: true
+        - in: header
+          name: orgId
+          description: orgId
+          schema: *ref_67
+          required: false
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  result:
+                    type: object
+                    properties:
+                      deletedSolutionsCount:
+                        type: number
+                      deletedProjectTemplatesCount:
+                        type: number
+                      deletedCertificateTemplatesCount:
+                        type: number
+                      deletedProjectTemplateTasksCount:
+                        type: number
+                      deletedSurveysCount:
+                        type: number
+                      deletedSurveySubmissionsCount:
+                        type: number
+                      deletedObservationsCount:
+                        type: number
+                      deletedObservationSubmissionsCount:
+                        type: number
+                      deletedProjectsCount:
+                        type: number
+              examples:
+                SuccessResponse:
+                  value:
+                    status: 200
+                    result:
+                      deletedSolutionsCount: 1
+                      deletedProjectTemplatesCount: 1
+                      deletedCertificateTemplatesCount: 1
+                      deletedProjectTemplateTasksCount: 11
+                      deletedSurveysCount: 0
+                      deletedSurveySubmissionsCount: 0
+                      deletedObservationsCount: 0
+                      deletedObservationSubmissionsCount: 0
+                      deletedProjectsCount: 0
+        '400':
+          description: 'Bad response '
+          headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  message:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        location:
+                          type: string
+                        param:
+                          type: string
+                        msg:
+                          type: string
+                      required:
+                        - location
+                        - param
+                        - msg
+              examples:
+                Failure response:
+                  value:
+                    status: 400
+                    message:
+                      - location: params
+                        param: _id
+                        msg: required resource id
+                      - location: query
+                        param: type
+                        msg: Resource type is required (program/solution)
+                      - location: query
+                        param: type
+                        msg: Invalid resource type. Must be "program" or "solution"
+      summary: To Remove Resources
+components:
+  securitySchemes: {}

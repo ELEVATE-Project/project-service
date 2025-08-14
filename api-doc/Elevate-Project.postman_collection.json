@@ -2148,6 +2148,52 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "deleteResource",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-auth-token",
+								"value": "{{userToken}}",
+								"type": "text"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}",
+								"type": "text"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}project/v1/admin/deleteResource/{_id}?type=solution",
+							"protocol": "http",
+							"host": ["{{baseUrl}}"],
+							"path": ["project", "v1", "admin", "deleteResource", "{_id}"],
+							"query": [
+								{
+									"key": "type",
+									"value": "solution"
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -3191,16 +3237,21 @@
 		},
 		{
 			"name": "healthCheck",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{baseUrl}}project/health",
-					"host": ["{{baseUrl}}project"],
-					"path": ["health"]
+			"item": [
+				{
+					"name": "healthCheck",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}project/health",
+							"host": ["{{baseUrl}}project"],
+							"path": ["health"]
+						}
+					},
+					"response": []
 				}
-			},
-			"response": []
+			]
 		}
 	]
 }

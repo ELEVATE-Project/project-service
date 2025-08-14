@@ -117,6 +117,10 @@ module.exports = {
 			type: Boolean,
 			default: true,
 		},
+		parentEntityKey: {
+			type: String,
+			default: null,
+		},
 	},
 	compoundIndex: [
 		{

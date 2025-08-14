@@ -329,7 +329,12 @@ module.exports = class ProgramsHelper {
 				data.updatedAt = new Date()
 				//convert components to objectedIds
 				if (data.components && data.components.length > 0) {
-					data.components = data.components.map((component) => UTILS.convertStringToObjectId(component))
+					const componentsWithOrder = data.components.filter(
+						(component) => component._id && component.hasOwnProperty('order')
+					)
+					data.components = componentsWithOrder.map((component) => {
+						return { ...component, _id: UTILS.convertStringToObjectId(component._id) }
+					})
 				}
 
 				if (checkDate) {
@@ -341,6 +346,55 @@ module.exports = class ProgramsHelper {
 					}
 				}
 
+				if (data.components) {
+					let programDocumentRecord = await programsQueries.programsDocument(
+						{ _id: programId, tenantId: userDetails.tenantAndOrgInfo.tenantId },
+						['components']
+					)
+
+					if (!programDocumentRecord[0]) {
+						throw {
+							message: CONSTANTS.apiResponses.PROGRAM_NOT_FOUND,
+						}
+					}
+
+					let currentComponents = [...programDocumentRecord[0].components] || [] // Create a copy
+
+					// Process each component in data.components
+					for (let component of data.components) {
+						let componentIndex = currentComponents.findIndex(
+							(currentComponent) => currentComponent._id.toString() === component._id.toString()
+						)
+
+						if (componentIndex !== -1) {
+							// Update existing component's order (preserve other fields)
+							currentComponents[componentIndex] = {
+								...currentComponents[componentIndex], // Keep existing fields
+								order: component.order, // Update only the order
+							}
+						} else {
+							// Add new component only if it's valid
+							currentComponents.push({
+								_id: component._id,
+								order: component.order,
+							})
+						}
+					}
+
+					// Check for duplicate orders
+					let orderValues = currentComponents.map((component) => component.order)
+					const hasDuplicateOrders = _.uniq(orderValues).length !== orderValues.length
+
+					if (hasDuplicateOrders) {
+						throw {
+							message: CONSTANTS.apiResponses.COMPONENT_ORDER_DUPLICATE_FOUND,
+							status: HTTP_STATUS_CODE.bad_request.status,
+						}
+					}
+
+					// Save currentComponents back to the database
+					data.components = currentComponents
+				}
 				// delete tenantId & orgId attached in req.body to avoid adding manupulative data
 				delete data.tenantId
 				delete data.orgId
@@ -1142,7 +1196,9 @@ module.exports = class ProgramsHelper {
 					},
 					{
 						$pull: {
-							components: { $in: updateSolutionIds },
+							components: {
+								_id: { $in: updateSolutionIds },
+							},
 						},
 					}
 				)
@@ -1449,6 +1505,43 @@ module.exports = class ProgramsHelper {
 					message: CONSTANTS.apiResponses.TARGETED_PROGRAMS_FETCHED,
 					data: targetedPrograms.data.data,
 					count: targetedPrograms.data.count,
+				})
+			} catch (error) {
+				return resolve({
+					success: false,
+					message: error.message,
+					data: {},
+				})
+			}
+		})
+	}
+
+	/**
+	 * Helper function to remove a solution ID from all program documents that reference it.
+	 * @name removeSolutionsFromProgram
+	 * @param {String} solutionId - The string form of the solution ObjectId to be removed from programs.
+	 * @returns {Promise<Object>} - Contains the number of modified documents and a success message.
+	 */
+	static removeSolutionsFromProgram(solutionId, tenantId) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				// Convert the string ID to MongoDB ObjectId
+				let solutionToObjectId = UTILS.convertStringToObjectId(solutionId)
+
+				// Call DB query to pull (remove) the solutionId from all program documents' components
+				let programData = await programsQueries.pullSolutionsFromComponents(solutionToObjectId, tenantId)
+				let result
+				if (programData) {
+					// Construct a result object with number of modified records
+					result = {
+						programsModifiedCount: programData.nModified,
+						solutionId: solutionId,
+						success: true,
+					}
+				}
+				return resolve({
+					result: result,
+					message: CONSTANTS.apiResponses.SOLUTION_RESOURCE_DELETED,
 				})
 			} catch (error) {
 				return resolve({

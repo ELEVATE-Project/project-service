@@ -479,6 +479,8 @@ module.exports = class SolutionsHelper {
 						'entityType',
 						'certificateTemplateId',
 						'metaInformation',
+						'linkUrl',
+						'linkTitle',
 					],
 					userDetails,
 					currentOrgOnly
@@ -1118,13 +1120,14 @@ module.exports = class SolutionsHelper {
 				}
 
 				if (solution && solution._id) {
+					let length = userPrivateProgram.components ? userPrivateProgram.components.length : 0
 					let updatedProgram = await programQueries.findAndUpdate(
 						{
 							_id: userPrivateProgram._id,
 							tenantId: userDetails.userInformation.tenantId,
 						},
 						{
-							$addToSet: { components: ObjectId(solution._id) },
+							$addToSet: { components: { _id: new ObjectId(solution._id), order: length + 1 } },
 						},
 						{
 							new: true,
@@ -1237,6 +1240,9 @@ module.exports = class SolutionsHelper {
 				break
 			case CONSTANTS.common.IMPROVEMENT_PROJECT:
 				link = appsPortalBaseUrl + prefix + CONSTANTS.common.CREATE_PROJECT + solutionLink
+				break
+			case CONSTANTS.common.COURSE:
+				link = appsPortalBaseUrl + prefix + CONSTANTS.common.CREATE_COURSE + solutionLink
 				break
 			default:
 				link = appsPortalBaseUrl + prefix + CONSTANTS.common.CREATE_SURVEY + solutionLink
@@ -2449,7 +2455,7 @@ module.exports = class SolutionsHelper {
 					requestedData,
 					userDetails
 				)
-				if (!userCreatedProjects.success) {
+				if (!userCreatedProjects.success && solutionType !== CONSTANTS.common.COURSE) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: userCreatedProjects.message,
@@ -2559,6 +2565,8 @@ module.exports = class SolutionsHelper {
 									'programName',
 									'name',
 									'description',
+									'linkUrl',
+									'linkTitle',
 								])
 							)
 							filteredTargetedSolutions.push(newEntry)

@@ -66,6 +66,7 @@ module.exports = {
 	PREFIX_FOR_SOLUTION_LINK: 'view',
 	CREATE_OBSERVATION: '/create-observation/',
 	CREATE_PROJECT: '/project/',
+	CREATE_COURSE: '/create-course/',
 	CREATE_SURVEY: '/create-survey/',
 	SUBMISSION_STATUS_COMPLETED: 'completed',
 	EXPIRED: 'expired',
@@ -161,8 +162,9 @@ module.exports = {
 	OVERRIDE_OPERATION: 'OVERRIDE',
 	PROMISE_FULFILLED: 'fulfilled',
 	DEFAULT_PROGRAM_USER_MAPPING_TOPIC: 'elevate_program_operation',
-	PROGRAM_EVENT_ENTITY: 'program',
+	PROGRAM: 'program',
 	FALSE: 'false',
 	OPTIONAL_SCOPE_FIELD: 'optional_factors',
 	MANDATORY_SCOPE_FIELD: 'factors',
+	SOLUTION: 'solution',
 }

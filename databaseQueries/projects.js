@@ -76,11 +76,11 @@ module.exports = class Projects {
 	 * @returns {Object} - Project data.
 	 */
 
-	static findOneAndUpdate(findQuery, UpdateObject, returnData = {}) {
+	static findOneAndUpdate(findQuery, updateObject, returnData = {}) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let projectDocument = await database.models.projects
-					.findOneAndUpdate(findQuery, UpdateObject, returnData)
+					.findOneAndUpdate(findQuery, updateObject, returnData)
 					.lean()
 				return resolve(projectDocument)
 			} catch (error) {
@@ -125,6 +125,23 @@ module.exports = class Projects {
 				if (updatedProjectCount) {
 					return resolve(updatedProjectCount)
 				}
+			} catch (error) {
+				return reject(error)
+			}
+		})
+	}
+
+	/**
+	 * Delete projects documents based on the provided MongoDB filter.
+	 * @param {Object} filter - MongoDB query filter to match documents for deletion.
+	 * @returns {Promise<Object>} - MongoDB deleteMany result containing deleted count.
+	 */
+	static delete(filter) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let deleteDocuments = await database.models.projects.deleteMany(filter)
+
+				return resolve(deleteDocuments)
 			} catch (error) {
 				return reject(error)
 			}

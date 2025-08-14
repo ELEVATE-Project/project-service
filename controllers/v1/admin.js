@@ -123,4 +123,63 @@ module.exports = class Admin {
 			}
 		})
 	}
+
+	/**
+   * @api {post} /project/v1/admin/deleteResource/:resourceId?type=solution
+   * Deletes a resource (program/solution) after validating admin access.
+   * @apiVersion 1.0.0
+   * @apiGroup Admin
+   * @apiSampleRequest /project/v1/admin/deleteResource/683867e60f8595db9c1b6c26?type=solution
+    * @apiParamExample {json} Response:
+    {
+    "message": "Solution and associated resources deleted successfully",
+    "status": 200,
+    "result": {
+        "deletedSolutionsCount": 1,
+        "deletedProjectTemplatesCount": 1,
+        "deletedCertificateTemplatesCount": 1,
+        "deletedProjectTemplateTasksCount": 0,
+        "deletedSurveysCount": 0,
+        "deletedSurveySubmissionsCount": 0,
+        "deletedObservationsCount": 0,
+        "deletedObservationSubmissionsCount": 0,
+        "deletedProjectsCount": 2,
+		"deletedProgramsCount":1
+    	}
+	}
+    * @apiUse successBody
+    * @apiUse errorBody
+    */
+	/**
+	 * Deletes a resource (program/solution) after validating admin access.
+	 *
+	 * @param {Object} req - Express request object containing user details, params, and query.
+	 * @param {Object} req.params - Contains route parameters, specifically `_id` of the resource.
+	 * @param {Object} req.query - Contains query parameters, specifically `type` (program/solution).
+	 * @param {Object} req.userDetails - Contains user roles and tenant/org info.
+	 * @returns {Promise<Object>} - Returns a success or failure response from the adminHelper.
+	 * @throws {Object} - Throws an error object with status, message, and error details if validation or deletion fails.
+	 */
+	async deleteResource(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				// Call adminHelper's deletedResourceDetails with required identifiers
+				let deleteResource = await adminHelper.deletedResourceDetails(
+					req.params._id,
+					req.query.type,
+					req.userDetails.tenantAndOrgInfo.tenantId,
+					req.userDetails.tenantAndOrgInfo.orgId,
+					req.userDetails.userInformation.userId,
+					req.userDetails.userToken
+				)
+				return resolve(deleteResource)
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
+				})
+			}
+		})
+	}
 }

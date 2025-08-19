@@ -220,6 +220,11 @@ let enviromentVariables = {
 		optional: true,
 		default: 'elevate_user_courses_raw',
 	},
+	KAFKA_HEALTH_CHECK_TOPIC: {
+		message: 'Required KAFKA_HEALTH_CHECK_TOPIC',
+		optional: true,
+		default: 'project-health-check-topic-check',
+	},
 }
 
 let success = true

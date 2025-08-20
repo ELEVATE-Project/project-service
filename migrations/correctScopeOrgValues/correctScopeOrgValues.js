@@ -54,6 +54,12 @@ function normalizeOrgId(orgId) {
 				}
 
 				if (!_.isEqual(currentOrganizationField, modifiedOrganizationField)) {
+					console.log(
+						`Record ${record._id}: ${JSON.stringify(currentOrganizationField)} -> ${JSON.stringify(
+							modifiedOrganizationField
+						)}`
+					)
+
 					let updateResult = await db
 						.collection(collectionName)
 						.updateOne({ _id: record._id }, { $set: { 'scope.organizations': modifiedOrganizationField } })

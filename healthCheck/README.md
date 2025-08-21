@@ -106,6 +106,7 @@ MONGODB_URL=mongodb://localhost:27017/mydb
 POSTGRES_URL=postgres://user:pass@localhost:5432/mydb
 GOTENBERG_URL=http://localhost:3000
 KAFKA_URL=kafka://localhost:9092
+KAFKA_HEALTH_CHECK_TOPIC = project-health-check-topic-check
 SURVEY_SERVICE_URL=http://localhost:4001/survey/health
 ```
 

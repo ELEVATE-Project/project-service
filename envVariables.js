@@ -205,6 +205,26 @@ let enviromentVariables = {
 		optional: true,
 		default: 'elevate-improvement-project-submission-dev',
 	},
+	RESOURCE_DELETION_TOPIC: {
+		message: 'Required RESOURCE_DELETION_TOPIC',
+		optional: false,
+		default: 'resource_deletion_topic',
+	},
+	USER_COURSES_SUBMISSION_TOPIC: {
+		message: 'Required USER_COURSES_SUBMISSION_TOPIC',
+		optional: true,
+		default: 'elevate_user_courses_dev',
+	},
+	USER_COURSES_TOPIC: {
+		message: 'Required USER_COURSES_TOPIC',
+		optional: true,
+		default: 'elevate_user_courses_raw',
+	},
+	KAFKA_HEALTH_CHECK_TOPIC: {
+		message: 'Required KAFKA_HEALTH_CHECK_TOPIC',
+		optional: false,
+		default: 'project-health-check-topic-check',
+	},
 }
 
 let success = true

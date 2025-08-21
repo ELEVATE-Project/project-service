@@ -153,6 +153,12 @@ module.exports = class UserProjectsHelper {
 					}
 				}
 
+				// if entityId & entityInformation are passed through payload, ignore them
+				const blackListedPayloadItems = ['entityId', 'entityInformation']
+				blackListedPayloadItems.map((payloadItem) => {
+					if (data.hasOwnProperty(payloadItem)) delete data[payloadItem]
+				})
+
 				if (process.env.SUBMISSION_LEVEL == 'USER') {
 					if (!(userProject[0].userId == userId)) {
 						throw {
@@ -324,29 +330,6 @@ module.exports = class UserProjectsHelper {
 				//     }
 				// }
 
-				// let addOrUpdateEntityToProject = false
-
-				// if (data.entityId) {
-				// 	// If entity is not present in project or new entity is updated.
-				// 	if (
-				// 		!userProject[0].entityInformation ||
-				// 		(userProject[0].entityInformation && userProject[0].entityInformation._id !== data.entityId)
-				// 	) {
-				// 		addOrUpdateEntityToProject = true
-				// 	}
-				// }
-
-				// if (addOrUpdateEntityToProject) {
-				// 	let entityInformation = await entitiesService.entityDocuments({ _id: entityId }, 'all')
-
-				// 	if (!entityInformation.success) {
-				// 		return resolve(entityInformation)
-				// 	}
-
-				// 	updateProject['entityInformation'] = entityInformation.data[0]
-				// 	updateProject.entityId = entityInformation.data[0]._id
-				// }
-
 				// if (createNewProgramAndSolution || solutionExists) {
 
 				//     let programAndSolutionInformation =
@@ -486,6 +469,7 @@ module.exports = class UserProjectsHelper {
 					})
 					updateProject['updateHistory'] = userProject[0].updateHistory
 				}
+
 				let projectUpdated = await projectQueries.findOneAndUpdate(
 					{
 						_id: userProject[0]._id,
@@ -735,8 +719,10 @@ module.exports = class UserProjectsHelper {
 					solution = await solutionsQueries.createSolution(solution)
 					solutionsCreated.push(solution)
 				}
-				const solutionIds = solutionsCreated.map((solution) => {
-					return solution._id
+
+				let componentLength = userPrivateProgram.components.length || 0
+				const componentArray = solutionsCreated.map((solution) => {
+					return { _id: new ObjectId(solution._id), order: ++componentLength }
 				})
 
 				// Update the program components
@@ -746,7 +732,7 @@ module.exports = class UserProjectsHelper {
 						tenantId: userDetails.userInformation.tenantId,
 					},
 					{
-						$addToSet: { components: solutionIds },
+						$addToSet: { components: componentArray },
 					}
 				)
 				const solutionsAndProgramData = {}
@@ -1459,9 +1445,10 @@ module.exports = class UserProjectsHelper {
 			try {
 				let solutionExternalId = ''
 				let templateDocuments
-				let defaultACL = CONSTANTS.common.DEFAULT_ACL
+				let defaultACL = _.cloneDeep(CONSTANTS.common.DEFAULT_ACL)
 				let tenantId = userDetails.userInformation.tenantId
 				let orgId = userDetails.userInformation.organizationId
+
 				if (templateId !== '') {
 					templateDocuments = await projectTemplateQueries.templateDocument({
 						externalId: templateId,
@@ -1678,6 +1665,8 @@ module.exports = class UserProjectsHelper {
 								scope: solutionDetails.scope,
 								// referenceFrom: solutionDetails.referenceFrom ? solutionDetails.referenceFrom : '', // added for project as a task
 								// project: solutionDetails.project ? solutionDetails.project : '',
+								entityType: solutionDetails.entityType,
+								parentEntityKey: solutionDetails.parentEntityKey,
 							}
 
 							projectCreation.data['programId'] = projectCreation.data.programInformation._id
@@ -1779,24 +1768,27 @@ module.exports = class UserProjectsHelper {
 							}
 							// Adding entityInformation in Project
 							if (solutionDetails.entityType && bodyData[solutionDetails.entityType]) {
-								let entityDetails = await entitiesService.entityDocuments({
+								const res = await entitiesService.entityDocuments({
 									_id: bodyData[solutionDetails.entityType],
-									tenantId: tenantId,
-									orgIds: { $in: ['ALL', orgId] },
+									tenantId,
 								})
-
-								if (!entityDetails?.success || !entityDetails?.data.length > 0) {
+								const entitiesList = Array.isArray(res) ? res : res?.data
+								if (!Array.isArray(entitiesList) || entitiesList.length === 0) {
 									throw {
 										message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
 										status: HTTP_STATUS_CODE.bad_request.status,
 									}
 								}
-								if (entityDetails && entityDetails?.data.length > 0) {
-									projectCreation.data['entityInformation'] = {
-										..._.pick(entityDetails.data[0], ['_id', 'entityType', 'entityTypeId']),
-										externalId: entityDetails.data[0]?.metaInformation?.externalId,
-									}
+								const entity = entitiesList[0]
+								projectCreation.data.entityInformation = {
+									_id: entity._id,
+									entityType: entity.entityType,
+									entityTypeId: entity.entityTypeId,
+									entityId: entity._id,
+									externalId: entity?.metaInformation?.externalId || '',
+									entityName: entity?.metaInformation?.name || '',
 								}
+								projectCreation.data.entityId = entity._id
 							}
 						}
 
@@ -1891,9 +1883,7 @@ module.exports = class UserProjectsHelper {
 								projectCreation.data.userProfile = updatedUserProfile.data
 							}
 						}
-						if (bodyData.entityId !== '') {
-							projectCreation.data['entityId'] = bodyData.entityId
-						}
+
 						if (bodyData.project) {
 							projectCreation.data['project'] = bodyData.project
 							projectCreation.data['referenceFrom'] = CONSTANTS.common.PROJECT
@@ -4694,8 +4684,6 @@ function _projectInformation(project, language) {
 
 			delete project.metaInformation
 			delete project.__v
-			delete project.entityInformation
-			// delete project.solutionInformation
 			delete project.programInformation
 
 			return resolve({
@@ -4864,6 +4852,14 @@ async function _projectTask(
 			let importSolutionsResponse
 			// create a child solution if solutionDetails has isReusable true solution details
 			if (singleTask?.solutionDetails?.isReusable) {
+				let programInformation = await programQueries.programsDocument({
+					_id: programId,
+					tenantId: userDetails.userInformation.tenantId,
+				})
+
+				programInformation = programInformation[0]
+
+				let componentLength = programInformation?.components?.length || 0
 				userDetails.tenantAndOrgInfo = {
 					tenantId: userDetails.userInformation.tenantId,
 					orgId: [userDetails.userInformation.organizationId],
@@ -4908,7 +4904,12 @@ async function _projectTask(
 							_id: programId,
 						},
 						{
-							$addToSet: { components: importSolutionsResponse.result._id },
+							$addToSet: {
+								components: {
+									_id: ObjectId(importSolutionsResponse.result._id),
+									order: ++componentLength,
+								},
+							},
 						}
 					)
 				} else if (singleTask.solutionDetails.type === CONSTANTS.common.SURVEY) {
@@ -4943,7 +4944,12 @@ async function _projectTask(
 							_id: programId,
 						},
 						{
-							$addToSet: { components: importSolutionsResponse.result.solutionId },
+							$addToSet: {
+								components: {
+									_id: ObjectId(importSolutionsResponse.result.solutionId),
+									order: ++componentLength,
+								},
+							},
 						}
 					)
 				}
@@ -4953,7 +4959,14 @@ async function _projectTask(
 			})
 
 			if (singleTask.children) {
-				await _projectTask(singleTask.children, isImportedFromLibrary, singleTask._id)
+				await _projectTask(
+					singleTask.children,
+					isImportedFromLibrary,
+					singleTask._id,
+					userToken,
+					programId,
+					userDetails
+				)
 			} else {
 				singleTask.children = []
 			}

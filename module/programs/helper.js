@@ -329,9 +329,15 @@ module.exports = class ProgramsHelper {
 				data.updatedAt = new Date()
 				//convert components to objectedIds
 				if (data.components && data.components.length > 0) {
-					const componentsWithOrder = data.components.filter(
-						(component) => component._id && component.hasOwnProperty('order')
-					)
+					const componentsWithOrder = data.components.filter((component) => {
+						return (
+							component._id &&
+							component.hasOwnProperty('order') &&
+							typeof component.order === 'number' &&
+							Number.isInteger(component.order) &&
+							component.order > 0
+						)
+					})
 					data.components = componentsWithOrder.map((component) => {
 						return { ...component, _id: UTILS.convertStringToObjectId(component._id) }
 					})

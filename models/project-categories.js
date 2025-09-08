@@ -59,6 +59,10 @@ module.exports = {
 			index: true,
 			required: true,
 		},
+		visibleToOrganizations: {
+			type: Array,
+			default: [],
+		},
 	},
 	compoundIndex: [
 		{

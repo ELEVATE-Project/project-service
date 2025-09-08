@@ -151,6 +151,15 @@ module.exports = {
 			index: true,
 			required: true,
 		},
+		visibility: {
+			type: String,
+			index: true,
+			default: 'CURRENT',
+		},
+		visibleToOrganizations: {
+			type: Array,
+			default: [],
+		},
 	},
 	compoundIndex: [
 		{

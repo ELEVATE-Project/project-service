@@ -16,6 +16,8 @@ const filesHelpers = require(MODULES_BASE_PATH + '/cloud-services/files/helper')
 const axios = require('axios')
 const entitiesService = require(GENERICS_FILES_PATH + '/services/entity-management')
 const projectAttributesQueries = require(DB_QUERY_BASE_PATH + '/projectAttributes')
+const solutionAndProjectTemplateUtils = require(GENERICS_FILES_PATH + '/helpers/solutionAndProjectTemplateUtils')
+const orgExtensionQueries = require(DB_QUERY_BASE_PATH + '/organizationExtension')
 
 /**
  * LibraryCategoriesHelper
@@ -64,7 +66,56 @@ module.exports = class LibraryCategoriesHelper {
 					},
 				}
 
+				// Fetch the organization extension document of the loggedin user
+				let orgExtension = await orgExtensionQueries.orgExtenDocuments({
+					tenantId: userDetails.userInformation.tenantId,
+					orgId: userDetails.userInformation.organizationId,
+				})
+
+				if (!orgExtension || orgExtension.length === 0) {
+					throw {
+						success: false,
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.ORG_EXTENSION_NOT_FOUND,
+					}
+				}
+
+				orgExtension = orgExtension[0]
+
 				matchQuery['$match']['tenantId'] = userDetails.userInformation.tenantId
+
+				let matchConditions = []
+
+				// allow ALL templates
+				if (
+					orgExtension.externalProjectResourceVisibilityPolicy ===
+					CONSTANTS.common.ORG_EXTENSION_VISIBILITY.ALL
+				) {
+					matchConditions.push({ visibility: CONSTANTS.common.ORG_EXTENSION_VISIBILITY.ALL })
+				}
+
+				// allow ASSOCIATED templates with orgId match (for both ALL and ASSOCIATED cases)
+				if (
+					[
+						CONSTANTS.common.ORG_EXTENSION_VISIBILITY.ALL,
+						CONSTANTS.common.ORG_EXTENSION_VISIBILITY.ASSOCIATED,
+					].includes(orgExtension.externalProjectResourceVisibilityPolicy)
+				) {
+					matchConditions.push({
+						visibility: CONSTANTS.common.ORG_EXTENSION_VISIBILITY.ASSOCIATED,
+						visibleToOrganizations: {
+							$in: [userDetails.userInformation.organizationId],
+						},
+					})
+				}
+				if (matchConditions.length > 0) {
+					matchQuery['$match']['$or'] = matchConditions
+					matchQuery['$match']['$or'].push({
+						orgId: userDetails.userInformation.organizationId,
+					})
+				} else {
+					matchQuery['$match']['orgId'] = userDetails.userInformation.organizationId
+				}
 
 				if (categoryId && categoryId !== '') {
 					matchQuery['$match']['categories.externalId'] = categoryId
@@ -402,13 +453,10 @@ module.exports = class LibraryCategoriesHelper {
 					},
 				})
 			} catch (error) {
-				return resolve({
-					success: true,
-					message: CONSTANTS.apiResponses.PROJECTS_FETCHED,
-					data: {
-						data: [],
-						count: 0,
-					},
+				return reject({
+					success: false,
+					status: HTTP_STATUS_CODE.not_found.status,
+					message: error.message,
 				})
 			}
 		})
@@ -593,10 +641,37 @@ module.exports = class LibraryCategoriesHelper {
 	static create(categoryData, files, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				const tenantId = userDetails.tenantAndOrgInfo.tenantId
+				const orgId = userDetails.tenantAndOrgInfo.orgId[0]
+
+				// Check if organization extension exists for the loggedin user
+				let orgExtension
+				orgExtension = await orgExtensionQueries.orgExtenDocuments({
+					tenantId,
+					orgId,
+				})
+				// Create default org-extension policy if not found
+				if (!orgExtension || orgExtension.length === 0) {
+					orgExtension = await orgExtensionQueries.create({
+						tenantId,
+						orgId,
+						...CONSTANTS.common.DEFAULT_ORG_EXTENSION_POLICIES,
+					})
+
+					if (!orgExtension || Object.keys(orgExtension).length === 0) {
+						throw {
+							success: false,
+							status: HTTP_STATUS_CODE.bad_request.status,
+							message: CONSTANTS.apiResponses.ORG_EXTENSION_CREATE_FAILED,
+						}
+					}
+				}
+				orgExtension = Array.isArray(orgExtension) ? orgExtension[0] : orgExtension
+
 				// Check if the category already exists
 				let filterQuery = {}
 				filterQuery['externalId'] = categoryData.externalId.toString()
-				filterQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+				filterQuery['tenantId'] = tenantId
 
 				const checkIfCategoryExist = await projectCategoriesQueries.categoryDocuments(filterQuery, [
 					'_id',
@@ -621,8 +696,17 @@ module.exports = class LibraryCategoriesHelper {
 				categoryData['evidences'] = evidences.data
 
 				// add tenantId and orgId
-				categoryData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-				categoryData['orgId'] = userDetails.tenantAndOrgInfo.orgId[0]
+				categoryData['tenantId'] = tenantId
+				categoryData['orgId'] = orgId
+				let relatedOrgs = await solutionAndProjectTemplateUtils.fetchRelatedOrgs(userDetails)
+				if (!relatedOrgs || !relatedOrgs.success || !relatedOrgs.result) {
+					throw {
+						success: false,
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.ORG_DETAILS_FETCH_UNSUCCESSFUL,
+					}
+				}
+				categoryData['visibleToOrganizations'] = relatedOrgs.result
 
 				let projectCategoriesData = await projectCategoriesQueries.create(categoryData)
 
@@ -660,12 +744,14 @@ module.exports = class LibraryCategoriesHelper {
 	static list(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let tenantId
-				let organizationId
-				let query = {}
+				let tenantId = req.userDetails.userInformation.tenantId
+				let organizationId = req.userDetails.userInformation.organizationId
+				let query = {
+					visibleToOrganizations: { $in: [organizationId] },
+				}
 
 				// create query to fetch assets
-				query['tenantId'] = req.userDetails.userInformation.tenantId
+				query['tenantId'] = tenantId
 
 				// handle currentOrgOnly filter
 				if (req.query['currentOrgOnly']) {

@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "788f6080-df49-4d46-ad45-e66e0ffc4b14",
+		"_postman_id": "9b841ca0-a325-4e98-b226-2aef7179a8c9",
 		"name": "Elevate-Project Copy",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "28589818"
@@ -694,7 +694,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/userProjects/list?page=1&limit=10&search=&language=hi&status=completed",
+							"raw": "{{baseUrl}}/project/v1/userProjects/list?page=1&limit=10&search=&language=hi&status=completed",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "userProjects", "list"],
 							"query": [
@@ -2181,7 +2181,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}project/v1/admin/deleteResource/{_id}?type=solution",
+							"raw": "http://{{baseUrl}}/project/v1/admin/deleteResource/{_id}?type=solution",
 							"protocol": "http",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "admin", "deleteResource", "{_id}"],
@@ -2191,6 +2191,34 @@
 									"value": "solution"
 								}
 							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateRelatedOrgs",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"entity\": \"organization\",\n    \"eventType\": \"update\",\n    \"entityId\": \"46\",\n    \"changes\": {\n        \"name\": {\n            \"oldValue\": \"Old Org Name\",\n            \"newValue\": \"New Org Name\"\n        },\n        \"description\": {\n            \"oldValue\": \"Old Desc\",\n            \"newValue\": \"Updated Desc\"\n        },\n        \"related_org_details\": {\n            \"oldValue\": [\n                {\n                    \"id\": 5,\n                    \"code\": \"bel\"\n                }\n            ],\n            \"newValue\": [\n                {\n                    \"id\": 5,\n                    \"code\": \"bel\"\n                },\n                {\n                    \"id\": 77,\n                    \"code\": \"blr\"\n                }\n            ]\n        }\n    },\n    \"id\": \"46\",\n    \"tenant_code\": \"shikshalokam\",\n    \"code\": \"mys\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/admin/updateRelatedOrgs",
+							"host": ["{{baseUrl}}"],
+							"path": ["project", "v1", "admin", "updateRelatedOrgs"]
 						}
 					},
 					"response": []
@@ -3247,6 +3275,98 @@
 							"raw": "{{baseUrl}}project/health",
 							"host": ["{{baseUrl}}project"],
 							"path": ["health"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "organizationExtension",
+			"item": [
+				{
+					"name": "update",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "x-auth-token",
+								"value": "{{token}}",
+								"type": "text"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}",
+								"type": "text"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"projectResourceVisibilityPolicy\": \"ASSOCIATED\",\n    \"externalProjectResourceVisibilityPolicy\" : \"ASSOCIATED\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/organizationExtension/update/:_id",
+							"host": ["{{baseUrl}}"],
+							"path": ["project", "v1", "organizationExtension", "update", ":_id"],
+							"variable": [
+								{
+									"key": "_id",
+									"value": "68bad65b2ffef8d283ae1efa"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "eventListener",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "internal_access_token",
+								"value": "{{internal_access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"entity\": \"organization\",\n    \"eventType\": \"create\",\n    \"entityId\": \"3\",\n    \"changes\": {},\n    \"id\": \"3\",\n    \"code\": \"mys\",\n    \"related_orgs\": [],\n    \"tenant_code\": \"shikshalokam\",\n    \"meta\": {},\n    \"status\": \"ACTIVE\",\n    \"deleted\": false,\n    \"created_by\": \"SYSTEM\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/organizationExtension/eventListener",
+							"host": ["{{baseUrl}}"],
+							"path": ["project", "v1", "organizationExtension", "eventListener"]
 						}
 					},
 					"response": []

@@ -19,6 +19,12 @@ module.exports = (req) => {
 				.isIn(['program', 'solution'])
 				.withMessage('Invalid resource type. Must be "program" or "solution"')
 		},
+		updateRelatedOrgs: function () {
+			req.checkBody('changes').exists().withMessage('changes object is required')
+			req.checkBody('changes.related_org_details')
+				.exists()
+				.withMessage('changes.related_org_details object is required')
+		},
 	}
 
 	if (adminValidator[req.params.method]) {

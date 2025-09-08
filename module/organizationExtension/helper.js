@@ -55,7 +55,7 @@ module.exports = class OrganizationHelper {
 				filteredBodyData['updatedBy'] = req.userDetails.userInformation.userName
 
 				// Update the org extension in DB and return the new document
-				const updatedOrgExtenion = await orgExtenQueries.update(
+				const updatedOrgExtension = await orgExtenQueries.update(
 					{
 						_id: UTILS.convertStringToObjectId(req.params._id),
 						tenantId,
@@ -67,7 +67,7 @@ module.exports = class OrganizationHelper {
 				)
 
 				// Throw error if updation failed
-				if (!updatedOrgExtenion) {
+				if (!updatedOrgExtension) {
 					throw {
 						success: false,
 						message: CONSTANTS.apiResponses.ORG_EXTENSION_UPDATE_FAILED,
@@ -78,7 +78,7 @@ module.exports = class OrganizationHelper {
 				return resolve({
 					success: true,
 					message: CONSTANTS.apiResponses.ORG_EXTENSION_UPDATED,
-					result: updatedOrgExtenion,
+					result: updatedOrgExtension,
 				})
 			} catch (error) {
 				// Catch and return error response

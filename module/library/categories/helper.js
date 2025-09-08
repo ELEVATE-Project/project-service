@@ -706,7 +706,7 @@ module.exports = class LibraryCategoriesHelper {
 						message: CONSTANTS.apiResponses.ORG_DETAILS_FETCH_UNSUCCESSFUL,
 					}
 				}
-				categoryData['visibleToOrganizations'] = relatedOrgs.result
+				categoryData['visibleToOrganizations'] = [orgId, ...relatedOrgs.result]
 
 				let projectCategoriesData = await projectCategoriesQueries.create(categoryData)
 

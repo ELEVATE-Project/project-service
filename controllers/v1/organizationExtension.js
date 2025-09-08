@@ -20,7 +20,6 @@ module.exports = class OrganizationExtension extends Abstract {
 			"externalProjectResourceVisibilityPolicy" : "CURRENT",
             "projectResourceVisibilityPolicy" : "CURRENT"
 		}
-	* @apiHeader {String} X-auth-token Authenticity token
 	* @apiSampleRequest /project/v1/organizationExtension/update
 	* @apiUse successBody
 	* @apiUse errorBody
@@ -124,7 +123,6 @@ module.exports = class OrganizationExtension extends Abstract {
             "created_at": "<timestamp>",
             "updated_at": "<timestamp>"
         }
-	* @apiHeader {String} internal-access-token
 	* @apiSampleRequest /project/v1/organizationExtension/eventListener
 	* @apiUse successBody
 	* @apiUse errorBody

@@ -434,7 +434,7 @@ module.exports = class ProjectTemplatesHelper {
 						templateData['tenantId'] = tenantId
 						templateData['orgId'] = orgId
 						templateData['visibility'] = orgExtension.projectResourceVisibilityPolicy
-						templateData['visibleToOrganizations'] = relatedOrgs.result
+						templateData['visibleToOrganizations'] = [orgId, ...relatedOrgs.result]
 
 						let createdTemplate = await projectTemplateQueries.createTemplate(templateData)
 

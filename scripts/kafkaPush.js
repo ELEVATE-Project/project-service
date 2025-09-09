@@ -1,3 +1,4 @@
+require('dotenv').config({ path: '../.env' })
 const kafka = require('kafka-node')
 
 // Remote Kafka broker IP and port

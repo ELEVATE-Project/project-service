@@ -3349,7 +3349,7 @@
 								"type": "text"
 							},
 							{
-								"key": "internal_access_token",
+								"key": "internal-access-token",
 								"value": "{{internal_access_token}}",
 								"type": "text"
 							}

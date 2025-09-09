@@ -24,7 +24,7 @@ module.exports = class Admin {
             "scope.entities"
         ]
     }
-  * @apiHeader {String} X-authenticated-user-token Authenticity token
+  * @apiHeader {String} X-auth-token Authenticity token
   * @apiSampleRequest /project/v1/admin/createIndex/solutions
   * @apiUse successBody
   * @apiUse errorBody

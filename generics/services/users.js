@@ -6,6 +6,7 @@
  */
 
 //dependencies
+const { json } = require('body-parser')
 const request = require('request')
 const interfaceServiceUrl = process.env.INTERFACE_SERVICE_URL
 
@@ -400,6 +401,7 @@ const fetchTenantDetails = function (tenantId, userToken, aggregateValidOrgs = f
 					'content-type': 'application/json',
 					'X-auth-token': userToken,
 				},
+				json: {},
 			}
 			request.post(url, options, userReadCallback)
 			let result = {

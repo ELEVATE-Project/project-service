@@ -108,13 +108,18 @@ module.exports = class LibraryCategoriesHelper {
 						},
 					})
 				}
-				if (matchConditions.length > 0) {
-					matchQuery['$match']['$or'] = matchConditions
-					matchQuery['$match']['$or'].push({
-						orgId: userDetails.userInformation.organizationId,
-					})
+
+				// Build a single `$or` array for visibility, then add it into `$and`
+				const visibilityOr =
+					matchConditions.length > 0
+						? [...matchConditions, { orgId: userDetails.userInformation.organizationId }]
+						: null
+				if (visibilityOr) {
+					// Preserve any existing $and clauses and append the visibility OR
+					matchQuery.$match.$and = [...(matchQuery.$match.$and || []), { $or: visibilityOr }]
 				} else {
-					matchQuery['$match']['orgId'] = userDetails.userInformation.organizationId
+					// Fallback to a simple orgId match when there are no other visibility conditions
+					matchQuery.$match.orgId = userDetails.userInformation.organizationId
 				}
 
 				if (categoryId && categoryId !== '') {
@@ -191,7 +196,8 @@ module.exports = class LibraryCategoriesHelper {
 
 						// construct the match query for filters
 						if (minDays !== Infinity && exactDurationFiltersInDays.length > 0) {
-							matchQuery['$match']['$or'] = [
+							matchQuery['$match']['$and'] = [
+								...(matchQuery['$match']['$and'] || []),
 								{ durationInDays: { $gt: minDays } }, // Use $gt for greater than
 								{ durationInDays: { $in: exactDurationFiltersInDays } }, // For exact durations
 							]
@@ -228,24 +234,26 @@ module.exports = class LibraryCategoriesHelper {
 					}
 				}
 
+				const searchConditions = []
 				if (search !== '') {
 					if (userLanguage === defaultLanguage) {
-						// Search directly in default fields for English
-						matchQuery['$match']['$or'] = [
+						searchConditions.push(
 							{ title: new RegExp(search, 'i') },
 							{ description: new RegExp(search, 'i') },
-							{ categories: new RegExp(search, 'i') },
-						]
+							{ categories: new RegExp(search, 'i') }
+						)
 					} else {
-						// Search in translations for other languages
-						matchQuery['$match']['$or'] = [
+						searchConditions.push(
 							{ [`translations.${userLanguage}.title`]: new RegExp(search, 'i') },
 							{ [`translations.${userLanguage}.description`]: new RegExp(search, 'i') },
 							{ title: new RegExp(search, 'i') },
 							{ description: new RegExp(search, 'i') },
-							{ categories: new RegExp(search, 'i') },
-						]
+							{ categories: new RegExp(search, 'i') }
+						)
 					}
+
+					// Add into $and instead of overwriting
+					matchQuery.$match.$and = [...(matchQuery.$match.$and || []), { $or: searchConditions }]
 				}
 
 				let sortedQuery = {
@@ -253,7 +261,6 @@ module.exports = class LibraryCategoriesHelper {
 						createdAt: -1,
 					},
 				}
-
 				if (sortedData && sortedData === CONSTANTS.common.IMPORTANT_PROJECT) {
 					sortedQuery['$sort'] = {}
 					sortedQuery['$sort']['noOfRatings'] = -1

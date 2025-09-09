@@ -45,6 +45,7 @@ module.exports = class OrganizationHelper {
 				Object.entries(filteredBodyData).map(([key, value]) => {
 					if (key == 'projectResourceVisibilityPolicy' || key == 'externalProjectResourceVisibilityPolicy') {
 						value = value.toUpperCase()
+						filteredBodyData[key] = value
 						// If provided value is not valid, reset to default
 						if (!orgExtenVisibilityValues.includes(value))
 							filteredBodyData[key] = CONSTANTS.common.DEFAULT_ORG_EXTENSION_POLICIES[key]
@@ -132,6 +133,7 @@ module.exports = class OrganizationHelper {
 				Object.entries(orgExtenData).map(([key, value]) => {
 					if (key == 'projectResourceVisibilityPolicy' || key == 'externalProjectResourceVisibilityPolicy') {
 						value = value.toUpperCase()
+						orgExtenData[key] = value
 						// If provided value is not valid, reset to default
 						if (!orgExtenVisibilityValues.includes(value))
 							orgExtenData[key] = CONSTANTS.common.DEFAULT_ORG_EXTENSION_POLICIES[key]

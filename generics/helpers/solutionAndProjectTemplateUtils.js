@@ -10,13 +10,12 @@
  * circular dependencies when placed in the solution module.
  */
 
-const { result } = require('lodash')
-
 // Dependencies
 const solutionsQueries = require(DB_QUERY_BASE_PATH + '/solutions')
 const programQueries = require(DB_QUERY_BASE_PATH + '/programs')
 const userService = require(GENERICS_FILES_PATH + '/services/users')
 const timeZoneDifference = process.env.TIMEZONE_DIFFRENECE_BETWEEN_LOCAL_TIME_AND_UTC
+const _ = require('lodash')
 
 /**
  * Create solution.

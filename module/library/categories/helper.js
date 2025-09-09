@@ -73,14 +73,10 @@ module.exports = class LibraryCategoriesHelper {
 				})
 
 				if (!orgExtension || orgExtension.length === 0) {
-					throw {
-						success: false,
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: CONSTANTS.apiResponses.ORG_EXTENSION_NOT_FOUND,
-					}
+					orgExtension = null
+				} else {
+					orgExtension = orgExtension[0]
 				}
-
-				orgExtension = orgExtension[0]
 
 				matchQuery['$match']['tenantId'] = userDetails.userInformation.tenantId
 
@@ -88,14 +84,16 @@ module.exports = class LibraryCategoriesHelper {
 
 				// allow ALL templates
 				if (
+					orgExtension &&
 					orgExtension.externalProjectResourceVisibilityPolicy ===
-					CONSTANTS.common.ORG_EXTENSION_VISIBILITY.ALL
+						CONSTANTS.common.ORG_EXTENSION_VISIBILITY.ALL
 				) {
 					matchConditions.push({ visibility: CONSTANTS.common.ORG_EXTENSION_VISIBILITY.ALL })
 				}
 
 				// allow ASSOCIATED templates with orgId match (for both ALL and ASSOCIATED cases)
 				if (
+					orgExtension &&
 					[
 						CONSTANTS.common.ORG_EXTENSION_VISIBILITY.ALL,
 						CONSTANTS.common.ORG_EXTENSION_VISIBILITY.ASSOCIATED,

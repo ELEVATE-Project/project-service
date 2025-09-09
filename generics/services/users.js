@@ -401,9 +401,8 @@ const fetchTenantDetails = function (tenantId, userToken, aggregateValidOrgs = f
 					'content-type': 'application/json',
 					'X-auth-token': userToken,
 				},
-				json: {},
 			}
-			request.post(url, options, userReadCallback)
+			request.get(url, options, userReadCallback)
 			let result = {
 				success: true,
 			}

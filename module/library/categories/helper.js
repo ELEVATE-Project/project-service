@@ -80,45 +80,7 @@ module.exports = class LibraryCategoriesHelper {
 
 				matchQuery['$match']['tenantId'] = userDetails.userInformation.tenantId
 
-				let matchConditions = []
-
-				// allow ALL templates
-				if (
-					orgExtension &&
-					orgExtension.externalProjectResourceVisibilityPolicy ===
-						CONSTANTS.common.ORG_EXTENSION_VISIBILITY.ALL
-				) {
-					matchConditions.push({ visibility: CONSTANTS.common.ORG_EXTENSION_VISIBILITY.ALL })
-				}
-
-				// allow ASSOCIATED templates with orgId match (for both ALL and ASSOCIATED cases)
-				if (
-					orgExtension &&
-					[
-						CONSTANTS.common.ORG_EXTENSION_VISIBILITY.ALL,
-						CONSTANTS.common.ORG_EXTENSION_VISIBILITY.ASSOCIATED,
-					].includes(orgExtension.externalProjectResourceVisibilityPolicy)
-				) {
-					matchConditions.push({
-						visibility: CONSTANTS.common.ORG_EXTENSION_VISIBILITY.ASSOCIATED,
-						visibleToOrganizations: {
-							$in: [userDetails.userInformation.organizationId],
-						},
-					})
-				}
-
-				// Build a single `$or` array for visibility, then add it into `$and`
-				const visibilityOr =
-					matchConditions.length > 0
-						? [...matchConditions, { orgId: userDetails.userInformation.organizationId }]
-						: null
-				if (visibilityOr) {
-					// Preserve any existing $and clauses and append the visibility OR
-					matchQuery.$match.$and = [...(matchQuery.$match.$and || []), { $or: visibilityOr }]
-				} else {
-					// Fallback to a simple orgId match when there are no other visibility conditions
-					matchQuery.$match.orgId = userDetails.userInformation.organizationId
-				}
+				matchQuery = applyVisibilityConditions(matchQuery, orgExtension, userDetails)
 
 				if (categoryId && categoryId !== '') {
 					matchQuery['$match']['categories.externalId'] = categoryId
@@ -647,19 +609,19 @@ module.exports = class LibraryCategoriesHelper {
 		return new Promise(async (resolve, reject) => {
 			try {
 				const tenantId = userDetails.tenantAndOrgInfo.tenantId
-				const orgId = userDetails.tenantAndOrgInfo.orgId[0]
+				const orgId = userDetails.tenantAndOrgInfo.orgId
 
 				// Check if organization extension exists for the loggedin user
 				let orgExtension
 				orgExtension = await orgExtensionQueries.orgExtenDocuments({
 					tenantId,
-					orgId,
+					orgId: orgId[0],
 				})
 				// Create default org-extension policy if not found
 				if (!orgExtension || orgExtension.length === 0) {
 					orgExtension = await orgExtensionQueries.create({
 						tenantId,
-						orgId,
+						orgId: orgId[0],
 						...CONSTANTS.common.DEFAULT_ORG_EXTENSION_POLICIES,
 					})
 
@@ -702,16 +664,8 @@ module.exports = class LibraryCategoriesHelper {
 
 				// add tenantId and orgId
 				categoryData['tenantId'] = tenantId
-				categoryData['orgId'] = orgId
-				let relatedOrgs = await solutionAndProjectTemplateUtils.fetchRelatedOrgs(userDetails)
-				if (!relatedOrgs || !relatedOrgs.success || !relatedOrgs.result) {
-					throw {
-						success: false,
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: CONSTANTS.apiResponses.ORG_DETAILS_FETCH_UNSUCCESSFUL,
-					}
-				}
-				categoryData['visibleToOrganizations'] = [orgId, ...relatedOrgs.result]
+				categoryData['orgId'] = orgId[0]
+				categoryData['visibleToOrganizations'] = orgId
 
 				let projectCategoriesData = await projectCategoriesQueries.create(categoryData)
 
@@ -885,4 +839,44 @@ function handleEvidenceUpload(files, userId) {
 			})
 		}
 	})
+}
+
+// Helper to build visibility conditions and mutate matchQuery
+function applyVisibilityConditions(matchQuery, orgExtension, userDetails) {
+	let matchConditions = []
+
+	// allow ALL templates
+	if (
+		orgExtension &&
+		orgExtension.externalProjectResourceVisibilityPolicy === CONSTANTS.common.ORG_EXTENSION_VISIBILITY.ALL
+	) {
+		matchConditions.push({ visibility: CONSTANTS.common.ORG_EXTENSION_VISIBILITY.ALL })
+	}
+
+	// allow ASSOCIATED templates with orgId match (for both ALL and ASSOCIATED cases)
+	if (
+		orgExtension &&
+		[CONSTANTS.common.ORG_EXTENSION_VISIBILITY.ALL, CONSTANTS.common.ORG_EXTENSION_VISIBILITY.ASSOCIATED].includes(
+			orgExtension.externalProjectResourceVisibilityPolicy
+		)
+	) {
+		matchConditions.push({
+			visibility: CONSTANTS.common.ORG_EXTENSION_VISIBILITY.ASSOCIATED,
+			visibleToOrganizations: {
+				$in: [userDetails.userInformation.organizationId],
+			},
+		})
+	}
+
+	// Build a single `$or` array for visibility, then add it into `$and`
+	const visibilityOr =
+		matchConditions.length > 0 ? [...matchConditions, { orgId: userDetails.userInformation.organizationId }] : null
+	if (visibilityOr) {
+		// Preserve any existing $and clauses and append the visibility OR
+		matchQuery.$match.$and = [...(matchQuery.$match.$and || []), { $or: visibilityOr }]
+	} else {
+		// Fallback to a simple orgId match when there are no other visibility conditions
+		matchQuery.$match.orgId = userDetails.userInformation.organizationId
+	}
+	return matchQuery
 }

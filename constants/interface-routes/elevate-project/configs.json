@@ -3908,7 +3908,7 @@
 		},
 		{
 			"sourceRoute": "/user/v1/tenant/read",
-			"type": "POST",
+			"type": "GET",
 			"priority": "MUST_HAVE",
 			"inSequence": false,
 			"orchestrated": false,
@@ -3922,7 +3922,7 @@
 		},
 		{
 			"sourceRoute": "/user/v1/tenant/read/:id",
-			"type": "POST",
+			"type": "GET",
 			"priority": "MUST_HAVE",
 			"inSequence": false,
 			"orchestrated": false,

@@ -3325,7 +3325,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/organizationExtension/update/:_id",
+							"raw": "{{baseUrl}}/project/v1/organizationExtension/createOrUpdate/:_id",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "organizationExtension", "update", ":_id"],
 							"variable": [

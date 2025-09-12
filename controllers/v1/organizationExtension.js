@@ -10,9 +10,9 @@ module.exports = class OrganizationExtension extends Abstract {
 	}
 
 	/**
-	 * @api {post} /project/v1/organizationExtension/update             Create Organization Extension
+	 * @api {post} /project/v1/organizationExtension/createOrUpdate             Create Organization Extension
 	 * @apiVersion 1.0.0
-	 * @apiName update
+	 * @apiName createOrUpdate
 	 * @apiGroup organizationExtension
      * @apiHeader {String} X-auth-token Authenticity token
 	 * @apiParamExample {json} Request-Body:
@@ -20,7 +20,7 @@ module.exports = class OrganizationExtension extends Abstract {
 			"externalProjectResourceVisibilityPolicy" : "CURRENT",
             "projectResourceVisibilityPolicy" : "CURRENT"
 		}
-	* @apiSampleRequest /project/v1/organizationExtension/update
+	* @apiSampleRequest /project/v1/organizationExtension/createOrUpdate
 	* @apiUse successBody
 	* @apiUse errorBody
 	* @apiParamExample {json} Response:
@@ -40,9 +40,9 @@ module.exports = class OrganizationExtension extends Abstract {
 	*/
 
 	/**
-	 * @api {patch} /project/v1/organizationExtension/update/:_id       Update Organization Extension
+	 * @api {patch} /project/v1/organizationExtension/createOrUpdate/:_id       Update Organization Extension
 	 * @apiVersion 1.0.0
-	 * @apiName update
+	 * @apiName createOrUpdate
 	 * @apiGroup organizationExtension
 	 * @apiHeader {String} X-auth-token Authenticity token
 	 *
@@ -54,7 +54,7 @@ module.exports = class OrganizationExtension extends Abstract {
 	 *   "projectResourceVisibilityPolicy" : "CURRENT"
 	 * }
 	 *
-	 * @apiSampleRequest /project/v1/organizationExtension/update/607f191e810c19729de860ea
+	 * @apiSampleRequest /project/v1/organizationExtension/createOrUpdate/607f191e810c19729de860ea
 	 * @apiUse successBody
 	 * @apiUse errorBody
 	 *
@@ -81,7 +81,7 @@ module.exports = class OrganizationExtension extends Abstract {
 	 * @param {Object} req - requested data.
 	 * @returns {Object} success/failure response.
 	 */
-	async update(req) {
+	async createOrUpdate(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let organizationExtension
@@ -142,7 +142,7 @@ module.exports = class OrganizationExtension extends Abstract {
 		}
 	*/
 	/**
-	 * Listens to kafka event and creates organization extension document
+	 * API to create organization extension document
 	 *
 	 * @method POST
 	 * @name eventListener

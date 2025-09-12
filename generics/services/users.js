@@ -6,7 +6,6 @@
  */
 
 //dependencies
-const { json } = require('body-parser')
 const request = require('request')
 const interfaceServiceUrl = process.env.INTERFACE_SERVICE_URL
 

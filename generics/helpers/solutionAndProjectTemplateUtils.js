@@ -15,7 +15,6 @@ const solutionsQueries = require(DB_QUERY_BASE_PATH + '/solutions')
 const programQueries = require(DB_QUERY_BASE_PATH + '/programs')
 const userService = require(GENERICS_FILES_PATH + '/services/users')
 const timeZoneDifference = process.env.TIMEZONE_DIFFRENECE_BETWEEN_LOCAL_TIME_AND_UTC
-const _ = require('lodash')
 
 /**
  * Create solution.
@@ -398,11 +397,11 @@ function setScope(solutionId, scopeData, userDetails) {
 /**
  * Fetch related org details from user-service
  * @method
- * @name fetchRelatedOrgs
+ * @name organizationDetails
  * @param {Object} userDetails - loggedin user info
  * @returns {Array} - Array of related org details
  */
-function fetchRelatedOrgs(userDetails) {
+function organizationDetails(userDetails) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			// fetching related_org_details from user-service
@@ -441,5 +440,5 @@ module.exports = {
 	createSolution: createSolution,
 	update: update,
 	setScope: setScope,
-	fetchRelatedOrgs,
+	organizationDetails,
 }

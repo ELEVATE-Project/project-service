@@ -1,3 +1,9 @@
+/**
+ * name : helper.js
+ * author : prajwal
+ * created-date : 11-sep-2025
+ * Description : Organization Extension helper functionality.
+ */
 const orgExtenQueries = require(DB_QUERY_BASE_PATH + '/organizationExtension.js')
 module.exports = class OrganizationHelper {
 	/**
@@ -47,8 +53,7 @@ module.exports = class OrganizationHelper {
 						value = value.toUpperCase()
 						filteredBodyData[key] = value
 						// If provided value is not valid, reset to default
-						if (!orgExtenVisibilityValues.includes(value))
-							filteredBodyData[key] = CONSTANTS.common.DEFAULT_ORG_EXTENSION_POLICIES[key]
+						if (!orgExtenVisibilityValues.includes(value)) delete filteredBodyData[key]
 					}
 				})
 
@@ -102,28 +107,38 @@ module.exports = class OrganizationHelper {
 		return new Promise(async (resolve, reject) => {
 			try {
 				const bodyData = req.body
+
 				// Pick tenantId from request body if present, else fallback to userDetails
 				const tenantId = bodyData.tenant_code ? bodyData.tenant_code : req.userDetails.tenantAndOrgInfo.tenantId
 
 				// Pick orgId from request body if present, else fallback to userDetails
 				const orgId = bodyData.code ? bodyData.code : req.userDetails.tenantAndOrgInfo.orgId[0]
 
-				// Use projectResourceVisibilityPolicy from body if given, else fallback to default
-				const projectResourceVisibilityPolicy = bodyData.projectResourceVisibilityPolicy
-					? bodyData.projectResourceVisibilityPolicy
-					: CONSTANTS.common.DEFAULT_ORG_EXTENSION_POLICIES.projectResourceVisibilityPolicy
-
-				// Use externalProjectResourceVisibilityPolicy from body if given, else fallback to default
-				const externalProjectResourceVisibilityPolicy = bodyData.externalProjectResourceVisibilityPolicy
-					? bodyData.externalProjectResourceVisibilityPolicy
-					: CONSTANTS.common.DEFAULT_ORG_EXTENSION_POLICIES.externalProjectResourceVisibilityPolicy
-
 				// Prepare data object for org extension creation
 				let orgExtenData = {
 					tenantId,
 					orgId,
-					projectResourceVisibilityPolicy,
-					externalProjectResourceVisibilityPolicy,
+				}
+
+				const orgExtensionDoc = await orgExtenQueries.orgExtenDocuments(orgExtenData)
+
+				if (orgExtensionDoc && orgExtensionDoc.length > 0) {
+					throw {
+						success: false,
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.ORG_EXTENSION_ALREADY_EXISTS,
+					}
+				}
+
+				// Use projectResourceVisibilityPolicy from body if given
+				if (bodyData.projectResourceVisibilityPolicy) {
+					orgExtenData['projectResourceVisibilityPolicy'] = bodyData.projectResourceVisibilityPolicy
+				}
+
+				// Use externalProjectResourceVisibilityPolicy from body if given
+				if (bodyData.externalProjectResourceVisibilityPolicy) {
+					orgExtenData['externalProjectResourceVisibilityPolicy'] =
+						bodyData.externalProjectResourceVisibilityPolicy
 				}
 
 				// Get all allowed values for org extension visibility
@@ -135,8 +150,7 @@ module.exports = class OrganizationHelper {
 						value = value.toUpperCase()
 						orgExtenData[key] = value
 						// If provided value is not valid, reset to default
-						if (!orgExtenVisibilityValues.includes(value))
-							orgExtenData[key] = CONSTANTS.common.DEFAULT_ORG_EXTENSION_POLICIES[key]
+						if (!orgExtenVisibilityValues.includes(value)) delete orgExtenData[key]
 					}
 				})
 

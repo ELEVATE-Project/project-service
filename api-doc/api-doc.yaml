@@ -12084,7 +12084,7 @@ paths:
                         param: type
                         msg: Invalid resource type. Must be "program" or "solution"
       summary: To Remove Resources
-  /v1/organizationExtension/update:
+  /v1/organizationExtension/createOrUpdate:
     post:
       description: ''
       operationId: ''

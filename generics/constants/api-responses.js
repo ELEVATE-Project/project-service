@@ -304,4 +304,5 @@ module.exports = {
 	ORG_DETAILS_FETCH_UNSUCCESSFUL: 'Organization details fetch failed',
 	RELATED_ORGS_UPDATE_FAILED: 'Related orgs update failed',
 	RELATED_ORGS_UPDATED_SUCCESSFULLY: 'Related orgs updated successfully',
+	ORG_EXTENSION_ALREADY_EXISTS: 'Organization extension already exists',
 }

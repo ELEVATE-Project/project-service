@@ -108,7 +108,7 @@ module.exports = async function (req, res, next, token = '') {
 		'/admin/deleteResource',
 		'/programs/removeSolutions',
 		'/organizationExtension/eventListener',
-		'/organizationExtension/update',
+		'/organizationExtension/createOrUpdate',
 		'/admin/updateRelatedOrgs',
 	]
 	let performInternalAccessTokenCheck = false

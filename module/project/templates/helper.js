@@ -342,7 +342,6 @@ module.exports = class ProjectTemplatesHelper {
 					orgExtension = await orgExtensionQueries.create({
 						tenantId,
 						orgId,
-						...CONSTANTS.common.DEFAULT_ORG_EXTENSION_POLICIES,
 					})
 
 					if (!orgExtension || Object.keys(orgExtension).length === 0) {
@@ -395,7 +394,7 @@ module.exports = class ProjectTemplatesHelper {
 					}
 				}
 
-				let relatedOrgs = await solutionsUtils.fetchRelatedOrgs(userDetails)
+				let relatedOrgs = await solutionsUtils.organizationDetails(userDetails)
 				if (!relatedOrgs || !relatedOrgs.success || !relatedOrgs.result) {
 					throw {
 						success: false,

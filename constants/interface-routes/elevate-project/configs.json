@@ -4033,20 +4033,6 @@
 			"service": "project"
 		},
 		{
-			"sourceRoute": "/project/v1/organizationExtension/eventListener",
-			"type": "POST",
-			"priority": "MUST_HAVE",
-			"inSequence": false,
-			"orchestrated": false,
-			"targetPackages": [
-				{
-					"basePackageName": "project",
-					"packageName": "elevate-project"
-				}
-			],
-			"service": "project"
-		},
-		{
 			"sourceRoute": "/project/v1/organizationExtension/createOrUpdate",
 			"type": "POST",
 			"priority": "MUST_HAVE",
@@ -4103,7 +4089,7 @@
 			"service": "project"
 		},
 		{
-			"sourceRoute": "/project/v1/admin/updateRelatedOrgs",
+			"sourceRoute": "/project/v1/organizationExtension/updateRelatedOrgs",
 			"type": "POST",
 			"priority": "MUST_HAVE",
 			"inSequence": false,

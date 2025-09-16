@@ -1,3 +1,11 @@
+/**
+ * name : organizationExtension.js
+ * author : prajwal
+ * created-date : 16-Sept-2025
+ * Description : Organization Extension controller
+ */
+
+//  Dependencies
 const organizationExtensionHelper = require(MODULES_BASE_PATH + '/organizationExtension/helper.js')
 
 module.exports = class OrganizationExtension extends Abstract {

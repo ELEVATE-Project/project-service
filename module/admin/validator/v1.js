@@ -19,17 +19,6 @@ module.exports = (req) => {
 				.isIn(['program', 'solution'])
 				.withMessage('Invalid resource type. Must be "program" or "solution"')
 		},
-		updateRelatedOrgs: function () {
-			req.checkBody('changes').exists().withMessage('changes object is required')
-			req.checkBody('changes.related_org_details')
-				.exists()
-				.withMessage('changes.related_org_details object is required')
-			req.checkBody('changes.related_org_details.newValue')
-				.exists()
-				.withMessage('changes.related_org_details.newValue is required')
-				.isArray()
-				.withMessage('changes.related_org_details.newValue must be an array')
-		},
 	}
 
 	if (adminValidator[req.params.method]) {

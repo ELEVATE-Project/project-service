@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "9b841ca0-a325-4e98-b226-2aef7179a8c9",
+		"_postman_id": "dea055fe-c3bb-44e5-9784-894633cf26b0",
 		"name": "Elevate-Project Copy",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "28589818"
@@ -2194,34 +2194,6 @@
 						}
 					},
 					"response": []
-				},
-				{
-					"name": "updateRelatedOrgs",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "internal-access-token",
-								"value": "{{internal_access_token}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"entity\": \"organization\",\n    \"eventType\": \"update\",\n    \"entityId\": \"46\",\n    \"changes\": {\n        \"name\": {\n            \"oldValue\": \"Old Org Name\",\n            \"newValue\": \"New Org Name\"\n        },\n        \"description\": {\n            \"oldValue\": \"Old Desc\",\n            \"newValue\": \"Updated Desc\"\n        },\n        \"related_org_details\": {\n            \"oldValue\": [\n                {\n                    \"id\": 5,\n                    \"code\": \"bel\"\n                }\n            ],\n            \"newValue\": [\n                {\n                    \"id\": 5,\n                    \"code\": \"bel\"\n                },\n                {\n                    \"id\": 77,\n                    \"code\": \"blr\"\n                }\n            ]\n        }\n    },\n    \"id\": \"46\",\n    \"tenant_code\": \"shikshalokam\",\n    \"code\": \"mys\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{baseUrl}}/project/v1/admin/updateRelatedOrgs",
-							"host": ["{{baseUrl}}"],
-							"path": ["project", "v1", "admin", "updateRelatedOrgs"]
-						}
-					},
-					"response": []
 				}
 			]
 		},
@@ -3327,7 +3299,7 @@
 						"url": {
 							"raw": "{{baseUrl}}/project/v1/organizationExtension/createOrUpdate/:_id",
 							"host": ["{{baseUrl}}"],
-							"path": ["project", "v1", "organizationExtension", "update", ":_id"],
+							"path": ["project", "v1", "organizationExtension", "createOrUpdate", ":_id"],
 							"variable": [
 								{
 									"key": "_id",
@@ -3339,15 +3311,10 @@
 					"response": []
 				},
 				{
-					"name": "eventListener",
+					"name": "updateRelatedOrgs",
 					"request": {
 						"method": "POST",
 						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							},
 							{
 								"key": "internal-access-token",
 								"value": "{{internal_access_token}}",
@@ -3356,7 +3323,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"entity\": \"organization\",\n    \"eventType\": \"create\",\n    \"entityId\": \"3\",\n    \"changes\": {},\n    \"id\": \"3\",\n    \"code\": \"mys\",\n    \"related_orgs\": [],\n    \"tenant_code\": \"shikshalokam\",\n    \"meta\": {},\n    \"status\": \"ACTIVE\",\n    \"deleted\": false,\n    \"created_by\": \"SYSTEM\"\n}",
+							"raw": "{\n    \"entity\": \"organization\",\n    \"eventType\": \"update\",\n    \"entityId\": \"46\",\n    \"changes\": {\n        \"name\": {\n            \"oldValue\": \"Old Org Name\",\n            \"newValue\": \"New Org Name\"\n        },\n        \"description\": {\n            \"oldValue\": \"Old Desc\",\n            \"newValue\": \"Updated Desc\"\n        },\n        \"related_org_details\": {\n            \"oldValue\": [\n                {\n                    \"id\": 5,\n                    \"code\": \"bel\"\n                }\n            ],\n            \"newValue\": [\n                {\n                    \"id\": 5,\n                    \"code\": \"bel\"\n                },\n                {\n                    \"id\": 77,\n                    \"code\": \"blr\"\n                }\n            ]\n        }\n    },\n    \"id\": \"46\",\n    \"tenant_code\": \"shikshalokam\",\n    \"code\": \"mys\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -3364,9 +3331,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/project/v1/organizationExtension/eventListener",
+							"raw": "{{baseUrl}}/project/v1/organizationExtension/updateRelatedOrgs",
 							"host": ["{{baseUrl}}"],
-							"path": ["project", "v1", "organizationExtension", "eventListener"]
+							"path": ["project", "v1", "organizationExtension", "updateRelatedOrgs"]
 						}
 					},
 					"response": []

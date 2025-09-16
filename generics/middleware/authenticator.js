@@ -107,7 +107,6 @@ module.exports = async function (req, res, next, token = '') {
 		'/templates/listByIds',
 		'/admin/deleteResource',
 		'/programs/removeSolutions',
-		'/organizationExtension/eventListener',
 		'/organizationExtension/createOrUpdate',
 		'/admin/updateRelatedOrgs',
 	]

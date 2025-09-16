@@ -53,11 +53,13 @@ module.exports = {
 			type: String,
 			index: true,
 			required: true,
+			default: 'default_code',
 		},
 		orgId: {
 			type: String,
 			index: true,
 			required: true,
+			default: 'default',
 		},
 		visibleToOrganizations: {
 			type: Array,
@@ -66,7 +68,7 @@ module.exports = {
 	},
 	compoundIndex: [
 		{
-			name: { externalId: 1, name: 1, tenantId: 1 },
+			name: { externalId: 1, tenantId: 1 },
 			indexType: { unique: true },
 		},
 	],

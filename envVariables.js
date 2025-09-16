@@ -225,8 +225,8 @@ let enviromentVariables = {
 		optional: false,
 		default: 'project-health-check-topic-check',
 	},
-	ORGANIZATION_EXTENSION_TOPIC: {
-		message: 'Required ORGANIZATION_EXTENSION_TOPIC',
+	ORG_UPDATES_TOPIC: {
+		message: 'Required ORG_UPDATES_TOPIC',
 		optional: false,
 		default: 'elevate_project_org_extension_event_listener',
 	},

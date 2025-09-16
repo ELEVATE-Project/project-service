@@ -1,5 +1,4 @@
 // module dependencies
-const adminHelper = require(MODULES_BASE_PATH + '/admin/helper')
 const orgExtensionHelper = require(MODULES_BASE_PATH + '/organizationExtension/helper')
 
 /**
@@ -34,7 +33,7 @@ const messageReceived = function (message) {
 
 				// If the event type is UPDATE, call adminHelper to handle update logic
 				if (parsedMessage.body.eventType === CONSTANTS.common.UPDATE_EVENT_TYPE) {
-					await adminHelper.updateRelatedOrgs(parsedMessage)
+					await orgExtensionHelper.updateRelatedOrgs(parsedMessage)
 				}
 			}
 

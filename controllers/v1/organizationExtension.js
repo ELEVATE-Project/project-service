@@ -102,58 +102,66 @@ module.exports = class OrganizationExtension extends Abstract {
 	}
 
 	/**
-	 * @api {post} /project/v1/organizationExtension/eventListener             Create default Organization Extension
+	 * @api {post} /project/v1/organizationExtension/updateRelatedOrgs 
 	 * @apiVersion 1.0.0
-	 * @apiName eventListener
-	 * @apiGroup organizationExtension
-     * @apiHeader {String} internal-access-token
+	 * @apiName updateRelatedOrgs
+	 * @apiGroup Admin
 	 * @apiParamExample {json} Request-Body:
 		{
-            "entity": "organization",
-            "eventType": "create",
-            "entityId": "1",
-            "changes": {},
-            "id": "1",
-            "code": "mys",
-            "tenant_code": "shikshalokam",
-            "meta": {},
-            "status": "ACTIVE",
-            "deleted": false,
-            "created_by": "<user_id>",
-            "created_at": "<timestamp>",
-            "updated_at": "<timestamp>"
-        }
-	* @apiSampleRequest /project/v1/organizationExtension/eventListener
+			"entity": "organization",
+			"eventType": "update",
+			"entityId": "<org_id>",
+			"changes": {
+				"name": { "oldValue": "Old Org Name", "newValue": "New Org Name" },
+				"related_org_details": {
+						"oldValue": [
+							{
+								"id" : 1,
+								"code" : "mys"
+							}
+						], 
+						"newValue": [
+							{
+								"id" : 12,
+								"code" : "blr"
+							}
+						]
+				}
+			},
+			"id": "<org_id>",
+			"updated_by": "<user_id>",
+			"tenant_code": "<tenant_code>",
+			"code": "<org_code>",
+			"updated_at": "<timestamp>"
+		}
+	* @apiHeader {String} X-auth-token Authenticity token
+	* @apiSampleRequest /project/v1/organizationExtension/updateRelatedOrgs
 	* @apiUse successBody
 	* @apiUse errorBody
 	* @apiParamExample {json} Response:
 		{
 			"status": 200,
-			"message": "Organization extension created successfully",
+			"message": "Related orgs updated successfully",
 			"result": {
-                "_id" : 607f191e810c19729de860ea,
-                "externalProjectResourceVisibilityPolicy" : "CURRENT",
-                "projectResourceVisibilityPolicy" : "CURRENT",
-                "createdBy" : "SYSTEM",
-                "updatedBy" : "SYSTEM",
-                "tenantId" : "shikshalokam",
-                "orgId" : "mys"
+				"templatesFound": 12,
+				"templatesUpdated" : 12
 			}
 		}
 	*/
+
 	/**
-	 * API to create organization extension document
+	 * Updates visibleToOrganizations field in parent project templates
 	 *
 	 * @method POST
-	 * @name eventListener
+	 * @name updateRelatedOrgs
 	 * @param {Object} req - requested data.
 	 * @returns {Object} success/failure response.
 	 */
-	async eventListener(req) {
+	async updateRelatedOrgs(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				const orgExtension = await organizationExtensionHelper.createOrgExtension(req)
-				return resolve(orgExtension)
+				const updatedRelatedOrgs = await organizationExtensionHelper.updateRelatedOrgs(req)
+				return resolve(updatedRelatedOrgs)
 			} catch (error) {
 				return reject({
 					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,

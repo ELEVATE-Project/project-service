@@ -323,7 +323,7 @@ const profile = function (userId = '', userToken = '') {
  * @returns {Promise} A promise that resolves with the organization details or rejects with an error.
  */
 
-const fetchDefaultOrgDetails = function (organisationIdentifier, userToken) {
+const getOrgDetails = function (organisationIdentifier, userToken) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			let url
@@ -550,7 +550,7 @@ module.exports = {
 	// profileReadPrivate: profileReadPrivate,
 	// getSubEntitiesBasedOnEntityType : getSubEntitiesBasedOnEntityType,
 	// getUserRoles: getUserRoles,
-	fetchDefaultOrgDetails: fetchDefaultOrgDetails,
+	getOrgDetails: getOrgDetails,
 	fetchTenantDetails: fetchTenantDetails,
 	fetchPublicTenantDetails: fetchPublicTenantDetails,
 	getUserProfileByIdentifier: getUserProfileByIdentifier,

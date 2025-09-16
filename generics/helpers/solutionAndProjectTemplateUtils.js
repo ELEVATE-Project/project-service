@@ -405,7 +405,7 @@ function organizationDetails(userDetails) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			// fetching related_org_details from user-service
-			let orgRead = await userService.fetchDefaultOrgDetails(userDetails.userInformation.organizations[0].id)
+			let orgRead = await userService.getOrgDetails(userDetails.userInformation.organizations[0].id)
 			if (!orgRead || !orgRead.success || !orgRead.data || Object.keys(orgRead.data).length == 0) {
 				throw {
 					success: false,

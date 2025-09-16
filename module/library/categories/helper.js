@@ -622,7 +622,6 @@ module.exports = class LibraryCategoriesHelper {
 					orgExtension = await orgExtensionQueries.create({
 						tenantId,
 						orgId: orgId[0],
-						...CONSTANTS.common.DEFAULT_ORG_EXTENSION_POLICIES,
 					})
 
 					if (!orgExtension || Object.keys(orgExtension).length === 0) {
@@ -841,7 +840,14 @@ function handleEvidenceUpload(files, userId) {
 	})
 }
 
-// Helper to build visibility conditions and mutate matchQuery
+/**
+ * Helper to build visibility conditions and mutate matchQuery
+ * @name applyVisibilityConditions
+ * @param {Object} matchQuery - matchQuery
+ * @param {Object} orgExtension - orgExtension
+ * @param {Object} userDetails - userDetails
+ * @returns {Object} returns modified matchQuery
+ */
 function applyVisibilityConditions(matchQuery, orgExtension, userDetails) {
 	let matchConditions = []
 
@@ -861,7 +867,7 @@ function applyVisibilityConditions(matchQuery, orgExtension, userDetails) {
 		)
 	) {
 		matchConditions.push({
-			visibility: CONSTANTS.common.ORG_EXTENSION_VISIBILITY.ASSOCIATED,
+			visibility: { $ne: CONSTANTS.common.ORG_EXTENSION_VISIBILITY.CURRENT },
 			visibleToOrganizations: {
 				$in: [userDetails.userInformation.organizationId],
 			},

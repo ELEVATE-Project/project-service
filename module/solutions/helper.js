@@ -1389,9 +1389,6 @@ module.exports = class SolutionsHelper {
 					{
 						link: link,
 						isReusable: false,
-						status: {
-							$ne: CONSTANTS.common.INACTIVE,
-						},
 						tenantId: tenantId,
 					},
 					['type', 'status', 'endDate']
@@ -1401,14 +1398,6 @@ module.exports = class SolutionsHelper {
 					return resolve({
 						message: CONSTANTS.apiResponses.INVALID_LINK,
 						result: [],
-					})
-				}
-
-				if (solutionData[0].status !== CONSTANTS.common.ACTIVE_STATUS) {
-					return resolve({
-						message: CONSTANTS.apiResponses.LINK_IS_EXPIRED,
-						result: [],
-						syuccess: false,
 					})
 				}
 
@@ -1432,6 +1421,14 @@ module.exports = class SolutionsHelper {
 					return resolve({
 						message: CONSTANTS.apiResponses.LINK_IS_EXPIRED,
 						result: [],
+					})
+				}
+
+				if (solutionData[0].status !== CONSTANTS.common.ACTIVE_STATUS) {
+					return resolve({
+						message: CONSTANTS.apiResponses.INVALID_LINK,
+						result: [],
+						success: false,
 					})
 				}
 				response.verified = true

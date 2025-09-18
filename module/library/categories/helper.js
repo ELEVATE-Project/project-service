@@ -79,7 +79,81 @@ module.exports = class LibraryCategoriesHelper {
 				}
 
 				matchQuery['$match']['tenantId'] = userDetails.userInformation.tenantId
-
+				/**
+				 * 
+					Sample for matchQuery obj when orgExtension.externalProjectResourceVisibilityPolicy = CURRENT
+					{
+						"$match": {
+							"status": "published",
+							"isReusable": true,
+							"tenantId": "shikshalokam",
+							"orgId": "slorg"
+						}
+					}
+				*/
+				/**
+				 * 
+					Sample for matchQuery obj when orgExtension.externalProjectResourceVisibilityPolicy = ASSOCIATED
+					{
+						"$match": {
+							"status": "published",
+							"isReusable": true,
+							"tenantId": "shikshalokam",
+							"$and": [
+								{
+								"$or": [
+									{
+										"visibility": {
+											"$ne": "CURRENT"
+										},
+										"visibleToOrganizations": {
+											"$in": [
+												"sot"
+											]
+										}
+									},
+									{
+										"orgId": "sot"
+									}
+								]
+								}
+							]
+						}
+					}
+				*/
+				/**
+				 * 
+					Sample for matchQuery obj when orgExtension.externalProjectResourceVisibilityPolicy = ALL
+					{
+						"$match": {
+						"status": "published",
+						"isReusable": true,
+						"tenantId": "shikshalokam",
+						"$and": [
+							{
+							"$or": [
+								{
+									"visibility": "ALL"
+								},
+								{
+									"visibility": {
+										"$ne": "CURRENT"
+									},
+									"visibleToOrganizations": {
+										"$in": [
+											"mys"
+										]
+									}
+								},
+								{
+									"orgId": "mys"
+								}
+							]
+							}
+						]
+						}
+					}
+				*/
 				matchQuery = applyVisibilityConditions(matchQuery, orgExtension, userDetails)
 
 				if (categoryId && categoryId !== '') {
@@ -848,6 +922,81 @@ function handleEvidenceUpload(files, userId) {
  * @param {Object} userDetails - userDetails
  * @returns {Object} returns modified matchQuery
  */
+/**
+ * 
+	Sample for matchQuery obj when orgExtension.externalProjectResourceVisibilityPolicy = CURRENT
+	{
+		"$match": {
+			"status": "published",
+			"isReusable": true,
+			"tenantId": "shikshalokam",
+			"orgId": "slorg"
+		}
+	}
+ */
+/**
+ * 
+	Sample for matchQuery obj when orgExtension.externalProjectResourceVisibilityPolicy = ASSOCIATED
+	{
+		"$match": {
+			"status": "published",
+			"isReusable": true,
+			"tenantId": "shikshalokam",
+			"$and": [
+				{
+				"$or": [
+					{
+						"visibility": {
+							"$ne": "CURRENT"
+						},
+						"visibleToOrganizations": {
+							"$in": [
+								"sot"
+							]
+						}
+					},
+					{
+						"orgId": "sot"
+					}
+				]
+				}
+			]
+		}
+	}
+ */
+/**
+ * 
+	Sample for matchQuery obj when orgExtension.externalProjectResourceVisibilityPolicy = ALL
+	{
+		"$match": {
+		"status": "published",
+		"isReusable": true,
+		"tenantId": "shikshalokam",
+		"$and": [
+			{
+			"$or": [
+				{
+					"visibility": "ALL"
+				},
+				{
+					"visibility": {
+						"$ne": "CURRENT"
+					},
+					"visibleToOrganizations": {
+						"$in": [
+							"mys"
+						]
+					}
+				},
+				{
+					"orgId": "mys"
+				}
+			]
+			}
+		]
+		}
+	}
+*/
 function applyVisibilityConditions(matchQuery, orgExtension, userDetails) {
 	let matchConditions = []
 

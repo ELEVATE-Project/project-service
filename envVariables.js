@@ -227,7 +227,7 @@ let enviromentVariables = {
 	},
 	ORG_UPDATES_TOPIC: {
 		message: 'Required ORG_UPDATES_TOPIC',
-		optional: false,
+		optional: true,
 		default: 'elevate_project_org_extension_event_listener',
 	},
 }

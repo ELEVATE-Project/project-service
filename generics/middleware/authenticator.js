@@ -50,7 +50,6 @@ module.exports = async function (req, res, next, token = '') {
 	let guestAccess = false
 	let guestAccessPaths = [
 		'/dataPipeline/',
-		'/templates/details',
 		'userProjects/certificateCallback',
 		'userProjects/certificateCallbackError',
 		'cloud-services/files/download',

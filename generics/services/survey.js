@@ -382,6 +382,57 @@ const deleteSolutionResource = function (solutionIds, resourceType, tenantId, or
 	})
 }
 
+/**
+ * @function programsDocument
+ * @description Fetches program documents from the Survey Service API based on filter criteria.
+ *              Makes a POST request with filter query and fields array, then returns the response.
+ *
+ * @param {Object} filterQuery - MongoDB-style filter query object used to filter program documents.
+ * @param {Array<string>} fieldsArray - List of field names to include in the result.
+ * @returns {Promise<Object>} Result indicating success/failure and optional response data.
+ */
+const programsDocument = function (filterQuery, fieldsArray) {
+	return new Promise(async (resolve, reject) => {
+		try {
+			// Construct the URL for Survey Service API
+			let programsDocumentUrl = SURVEY_SERVICE_URL + CONSTANTS.endpoints.FETCH_SOLUTION_DOCUMENT
+			// Prepare request headers with authentication and body payload
+			let options = {
+				headers: {
+					'content-type': 'application/json',
+					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
+				},
+				json: {
+					filterQuery: filterQuery,
+					fieldsArray: fieldsArray,
+				},
+			}
+			// Send a POST request to the Survey Service
+			request.post(programsDocumentUrl, options, programsDocumentCallback)
+			// Callback function to handle the response from the Survey Service
+			function programsDocumentCallback(err, data) {
+				let result = {}
+
+				if (err) {
+					result.success = false
+				} else {
+					let response = data.body
+					// Check if the result status is HTTP 200 OK
+					if (response.status === HTTP_STATUS_CODE['ok'].status) {
+						result = response.result
+					} else {
+						result.success = false
+					}
+				}
+
+				return resolve(result)
+			}
+		} catch (error) {
+			return reject(error)
+		}
+	})
+}
+
 module.exports = {
 	listSolutions: listSolutions,
 	updateSolution: updateSolution,
@@ -389,4 +440,5 @@ module.exports = {
 	surveyDetails: surveyDetails,
 	importTemplateToSolution: importTemplateToSolution,
 	deleteSolutionResource: deleteSolutionResource,
+	programsDocument: programsDocument,
 }

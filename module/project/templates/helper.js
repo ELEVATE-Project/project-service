@@ -33,6 +33,7 @@ const testimonialsHelper = require(MODULES_BASE_PATH + '/testimonials/helper')
 const surveyService = require(SERVICES_BASE_PATH + '/survey')
 const solutionsUtils = require(GENERICS_FILES_PATH + '/helpers/solutionAndProjectTemplateUtils')
 const entitiesService = require(GENERICS_FILES_PATH + '/services/entity-management')
+const solutionsHelper = require(MODULES_BASE_PATH + '/solutions/helper')
 
 module.exports = class ProjectTemplatesHelper {
 	/**
@@ -572,6 +573,85 @@ module.exports = class ProjectTemplatesHelper {
 				input.push(null)
 			} catch (error) {
 				return reject(error)
+			}
+		})
+	}
+
+	/**
+	 * @function createChildProjectTemplate
+	 * @description Creates child project templates by duplicating existing project templates
+	 *              and linking them to a program solution.
+	 *
+	 * @param {Array<string>} projectTemplateExternalIds - List of external IDs of project templates to duplicate.
+	 * @param {Object} userDetails - Information about the user performing the operation.
+	 * @param {string} programExternalId - External ID of the program the templates belong to.
+	 * @param {boolean} isExternalProgram - Flag to determine if the program is external.
+	 *
+	 * @returns {Promise<Object>} Resolves with:
+	 *   - `success: true`, message, and `data` containing array of newly created project templates.
+	 *   - `success: false` and error details if operation fails.
+	 */
+	static createChildProjectTemplate(projectTemplateExternalIds, userDetails, programExternalId, isExternalProgram) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let responseData = []
+				// Loop through each project template ID and create its duplicate
+				for (const templateId of projectTemplateExternalIds) {
+					// Fetch project template document
+					let projectTemplateData = await projectTemplateQueries.templateDocument({
+						status: CONSTANTS.common.PUBLISHED,
+						externalId: templateId,
+						isReusable: true,
+					})
+					// Prepare solution data based on project template
+					const solutionData = {
+						name: projectTemplateData[0].title,
+						programExternalId: programExternalId,
+						externalId: projectTemplateData[0].externalId,
+					}
+
+					if (!projectTemplateData.length > 0) {
+						throw new Error(CONSTANTS.apiResponses.PROJECT_TEMPLATE_NOT_FOUND)
+					}
+
+					// Create a solution for this project template
+					let createdSolution = await solutionsHelper.createSolution(
+						solutionData,
+						true,
+						userDetails,
+						isExternalProgram
+					)
+
+					// Import project template into the newly created solution
+					let duplicateProjectTemplateId = await this.importProjectTemplate(
+						templateId,
+						userDetails.userInformation.userId,
+						userDetails.userToken,
+						createdSolution.result._id,
+						{},
+						userDetails
+					)
+
+					// Push duplicate template mapping to response
+					responseData.push({
+						parentExternalId: templateId,
+						_id: duplicateProjectTemplateId.data._id,
+						externalId: duplicateProjectTemplateId.data.externalId,
+					})
+				}
+
+				return resolve({
+					success: true,
+					message: CONSTANTS.apiResponses.DUPLICATE_PROJECT_TEMPLATES_CREATED,
+					data: responseData,
+				})
+			} catch (error) {
+				return resolve({
+					status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
+					success: false,
+					message: error.message,
+					data: {},
+				})
 			}
 		})
 	}
@@ -1256,7 +1336,7 @@ module.exports = class ProjectTemplatesHelper {
 						externalId: { $in: externalIds },
 						tenantId,
 					},
-					['title', 'metaInformation.goal', 'externalId', 'solutionId']
+					['title', 'metaInformation.goal', 'externalId', 'solutionId', 'isReusable']
 				)
 
 				if (!templateData.length > 0) {

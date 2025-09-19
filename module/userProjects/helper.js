@@ -558,7 +558,8 @@ module.exports = class UserProjectsHelper {
 		userId,
 		solutionId,
 		isATargetedSolution = '',
-		userDetails
+		userDetails,
+		isExternalProgram
 	) {
 		return new Promise(async (resolve, reject) => {
 			try {
@@ -578,14 +579,13 @@ module.exports = class UserProjectsHelper {
 				if (programId !== '') {
 					programAndSolutionData['programId'] = programId
 				}
-
 				let solutionAndProgramCreation = await solutionsHelper.createProgramAndSolution(
 					userId,
 					programAndSolutionData,
 					isATargetedSolution,
-					userDetails
+					userDetails,
+					isExternalProgram
 				)
-
 				if (!solutionAndProgramCreation.success) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
@@ -3038,7 +3038,8 @@ module.exports = class UserProjectsHelper {
 		userId,
 		isATargetedSolution = false,
 		language,
-		userDetails
+		userDetails,
+		isExternalProgram
 	) {
 		return new Promise(async (resolve, reject) => {
 			try {
@@ -3087,7 +3088,8 @@ module.exports = class UserProjectsHelper {
 						userId,
 						requestedData.solutionId,
 						isATargetedSolution,
-						userDetails
+						userDetails,
+						isExternalProgram
 					)
 
 					if (!programAndSolutionInformation.success) {
@@ -3108,7 +3110,8 @@ module.exports = class UserProjectsHelper {
 						userId,
 						'',
 						false,
-						userDetails
+						userDetails,
+						isExternalProgram
 					)
 
 					if (!programAndSolutionInformation.success) {

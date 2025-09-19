@@ -15,6 +15,7 @@ const solutionsQueries = require(DB_QUERY_BASE_PATH + '/solutions')
 const programQueries = require(DB_QUERY_BASE_PATH + '/programs')
 const userService = require(GENERICS_FILES_PATH + '/services/users')
 const timeZoneDifference = process.env.TIMEZONE_DIFFRENECE_BETWEEN_LOCAL_TIME_AND_UTC
+const surveyService = require(GENERICS_FILES_PATH + '/services/survey')
 
 /**
  * Create solution.
@@ -28,7 +29,7 @@ const timeZoneDifference = process.env.TIMEZONE_DIFFRENECE_BETWEEN_LOCAL_TIME_AN
  * @returns {JSON} solution creation data.
  */
 
-function createSolution(solutionData, checkDate = false, userDetails) {
+function createSolution(solutionData, checkDate = false, userDetails, isExternalProgram = false) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			solutionData.type = solutionData.subType =
@@ -47,14 +48,27 @@ function createSolution(solutionData, checkDate = false, userDetails) {
 			programMatchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
 
 			programMatchQuery['externalId'] = solutionData.programExternalId
-			let programData = await programQueries.programsDocument(programMatchQuery, [
-				'name',
-				'description',
-				'scope',
-				'endDate',
-				'startDate',
-				'components',
-			])
+
+			let programData
+			if (isExternalProgram) {
+				programData = await surveyService.programsDocument(programMatchQuery, [
+					'name',
+					'description',
+					'scope',
+					'endDate',
+					'startDate',
+					'components',
+				])
+			} else {
+				programData = await programQueries.programsDocument(programMatchQuery, [
+					'name',
+					'description',
+					'scope',
+					'endDate',
+					'startDate',
+					'components',
+				])
+			}
 			if (!programData.length > 0) {
 				throw {
 					message: CONSTANTS.apiResponses.PROGRAM_NOT_FOUND,

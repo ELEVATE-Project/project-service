@@ -24,6 +24,7 @@ const userService = require(GENERICS_FILES_PATH + '/services/users')
 const programSolutionUtility = require(GENERICS_FILES_PATH + '/helpers/programSolutionUtilities')
 const timeZoneDifference = process.env.TIMEZONE_DIFFRENECE_BETWEEN_LOCAL_TIME_AND_UTC
 const solutionsUtils = require(GENERICS_FILES_PATH + '/helpers/solutionAndProjectTemplateUtils')
+const surveyService = require(GENERICS_FILES_PATH + '/services/survey')
 
 /**
  * SolutionsHelper
@@ -183,10 +184,15 @@ module.exports = class SolutionsHelper {
 	 * @returns {JSON} solution creation data.
 	 */
 
-	static createSolution(solutionData, checkDate = false, userDetails) {
+	static createSolution(solutionData, checkDate = false, userDetails, isExternalProgram) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let newSolution = await solutionsUtils.createSolution(solutionData, checkDate, userDetails)
+				let newSolution = await solutionsUtils.createSolution(
+					solutionData,
+					checkDate,
+					userDetails,
+					isExternalProgram
+				)
 				if (newSolution?.data && !newSolution?.data?._id) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
@@ -896,7 +902,13 @@ module.exports = class SolutionsHelper {
 	 * @returns {Array} - Created user program and solution.
 	 */
 
-	static createProgramAndSolution(userId, data, createADuplicateSolution = '', userDetails) {
+	static createProgramAndSolution(
+		userId,
+		data,
+		createADuplicateSolution = '',
+		userDetails,
+		isExternalProgram = false
+	) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let userPrivateProgram = {}
@@ -917,8 +929,12 @@ module.exports = class SolutionsHelper {
 						filterQuery.createdBy = userId
 					}
 
-					let checkforProgramExist = await programQueries.programsDocument(filterQuery, 'all', ['__v'])
-
+					let checkforProgramExist
+					if (isExternalProgram) {
+						checkforProgramExist = await surveyService.programsDocument(filterQuery, ['all'])
+					} else {
+						checkforProgramExist = await programQueries.programsDocument(filterQuery, 'all', ['__v'])
+					}
 					if (!checkforProgramExist.length > 0) {
 						return resolve({
 							status: HTTP_STATUS_CODE.bad_request.status,

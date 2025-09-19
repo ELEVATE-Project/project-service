@@ -1089,7 +1089,8 @@ module.exports = class UserProjects extends Abstract {
 					req.userDetails.userInformation.userId,
 					req.query.isATargetedSolution ? req.query.isATargetedSolution : false,
 					req.query.language ? req.query.language : '',
-					req.userDetails
+					req.userDetails,
+					req.query.isExternalProgram ? req.query.isExternalProgram : false
 				)
 
 				return resolve({

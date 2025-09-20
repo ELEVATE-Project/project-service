@@ -26,6 +26,8 @@ Execute the following scripts after deployment:
     – Normalize `orgId/orgIds` fields across collections.
 -   `migrations/correctScopeOrgValues/correctScopeOrgValues.js`  
     – Normalize `orgId/orgIds` fields in solution scope, if present.
+-   `migrations/updateComponentsOfAllPrograms.js`
+    – Updates components of existing program with sequence.
 
 ---
 

@@ -5399,7 +5399,7 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 			if (!observationCreated.success || !observationCreated?.data?._id) {
 				throw {
 					status: HTTP_STATUS_CODE.bad_request.status,
-					message: CONSTANTS.apiResponses.OBSERVATION_NOT_CREATED,
+					message: observationCreated.message || CONSTANTS.apiResponses.OBSERVATION_NOT_CREATED,
 				}
 			} else {
 				result['observationId'] = observationCreated.data._id

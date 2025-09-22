@@ -7,9 +7,6 @@ const kafkaClient = require('../../config/kafka')()
 // Import Axios for HTTP requests
 const axios = require('axios')
 
-// Import minimist to parse command-line arguments
-const minimist = require('minimist')
-
 // Import readline to ask user input interactively
 const readline = require('readline')
 
@@ -20,7 +17,7 @@ const { MongoClient } = require('mongodb')
 const dbClient = new MongoClient(process.env.MONGODB_URL, { useUnifiedTopology: true })
 
 // Parse command-line arguments
-const argv = minimist(process.argv.slice(2))
+const args = process.argv.slice(2)
 
 // Immediately invoked function to perform health checks before running migration
 ;(async function healthCheck() {
@@ -61,7 +58,7 @@ const argv = minimist(process.argv.slice(2))
 // Fetch the list of tenants from the interface service
 async function fetchTenantList() {
 	try {
-		const tenant = argv.tenant
+		const tenant = Array.isArray(args) && args.length > 0 ? args[0] : null
 		let tenantList = []
 
 		if (!tenant) {

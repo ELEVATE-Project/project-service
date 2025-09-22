@@ -337,19 +337,13 @@ module.exports = class ProjectTemplatesHelper {
 					tenantId,
 					orgId,
 				})
-				// Create default org-extension policy if not found
-				if (!orgExtension || orgExtension.length === 0) {
-					orgExtension = await orgExtensionQueries.create({
-						tenantId,
-						orgId,
-					})
 
-					if (!orgExtension || Object.keys(orgExtension).length === 0) {
-						throw {
-							success: false,
-							status: HTTP_STATUS_CODE.bad_request.status,
-							message: CONSTANTS.apiResponses.ORG_EXTENSION_CREATE_FAILED,
-						}
+				//Throw error if org policy is not found
+				if (!orgExtension || orgExtension.length === 0) {
+					throw {
+						success: false,
+						status: HTTP_STATUS_CODE.not_found.status,
+						message: CONSTANTS.apiResponses.ORG_EXTENSION_NOT_FOUND,
 					}
 				}
 				orgExtension = Array.isArray(orgExtension) ? orgExtension[0] : orgExtension

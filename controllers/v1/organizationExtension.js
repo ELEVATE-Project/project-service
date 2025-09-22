@@ -94,9 +94,9 @@ module.exports = class OrganizationExtension extends Abstract {
 			try {
 				let organizationExtension
 				if (req.method === CONSTANTS.common.API_REQUEST_METHODS.POST) {
-					organizationExtension = await organizationExtensionHelper.createOrgExtension(req)
+					organizationExtension = await organizationExtensionHelper.create(req)
 				} else if (req.method === CONSTANTS.common.API_REQUEST_METHODS.PATCH) {
-					organizationExtension = await organizationExtensionHelper.updateOrgExtension(req)
+					organizationExtension = await organizationExtensionHelper.update(req)
 				}
 				return resolve(organizationExtension)
 			} catch (error) {
@@ -119,23 +119,16 @@ module.exports = class OrganizationExtension extends Abstract {
 			"entity": "organization",
 			"eventType": "update",
 			"entityId": "<org_id>",
-			"changes": {
-				"name": { "oldValue": "Old Org Name", "newValue": "New Org Name" },
-				"related_org_details": {
-						"oldValue": [
-							{
-								"id" : 1,
-								"code" : "mys"
-							}
-						], 
-						"newValue": [
-							{
-								"id" : 12,
-								"code" : "blr"
-							}
-						]
+			"related_org_details": [
+				{
+					"id" : 1,
+					"code" : "mys"
+				},
+				{
+					"id" : 12,
+					"code" : "blr"
 				}
-			},
+			],
 			"id": "<org_id>",
 			"updated_by": "<user_id>",
 			"tenant_code": "<tenant_code>",

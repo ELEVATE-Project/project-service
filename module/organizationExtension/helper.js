@@ -11,12 +11,12 @@ module.exports = class OrganizationHelper {
 	/**
 	 * Update Organization Extension document
 	 * @method
-	 * @name updateOrgExtension
+	 * @name update
 	 * @param req - requestData
 	 * @returns {Object} Updated document
 	 */
 
-	static async updateOrgExtension(req) {
+	static async update(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Fetch org extension document by ID
@@ -101,11 +101,11 @@ module.exports = class OrganizationHelper {
 	/**
 	 * Create Organization Extension document
 	 * @method
-	 * @name createOrgExtension
+	 * @name create
 	 * @param req - requestData
 	 * @returns {Object} Created document
 	 */
-	static async createOrgExtension(req) {
+	static async create(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				const bodyData = req.body
@@ -204,7 +204,7 @@ module.exports = class OrganizationHelper {
 					: request.body.code
 
 				// get new related organization codes from request body
-				let relatedOrgCodes = request.body.changes.related_org_details.newValue
+				let relatedOrgCodes = request.body.related_org_details
 
 				// map array of org objects to only extract their "code" values
 				relatedOrgCodes = relatedOrgCodes.map((org) => {

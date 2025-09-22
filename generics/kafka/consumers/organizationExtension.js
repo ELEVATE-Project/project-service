@@ -28,7 +28,7 @@ const messageReceived = function (message) {
 
 				// If the event type is CREATE, call orgExtensionHelper to handle creation logic
 				if (parsedMessage.body.eventType === CONSTANTS.common.CREATE_EVENT_TYPE) {
-					await orgExtensionHelper.createOrgExtension(parsedMessage)
+					await orgExtensionHelper.create(parsedMessage)
 				}
 
 				// If the event type is UPDATE, call adminHelper to handle update logic

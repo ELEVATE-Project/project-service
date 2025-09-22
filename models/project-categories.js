@@ -64,6 +64,7 @@ module.exports = {
 		visibleToOrganizations: {
 			type: Array,
 			default: [],
+			index: true,
 		},
 	},
 	compoundIndex: [

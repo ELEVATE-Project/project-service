@@ -5,7 +5,14 @@
  * Description : All common messages.
  */
 
+const ORG_EXTENSION_VISIBILITY = {
+	ALL: 'ALL',
+	CURRENT: 'CURRENT',
+	ASSOCIATED: 'ASSOCIATED',
+}
+
 module.exports = {
+	ORG_EXTENSION_VISIBILITY,
 	ACTIVE_STATUS: 'active',
 	PUBLISHED: 'published',
 	ASSESSMENT: 'assessment',
@@ -151,6 +158,7 @@ module.exports = {
 	DELETE_EVENT_ENTITY: 'user',
 	DELETE_EVENT_TYPE: 'delete',
 	CREATE_EVENT_TYPE: 'create',
+	UPDATE_EVENT_TYPE: 'update',
 	OBJECT: 'object',
 	STRING: 'string',
 	ALL: 'all',
@@ -167,4 +175,15 @@ module.exports = {
 	OPTIONAL_SCOPE_FIELD: 'optional_factors',
 	MANDATORY_SCOPE_FIELD: 'factors',
 	SOLUTION: 'solution',
+	DEFAULT_ORG_EXTENSION_POLICIES: {
+		projectResourceVisibilityPolicy: ORG_EXTENSION_VISIBILITY.CURRENT,
+		externalProjectResourceVisibilityPolicy: ORG_EXTENSION_VISIBILITY.CURRENT,
+	},
+	API_REQUEST_METHODS: {
+		GET: 'GET',
+		POST: 'POST',
+		PATCH: 'PATCH',
+		PUT: 'PUT',
+		DELETE: 'DELETE',
+	},
 }

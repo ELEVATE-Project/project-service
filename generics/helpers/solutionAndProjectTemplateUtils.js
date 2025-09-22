@@ -394,8 +394,51 @@ function setScope(solutionId, scopeData, userDetails) {
 	})
 }
 
+/**
+ * Fetch related org details from user-service
+ * @method
+ * @name organizationDetails
+ * @param {Object} userDetails - loggedin user info
+ * @returns {Array} - Array of related org details
+ */
+function organizationDetails(userDetails) {
+	return new Promise(async (resolve, reject) => {
+		try {
+			// fetching related_org_details from user-service
+			let orgRead = await userService.getOrgDetails(userDetails.userInformation.organizations[0].id)
+			if (!orgRead || !orgRead.success || !orgRead.data || Object.keys(orgRead.data).length == 0) {
+				throw {
+					success: false,
+					status: HTTP_STATUS_CODE.bad_request.status,
+					message: CONSTANTS.apiResponses.ORG_DETAILS_FETCH_UNSUCCESSFUL,
+				}
+			}
+			orgRead = orgRead.data
+			let relatedOrgCodes
+
+			// aggregate organization codes
+			if (orgRead.related_org_details && Array.isArray(orgRead.related_org_details)) {
+				relatedOrgCodes = orgRead.related_org_details.map((org) => {
+					return org.code
+				})
+			}
+			relatedOrgCodes = relatedOrgCodes && Array.isArray(relatedOrgCodes) ? relatedOrgCodes : []
+			return resolve({
+				success: true,
+				result: relatedOrgCodes,
+			})
+		} catch (error) {
+			return reject({
+				message: error.message,
+				success: false,
+			})
+		}
+	})
+}
+
 module.exports = {
 	createSolution: createSolution,
 	update: update,
 	setScope: setScope,
+	organizationDetails,
 }

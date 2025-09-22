@@ -106,6 +106,8 @@ module.exports = async function (req, res, next, token = '') {
 		'/templates/listByIds',
 		'/admin/deleteResource',
 		'/programs/removeSolutions',
+		'/organizationExtension/createOrUpdate',
+		'/organizationExtension/updateRelatedOrgs',
 	]
 	let performInternalAccessTokenCheck = false
 	let adminHeader = false

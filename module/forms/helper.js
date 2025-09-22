@@ -21,7 +21,7 @@ module.exports = class FormsHelper {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// call user-service to fetch default organization details
-				let defaultOrgDetails = await userService.fetchDefaultOrgDetails(
+				let defaultOrgDetails = await userService.getOrgDetails(
 					process.env.DEFAULT_ORGANISATION_CODE,
 					userToken
 				)

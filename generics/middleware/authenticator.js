@@ -384,7 +384,7 @@ module.exports = async function (req, res, next, token = '') {
 
 			// convert the types of items to string
 			orgDetails.data.related_orgs = orgDetails.data.organizations.map((data) => {
-				return data.code.toString()
+				return data.code.toString().toLowerCase()
 			})
 			// aggregate valid orgids
 
@@ -496,6 +496,7 @@ module.exports = async function (req, res, next, token = '') {
 					rspObj.responseCode = HTTP_STATUS_CODE['unauthorized'].status
 					return res.status(HTTP_STATUS_CODE['unauthorized'].status).send(respUtil(rspObj))
 				}
+				result = convertTenantAndOrgToLowercase(result)
 				req.headers['tenantid'] = result.tenantId
 				req.headers['orgid'] = result.orgId
 
@@ -513,7 +514,7 @@ module.exports = async function (req, res, next, token = '') {
 
 				req.headers['orgid'] = validateOrgsResult.validOrgIds
 			} else if (userRoles.includes(CONSTANTS.common.TENANT_ADMIN)) {
-				req.headers['tenantid'] = decodedToken.data.tenant_id.toString()
+				req.headers['tenantid'] = decodedToken.data.tenant_id.toString().toLowerCase()
 
 				let orgId = req.body.orgId || req.headers['orgid']
 
@@ -524,7 +525,7 @@ module.exports = async function (req, res, next, token = '') {
 					return res.status(HTTP_STATUS_CODE['bad_request'].status).send(respUtil(rspObj))
 				}
 
-				req.headers['orgid'] = orgId
+				req.headers['orgid'] = UTILS.lowerCase(orgId)
 
 				let validateOrgsResult = await validateIfOrgsBelongsToTenant(
 					req.headers['tenantid'],
@@ -538,8 +539,8 @@ module.exports = async function (req, res, next, token = '') {
 				}
 				req.headers['orgid'] = validateOrgsResult.validOrgIds
 			} else if (userRoles.includes(CONSTANTS.common.ORG_ADMIN)) {
-				req.headers['tenantid'] = decodedToken.data.tenant_id.toString()
-				req.headers['orgid'] = [decodedToken.data.organization_id.toString()]
+				req.headers['tenantid'] = decodedToken.data.tenant_id.toString().toLowerCase()
+				req.headers['orgid'] = [decodedToken.data.organization_id.toString().toLowerCase()]
 			} else {
 				rspObj.errCode = CONSTANTS.apiResponses.TOKEN_MISSING_CODE
 				rspObj.errMsg = CONSTANTS.apiResponses.TOKEN_MISSING_MESSAGE
@@ -618,6 +619,17 @@ module.exports = async function (req, res, next, token = '') {
 			const value = getNestedValue(contextObject, path.trim())
 			return value?.toString?.() ?? ''
 		})
+	}
+
+	function convertTenantAndOrgToLowercase(result) {
+		if (result?.success && result.tenantId && result.orgId) {
+			return {
+				...result,
+				tenantId: UTILS.lowerCase(result.tenantId),
+				orgId: UTILS.lowerCase(result.orgId),
+			}
+		}
+		return result
 	}
 
 	next()

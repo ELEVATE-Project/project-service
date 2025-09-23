@@ -2404,9 +2404,7 @@ module.exports = class SolutionsHelper {
 				let solutionIds = []
 				requestedData['filter'] = {}
 				let getTargetedSolution = true
-				let targetedSolutions = {
-					success: false,
-				}
+				let targetedSolutions = null
 				let result = {
 					data: [],
 					count: 0,
@@ -2527,7 +2525,7 @@ module.exports = class SolutionsHelper {
 						}
 					}
 				}
-				if (targetedSolutions.success) {
+				if (targetedSolutions?.success) {
 					// When targetedSolutions is empty and currentScopeOnly is set to true send empty response
 					if (!(targetedSolutions.data.data.length > 0) && currentScopeOnly) {
 						return resolve({
@@ -2597,7 +2595,7 @@ module.exports = class SolutionsHelper {
 							totalCount = mergedData.length
 						}
 					}
-				} else {
+				} else if (targetedSolutions?.success == false) {
 					return resolve({
 						success: true,
 						message: CONSTANTS.apiResponses.TARGETED_SOLUTIONS_FETCHED,

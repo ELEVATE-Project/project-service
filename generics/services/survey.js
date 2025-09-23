@@ -313,6 +313,7 @@ const createObservation = function (token, solutionId, data, userRoleAndProfileI
 						result['data'] = response.result
 					} else {
 						result.success = false
+						result.message = response.message
 					}
 				}
 

@@ -621,6 +621,17 @@ module.exports = async function (req, res, next, token = '') {
 		})
 	}
 
+	/**
+	 *
+	 * @function
+	 * @name convertTenantAndOrgToLowercase
+	 * @param {Object} result - The result object containing success flag, tenantId, and orgId.
+	 * @param {Boolean} result.success - Indicates whether the operation was successful.
+	 * @param {String} result.tenantId - Tenant ID to be converted to lowercase.
+	 * @param {String} result.orgId - Organization ID to be converted to lowercase.
+	 * @returns {Object} Returns the modified result object with tenantId and orgId in lowercase,
+	 *                   or the original result object if conditions are not met.
+	 */
 	function convertTenantAndOrgToLowercase(result) {
 		if (result?.success && result.tenantId && result.orgId) {
 			return {

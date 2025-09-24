@@ -170,7 +170,7 @@ const pushMessageToKafka = async (payload) => {
 
 async function updateProjectCategories(DB) {
 	try {
-		const abc = await DB.collection('projectCategories').updateMany({}, [
+		await DB.collection('projectCategories').updateMany({}, [
 			{
 				$set: {
 					visibleToOrganizations: ['$orgId'],

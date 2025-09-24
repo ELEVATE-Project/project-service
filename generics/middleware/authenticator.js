@@ -514,7 +514,7 @@ module.exports = async function (req, res, next, token = '') {
 
 				req.headers['orgid'] = validateOrgsResult.validOrgIds
 			} else if (userRoles.includes(CONSTANTS.common.TENANT_ADMIN)) {
-				req.headers['tenantid'] = decodedToken.data.tenant_id.toString().toLowerCase()
+				req.headers['tenantid'] = UTILS.lowerCase(decodedToken.data.tenant_id.toString())
 
 				let orgId = req.body.orgId || req.headers['orgid']
 
@@ -525,7 +525,9 @@ module.exports = async function (req, res, next, token = '') {
 					return res.status(HTTP_STATUS_CODE['bad_request'].status).send(respUtil(rspObj))
 				}
 
-				req.headers['orgid'] = UTILS.lowerCase(orgId)
+				req.headers['orgid'] = Array.isArray(orgId)
+					? orgId.map((org) => UTILS.lowerCase(org))
+					: UTILS.lowerCase(orgId)
 
 				let validateOrgsResult = await validateIfOrgsBelongsToTenant(
 					req.headers['tenantid'],
@@ -539,8 +541,8 @@ module.exports = async function (req, res, next, token = '') {
 				}
 				req.headers['orgid'] = validateOrgsResult.validOrgIds
 			} else if (userRoles.includes(CONSTANTS.common.ORG_ADMIN)) {
-				req.headers['tenantid'] = decodedToken.data.tenant_id.toString().toLowerCase()
-				req.headers['orgid'] = [decodedToken.data.organization_id.toString().toLowerCase()]
+				req.headers['tenantid'] = UTILS.lowerCase(decodedToken.data.tenant_id.toString())
+				req.headers['orgid'] = [UTILS.lowerCase(decodedToken.data.organization_id.toString())]
 			} else {
 				rspObj.errCode = CONSTANTS.apiResponses.TOKEN_MISSING_CODE
 				rspObj.errMsg = CONSTANTS.apiResponses.TOKEN_MISSING_MESSAGE
@@ -634,11 +636,11 @@ module.exports = async function (req, res, next, token = '') {
 	 */
 	function convertTenantAndOrgToLowercase(result) {
 		if (result?.success && result.tenantId && result.orgId) {
-			return {
-				...result,
-				tenantId: UTILS.lowerCase(result.tenantId),
-				orgId: UTILS.lowerCase(result.orgId),
-			}
+			const tenantId = UTILS.lowerCase(result.tenantId)
+			const orgId = Array.isArray(result.orgId)
+				? result.orgId.map((org) => UTILS.lowerCase(org))
+				: UTILS.lowerCase(result.orgId)
+			return { ...result, tenantId, orgId }
 		}
 		return result
 	}

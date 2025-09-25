@@ -296,4 +296,5 @@ module.exports = {
 	FAILED_TO_ADD_ENTITY: 'Failed to add entity to the project',
 	ENTITY_ADDED_TO_PROJECT_SUCCESSFULLY: 'Entity added to project successfully',
 	PROJECT_ENTITIES_UPDATE_NOT_ALLOWED: 'Project entities updation not allowed',
+	INVALID_MAPPING_DATA: 'Invalid mapping data',
 }

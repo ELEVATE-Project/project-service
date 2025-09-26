@@ -297,4 +297,5 @@ module.exports = {
 	ENTITY_ADDED_TO_PROJECT_SUCCESSFULLY: 'Entity added to project successfully',
 	PROJECT_ENTITIES_UPDATE_NOT_ALLOWED: 'Project entities updation not allowed',
 	INVALID_MAPPING_DATA: 'Invalid mapping data',
+	LINK_IS_NOT_ACTIVE_YET: 'The link has not started yet. Please try again from: ',
 }

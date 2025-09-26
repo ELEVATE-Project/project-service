@@ -2,6 +2,7 @@ const programsHelper = require(MODULES_BASE_PATH + '/programs/helper')
 const userService = require(GENERICS_FILES_PATH + '/services/users')
 const userExtensionsQueries = require(DB_QUERY_BASE_PATH + '/userExtension')
 const kafkaProducersHelper = require(GENERICS_FILES_PATH + '/kafka/producers')
+const programQueries = require(DB_QUERY_BASE_PATH + '/programs')
 /**
  * UserExtensionHelper
  * @class
@@ -439,6 +440,222 @@ module.exports = class UserExtensionHelper {
 			}
 		})
 	}
+
+	static update(bodyData, userDetails) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				// Extract userIds from incoming body data
+				const userIds = bodyData.map((user) => user.userId)
+
+				// Extract tenant & user information
+				const tenantId = userDetails.tenantAndOrgInfo.tenantId
+				const userName = userDetails.userInformation.userName
+
+				// Fetch user details from user service
+				const { success, data } = (await userService.accountSearch(userIds, tenantId)) || {}
+
+				// Throw error if no valid users returned from service
+				if (!success || !data || data.count === 0) {
+					throw {
+						success: false,
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.USER_EXTENSION_UPDATE_FAILED,
+					}
+				}
+
+				// Map returned users into simplified objects
+				let validUsers = data.data.map((user) => {
+					return {
+						id: user.id,
+						username: user.name,
+						orgId: user.user_organizations[0].organization_code,
+						roles: user.user_organizations[0].roles.map((role) => role.role.title),
+					}
+				})
+
+				// Create a map for quick user lookups by id
+				const usersMap = new Map()
+				validUsers.forEach((user) => {
+					usersMap.set(user.id, user)
+				})
+
+				// Filter body data to only include valid users
+				let validUserIds = validUsers.map((user) => user.id)
+				let filteredBodyData = bodyData.filter((data) => validUserIds.includes(data.userId))
+
+				// Extract all programIds from filtered body data
+				const allProgramIds = filteredBodyData.map((data) => data.programId)
+
+				// Fetch program details for all programIds
+				const allProgramsData = await programQueries.programsDocument(
+					{
+						_id: { $in: allProgramIds },
+					},
+					['name', 'externalId']
+				)
+
+				// Create a map of programId to program data
+				const programsMap = {}
+				allProgramsData.map((program) => {
+					programsMap[program._id] = program
+				})
+				let responses = []
+				let kafkaMessages = []
+
+				// Loop over each filtered body data entry
+				for (const data of filteredBodyData) {
+					let orgId
+
+					// Find the user’s orgId and intersect roles between request and user
+					for (const user of validUsers) {
+						if (user.id == data.userId) {
+							orgId = user.orgId
+							let validUserRoles = user.roles.filter((role) => data.roles.includes(role))
+							data.roles = validUserRoles
+							break
+						}
+					}
+					const operation = data.operation.toUpperCase()
+
+					// Fetch existing userExtension doc if any
+					let userExtension = await userExtensionsQueries.userExtensionDocument({
+						userId: data.userId,
+						tenantId,
+					})
+					const userExtensionDoc =
+						Array.isArray(userExtension) && userExtension.length > 0 ? userExtension[0] : null
+
+					// Early failure condition
+					if (!userExtensionDoc && operation === CONSTANTS.common.REMOVE_OPERATION) {
+						responses.push(buildResponse(false, data))
+						continue
+					}
+
+					// =================== REMOVE OPERATION ===================
+					if (operation === CONSTANTS.common.REMOVE_OPERATION) {
+						if (!userExtensionDoc?.programRoleMapping) {
+							responses.push(buildResponse(false, data, userExtensionDoc?._id))
+							continue
+						}
+
+						try {
+							// Pull programRoleMapping by programId
+							await userExtensionsQueries.findAndUpdate(
+								{ _id: userExtensionDoc._id, tenantId },
+								{
+									$pull: { programRoleMapping: { programId: ObjectId(data.programId) } },
+									updatedBy: userName,
+								}
+							)
+
+							// Mark success and push Kafka delete event
+							responses.push(buildResponse(true, data, userExtensionDoc._id))
+							data.roles.map((role) => {
+								kafkaMessages.push(
+									createKafkaPayload(
+										usersMap.get(data.userId),
+										data.programId,
+										role,
+										CONSTANTS.common.DELETE_EVENT_TYPE,
+										programsMap
+									)
+								)
+							})
+						} catch (err) {
+							responses.push(buildResponse(false, data, userExtensionDoc._id))
+						}
+						continue
+					}
+
+					// =================== APPEND OPERATION ===================
+					if (operation === CONSTANTS.common.APPEND_OPERATION) {
+						if (userExtensionDoc) {
+							// If userExtension already exists, add new programRoleMapping if not present
+							try {
+								await userExtensionsQueries.findAndUpdate(
+									{
+										_id: ObjectId(userExtensionDoc._id),
+										userId: data.userId,
+										tenantId,
+										'programRoleMapping.programId': { $ne: ObjectId(data.programId) },
+									},
+									{
+										$addToSet: {
+											programRoleMapping: {
+												programId: ObjectId(data.programId),
+												roles: data.roles,
+											},
+										},
+										updatedBy: userName,
+									}
+								)
+								// Mark success and push Kafka create event
+								responses.push(buildResponse(true, data, userExtensionDoc._id))
+								data.roles.map((role) => {
+									kafkaMessages.push(
+										createKafkaPayload(
+											usersMap.get(data.userId),
+											data.programId,
+											role,
+											CONSTANTS.common.CREATE_EVENT_TYPE,
+											programsMap
+										)
+									)
+								})
+							} catch (err) {
+								responses.push(buildResponse(false, data, userExtensionDoc._id))
+							}
+						} else {
+							// If userExtension does not exist, create new userExtension record
+							try {
+								const newUserExtension = await userExtensionsQueries.createUserExtension({
+									userId: data.userId.toString(),
+									tenantId,
+									orgIds: [orgId],
+									externalId: `${tenantId}-${orgId}-${data.userId}`,
+									programRoleMapping: [
+										{
+											programId: ObjectId(data.programId),
+											roles: data.roles,
+										},
+									],
+									createdBy: userName,
+									updatedBy: userName,
+								})
+								// Mark success and push Kafka create event
+								responses.push(buildResponse(true, data, newUserExtension._id))
+								data.roles.map((role) => {
+									kafkaMessages.push(
+										createKafkaPayload(
+											usersMap.get(data.userId),
+											data.programId,
+											role,
+											CONSTANTS.common.CREATE_EVENT_TYPE,
+											programsMap
+										)
+									)
+								})
+							} catch (err) {
+								responses.push(buildResponse(false, data))
+							}
+						}
+					}
+				}
+				// Push all Kafka messages at the end
+				for (let message of kafkaMessages) {
+					kafkaProducersHelper.pushProgramOperationEvent(message)
+				}
+				return resolve({
+					success: true,
+					message: CONSTANTS.apiResponses.USER_EXTENSION_UPDATED,
+					data: responses,
+					result: responses,
+				})
+			} catch (error) {
+				return reject(error)
+			}
+		})
+	}
 }
 
 /**
@@ -497,5 +714,26 @@ function addNewProgramEntry(
 		kafkaEventPayloads.push(
 			createKafkaPayload(userProfile, programId, role, CONSTANTS.common.CREATE_EVENT_TYPE, programInfoMap)
 		)
+	}
+}
+
+/**
+ *
+ * @param {String} success - success response [ true / false ]
+ * @param {Object} data - program data
+ * @param {String} id - userExtension id
+ * @returns {Object}
+ */
+
+function buildResponse(success, data, id = null) {
+	return {
+		success,
+		message: success
+			? CONSTANTS.apiResponses.USER_EXTENSION_UPDATED
+			: CONSTANTS.apiResponses.USER_EXTENSION_UPDATE_FAILED,
+		userId: data.userId,
+		_id: id,
+		programId: data.programId,
+		roles: data.roles,
 	}
 }

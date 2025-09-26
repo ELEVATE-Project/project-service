@@ -81,4 +81,27 @@ module.exports = class UserExtension extends Abstract {
 			}
 		})
 	}
+
+	/**
+	 * update user extensions.
+	 * @method
+	 * @name update
+	 * @param {Object} req - request data.
+	 * @returns {Object} user extension data.
+	 */
+
+	update(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				const updateUserExtension = await userExtensionHelper.update(req.body.data, req.userDetails)
+				return resolve(updateUserExtension)
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
+				})
+			}
+		})
+	}
 }

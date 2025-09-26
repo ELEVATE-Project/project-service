@@ -305,4 +305,6 @@ module.exports = {
 	RELATED_ORGS_UPDATE_FAILED: 'Related orgs update failed',
 	RELATED_ORGS_UPDATED_SUCCESSFULLY: 'Related orgs updated successfully',
 	ORG_EXTENSION_ALREADY_EXISTS: 'Organization extension already exists',
+	USER_EXTENSION_UPDATED: 'User extension updated successfully',
+	USER_EXTENSION_UPDATE_FAILED: 'User extension update failed',
 }

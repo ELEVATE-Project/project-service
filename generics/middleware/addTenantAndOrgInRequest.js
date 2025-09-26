@@ -30,7 +30,7 @@ module.exports = async function (req, res, next) {
 
 	if (performTenantAndOrgCheck) {
 		req.body['tenantId'] = req.userDetails.userInformation.tenantId
-		req.body['organizations'] = [req.userDetails.userInformation.organizationId]
+		req.body['organizations'] = [UTILS.lowerCase(req.userDetails.userInformation.organizationId)]
 	}
 
 	next()

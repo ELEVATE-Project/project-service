@@ -4543,6 +4543,10 @@ function _projectInformation(project, language) {
 			if (project.entityInformation) {
 				project.entityId = project.entityInformation._id
 				project.entityName = project.entityInformation.name
+			} else if (project.solutionInformation && project.solutionInformation.entityType) {
+				project['entityInformation'] = {
+					entityType: project.solutionInformation.entityType,
+				}
 			}
 
 			if (project.programInformation) {

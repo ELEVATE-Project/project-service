@@ -307,4 +307,5 @@ module.exports = {
 	ORG_EXTENSION_ALREADY_EXISTS: 'Organization extension already exists',
 	USER_EXTENSION_UPDATED: 'User extension updated successfully',
 	USER_EXTENSION_UPDATE_FAILED: 'User extension update failed',
+	INVALID_MAPPING_DATA: 'Invalid mapping data',
 }

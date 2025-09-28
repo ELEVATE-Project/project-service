@@ -395,7 +395,7 @@ const programsDocument = function (filterQuery, fieldsArray) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			// Construct the URL for Survey Service API
-			let programsDocumentUrl = SURVEY_SERVICE_URL + CONSTANTS.endpoints.FETCH_SOLUTION_DOCUMENT
+			let programsDocumentUrl = SURVEY_SERVICE_URL + CONSTANTS.endpoints.FETCH_PROGRAM_DOCUMENT
 			// Prepare request headers with authentication and body payload
 			let options = {
 				headers: {
@@ -433,6 +433,58 @@ const programsDocument = function (filterQuery, fieldsArray) {
 	})
 }
 
+/**
+ * @function programsDocument
+ * @description Fetches a specific solution document from the Survey Service API
+ *              using the provided solution ID and user authentication token.
+ *
+ * @param {string} solutionId - The unique identifier of the solution to fetch.
+ * @param {string} userToken - The authentication token of the user requesting the solution.
+ * @returns {Promise<Object>} Result indicating success/failure and optional response data.
+ */
+const solutionDocument = function (solutionId, userToken) {
+	return new Promise(async (resolve, reject) => {
+		try {
+			// Construct the full API URL to fetch solution document
+			const solutionDocumentUrl =
+				SURVEY_SERVICE_URL + CONSTANTS.endpoints.FETCH_SOLUTION_DOCUMENT + '/' + solutionId
+			// Prepare request headers with authentication and body payload
+			let options = {
+				headers: {
+					'content-type': 'application/json',
+					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
+					'X-auth-token': userToken,
+				},
+			}
+
+			// Send a GET request to the Survey Service
+			request.get(solutionDocumentUrl, options, solutionDocumentbackCallback)
+			// Callback function to handle the response from the Survey Service
+			function solutionDocumentbackCallback(err, data) {
+				let result = {}
+
+				if (err) {
+					result.success = false
+				} else {
+					let response = data.body
+
+					// Check if the result status is HTTP 200 OK
+					response = JSON.parse(response)
+					if (response.status === HTTP_STATUS_CODE['ok'].status) {
+						result = response.result
+					} else {
+						result.success = false
+					}
+				}
+
+				return resolve(result)
+			}
+		} catch (error) {
+			return reject(error)
+		}
+	})
+}
+
 module.exports = {
 	listSolutions: listSolutions,
 	updateSolution: updateSolution,
@@ -441,4 +493,5 @@ module.exports = {
 	importTemplateToSolution: importTemplateToSolution,
 	deleteSolutionResource: deleteSolutionResource,
 	programsDocument: programsDocument,
+	solutionDocument: solutionDocument,
 }

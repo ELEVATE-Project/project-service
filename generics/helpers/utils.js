@@ -987,6 +987,15 @@ function getFilteredScope(scopeData, tenantPublicDetailsMetaField) {
 	return filteredScope
 }
 
+/**
+ * Strictly validates whether the given value is a valid MongoDB ObjectId string.
+ * @param {string} _id - The value to validate.
+ * @returns {boolean} - True if the value is a 24-character hex string, false otherwise.
+ */
+function strictObjectIdCheck(_id) {
+	return /^[a-fA-F0-9]{24}$/.test(_id)
+}
+
 module.exports = {
 	camelCaseToTitleCase: camelCaseToTitleCase,
 	lowerCase: lowerCase,
@@ -1031,4 +1040,5 @@ module.exports = {
 	validateRoles,
 	targetingQuery,
 	getFilteredScope,
+	strictObjectIdCheck,
 }

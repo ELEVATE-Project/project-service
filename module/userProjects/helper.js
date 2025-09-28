@@ -548,6 +548,13 @@ module.exports = class UserProjectsHelper {
 	 * @param {String} userToken - Logged in user token.
 	 * @param {String} [ programId = "" ] - Program Id.
 	 * @param {String} [ programName = "" ] - Program Name.
+	 * @param {Array} entities - List of entity IDs.
+	 * @param {String} userId - Logged in user id.
+	 * @param {String} solutionId - Solution id.
+	 * @param {Boolean|String} [ isATargetedSolution = "" ] - Flag to check if it is a targeted solution.
+	 * @param {Object} userDetails - User details object.
+	 * @param {Boolean} isExternalProgram - Flag to check if it is an external program.
+	 * @returns {Object} Created program and solution data.
 	 * @returns {Object} Created program and solution data.
 	 */
 
@@ -1290,7 +1297,7 @@ module.exports = class UserProjectsHelper {
 						const getSolutionDetails = {
 							[CONSTANTS.common.ASSESSMENT]: () => _assessmentDetails(assessmentOrObservation),
 							[CONSTANTS.common.OBSERVATION]: () =>
-								_observationDetails(assessmentOrObservation, bodyData),
+								_observationDetails(assessmentOrObservation, bodyData, userDetails),
 							[CONSTANTS.common.IMPROVEMENT_PROJECT]: async () => {
 								// get programTempalteDetails aliong with solutionDetils if task type is improvementProject
 								assessmentOrObservation.projectTemplateDetails = currentTask.projectTemplateDetails
@@ -1302,7 +1309,8 @@ module.exports = class UserProjectsHelper {
 									userDetails
 								)
 							},
-							[CONSTANTS.common.SURVEY]: () => _surveyDetails(assessmentOrObservation, bodyData),
+							[CONSTANTS.common.SURVEY]: () =>
+								_surveyDetails(assessmentOrObservation, bodyData, userDetails),
 						}
 						let fetchSolutions = getSolutionDetails[taskSolutionType]
 
@@ -3029,6 +3037,7 @@ module.exports = class UserProjectsHelper {
 	 * @param {String} language - language code
 	 * @param {Object} userDetails - loggedin user's info
 	 * @returns {Object} Project created information.
+	 * @param {Boolean} isExternalProgram - Flag to check if it is an external program.
 	 */
 
 	static importFromLibrary(
@@ -5352,10 +5361,11 @@ function _assessmentDetails(assessmentData) {
  * @name _observationDetails
  * @param {Object} observationData - Observation data.
  * @param {Object} userRoleAndProfileInformation -req body Data
+ * @param {Object} userDetails - User details object.
  * @returns {Object}
  */
 
-function _observationDetails(observationData, userRoleAndProfileInformation = {}) {
+function _observationDetails(observationData, userRoleAndProfileInformation = {}, userDetails) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			let result = {}
@@ -5408,6 +5418,31 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 				result['observationId'] = observationCreated.data._id
 			}
 
+			// Check if a new observation solution was successfully created
+			if (observationCreated.data.solutionId) {
+				let fetchSolutionDetails = await surveyService.solutionDocument(
+					observationCreated.data.solutionId,
+					observationData.token
+				)
+
+				// Update the solution by setting "isExternalProgram" to false
+				if (fetchSolutionDetails.isExternalProgram) {
+					let updatedSolutionData = await surveyService.updateSolution(
+						observationData.token,
+						{ isExternalProgram: false },
+						fetchSolutionDetails.externalId,
+						userDetails
+					)
+
+					// If the update request failed, throw an error response
+					if (!updatedSolutionData.success) {
+						throw {
+							status: HTTP_STATUS_CODE.bad_request.status,
+							message: CONSTANTS.apiResponses.SOLUTION_NOT_UPDATED,
+						}
+					}
+				}
+			}
 			result['solutionId'] = observationData.solutionDetails._id
 
 			return resolve({
@@ -5429,9 +5464,10 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
  * @name _surveyDetails
  * @param {Object} surveyData - survey data.
  * @param {Object} userRoleAndProfileInformation -req body Data
+ * @param {Object} userDetails - User details object.
  * @returns {Object}
  */
-function _surveyDetails(surveyData, userRoleAndProfileInformation = {}) {
+function _surveyDetails(surveyData, userRoleAndProfileInformation = {}, userDetails) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			let result = {}
@@ -5464,6 +5500,30 @@ function _surveyDetails(surveyData, userRoleAndProfileInformation = {}) {
 
 			result['surveySubmissionId'] = surveyCreated.data.assessment.submissionId
 
+			// Check if a new survey solution was successfully created
+			if (surveyCreated.data.solution._id) {
+				let fetchSolutionDetails = await surveyService.solutionDocument(
+					surveyCreated.data.solution._id,
+					surveyData.token
+				)
+				// If the solution is marked as "External Program"
+				if (fetchSolutionDetails.isExternalProgram) {
+					// Update the solution by setting "isExternalProgram" to false
+					let updatedSolutionData = await surveyService.updateSolution(
+						surveyData.token,
+						{ isExternalProgram: false },
+						fetchSolutionDetails.externalId,
+						userDetails
+					)
+					// If the update request failed, throw an error response
+					if (!updatedSolutionData.success) {
+						throw {
+							status: HTTP_STATUS_CODE.bad_request.status,
+							message: CONSTANTS.apiResponses.SOLUTION_NOT_UPDATED,
+						}
+					}
+				}
+			}
 			result['solutionId'] = surveyData.solutionDetails._id
 
 			return resolve({

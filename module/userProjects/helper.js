@@ -4555,6 +4555,10 @@ function _projectInformation(project, language) {
 			if (project.entityInformation) {
 				project.entityId = project.entityInformation._id
 				project.entityName = project.entityInformation.name
+			} else if (project.solutionInformation && project.solutionInformation.entityType) {
+				project['entityInformation'] = {
+					entityType: project.solutionInformation.entityType,
+				}
 			}
 
 			if (project.programInformation) {
@@ -5412,7 +5416,7 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 			if (!observationCreated.success || !observationCreated?.data?._id) {
 				throw {
 					status: HTTP_STATUS_CODE.bad_request.status,
-					message: CONSTANTS.apiResponses.OBSERVATION_NOT_CREATED,
+					message: observationCreated.message || CONSTANTS.apiResponses.OBSERVATION_NOT_CREATED,
 				}
 			} else {
 				result['observationId'] = observationCreated.data._id

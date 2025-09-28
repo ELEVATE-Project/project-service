@@ -28,6 +28,32 @@ module.exports = class UserExtensionHelper {
 				const allProgramIds = new Set()
 				const allUserIds = new Set()
 
+				//delete invalid program operations from csv data
+				for (let index = userRolesCSVData.length - 1; index >= 0; index--) {
+					const userRole = UTILS.valueParser(userRolesCSVData[index])
+
+					// Safely handle missing/null/undefined programOperation
+					const programOperation = userRole.programOperation
+						? UTILS.upperCase(userRole.programOperation)
+						: null
+
+					if (
+						programOperation === CONSTANTS.common.REMOVE_OPERATION ||
+						programOperation === CONSTANTS.common.ADD_OPERATION
+					) {
+						userRolesCSVData[index].programOperation = programOperation
+					} else {
+						userRolesCSVData.splice(index, 1)
+					}
+				}
+
+				if (userRolesCSVData.length === 0) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.INVALID_MAPPING_DATA,
+					}
+				}
+
 				//iterating through userRolesCSVData to collect all programIds and userIds
 				for (const csvRow of userRolesCSVData) {
 					const userRole = UTILS.valueParser(csvRow)
@@ -78,8 +104,12 @@ module.exports = class UserExtensionHelper {
 						},
 					},
 					false,
-					{ externalId: { $in: Array.from(allProgramIds) } },
-					['_id', 'externalId', 'name']
+					{
+						externalId: { $in: Array.from(allProgramIds) },
+						tenantId: tenantAndOrgInfo.tenantId,
+						orgId: tenantAndOrgInfo.orgId[0],
+					},
+					['_id', 'externalId', 'name', 'orgId']
 				)
 
 				// Create maps for program IDs and program information
@@ -124,6 +154,19 @@ module.exports = class UserExtensionHelper {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.USER_PROFILE_NOT_FOUND,
+					}
+				}
+
+				//iterating through userProfileMap to check if user belongs to same org
+				for (let userId in userProfileMap) {
+					const user = userProfileMap[userId]
+					if (
+						!user.organizations ||
+						!Array.isArray(user.organizations) ||
+						user.organizations.length === 0 ||
+						!user.organizations.find((org) => org.code === tenantAndOrgInfo.orgId[0])
+					) {
+						delete userProfileMap[userId]
 					}
 				}
 

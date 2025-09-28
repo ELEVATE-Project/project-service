@@ -60,7 +60,8 @@ module.exports = class ProgramsHelper {
 						}
 					}
 					validOrgs = validOrgs.data
-
+					validOrgs = validOrgs.map((org) => org.toLowerCase())
+					scopeData.organizations = scopeData.organizations.map((id) => id.toLowerCase())
 					// filter valid orgs
 					scopeData.organizations = scopeData.organizations.filter(
 						(id) => validOrgs.includes(id) || id.toLowerCase() == CONSTANTS.common.ALL
@@ -329,9 +330,15 @@ module.exports = class ProgramsHelper {
 				data.updatedAt = new Date()
 				//convert components to objectedIds
 				if (data.components && data.components.length > 0) {
-					const componentsWithOrder = data.components.filter(
-						(component) => component._id && component.hasOwnProperty('order')
-					)
+					const componentsWithOrder = data.components.filter((component) => {
+						return (
+							component._id &&
+							component.hasOwnProperty('order') &&
+							typeof component.order === 'number' &&
+							Number.isInteger(component.order) &&
+							component.order > 0
+						)
+					})
 					data.components = componentsWithOrder.map((component) => {
 						return { ...component, _id: UTILS.convertStringToObjectId(component._id) }
 					})

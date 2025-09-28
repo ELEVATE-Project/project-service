@@ -1405,9 +1405,6 @@ module.exports = class SolutionsHelper {
 					{
 						link: link,
 						isReusable: false,
-						status: {
-							$ne: CONSTANTS.common.INACTIVE,
-						},
 						tenantId: tenantId,
 					},
 					['type', 'status', 'endDate']
@@ -1417,14 +1414,6 @@ module.exports = class SolutionsHelper {
 					return resolve({
 						message: CONSTANTS.apiResponses.INVALID_LINK,
 						result: [],
-					})
-				}
-
-				if (solutionData[0].status !== CONSTANTS.common.ACTIVE_STATUS) {
-					return resolve({
-						message: CONSTANTS.apiResponses.LINK_IS_EXPIRED,
-						result: [],
-						syuccess: false,
 					})
 				}
 
@@ -1448,6 +1437,14 @@ module.exports = class SolutionsHelper {
 					return resolve({
 						message: CONSTANTS.apiResponses.LINK_IS_EXPIRED,
 						result: [],
+					})
+				}
+
+				if (solutionData[0].status !== CONSTANTS.common.ACTIVE_STATUS) {
+					return resolve({
+						message: CONSTANTS.apiResponses.INVALID_LINK,
+						result: [],
+						success: false,
 					})
 				}
 				response.verified = true
@@ -2423,9 +2420,7 @@ module.exports = class SolutionsHelper {
 				let solutionIds = []
 				requestedData['filter'] = {}
 				let getTargetedSolution = true
-				let targetedSolutions = {
-					success: false,
-				}
+				let targetedSolutions = null
 				let result = {
 					data: [],
 					count: 0,
@@ -2546,7 +2541,7 @@ module.exports = class SolutionsHelper {
 						}
 					}
 				}
-				if (targetedSolutions.success) {
+				if (targetedSolutions?.success) {
 					// When targetedSolutions is empty and currentScopeOnly is set to true send empty response
 					if (!(targetedSolutions.data.data.length > 0) && currentScopeOnly) {
 						return resolve({
@@ -2616,7 +2611,7 @@ module.exports = class SolutionsHelper {
 							totalCount = mergedData.length
 						}
 					}
-				} else {
+				} else if (targetedSolutions?.success == false) {
 					return resolve({
 						success: true,
 						message: CONSTANTS.apiResponses.TARGETED_SOLUTIONS_FETCHED,

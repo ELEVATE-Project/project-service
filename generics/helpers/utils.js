@@ -146,6 +146,18 @@ function lowerCase(str) {
 }
 
 /**
+ * convert string to upperCase.
+ * @function
+ * @name upperCase
+ * @param {String} str
+ * @returns {String} returns a upperCase string. ex: HELLO, o/p: hello
+ */
+
+function upperCase(str) {
+	return str.toUpperCase()
+}
+
+/**
  * check whether the given string is url.
  * @function
  * @name checkIfStringIsUrl - check whether string is url or not.
@@ -1041,4 +1053,5 @@ module.exports = {
 	targetingQuery,
 	getFilteredScope,
 	strictObjectIdCheck,
+	upperCase: upperCase,
 }

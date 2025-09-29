@@ -653,6 +653,10 @@ module.exports = class ProjectTemplatesHelper {
 						isExternalProgram
 					)
 
+					if (!createdSolution?.result?._id) {
+						throw new Error(CONSTANTS.apiResponses.SOLUTION_NOT_CREATED)
+					}
+
 					// Import project template into the newly created solution
 					let duplicateProjectTemplateId = await this.importProjectTemplate(
 						templateId,
@@ -662,6 +666,10 @@ module.exports = class ProjectTemplatesHelper {
 						{},
 						userDetails
 					)
+
+					if (!duplicateProjectTemplateId?.success || !duplicateProjectTemplateId?.data?._id) {
+						throw new Error(CONSTANTS.apiResponses.DUPLICATE_PROJECT_TEMPLATES_NOT_CREATED)
+					}
 
 					// Push duplicate template mapping to response
 					responseData.push({

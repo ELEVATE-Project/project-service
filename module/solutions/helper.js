@@ -2800,7 +2800,7 @@ module.exports = class SolutionsHelper {
 				let verifySolution = await this.verifySolutionDetails(link, userId, userToken, userDetails)
 				if (!verifySolution.success) {
 					throw {
-						satus: HTTP_STATUS_CODE.bad_request.status,
+						status: HTTP_STATUS_CODE.bad_request.status,
 						message: verifySolution.message ? verifySolution.message : CONSTANTS.apiResponses.INVALID_LINK,
 					}
 				}

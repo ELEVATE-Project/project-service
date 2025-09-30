@@ -1166,9 +1166,9 @@ module.exports = class ProjectTemplatesHelper {
 					newProjectTemplateTask.solutionDetails._id,
 					'',
 					{
-						name: `${newProjectTemplateTask.solutionDetails.name}-${timestamp}`,
+						name: `${newProjectTemplateTask.solutionDetails.name}`,
 						externalId: `${newProjectTemplateTask.solutionDetails.externalId}-${timestamp}`,
-						description: `${newProjectTemplateTask.solutionDetails.name}-${timestamp}`,
+						description: `${newProjectTemplateTask.solutionDetails.name}`,
 						programExternalId: newProjectTemplateTask.programId,
 						status: CONSTANTS.common.PUBLISHED_STATUS,
 					},

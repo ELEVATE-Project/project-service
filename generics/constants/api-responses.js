@@ -307,4 +307,5 @@ module.exports = {
 	ORG_EXTENSION_ALREADY_EXISTS: 'Organization extension already exists',
 	INVALID_MAPPING_DATA: 'Invalid mapping data',
 	LINK_IS_NOT_ACTIVE_YET: 'The link has not started yet. Please try again from: ',
+	INVALID_MAPPING_DATA: 'Invalid mapping data',
 }

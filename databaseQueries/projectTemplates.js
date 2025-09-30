@@ -170,4 +170,24 @@ module.exports = class ProjectTemplates {
 			}
 		})
 	}
+
+	/**
+	 * Update project templates documents.
+	 * @method
+	 * @name updateMany
+	 * @param {Object} [filterQuery] - filtered Query.
+	 * @param {Object} [updateData] - update data.
+	 * @returns {Array} - Project templates data.
+	 */
+
+	static updateMany(filterQuery, updateObject) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let projectTemplate = await database.models.projectTemplates.updateMany(filterQuery, updateObject)
+				return resolve(projectTemplate)
+			} catch (error) {
+				return reject(error)
+			}
+		})
+	}
 }

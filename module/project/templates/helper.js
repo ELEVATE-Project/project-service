@@ -33,6 +33,7 @@ const testimonialsHelper = require(MODULES_BASE_PATH + '/testimonials/helper')
 const surveyService = require(SERVICES_BASE_PATH + '/survey')
 const solutionsUtils = require(GENERICS_FILES_PATH + '/helpers/solutionAndProjectTemplateUtils')
 const entitiesService = require(GENERICS_FILES_PATH + '/services/entity-management')
+const orgExtensionQueries = require(DB_QUERY_BASE_PATH + '/organizationExtension')
 
 module.exports = class ProjectTemplatesHelper {
 	/**
@@ -327,6 +328,25 @@ module.exports = class ProjectTemplatesHelper {
 	static bulkCreate(templates, userDetails, translationFiles = {}) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				const tenantId = userDetails.tenantAndOrgInfo.tenantId
+				const orgId = userDetails.tenantAndOrgInfo.orgId[0]
+
+				// Check if organization extension exists for the loggedin user
+				let orgExtension
+				orgExtension = await orgExtensionQueries.orgExtenDocuments({
+					tenantId,
+					orgId,
+				})
+
+				//Throw error if org policy is not found
+				if (!orgExtension || orgExtension.length === 0) {
+					throw {
+						success: false,
+						status: HTTP_STATUS_CODE.not_found.status,
+						message: CONSTANTS.apiResponses.ORG_EXTENSION_NOT_FOUND,
+					}
+				}
+				orgExtension = Array.isArray(orgExtension) ? orgExtension[0] : orgExtension
 				if (templates[0].solutionId && templates[0].solutionId !== '') {
 					const isSolutionExist = await solutionsQueries.solutionsDocument({ _id: templates[0].solutionId })
 					if (!isSolutionExist.length > 0) {
@@ -368,11 +388,20 @@ module.exports = class ProjectTemplatesHelper {
 					}
 				}
 
+				let relatedOrgs = await solutionsUtils.organizationDetails(userDetails)
+				if (!relatedOrgs || !relatedOrgs.success || !relatedOrgs.result) {
+					throw {
+						success: false,
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.ORG_DETAILS_FETCH_UNSUCCESSFUL,
+					}
+				}
+
 				for (let template = 0; template < templates.length; template++) {
 					let currentData = templates[template]
 					// create match query
 					let matchQuery = {}
-					matchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+					matchQuery['tenantId'] = tenantId
 					matchQuery['status'] = CONSTANTS.common.PUBLISHED
 					matchQuery['externalId'] = currentData.externalId
 					matchQuery['isReusable'] = true
@@ -395,8 +424,10 @@ module.exports = class ProjectTemplatesHelper {
 							templateData.userId =
 								userDetails.userInformation.userId
 						templateData.isReusable = true
-						templateData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-						templateData['orgId'] = userDetails.tenantAndOrgInfo.orgId[0]
+						templateData['tenantId'] = tenantId
+						templateData['orgId'] = orgId
+						templateData['visibility'] = orgExtension.projectResourceVisibilityPolicy
+						templateData['visibleToOrganizations'] = [orgId, ...relatedOrgs.result]
 
 						let createdTemplate = await projectTemplateQueries.createTemplate(templateData)
 
@@ -1135,9 +1166,9 @@ module.exports = class ProjectTemplatesHelper {
 					newProjectTemplateTask.solutionDetails._id,
 					'',
 					{
-						name: `${newProjectTemplateTask.solutionDetails.name}-${timestamp}`,
+						name: `${newProjectTemplateTask.solutionDetails.name}`,
 						externalId: `${newProjectTemplateTask.solutionDetails.externalId}-${timestamp}`,
-						description: `${newProjectTemplateTask.solutionDetails.name}-${timestamp}`,
+						description: `${newProjectTemplateTask.solutionDetails.name}`,
 						programExternalId: newProjectTemplateTask.programId,
 						status: CONSTANTS.common.PUBLISHED_STATUS,
 					},

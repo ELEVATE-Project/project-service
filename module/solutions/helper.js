@@ -930,7 +930,7 @@ module.exports = class SolutionsHelper {
 					}
 
 					let checkforProgramExist
-					if (isExternalProgram) {
+					if (UTILS.convertStringToBoolean(isExternalProgram)) {
 						checkforProgramExist = await surveyService.programsDocument(filterQuery, ['all'])
 					} else {
 						checkforProgramExist = await programQueries.programsDocument(filterQuery, 'all', ['__v'])

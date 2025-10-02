@@ -5422,31 +5422,6 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 				result['observationId'] = observationCreated.data._id
 			}
 
-			// Check if a new observation solution was successfully created
-			if (observationCreated.data.solutionId) {
-				let fetchSolutionDetails = await surveyService.solutionDocument(
-					observationCreated.data.solutionId,
-					observationData.token
-				)
-
-				// Update the solution by setting "isExternalProgram" to false
-				if (fetchSolutionDetails.isExternalProgram) {
-					let updatedSolutionData = await surveyService.updateSolution(
-						observationData.token,
-						{ isExternalProgram: false },
-						fetchSolutionDetails.externalId,
-						userDetails
-					)
-
-					// If the update request failed, throw an error response
-					if (!updatedSolutionData.success) {
-						throw {
-							status: HTTP_STATUS_CODE.bad_request.status,
-							message: CONSTANTS.apiResponses.SOLUTION_NOT_UPDATED,
-						}
-					}
-				}
-			}
 			result['solutionId'] = observationData.solutionDetails._id
 
 			return resolve({

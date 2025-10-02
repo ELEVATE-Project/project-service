@@ -54,7 +54,7 @@ function createSolution(solutionData, checkDate = false, userDetails, isExternal
 			}
 
 			let programData
-			if (isExternalProgram) {
+			if (UTILS.convertStringToBoolean(isExternalProgram)) {
 				programData = await surveyService.programsDocument(programMatchQuery, [
 					'name',
 					'description',

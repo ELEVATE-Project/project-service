@@ -40,11 +40,12 @@ services:
       - project_net
     logging:
       driver: none
-      
+
   project:
-    image: shikshalokamqa/elevate-project-service:1.0.0
+    image: shikshalokamqa/elevate-project-service:1.0.2
+    container_name: project
     ports:
-      - '5000:5000'
+      - '6000:6000'
     command: ['nodemon', 'app.js']
     environment:
       - MONGODB_URL=mongodb://mongo:27017/elevate-project
@@ -58,7 +59,7 @@ services:
 
   # Entity-management config
   entity_management:
-    image: shikshalokamqa/elevate-entity-management:1.0.0
+    image: shikshalokamqa/elevate-entity-management:1.0.2
     ports:
       - '5001:5001'
     command: ['nodemon', 'app.js']
@@ -70,7 +71,7 @@ services:
       - project_net
 
   user:
-    image: shikshalokamqa/elevate-user:3.1.1
+    image: shikshalokamqa/elevate-user:3.1.3
     ports:
       - '3001:3001'
     command: >
@@ -141,7 +142,7 @@ services:
       - ${scheduler_env}
   interface:
     # Update with latest image
-    image: shikshalokamqa/elevate-interface:3.1.1
+    image: shikshalokamqa/elevate-interface:3.1.5
     ports:
       - '3569:3569'
     command: ['node', 'app.js']
@@ -185,6 +186,7 @@ services:
   # Mongo config
   mongo:
     image: 'mongo:4.4.14'
+    container_name: project_mongo_1
     restart: 'always'
     ports:
       - '27017:27017'
@@ -207,14 +209,14 @@ services:
 
   portal:
     # Update with latest image
-    image: shikshalokamqa/mentoring-mobile-app:2.6.1
+    image: shikshalokamqa/elevate-project-obervation-pwa:1.0
     container_name: portal
     ports:
-      - '8100:8100'
+      - '7007:7007'
     volumes:
-      - /home/joffin/elevate/single-click/linux/environment.ts:/app/src/environments/environment.ts
-    command: >
-      /bin/bash -c "ionic build --prod && ionic serve --host 0.0.0.0"
+      - /home/shikshalokam/elevate/single-click/linux/env.js:/usr/src/app/www/assets/env/env.js
+    # command: >
+    #   /bin/bash -c "ionic build --prod && ionic serve --host 0.0.0.0"
     networks:
       - project_net
 

@@ -4,7 +4,7 @@ API_DOC_URL=/project/api-doc
 APPLICATION_BASE_URL=/project/
 APPLICATION_ENV=development
 APPLICATION_HOST=project
-APPLICATION_PORT=5000
+APPLICATION_PORT=6000
 APP_PORTAL_BASE_URL=https://dev.elevate-ml.shikshalokam.org
 CLOUD_STORAGE=GCP
 CLOUD_STORAGE_ACCOUNTNAME=sl-mentoring-dev-storage@sl-dev-project.iam.gserviceaccount.com
@@ -15,7 +15,7 @@ CLOUD_STORAGE_PROVIDER=gcloud
 CLOUD_STORAGE_SECRET=-----BEGIN PRIVATE KEY-----\nMIIEvAIBADA****ZoENzsgvIUA==\n-----END PRIVATE KEY-----\n
 DEFAULT_ORGANISATION_CODE=1
 DOWNLOADABLE_URL_EXPIRY_IN_SECONDS=300
-ELEVATE_PROJECT_SERVICE_URL=https://project-dev.elevate-apis.shikshalokam.org
+ELEVATE_PROJECT_SERVICE_URL=http://interface:3569
 ENTITY_MANAGEMENT_SERVICE_BASE_URL=/entity-management
 GOTENBERG_URL=http://gotenberg:3000
 INTERFACE_SERVICE_URL=http://interface:3569

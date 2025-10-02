@@ -26,6 +26,7 @@ const timeZoneDifference = process.env.TIMEZONE_DIFFRENECE_BETWEEN_LOCAL_TIME_AN
 const solutionsUtils = require(GENERICS_FILES_PATH + '/helpers/solutionAndProjectTemplateUtils')
 const surveyService = require(GENERICS_FILES_PATH + '/services/survey')
 
+const moment = require('moment-timezone')
 /**
  * SolutionsHelper
  * @class
@@ -1407,7 +1408,7 @@ module.exports = class SolutionsHelper {
 						isReusable: false,
 						tenantId: tenantId,
 					},
-					['type', 'status', 'endDate']
+					['type', 'status', 'endDate', 'startDate']
 				)
 
 				if (!Array.isArray(solutionData) || solutionData.length < 1) {
@@ -1445,6 +1446,20 @@ module.exports = class SolutionsHelper {
 						message: CONSTANTS.apiResponses.INVALID_LINK,
 						result: [],
 						success: false,
+					})
+				}
+
+				// check start date is greater than current date
+				if (solutionData[0].startDate && new Date() < new Date(solutionData[0].startDate)) {
+					return resolve({
+						message:
+							CONSTANTS.apiResponses.LINK_IS_NOT_ACTIVE_YET +
+							moment(solutionData[0].startDate)
+								.utc()
+								.utcOffset(timeZoneDifference)
+								.add(1, 'minute')
+								.format('ddd, D MMM YYYY, hh:mm A'),
+						result: [],
 					})
 				}
 				response.verified = true
@@ -2802,7 +2817,7 @@ module.exports = class SolutionsHelper {
 				let verifySolution = await this.verifySolutionDetails(link, userId, userToken, userDetails)
 				if (!verifySolution.success) {
 					throw {
-						satus: HTTP_STATUS_CODE.bad_request.status,
+						status: HTTP_STATUS_CODE.bad_request.status,
 						message: verifySolution.message ? verifySolution.message : CONSTANTS.apiResponses.INVALID_LINK,
 					}
 				}

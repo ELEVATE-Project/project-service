@@ -634,15 +634,15 @@ module.exports = class ProjectTemplatesHelper {
 						externalId: templateId,
 						isReusable: true,
 					})
+					if (!projectTemplateData.length > 0) {
+						throw new Error(CONSTANTS.apiResponses.PROJECT_TEMPLATE_NOT_FOUND)
+					}
+
 					// Prepare solution data based on project template
 					const solutionData = {
 						name: projectTemplateData[0].title,
 						programExternalId: programExternalId,
 						externalId: projectTemplateData[0].externalId,
-					}
-
-					if (!projectTemplateData.length > 0) {
-						throw new Error(CONSTANTS.apiResponses.PROJECT_TEMPLATE_NOT_FOUND)
 					}
 
 					// Create a solution for this project template

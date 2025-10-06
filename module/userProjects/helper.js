@@ -5369,7 +5369,7 @@ function _assessmentDetails(assessmentData) {
  * @returns {Object}
  */
 
-function _observationDetails(observationData, userRoleAndProfileInformation = {}, userDetails) {
+function _observationDetails(observationData, userRoleAndProfileInformation = {}) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			let result = {}

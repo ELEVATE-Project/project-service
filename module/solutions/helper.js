@@ -182,6 +182,7 @@ module.exports = class SolutionsHelper {
 	 * @param {Object} userDetails - user related info
 	 * @param {String} tenantId - tenant id
 	 * @param {String} orgId - org id
+	 * @param {Boolean} isExternalProgram - isExternalProgram info
 	 * @returns {JSON} solution creation data.
 	 */
 

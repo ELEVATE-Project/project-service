@@ -5446,7 +5446,7 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
  * @param {Object} userDetails - User details object.
  * @returns {Object}
  */
-function _surveyDetails(surveyData, userRoleAndProfileInformation = {}, userDetails) {
+function _surveyDetails(surveyData, userRoleAndProfileInformation = {}) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			let result = {}
@@ -5476,33 +5476,7 @@ function _surveyDetails(surveyData, userRoleAndProfileInformation = {}, userDeta
 					message: CONSTANTS.apiResponses.SURVEY_NOT_CREATED,
 				}
 			}
-
 			result['surveySubmissionId'] = surveyCreated.data.assessment.submissionId
-
-			// Check if a new survey solution was successfully created
-			if (surveyCreated.data.solution._id) {
-				let fetchSolutionDetails = await surveyService.solutionDocument(
-					surveyCreated.data.solution._id,
-					surveyData.token
-				)
-				// If the solution is marked as "External Program"
-				if (fetchSolutionDetails.isExternalProgram) {
-					// Update the solution by setting "isExternalProgram" to false
-					let updatedSolutionData = await surveyService.updateSolution(
-						surveyData.token,
-						{ isExternalProgram: false },
-						fetchSolutionDetails.externalId,
-						userDetails
-					)
-					// If the update request failed, throw an error response
-					if (!updatedSolutionData.success) {
-						throw {
-							status: HTTP_STATUS_CODE.bad_request.status,
-							message: CONSTANTS.apiResponses.SOLUTION_NOT_UPDATED,
-						}
-					}
-				}
-			}
 			result['solutionId'] = surveyData.solutionDetails._id
 
 			return resolve({

@@ -435,7 +435,7 @@ const programsDocument = function (filterQuery, fieldsArray) {
 }
 
 /**
- * @function programsDocument
+ * @function solutionDocument
  * @description Fetches a specific solution document from the Survey Service API
  *              using the provided solution ID and user authentication token.
  *

@@ -870,7 +870,8 @@ module.exports = class ProjectTemplates extends Abstract {
             {
                 "parentExternalId": "IDE-1747297137661",
                 "_id": "68cbf6d442ed3665bb680149",
-                "externalId": "IDE-1747297137661-1758197460270"
+                "externalId": "IDE-1747297137661-1758197460270",
+                "isReusable": false
             }
         ]
     }

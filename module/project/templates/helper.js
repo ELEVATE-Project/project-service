@@ -676,6 +676,7 @@ module.exports = class ProjectTemplatesHelper {
 						parentExternalId: templateId,
 						_id: duplicateProjectTemplateId.data._id,
 						externalId: duplicateProjectTemplateId.data.externalId,
+						isReusable: duplicateProjectTemplateId.data.isReusable,
 					})
 				}
 
@@ -826,6 +827,7 @@ module.exports = class ProjectTemplatesHelper {
 					data: {
 						_id: duplicateTemplateDocument._id,
 						externalId: newProjectTemplate.externalId,
+						isReusable: newProjectTemplate.isReusable,
 					},
 				})
 			} catch (error) {

@@ -484,6 +484,15 @@ module.exports = class UserExtensionHelper {
 		})
 	}
 
+	/**
+	 * update user extension
+	 * @method
+	 * @name update
+	 * @param {Object} bodyData - program role mapping data
+	 * @param {Object} queryParams - request query parameters
+	 * @returns {Object}
+	 */
+
 	static update(bodyData, queryParams) {
 		return new Promise(async (resolve, reject) => {
 			try {

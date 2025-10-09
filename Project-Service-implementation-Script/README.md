@@ -58,4 +58,3 @@ i. For programTemplate :
         ` python3 main.py --env local --project ProjectTemplate.xlsx`
     -   This command will upload the project data from ProjectTemplate.xlsx to the local environment.
         We have `dev` and `local` as environment.
-

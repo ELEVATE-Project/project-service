@@ -309,4 +309,6 @@ module.exports = {
 	USER_EXTENSION_UPDATE_FAILED: 'User extension update failed',
 	INVALID_MAPPING_DATA: 'Invalid mapping data',
 	INVALID_TENANTID_OR_USERID: 'Invalid tenant-id or user-id',
+	LINK_IS_NOT_ACTIVE_YET: 'The link has not started yet. Please try again from: ',
+	INVALID_MAPPING_DATA: 'Invalid mapping data',
 }

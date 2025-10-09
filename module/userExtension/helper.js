@@ -50,7 +50,7 @@ module.exports = class UserExtensionHelper {
 
 				if (userRolesCSVData.length === 0) {
 					throw {
-						status: httpStatusCode.bad_request.status,
+						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.INVALID_MAPPING_DATA,
 					}
 				}

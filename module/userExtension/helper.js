@@ -501,22 +501,10 @@ module.exports = class UserExtensionHelper {
 
 				// Extract tenant & user information
 				const tenantId = queryParams.tenantId
-				const userId = queryParams.userId
-
-				// Check if program-role mapper is a valid user
-				let { success, data } = (await userService.accountSearch([userId], tenantId)) || {}
-
-				// Throw error
-				if (!success || !data || data.count === 0) {
-					throw {
-						success: false,
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: CONSTANTS.apiResponses.INVALID_TENANTID_OR_USERID,
-					}
-				}
+				const userId = queryParams.userId ? queryParams.userId : 'SYSTEM'
 
 				// Fetch user details from user service
-				;({ success, data } = (await userService.accountSearch(userIds, tenantId)) || {})
+				const { success, data } = (await userService.accountSearch(userIds, tenantId)) || {}
 
 				// Throw error if no valid users returned from service
 				if (!success || !data || data.count === 0) {

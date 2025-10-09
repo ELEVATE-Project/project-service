@@ -27,13 +27,6 @@ module.exports = (req) => {
 				.isString()
 				.withMessage('orgId must be a string')
 
-			req.checkQuery('userId')
-				.exists()
-				.withMessage('user id is required')
-				.notEmpty()
-				.isString()
-				.withMessage('userId must be a string')
-
 			if (Array.isArray(req.body.data)) {
 				req.body.data.forEach((item, index) => {
 					// userId required and should be number

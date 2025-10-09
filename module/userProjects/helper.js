@@ -1297,7 +1297,7 @@ module.exports = class UserProjectsHelper {
 						const getSolutionDetails = {
 							[CONSTANTS.common.ASSESSMENT]: () => _assessmentDetails(assessmentOrObservation),
 							[CONSTANTS.common.OBSERVATION]: () =>
-								_observationDetails(assessmentOrObservation, bodyData, userDetails),
+								_observationDetails(assessmentOrObservation, bodyData),
 							[CONSTANTS.common.IMPROVEMENT_PROJECT]: async () => {
 								// get programTempalteDetails aliong with solutionDetils if task type is improvementProject
 								assessmentOrObservation.projectTemplateDetails = currentTask.projectTemplateDetails
@@ -1309,8 +1309,7 @@ module.exports = class UserProjectsHelper {
 									userDetails
 								)
 							},
-							[CONSTANTS.common.SURVEY]: () =>
-								_surveyDetails(assessmentOrObservation, bodyData, userDetails),
+							[CONSTANTS.common.SURVEY]: () => _surveyDetails(assessmentOrObservation, bodyData),
 						}
 						let fetchSolutions = getSolutionDetails[taskSolutionType]
 

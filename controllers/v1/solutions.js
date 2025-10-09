@@ -492,6 +492,47 @@ module.exports = class Solutions extends Abstract {
 	}
 
 	/**
+  * @api {get} /project/v1/solutions/fetchLinkInternal/:solutionId
+  * @apiVersion 1.0.0
+  * @apiName Get link by solution id
+  * @apiGroup Solutions
+  * @apiSampleRequest /project/v1/solutions/fetchLinkInternal/5fa28620b6bd9b757dc4e932
+  * @apiUse successBody
+  * @apiUse errorBody
+  * @apiParamExample {json} Response:
+  * {
+    "message": "Solution Link generated successfully",
+    "status": 200,
+    "result": "https://dev.sunbirded.org/manage-learn/create-project/38cd93bdb87489c3890fe0ab00e7d406"
+    }
+  */
+
+	/**
+	 * Get link by solution id.
+	 * @method
+	 * @name fetchLinkInternal
+	 * @param {Object} req - requested data.
+	 * @param {String} req.params._id - solution Id
+	 * @returns {Array}
+	 */
+
+	async fetchLinkInternal(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let solutionData = await solutionsHelper.fetchLinkInternal(req.params._id)
+
+				return resolve(solutionData)
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
+				})
+			}
+		})
+	}
+
+	/**
   * @api {post} /project/v1/solutions/verifyLink/:link
   * @apiVersion 1.0.0
   * @apiName verify Link

@@ -69,4 +69,5 @@ module.exports = {
 	PROFILE_READ_BY_ID: '/v1/user/profileById',
 	FIND_ENTITY_DETAILS: '/v1/entities/details',
 	DELETE_SOLUTION_RESOURCE: '/v1/admin/deleteSolutionResource',
+	TENANT_READ_INTERNAL: '/v1/tenant/readInternal',
 }

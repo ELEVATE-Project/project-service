@@ -449,6 +449,72 @@ const fetchTenantDetails = function (tenantId, userToken, aggregateValidOrgs = f
 
 /**
  * Fetches the tenant details for a given tenant ID along with org it is associated with.
+ * @param {string} tenantId - The code/id of the organization.
+ * @param {Boolean} aggregateValidOrgs - boolean value to populate valid orgs from response
+ * @returns {Promise} A promise that resolves with the organization details or rejects with an error.
+ */
+
+const fetchTenantDetailsInternal = function (tenantId, aggregateValidOrgs = false) {
+	return new Promise(async (resolve, reject) => {
+		try {
+			let url =
+				interfaceServiceUrl +
+				process.env.USER_SERVICE_BASE_URL +
+				CONSTANTS.endpoints.TENANT_READ_INTERNAL +
+				'/' +
+				tenantId
+
+			const options = {
+				headers: {
+					'content-type': 'application/json',
+					internal_access_token: process.env.INTERNAL_ACCESS_TOKEN,
+				},
+			}
+			request.get(url, options, userReadCallback)
+			let result = {
+				success: true,
+			}
+			function userReadCallback(err, data) {
+				if (err) {
+					result.success = false
+				} else {
+					let response = JSON.parse(data.body)
+					if (response.responseCode === HTTP_STATUS_CODE['ok'].code) {
+						if (aggregateValidOrgs == true) {
+							if (response.result.organizations && response.result.organizations.length) {
+								// convert the types of items to string
+								let validOrgs = response.result.organizations.map((data) => {
+									return data.code.toString()
+								})
+								result['data'] = validOrgs
+							} else {
+								result['data'] = []
+							}
+						} else {
+							result['data'] = response.result
+						}
+					} else {
+						result.success = false
+					}
+				}
+
+				return resolve(result)
+			}
+			setTimeout(function () {
+				return resolve(
+					(result = {
+						success: false,
+					})
+				)
+			}, CONSTANTS.common.SERVER_TIME_OUT)
+		} catch (error) {
+			return reject(error)
+		}
+	})
+}
+
+/**
+ * Fetches the tenant details for a given tenant ID along with org it is associated with.
  * @param {String} tenantId - tenantId details
  * @returns {Promise} A promise that resolves with the organization details or rejects with an error.
  */
@@ -557,4 +623,5 @@ module.exports = {
 	fetchTenantDetails: fetchTenantDetails,
 	fetchPublicTenantDetails: fetchPublicTenantDetails,
 	getUserProfileByIdentifier: getUserProfileByIdentifier,
+	fetchTenantDetailsInternal: fetchTenantDetailsInternal,
 }

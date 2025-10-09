@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "d9522244-fd29-4a6a-b90e-0f3ccd99de48",
+		"_postman_id": "1feb2e64-e814-4c89-8f92-ae35484c97b8",
 		"name": "Elevate-Project projet-service",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "28589818"
@@ -3239,27 +3239,7 @@
 						"method": "POST",
 						"header": [
 							{
-								"key": "x-auth-token",
-								"value": "",
-								"type": "text"
-							},
-							{
 								"key": "internal-access-token",
-								"value": "",
-								"type": "text"
-							},
-							{
-								"key": "admin-auth-token",
-								"value": "",
-								"type": "text"
-							},
-							{
-								"key": "tenantId",
-								"value": "",
-								"type": "text"
-							},
-							{
-								"key": "orgId",
 								"value": "",
 								"type": "text"
 							}
@@ -3274,9 +3254,23 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/userExtension/update",
+							"raw": "{{baseUrl}}project/v1/userExtension/update?tenantId&orgId&userId",
 							"host": ["{{baseUrl}}project"],
-							"path": ["v1", "userExtension", "update"]
+							"path": ["v1", "userExtension", "update"],
+							"query": [
+								{
+									"key": "tenantId",
+									"value": null
+								},
+								{
+									"key": "orgId",
+									"value": null
+								},
+								{
+									"key": "userId",
+									"value": null
+								}
+							]
 						}
 					},
 					"response": []

@@ -12339,7 +12339,7 @@ paths:
         description: This is orgId used to create resources
         schema: *ref_68
         required: true
-  /v1/userExtension/update:
+  /v1/userExtension/update?tenantId={{tenantId}}&orgId={{orgId}}&userId={{userId}}:
     post:
       description: ''
       operationId: ''
@@ -12452,30 +12452,44 @@ paths:
                         - org_admin
     parameters:
       - in: header
-        name: x-auth-token
-        description: loggedin user token
+        name: internal-access-token
+        description: internal access token of the service
+        schema:
+          type: string
+        required: true
+      - in: query
+        name: tenantId
+        description: tenantid of the prorgram manager
         schema: &ref_69
           type: string
         required: true
-      - in: header
-        name: internal-access-token
-        description: internal access token of the service
+      - in: query
+        name: userId
+        description: userId
         schema: *ref_69
         required: true
-      - in: header
-        name: admin-auth-token
-        description: admin authentication token
-        schema: *ref_69
-        required: true
-      - in: header
-        name: tenantId
-        description: tenant id of the loggedin user
-        schema: *ref_69
-        required: true
-      - in: header
+      - in: query
         name: orgId
-        description: org id of the loggedin user
+        description: orgId of the program manager
         schema: *ref_69
         required: true
+      - name: '{tenantId'
+        in: path
+        required: true
+        schema:
+          type: string
+        description: ''
+      - name: '{orgId'
+        in: path
+        required: true
+        schema:
+          type: string
+        description: ''
+      - name: '{userId'
+        in: path
+        required: true
+        schema:
+          type: string
+        description: ''
 components:
   securitySchemes: {}

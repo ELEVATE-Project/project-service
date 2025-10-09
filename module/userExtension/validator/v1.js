@@ -12,6 +12,28 @@ module.exports = (req) => {
 				(data) => Array.isArray(data) && data.length > 0
 			)
 
+			// Validate query parameters
+			req.checkQuery('tenantId')
+				.exists()
+				.withMessage('tenant id is required')
+				.notEmpty()
+				.isString()
+				.withMessage('tenantId must be a string')
+
+			req.checkQuery('orgId')
+				.exists()
+				.withMessage('org id is required')
+				.notEmpty()
+				.isString()
+				.withMessage('orgId must be a string')
+
+			req.checkQuery('userId')
+				.exists()
+				.withMessage('user id is required')
+				.notEmpty()
+				.isString()
+				.withMessage('userId must be a string')
+
 			if (Array.isArray(req.body.data)) {
 				req.body.data.forEach((item, index) => {
 					// userId required and should be number

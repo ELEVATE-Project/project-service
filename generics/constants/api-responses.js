@@ -308,4 +308,5 @@ module.exports = {
 	USER_EXTENSION_UPDATED: 'User extension updated successfully',
 	USER_EXTENSION_UPDATE_FAILED: 'User extension update failed',
 	INVALID_MAPPING_DATA: 'Invalid mapping data',
+	INVALID_TENANTID_OR_USERID: 'Invalid tenant-id or user-id',
 }

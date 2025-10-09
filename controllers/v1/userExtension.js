@@ -91,7 +91,7 @@ module.exports = class UserExtension extends Abstract {
 	 */
 
 	/**
-	* @api {post} /project/v1/userExtension/update
+	* @api {post} /project/v1/userExtension/update?tenantId=shikshalokam&orgId=mys&userId=1
 	* @apiVersion 1.0.0
 	* @apiName update
 	* @apiGroup User Extension
@@ -148,7 +148,7 @@ module.exports = class UserExtension extends Abstract {
 	update(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				const updateUserExtension = await userExtensionHelper.update(req.body.data, req.userDetails)
+				const updateUserExtension = await userExtensionHelper.update(req.body.data, req.query)
 				return resolve(updateUserExtension)
 			} catch (error) {
 				return reject({

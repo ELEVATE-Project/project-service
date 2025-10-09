@@ -80,6 +80,11 @@ tags:
     externalDocs:
       description: ''
       url: ''
+  - name: userExtension
+    description: ''
+    externalDocs:
+      description: ''
+      url: ''
 paths:
   /v1/project/templates/bulkCreate:
     post:
@@ -12334,5 +12339,157 @@ paths:
         description: This is orgId used to create resources
         schema: *ref_68
         required: true
+  /v1/userExtension/update?tenantId={{tenantId}}&orgId={{orgId}}&userId={{userId}}:
+    post:
+      description: ''
+      operationId: ''
+      tags:
+        - userExtension
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: number
+                  result:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        success:
+                          type: boolean
+                        message:
+                          type: string
+                        userId:
+                          type: number
+                        _id:
+                          type: string
+                        programId:
+                          type: string
+                        roles:
+                          type: array
+                          items:
+                            type: string
+              examples:
+                example1:
+                  value:
+                    message: User extension updated successfully
+                    status: 200
+                    result:
+                      - success: true
+                        message: User extension updated successfully
+                        userId: 456
+                        _id: 68d624bcb29ba75de094634e
+                        programId: 6825a30dc407a50014b6a73f
+                        roles:
+                          - org_admin
+                          - mentee
+        '400':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  message:
+                    type: string
+              examples:
+                example1:
+                  value:
+                    status: 400
+                    message: User extension update failed
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      userId:
+                        type: number
+                      programId:
+                        type: string
+                      operation:
+                        type: string
+                      roles:
+                        type: array
+                        items:
+                          type: string
+                    required:
+                      - userId
+                      - programId
+                      - operation
+                      - roles
+            examples:
+              example1:
+                value:
+                  data:
+                    - userId: 1
+                      programId: 686e16212cb81c0014a49111
+                      operation: append
+                      roles:
+                        - program_manager
+                    - userId: 456
+                      programId: 6825a30dc407a50014b6a73f
+                      operation: append
+                      roles:
+                        - program_manager
+                        - mentee
+                        - org_admin
+    parameters:
+      - in: header
+        name: internal-access-token
+        description: internal access token of the service
+        schema:
+          type: string
+        required: true
+      - in: query
+        name: tenantId
+        description: tenantid of the prorgram manager
+        schema: &ref_69
+          type: string
+        required: true
+      - in: query
+        name: userId
+        description: userId
+        schema: *ref_69
+        required: true
+      - in: query
+        name: orgId
+        description: orgId of the program manager
+        schema: *ref_69
+        required: true
+      - name: '{tenantId'
+        in: path
+        required: true
+        schema:
+          type: string
+        description: ''
+      - name: '{orgId'
+        in: path
+        required: true
+        schema:
+          type: string
+        description: ''
+      - name: '{userId'
+        in: path
+        required: true
+        schema:
+          type: string
+        description: ''
 components:
   securitySchemes: {}

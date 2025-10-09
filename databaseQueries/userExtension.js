@@ -89,7 +89,7 @@ module.exports = class UserExtension {
 	 * @returns {Array} userExtension details.
 	 */
 
-	static findAndUpdate(filterData = 'all', setData, returnData = { new: false }) {
+	static findAndUpdate(filterData = 'all', setData, returnData = { new: false, rawResult: false }) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let queryObject = filterData != 'all' ? filterData : {}

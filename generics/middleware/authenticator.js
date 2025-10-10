@@ -108,7 +108,7 @@ module.exports = async function (req, res, next, token = '') {
 		'/programs/removeSolutions',
 		'/organizationExtension/createOrUpdate',
 		'/organizationExtension/updateRelatedOrgs',
-		'solutions/fetchLinkInternal',
+		'/solutions/fetchLinkInternal',
 	]
 	let performInternalAccessTokenCheck = false
 	let adminHeader = false

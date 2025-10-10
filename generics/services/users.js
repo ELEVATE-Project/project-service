@@ -470,11 +470,11 @@ const fetchTenantDetailsInternal = function (tenantId, aggregateValidOrgs = fals
 					internal_access_token: process.env.INTERNAL_ACCESS_TOKEN,
 				},
 			}
-			request.get(url, options, userReadCallback)
+			request.get(url, options, userTenantDetailsCallback)
 			let result = {
 				success: true,
 			}
-			function userReadCallback(err, data) {
+			function userTenantDetailsCallback(err, data) {
 				if (err) {
 					result.success = false
 				} else {

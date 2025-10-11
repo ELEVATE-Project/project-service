@@ -17,6 +17,9 @@ module.exports = async function (req, res, next) {
 		'userProjects/details',
 		'users/solutions',
 	]
+	let normalUserPath = ['/programs/publishToLibrary', '/programs/ProgramUpdateForLibrary']
+
+	let addTeanntAndOrgDetails = false
 
 	let performTenantAndOrgCheck = false
 
@@ -28,11 +31,24 @@ module.exports = async function (req, res, next) {
 		})
 	)
 
+	await Promise.all(
+		normalUserPath.map(async function (path) {
+			if (req.path.includes(path)) {
+				addTeanntAndOrgDetails = true
+			}
+		})
+	)
+
 	if (performTenantAndOrgCheck) {
 		req.body['tenantId'] = req.userDetails.userInformation.tenantId
 		req.body['organizations'] = [UTILS.lowerCase(req.userDetails.userInformation.organizationId)]
 	}
 
+	if (addTeanntAndOrgDetails) {
+		req.userDetails.tenantAndOrgInfo = {}
+		req.userDetails.tenantAndOrgInfo.tenantId = req.userDetails.userInformation.tenantId
+		req.userDetails.tenantAndOrgInfo.orgId = [req.userDetails.userInformation.organizationId]
+	}
 	next()
 	return
 }

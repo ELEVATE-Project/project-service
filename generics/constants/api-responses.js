@@ -308,4 +308,5 @@ module.exports = {
 	INVALID_MAPPING_DATA: 'Invalid mapping data',
 	LINK_IS_NOT_ACTIVE_YET: 'The link has not started yet. Please try again from: ',
 	INVALID_MAPPING_DATA: 'Invalid mapping data',
+	PARTIAL_CHILD_PROJECT_TEMPLATES_CREATED: 'Partial Child Project Template Created',
 }

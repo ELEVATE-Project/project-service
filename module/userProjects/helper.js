@@ -3036,7 +3036,7 @@ module.exports = class UserProjectsHelper {
 	 * @param {String} language - language code
 	 * @param {Object} userDetails - loggedin user's info
 	 * @returns {Object} Project created information.
-	 * @param {Boolean} isExternalProgram - Flag to check if it is an external program.
+	 * @param {Boolean} isExternalProgram - Flag to check if it is an external program (If true then program is present in survey service.If false program is present in project service).
 	 */
 
 	static importFromLibrary(
@@ -5364,7 +5364,6 @@ function _assessmentDetails(assessmentData) {
  * @name _observationDetails
  * @param {Object} observationData - Observation data.
  * @param {Object} userRoleAndProfileInformation -req body Data
- * @param {Object} userDetails - User details object.
  * @returns {Object}
  */
 
@@ -5442,7 +5441,6 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
  * @name _surveyDetails
  * @param {Object} surveyData - survey data.
  * @param {Object} userRoleAndProfileInformation -req body Data
- * @param {Object} userDetails - User details object.
  * @returns {Object}
  */
 function _surveyDetails(surveyData, userRoleAndProfileInformation = {}) {

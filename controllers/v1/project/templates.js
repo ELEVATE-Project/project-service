@@ -844,7 +844,12 @@ module.exports = class ProjectTemplates extends Abstract {
      * @api {post} /project/v1/project/templates/createChildProjectTemplate?isExternalProgram=true&programExternalId=AWS_Prog_MYS_may192
 	 * @description Handles the creation of child project templates by delegating to the helper function.
 	 *              Extracts necessary data from the request object and returns the service response.
-	 *
+	 * This API:
+     * 1. Fetches each project template scoped to the authenticated user's tenant org.
+     * 2. Creates a new Solution entry for each fetched project template, associated with the provided `programExternalId`.
+     * 3. Imports and duplicates the fetched Project Template into the newly created solution.
+     * 4. Returns the mapping of parent template externalIds to the newly created (child) template IDs.
+     *
 	 * @param {Object} req - Express request object.
 	 * @param {Array<string>} req.body.projectTemplateExternalIds - Array of project template external IDs to duplicate.
 	 * @param {Object} req.userDetails - Information about the authenticated user.
@@ -859,21 +864,38 @@ module.exports = class ProjectTemplates extends Abstract {
 	 * @apiParamExample {json} Response:
      * {
         "projectTemplateExternalIds": [
-            "IDE-1747297137661"
-        ]
+                "IDE-1747297137661",
+                "IDE-1747297530253",
+                "IDE-1747326100274"
+            ]
     }
     *@apiParamExample {json} Response:
 	 * {
-        "message": "Successfully created duplicate project templates",
-        "status": 200,
-        "result": [
+    "message": "Successfully created duplicate project templates",
+    "status": 200,
+    "result": {
+        "successfulTemplates": [
             {
                 "parentExternalId": "IDE-1747297137661",
-                "_id": "68cbf6d442ed3665bb680149",
-                "externalId": "IDE-1747297137661-1758197460270",
+                "_id": "68ebe09ff17e2f28c3b8c818",
+                "externalId": "IDE-1747297137661-1760288927495",
+                "isReusable": false
+            },
+            {
+                "parentExternalId": "IDE-1747297530253",
+                "_id": "68ebe09ff17e2f28c3b8c829",
+                "externalId": "IDE-1747297530253-1760288927644",
+                "isReusable": false
+            },
+            {
+                "parentExternalId": "IDE-1747326100274",
+                "_id": "68ebe09ff17e2f28c3b8c83a",
+                "externalId": "IDE-1747326100274-1760288927770",
                 "isReusable": false
             }
-        ]
+        ],
+        "failedTemplates": []
+    }
     }
 	 */
 	async createChildProjectTemplate(req) {

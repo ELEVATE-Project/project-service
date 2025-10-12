@@ -626,64 +626,85 @@ module.exports = class ProjectTemplatesHelper {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let responseData = []
-				// Loop through each project template ID and create its duplicate
+				let failedTemplates = []
+
 				for (const templateId of projectTemplateExternalIds) {
-					// Fetch project template document
-					let projectTemplateData = await projectTemplateQueries.templateDocument({
-						status: CONSTANTS.common.PUBLISHED,
-						externalId: templateId,
-						isReusable: true,
-					})
-					if (!projectTemplateData.length > 0) {
-						throw new Error(CONSTANTS.apiResponses.PROJECT_TEMPLATE_NOT_FOUND)
+					try {
+						let projectTemplateData = await projectTemplateQueries.templateDocument({
+							status: CONSTANTS.common.PUBLISHED,
+							externalId: templateId,
+							isReusable: true,
+						})
+						if (!projectTemplateData?.length) {
+							throw new Error(CONSTANTS.apiResponses.PROJECT_TEMPLATE_NOT_FOUND)
+						}
+
+						// Prepare solution data based on project template
+						const solutionData = {
+							name: projectTemplateData[0].title,
+							programExternalId: programExternalId,
+							externalId: projectTemplateData[0].externalId,
+						}
+
+						// Create a solution for this project template
+						let createdSolution = await solutionsHelper.createSolution(
+							solutionData,
+							true,
+							userDetails,
+							isExternalProgram
+						)
+
+						if (!createdSolution?.result?._id) {
+							throw new Error(CONSTANTS.apiResponses.SOLUTION_NOT_CREATED)
+						}
+
+						// Import project template into the newly created solution
+						let duplicateProjectTemplateId = await this.importProjectTemplate(
+							templateId,
+							userDetails.userInformation.userId,
+							userDetails.userToken,
+							createdSolution.result._id,
+							{},
+							userDetails
+						)
+
+						if (!duplicateProjectTemplateId?.success || !duplicateProjectTemplateId?.data?._id) {
+							throw new Error(CONSTANTS.apiResponses.DUPLICATE_PROJECT_TEMPLATES_NOT_CREATED)
+						}
+
+						// Add success
+						responseData.push({
+							parentExternalId: templateId,
+							_id: duplicateProjectTemplateId.data._id,
+							externalId: duplicateProjectTemplateId.data.externalId,
+							isReusable: duplicateProjectTemplateId.data.isReusable,
+						})
+					} catch (innerError) {
+						// Continue even if one fails
+						failedTemplates.push({
+							parentExternalId: templateId,
+							error: innerError.message,
+						})
 					}
+				}
 
-					// Prepare solution data based on project template
-					const solutionData = {
-						name: projectTemplateData[0].title,
-						programExternalId: programExternalId,
-						externalId: projectTemplateData[0].externalId,
-					}
-
-					// Create a solution for this project template
-					let createdSolution = await solutionsHelper.createSolution(
-						solutionData,
-						true,
-						userDetails,
-						isExternalProgram
-					)
-
-					if (!createdSolution?.result?._id) {
-						throw new Error(CONSTANTS.apiResponses.SOLUTION_NOT_CREATED)
-					}
-
-					// Import project template into the newly created solution
-					let duplicateProjectTemplateId = await this.importProjectTemplate(
-						templateId,
-						userDetails.userInformation.userId,
-						userDetails.userToken,
-						createdSolution.result._id,
-						{},
-						userDetails
-					)
-
-					if (!duplicateProjectTemplateId?.success || !duplicateProjectTemplateId?.data?._id) {
-						throw new Error(CONSTANTS.apiResponses.DUPLICATE_PROJECT_TEMPLATES_NOT_CREATED)
-					}
-
-					// Push duplicate template mapping to response
-					responseData.push({
-						parentExternalId: templateId,
-						_id: duplicateProjectTemplateId.data._id,
-						externalId: duplicateProjectTemplateId.data.externalId,
-						isReusable: duplicateProjectTemplateId.data.isReusable,
-					})
+				// Determine final message
+				let message = ''
+				if (responseData.length && failedTemplates.length) {
+					message = CONSTANTS.apiResponses.PARTIAL_CHILD_PROJECT_TEMPLATES_CREATED
+				} else if (responseData.length && !failedTemplates.length) {
+					message = CONSTANTS.apiResponses.DUPLICATE_PROJECT_TEMPLATES_CREATED
+				} else {
+					message = CONSTANTS.apiResponses.FAILED_TO_CREATE_TEMPLATE
 				}
 
 				return resolve({
-					success: true,
-					message: CONSTANTS.apiResponses.DUPLICATE_PROJECT_TEMPLATES_CREATED,
-					data: responseData,
+					success: responseData.length > 0,
+					message,
+					data: {
+						successfulTemplates: responseData,
+						failedTemplates: failedTemplates,
+					},
 				})
 			} catch (error) {
 				return resolve({

@@ -71,4 +71,5 @@ module.exports = {
 	DELETE_SOLUTION_RESOURCE: '/v1/admin/deleteSolutionResource',
 	FETCH_PROGRAM_DOCUMENT: '/v1/programs/fetchProgramDetails',
 	FETCH_SOLUTION_DOCUMENT: '/v1/solutions/getDetails',
+	ACCOUNT_SEARCH: '/v1/account/search',
 }

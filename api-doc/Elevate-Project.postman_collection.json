@@ -1,7 +1,7 @@
 {
 	"info": {
-		"_postman_id": "dea055fe-c3bb-44e5-9784-894633cf26b0",
-		"name": "Elevate-Project Copy",
+		"_postman_id": "1feb2e64-e814-4c89-8f92-ae35484c97b8",
+		"name": "Elevate-Project projet-service",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "28589818"
 	},
@@ -3229,6 +3229,48 @@
 							"raw": "{{baseUrl}}/v1/userExtension/bulkUpload",
 							"host": ["{{baseUrl}}"],
 							"path": ["v1", "userExtension", "bulkUpload"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "internal-access-token",
+								"value": "",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data\": [\n        {\n            \"userId\": 1,\n            \"programId\": \"686e16212cb81c0014a49111\",\n            \"operation\": \"append\",\n            \"roles\": [\n                \"program_manager\"\n            ]\n        },\n        {\n            \"userId\": 456,\n            \"programId\": \"6825a30dc407a50014b6a73f\",\n            \"operation\": \"append\",\n            \"roles\": [\n                \"program_manager\",\n                \"mentee\",\n                \"org_admin\"\n            ]\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}project/v1/userExtension/update?tenantId&orgId&userId",
+							"host": ["{{baseUrl}}project"],
+							"path": ["v1", "userExtension", "update"],
+							"query": [
+								{
+									"key": "tenantId",
+									"value": null
+								},
+								{
+									"key": "orgId",
+									"value": null
+								},
+								{
+									"key": "userId",
+									"value": null
+								}
+							]
 						}
 					},
 					"response": []

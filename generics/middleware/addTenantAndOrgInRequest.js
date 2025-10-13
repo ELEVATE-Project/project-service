@@ -17,7 +17,7 @@ module.exports = async function (req, res, next) {
 		'userProjects/details',
 		'users/solutions',
 	]
-	let normalUserPath = ['/programs/publishToLibrary', '/programs/ProgramUpdateForLibrary']
+	let normalUserInternalAccessPath = ['/programs/publishToLibrary', '/programs/ProgramUpdateForLibrary']
 
 	let addTenantAndOrgDetails = false
 
@@ -32,7 +32,7 @@ module.exports = async function (req, res, next) {
 	)
 
 	await Promise.all(
-		normalUserPath.map(async function (path) {
+		normalUserInternalAccessPath.map(async function (path) {
 			if (req.path.includes(path)) {
 				addTenantAndOrgDetails = true
 			}

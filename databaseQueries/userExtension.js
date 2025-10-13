@@ -139,6 +139,24 @@ module.exports = class UserExtension {
 	}
 
 	/**
+	 * Delete userExtension documents based on the provided MongoDB filter.
+	 *
+	 * @param {Object} filter - MongoDB query filter to match documents for deletion.
+	 * @returns {Promise<Object>} - MongoDB deleteMany result containing deleted count.
+	 */
+	static delete(filter) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let deleteDocuments = await database.models.userExtension.deleteMany(filter)
+
+				return resolve(deleteDocuments)
+			} catch (error) {
+				return reject(error)
+			}
+		})
+	}
+
+	/**
 	 * Remove entries from `programRoleMapping` array where programId matches the given ID,
 	 * across all userExtension documents.
 	 *

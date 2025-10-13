@@ -359,7 +359,7 @@ module.exports = class Programs extends Abstract {
 				let programCreationData = await programsHelper.create(
 					req.body,
 					req.userDetails.userInformation.userId,
-					true, //this is true for when its called via API calls
+					false, //this is true for when its called via API calls
 					req.userDetails
 				)
 

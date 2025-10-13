@@ -700,6 +700,7 @@ module.exports = class ProjectTemplatesHelper {
 					message = CONSTANTS.apiResponses.FAILED_TO_CREATE_TEMPLATE
 				}
 
+				// If anythings fail in between this logic will revert back those created data
 				if (failedTemplates.length > 0) {
 					for (const _id of solutionIdsToDelete) {
 						await adminHelper.deletedResourceDetails(
@@ -707,7 +708,7 @@ module.exports = class ProjectTemplatesHelper {
 							CONSTANTS.common.SOLUTION,
 							userDetails.tenantAndOrgInfo.tenantId,
 							userDetails.tenantAndOrgInfo[0],
-							userDetails.userInformation
+							userDetails.userInformation.userId
 						)
 					}
 				}

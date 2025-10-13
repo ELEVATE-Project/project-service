@@ -816,6 +816,7 @@ module.exports = class UserExtensionHelper {
 				}
 
 				// Step 3: Iterate and process removals
+				// For each program entry, filter out removed roles and prepare Kafka messages
 				for (const programEntry of userExtensionDoc.programRoleMapping || []) {
 					const currentRoles = programEntry.roles || []
 					const remainingRoles = currentRoles.filter((role) => !removedRoles.includes(role))

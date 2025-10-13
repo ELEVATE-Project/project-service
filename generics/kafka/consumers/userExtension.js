@@ -2,10 +2,135 @@
  * name : userExtension.js
  * author : Vishnu
  * created-date : 13-Oct-2025
- * Description :  consumer for user extension related change events.
+ * Description :  consumer for user extension related event capture.
  */
 // module dependencies
 const userExtensionHelper = require(MODULES_BASE_PATH + '/userExtension/helper')
+
+/**
+ * Sample Kafka message which will be processed by this consumer
+ * {
+  "entity": "user",
+  "eventType": "update",
+  "entityId": 1634,
+  "oldValues": {
+    "id": 1634,
+    "email": "2a6f1d34e5cba6c3b55c7f9d4f80a9d7dfc0d12af3b9045e9e4c14c229f9b87a1c3a9f8b3c2b7e8c1f8b3a7e4f2c9b8d1",
+    "email_verified": false,
+    "name": "Nevil Mathew",
+    "username": "nevil.mathew_x4d8ph",
+    "phone": null,
+    "phone_code": null,
+    "location": null,
+    "about": null,
+    "share_link": null,
+    "status": "ACTIVE",
+    "image": null,
+    "has_accepted_terms_and_conditions": false,
+    "languages": null,
+    "preferred_language": "en",
+    "custom_entity_text": null,
+    "tenant_code": "default",
+    "meta": null,
+    "created_at": "2025-09-29T19:28:04.526Z",
+    "updated_at": "2025-09-29T19:28:04.526Z",
+    "deleted_at": null,
+    "organizations": [
+      {
+        "id": 1,
+        "name": "MentorEd",
+        "code": "default_code",
+        "description": "Organization for the default tenant",
+        "status": "ACTIVE",
+        "related_orgs": [],
+        "tenant_code": "default",
+        "meta": null,
+        "created_by": null,
+        "updated_by": 1,
+        "roles": [
+          {
+            "id": 5,
+            "title": "mentee",
+            "label": "Mentee Role",
+            "user_type": 0,
+            "status": "ACTIVE",
+            "organization_id": 1,
+            "visibility": "PUBLIC",
+            "tenant_code": "default",
+            "translations": null
+          },
+          {
+            "id": 7,
+            "title": "org_admin",
+            "label": "Organization Administrator",
+            "user_type": 1,
+            "status": "ACTIVE",
+            "organization_id": 1,
+            "visibility": "PUBLIC",
+            "tenant_code": "default",
+            "translations": null
+          }
+        ]
+      }
+    ]
+  },
+  "newValues": {
+    "organizations": [
+      {
+        "id": 1,
+        "name": "MentorEd",
+        "code": "default_code",
+        "description": "Organization for the default tenant",
+        "status": "ACTIVE",
+        "related_orgs": [],
+        "tenant_code": "default",
+        "meta": null,
+        "created_by": null,
+        "updated_by": 1,
+        "roles": [
+          {
+            "id": 4,
+            "title": "mentor",
+            "label": "Mentor Role",
+            "user_type": 0,
+            "status": "ACTIVE",
+            "organization_id": 1,
+            "visibility": "PUBLIC",
+            "tenant_code": "default",
+            "translations": null
+          },
+          {
+            "id": 5,
+            "title": "mentee",
+            "label": "Mentee Role",
+            "user_type": 0,
+            "status": "ACTIVE",
+            "organization_id": 1,
+            "visibility": "PUBLIC",
+            "tenant_code": "default",
+            "translations": null
+          },
+          {
+            "id": 7,
+            "title": "org_admin",
+            "label": "Organization Administrator",
+            "user_type": 1,
+            "status": "ACTIVE",
+            "organization_id": 1,
+            "visibility": "PUBLIC",
+            "tenant_code": "default",
+            "translations": null
+          }
+        ]
+      }
+    ]
+  },
+  "created_at": "2025-09-29T19:28:04.526Z",
+  "updated_at": "2025-09-29T19:28:04.526Z"
+}
+
+
+ */
 
 /**
  * consumer message received.

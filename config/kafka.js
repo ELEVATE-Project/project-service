@@ -123,6 +123,7 @@ var _sendToKafkaConsumers = function (topic, host) {
 			if (error.topics && error.topics[0] === SUBMISSION_TOPIC) {
 				submissionsConsumer.errorTriggered(error)
 			}
+
 			if (error.topics && error.topics[0] === CERTIFICATE_TOPIC) {
 				projectCertificateConsumer.errorTriggered(error)
 			}
@@ -130,9 +131,15 @@ var _sendToKafkaConsumers = function (topic, host) {
 			if (error.topics && error.topics[0] === USER_DELETE_TOPIC) {
 				userDeleteConsumer.errorTriggered(error)
 			}
+
 			if (error.topics && error.topics[0] === COURSES_TOPIC) {
 				userCoursesConsumer.errorTriggered(error)
 			}
+
+			if (error.topics && error.topics[0] === ORG_EXTENSION_TOPIC) {
+				organizationExtensionConsumer.errorTriggered(error)
+			}
+
 			if (error.topics && error.topics[0] === USER_ACCOUNT_EVENT_TOPIC) {
 				userExtensionConsumer.errorTriggered(error)
 			}

@@ -35,6 +35,7 @@ const solutionsUtils = require(GENERICS_FILES_PATH + '/helpers/solutionAndProjec
 const entitiesService = require(GENERICS_FILES_PATH + '/services/entity-management')
 const solutionsHelper = require(MODULES_BASE_PATH + '/solutions/helper')
 const orgExtensionQueries = require(DB_QUERY_BASE_PATH + '/organizationExtension')
+const adminHelper = require(MODULES_BASE_PATH + '/admin/helper')
 
 module.exports = class ProjectTemplatesHelper {
 	/**
@@ -627,7 +628,7 @@ module.exports = class ProjectTemplatesHelper {
 			try {
 				let responseData = []
 				let failedTemplates = []
-
+				let solutionIdsToDelete = []
 				for (const templateId of projectTemplateExternalIds) {
 					try {
 						let projectTemplateData = await projectTemplateQueries.templateDocument({
@@ -657,7 +658,8 @@ module.exports = class ProjectTemplatesHelper {
 						if (!createdSolution?.result?._id) {
 							throw new Error(CONSTANTS.apiResponses.SOLUTION_NOT_CREATED)
 						}
-
+						// Store solution ID
+						solutionIdsToDelete.push(createdSolution.result._id)
 						// Import project template into the newly created solution
 						let duplicateProjectTemplateId = await this.importProjectTemplate(
 							templateId,
@@ -696,6 +698,18 @@ module.exports = class ProjectTemplatesHelper {
 					message = CONSTANTS.apiResponses.DUPLICATE_PROJECT_TEMPLATES_CREATED
 				} else {
 					message = CONSTANTS.apiResponses.FAILED_TO_CREATE_TEMPLATE
+				}
+
+				if (failedTemplates.length > 0) {
+					for (const _id of solutionIdsToDelete) {
+						await adminHelper.deletedResourceDetails(
+							_id,
+							CONSTANTS.common.SOLUTION,
+							userDetails.tenantAndOrgInfo.tenantId,
+							userDetails.tenantAndOrgInfo[0],
+							userDetails.userInformation
+						)
+					}
 				}
 
 				return resolve({

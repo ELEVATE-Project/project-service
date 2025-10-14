@@ -32,7 +32,12 @@ const messageReceived = function (message) {
 				}
 
 				// If the event type is UPDATE, call adminHelper to handle update logic
-				if (parsedMessage.body.eventType === CONSTANTS.common.UPDATE_EVENT_TYPE) {
+				if (
+					parsedMessage.body.eventType === CONSTANTS.common.UPDATE_EVENT_TYPE &&
+					parsedMessage.body.newValues &&
+					parsedMessage.body.newValues.related_org_details
+				) {
+					parsedMessage.body.related_org_details = parsedMessage.body.newValues.related_org_details
 					await orgExtensionHelper.updateRelatedOrgs(parsedMessage)
 				}
 			}

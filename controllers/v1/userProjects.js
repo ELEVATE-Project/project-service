@@ -1503,6 +1503,35 @@ module.exports = class UserProjects extends Abstract {
 	}
 
 	/**
+     * @api {get} /v1/userProjects/addEntity/:_id={{projectId}}
+     * @apiVersion 1.0.0
+     * @apiName Add Entity
+     * @apiHeader {String} X-auth-token Authenticity token
+     * @apiSampleRequest /v1/userProjects/addEntity/68d38c9f69f139b91c9e57b8
+     * @apiSampleRequest {json} Request
+     * {
+            "entityId": "687a66c07f4bcd29a40c908d"
+        }
+     * @apiUse successBody
+     * @apiParamExample {json} Response:
+        {
+            "success" : true,
+            "message" : "Entity added to project successfully",
+            "result" : {
+                "projectId" : "68d38c9f69f139b91c9e57b8",
+                "entityInformation" : {
+                    "_id" : "687a66c07f4bcd29a40c908d",
+                    "entityType" : "school",
+                    "entityTypeId" : "687e96c01f4bce29a40c178h",
+                    "entityId" : "687a66c07f4bcd29a40c908d",
+                    "externalId" : "school-17384712438",
+                    "entityName" : "GOVT HIGH SCHOOL Gulbarga"
+                }
+            }
+        }
+    */
+
+	/**
 	 * Add entities in project.
 	 * @method
 	 * @name addEntity

@@ -230,6 +230,11 @@ let enviromentVariables = {
 		optional: true,
 		default: 'elevate_project_org_extension_event_listener',
 	},
+	USER_ACCOUNT_EVENT_TOPIC: {
+		message: 'Required USER_ACCOUNT_EVENT_TOPIC',
+		optional: true,
+		default: 'elevate_user_account_event_listener',
+	},
 }
 
 let success = true

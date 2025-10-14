@@ -153,7 +153,7 @@ const messageReceived = function (message) {
 			) {
 				const { eventType, oldValues = {}, newValues = {} } = parsedMessage
 				// Handle only UPDATE events
-				if (eventType === CONSTANTS.common.UPDATE_EVENT_TYPE) {
+				if (eventType === CONSTANTS.common.UPDATE_EVENT_TYPE || eventType === 'bulk-update') {
 					let removedRoleTitles = []
 					const oldOrganizations = oldValues.organizations || []
 					const newOrganizations = newValues.organizations || []

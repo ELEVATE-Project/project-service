@@ -644,7 +644,8 @@ module.exports = class ProjectTemplatesHelper {
 						const solutionData = {
 							name: projectTemplateData[0].title,
 							programExternalId: programExternalId,
-							externalId: projectTemplateData[0].externalId,
+							externalId: projectTemplateData[0].externalId + UTILS.generateUniqueId(),
+							referenceFrom: CONSTANTS.common.OBSERVATION,
 						}
 
 						// Create a solution for this project template

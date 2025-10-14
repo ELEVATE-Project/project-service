@@ -312,4 +312,7 @@ module.exports = {
 	LINK_IS_NOT_ACTIVE_YET: 'The link has not started yet. Please try again from: ',
 	INVALID_MAPPING_DATA: 'Invalid mapping data',
 	PARTIAL_CHILD_PROJECT_TEMPLATES_CREATED: 'Partial Child Project Template Created',
+	SOLUTION_RESOURCE_DELETED: 'Solution and associated resources deleted successfull',
+	PROGRAM_RESOURCE_DELETED: 'Program and associated resources deleted successfull',
+	INVALID_RESOURCE_TYPE: 'Invalid Resource Type',
 }

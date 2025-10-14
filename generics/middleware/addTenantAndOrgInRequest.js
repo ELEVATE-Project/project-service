@@ -17,6 +17,9 @@ module.exports = async function (req, res, next) {
 		'userProjects/details',
 		'users/solutions',
 	]
+	let normalUserInternalAccessPath = ['/programs/publishToLibrary', '/programs/ProgramUpdateForLibrary']
+
+	let addTenantAndOrgDetails = false
 
 	let performTenantAndOrgCheck = false
 
@@ -28,11 +31,25 @@ module.exports = async function (req, res, next) {
 		})
 	)
 
+	await Promise.all(
+		normalUserInternalAccessPath.map(async function (path) {
+			if (req.path.includes(path)) {
+				addTenantAndOrgDetails = true
+			}
+		})
+	)
+
 	if (performTenantAndOrgCheck) {
 		req.body['tenantId'] = req.userDetails.userInformation.tenantId
 		req.body['organizations'] = [UTILS.lowerCase(req.userDetails.userInformation.organizationId)]
 	}
 
+	// If the user is normal which doesn't have admin and system admin role then this logic will help to assign tenantAndOrgInfo
+	if (addTenantAndOrgDetails) {
+		req.userDetails.tenantAndOrgInfo = {}
+		req.userDetails.tenantAndOrgInfo.tenantId = req.userDetails.userInformation.tenantId
+		req.userDetails.tenantAndOrgInfo.orgId = [req.userDetails.userInformation.organizationId]
+	}
 	next()
 	return
 }

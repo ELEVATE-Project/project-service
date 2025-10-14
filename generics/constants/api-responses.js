@@ -311,4 +311,7 @@ module.exports = {
 	INVALID_TENANTID_OR_USERID: 'Invalid tenant-id or user-id',
 	LINK_IS_NOT_ACTIVE_YET: 'The link has not started yet. Please try again from: ',
 	INVALID_MAPPING_DATA: 'Invalid mapping data',
+	SKIPPING_EVENT_PROCESSING: 'Skipping event processing as no relevant changes found',
+	NO_CHANGES_IN_PROGRAM_MAPPING: 'No roles removed — mappings unchanged.',
+	USER_EXTENSION_DELETED: 'User extension deleted successfully',
 }

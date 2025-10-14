@@ -69,5 +69,7 @@ module.exports = {
 	PROFILE_READ_BY_ID: '/v1/user/profileById',
 	FIND_ENTITY_DETAILS: '/v1/entities/details',
 	DELETE_SOLUTION_RESOURCE: '/v1/admin/deleteSolutionResource',
+	FETCH_PROGRAM_DOCUMENT: '/v1/programs/fetchProgramDetails',
+	FETCH_SOLUTION_DOCUMENT: '/v1/solutions/getDetails',
 	ACCOUNT_SEARCH: '/v1/account/search',
 }

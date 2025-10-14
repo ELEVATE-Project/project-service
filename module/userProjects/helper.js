@@ -548,6 +548,13 @@ module.exports = class UserProjectsHelper {
 	 * @param {String} userToken - Logged in user token.
 	 * @param {String} [ programId = "" ] - Program Id.
 	 * @param {String} [ programName = "" ] - Program Name.
+	 * @param {Array} entities - List of entity IDs.
+	 * @param {String} userId - Logged in user id.
+	 * @param {String} solutionId - Solution id.
+	 * @param {Boolean|String} [ isATargetedSolution = "" ] - Flag to check if it is a targeted solution.
+	 * @param {Object} userDetails - User details object.
+	 * @param {Boolean} isExternalProgram - Flag to check if it is an external program.
+	 * @returns {Object} Created program and solution data.
 	 * @returns {Object} Created program and solution data.
 	 */
 
@@ -558,7 +565,8 @@ module.exports = class UserProjectsHelper {
 		userId,
 		solutionId,
 		isATargetedSolution = '',
-		userDetails
+		userDetails,
+		isExternalProgram
 	) {
 		return new Promise(async (resolve, reject) => {
 			try {
@@ -578,14 +586,13 @@ module.exports = class UserProjectsHelper {
 				if (programId !== '') {
 					programAndSolutionData['programId'] = programId
 				}
-
 				let solutionAndProgramCreation = await solutionsHelper.createProgramAndSolution(
 					userId,
 					programAndSolutionData,
 					isATargetedSolution,
-					userDetails
+					userDetails,
+					isExternalProgram
 				)
-
 				if (!solutionAndProgramCreation.success) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
@@ -3029,6 +3036,7 @@ module.exports = class UserProjectsHelper {
 	 * @param {String} language - language code
 	 * @param {Object} userDetails - loggedin user's info
 	 * @returns {Object} Project created information.
+	 * @param {Boolean} isExternalProgram - Flag to check if it is an external program (If true then program is present in survey service.If false program is present in project service).
 	 */
 
 	static importFromLibrary(
@@ -3038,7 +3046,8 @@ module.exports = class UserProjectsHelper {
 		userId,
 		isATargetedSolution = false,
 		language,
-		userDetails
+		userDetails,
+		isExternalProgram
 	) {
 		return new Promise(async (resolve, reject) => {
 			try {
@@ -3087,7 +3096,8 @@ module.exports = class UserProjectsHelper {
 						userId,
 						requestedData.solutionId,
 						isATargetedSolution,
-						userDetails
+						userDetails,
+						isExternalProgram
 					)
 
 					if (!programAndSolutionInformation.success) {
@@ -3108,7 +3118,8 @@ module.exports = class UserProjectsHelper {
 						userId,
 						'',
 						false,
-						userDetails
+						userDetails,
+						isExternalProgram
 					)
 
 					if (!programAndSolutionInformation.success) {
@@ -5462,9 +5473,7 @@ function _surveyDetails(surveyData, userRoleAndProfileInformation = {}) {
 					message: CONSTANTS.apiResponses.SURVEY_NOT_CREATED,
 				}
 			}
-
 			result['surveySubmissionId'] = surveyCreated.data.assessment.submissionId
-
 			result['solutionId'] = surveyData.solutionDetails._id
 
 			return resolve({

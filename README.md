@@ -67,23 +67,22 @@ done
 ```
 
 1.  **Download and execute main setup script:** Execute the following command in your terminal from the project directory.
-    `    curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/mac-linux/setup_project.sh && chmod +x setup_project.sh && sudo ./setup_project.sh
-   `
+    `   curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/mac-linux/setup_project.sh && chmod +x setup_project.sh && sudo ./setup_project.sh`
 
-        > Note : The script will download all the essential files and launch the services in Docker. Once all services are successfully up and running, you can proceed to the next steps.
+         > Note : The script will download all the essential files and launch the services in Docker. Once all services are successfully up and running, you can proceed to the next steps.
 
-        **General Instructions :**
+         **General Instructions :**
 
-        1. All containers which are part of the docker-compose can be gracefully stopped by pressing Ctrl + c in the same terminal where the services are running.
+         1. All containers which are part of the docker-compose can be gracefully stopped by pressing Ctrl + c in the same terminal where the services are running.
 
-        2. All docker containers can be stopped and removed by using below command.
-            ```
-            sudo ./docker-compose-down.sh
-            ```
-        3. All services and dependencies can be started using below command.
-            ```
-            sudo ./docker-compose-up.sh
-            ```
+         2. All docker containers can be stopped and removed by using below command.
+             ```
+             sudo ./docker-compose-down.sh
+             ```
+         3. All services and dependencies can be started using below command.
+             ```
+             sudo ./docker-compose-up.sh
+             ```
 
     **Keep the current terminal session active, and kindly open a new terminal window within the project directory.**
 

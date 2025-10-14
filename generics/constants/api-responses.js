@@ -313,6 +313,5 @@ module.exports = {
 	INVALID_MAPPING_DATA: 'Invalid mapping data',
 	SKIPPING_EVENT_PROCESSING: 'Skipping event processing as no relevant changes found',
 	NO_CHANGES_IN_PROGRAM_MAPPING: 'No roles removed — mappings unchanged.',
-	USER_EXTENSION_NOT_FOUND: 'User extension not found',
 	USER_EXTENSION_DELETED: 'User extension deleted successfully',
 }

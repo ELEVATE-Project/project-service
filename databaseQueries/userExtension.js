@@ -89,7 +89,7 @@ module.exports = class UserExtension {
 	 * @returns {Array} userExtension details.
 	 */
 
-	static findAndUpdate(filterData = 'all', setData, returnData = { new: false }) {
+	static findAndUpdate(filterData = 'all', setData, returnData = { new: false, rawResult: false }) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let queryObject = filterData != 'all' ? filterData : {}
@@ -132,6 +132,24 @@ module.exports = class UserExtension {
 				}
 				const userExtensionData = await database.models.userExtension.findOne(queryObject, projection)
 				return resolve(userExtensionData)
+			} catch (error) {
+				return reject(error)
+			}
+		})
+	}
+
+	/**
+	 * Delete userExtension documents based on the provided MongoDB filter.
+	 *
+	 * @param {Object} filter - MongoDB query filter to match documents for deletion.
+	 * @returns {Promise<Object>} - MongoDB deleteMany result containing deleted count.
+	 */
+	static delete(filter) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let deleteDocuments = await database.models.userExtension.deleteMany(filter)
+
+				return resolve(deleteDocuments)
 			} catch (error) {
 				return reject(error)
 			}

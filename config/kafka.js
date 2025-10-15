@@ -13,6 +13,7 @@ const USER_DELETE_TOPIC = process.env.USER_DELETE_TOPIC
 const USER_DELETE_ON_OFF = process.env.USER_DELETE_ON_OFF
 const COURSES_TOPIC = process.env.USER_COURSES_SUBMISSION_TOPIC
 const ORG_EXTENSION_TOPIC = process.env.ORG_UPDATES_TOPIC
+const USER_ACCOUNT_EVENT_TOPIC = process.env.USER_ACCOUNT_EVENT_TOPIC
 
 /**
  * Kafka configurations.
@@ -56,6 +57,8 @@ const connect = function () {
 
 	_sendToKafkaConsumers(ORG_EXTENSION_TOPIC, process.env.KAFKA_URL)
 
+	// consume event that produced by the user service
+	_sendToKafkaConsumers(USER_ACCOUNT_EVENT_TOPIC, process.env.KAFKA_URL)
 	return {
 		kafkaProducer: producer,
 		kafkaClient: client,
@@ -109,12 +112,18 @@ var _sendToKafkaConsumers = function (topic, host) {
 			if (message && message.topic === ORG_EXTENSION_TOPIC) {
 				organizationExtensionConsumer.messageReceived(message)
 			}
+
+			// call userExtension consumer
+			if (message && message.topic === USER_ACCOUNT_EVENT_TOPIC) {
+				userExtensionConsumer.messageReceived(message)
+			}
 		})
 
 		consumer.on('error', async function (error) {
 			if (error.topics && error.topics[0] === SUBMISSION_TOPIC) {
 				submissionsConsumer.errorTriggered(error)
 			}
+
 			if (error.topics && error.topics[0] === CERTIFICATE_TOPIC) {
 				projectCertificateConsumer.errorTriggered(error)
 			}
@@ -122,11 +131,17 @@ var _sendToKafkaConsumers = function (topic, host) {
 			if (error.topics && error.topics[0] === USER_DELETE_TOPIC) {
 				userDeleteConsumer.errorTriggered(error)
 			}
+
 			if (error.topics && error.topics[0] === COURSES_TOPIC) {
 				userCoursesConsumer.errorTriggered(error)
 			}
+
 			if (error.topics && error.topics[0] === ORG_EXTENSION_TOPIC) {
 				organizationExtensionConsumer.errorTriggered(error)
+			}
+
+			if (error.topics && error.topics[0] === USER_ACCOUNT_EVENT_TOPIC) {
+				userExtensionConsumer.errorTriggered(error)
 			}
 		})
 	}

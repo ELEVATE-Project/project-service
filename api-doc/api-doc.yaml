@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Elevate-Project
-  version: 1.0.0
+  version: 3.4.0
   description: >-
     The Elevate Project service offers a comprehensive suite of endpoints
     designed to facilitate the creation of projects, both with and without
@@ -31,51 +31,51 @@ info:
 servers:
   - url: http://{{baseurl}}project
 tags:
-  - name: projectTemplates
-  - name: projectCategories
-  - name: projectTemplateTasks
-  - name: userProjects
-  - name: reports
-  - name: programs
-  - name: solutions
-  - name: admin
-  - name: cloud-services
+  - name: ProjectTemplates
+  - name: ProjectCategories
+  - name: ProjectTemplateTasks
+  - name: UserProjects
+  - name: Reports
+  - name: Programs
+  - name: Solutions
+  - name: Admin
+  - name: Cloud-Services
   - name: Form Apis
-  - name: certificateTemplates
-  - name: configurations
-  - name: users
+  - name: CertificateTemplates
+  - name: Configurations
+  - name: Users
     description: ''
     externalDocs:
       description: ''
       url: ''
-  - name: profile
+  - name: Profile
     description: ''
     externalDocs:
       description: ''
       url: ''
-  - name: certificateBaseTemplates
+  - name: CertificateBaseTemplates
     description: ''
     externalDocs:
       description: ''
       url: ''
-  - name: template
+  - name: Template
     description: ''
     externalDocs:
       description: ''
       url: ''
-  - name: projectAttributes
+  - name: ProjectAttributes
     description: ''
     externalDocs:
       description: ''
       url: ''
-  - name: wishlist
+  - name: Wishlist
     description: ''
     externalDocs:
       description: ''
       url: ''
-  - name: healthCheck
+  - name: HealthCheck
     description: ''
-  - name: organizationExtension
+  - name: OrganizationExtension
     description: ''
     externalDocs:
       description: ''
@@ -89,7 +89,7 @@ paths:
   /v1/project/templates/bulkCreate:
     post:
       tags:
-        - projectTemplates
+        - ProjectTemplates
       summary: Bulk create project templates
       requestBody:
         required: true
@@ -439,7 +439,7 @@ paths:
   /v1/project/templates/bulkUpdate:
     post:
       tags:
-        - projectTemplates
+        - ProjectTemplates
       summary: Bulk update project templates
       requestBody:
         required: true
@@ -517,7 +517,7 @@ paths:
   /v1/project/templates/update/{_id}:
     post:
       tags:
-        - projectTemplates
+        - ProjectTemplates
       summary: Update project template
       requestBody:
         content:
@@ -620,7 +620,7 @@ paths:
   /v1/project/templates/listByIds:
     post:
       tags:
-        - projectTemplates
+        - ProjectTemplates
       summary: ' List project templates by id'
       requestBody:
         content:
@@ -702,7 +702,7 @@ paths:
   /v1/project/templates/importProjectTemplate/{_id}?solutionId={solution_id}:
     post:
       tags:
-        - projectTemplates
+        - ProjectTemplates
       summary: Imports a project template.
       parameters:
         - name: X-auth-token
@@ -789,7 +789,7 @@ paths:
   /v1/project/templates/details/{templateId}:
     get:
       tags:
-        - projectTemplates
+        - ProjectTemplates
       summary: Fetches details of a specific project template
       parameters:
         - &ref_31
@@ -1216,7 +1216,7 @@ paths:
   /v1/library/categories/create:
     post:
       tags: &ref_24
-        - projectCategories
+        - ProjectCategories
       summary: Creates a new project category in the library.
       requestBody:
         required: true
@@ -1343,7 +1343,7 @@ paths:
   /v1/library/categories/update/{project_category_id}:
     post:
       tags:
-        - projectCategories
+        - ProjectCategories
       summary: Update an existing project category.
       requestBody:
         required: true
@@ -1474,7 +1474,7 @@ paths:
   /v1/library/categories/list:
     post:
       tags:
-        - projectCategories
+        - ProjectCategories
       summary: Retrieve a list of project categories.
       requestBody:
         content:
@@ -1569,7 +1569,7 @@ paths:
   /v1/project/templateTasks/bulkCreate/{_id}:
     post:
       tags:
-        - projectTemplateTasks
+        - ProjectTemplateTasks
       summary: Bulk create project template tasks.
       requestBody:
         required: true
@@ -1692,7 +1692,7 @@ paths:
   /v1/project/templateTasks/bulkUpdate/{projectTemplateId}:
     post:
       tags:
-        - projectTemplateTasks
+        - ProjectTemplateTasks
       summary: Bulk update project template tasks.
       requestBody:
         required: true
@@ -1775,7 +1775,7 @@ paths:
   /v1/userProjects/importFromLibrary/{_id}:
     post:
       tags:
-        - userProjects
+        - UserProjects
       summary: Import user projects from library.
       requestBody:
         content:
@@ -1966,7 +1966,7 @@ paths:
   /v1/userProjects/importedProjects/{programId}:
     get:
       tags:
-        - userProjects
+        - UserProjects
       summary: Fetch Imported Projects for a Specific Program
       parameters:
         - name: X-auth-token
@@ -2051,7 +2051,7 @@ paths:
   /v1/userProjects/list?page={page_no}&limit={limit}&search=&filter=:
     post:
       tags:
-        - userProjects
+        - UserProjects
       summary: List User Projects
       requestBody:
         content:
@@ -2180,7 +2180,7 @@ paths:
   /v1/userProjects/sync/{_id}?lastDownloadedAt=:
     post:
       tags:
-        - userProjects
+        - UserProjects
       summary: Sync User Project
       requestBody:
         content:
@@ -2316,7 +2316,7 @@ paths:
   /v1/userProjects/details?solutionId={solution_id}&templateId={template_id}:
     post:
       tags:
-        - userProjects
+        - UserProjects
       summary: Fetch details of a specific user project.
       requestBody:
         content:
@@ -2881,7 +2881,7 @@ paths:
   /v1/userProjects/add:
     post:
       tags: &ref_48
-        - userProjects
+        - UserProjects
       summary: Add a new user project.
       requestBody:
         content:
@@ -3188,7 +3188,7 @@ paths:
   /v1/userProjects/share/{project_id}:
     get:
       tags:
-        - userProjects
+        - UserProjects
       summary: Add a new user project.
       parameters:
         - name: X-auth-token
@@ -3268,7 +3268,7 @@ paths:
   /v1/userProjects/tasksStatus/{_id}:
     post:
       tags: &ref_39
-        - userProjects
+        - UserProjects
       summary: Retrieve the status of specific tasks for a user project.
       requestBody:
         content:
@@ -3368,7 +3368,7 @@ paths:
   /v1/reports/entity?requestPdf=true&reportType={type}&programId={_id}:
     get:
       tags: &ref_10
-        - reports
+        - Reports
       summary: entity report
       parameters:
         - name: X-auth-token
@@ -3465,7 +3465,7 @@ paths:
   /v1/programs/create:
     post:
       tags:
-        - programs
+        - Programs
       summary: Create a new program.
       requestBody:
         content:
@@ -3662,7 +3662,7 @@ paths:
   /v1/programs/update/{programId}:
     post:
       tags:
-        - programs
+        - Programs
       summary: Update an existing program.
       requestBody:
         content:
@@ -3854,7 +3854,7 @@ paths:
   /v1/programs/details/{programId}:
     get:
       tags:
-        - programs
+        - Programs
       summary: Fetch program details by program id.
       parameters:
         - name: X-auth-token
@@ -3976,7 +3976,7 @@ paths:
   /v1/programs/addRolesInScope/{programId}:
     post:
       tags:
-        - programs
+        - Programs
       summary: Add roles to program scope.
       requestBody:
         content:
@@ -4078,7 +4078,7 @@ paths:
   /v1/programs/addEntitiesInScope/{programId}:
     post:
       tags:
-        - programs
+        - Programs
       summary: Add entities to program scope.
       requestBody:
         content:
@@ -4181,7 +4181,7 @@ paths:
   /v1/programs/removeRolesInScope/{programId}:
     post:
       tags:
-        - programs
+        - Programs
       summary: Remove roles from program scope.
       requestBody:
         content:
@@ -4275,7 +4275,7 @@ paths:
   /v1/programs/removeEntitiesInScope/{programId}:
     post:
       tags:
-        - programs
+        - Programs
       summary: Remove entities from program scope
       requestBody:
         content:
@@ -4378,7 +4378,7 @@ paths:
   /v1/programs/list?page={page_no}&limit={limit}&search=:
     get:
       tags:
-        - programs
+        - Programs
       summary: List programs.
       parameters:
         - name: X-auth-token
@@ -4473,7 +4473,7 @@ paths:
   /v1/programs/join/{programId}:
     get:
       tags:
-        - programs
+        - Programs
       summary: Join program.
       parameters:
         - name: X-auth-token
@@ -4642,7 +4642,7 @@ paths:
   /v1/solutions/create:
     post:
       tags:
-        - solutions
+        - Solutions
       summary: Create solution.
       requestBody:
         content:
@@ -4860,7 +4860,7 @@ paths:
   /v1/solutions/update/{solutionId}:
     post:
       tags:
-        - solutions
+        - Solutions
       summary: ' Update solution.'
       requestBody:
         content:
@@ -5082,7 +5082,7 @@ paths:
   /v1/solutions/addRolesInScope/{solutionId}:
     post:
       tags:
-        - solutions
+        - Solutions
       summary: ' Add roles to solution scope.'
       requestBody:
         content:
@@ -5185,7 +5185,7 @@ paths:
   /v1/solutions/detailsBasedOnRoleAndLocation/{solutionId}:
     post:
       tags:
-        - solutions
+        - Solutions
       summary: Get solution details by role and location.
       requestBody:
         content:
@@ -5325,7 +5325,7 @@ paths:
   /v1/solutions/removeRolesInScope/{solutionId}:
     post:
       tags:
-        - solutions
+        - Solutions
       summary: Remove roles from solution scope.
       requestBody:
         content:
@@ -5433,7 +5433,7 @@ paths:
   /v1/solutions/fetchLink/{solutionId}:
     get:
       tags:
-        - solutions
+        - Solutions
       summary: Fetch solution link.
       parameters:
         - name: X-auth-token
@@ -5513,7 +5513,7 @@ paths:
   /v1/solutions/addEntitiesInScope/{solutionId}:
     post:
       tags:
-        - solutions
+        - Solutions
       summary: Add entities to solution scope.
       requestBody:
         content:
@@ -5606,7 +5606,7 @@ paths:
   /v1/solutions/removeEntitiesInScope/{solutionId}:
     post:
       tags:
-        - solutions
+        - Solutions
       summary: Remove entities from solution scope
       requestBody:
         content:
@@ -5710,7 +5710,7 @@ paths:
   /v1/solutions/forUserRoleAndLocation?programId={programId}&type={type}&subType={subType}&page={page}&limit=:
     post:
       tags:
-        - solutions
+        - Solutions
       summary: Fetch solutions for user role and location.
       requestBody:
         content:
@@ -5852,7 +5852,7 @@ paths:
   /v1/solutions/targetedSolutions?type={solutionType}&page={page_no}&limit={limit}&search={search}&filter={filter}:
     post:
       tags:
-        - solutions
+        - Solutions
       summary: Fetch targeted solutions.
       requestBody:
         content:
@@ -6008,7 +6008,7 @@ paths:
   /v1/solutions/verifyLink/{link}:
     post:
       tags:
-        - solutions
+        - Solutions
       summary: ' Verify solution link.'
       requestBody:
         content:
@@ -6116,7 +6116,7 @@ paths:
   /v1/solutions/verifySolution/{solutionId}:
     post:
       tags: &ref_36
-        - solutions
+        - Solutions
       summary: Verify solution by id.
       requestBody:
         content:
@@ -6237,7 +6237,7 @@ paths:
   /v1/solutions/list:
     post:
       tags:
-        - solutions
+        - Solutions
       summary: List solutions
       requestBody:
         content:
@@ -6356,7 +6356,7 @@ paths:
   /v1/solutions/getDetails/{solutionId}:
     get:
       tags:
-        - solutions
+        - Solutions
       summary: Fetch Solution Details
       parameters:
         - name: X-auth-token
@@ -6508,7 +6508,7 @@ paths:
   /v1/admin/createIndex/{_collectionName}:
     post:
       tags: &ref_15
-        - admin
+        - Admin
       summary: Create Index
       requestBody: &ref_16
         content:
@@ -6606,7 +6606,7 @@ paths:
   /v1/cloud-services/files/preSignedUrls:
     post:
       tags: &ref_20
-        - cloud-services
+        - Cloud-Services
       summary: Generate Pre-Signed URLs
       requestBody:
         content:
@@ -6718,7 +6718,7 @@ paths:
   /v1/cloud-services/files/getDownloadableUrl:
     post:
       tags:
-        - cloud-services
+        - Cloud-Services
       summary: Generate Downloadable URLs
       requestBody:
         content:
@@ -7185,7 +7185,7 @@ paths:
   /v1/certificateBaseTemplates/createOrUpdate:
     post:
       tags:
-        - certificateBaseTemplates
+        - CertificateBaseTemplates
       summary: Creates certificate base template
       requestBody:
         content:
@@ -7308,7 +7308,7 @@ paths:
   /v1/certificateBaseTemplates/createOrUpdate/{_id}:
     patch:
       tags:
-        - certificateBaseTemplates
+        - CertificateBaseTemplates
       summary: Updates an existing certificate base template.
       requestBody:
         content:
@@ -7723,11 +7723,11 @@ paths:
 
         * This is a mandatory parameter and cannot be empty or null.
       tags:
-        - projectCategories
+        - ProjectCategories
   /v1/project/templates/list:
     get:
       tags:
-        - projectTemplates
+        - ProjectTemplates
       summary: Lists all the project template
       parameters: &ref_33
         - *ref_24
@@ -8894,7 +8894,7 @@ paths:
   /v1/certificateTemplates/createOrUpdate:
     post:
       tags:
-        - certificateTemplates
+        - CertificateTemplates
       summary: Create a certificate template
       requestBody:
         required: true
@@ -9171,7 +9171,7 @@ paths:
   /v1/certificateTemplates/uploadTemplate:
     post:
       tags: &ref_29
-        - certificateTemplates
+        - CertificateTemplates
       summary: Helps to upload certificate template file
       requestBody:
         required: true
@@ -9400,7 +9400,7 @@ paths:
   /v1/project/configurations/read:
     get:
       tags:
-        - configurations
+        - Configurations
       summary: Fetchs all the configurations meta
       parameters:
         - *ref_31
@@ -9455,7 +9455,7 @@ paths:
   /v1/profle/read:
     get:
       tags:
-        - profile
+        - Profile
       summary: Fetch user profile details
       parameters:
         - *ref_34
@@ -9934,7 +9934,7 @@ paths:
         * This is a mandatory parameter and cannot be empty or null.
       operationId: ''
       tags:
-        - certificateTemplates
+        - CertificateTemplates
       parameters:
         - in: path
           name: _id
@@ -10188,7 +10188,7 @@ paths:
   /v1/users/programs/isAPrivateProgram=&page=&limit=0&search=&language=&getProjectsCount=:
     post:
       tags:
-        - users
+        - Users
       summary: Fetch user programs details.
       parameters:
         - in: query
@@ -10328,7 +10328,7 @@ paths:
   /v1/users/solutions/{_id}:
     post:
       tags:
-        - users
+        - Users
       summary: Fetch user solutions details.
       parameters:
         - *ref_34
@@ -10760,7 +10760,7 @@ paths:
   /v1/template/list?language=ka&hasSpotlight=false&duration=1 week&roles=:
     get:
       tags:
-        - template
+        - Template
       summary: Lists all the templates
       parameters:
         - *ref_31
@@ -10916,7 +10916,7 @@ paths:
         * This is a mandatory parameter and cannot be empty or null.
       operationId: ''
       tags:
-        - projectAttributes
+        - ProjectAttributes
       parameters:
         - &ref_55
           in: header
@@ -11016,7 +11016,7 @@ paths:
           `When updating translations data, make sure to provide translations for all the data fields in all supported languages. If any translations are missing, the API will only return the fields you have provided, which may result in incomplete data. When updating the  values for duration please maintain lowercase. If you are updating roles filter the value to be added in the request body should be the code of the user role fetched from userRoleExtension.`
       operationId: ''
       tags:
-        - projectAttributes
+        - ProjectAttributes
       parameters:
         - *ref_55
         - in: header
@@ -11173,7 +11173,7 @@ paths:
         * This is a mandatory parameter and cannot be empty or null.
       operationId: ''
       tags:
-        - projectAttributes
+        - ProjectAttributes
       parameters:
         - *ref_55
         - &ref_59
@@ -11316,7 +11316,7 @@ paths:
         * This is a mandatory parameter and cannot be empty or null.
       operationId: ''
       tags: &ref_60
-        - wishlist
+        - Wishlist
       parameters: &ref_61
         - *ref_55
         - *ref_59
@@ -11607,7 +11607,7 @@ paths:
   /v1/userExtension/bulkUpload:
     post:
       tags:
-        - userExtension
+        - UserExtension
       summary: Bulk user role management API
       requestBody:
         required: true
@@ -11688,7 +11688,7 @@ paths:
         * This is a mandatory parameter and cannot be empty or null.
       operationId: ''
       tags:
-        - healthCheck
+        - HealthCheck
       parameters: []
       responses:
         '200':
@@ -11848,7 +11848,7 @@ paths:
         * This is a mandatory parameter and cannot be empty or null.
       operationId: ''
       tags:
-        - userProjects
+        - UserProjects
       parameters: []
       responses:
         '200':
@@ -11965,7 +11965,7 @@ paths:
         * This is a mandatory parameter and cannot be empty or null.
       operationId: ''
       tags:
-        - admin
+        - Admin
       parameters:
         - in: path
           name: type
@@ -12094,7 +12094,7 @@ paths:
       description: ''
       operationId: ''
       tags:
-        - organizationExtension
+        - OrganizationExtension
       parameters: []
       responses:
         '200':
@@ -12185,7 +12185,7 @@ paths:
       description: ''
       operationId: ''
       tags:
-        - organizationExtension
+        - OrganizationExtension
       parameters: []
       responses:
         '200':

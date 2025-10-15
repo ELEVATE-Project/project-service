@@ -3101,6 +3101,8 @@ module.exports = class SolutionsHelper {
 							message: CONSTANTS.apiResponses.PROJECT_TEMPLATE_ID_NOT_FOUND,
 						}
 					}
+					//Adding for drop 1 of elevate-project will remove it later
+					const projectTemplatesHelper = require(MODULES_BASE_PATH + '/project/templates/helper')
 					templateOrQuestionDetails = await projectTemplatesHelper.details(
 						solutionData.projectTemplateId,
 						'',

@@ -48,10 +48,10 @@ function createSolution(solutionData, checkDate = false, userDetails, isExternal
 			let programMatchQuery = {}
 			programMatchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
 
-			if (UTILS.strictObjectIdCheck(solutionData.programExternalId)) {
-				programMatchQuery['_id'] = solutionData.programExternalId
+			if (UTILS.strictObjectIdCheck(solutionData.programId)) {
+				programMatchQuery['_id'] = solutionData.programId
 			} else {
-				programMatchQuery['externalId'] = solutionData.programExternalId
+				programMatchQuery['externalId'] = solutionData.programId
 			}
 
 			let programData
@@ -134,10 +134,17 @@ function createSolution(solutionData, checkDate = false, userDetails, isExternal
 			delete programMatchQuery.externalId
 			programMatchQuery['_id'] = solutionData.programId
 
+			let newprogramData
+			if (UTILS.convertStringToBoolean(isExternalProgram)) {
+				newprogramData = await surveyService.programsDocument(programMatchQuery, ['components'])
+			} else {
+				newprogramData = await programQueries.programsDocument(programMatchQuery, ['components'])
+			}
 			let updateProgram = await programQueries.findAndUpdate(programMatchQuery, {
-				$addToSet: { components: { _id: solutionCreation._id, order: programsComponent.length + 1 } },
+				$addToSet: {
+					components: { _id: solutionCreation._id, order: newprogramData[0].components.length + 1 },
+				},
 			})
-
 			if (!solutionData?.excludeScope && programData[0].scope) {
 				await setScope(solutionCreation._id, solutionData.scope ? solutionData.scope : {}, userDetails)
 			}

@@ -48,10 +48,10 @@ function createSolution(solutionData, checkDate = false, userDetails, isExternal
 			let programMatchQuery = {}
 			programMatchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
 
-			if (UTILS.strictObjectIdCheck(solutionData.programId)) {
-				programMatchQuery['_id'] = solutionData.programId
+			if (UTILS.strictObjectIdCheck(solutionData.programExternalId)) {
+				programMatchQuery['_id'] = solutionData.programExternalId
 			} else {
-				programMatchQuery['externalId'] = solutionData.programId
+				programMatchQuery['externalId'] = solutionData.programExternalId
 			}
 
 			let programData
@@ -132,7 +132,11 @@ function createSolution(solutionData, checkDate = false, userDetails, isExternal
 			}
 
 			delete programMatchQuery.externalId
-			programMatchQuery['_id'] = solutionData.programId
+			if (UTILS.strictObjectIdCheck(solutionData.programExternalId)) {
+				programMatchQuery['_id'] = solutionData.programExternalId
+			} else {
+				programMatchQuery['externalId'] = solutionData.programExternalId
+			}
 
 			let newprogramData
 			if (UTILS.convertStringToBoolean(isExternalProgram)) {

@@ -1423,16 +1423,30 @@ module.exports = class UserProjects extends Abstract {
 	}
 
 	/**
-	 * Delete user PII data
-	 * @method
-	 * @name deleteUserPIIData
-	 * @param {Object} req - request data.
+     * @api {post} /v1/userProjects/deleteUserPIIData
+     * @apiVersion 1.0.0
+     * @description To delete the user transactional data
+     * @apiName Search Entities
+     * @apiHeader {String} X-auth-token Authenticity token
+     * @apiSampleRequest /v1/userProjects/deleteUserPIIData
+     * @apiSampleRequest {json} Request
+     * {
+            "id": 1   //userId
+        }
+     * @apiUse successBody
+     * @apiUse errorBody
      * @apiParamExample {json} Response:
-        {
+      {
             "message": "Data deleted successfully.",
             "status": 200
-        }
-	 * @returns {JSON} User data deletion response
+      }
+    */
+	/**
+	 * Search entities in project.
+	 * @method
+	 * @name searchEntities
+	 * @param {Object} req - request Data.
+	 * @returns {JSON} Data deleted successfully.
 	 */
 
 	async deleteUserPIIData(req) {

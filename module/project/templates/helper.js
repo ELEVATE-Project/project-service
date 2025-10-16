@@ -33,7 +33,9 @@ const testimonialsHelper = require(MODULES_BASE_PATH + '/testimonials/helper')
 const surveyService = require(SERVICES_BASE_PATH + '/survey')
 const solutionsUtils = require(GENERICS_FILES_PATH + '/helpers/solutionAndProjectTemplateUtils')
 const entitiesService = require(GENERICS_FILES_PATH + '/services/entity-management')
+const solutionsHelper = require(MODULES_BASE_PATH + '/solutions/helper')
 const orgExtensionQueries = require(DB_QUERY_BASE_PATH + '/organizationExtension')
+const adminHelper = require(MODULES_BASE_PATH + '/admin/helper')
 
 module.exports = class ProjectTemplatesHelper {
 	/**
@@ -608,6 +610,130 @@ module.exports = class ProjectTemplatesHelper {
 	}
 
 	/**
+	 * @function createChildProjectTemplate
+	 * @description Creates child project templates by duplicating existing project templates
+	 *              and linking them to a program solution.
+	 *
+	 * @param {Array<string>} projectTemplateExternalIds - List of external IDs of project templates to duplicate.
+	 * @param {Object} userDetails - Information about the user performing the operation.
+	 * @param {string} programExternalId - External ID of the program the templates belong to.
+	 * @param {boolean} isExternalProgram - Flag to determine if the program is external.
+	 *
+	 * @returns {Promise<Object>} Resolves with:
+	 *   - `success: true`, message, and `data` containing array of newly created project templates.
+	 *   - `success: false` and error details if operation fails.
+	 */
+	static createChildProjectTemplate(projectTemplateExternalIds, userDetails, programExternalId, isExternalProgram) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let responseData = []
+				let failedTemplates = []
+				let solutionIdsToDelete = []
+				for (const templateId of projectTemplateExternalIds) {
+					try {
+						let projectTemplateData = await projectTemplateQueries.templateDocument({
+							status: CONSTANTS.common.PUBLISHED,
+							externalId: templateId,
+							isReusable: true,
+						})
+						if (!projectTemplateData?.length) {
+							throw new Error(CONSTANTS.apiResponses.PROJECT_TEMPLATE_NOT_FOUND)
+						}
+
+						// Prepare solution data based on project template
+						const solutionData = {
+							name: projectTemplateData[0].title,
+							programExternalId: programExternalId,
+							externalId: projectTemplateData[0].externalId + UTILS.generateUniqueId(),
+							referenceFrom: CONSTANTS.common.OBSERVATION,
+						}
+
+						// Create a solution for this project template
+						let createdSolution = await solutionsHelper.createSolution(
+							solutionData,
+							true,
+							userDetails,
+							isExternalProgram
+						)
+
+						if (!createdSolution?.result?._id) {
+							throw new Error(CONSTANTS.apiResponses.SOLUTION_NOT_CREATED)
+						}
+						// Store solution ID
+						solutionIdsToDelete.push(createdSolution.result._id)
+						// Import project template into the newly created solution
+						let duplicateProjectTemplateId = await this.importProjectTemplate(
+							templateId,
+							userDetails.userInformation.userId,
+							userDetails.userToken,
+							createdSolution.result._id,
+							{},
+							userDetails
+						)
+
+						if (!duplicateProjectTemplateId?.success || !duplicateProjectTemplateId?.data?._id) {
+							throw new Error(CONSTANTS.apiResponses.DUPLICATE_PROJECT_TEMPLATES_NOT_CREATED)
+						}
+
+						// Add success
+						responseData.push({
+							parentExternalId: templateId,
+							_id: duplicateProjectTemplateId.data._id,
+							externalId: duplicateProjectTemplateId.data.externalId,
+							isReusable: duplicateProjectTemplateId.data.isReusable,
+						})
+					} catch (innerError) {
+						// Continue even if one fails
+						failedTemplates.push({
+							parentExternalId: templateId,
+							error: innerError.message,
+						})
+					}
+				}
+
+				// Determine final message
+				let message = ''
+				if (responseData.length && failedTemplates.length) {
+					message = CONSTANTS.apiResponses.PARTIAL_CHILD_PROJECT_TEMPLATES_CREATED
+				} else if (responseData.length && !failedTemplates.length) {
+					message = CONSTANTS.apiResponses.DUPLICATE_PROJECT_TEMPLATES_CREATED
+				} else {
+					message = CONSTANTS.apiResponses.FAILED_TO_CREATE_TEMPLATE
+				}
+
+				// If anythings fail in between this logic will revert back those created data
+				if (failedTemplates.length > 0) {
+					for (const _id of solutionIdsToDelete) {
+						await adminHelper.deletedResourceDetails(
+							_id,
+							CONSTANTS.common.SOLUTION,
+							userDetails.tenantAndOrgInfo.tenantId,
+							userDetails.tenantAndOrgInfo[0],
+							userDetails.userInformation.userId
+						)
+					}
+				}
+
+				return resolve({
+					success: responseData.length > 0,
+					message,
+					data: {
+						successfulTemplates: responseData,
+						failedTemplates: failedTemplates,
+					},
+				})
+			} catch (error) {
+				return resolve({
+					status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
+					success: false,
+					message: error.message,
+					data: {},
+				})
+			}
+		})
+	}
+
+	/**
 	 * Bulk update project templates.
 	 * @method
 	 * @name importProjectTemplate - import templates from existing project templates.
@@ -738,6 +864,7 @@ module.exports = class ProjectTemplatesHelper {
 					data: {
 						_id: duplicateTemplateDocument._id,
 						externalId: newProjectTemplate.externalId,
+						isReusable: newProjectTemplate.isReusable,
 					},
 				})
 			} catch (error) {
@@ -1287,7 +1414,7 @@ module.exports = class ProjectTemplatesHelper {
 						externalId: { $in: externalIds },
 						tenantId,
 					},
-					['title', 'metaInformation.goal', 'externalId', 'solutionId']
+					['title', 'metaInformation.goal', 'externalId', 'solutionId', 'isReusable']
 				)
 
 				if (!templateData.length > 0) {

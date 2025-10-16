@@ -310,5 +310,11 @@ module.exports = {
 	INVALID_MAPPING_DATA: 'Invalid mapping data',
 	INVALID_TENANTID_OR_USERID: 'Invalid tenant-id or user-id',
 	LINK_IS_NOT_ACTIVE_YET: 'The link has not started yet. Please try again from: ',
-	INVALID_MAPPING_DATA: 'Invalid mapping data',
+	PARTIAL_CHILD_PROJECT_TEMPLATES_CREATED: 'Partial Child Project Template Created',
+	SOLUTION_RESOURCE_DELETED: 'Solution and associated resources deleted successfull',
+	PROGRAM_RESOURCE_DELETED: 'Program and associated resources deleted successfull',
+	INVALID_RESOURCE_TYPE: 'Invalid Resource Type',
+	SKIPPING_EVENT_PROCESSING: 'Skipping event processing as no relevant changes found',
+	NO_CHANGES_IN_PROGRAM_MAPPING: 'No roles removed — mappings unchanged.',
+	USER_EXTENSION_DELETED: 'User extension deleted successfully',
 }

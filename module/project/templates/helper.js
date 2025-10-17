@@ -1326,20 +1326,33 @@ module.exports = class ProjectTemplatesHelper {
 					importSolutionsResponse.result.externalId
 				)
 
-				//updating programComponents
-				await programQueries.findAndUpdate(
+				let observationPrograms = await programQueries.programsDocument(
 					{
 						_id: newProjectTemplateTask.programId,
 					},
-					{
-						$addToSet: {
-							components: {
-								_id: newProjectTemplateTask.solutionDetails._id,
-								order: ++nextComponentOrder,
-							},
-						},
-					}
+					['components']
 				)
+
+				let observationComponentOrder =
+					observationPrograms && observationPrograms.length > 0
+						? observationPrograms[0]?.components?.length || 0
+						: 0
+				if (observationPrograms) {
+					await programQueries.updateOne(
+						{
+							_id: newProjectTemplateTask.programId,
+							'components._id': { $ne: newProjectTemplateTask.solutionDetails._id },
+						},
+						{
+							$addToSet: {
+								components: {
+									_id: newProjectTemplateTask.solutionDetails._id,
+									order: ++observationComponentOrder,
+								},
+							},
+						}
+					)
+				}
 			} else if (taskType === CONSTANTS.common.SURVEY && newProjectTemplateTask?.solutionDetails?.isReusable) {
 				//Create child solutions for solutiontype survey
 				let importSolutionsResponse = await surveyService.importTemplateToSolution(
@@ -1371,20 +1384,32 @@ module.exports = class ProjectTemplatesHelper {
 					duplicateTemplateTaskId,
 					importSolutionsResponse.result.solutionExternalId
 				)
-				//updating programComponents
-				await programQueries.findAndUpdate(
+				let surveyPrograms = await programQueries.programsDocument(
 					{
 						_id: newProjectTemplateTask.programId,
 					},
-					{
-						$addToSet: {
-							components: {
-								_id: newProjectTemplateTask.solutionDetails._id,
-								order: ++nextComponentOrder,
-							},
-						},
-					}
+					['components']
 				)
+
+				let surveyComponentOrder =
+					surveyPrograms && surveyPrograms.length > 0 ? surveyPrograms[0]?.components?.length || 0 : 0
+
+				if (surveyPrograms) {
+					await programQueries.updateOne(
+						{
+							_id: newProjectTemplateTask.programId,
+							'components._id': { $ne: newProjectTemplateTask.solutionDetails._id },
+						},
+						{
+							$addToSet: {
+								components: {
+									_id: newProjectTemplateTask.solutionDetails._id,
+									order: ++surveyComponentOrder,
+								},
+							},
+						}
+					)
+				}
 			} else {
 				// Default fallback task creation
 				duplicateTemplateTaskId = await createTemplateTask()

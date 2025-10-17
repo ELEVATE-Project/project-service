@@ -16,6 +16,8 @@ const width = 800 // width of the chart
 const height = 500 // height of the chart
 const chartJSNodeCanvas = new ChartJSNodeCanvas({ width, height })
 const moment = require('moment')
+const programLocks = new Map()
+
 // const druidQueries = require('./druid_queries.json');
 /**
  * convert camel case to title case.
@@ -1008,6 +1010,30 @@ function strictObjectIdCheck(_id) {
 	return /^[a-fA-F0-9]{24}$/.test(_id)
 }
 
+/**
+ * Executes a given function with a lock on a specific program ID.
+ * Prevents concurrent updates or operations on the same program.
+ *
+ * @async
+ * @function executeWithProgramLock
+ * @param {String} programId - Unique identifier of the program to lock.
+ * @param {Function} fn - The async function to execute while holding the lock.
+ * @returns {Promise<*>} Returns the result of the provided function once executed.
+ *
+ */
+async function executeWithProgramLock(programId, fn) {
+	// Wait until any existing lock for this program ID is released
+	while (programLocks.get(programId)) {
+		await new Promise((res) => setTimeout(res, 50)) // wait for previous update
+	}
+	programLocks.set(programId, true)
+	try {
+		return await fn()
+	} finally {
+		programLocks.delete(programId)
+	}
+}
+
 module.exports = {
 	camelCaseToTitleCase: camelCaseToTitleCase,
 	lowerCase: lowerCase,
@@ -1054,4 +1080,5 @@ module.exports = {
 	getFilteredScope,
 	strictObjectIdCheck,
 	upperCase: upperCase,
+	executeWithProgramLock: executeWithProgramLock,
 }

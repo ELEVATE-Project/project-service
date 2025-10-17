@@ -138,16 +138,15 @@ function createSolution(solutionData, checkDate = false, userDetails, isExternal
 				programMatchQuery['externalId'] = solutionData.programExternalId
 			}
 
-			let newprogramData
-			if (UTILS.convertStringToBoolean(isExternalProgram)) {
-				newprogramData = await surveyService.programsDocument(programMatchQuery, ['components'])
-			} else {
-				newprogramData = await programQueries.programsDocument(programMatchQuery, ['components'])
-			}
-			let updateProgram = await programQueries.findAndUpdate(programMatchQuery, {
-				$addToSet: {
-					components: { _id: solutionCreation._id, order: newprogramData[0].components.length + 1 },
-				},
+			UTILS.executeWithProgramLock(programData[0]._id.toString(), async () => {
+				const newprogramData = await programQueries.programsDocument(programMatchQuery, ['components'])
+
+				const order = (newprogramData[0].components?.length || 0) + 1
+				const updateResult = await programQueries.updateOne(programMatchQuery, {
+					$addToSet: {
+						components: { _id: solutionCreation._id, order },
+					},
+				})
 			})
 			if (!solutionData?.excludeScope && programData[0].scope) {
 				await setScope(solutionCreation._id, solutionData.scope ? solutionData.scope : {}, userDetails)

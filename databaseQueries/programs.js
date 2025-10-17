@@ -78,6 +78,27 @@ module.exports = class Programs {
 	}
 
 	/**
+	 * update one program document.
+	 * @method
+	 * @name updateOne
+	 * @param {Object} [filterData={}] - Filter criteria to match the program document.
+	 * @param {Object} [updateData={}] - Fields to update in the program document.
+	 * @param {Object} [options={}] - Optional settings for the update operation (e.g., upsert, new).
+	 * @returns {Object} Update result.
+	 */
+	static async updateOne(filterData = {}, updateData = {}, options = {}) {
+		try {
+			const queryObject = filterData !== 'all' ? filterData : {}
+
+			const result = await database.models.programs.updateOne(queryObject, updateData, options)
+
+			return result
+		} catch (error) {
+			throw error
+		}
+	}
+
+	/**
 	 * aggregate function.
 	 * @method
 	 * @name getAggregate

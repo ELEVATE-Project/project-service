@@ -659,7 +659,7 @@ module.exports = class ProjectTemplatesHelper {
 							programExternalId: programExternalId,
 							externalId: projectTemplateData[0].externalId + UTILS.generateUniqueId(),
 							referenceFrom: CONSTANTS.common.OBSERVATION,
-							entityType: entityType,
+							entityType: projectTemplateData?.entityType ? projectTemplateData?.entityType : entityType,
 						}
 
 						// Create a solution for this project template

@@ -618,12 +618,18 @@ module.exports = class ProjectTemplatesHelper {
 	 * @param {Object} userDetails - Information about the user performing the operation.
 	 * @param {string} programExternalId - External ID of the program the templates belong to.
 	 * @param {boolean} isExternalProgram - Flag to determine if the program is external.
-	 *
+	 * @param {string} entityType - Type of entity to be created.
 	 * @returns {Promise<Object>} Resolves with:
 	 *   - `success: true`, message, and `data` containing array of newly created project templates.
 	 *   - `success: false` and error details if operation fails.
 	 */
-	static createChildProjectTemplate(projectTemplateExternalIds, userDetails, programExternalId, isExternalProgram) {
+	static createChildProjectTemplate(
+		projectTemplateExternalIds,
+		userDetails,
+		programExternalId,
+		isExternalProgram,
+		entityType = ''
+	) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let responseData = []
@@ -653,6 +659,7 @@ module.exports = class ProjectTemplatesHelper {
 							programExternalId: programExternalId,
 							externalId: projectTemplateData[0].externalId + UTILS.generateUniqueId(),
 							referenceFrom: CONSTANTS.common.OBSERVATION,
+							entityType: projectTemplateData?.entityType ? projectTemplateData?.entityType : entityType,
 						}
 
 						// Create a solution for this project template

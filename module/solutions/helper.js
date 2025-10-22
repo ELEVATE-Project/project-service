@@ -183,17 +183,25 @@ module.exports = class SolutionsHelper {
 	 * @param {String} tenantId - tenant id
 	 * @param {String} orgId - org id
 	 * @param {Boolean} isExternalProgram - isExternalProgram info
+	 * @param {Boolean} isProgramUpdateRequired - condition to update program
 	 * @returns {JSON} solution creation data.
 	 */
 
-	static createSolution(solutionData, checkDate = false, userDetails, isExternalProgram) {
+	static createSolution(
+		solutionData,
+		checkDate = false,
+		userDetails,
+		isExternalProgram,
+		isProgramUpdateRequired = true
+	) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let newSolution = await solutionsUtils.createSolution(
 					solutionData,
 					checkDate,
 					userDetails,
-					isExternalProgram
+					isExternalProgram,
+					isProgramUpdateRequired
 				)
 				if (newSolution?.data && !newSolution?.data?._id) {
 					throw {
@@ -1279,7 +1287,7 @@ module.exports = class SolutionsHelper {
 	 * @returns {Object} - Details of the solution.
 	 */
 
-	static fetchLink(solutionId, userDetails, token) {
+	static fetchLink(solutionId, userDetails, token = '') {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// build solution match query
@@ -1322,17 +1330,22 @@ module.exports = class SolutionsHelper {
 				if (!solutionLink) {
 					solutionLink = await UTILS.md5Hash(solution._id + '###' + solution.author)
 					// replacing the userDetails tena
-					userDetails.tenantAndOrgInfo = {
-						tenantId: solution.tenantId,
-						orgId: [solution.orgId],
+					let updateData = {
+						link: solutionLink,
+					}
+					let matchQuery = {
+						_id: solutionId,
 					}
 
-					let updateSolution = await this.update(solutionId, { link: solutionLink }, userDetails)
-					if (
-						!updateSolution.success ||
-						!updateSolution.data ||
-						!(Object.keys(updateSolution.data).length > 0)
-					) {
+					if (token) {
+						updateData.updatedBy = userDetails.userInformation.userId
+					}
+
+					let updateSolution = await solutionsQueries.updateSolutionDocument(matchQuery, updateData, {
+						new: true,
+					})
+
+					if (!updateSolution._id) {
 						throw {
 							status: HTTP_STATUS_CODE.bad_request.status,
 							message: CONSTANTS.apiResponses.LINK_GENERATION_FAILED,

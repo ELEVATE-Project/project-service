@@ -1007,6 +1007,29 @@ function getFilteredScope(scopeData, tenantPublicDetailsMetaField) {
 function strictObjectIdCheck(_id) {
 	return /^[a-fA-F0-9]{24}$/.test(_id)
 }
+/**
+ * generate SolutionsIds with orders to be added to the program component.
+ *
+ * @param {Array} existingComponents - current program component data.
+ * @param {newSolutionIds} newSolutionIds - solutionIds to update in program component.
+ * @returns {Object} -  solutions Id with orders to update in program components.
+ */
+function addSolutionsWithOrdersForProgramComponent(existingComponents = [], newSolutionIds = []) {
+	// Get the latest order from existing components
+	const latestOrderFromComponents = existingComponents.length
+		? Math.max(...existingComponents.map((comp) => comp.order || 0))
+		: 0
+
+	// Assign orders to new solutions starting from next available
+	let currentOrder = latestOrderFromComponents + 1
+
+	const newComponents = newSolutionIds.map((solutionId) => ({
+		_id: new ObjectId(solutionId),
+		order: currentOrder++,
+	}))
+
+	return newComponents
+}
 
 module.exports = {
 	camelCaseToTitleCase: camelCaseToTitleCase,
@@ -1054,4 +1077,5 @@ module.exports = {
 	getFilteredScope,
 	strictObjectIdCheck,
 	upperCase: upperCase,
+	addSolutionsWithOrdersForProgramComponent,
 }

@@ -906,7 +906,8 @@ module.exports = class ProjectTemplates extends Abstract {
 					req.body.projectTemplateExternalIds,
 					req.userDetails,
 					req.query.programExternalId ? req.query.programExternalId : '',
-					req.query.isExternalProgram ? req.query.isExternalProgram : true
+					req.query.isExternalProgram ? req.query.isExternalProgram : true,
+					req.query.entityType ? req.query.entityType : ''
 				)
 
 				// Maintain both `data` and `result` for downstream compatibility

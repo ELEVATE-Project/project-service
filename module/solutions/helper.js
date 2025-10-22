@@ -183,17 +183,25 @@ module.exports = class SolutionsHelper {
 	 * @param {String} tenantId - tenant id
 	 * @param {String} orgId - org id
 	 * @param {Boolean} isExternalProgram - isExternalProgram info
+	 * @param {Boolean} isProgramUpdateRequired - condition to update program
 	 * @returns {JSON} solution creation data.
 	 */
 
-	static createSolution(solutionData, checkDate = false, userDetails, isExternalProgram) {
+	static createSolution(
+		solutionData,
+		checkDate = false,
+		userDetails,
+		isExternalProgram,
+		isProgramUpdateRequired = true
+	) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let newSolution = await solutionsUtils.createSolution(
 					solutionData,
 					checkDate,
 					userDetails,
-					isExternalProgram
+					isExternalProgram,
+					isProgramUpdateRequired
 				)
 				if (newSolution?.data && !newSolution?.data?._id) {
 					throw {

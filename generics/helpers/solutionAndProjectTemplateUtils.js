@@ -27,10 +27,17 @@ const surveyService = require(GENERICS_FILES_PATH + '/services/survey')
  * @param {String} tenantId - tenant id
  * @param {String} orgId - org id
  * @param {Boolean} isExternalProgram - isExternalProgram info
+ * @param {Boolean} isProgramUpdateRequired - condition to update program
  * @returns {JSON} solution creation data.
  */
 
-function createSolution(solutionData, checkDate = false, userDetails, isExternalProgram = false) {
+function createSolution(
+	solutionData,
+	checkDate = false,
+	userDetails,
+	isExternalProgram = false,
+	isProgramUpdateRequired = true
+) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			solutionData.type = solutionData.subType =
@@ -137,18 +144,14 @@ function createSolution(solutionData, checkDate = false, userDetails, isExternal
 			} else {
 				programMatchQuery['externalId'] = solutionData.programExternalId
 			}
-
-			let newprogramData
-			if (UTILS.convertStringToBoolean(isExternalProgram)) {
-				newprogramData = await surveyService.programsDocument(programMatchQuery, ['components'])
-			} else {
-				newprogramData = await programQueries.programsDocument(programMatchQuery, ['components'])
+			if (isProgramUpdateRequired) {
+				let updateProgram = await programQueries.findAndUpdate(programMatchQuery, {
+					$addToSet: {
+						components: { _id: solutionCreation._id, order: programsComponent.length + 1 },
+					},
+				})
 			}
-			let updateProgram = await programQueries.findAndUpdate(programMatchQuery, {
-				$addToSet: {
-					components: { _id: solutionCreation._id, order: newprogramData[0].components.length + 1 },
-				},
-			})
+			//If scope data is provided, update it separately
 			if (!solutionData?.excludeScope && programData[0].scope) {
 				await setScope(solutionCreation._id, solutionData.scope ? solutionData.scope : {}, userDetails)
 			}

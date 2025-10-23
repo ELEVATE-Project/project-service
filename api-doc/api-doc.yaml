@@ -29,19 +29,19 @@ info:
 
     | `orgId`                 | Organization ID                  | `blr`
 servers:
-  - url: http://{{baseurl}}project
+  - url: http://{{baseurl}}/project
 tags:
-  - name: ProjectTemplates
-  - name: ProjectCategories
-  - name: ProjectTemplateTasks
-  - name: UserProjects
+  - name: Project Templates
+  - name: Project Categories
+  - name: Project Template Tasks
+  - name: User Projects
   - name: Reports
   - name: Programs
   - name: Solutions
   - name: Admin
   - name: Cloud-Services
-  - name: Form Apis
-  - name: CertificateTemplates
+  - name: Forms
+  - name: Certificate Templates
   - name: Configurations
   - name: Users
     description: ''
@@ -53,7 +53,7 @@ tags:
     externalDocs:
       description: ''
       url: ''
-  - name: CertificateBaseTemplates
+  - name: Certificate Base Templates
     description: ''
     externalDocs:
       description: ''
@@ -63,7 +63,7 @@ tags:
     externalDocs:
       description: ''
       url: ''
-  - name: ProjectAttributes
+  - name: Project Attributes
     description: ''
     externalDocs:
       description: ''
@@ -75,7 +75,7 @@ tags:
       url: ''
   - name: HealthCheck
     description: ''
-  - name: OrganizationExtension
+  - name: Organization Extension
     description: ''
     externalDocs:
       description: ''
@@ -84,7 +84,7 @@ paths:
   /v1/project/templates/bulkCreate:
     post:
       tags:
-        - ProjectTemplates
+        - Project Templates
       summary: Bulk create project templates
       requestBody:
         required: true
@@ -433,7 +433,7 @@ paths:
   /v1/project/templates/bulkUpdate:
     post:
       tags:
-        - ProjectTemplates
+        - Project Templates
       summary: Bulk update project templates
       requestBody:
         required: true
@@ -511,7 +511,7 @@ paths:
   /v1/project/templates/update/{_id}:
     post:
       tags:
-        - ProjectTemplates
+        - Project Templates
       summary: Update project template
       requestBody:
         content:
@@ -544,7 +544,7 @@ paths:
           example: application/json
           required: true
         - name: _id
-          in: header
+          in: path
           schema:
             type: string
           example: '123'
@@ -614,7 +614,7 @@ paths:
   /v1/project/templates/listByIds:
     post:
       tags:
-        - ProjectTemplates
+        - Project Templates
       summary: ' List project templates by id'
       requestBody:
         content:
@@ -695,7 +695,7 @@ paths:
   /v1/project/templates/importProjectTemplate/{_id}?solutionId={solution_id}:
     post:
       tags:
-        - ProjectTemplates
+        - Project Templates
       summary: Imports a project template.
       parameters:
         - name: X-auth-token
@@ -714,13 +714,13 @@ paths:
           example: application/json
           required: true
         - name: _id
-          in: query
+          in: path
           schema:
             type: string
           description: We need to pass the external id of the parent project template.
           required: true
-        - name: solutionId
-          in: query
+        - name: solution_id
+          in: path
           schema:
             type: string
           description: >-
@@ -782,7 +782,7 @@ paths:
   /v1/project/templates/details/{templateId}:
     get:
       tags: &ref_73
-        - ProjectTemplates
+        - Project Templates
       summary: Fetches details of a specific project template
       parameters:
         - &ref_31
@@ -800,8 +800,8 @@ paths:
             To use this API, you require an X-auth-token. This token is
             available in the login API Response.
           required: true
-        - name: _id
-          in: query
+        - name: templateId
+          in: path
           schema:
             type: string
           description: We need to pass the correct id to fetch template details.
@@ -1209,7 +1209,7 @@ paths:
   /v1/library/categories/create:
     post:
       tags: &ref_24
-        - ProjectCategories
+        - Project Categories
       summary: Creates a new project category in the library.
       requestBody:
         required: true
@@ -1335,7 +1335,7 @@ paths:
   /v1/library/categories/update/{project_category_id}:
     post:
       tags:
-        - ProjectCategories
+        - Project Categories
       summary: Update an existing project category.
       requestBody:
         required: true
@@ -1378,8 +1378,8 @@ paths:
           schema:
             type: string
           example: application/json
-        - name: _id
-          in: header
+        - name: project_category_id
+          in: path
           schema:
             type: string
           example: '1234'
@@ -1465,9 +1465,8 @@ paths:
   /v1/library/categories/list:
     get:
       tags:
-        - ProjectCategories
+        - Project Categories
       summary: Retrieve a list of project categories.
-      requestBody: {}
       parameters:
         - name: X-auth-token
           in: header
@@ -1543,7 +1542,7 @@ paths:
   /v1/project/templateTasks/bulkCreate/{_id}:
     post:
       tags:
-        - ProjectTemplateTasks
+        - Project Template Tasks
       summary: Bulk create project template tasks.
       requestBody:
         required: true
@@ -1665,7 +1664,7 @@ paths:
   /v1/project/templateTasks/bulkUpdate/{projectTemplateId}:
     post:
       tags:
-        - ProjectTemplateTasks
+        - Project Template Tasks
       summary: Bulk update project template tasks.
       requestBody:
         required: true
@@ -1746,7 +1745,7 @@ paths:
   /v1/userProjects/importFromLibrary/{_id}:
     post:
       tags:
-        - UserProjects
+        - User Projects
       summary: Import user projects from library.
       requestBody:
         content:
@@ -1787,8 +1786,8 @@ paths:
             type: boolean
           example: 'false'
           required: true
-        - in: query
-          name: id
+        - in: path
+          name: _id
           description: The user must provide the project template id in the path
           schema: *ref_0
           required: true
@@ -1936,7 +1935,7 @@ paths:
   /v1/userProjects/importedProjects/{programId}:
     get:
       tags:
-        - UserProjects
+        - User Projects
       summary: Fetch Imported Projects for a Specific Program
       parameters:
         - name: X-auth-token
@@ -2020,7 +2019,7 @@ paths:
   /v1/userProjects/list?page={page_no}&limit={limit}&search=&filter=:
     post:
       tags:
-        - UserProjects
+        - User Projects
       summary: List User Projects
       requestBody:
         content:
@@ -2149,7 +2148,7 @@ paths:
   /v1/userProjects/sync/{_id}?lastDownloadedAt=:
     post:
       tags:
-        - UserProjects
+        - User Projects
       summary: Sync User Project
       requestBody:
         content:
@@ -2218,8 +2217,8 @@ paths:
           example: '2024-04-21T11:58:09.204Z'
           required: false
           description: The user need to provide downloaded at
-        - in: query
-          name: id
+        - in: path
+          name: _id
           description: The user need to provided project id.
           schema: *ref_0
           required: true
@@ -2285,7 +2284,7 @@ paths:
   /v1/userProjects/details?solutionId={solution_id}&templateId={template_id}:
     post:
       tags:
-        - UserProjects
+        - User Projects
       summary: Fetch details of a specific user project.
       requestBody:
         content:
@@ -2849,7 +2848,7 @@ paths:
   /v1/userProjects/add:
     post:
       tags: &ref_48
-        - UserProjects
+        - User Projects
       summary: Add a new user project.
       requestBody:
         content:
@@ -3155,7 +3154,7 @@ paths:
   /v1/userProjects/share/{project_id}:
     get:
       tags:
-        - UserProjects
+        - User Projects
       summary: Add a new user project.
       parameters:
         - name: X-auth-token
@@ -3235,7 +3234,7 @@ paths:
   /v1/userProjects/tasksStatus/{_id}:
     post:
       tags: &ref_39
-        - UserProjects
+        - User Projects
       summary: Retrieve the status of specific tasks for a user project.
       requestBody:
         content:
@@ -6852,10 +6851,10 @@ paths:
         `required`
 
         * This is a mandatory parameter and cannot be empty or null.
-  /v1/forms/read/{Id}:
+  /v1/forms/read/{_id}:
     post:
       tags:
-        - Form Apis
+        - Forms
       summary: Fetches a form by its id.
       parameters:
         - name: X-auth-token
@@ -6872,8 +6871,8 @@ paths:
           schema:
             type: string
           example: '{{internal_access_token}}'
-        - in: query
-          name: id
+        - in: path
+          name: _id
           description: To read the data we need to match its id
           schema: &ref_8
             type: string
@@ -6934,7 +6933,7 @@ paths:
   /v1/forms/create:
     post:
       tags:
-        - Form Apis
+        - Forms
       summary: Creates a new form.
       requestBody:
         content:
@@ -7090,7 +7089,7 @@ paths:
   /v1/forms/update/{Id}:
     post:
       tags:
-        - Form Apis
+        - Forms
       summary: Updates an existing form by its id.
       requestBody:
         content:
@@ -7243,7 +7242,7 @@ paths:
   /v1/certificateBaseTemplates/createOrUpdate:
     post:
       tags:
-        - CertificateBaseTemplates
+        - Certificate Base Templates
       summary: Creates certificate base template
       requestBody:
         content:
@@ -7364,7 +7363,7 @@ paths:
   /v1/certificateBaseTemplates/createOrUpdate/{_id}:
     patch:
       tags:
-        - CertificateBaseTemplates
+        - Certificate Base Templates
       summary: Updates an existing certificate base template.
       requestBody:
         content:
@@ -7569,7 +7568,7 @@ paths:
           schema: *ref_18
           example: '{{internal_access_token}}'
           required: true
-        - name: _collectionName
+        - name: collectionName
           in: path
           schema:
             type: string
@@ -7779,11 +7778,11 @@ paths:
 
         * This is a mandatory parameter and cannot be empty or null.
       tags:
-        - ProjectCategories
+        - Project Categories
   /v1/project/templates/list:
     get:
       tags:
-        - ProjectTemplates
+        - Project Templates
       summary: Lists all the project template
       parameters: &ref_33
         - *ref_24
@@ -8950,7 +8949,7 @@ paths:
   /v1/certificateTemplates/createOrUpdate:
     post:
       tags:
-        - CertificateTemplates
+        - Certificate Templates
       summary: Create a certificate template
       requestBody:
         required: true
@@ -9224,10 +9223,10 @@ paths:
         `required`
 
         * This is a mandatory parameter and cannot be empty or null.
-  /v1/certificateTemplates/uploadTemplate:
+  /v1/certificateTemplates/uploadTemplate/{_id}?updateTemplate={Boolean}:
     post:
       tags: &ref_29
-        - CertificateTemplates
+        - Certificate Templates
       summary: Helps to upload certificate template file
       requestBody:
         required: true
@@ -9512,7 +9511,15 @@ paths:
         - Profile
       summary: Fetch user profile details
       parameters:
-        - *ref_34
+        - name: X-auth-token
+          in: header
+          schema:
+            type: string
+          example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
+          required: true
       responses:
         '200':
           description: Successful response
@@ -9988,7 +9995,7 @@ paths:
         * This is a mandatory parameter and cannot be empty or null.
       operationId: ''
       tags:
-        - CertificateTemplates
+        - Certificate Templates
       parameters:
         - in: path
           name: _id
@@ -10970,7 +10977,7 @@ paths:
         * This is a mandatory parameter and cannot be empty or null.
       operationId: ''
       tags:
-        - ProjectAttributes
+        - Project Attributes
       parameters:
         - &ref_55
           in: header
@@ -11070,7 +11077,7 @@ paths:
           `When updating translations data, make sure to provide translations for all the data fields in all supported languages. If any translations are missing, the API will only return the fields you have provided, which may result in incomplete data. When updating the  values for duration please maintain lowercase. If you are updating roles filter the value to be added in the request body should be the code of the user role fetched from userRoleExtension.`
       operationId: ''
       tags:
-        - ProjectAttributes
+        - Project Attributes
       parameters:
         - *ref_55
         - in: header
@@ -11227,7 +11234,7 @@ paths:
         * This is a mandatory parameter and cannot be empty or null.
       operationId: ''
       tags:
-        - ProjectAttributes
+        - Project Attributes
       parameters:
         - *ref_55
         - &ref_59
@@ -12033,7 +12040,7 @@ paths:
       description: ''
       operationId: ''
       tags:
-        - OrganizationExtension
+        - Organization Extension
       parameters: []
       responses:
         '200':
@@ -12124,7 +12131,7 @@ paths:
       description: ''
       operationId: ''
       tags:
-        - OrganizationExtension
+        - Organization Extension
       parameters: []
       responses:
         '200':
@@ -12294,7 +12301,7 @@ paths:
         * This is a mandatory parameter and cannot be empty or null.
       operationId: ''
       tags:
-        - UserProjects
+        - User Projects
       parameters:
         - in: header
           name: X-auth-token
@@ -12396,7 +12403,7 @@ paths:
         * This is a mandatory parameter and cannot be empty or null.
       operationId: ''
       tags: &ref_69
-        - UserProjects
+        - User Projects
       parameters: &ref_70
         - in: header
           name: X-auth-token

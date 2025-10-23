@@ -346,7 +346,7 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/project/v1/project/templates/createChildProjectTemplate?isExternalProgram=true&programExternalId=AWS_Prog_MYS_may192",
-							"host": ["{{baseUrl}}project"],
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "project", "templates", "createChildProjectTemplate"],
 							"query": [
 								{
@@ -649,7 +649,7 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/project/v1/project/templateTasks/bulkUpdate/:projectTemplateId",
-							"host": ["{{baseUrl}}project"],
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "project", "templateTasks", "bulkUpdate", ":projectTemplateId"],
 							"variable": [
 								{
@@ -833,7 +833,7 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/project/v1/userProjects/sync/6624ff5124fc48e1fcdbec29?lastDownloadedAt=2024-04-21T11:58:09.204Z",
-							"host": ["{{baseUrl}}project"],
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "userProjects", "sync", "6624ff5124fc48e1fcdbec29"],
 							"query": [
 								{
@@ -876,7 +876,7 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/project/v1/userProjects/details?solutionId=66727b63cf0222d7ec1fa7e0&templateId=IMP-3147f",
-							"host": ["{{baseUrl}}project"],
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "userProjects", "details"],
 							"query": [
 								{
@@ -1106,7 +1106,7 @@
 						],
 						"url": {
 							"raw": "{{baseUrl}}/project/v1/userProjects/searchEntities?solutionId=6880adeee1b9e76a809cd9db&page=10&limit=5",
-							"host": ["{{baseUrl}}project"],
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "userProjects", "searchEntities"],
 							"query": [
 								{
@@ -1148,7 +1148,7 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/project/v1/userProjects/addEntity/68d38c9f69f139b91c9e57b8",
-							"host": ["{{baseUrl}}project"],
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "userProjects", "addEntity", "68d38c9f69f139b91c9e57b8"]
 						}
 					},
@@ -1181,7 +1181,7 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/project/v1/userProjects/deleteUserPIIData",
-							"host": ["{{baseUrl}}project"],
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "userProjects", "deleteUserPIIData"]
 						}
 					},
@@ -1210,7 +1210,7 @@
 						],
 						"url": {
 							"raw": "{{baseUrl}}/project/v1/reports/entity?requestPdf=true&reportType=0",
-							"host": ["{{baseUrl}}project"],
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "reports", "entity"],
 							"query": [
 								{
@@ -1244,7 +1244,7 @@
 						],
 						"url": {
 							"raw": "{{baseUrl}}/project/v1/reports/detailView?requestPdf=true&reportType=2&programId=5f3bc13016fdc4ed008171ae",
-							"host": ["{{baseUrl}}project"],
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "reports", "detailView"],
 							"query": [
 								{
@@ -2611,7 +2611,7 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/project/v1/certificateBaseTemplates/createOrUpdate",
-							"host": ["{{baseUrl}}project"],
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "certificateBaseTemplates", "createOrUpdate"]
 						}
 					},
@@ -2668,7 +2668,7 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/project/v1/certificateBaseTemplates/createOrUpdate/6646e0a7b5226e19a19edf37",
-							"host": ["{{baseUrl}}project"],
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "certificateBaseTemplates", "createOrUpdate", "6646e0a7b5226e19a19edf37"]
 						}
 					},
@@ -2719,7 +2719,7 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/project/v1/certificateTemplates/createOrUpdate",
-							"host": ["{{baseUrl}}project"],
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "certificateTemplates", "createOrUpdate"]
 						}
 					},
@@ -2765,7 +2765,7 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/project/v1/certificateTemplates/createOrUpdate",
-							"host": ["{{baseUrl}}project"],
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "certificateTemplates", "createOrUpdate"]
 						}
 					},
@@ -2812,7 +2812,7 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/project/v1/certificateTemplates/uploadTemplate/:_id?updateTemplate=true",
-							"host": ["{{baseUrl}}project"],
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "certificateTemplates", "uploadTemplate", ":_id"],
 							"query": [
 								{
@@ -2914,7 +2914,7 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/project/v1/certificateTemplates/createSvg?baseTemplateId=66bb5c3e196c83581cc26aa8",
-							"host": ["{{baseUrl}}project"],
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "certificateTemplates", "createSvg"],
 							"query": [
 								{
@@ -2944,7 +2944,7 @@
 						],
 						"url": {
 							"raw": "{{baseUrl}}/project/v1/configurations/read",
-							"host": ["{{baseUrl}}project"],
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "configurations", "read"]
 						}
 					},
@@ -3000,7 +3000,7 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/project/v1/users/programs?isAPrivateProgram=true&page=1&limit=100&search=&language=&getProjectsCount=true",
-							"host": ["{{baseUrl}}project"],
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "users", "programs"],
 							"query": [
 								{
@@ -3054,7 +3054,7 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/project/v1/users/solutions/66bb85bebf682a1f367c55b9",
-							"host": ["{{baseUrl}}project"],
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "users", "solutions", "66bb85bebf682a1f367c55b9"]
 						}
 					},
@@ -3078,7 +3078,7 @@
 						],
 						"url": {
 							"raw": "{{baseUrl}}/project/v1/wishlist/add/66399e6304785762f7e8e4cb",
-							"host": ["{{baseUrl}}project"],
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "wishlist", "add", "66399e6304785762f7e8e4cb"]
 						}
 					},
@@ -3097,7 +3097,7 @@
 						],
 						"url": {
 							"raw": "{{baseUrl}}/project/v1/wishlist/list?page=1&language=ka&limit=10",
-							"host": ["{{baseUrl}}project"],
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "wishlist", "list"],
 							"query": [
 								{
@@ -3130,7 +3130,7 @@
 						],
 						"url": {
 							"raw": "{{baseUrl}}/project/v1/wishlist/remove/66399e6304785762f7e8e4cb",
-							"host": ["{{baseUrl}}project"],
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "wishlist", "remove", "66399e6304785762f7e8e4cb"]
 						}
 					},
@@ -3174,7 +3174,7 @@
 						],
 						"url": {
 							"raw": "{{baseUrl}}/project/v1/projectAttributes/create",
-							"host": ["{{baseUrl}}project"],
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "projectAttributes", "create"]
 						}
 					},
@@ -3222,7 +3222,7 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/project/v1/projectAttributes/update?code=duration&language=hi",
-							"host": ["{{baseUrl}}project"],
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "projectAttributes", "update"],
 							"query": [
 								{
@@ -3256,7 +3256,7 @@
 						],
 						"url": {
 							"raw": "{{baseUrl}}/project/v1/projectAttributes/find?language=en",
-							"host": ["{{baseUrl}}project"],
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "projectAttributes", "find"],
 							"query": [
 								{
@@ -3291,7 +3291,7 @@
 						],
 						"url": {
 							"raw": "{{baseUrl}}/project/v1/template/list?language=ka&hasSpotlight=false&duration=1week&roles=DistrictsEducationOfficer",
-							"host": ["{{baseUrl}}project"],
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "template", "list"],
 							"query": [
 								{
@@ -3394,7 +3394,7 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/project/v1/userExtension/update?tenantId&orgId&userId",
-							"host": ["{{baseUrl}}project"],
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "userExtension", "update"],
 							"query": [
 								{
@@ -3426,7 +3426,7 @@
 						"header": [],
 						"url": {
 							"raw": "{{baseUrl}}/project/health",
-							"host": ["{{baseUrl}}project"],
+							"host": ["{{baseUrl}}"],
 							"path": ["health"]
 						}
 					},

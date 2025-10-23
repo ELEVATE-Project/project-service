@@ -1279,6 +1279,7 @@ module.exports = class UserProjectsHelper {
 								_id: projectId,
 								taskId: taskId,
 							},
+							entityId: assessmentOrObservationData?.entityId,
 						}
 
 						// get solutions details based on solutionTypes
@@ -5384,7 +5385,6 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 					observationData.project.taskId = templateTasks[0]._id
 				}
 			}
-
 			let startDate = new Date()
 			let endDate = new Date()
 			endDate.setFullYear(endDate.getFullYear() + 1)
@@ -5394,14 +5394,16 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 				status: CONSTANTS.common.PUBLISHED_STATUS,
 				startDate: startDate,
 				endDate: endDate,
-				...(userRoleAndProfileInformation[observationData.solutionDetails.subType] && {
-					entities: observationData.entityId
-						? [observationData.entityId]
-						: [userRoleAndProfileInformation[observationData.solutionDetails.subType]],
+				...((observationData.entityId ||
+					userRoleAndProfileInformation[observationData.solutionDetails.subType]) && {
+					entities: [
+						observationData.entityId ||
+							userRoleAndProfileInformation[observationData.solutionDetails.subType],
+					],
 				}),
+
 				project: observationData.project,
 			}
-
 			let observationCreated = await surveyService.createObservation(
 				observationData.token,
 				observationData.solutionDetails._id,

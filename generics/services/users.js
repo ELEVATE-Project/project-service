@@ -319,12 +319,11 @@ const profile = function (userId = '', userToken = '') {
 /**
  * Fetches the default organization details for a given organization code/id.
  * @param {string} organisationIdentifier - The code/id of the organization.
- * @param {String} userToken - user token
  * @param {String} tenantId - tenantId
  * @returns {Promise} A promise that resolves with the organization details or rejects with an error.
  */
 
-const getOrgDetails = function (organisationIdentifier, userToken, tenantId) {
+const getOrgDetails = function (organisationIdentifier, tenantId) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			let url

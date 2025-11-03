@@ -294,23 +294,22 @@
             <div style="width:auto; float:left;position: absolute; bottom:0;">
                 <p class="title" style="margin:auto">Project Status</p>
             </div>
-            <div style="width:60%; margin-left: 20%; margin-bottom:7px;">
-                <% 
-                  const totalTasks = data.tasksArray.length;
-                  const completedTasks = data.response.completedTaskCount || 0;
-                  const progressPercent = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-                %>
-              
-                <p class="progressbarText"><%= completedTasks %>/<%= totalTasks %> tasks completed</p>
-              
-                <% if (totalTasks === 0) { %>
-                    <div id="progress-1"></div>
-                <% } else if (completedTasks === totalTasks) { %>
+            <div style="width:60%; margin-left: 20%;margin-bottom:7px;">
+                
+                <% if(data.tasksArray.length != 0 && data.response.completedTaskCount == data.tasksArray.length) { %>
+                    <p class= "progressbarText"><%=data.response.completedTaskCount%>/<%=data.tasksArray.length%> tasks completed</p>
                     <div id="progress-0"></div>
-                <% } else { %>
-                    <progress value="<%= progressPercent %>" max="100"></progress>
-                <% } %>
-              </div>              
+                <% } else if(data.response.completedTaskCount !== 0 && data.response.completedTaskCount < data.tasksArray.length ) { %>
+                    <p class= "progressbarText"><%=data.response.completedTaskCount%>/<%=data.tasksArray.length%> tasks completed</p>
+                    <progress value="60" max="100"></progress>
+                <% } else if(data.response.completedTaskCount == 0) {%>
+                    <p class ="progressbarText"><%=data.response.completedTaskCount%>/<%=data.tasksArray.length%> tasks completed</p>
+                    <div id="progress-1"></div>
+                <% } else  {%>
+                    <p class ="progressbarText"><%=data.response.completedTaskCount%>/<%=data.tasksArray.length%> tasks completed</p>
+                    <div id="progress-1"></div>
+                <% }  %>
+            </div>
         </div>
         
     </div> 

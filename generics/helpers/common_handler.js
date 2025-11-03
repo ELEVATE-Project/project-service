@@ -185,7 +185,7 @@ const improvementProjectTaskPdfGeneration = async function (responseData, userId
 			})
 		}
 
-		responseData.completedTaskCount = completedTaskCount
+		responseData.completedTaskCount = responseData.taskcompleted
 		try {
 			let FormData = []
 

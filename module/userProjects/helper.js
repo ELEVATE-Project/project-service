@@ -2539,7 +2539,7 @@ module.exports = class UserProjectsHelper {
 
 				//store tasks and attachment data into object
 				let projectFilter = {
-					tasks: projectDocument.filteredTasks,
+					tasks: projectDocument.filteredTasks ? projectDocument.filteredTasks : projectDocument.tasks,
 					attachments: projectDocument.attachments,
 				}
 

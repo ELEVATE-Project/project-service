@@ -1276,6 +1276,9 @@ module.exports = class ProjectTemplatesHelper {
 					minNoOfSubmissionsRequired:
 						newProjectTemplateTask?.solutionDetails?.minNoOfSubmissionsRequired ??
 						CONSTANTS.common.DEFAULT_SUBMISSION_REQUIRED,
+					allowMultipleAssessemts: solution.allowMultipleAssessemts
+						? solution.allowMultipleAssessemts
+						: false,
 				}),
 			})
 

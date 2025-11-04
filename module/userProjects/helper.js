@@ -2502,7 +2502,8 @@ module.exports = class UserProjectsHelper {
 								remarks: 1,
 								attachments: 1,
 								'taskReport.completed': 1,
-								tasks: {
+								tasks: 1,
+								filteredTasks: {
 									$filter: {
 										input: '$tasks',
 										as: 'tasks',
@@ -2538,7 +2539,7 @@ module.exports = class UserProjectsHelper {
 
 				//store tasks and attachment data into object
 				let projectFilter = {
-					tasks: projectDocument.tasks,
+					tasks: projectDocument.filteredTasks,
 					attachments: projectDocument.attachments,
 				}
 

@@ -2524,7 +2524,6 @@ module.exports = class UserProjectsHelper {
 					}
 				}
 
-				console.log(projectDocument)
 				projectDocument = projectDocument[0]
 				projectDocument.goal = projectDocument.metaInformation ? projectDocument.metaInformation.goal : ''
 				projectDocument.duration = projectDocument.metaInformation
@@ -2644,7 +2643,6 @@ module.exports = class UserProjectsHelper {
 					projectDocument.status = UTILS.revertProjectStatus(projectDocument.status)
 				}
 				let response
-				console.log(projectDocument)
 				// if projectpdf is requested generate that else project task pdf can be called
 				if (projectPdf) {
 					response = await common_handler.improvementProjectPdfGeneration(projectDocument, userId)

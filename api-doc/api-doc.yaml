@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Elevate-Project
-  version: 1.0.0
+  version: 3.4.0
   description: >-
     The Elevate Project service offers a comprehensive suite of endpoints
     designed to facilitate the creation of projects, both with and without
@@ -29,58 +29,53 @@ info:
 
     | `orgId`                 | Organization ID                  | `blr`
 servers:
-  - url: http://{{baseurl}}project
+  - url: http://{{baseurl}}/project
 tags:
-  - name: projectTemplates
-  - name: projectCategories
-  - name: projectTemplateTasks
-  - name: userProjects
-  - name: reports
-  - name: programs
-  - name: solutions
-  - name: admin
-  - name: cloud-services
-  - name: Form Apis
-  - name: certificateTemplates
-  - name: configurations
-  - name: users
+  - name: Project Templates
+  - name: Project Categories
+  - name: Project Template Tasks
+  - name: User Projects
+  - name: Reports
+  - name: Programs
+  - name: Solutions
+  - name: Admin
+  - name: Cloud-Services
+  - name: Forms
+  - name: Certificate Templates
+  - name: Configurations
+  - name: Users
     description: ''
     externalDocs:
       description: ''
       url: ''
-  - name: profile
+  - name: Profile
     description: ''
     externalDocs:
       description: ''
       url: ''
-  - name: certificateBaseTemplates
+  - name: Certificate Base Templates
     description: ''
     externalDocs:
       description: ''
       url: ''
-  - name: template
+  - name: Template
     description: ''
     externalDocs:
       description: ''
       url: ''
-  - name: projectAttributes
+  - name: Project Attributes
     description: ''
     externalDocs:
       description: ''
       url: ''
-  - name: wishlist
+  - name: Wishlist
     description: ''
     externalDocs:
       description: ''
       url: ''
-  - name: healthCheck
+  - name: HealthCheck
     description: ''
-  - name: organizationExtension
-    description: ''
-    externalDocs:
-      description: ''
-      url: ''
-  - name: userExtension
+  - name: Organization Extension
     description: ''
     externalDocs:
       description: ''
@@ -89,7 +84,7 @@ paths:
   /v1/project/templates/bulkCreate:
     post:
       tags:
-        - projectTemplates
+        - Project Templates
       summary: Bulk create project templates
       requestBody:
         required: true
@@ -425,9 +420,8 @@ paths:
                     message: Missing file of type projectTemplates
                     status: 400
       description: >-
-        This endpoint allows for the bulk creation of project templates by
-        uploading a csv file containing multiple templates and a json file for
-        multiple languages.
+        Enables bulk creation of project templates by uploading a CSV file
+        with multiple templates and a JSON file for multilingual data.
 
         * The API Endpoint for the bulk creation of project templates is
         `/v1/project/templates/bulkCreate`
@@ -439,7 +433,7 @@ paths:
   /v1/project/templates/bulkUpdate:
     post:
       tags:
-        - projectTemplates
+        - Project Templates
       summary: Bulk update project templates
       requestBody:
         required: true
@@ -504,8 +498,8 @@ paths:
                     message: Missing file of type projectTemplates
                     status: 400
       description: >-
-        This endpoint allows for the bulk updating of project templates by
-        uploading a csv file containing multiple templates.
+        Enables bulk updating of project templates through a CSV 
+        file containing multiple records.
 
         * The API Endpoint for the bulk updating of project templates is
         `/v1/project/templates/bulkUpdate`
@@ -517,7 +511,7 @@ paths:
   /v1/project/templates/update/{_id}:
     post:
       tags:
-        - projectTemplates
+        - Project Templates
       summary: Update project template
       requestBody:
         content:
@@ -550,7 +544,7 @@ paths:
           example: application/json
           required: true
         - name: _id
-          in: header
+          in: path
           schema:
             type: string
           example: '123'
@@ -607,8 +601,8 @@ paths:
                     status: 400
                     message: Project template not found
       description: >-
-        This endpoint allows for updating a specific project template by
-        providing template Id in params.
+        Updates a specific project template using its template 
+        ID provided in the path parameters.
 
         * The API Endpoint for updating a specific project template is
         `/v1/project/templates/update`
@@ -620,7 +614,7 @@ paths:
   /v1/project/templates/listByIds:
     post:
       tags:
-        - projectTemplates
+        - Project Templates
       summary: ' List project templates by id'
       requestBody:
         content:
@@ -689,8 +683,7 @@ paths:
                     status: 400
                     message: Project template not found
       description: >-
-        This endpoint retrieves a list of project templates based on the
-        provided external id.
+        Fetches a list of project templates filtered by the provided external ID.
 
         * The API Endpoint to retrieves a list of project templates is
         `/v1/project/templates/listByIds`
@@ -702,7 +695,7 @@ paths:
   /v1/project/templates/importProjectTemplate/{_id}?solutionId={solution_id}:
     post:
       tags:
-        - projectTemplates
+        - Project Templates
       summary: Imports a project template.
       parameters:
         - name: X-auth-token
@@ -721,13 +714,13 @@ paths:
           example: application/json
           required: true
         - name: _id
-          in: query
+          in: path
           schema:
             type: string
           description: We need to pass the external id of the parent project template.
           required: true
-        - name: solutionId
-          in: query
+        - name: solution_id
+          in: path
           schema:
             type: string
           description: >-
@@ -776,8 +769,8 @@ paths:
                         param: _id
                         msg: required project template id
       description: >-
-        This endpoint will help you to create a duplicate projectTemplate in the
-        query you should pass parent projectTemplate externalId and solutionId.
+        Creates a duplicate project template using the parent template’s external 
+        ID and associated solution ID.
 
         * The API Endpoint will help you to create a duplicate projectTemplate
         is `/v1/project/templates/importProjectTemplate`
@@ -788,8 +781,8 @@ paths:
         * This is a mandatory parameter and cannot be empty or null.
   /v1/project/templates/details/{templateId}:
     get:
-      tags:
-        - projectTemplates
+      tags: &ref_73
+        - Project Templates
       summary: Fetches details of a specific project template
       parameters:
         - &ref_31
@@ -807,8 +800,8 @@ paths:
             To use this API, you require an X-auth-token. This token is
             available in the login API Response.
           required: true
-        - name: _id
-          in: query
+        - name: templateId
+          in: path
           schema:
             type: string
           description: We need to pass the correct id to fetch template details.
@@ -1175,7 +1168,7 @@ paths:
                       projectId: ''
         '400':
           description: 'Bad response '
-          headers: {}
+          headers: &ref_74 {}
           content:
             application/json:
               schema:
@@ -1203,8 +1196,8 @@ paths:
                         param: _id
                         msg: required project template id or externalId
       description: >-
-        This endpoint retrieves detailed information about a specified project
-        template using the template id provided in the params.
+        Retrieves detailed information for a specific project template 
+        identified by its template ID.
 
         * The API to retrieves detailed information about a specified project
         template `/v1/project/templates/details`
@@ -1216,7 +1209,7 @@ paths:
   /v1/library/categories/create:
     post:
       tags: &ref_24
-        - projectCategories
+        - Project Categories
       summary: Creates a new project category in the library.
       requestBody:
         required: true
@@ -1330,8 +1323,7 @@ paths:
                         param: name
                         msg: name is required
       description: >-
-        This endpoint allows the creation of a new project category in the
-        library.
+        Creates a new project category in the project library.
 
         * The API allows the creation of a new project category in the library
         is `/v1/project/categories/create`
@@ -1343,7 +1335,7 @@ paths:
   /v1/library/categories/update/{project_category_id}:
     post:
       tags:
-        - projectCategories
+        - Project Categories
       summary: Update an existing project category.
       requestBody:
         required: true
@@ -1386,8 +1378,8 @@ paths:
           schema:
             type: string
           example: application/json
-        - name: _id
-          in: header
+        - name: project_category_id
+          in: path
           schema:
             type: string
           example: '1234'
@@ -1460,9 +1452,8 @@ paths:
                         param: _id
                         msg: required category id
       description: >-
-        This endpoint allows the user to update the details of an existing
-        project category. The user must provide the project category id in the
-        params and the updated details in the request body.
+        Updates an existing project category using its ID and the updated 
+        details provided in the request body.
 
         * The API allows the user to update the details of an existing project
         category is `/v1/project/categories/update`
@@ -1472,28 +1463,10 @@ paths:
 
         * This is a mandatory parameter and cannot be empty or null.
   /v1/library/categories/list:
-    post:
+    get:
       tags:
-        - projectCategories
+        - Project Categories
       summary: Retrieve a list of project categories.
-      requestBody:
-        content:
-          '*/*':
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                externalId:
-                  type: string
-                icon:
-                  type: string
-            examples:
-              sampleBodyData:
-                value:
-                  name: Teachers
-                  externalId: teachers
-                  icon: static/projectCategories/teacher.png
       parameters:
         - name: X-auth-token
           in: header
@@ -1557,7 +1530,7 @@ paths:
                     status: 400
                     message: Bad request
       description: >-
-        This endpoint allows the user to fetch a list of all project categories.
+        Retrieves a list of all available project categories.
 
         * The API allows the user to fetch a list of all project categories is
         `/v1/project/categories/list`
@@ -1569,7 +1542,7 @@ paths:
   /v1/project/templateTasks/bulkCreate/{_id}:
     post:
       tags:
-        - projectTemplateTasks
+        - Project Template Tasks
       summary: Bulk create project template tasks.
       requestBody:
         required: true
@@ -1678,9 +1651,8 @@ paths:
                         param: _id
                         msg: required project template id
       description: >-
-        This endpoint allows the user to bulk create tasks for a specified
-        project template by uploading a csv file. The user must provide the
-        project template id in the params.
+        Enables bulk creation of tasks for a specific project template by uploading 
+        a CSV file and providing the template ID.
 
         * The API allows the user to bulk create tasks for a specified project
         template is `/v1/project/templateTasks/bulkCreate`
@@ -1692,7 +1664,7 @@ paths:
   /v1/project/templateTasks/bulkUpdate/{projectTemplateId}:
     post:
       tags:
-        - projectTemplateTasks
+        - Project Template Tasks
       summary: Bulk update project template tasks.
       requestBody:
         required: true
@@ -1760,10 +1732,8 @@ paths:
                     message: Project template not found
                     status: 400
       description: >-
-        This endpoint allows the user to bulk update tasks for a specified
-        project template by uploading a csv file. The user must provide the
-        project template id in the path and the csv file containing the updated
-        tasks in the request body.
+        Allows bulk updating of tasks within a project template using a CSV file 
+        and the template ID.
 
         * The API allows the user to bulk update tasks for a specified project
         template is `/v1/project/templateTasks/bulkUpdate`
@@ -1775,7 +1745,7 @@ paths:
   /v1/userProjects/importFromLibrary/{_id}:
     post:
       tags:
-        - userProjects
+        - User Projects
       summary: Import user projects from library.
       requestBody:
         content:
@@ -1816,8 +1786,8 @@ paths:
             type: boolean
           example: 'false'
           required: true
-        - in: query
-          name: id
+        - in: path
+          name: _id
           description: The user must provide the project template id in the path
           schema: *ref_0
           required: true
@@ -1952,9 +1922,8 @@ paths:
                     status: 200
                     result: {}
       description: >-
-        This endpoint allows the user to import projects from a specified
-        project library. The user must provide the project template id in the
-        path.
+        Imports projects from the project library using the specified project 
+        template ID.
 
         * The API allows the user to import projects from a specified project
         library is `/v1/userProjects/importFromLibrary`
@@ -1966,7 +1935,7 @@ paths:
   /v1/userProjects/importedProjects/{programId}:
     get:
       tags:
-        - userProjects
+        - User Projects
       summary: Fetch Imported Projects for a Specific Program
       parameters:
         - name: X-auth-token
@@ -2038,8 +2007,7 @@ paths:
                     status: 400
                     message: Bad request
       description: >-
-        This endpoint retrieves a list of imported projects associated with a
-        given program id.
+        Retrieves all imported projects linked to the specified program ID.
 
         * The API retrieves a list of imported projects associated with a given
         program id is `/v1/userProjects/importedProjects`
@@ -2051,7 +2019,7 @@ paths:
   /v1/userProjects/list?page={page_no}&limit={limit}&search=&filter=:
     post:
       tags:
-        - userProjects
+        - User Projects
       summary: List User Projects
       requestBody:
         content:
@@ -2180,7 +2148,7 @@ paths:
   /v1/userProjects/sync/{_id}?lastDownloadedAt=:
     post:
       tags:
-        - userProjects
+        - User Projects
       summary: Sync User Project
       requestBody:
         content:
@@ -2249,8 +2217,8 @@ paths:
           example: '2024-04-21T11:58:09.204Z'
           required: false
           description: The user need to provide downloaded at
-        - in: query
-          name: id
+        - in: path
+          name: _id
           description: The user need to provided project id.
           schema: *ref_0
           required: true
@@ -2316,7 +2284,7 @@ paths:
   /v1/userProjects/details?solutionId={solution_id}&templateId={template_id}:
     post:
       tags:
-        - userProjects
+        - User Projects
       summary: Fetch details of a specific user project.
       requestBody:
         content:
@@ -2866,9 +2834,8 @@ paths:
                       'isATargetedSolution')
                     status: 500
       description: >-
-        This endpoint allows the retrieval of detailed information about a user
-        project, including project metadata, tasks, and user profile
-        information.
+        Retrieves comprehensive details of a user project, including metadata, 
+        tasks, and user profile info.
 
         * The API retrieves the detailed information about a user project,
         including project metadata, tasks, and user profile information is
@@ -2881,7 +2848,7 @@ paths:
   /v1/userProjects/add:
     post:
       tags: &ref_48
-        - userProjects
+        - User Projects
       summary: Add a new user project.
       requestBody:
         content:
@@ -3175,8 +3142,7 @@ paths:
                         param: title
                         msg: required project title
       description: >-
-        This endpoint allows for the creation of a new user project, including
-        setting project metadata, tasks, and categories.
+        Creates a new user project with associated metadata, tasks, and categories.
 
         * The API allows for the creation of a new user project is
         `/v1/userProjects/add`.
@@ -3188,7 +3154,7 @@ paths:
   /v1/userProjects/share/{project_id}:
     get:
       tags:
-        - userProjects
+        - User Projects
       summary: Add a new user project.
       parameters:
         - name: X-auth-token
@@ -3268,7 +3234,7 @@ paths:
   /v1/userProjects/tasksStatus/{_id}:
     post:
       tags: &ref_39
-        - userProjects
+        - User Projects
       summary: Retrieve the status of specific tasks for a user project.
       requestBody:
         content:
@@ -3354,9 +3320,8 @@ paths:
                         param: _id
                         msg: required project id
       description: >-
-        This endpoint fetches the status of tasks identified by their id within
-        a user project. The request requires authentication tokens in the
-        headers and the project id in the query parameters.
+        Retrieves the status of specific tasks within a user project using task 
+        IDs and project ID. Authentication is required.
 
         * The API allows to fetches the status of tasks identified by their id
         within a user project is `/v1/userProjects/tasksStatus`.
@@ -3368,8 +3333,8 @@ paths:
   /v1/reports/entity?requestPdf=true&reportType={type}&programId={_id}:
     get:
       tags: &ref_10
-        - reports
-      summary: entity report
+        - Reports
+      summary: Entity report
       parameters:
         - name: X-auth-token
           in: header
@@ -3465,7 +3430,7 @@ paths:
   /v1/programs/create:
     post:
       tags:
-        - programs
+        - Programs
       summary: Create a new program.
       requestBody:
         content:
@@ -3497,6 +3462,8 @@ paths:
                   type: array
                   items:
                     type: string
+                userId:
+                  type: string
                 imageCompression:
                   type: object
                   properties:
@@ -3506,38 +3473,21 @@ paths:
                   type: array
                   items:
                     type: string
-                metaInformation:
-                  type: object
-                  properties:
-                    myName:
-                      type: string
                 scope:
                   type: object
                   properties:
-                    cluster:
-                      type: array
-                      items:
-                        type: string
-                    professional_role:
-                      type: array
-                      items:
-                        type: string
-                    professional_subroles:
+                    state:
                       type: array
                       items:
                         type: string
                 requestForPIIConsent:
                   type: boolean
-                startDate:
-                  type: string
-                endDate:
-                  type: string
             examples:
-              example1:
+              sampleBodyData:
                 value:
-                  externalId: new-program-on-june-26
-                  name: DCPCR School Development Index 2024-25
-                  description: DCPCR School Development Index 2024-25
+                  externalId: PROGID01
+                  name: DCPCR School Development Index 2018-19
+                  description: DCPCR School Development Index 2018-19
                   isDeleted: false
                   resourceType:
                     - program
@@ -3545,21 +3495,15 @@ paths:
                     - English
                   keywords: []
                   concepts: []
+                  userId: a082787f-8f8f-42f2-a706-35457ca6f1fd
                   imageCompression:
                     quality: 10
-                  components: []
-                  metaInformation:
-                    myName: Prajwal
+                  components:
+                    - 5b98fa069f664f7e1ae7498c
                   scope:
-                    cluster:
-                      - 67c82d54538125889163fb57
-                    professional_role:
-                      - 681b07b49c57cdcf03c79ae3
-                    professional_subroles:
-                      - 682300fe4e2812081f342664
+                    state:
+                      - e3a58f2b3c4d719a6821b590
                   requestForPIIConsent: true
-                  startDate: '2024-07-09 18:50:00'
-                  endDate: '2025-08-15 18:50:00'
       parameters:
         - name: X-auth-token
           in: header
@@ -3662,7 +3606,7 @@ paths:
   /v1/programs/update/{programId}:
     post:
       tags:
-        - programs
+        - Programs
       summary: Update an existing program.
       requestBody:
         content:
@@ -3854,7 +3798,7 @@ paths:
   /v1/programs/details/{programId}:
     get:
       tags:
-        - programs
+        - Programs
       summary: Fetch program details by program id.
       parameters:
         - name: X-auth-token
@@ -3976,7 +3920,7 @@ paths:
   /v1/programs/addRolesInScope/{programId}:
     post:
       tags:
-        - programs
+        - Programs
       summary: Add roles to program scope.
       requestBody:
         content:
@@ -3992,7 +3936,7 @@ paths:
               sampleBodyData:
                 value:
                   roles:
-                    - UUU
+                    - head_master
       parameters:
         - name: X-auth-token
           in: header
@@ -4078,7 +4022,7 @@ paths:
   /v1/programs/addEntitiesInScope/{programId}:
     post:
       tags:
-        - programs
+        - Programs
       summary: Add entities to program scope.
       requestBody:
         content:
@@ -4087,6 +4031,33 @@ paths:
               type: object
               properties:
                 entities:
+                  type: object
+                  properties:
+                    district:
+                      type: array
+                      items:
+                        type: string
+                    professional_subroles:
+                      type: array
+                      items:
+                        type: string
+                    professional_role:
+                      type: array
+                      items:
+                        type: string
+                    school:
+                      type: array
+                      items:
+                        type: string
+                    language:
+                      type: array
+                      items:
+                        type: string
+                    gender:
+                      type: array
+                      items:
+                        type: string
+                organizations:
                   type: array
                   items:
                     type: string
@@ -4094,7 +4065,22 @@ paths:
               sampleBodyData:
                 value:
                   entities:
-                    - 5f33c3d85f637784791cd830
+                    district:
+                      - 682303044e2812081f3426fb
+                    professional_subroles:
+                      - 682301604e2812081f342674
+                      - 682303044e2812081f3426fb
+                    professional_role:
+                      - 681b07b49c57cdcf03c79ae3
+                      - 681b0800f21c88cef9517e0e
+                    school:
+                      - 67c82d9553812588916410d3
+                    language:
+                      - 681b0800f21c88cef951890e
+                    gender:
+                      - 67c82d955381258891642345
+                  organizations:
+                    - blr
       parameters:
         - name: X-auth-token
           in: header
@@ -4181,7 +4167,7 @@ paths:
   /v1/programs/removeRolesInScope/{programId}:
     post:
       tags:
-        - programs
+        - Programs
       summary: Remove roles from program scope.
       requestBody:
         content:
@@ -4275,7 +4261,7 @@ paths:
   /v1/programs/removeEntitiesInScope/{programId}:
     post:
       tags:
-        - programs
+        - Programs
       summary: Remove entities from program scope
       requestBody:
         content:
@@ -4284,6 +4270,17 @@ paths:
               type: object
               properties:
                 entities:
+                  type: object
+                  properties:
+                    professional_subroles:
+                      type: array
+                      items:
+                        type: string
+                    professional_role:
+                      type: array
+                      items:
+                        type: string
+                organizations:
                   type: array
                   items:
                     type: string
@@ -4291,7 +4288,15 @@ paths:
               sampleBodyData:
                 value:
                   entities:
-                    - 5f33c3d85f637784791cd830
+                    professional_subroles:
+                      - 682301254e2812081f34266c
+                      - 682303044e2812081f3426fb
+                      - 682301604e2812081f342674
+                    professional_role:
+                      - 681b07b49c57cdcf03c79ae3
+                      - 681b0800f21c88cef9517e0e
+                  organizations:
+                    - ALL
       parameters:
         - name: X-auth-token
           in: header
@@ -4378,7 +4383,7 @@ paths:
   /v1/programs/list?page={page_no}&limit={limit}&search=:
     get:
       tags:
-        - programs
+        - Programs
       summary: List programs.
       parameters:
         - name: X-auth-token
@@ -4470,179 +4475,10 @@ paths:
         `required`
 
         * This is a mandatory parameter and cannot be empty or null.
-  /v1/programs/join/{programId}:
-    get:
-      tags:
-        - programs
-      summary: Join program.
-      parameters:
-        - name: X-auth-token
-          in: header
-          schema:
-            type: string
-          example: '{{userToken}}'
-          description: >-
-            To use this API, you require an X-auth-token. This token is
-            available in the login API Response.
-          required: true
-        - name: internal-access-token
-          in: header
-          schema:
-            type: string
-          example: '{{internal_access_token}}'
-        - name: programId
-          in: path
-          schema:
-            type: string
-          description: >-
-            We need to pass valid programId to join a specific program
-            identified by its program id.
-          required: true
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              examples:
-                SuccessResponse:
-                  value:
-                    message: You have joined this program successfully
-                    status: 200
-                    result:
-                      _id: 5ffbf8909259097d48017bbf
-        '400':
-          description: Bad response
-          headers: {}
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: number
-                  message:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        location:
-                          type: string
-                        param:
-                          type: string
-                        msg:
-                          type: string
-                      required:
-                        - location
-                        - param
-                        - msg
-              examples:
-                FailureResponse:
-                  value:
-                    status: 400
-                    message:
-                      - location: params
-                        param: _id
-                        msg: required program id
-                      - location: params
-                        param: _id
-                        msg: Invalid program id
-      requestBody:
-        description: ''
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                externalId:
-                  type: string
-                name:
-                  type: string
-                description:
-                  type: string
-                isDeleted:
-                  type: boolean
-                resourceType:
-                  type: array
-                  items:
-                    type: string
-                language:
-                  type: array
-                  items:
-                    type: string
-                keywords:
-                  type: array
-                  items:
-                    type: string
-                concepts:
-                  type: array
-                  items:
-                    type: string
-                userId:
-                  type: string
-                imageCompression:
-                  type: object
-                  properties:
-                    quality:
-                      type: number
-                components:
-                  type: array
-                  items:
-                    type: string
-                scope:
-                  type: object
-                  properties:
-                    entityType:
-                      type: string
-                    entities:
-                      type: array
-                      items:
-                        type: string
-                    roles:
-                      type: array
-                      items:
-                        type: string
-                requestForPIIConsent:
-                  type: boolean
-            examples:
-              sampleBodyData:
-                value:
-                  externalId: PROGID01
-                  name: DCPCR School Development Index 2018-19
-                  description: DCPCR School Development Index 2018-19
-                  isDeleted: false
-                  resourceType:
-                    - program
-                  language:
-                    - English
-                  keywords: []
-                  concepts: []
-                  userId: a082787f-8f8f-42f2-a706-35457ca6f1fd
-                  imageCompression:
-                    quality: 10
-                  components:
-                    - 5b98fa069f664f7e1ae7498c
-                  scope:
-                    entityType: state
-                    entities:
-                      - bc75cc99-9205-463e-a722-5326857838f8
-                      - 8ac1efe9-0415-4313-89ef-884e1c8eee34
-                    roles:
-                      - HM
-                  requestForPIIConsent: true
-      description: >-
-        Allows a user to join a specific program identified by its program id.
-
-        * The endpoint allows a user to join a specific program identified by
-        its program id is `/v1/programs/join`.
-
-        * It is mandatory to provide values for parameters which are marked as
-        `required`
-
-        * This is a mandatory parameter and cannot be empty or null.
   /v1/solutions/create:
     post:
       tags:
-        - solutions
+        - Solutions
       summary: Create solution.
       requestBody:
         content:
@@ -4860,7 +4696,7 @@ paths:
   /v1/solutions/update/{solutionId}:
     post:
       tags:
-        - solutions
+        - Solutions
       summary: ' Update solution.'
       requestBody:
         content:
@@ -5082,7 +4918,7 @@ paths:
   /v1/solutions/addRolesInScope/{solutionId}:
     post:
       tags:
-        - solutions
+        - Solutions
       summary: ' Add roles to solution scope.'
       requestBody:
         content:
@@ -5098,7 +4934,7 @@ paths:
               sampleBodyData:
                 value:
                   roles:
-                    - aaa
+                    - head_master
       parameters:
         - name: X-auth-token
           in: header
@@ -5185,7 +5021,7 @@ paths:
   /v1/solutions/detailsBasedOnRoleAndLocation/{solutionId}:
     post:
       tags:
-        - solutions
+        - Solutions
       summary: Get solution details by role and location.
       requestBody:
         content:
@@ -5193,14 +5029,14 @@ paths:
             schema:
               type: object
               properties:
-                entityType:
-                  type: string
-                entities:
+                roles:
                   type: array
                   items:
                     type: string
-                role:
-                  type: string
+                state:
+                  type: array
+                  items:
+                    type: string
                 filter:
                   type: object
                   properties:
@@ -5211,14 +5047,14 @@ paths:
             examples:
               sampleBodyData:
                 value:
-                  entityType: block
-                  entities:
-                    - 5fd1b52ab53a6416aaeefc80
-                    - 5fd098e2e049735a86b748ac
-                  role: BEO,SEO
+                  roles:
+                    - head_master
+                    - district_education_officer
+                  state:
+                    - e3a58f2b3c4d719a6821b590
                   filter:
                     skipSolutions:
-                      - 660f9383f65100c296372c79
+                      - 660f9383f65100c296372c77
       parameters:
         - name: X-auth-token
           in: header
@@ -5325,7 +5161,7 @@ paths:
   /v1/solutions/removeRolesInScope/{solutionId}:
     post:
       tags:
-        - solutions
+        - Solutions
       summary: Remove roles from solution scope.
       requestBody:
         content:
@@ -5433,7 +5269,7 @@ paths:
   /v1/solutions/fetchLink/{solutionId}:
     get:
       tags:
-        - solutions
+        - Solutions
       summary: Fetch solution link.
       parameters:
         - name: X-auth-token
@@ -5513,7 +5349,7 @@ paths:
   /v1/solutions/addEntitiesInScope/{solutionId}:
     post:
       tags:
-        - solutions
+        - Solutions
       summary: Add entities to solution scope.
       requestBody:
         content:
@@ -5522,6 +5358,33 @@ paths:
               type: object
               properties:
                 entities:
+                  type: object
+                  properties:
+                    district:
+                      type: array
+                      items:
+                        type: string
+                    professional_subroles:
+                      type: array
+                      items:
+                        type: string
+                    professional_role:
+                      type: array
+                      items:
+                        type: string
+                    school:
+                      type: array
+                      items:
+                        type: string
+                    language:
+                      type: array
+                      items:
+                        type: string
+                    gender:
+                      type: array
+                      items:
+                        type: string
+                organizations:
                   type: array
                   items:
                     type: string
@@ -5529,7 +5392,22 @@ paths:
               sampleBodyData:
                 value:
                   entities:
-                    - 5fd1b52ab53a6416aaeefb12
+                    district:
+                      - 67c82d9553812588916410d3
+                    professional_subroles:
+                      - 682301604e2812081f342674
+                      - 682303044e2812081f3426fb
+                    professional_role:
+                      - 681b07b49c57cdcf03c79ae3
+                      - 681b0800f21c88cef9517e0e
+                    school:
+                      - 67c82d9553812588916410d3
+                    language:
+                      - 681b0800f21c88cef951890e
+                    gender:
+                      - 67c82d955381258891642345
+                  organizations:
+                    - blr
       parameters:
         - name: X-auth-token
           in: header
@@ -5606,7 +5484,7 @@ paths:
   /v1/solutions/removeEntitiesInScope/{solutionId}:
     post:
       tags:
-        - solutions
+        - Solutions
       summary: Remove entities from solution scope
       requestBody:
         content:
@@ -5615,6 +5493,17 @@ paths:
               type: object
               properties:
                 entities:
+                  type: object
+                  properties:
+                    professional_subroles:
+                      type: array
+                      items:
+                        type: string
+                    professional_role:
+                      type: array
+                      items:
+                        type: string
+                organizations:
                   type: array
                   items:
                     type: string
@@ -5622,8 +5511,15 @@ paths:
               sampleBodyData:
                 value:
                   entities:
-                    - 5fd098e2e049735a86b748ac
-                    - 5fd1b52ab53a6416aaeefb12
+                    professional_subroles:
+                      - 682301254e2812081f34266c
+                      - 682303044e2812081f3426fb
+                      - 682301604e2812081f342674
+                    professional_role:
+                      - 681b07b49c57cdcf03c79ae3
+                      - 681b0800f21c88cef9517e0e
+                  organizations:
+                    - ALL
       parameters:
         - name: X-auth-token
           in: header
@@ -5710,7 +5606,7 @@ paths:
   /v1/solutions/forUserRoleAndLocation?programId={programId}&type={type}&subType={subType}&page={page}&limit=:
     post:
       tags:
-        - solutions
+        - Solutions
       summary: Fetch solutions for user role and location.
       requestBody:
         content:
@@ -5837,9 +5733,8 @@ paths:
                         param: entityType
                         msg: entityType required
       description: >-
-        Retrieves solutions based on user role, entity type, and entities within
-        a specified program. This endpoint supports pagination and search
-        functionality.
+        Fetches solutions filtered by user role, entity type, and program, 
+        with support for pagination and search.
 
         * The endpoint allows a user to retrieves solutions based on user role,
         entity type, and entities within a specified program is
@@ -5852,7 +5747,7 @@ paths:
   /v1/solutions/targetedSolutions?type={solutionType}&page={page_no}&limit={limit}&search={search}&filter={filter}:
     post:
       tags:
-        - solutions
+        - Solutions
       summary: Fetch targeted solutions.
       requestBody:
         content:
@@ -6008,7 +5903,7 @@ paths:
   /v1/solutions/verifyLink/{link}:
     post:
       tags:
-        - solutions
+        - Solutions
       summary: ' Verify solution link.'
       requestBody:
         content:
@@ -6016,22 +5911,18 @@ paths:
             schema:
               type: object
               properties:
-                entityType:
+                roles:
                   type: string
-                entities:
+                state:
                   type: array
                   items:
                     type: string
-                role:
-                  type: string
             examples:
               sampleBodyData:
                 value:
-                  entityType: block
-                  entities:
-                    - 5fd1b52ab53a6416aaeefc80
-                    - 5fd098e2e049735a86b748ac
-                  role: BEO
+                  roles: head_master,district_education_officer
+                  state:
+                    - e3a58f2b3c4d719a6821b590
       parameters:
         - name: X-auth-token
           in: header
@@ -6103,8 +5994,7 @@ paths:
                         param: _id
                         msg: required solution link
       description: >-
-        Verifies the validity of a solution link and returns details about the
-        targeted solution.
+        Validates a solution link and provides details of the associated solution.
 
          * The endpoint allows a user to verifies the validity of a solution link and returns details about the
         targeted solution is `/v1/solutions/verifyLink`.
@@ -6116,7 +6006,7 @@ paths:
   /v1/solutions/verifySolution/{solutionId}:
     post:
       tags: &ref_36
-        - solutions
+        - Solutions
       summary: Verify solution by id.
       requestBody:
         content:
@@ -6223,8 +6113,7 @@ paths:
                         param: entityType
                         msg: entityType required
       description: >-
-        Verifies if a solution identified by its solution id is targeted and
-        returns details about the solution.
+        Checks if a solution by ID is targeted and returns its details.
 
         * The endpoint allows a user to verifies if a solution identified by its
         solution id is targeted and returns details about the solution is
@@ -6237,7 +6126,7 @@ paths:
   /v1/solutions/list:
     post:
       tags:
-        - solutions
+        - Solutions
       summary: List solutions
       requestBody:
         content:
@@ -6356,7 +6245,7 @@ paths:
   /v1/solutions/getDetails/{solutionId}:
     get:
       tags:
-        - solutions
+        - Solutions
       summary: Fetch Solution Details
       parameters:
         - name: X-auth-token
@@ -6508,7 +6397,7 @@ paths:
   /v1/admin/createIndex/{_collectionName}:
     post:
       tags: &ref_15
-        - admin
+        - Admin
       summary: Create Index
       requestBody: &ref_16
         content:
@@ -6592,8 +6481,8 @@ paths:
                         param: keys
                         msg: keys required
       description: >-
-        This endpoint allows an admin to create an index for a specified
-        collection. The request body should include the keys to be indexed.
+        Allows admins to create an index for a collection by specifying index 
+        keys in the request body.
 
         * The endpoint allows a user to create an index for a specified
         collection. The request body should include the keys to be indexed is
@@ -6606,7 +6495,7 @@ paths:
   /v1/cloud-services/files/preSignedUrls:
     post:
       tags: &ref_20
-        - cloud-services
+        - Cloud-Services
       summary: Generate Pre-Signed URLs
       requestBody:
         content:
@@ -6718,7 +6607,7 @@ paths:
   /v1/cloud-services/files/getDownloadableUrl:
     post:
       tags:
-        - cloud-services
+        - Cloud-Services
       summary: Generate Downloadable URLs
       requestBody:
         content:
@@ -6746,11 +6635,6 @@ paths:
             To use this API, you require an X-auth-token. This token is
             available in the login API Response.
           required: true
-        - name: internal-access-token
-          in: header
-          schema:
-            type: string
-          example: '{{internal_access_token}}'
       responses:
         '200':
           description: Successful response
@@ -6793,10 +6677,10 @@ paths:
         `required`
 
         * This is a mandatory parameter and cannot be empty or null.
-  /v1/forms/read/{Id}:
+  /v1/forms/read/{_id}:
     post:
       tags:
-        - Form Apis
+        - Forms
       summary: Fetches a form by its id.
       parameters:
         - name: X-auth-token
@@ -6813,8 +6697,8 @@ paths:
           schema:
             type: string
           example: '{{internal_access_token}}'
-        - in: query
-          name: id
+        - in: path
+          name: _id
           description: To read the data we need to match its id
           schema: &ref_8
             type: string
@@ -6866,8 +6750,7 @@ paths:
       description: >-
         This API retrieves a form based on the provided id.
 
-        * The endpoint allows a user to creates a new form with the specified
-        type, subType, and data is `/v1/forms/read`.
+        * The endpoint allows a user to retrieves a form based on the provided id is `/v1/forms/read`.
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -6876,7 +6759,7 @@ paths:
   /v1/forms/create:
     post:
       tags:
-        - Form Apis
+        - Forms
       summary: Creates a new form.
       requestBody:
         content:
@@ -7032,7 +6915,7 @@ paths:
   /v1/forms/update/{Id}:
     post:
       tags:
-        - Form Apis
+        - Forms
       summary: Updates an existing form by its id.
       requestBody:
         content:
@@ -7185,7 +7068,7 @@ paths:
   /v1/certificateBaseTemplates/createOrUpdate:
     post:
       tags:
-        - certificateBaseTemplates
+        - Certificate Base Templates
       summary: Creates certificate base template
       requestBody:
         content:
@@ -7293,10 +7176,8 @@ paths:
                         param: name
                         msg: Base template name required
       description: >-
-        This API creates or updates a certificate base template using a
-        multipart form data.The request requires authentication tokens in the
-        headers.
-
+        Creates or updates a base certificate template using multipart 
+        form data. Authentication is required.
 
         * The endpoint allows a user to creates certificate base
         template`/v1/certificateBaseTemplates/createOrUpdate`.
@@ -7308,7 +7189,7 @@ paths:
   /v1/certificateBaseTemplates/createOrUpdate/{_id}:
     patch:
       tags:
-        - certificateBaseTemplates
+        - Certificate Base Templates
       summary: Updates an existing certificate base template.
       requestBody:
         content:
@@ -7513,7 +7394,7 @@ paths:
           schema: *ref_18
           example: '{{internal_access_token}}'
           required: true
-        - name: _collectionName
+        - name: collectionName
           in: path
           schema:
             type: string
@@ -7723,11 +7604,11 @@ paths:
 
         * This is a mandatory parameter and cannot be empty or null.
       tags:
-        - projectCategories
+        - Project Categories
   /v1/project/templates/list:
     get:
       tags:
-        - projectTemplates
+        - Project Templates
       summary: Lists all the project template
       parameters: &ref_33
         - *ref_24
@@ -8894,7 +8775,7 @@ paths:
   /v1/certificateTemplates/createOrUpdate:
     post:
       tags:
-        - certificateTemplates
+        - Certificate Templates
       summary: Create a certificate template
       requestBody:
         required: true
@@ -9168,10 +9049,10 @@ paths:
         `required`
 
         * This is a mandatory parameter and cannot be empty or null.
-  /v1/certificateTemplates/uploadTemplate:
+  /v1/certificateTemplates/uploadTemplate/{_id}?updateTemplate={Boolean}:
     post:
       tags: &ref_29
-        - certificateTemplates
+        - Certificate Templates
       summary: Helps to upload certificate template file
       requestBody:
         required: true
@@ -9268,9 +9149,8 @@ paths:
                         param: _id
                         msg: required certificate templateId
       description: >-
-        This endpoint allows the user to upload certificate template file. The
-        user must provide the project template id in the path and the file
-        containing the template in the request body.
+        Uploads a certificate template file for a specific project template 
+        using its template ID.
 
         * The API allows the user to upload certificate template file
         `/v1/project/certificateTemplates/uploadTemplate.`
@@ -9400,7 +9280,7 @@ paths:
   /v1/project/configurations/read:
     get:
       tags:
-        - configurations
+        - Configurations
       summary: Fetchs all the configurations meta
       parameters:
         - *ref_31
@@ -9442,10 +9322,9 @@ paths:
                     status: 400
                     message: Bad request
       description: >-
-        This endpoint retrieves all the configurations meta.The request requires
-        authentication tokens in the headers.
+        Retrieves all configuration metadata. Authentication is required.
 
-        * The API to retrieves all the configurations meta
+        * The API to retrieves all the configurations metadata
         `/v1/project/configurations/read`
 
         * It is mandatory to provide values for parameters which are marked as
@@ -9455,10 +9334,18 @@ paths:
   /v1/profle/read:
     get:
       tags:
-        - profile
+        - Profile
       summary: Fetch user profile details
       parameters:
-        - *ref_34
+        - name: X-auth-token
+          in: header
+          schema:
+            type: string
+          example: '{{userToken}}'
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
+          required: true
       responses:
         '200':
           description: Successful response
@@ -9934,7 +9821,7 @@ paths:
         * This is a mandatory parameter and cannot be empty or null.
       operationId: ''
       tags:
-        - certificateTemplates
+        - Certificate Templates
       parameters:
         - in: path
           name: _id
@@ -10188,7 +10075,7 @@ paths:
   /v1/users/programs/isAPrivateProgram=&page=&limit=0&search=&language=&getProjectsCount=:
     post:
       tags:
-        - users
+        - Users
       summary: Fetch user programs details.
       parameters:
         - in: query
@@ -10328,7 +10215,7 @@ paths:
   /v1/users/solutions/{_id}:
     post:
       tags:
-        - users
+        - Users
       summary: Fetch user solutions details.
       parameters:
         - *ref_34
@@ -10760,7 +10647,7 @@ paths:
   /v1/template/list?language=ka&hasSpotlight=false&duration=1 week&roles=:
     get:
       tags:
-        - template
+        - Template
       summary: Lists all the templates
       parameters:
         - *ref_31
@@ -10908,7 +10795,7 @@ paths:
         requires authentication tokens in the headers.
 
 
-        * The API allows the user to edit Svg files`v1/projectAttributes/create`
+        * The API allows the user to create project attributes`v1/projectAttributes/create`
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -10916,7 +10803,7 @@ paths:
         * This is a mandatory parameter and cannot be empty or null.
       operationId: ''
       tags:
-        - projectAttributes
+        - Project Attributes
       parameters:
         - &ref_55
           in: header
@@ -11016,7 +10903,7 @@ paths:
           `When updating translations data, make sure to provide translations for all the data fields in all supported languages. If any translations are missing, the API will only return the fields you have provided, which may result in incomplete data. When updating the  values for duration please maintain lowercase. If you are updating roles filter the value to be added in the request body should be the code of the user role fetched from userRoleExtension.`
       operationId: ''
       tags:
-        - projectAttributes
+        - Project Attributes
       parameters:
         - *ref_55
         - in: header
@@ -11165,7 +11052,7 @@ paths:
         params.
 
 
-        * The API allows the user to edit Svg files`v1/projectAttributes/find`
+        * The API allows the user to find project attributes `v1/projectAttributes/find`
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -11173,7 +11060,7 @@ paths:
         * This is a mandatory parameter and cannot be empty or null.
       operationId: ''
       tags:
-        - projectAttributes
+        - Project Attributes
       parameters:
         - *ref_55
         - &ref_59
@@ -11308,7 +11195,7 @@ paths:
         params.
 
 
-        * The API allows the user to edit Svg files`v1/wishlist/add`
+        * The API allows the user to add wishlist `v1/wishlist/add`
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -11316,7 +11203,7 @@ paths:
         * This is a mandatory parameter and cannot be empty or null.
       operationId: ''
       tags: &ref_60
-        - wishlist
+        - Wishlist
       parameters: &ref_61
         - *ref_55
         - *ref_59
@@ -11387,7 +11274,7 @@ paths:
         params.
 
 
-        * The API allows the user to edit Svg files`v1/wishlist/list`
+        * The API allows the user to list all wishlist`v1/wishlist/list`
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -11567,7 +11454,7 @@ paths:
         params.
 
 
-        * The API allows the user to edit Svg files`v1/wishlist/remove`
+        * The API allows the user to remove wishlist`v1/wishlist/remove`
 
         * It is mandatory to provide values for parameters which are marked as
         `required`
@@ -11607,7 +11494,7 @@ paths:
   /v1/userExtension/bulkUpload:
     post:
       tags:
-        - userExtension
+        - UserExtension
       summary: Bulk user role management API
       requestBody:
         required: true
@@ -11688,7 +11575,7 @@ paths:
         * This is a mandatory parameter and cannot be empty or null.
       operationId: ''
       tags:
-        - healthCheck
+        - HealthCheck
       parameters: []
       responses:
         '200':
@@ -11835,121 +11722,6 @@ paths:
                     status: 400
                     result: {}
       summary: To verify the health status
-  /v1/userProjects/searchEntities:
-    get:
-      description: >2-
-         This endpoint is used to search the entities of a project or a solution. 
-        * The API Endpoint to search the entities of a project or a solution. 
-        is `v1/userProjects/searchEntities`
-
-        * It is mandatory to provide values for parameters which are marked as
-        `required`
-
-        * This is a mandatory parameter and cannot be empty or null.
-      operationId: ''
-      tags:
-        - userProjects
-      parameters: []
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                  status:
-                    type: number
-                  result:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        data:
-                          type: array
-                          items:
-                            type: object
-                            properties:
-                              _id:
-                                type: string
-                              externalId:
-                                type: string
-                              name:
-                                type: string
-                              entityType:
-                                type: string
-                              selected:
-                                type: boolean
-                            required:
-                              - _id
-                              - externalId
-                              - name
-                              - entityType
-                              - selected
-                        count:
-                          type: number
-              examples:
-                example1:
-                  value:
-                    message: Entities fetched successfully
-                    status: 200
-                    result:
-                      - data:
-                          - _id: 6852c9207248c20014b38dd3
-                            externalId: '16030100406'
-                            name: BALARAM BAZAR J. B. SCHOOL
-                            entityType: school
-                            selected: false
-                          - _id: 6852c9207248c20014b38dd4
-                            externalId: '16030100405'
-                            name: BALARAM HIGH SCHOOL
-                            entityType: school
-                            selected: false
-                          - _id: 6852c9207248c20014b38dd5
-                            externalId: '16030103101'
-                            name: JARMANJOY CHOWDHURY PARA SB SCHOOL
-                            entityType: school
-                            selected: false
-                          - _id: 6852c9207248c20014b38dd6
-                            externalId: '16030100407'
-                            name: JITENDRA ROAJA PARA JB SCHOOL
-                            entityType: school
-                            selected: false
-                          - _id: 6852c9207248c20014b38dd7
-                            externalId: '16030100403'
-                            name: LATIACHARA JB SCHOOL
-                            entityType: school
-                            selected: false
-                        count: 5
-    parameters:
-      - in: query
-        name: solutionId
-        description: solution id
-        schema: &ref_65
-          type: string
-      - in: query
-        name: page
-        description: page number
-        schema: &ref_64
-          type: number
-      - in: query
-        name: limit
-        description: page size
-        schema: *ref_64
-      - in: query
-        name: projectId
-        description: project id
-        schema: *ref_65
-      - in: query
-        name: parentEntityId
-        description: parent entity id
-        schema: *ref_65
-      - in: header
-        name: x-auth-token
-        description: authenticated user token
-        schema: *ref_65
   /project/v1/admin/deleteResource/:resourceId?type=solution:
     post:
       description: >-
@@ -11965,7 +11737,7 @@ paths:
         * This is a mandatory parameter and cannot be empty or null.
       operationId: ''
       tags:
-        - admin
+        - Admin
       parameters:
         - in: path
           name: type
@@ -12094,7 +11866,7 @@ paths:
       description: ''
       operationId: ''
       tags:
-        - organizationExtension
+        - Organization Extension
       parameters: []
       responses:
         '200':
@@ -12185,7 +11957,7 @@ paths:
       description: ''
       operationId: ''
       tags:
-        - organizationExtension
+        - Organization Extension
       parameters: []
       responses:
         '200':
@@ -12339,16 +12111,35 @@ paths:
         description: This is orgId used to create resources
         schema: *ref_68
         required: true
-  /v1/userExtension/update?tenantId={{tenantId}}&orgId={{orgId}}&userId={{userId}}:
-    post:
-      description: ''
+  /v1/userProjects/searchEntities/{solutionId}?search={searchText}:
+    get:
+      summary: Search entities in project.
+      description: >-
+        This endpoint search entities in project based on the solution id
+        passed.
+
+        * The API allows search entities in project based on the solution id
+        passed is `/v1/userProjects/searchEntities`.
+
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
       operationId: ''
       tags:
-        - userExtension
-      parameters: []
+        - User Projects
+      parameters:
+        - in: header
+          name: X-auth-token
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
+          schema:
+            type: string
+          required: true
       responses:
         '200':
-          description: OK
+          description: Successful response
           content:
             application/json:
               schema:
@@ -12363,36 +12154,38 @@ paths:
                     items:
                       type: object
                       properties:
-                        success:
-                          type: boolean
-                        message:
-                          type: string
-                        userId:
-                          type: number
-                        _id:
-                          type: string
-                        programId:
-                          type: string
-                        roles:
+                        data:
                           type: array
                           items:
-                            type: string
+                            type: object
+                            properties:
+                              _id:
+                                type: string
+                              externalId:
+                                type: string
+                              name:
+                                type: string
+                              entityType:
+                                type: string
+                              selected:
+                                type: boolean
+                        count:
+                          type: number
               examples:
-                example1:
+                SuccessResponse:
                   value:
-                    message: User extension updated successfully
+                    message: Entities fetched successfully
                     status: 200
                     result:
-                      - success: true
-                        message: User extension updated successfully
-                        userId: 456
-                        _id: 68d624bcb29ba75de094634e
-                        programId: 6825a30dc407a50014b6a73f
-                        roles:
-                          - org_admin
-                          - mentee
+                      - data:
+                          - _id: 6852c9207248c20014b38dd3
+                            externalId: '16030100406'
+                            name: BALARAM BAZAR J. B. SCHOOL
+                            entityType: school
+                            selected: false
+                        count: 1
         '400':
-          description: ''
+          description: Bad response
           headers: {}
           content:
             application/json:
@@ -12404,92 +12197,346 @@ paths:
                   message:
                     type: string
               examples:
-                example1:
+                FailureResponse:
                   value:
                     status: 400
-                    message: User extension update failed
+                    message: Required Solution id
+    parameters:
+      - name: solutionId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Valid Solution Id
+      - name: searchText
+        in: path
+        required: false
+        schema:
+          type: string
+        description: ''
+  /v1/userProjects/addEntity/{_id}:
+    post:
+      summary: Add entities to a project
+      description: >-
+        This endpoint helps to add entities to a project.
+
+        * The API allows to add entities to a project is
+        `/v1/userProjects/addEntity`.
+
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
+      operationId: ''
+      tags: &ref_69
+        - User Projects
+      parameters: &ref_70
+        - in: header
+          name: X-auth-token
+          description: >-
+            To use this API, you require an X-auth-token. This token is
+            available in the login API Response.
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  result:
+                    type: object
+                    properties:
+                      projectId:
+                        type: string
+                      entityInformation:
+                        type: object
+                        properties:
+                          _id:
+                            type: string
+                          entityType:
+                            type: string
+                          entityTypeId:
+                            type: string
+                          entityId:
+                            type: string
+                          externalId:
+                            type: string
+                          entityName:
+                            type: string
+              examples:
+                SuccessResponse:
+                  value:
+                    success: true
+                    message: Entity added to project successfully
+                    result:
+                      projectId: 68d38c9f69f139b91c9e57b8
+                      entityInformation:
+                        _id: 687a66c07f4bcd29a40c908d
+                        entityType: school
+                        entityTypeId: 687e96c01f4bce29a40c178h
+                        entityId: 687a66c07f4bcd29a40c908d
+                        externalId: school-17384712438
+                        entityName: GOVT HIGH SCHOOL Gulbarga
+        '400':
+          description: Bad response
+          headers: &ref_71 {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  message:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        location:
+                          type: string
+                        param:
+                          type: string
+                        msg:
+                          type: string
+                      required:
+                        - location
+                        - param
+                        - msg
+              examples:
+                FailureResponse:
+                  value:
+                    status: 400
+                    message:
+                      - location: params
+                        param: _id
+                        msg: projectId is required in path params
+                      - location: params
+                        param: _id
+                        msg: projectId must be a valid MongoDB ObjectId
       requestBody:
         content:
           application/json:
             schema:
               type: object
               properties:
-                data:
+                entityId:
+                  type: string
+            examples:
+              sampleBodyData:
+                value:
+                  entityId: 687a66c07f4bcd29a40c908d
+    parameters: &ref_72
+      - name: _id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: ''
+  /v1/userProjects/deleteUserPIIData:
+    post:
+      summary: To delete the user transactional data
+      description: >-
+        This endpoint helps to delete the user transactional data.
+
+        * The API allows to delete the user transactional dat is
+        `/v1/userProjects/deleteUserPIIData`.
+
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
+      operationId: ''
+      tags: *ref_69
+      parameters: *ref_70
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: number
+              examples:
+                SuccessResponse:
+                  value:
+                    message: Data deleted successfully.
+                    status: 200
+        '400':
+          description: Bad response
+          headers: *ref_71
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  message:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        location:
+                          type: string
+                        param:
+                          type: string
+                        msg:
+                          type: string
+              examples:
+                FailureResponse:
+                  value:
+                    status: 400
+                    message:
+                      - location: body
+                        param: id
+                        msg: required id of the user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: number
+            examples:
+              sampleBodyData:
+                value:
+                  id: 1
+    parameters: *ref_72
+  /v1/project/templates/createChildProjectTemplate?isExternalProgram={true/false}&programExternalId={programExternalId}:
+    get:
+      tags: *ref_73
+      summary: Create child project template
+      parameters:
+        - *ref_31
+        - *ref_32
+        - in: header
+          name: internal-access-token
+          description: ''
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              examples:
+                SuccessResponse:
+                  value:
+                    message: Partial Child Project Template Created
+                    status: 200
+                    result:
+                      successfulTemplates:
+                        - parentExternalId: IDE-1747297530253
+                          _id: 68ece25327bd998cf7670bab
+                          externalId: IDE-1747297530253-1760354899122
+                          isReusable: false
+                        - parentExternalId: IDE-1747326100274
+                          _id: 68ece25327bd998cf7670bbc
+                          externalId: IDE-1747326100274-1760354899255
+                          isReusable: false
+                      failedTemplates:
+                        - parentExternalId: IDE-1747297137661
+                          error: >-
+                            E11000 duplicate key error collection:
+                            qadb.solutions index: externalId_1_tenantId_1 dup
+                            key: { externalId: "IDE-1747297137661", tenantId:
+                            "shikshalokam" }
+        '400':
+          description: 'Bad response '
+          headers: *ref_74
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  message:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        location:
+                          type: string
+                        param:
+                          type: string
+                        msg:
+                          type: string
+                      required:
+                        - location
+                        - param
+                        - msg
+              examples:
+                FailureResponse:
+                  value:
+                    status: 400
+                    message:
+                      - location: query
+                        param: programExternalId
+                        msg: required programExternalId
+                      - location: body
+                        param: projectTemplateExternalIds
+                        msg: required projectTemplateExternalIds
+                      - location: body
+                        param: projectTemplateExternalIds
+                        msg: projectTemplateExternalIds must be an array
+                      - location: body
+                        param: projectTemplateExternalIds
+                        msg: projectTemplateExternalIds cannot be empty
+      description: >-
+        This endpoint create child project template based on the parent project
+        template externalId passed in the request body.
+
+        * The API to create child project template is
+        `/v1/project/templates/createChildProjectTemplate`
+
+        * It is mandatory to provide values for parameters which are marked as
+        `required`
+
+        * This is a mandatory parameter and cannot be empty or null.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                projectTemplateExternalIds:
                   type: array
                   items:
-                    type: object
-                    properties:
-                      userId:
-                        type: number
-                      programId:
-                        type: string
-                      operation:
-                        type: string
-                      roles:
-                        type: array
-                        items:
-                          type: string
-                    required:
-                      - userId
-                      - programId
-                      - operation
-                      - roles
+                    type: string
             examples:
-              example1:
+              sampleBodyData:
                 value:
-                  data:
-                    - userId: 1
-                      programId: 686e16212cb81c0014a49111
-                      operation: append
-                      roles:
-                        - program_manager
-                    - userId: 456
-                      programId: 6825a30dc407a50014b6a73f
-                      operation: append
-                      roles:
-                        - program_manager
-                        - mentee
-                        - org_admin
+                  projectTemplateExternalIds:
+                    - IDE-1747297137661
+                    - IDE-1747297530253
+                    - IDE-1747326100274
     parameters:
-      - in: header
-        name: internal-access-token
-        description: internal access token of the service
-        schema:
-          type: string
-        required: true
-      - in: query
-        name: tenantId
-        description: tenantid of the prorgram manager
-        schema: &ref_69
-          type: string
-        required: true
-      - in: query
-        name: userId
-        description: userId
-        schema: *ref_69
-        required: true
-      - in: query
-        name: orgId
-        description: orgId of the program manager
-        schema: *ref_69
-        required: true
-      - name: '{tenantId'
+      - name: true/false
         in: path
         required: true
         schema:
           type: string
         description: ''
-      - name: '{orgId'
+      - name: programExternalId
         in: path
         required: true
         schema:
           type: string
-        description: ''
-      - name: '{userId'
-        in: path
-        required: true
-        schema:
-          type: string
-        description: ''
+        description: Valid program external Id to be passed
 components:
   securitySchemes: {}

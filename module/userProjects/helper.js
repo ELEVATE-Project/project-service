@@ -2524,6 +2524,7 @@ module.exports = class UserProjectsHelper {
 					}
 				}
 
+				console.log(projectDocument)
 				projectDocument = projectDocument[0]
 				projectDocument.goal = projectDocument.metaInformation ? projectDocument.metaInformation.goal : ''
 				projectDocument.duration = projectDocument.metaInformation
@@ -2553,7 +2554,11 @@ module.exports = class UserProjectsHelper {
 					projectDataWithUrl.data.tasks &&
 					projectDataWithUrl.data.tasks.length > 0
 				) {
-					projectDocument.tasks = projectDataWithUrl.data.tasks
+					if (projectDocument.filteredTasks) {
+						projectDocument.filteredTasks = projectDataWithUrl.data.tasks
+					} else {
+						projectDocument.tasks = projectDataWithUrl.data.tasks
+					}
 				}
 
 				if (
@@ -2639,6 +2644,7 @@ module.exports = class UserProjectsHelper {
 					projectDocument.status = UTILS.revertProjectStatus(projectDocument.status)
 				}
 				let response
+				console.log(projectDocument)
 				// if projectpdf is requested generate that else project task pdf can be called
 				if (projectPdf) {
 					response = await common_handler.improvementProjectPdfGeneration(projectDocument, userId)

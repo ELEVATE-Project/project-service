@@ -1425,7 +1425,12 @@ module.exports = class SolutionsHelper {
 					['type', 'status', 'endDate', 'startDate']
 				)
 
-				if (!Array.isArray(solutionData) || solutionData.length < 1) {
+				// updated condition, if solution is inactive no need to check further
+				if (
+					!Array.isArray(solutionData) ||
+					solutionData.length < 1 ||
+					solutionData[0].status !== CONSTANTS.common.ACTIVE_STATUS
+				) {
 					return resolve({
 						message: CONSTANTS.apiResponses.INVALID_LINK,
 						result: [],
@@ -1465,6 +1470,7 @@ module.exports = class SolutionsHelper {
 
 				// check start date is greater than current date
 				if (solutionData[0].startDate && new Date() < new Date(solutionData[0].startDate)) {
+					//isValidStartDate is passed in this situation and based on that key only verifyLink function should return message
 					return resolve({
 						message:
 							CONSTANTS.apiResponses.LINK_IS_NOT_ACTIVE_YET +
@@ -1473,7 +1479,9 @@ module.exports = class SolutionsHelper {
 								.utcOffset(timeZoneDifference)
 								.add(1, 'minute')
 								.format('ddd, D MMM YYYY, hh:mm A'),
-						result: [],
+						result: {
+							isValidStartDate: false,
+						},
 					})
 				}
 				response.verified = true
@@ -1719,7 +1727,13 @@ module.exports = class SolutionsHelper {
 
 				queryData.data['link'] = link
 				let matchQuery = queryData.data
+				// here we have to identify if the solution is targetted or not regardless of time (solution active or not)
+				if (matchQuery.status) {
+					delete matchQuery.status
+				}
+
 				matchQuery['tenantId'] = userDetails.userInformation.tenantId
+
 				let solutionData = await solutionsQueries.solutionsDocument(matchQuery, [
 					'_id',
 					'link',
@@ -1752,6 +1766,7 @@ module.exports = class SolutionsHelper {
 					? solutionDetails[0].projectTemplateId
 					: ''
 				response.programName = solutionDetails[0].programName
+				response.status = solutionDetails[0].status // this status is required to know whether the solution is active or inactive at verifyLink function.
 				delete response._id
 
 				return resolve({
@@ -2829,12 +2844,17 @@ module.exports = class SolutionsHelper {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let verifySolution = await this.verifySolutionDetails(link, userId, userToken, userDetails)
-				if (!verifySolution.success) {
+
+				// if link access is requested before start date return error
+				if (verifySolution.result && verifySolution.result.isValidStartDate === false) {
 					throw {
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: verifySolution.message ? verifySolution.message : CONSTANTS.apiResponses.INVALID_LINK,
+						status: HTTP_STATUS_CODE.bad_request.statusß,
+						message: verifySolution.message
+							? verifySolution.message
+							: messageConstants.apiResponses.INVALID_LINK,
 					}
 				}
+
 				let checkForTargetedSolution = await this.checkForTargetedSolution(link, bodyData, userDetails)
 				if (!checkForTargetedSolution || Object.keys(checkForTargetedSolution.result).length <= 0) {
 					return resolve(checkForTargetedSolution)
@@ -2842,75 +2862,9 @@ module.exports = class SolutionsHelper {
 
 				let solutionData = checkForTargetedSolution.result
 				let isSolutionActive = solutionData.status === CONSTANTS.common.INACTIVE ? false : true
-				// if (solutionData.type == CONSTANTS.common.OBSERVATION) {
-				// Targeted solution
-				// if (checkForTargetedSolution.result.isATargetedSolution) {
-				//   let observationDetailFromLink =
-				//     await entitiesHelper.details(
-				//       userToken,
-				//       solutionData.solutionId
-				//     );
 
-				//   if (observationDetailFromLink.success) {
-				//     checkForTargetedSolution.result["observationId"] =
-				//       observationDetailFromLink.result._id != ""
-				//         ? observationDetailFromLink.result._id
-				//         : "";
-				//   } else if (!isSolutionActive) {
-				//     throw new Error(CONSTANTS.apiResponses.LINK_IS_EXPIRED);
-				//   }
-				// } else {
-				//   if (!isSolutionActive) {
-				//     throw new Error(CONSTANTS.apiResponses.LINK_IS_EXPIRED);
-				//   }
-				// }
-				// } else if (solutionData.type === CONSTANTS.common.SURVEY) {
-				// Get survey submissions of user
-				/**
-           * function userServeySubmission 
-           * Request:
-           * @query :SolutionId -> solutionId
-           * @param {userToken} for UserId
-           * @response Array of survey submissions
-           * example: {
-            "success":true,
-            "message":"Survey submission fetched successfully",
-            "data":[
-                {
-                    "_id":"62e228eedd8c6d0009da5084",
-                    "solutionId":"627dfc6509446e00072ccf78",
-                    "surveyId":"62e228eedd8c6d0009da507d",
-                    "status":"completed",
-                    "surveyInformation":{
-                        "name":"Create a Survey (To check collated reports) for 4.9 regression -- FD 380",
-                        "description":"Create a Survey (To check collated reports) for 4.9 regression -- FD 380"
-                    }
-                }
-            ]
-          }       
-           */
-				// let surveySubmissionDetails =
-				//   await surveyService.userSurveySubmissions(
-				//     userToken,
-				//     solutionData.solutionId
-				//   );
-				// let surveySubmissionData = surveySubmissionDetails.result;
-				// if (surveySubmissionData.length > 0) {
-				//   checkForTargetedSolution.result.submissionId =
-				//     surveySubmissionData[0]._id ? surveySubmissionData[0]._id : "";
-				//   checkForTargetedSolution.result.surveyId = surveySubmissionData[0]
-				//     .surveyId
-				//     ? surveySubmissionData[0].surveyId
-				//     : "";
-				//   checkForTargetedSolution.result.submissionStatus =
-				//     surveySubmissionData[0].status;
-				// } else if (!isSolutionActive) {
-				//   throw new Error(CONSTANTS.apiResponses.LINK_IS_EXPIRED);
-				// }
-				// } else
 				if (solutionData.type === CONSTANTS.common.IMPROVEMENT_PROJECT) {
 					// Targeted solution
-
 					if (checkForTargetedSolution.result.isATargetedSolution && createProject) {
 						//targeted user with project creation
 

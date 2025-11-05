@@ -33,7 +33,6 @@ const testimonialsHelper = require(MODULES_BASE_PATH + '/testimonials/helper')
 const surveyService = require(SERVICES_BASE_PATH + '/survey')
 const solutionsUtils = require(GENERICS_FILES_PATH + '/helpers/solutionAndProjectTemplateUtils')
 const entitiesService = require(GENERICS_FILES_PATH + '/services/entity-management')
-const solutionsHelper = require(MODULES_BASE_PATH + '/solutions/helper')
 const orgExtensionQueries = require(DB_QUERY_BASE_PATH + '/organizationExtension')
 const adminHelper = require(MODULES_BASE_PATH + '/admin/helper')
 
@@ -663,7 +662,7 @@ module.exports = class ProjectTemplatesHelper {
 						}
 
 						// Create a solution for this project template
-						let createdSolution = await solutionsHelper.createSolution(
+						let createdSolution = await solutionsUtils.createSolution(
 							solutionData,
 							true,
 							userDetails,

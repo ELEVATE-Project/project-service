@@ -2848,7 +2848,7 @@ module.exports = class SolutionsHelper {
 				// if link access is requested before start date return error
 				if (verifySolution.result && verifySolution.result.isValidStartDate === false) {
 					throw {
-						status: httpStatusCode.bad_request.status,
+						status: HTTP_STATUS_CODE.bad_request.statusß,
 						message: verifySolution.message
 							? verifySolution.message
 							: messageConstants.apiResponses.INVALID_LINK,

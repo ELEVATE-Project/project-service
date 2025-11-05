@@ -1727,7 +1727,11 @@ module.exports = class SolutionsHelper {
 
 				queryData.data['link'] = link
 				let matchQuery = queryData.data
-				delete matchQuery.status // here we have to identify if the solution is targetted or not regardless of time (solution active or not)
+				// here we have to identify if the solution is targetted or not regardless of time (solution active or not)
+				if (matchQuery.status) {
+					delete matchQuery.status
+				}
+
 				matchQuery['tenantId'] = userDetails.userInformation.tenantId
 
 				let solutionData = await solutionsQueries.solutionsDocument(matchQuery, [

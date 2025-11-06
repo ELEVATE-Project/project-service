@@ -1426,11 +1426,15 @@ module.exports = class SolutionsHelper {
 				)
 
 				// updated condition, if solution is inactive no need to check further
-				if (
-					!Array.isArray(solutionData) ||
-					solutionData.length < 1 ||
-					solutionData[0].status !== CONSTANTS.common.ACTIVE_STATUS
-				) {
+				if (!Array.isArray(solutionData) || solutionData.length < 1) {
+					return resolve({
+						message: CONSTANTS.apiResponses.NO_SOLUTION_FOUND_FOR_THE_LINK,
+						result: [],
+						returnError: true,
+					})
+				}
+
+				if (solutionData[0].status !== CONSTANTS.common.ACTIVE_STATUS) {
 					return resolve({
 						message: CONSTANTS.apiResponses.INVALID_LINK,
 						result: [],
@@ -1479,9 +1483,8 @@ module.exports = class SolutionsHelper {
 								.utcOffset(timeZoneDifference)
 								.add(1, 'minute')
 								.format('ddd, D MMM YYYY, hh:mm A'),
-						result: {
-							isValidStartDate: false,
-						},
+						result: [],
+						returnError: true,
 					})
 				}
 				response.verified = true
@@ -2846,9 +2849,9 @@ module.exports = class SolutionsHelper {
 				let verifySolution = await this.verifySolutionDetails(link, userId, userToken, userDetails)
 
 				// if link access is requested before start date return error
-				if (verifySolution.result && verifySolution.result.isValidStartDate === false) {
+				if (verifySolution.returnError) {
 					throw {
-						status: HTTP_STATUS_CODE.bad_request.statusß,
+						status: HTTP_STATUS_CODE.bad_request.status,
 						message: verifySolution.message
 							? verifySolution.message
 							: messageConstants.apiResponses.INVALID_LINK,
@@ -2856,6 +2859,7 @@ module.exports = class SolutionsHelper {
 				}
 
 				let checkForTargetedSolution = await this.checkForTargetedSolution(link, bodyData, userDetails)
+
 				if (!checkForTargetedSolution || Object.keys(checkForTargetedSolution.result).length <= 0) {
 					return resolve(checkForTargetedSolution)
 				}

@@ -3073,7 +3073,6 @@ module.exports = class SolutionsHelper {
 						}
 					}
 					//Adding for drop 1 of elevate-project will remove it later
-					const projectTemplatesHelper = require(MODULES_BASE_PATH + '/project/templates/helper')
 					templateOrQuestionDetails = await projectTemplatesHelper.details(
 						solutionData.projectTemplateId,
 						'',

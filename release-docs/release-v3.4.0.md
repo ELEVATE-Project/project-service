@@ -84,6 +84,7 @@ _No migrations applicable._
 "USER_COURSES_SUBMISSION_TOPIC": "elevate_user_courses_prod"
 "USER_COURSES_TOPIC": "elevate_user_courses_prod_raw"
 "RESOURCE_DELETION_TOPIC": "resource_deletion_topic_prod"
+"ORG_UPDATES_TOPIC" : "elevate_project_org_extension_event_listener"
 ```
 
 **Update:**
@@ -108,6 +109,10 @@ node correctScopeOrgValues.js
 # M3. Update program components
 cd migrations/updateComponentInPrograms
 node updateComponentInPrograms.js
+
+# M4. Create default org policies
+cd migrations/createOrgExtensions
+node createOrgExtensions.js
 ```
 
 ### 3. PM2 Deployment

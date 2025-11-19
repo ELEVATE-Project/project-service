@@ -9,6 +9,7 @@
 -   **[1547] Solution Sequencing** – Added feature to list solutions in the sequencing order defined in a program.
 -   **[1559] Resource Deletion (Admin APIs)** – Implemented APIs to remove programs/solutions and their related resources from the system.
 -   **Health Check** – Introduced a health check feature with relevant API endpoints for system monitoring.
+-   **Org Policies** - Introduced org policies in library flow to allow the users to access resources despite of organization boundaries.
 
 ---
 
@@ -28,6 +29,8 @@ Execute the following scripts after deployment:
     – Normalize `orgId/orgIds` fields in solution scope, if present.
 -   `migrations/updateComponentsOfAllPrograms.js`
     – Updates components of existing program with sequence.
+-   `migrations/createOrgExtensions/createOrgExtensions.js`
+    -This script helps to create default org policies & updates projectCategories collections.
 
 ---
 

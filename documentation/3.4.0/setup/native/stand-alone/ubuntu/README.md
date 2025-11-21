@@ -150,7 +150,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
         1. Download `create-databases.sh` Script File:
 
             ```
-            curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/native/scripts/linux/create-databases.sh
+            curl -OJL https://github.com/ELEVATE-Project/project-service/blob/setupGuide-3.4/documentation/3.4.0/native/scripts/stand-alone/ubuntu/create-databases.sh
             ```
 
         2. Make the executable by running the following command:

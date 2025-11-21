@@ -1,0 +1,17 @@
+API_DOC_URL= /interface/api-doc
+APPLICATION_ENV= development
+APPLICATION_PORT= 3569
+ENTITY_SERVICE_BASE_URL= http://localhost:5001
+INSTALLED_PACKAGES=elevate-project elevate-self-creation-portal elevate-survey-observation
+NOTIFICATION_SERVICE_BASE_URL= http://localhost:3002
+PROJECT_SERVICE_BASE_URL= http://localhost:5000
+RATE_LIMITER_ENABLED= false
+RATE_LIMITER_GENERAL_LIMIT= 50
+RATE_LIMITER_NUMBER_OF_PROXIES= 3
+RATE_LIMITER_PUBLIC_LOW_LIMIT= 5
+REQUIRED_BASE_PACKAGES= project,self-creation-portal,survey
+REQUIRED_PACKAGES=elevate-project@1.1.34 elevate-self-creation-portal@1.0.64 elevate-survey-observation@1.0.3
+ROUTE_CONFIG_JSON_URLS_PATHS=https://raw.githubusercontent.com/ELEVATE-Project/survey-project-creation-service/story-1085-publish/src/constants/interface-routes/configs.json,https://raw.githubusercontent.com/ELEVATE-Project/samiksha-service/refs/heads/develop/constants/interface-routes/elevate-survey-observation/configs.json,https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/develop/constants/interface-routes/elevate-project/configs.json
+SCHEDULER_SERVICE_BASE_URL= http://localhost:4000
+SUPPORTED_HTTP_TYPES= GET POST PUT PATCH DELETE
+USER_SERVICE_BASE_URL= http://localhost:3001

@@ -1,0 +1,27 @@
+# Entity service configurations file
+APPLICATION_PORT = 5001
+APPLICATION_ENV ="development"
+APPLICATION_BASE_URL='/entity-management/'
+INTERNAL_ACCESS_TOKEN ="internal_access_token"
+ACCESS_TOKEN_SECRET=hsghasghjab1273JHajnbabsjdj1273981273jhajksdh8y3123yhjkah812398yhjqwe7617237yuhdhhdqwu271
+# DB 
+MONGODB_URL=mongodb://localhost:27017/elevate-entity
+AUTH_METHOD = native
+# USER_SERVICE
+USER_SERVICE_URL = https://dev.elevate-apis.shikshalokam.org
+USER_SERVICE_BASE_URL=/user
+KAFKA_HEALTH_CHECK_TOPIC=test
+#service name
+SERVICE_NAME = elevate-entity-service
+API_DOC_URL="https://project-dev.elevate-apis.shikshalokam.org/entity-management/api-doc"
+APPLICATION_HOST=localhost
+IS_AUTH_TOKEN_BEARER="false"
+ADMIN_ACCESS_TOKEN=rwwee3$123
+ADMIN_TOKEN_HEADER_NAME="admin-auth-token"
+INTERFACE_SERVICE_URL="https://saas-qa.tekdinext.com"
+KAFKA_HEALTH_CHECK_TOPIC = entity-health-check-topic-check
+KAFKA_COMMUNICATIONS_ON_OFF = ON
+KAFKA_URL = kafka:9092
+KAFKA_COMMUNICATIONS_ON_OFF = ON
+KAFKA_GROUP_ID = entity
+HEALTH_CHECK_DEBUG_MODE = true

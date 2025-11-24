@@ -12,3 +12,4 @@ KAFKA_HOST=localhost:9092
 KAFKA_TOPIC=develop.notifications
 SENDGRID_API_KEY=SG.asd9f87a9s8d7f.
 SENDGRID_FROM_MAIL=no-reply@some.org
+ZEST_ENV=ZEST_ENV

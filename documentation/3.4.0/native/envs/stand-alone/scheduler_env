@@ -10,3 +10,4 @@ KAFKA_URL=localhost:9092
 NOTIFICATION_KAFKA_TOPIC=develop.notifications
 REDIS_HOST=localhost
 REDIS_PORT=6379
+MONGODB_URL="mongodb://localhost:27017/tl-cron-rest"

@@ -93,11 +93,12 @@ Before setting up the following ELEVATE-Project application, dependencies given 
      git clone -b develop https://github.com/ELEVATE-Project/entity-management.git && \
      git clone -b develop https://github.com/ELEVATE-Project/user.git && \
      git clone -b master https://github.com/ELEVATE-Project/notification.git && \
-     git clone -b master https://github.com/ELEVATE-Project/interface-service.git && \
+     git clone -b main https://github.com/ELEVATE-Project/interface-service.git && \
      git clone -b master https://github.com/ELEVATE-Project/scheduler.git && \
      git clone -b release-3.4.0 https://github.com/ELEVATE-Project/observation-survey-projects-pwa && \
-     git clone -b releaase-1.1.0 https://github.com/ELEVATE-Project/elevate-portal/tree/releaase-1.1.0 && \
+     git clone -b releaase-1.1.0 https://github.com/ELEVATE-Project/elevate-portal && \
      git clone -b release-3.4.0 https://github.com/ELEVATE-Project/observation-portal
+
    ```
 
 3.  **Install NPM Packages**

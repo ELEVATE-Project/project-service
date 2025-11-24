@@ -130,10 +130,6 @@ Go to the detailed Windows Native setup guide: **<a href="link/to/samiksha/nativ
 
 ## 📖 Related Documentation & Tools
 
-### Postman Collections
-
-* **<a href="https://github.com/ELEVATE-Project/project-service/tree/main/api-doc" target="_blank">Projects Service API Collection</a>**
-
 ### Adding New Projects to the System
 
 With implementation scripts, you can seamlessly add new projects to the system. Once a project is successfully added, it becomes visible on the portal, ready for use and interaction. For a comprehensive guide on setting up and using the implementation script, please refer to the **<a href="https://github.com/ELEVATE-Project/project-service/tree/main/Project-Service-implementation-Script" target="_blank">documentation here</a>**.

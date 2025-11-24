@@ -66,7 +66,7 @@ done
 
 1.  **Download and execute main setup script:** Execute the following command in your terminal from the project directory.
     ```
-       curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/mac-linux/setup_project.sh && chmod +x setup_project.sh && sudo ./setup_project.sh
+    curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/mac-linux/setup_project.sh && chmod +x setup_project.sh && sudo ./setup_project.sh
     ```
 
 > Note : The script will download all the essential files and launch the services in Docker. Once all services are successfully up and running, you can proceed to the next steps.
@@ -108,7 +108,7 @@ To enable the Citus extension for user services, follow these steps.
 
    1. Enable Citus and set distribution columns for `user` database by running the `citus_setup.sh`with the following arguments.
    ```
-     sudo ./citus_setup.sh user postgres://postgres:postgres@citus_master:5432/user
+   sudo ./citus_setup.sh user postgres://postgres:postgres@citus_master:5432/user
    ```
 
 ## Persistence Of Database Data In Docker Container (Optional)

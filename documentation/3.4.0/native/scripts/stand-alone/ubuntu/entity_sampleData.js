@@ -1,4 +1,4 @@
-const {  ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb')
 
 let entityType = [
 	{
@@ -81,6 +81,7 @@ let entityType = [
 		__v: 0,
 		orgId: 'sl',
 	},
+	
 ]
 
 let entities = [

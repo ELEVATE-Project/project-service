@@ -1,15 +1,8 @@
 const { ObjectId } = require('mongodb')
 
-let districtId = new ObjectId()
-let blockId = new ObjectId()
-let clusterId = new ObjectId()
-let schoolId = new ObjectId()
-let professionalId = new ObjectId()
-let professionalSubRoleId = new ObjectId()
-
 let entityType = [
 	{
-		_id: ObjectId('6825914b97b5680013e6a140'),
+		_id: new ObjectId('6825914b97b5680013e6a140'),
 		profileForm: [],
 		profileFields: [],
 		types: [],
@@ -29,7 +22,7 @@ let entityType = [
 		orgId: 'sl',
 	},
 	{
-		_id: ObjectId('6825915197b5680013e6a142'),
+		_id: new ObjectId('6825915197b5680013e6a142'),
 		profileForm: [],
 		profileFields: [],
 		types: [],
@@ -49,7 +42,7 @@ let entityType = [
 		orgId: 'sl',
 	},
 	{
-		_id: ObjectId('682591cc97b5680013e6a15c'),
+		_id: new ObjectId('682591cc97b5680013e6a15c'),
 		profileForm: [],
 		profileFields: [],
 		types: [],
@@ -69,7 +62,7 @@ let entityType = [
 		orgId: 'sl',
 	},
 	{
-		_id: ObjectId('682591d397b5680013e6a15e'),
+		_id: new ObjectId('682591d397b5680013e6a15e'),
 		profileForm: [],
 		profileFields: [],
 		types: [],
@@ -88,74 +81,12 @@ let entityType = [
 		__v: 0,
 		orgId: 'sl',
 	},
-	// {
-	// 	_id: new ObjectId(),
-	// 	name: 'state',
-	// 	toBeMappedToParentEntities: true,
-	// 	immediateChildrenEntityType: ['district', 'block', 'cluster', 'school'],
-	// 	isDeleted: false,
-	// 	tenantId: 'shikshalokam',
-	// 	orgId: 'slOrg',
-	// },
-	// {
-	// 	_id: new ObjectId(),
-	// 	name: 'district',
-	// 	toBeMappedToParentEntities: true,
-	// 	immediateChildrenEntityType: ['block', 'cluster', 'school'],
-	// 	isDeleted: false,
-	// 	tenantId: 'shikshalokam',
-	// 	orgId: 'slOrg',
-	// },
-	// {
-	// 	_id: new ObjectId(),
-	// 	name: 'block',
-	// 	toBeMappedToParentEntities: true,
-	// 	immediateChildrenEntityType: ['cluster', 'school'],
-	// 	isDeleted: false,
-	// 	tenantId: 'shikshalokam',
-	// 	orgId: 'slOrg',
-	// },
-	// {
-	// 	_id: new ObjectId(),
-	// 	name: 'cluster',
-	// 	toBeMappedToParentEntities: true,
-	// 	immediateChildrenEntityType: ['school'],
-	// 	isDeleted: false,
-	// 	tenantId: 'shikshalokam',
-	// 	orgId: 'slOrg',
-	// },
-	// {
-	// 	_id: new ObjectId(),
-	// 	name: 'school',
-	// 	toBeMappedToParentEntities: true,
-	// 	immediateChildrenEntityType: [],
-	// 	isDeleted: false,
-	// 	tenantId: 'shikshalokam',
-	// 	orgId: 'slOrg',
-	// },
-	// {
-	// 	_id: new ObjectId(),
-	// 	name: 'professional_role',
-	// 	toBeMappedToParentEntities: true,
-	// 	immediateChildrenEntityType: ['professional_subroles'],
-	// 	isDeleted: false,
-	// 	tenantId: 'shikshalokam',
-	// 	orgId: 'slOrg',
-	// },
-	// {
-	// 	_id: new ObjectId(),
-	// 	name: 'professional_subroles',
-	// 	toBeMappedToParentEntities: true,
-	// 	immediateChildrenEntityType: [],
-	// 	isDeleted: false,
-	// 	tenantId: 'shikshalokam',
-	// 	orgId: 'slOrg',
-	// },
+	
 ]
 
 let entities = [
 	{
-		_id: ObjectId('6852c86c7248c20014b38a4d'),
+		_id: new ObjectId('6852c86c7248c20014b38a4d'),
 		metaInformation: {
 			targetedEntityTypes: [],
 			externalId: '16',
@@ -165,7 +96,7 @@ let entities = [
 		createdBy: '20',
 		updatedBy: '20',
 		deleted: false,
-		entityTypeId: ObjectId('6825914b97b5680013e6a140'),
+		entityTypeId: new ObjectId('6825914b97b5680013e6a140'),
 		entityType: 'state',
 		registryDetails: {
 			code: '16',
@@ -177,11 +108,11 @@ let entities = [
 		createdAt: new Date('2025-06-18T14:08:44.438Z'),
 		__v: 0,
 		groups: {
-			district: [ObjectId('6852c8ae7248c20014b38a57')],
+			district: [new ObjectId('6852c8ae7248c20014b38a57')],
 		},
 	},
 	{
-		_id: ObjectId('6852c8ae7248c20014b38a57'),
+		_id: new ObjectId('6852c8ae7248c20014b38a57'),
 		metaInformation: {
 			targetedEntityTypes: [],
 			externalId: 'westTripura',
@@ -191,7 +122,7 @@ let entities = [
 		createdBy: '20',
 		updatedBy: '20',
 		deleted: false,
-		entityTypeId: ObjectId('6825915197b5680013e6a142'),
+		entityTypeId: new ObjectId('6825915197b5680013e6a142'),
 		entityType: 'district',
 		registryDetails: {
 			code: 'westTripura',
@@ -204,23 +135,23 @@ let entities = [
 		__v: 0,
 		groups: {
 			block: [
-				ObjectId('6852c8de7248c20014b38a9d'),
-				ObjectId('6852c8de7248c20014b38a9e'),
-				ObjectId('6852c8de7248c20014b38a9f'),
-				ObjectId('6852c8de7248c20014b38aa0'),
-				ObjectId('6852c8de7248c20014b38aa1'),
-				ObjectId('6852c8de7248c20014b38aa2'),
-				ObjectId('6852c8de7248c20014b38aa3'),
-				ObjectId('6852c8de7248c20014b38aa4'),
-				ObjectId('6852c8de7248c20014b38aa5'),
-				ObjectId('6852c8de7248c20014b38aa6'),
-				ObjectId('6852c8de7248c20014b38aa7'),
-				ObjectId('6852c8de7248c20014b38aa8'),
+				new ObjectId('6852c8de7248c20014b38a9d'),
+				new ObjectId('6852c8de7248c20014b38a9e'),
+				new ObjectId('6852c8de7248c20014b38a9f'),
+				new ObjectId('6852c8de7248c20014b38aa0'),
+				new ObjectId('6852c8de7248c20014b38aa1'),
+				new ObjectId('6852c8de7248c20014b38aa2'),
+				new ObjectId('6852c8de7248c20014b38aa3'),
+				new ObjectId('6852c8de7248c20014b38aa4'),
+				new ObjectId('6852c8de7248c20014b38aa5'),
+				new ObjectId('6852c8de7248c20014b38aa6'),
+				new ObjectId('6852c8de7248c20014b38aa7'),
+				new ObjectId('6852c8de7248c20014b38aa8'),
 			],
 		},
 	},
 	{
-		_id: ObjectId('68876746b19aea00144c2af9'),
+		_id: new ObjectId('68876746b19aea00144c2af9'),
 		metaInformation: {
 			targetedEntityTypes: [
 				{
@@ -235,7 +166,7 @@ let entities = [
 		createdBy: '1',
 		updatedBy: '1',
 		deleted: false,
-		entityTypeId: ObjectId('682591cc97b5680013e6a15c'),
+		entityTypeId: new ObjectId('682591cc97b5680013e6a15c'),
 		entityType: 'professional_role',
 		registryDetails: {
 			locationId: 'Facilitator',
@@ -248,11 +179,11 @@ let entities = [
 		createdAt: new Date('2025-07-28T12:04:22.011Z'),
 		__v: 0,
 		groups: {
-			professional_subroles: [ObjectId('688767deb19aea00144c2b08')],
+			professional_subroles: [new ObjectId('688767deb19aea00144c2b08')],
 		},
 	},
 	{
-		_id: ObjectId('688767deb19aea00144c2b08'),
+		_id: new ObjectId('688767deb19aea00144c2b08'),
 		metaInformation: {
 			targetedEntityTypes: [
 				{
@@ -271,7 +202,7 @@ let entities = [
 		createdBy: '1',
 		updatedBy: '1',
 		deleted: false,
-		entityTypeId: ObjectId('682591d397b5680013e6a15e'),
+		entityTypeId: new ObjectId('682591d397b5680013e6a15e'),
 		entityType: 'professional_subroles',
 		registryDetails: {
 			locationId: 'facilitator',
@@ -284,123 +215,7 @@ let entities = [
 		createdAt: new Date('2025-07-28T12:06:54.072Z'),
 		__v: 0,
 	},
-	// {
-	// 	_id: new ObjectId(),
-	// 	name: 'Karnataka',
-	// 	entityType: 'state',
-	// 	entityTypeId: entityType[0]._id,
-	// 	userId: '1',
-	// 	metaInformation: {
-	// 		externalId: 'KR001',
-	// 		name: 'Karnataka',
-	// 	},
-	// 	childHierarchyPath: ['district', 'block', 'cluster', 'school'],
-	// 	groups: {
-	// 		district: [districtId],
-	// 		block: [blockId],
-	// 		cluster: [clusterId],
-	// 		school: [schoolId],
-	// 	},
-	// 	tenantId: 'shikshalokam',
-	// 	orgId: 'slOrg',
-	// },
-	// {
-	// 	_id: districtId,
-	// 	name: 'Bangalore',
-	// 	entityType: 'district',
-	// 	entityTypeId: entityType[1]._id,
-	// 	userId: '1',
-	// 	metaInformation: {
-	// 		externalId: 'BN001',
-	// 		name: 'Bangalore',
-	// 	},
-	// 	childHierarchyPath: ['block', 'cluster', 'school'],
-	// 	groups: {
-	// 		block: [blockId],
-	// 		cluster: [clusterId],
-	// 		school: [schoolId],
-	// 	},
-	// 	tenantId: 'shikshalokam',
-	// 	orgId: 'slOrg',
-	// },
-
-	// {
-	// 	_id: blockId,
-	// 	entityType: 'block',
-	// 	entityTypeId: entityType[2]._id,
-	// 	userId: '1',
-	// 	metaInformation: {
-	// 		externalId: 'BU',
-	// 		name: 'Bangalore Urban',
-	// 	},
-	// 	childHierarchyPath: ['cluster', 'school'],
-	// 	groups: {
-	// 		cluster: [clusterId],
-	// 		school: [schoolId],
-	// 	},
-	// 	tenantId: 'shikshalokam',
-	// 	orgId: 'slOrg',
-	// },
-	// {
-	// 	_id: clusterId,
-	// 	entityType: 'district',
-	// 	entityTypeId: entityType[3]._id,
-	// 	userId: '1',
-	// 	metaInformation: {
-	// 		externalId: 'JPN',
-	// 		name: 'JP Nagar',
-	// 	},
-	// 	childHierarchyPath: ['school'],
-	// 	groups: {
-	// 		school: [schoolId],
-	// 	},
-	// 	tenantId: 'shikshalokam',
-	// 	orgId: 'slOrg',
-	// },
-	// {
-	// 	_id: schoolId,
-	// 	entityType: 'school',
-	// 	entityTypeId: entityType[4]._id,
-	// 	userId: '1',
-	// 	metaInformation: {
-	// 		externalId: 'GS01',
-	// 		name: 'Govt School',
-	// 	},
-	// 	childHierarchyPath: [],
-	// 	groups: {},
-	// 	tenantId: 'shikshalokam',
-	// 	orgId: 'slOrg',
-	// },
-	// {
-	// 	_id: professionalId,
-	// 	entityType: 'professional_role',
-	// 	entityTypeId: entityType[5]._id,
-	// 	userId: '1',
-	// 	metaInformation: {
-	// 		externalId: 'STD',
-	// 		name: 'student',
-	// 	},
-	// 	childHierarchyPath: ['professional_subroles'],
-	// 	groups: {
-	// 		professional_subroles: [professionalSubRoleId],
-	// 	},
-	// 	tenantId: 'shikshalokam',
-	// 	orgId: 'slOrg',
-	// },
-	// {
-	// 	_id: professionalSubRoleId,
-	// 	entityType: 'professional_subroles',
-	// 	entityTypeId: entityType[6]._id,
-	// 	userId: '1',
-	// 	metaInformation: {
-	// 		externalId: 'SG',
-	// 		name: 'student-school',
-	// 	},
-	// 	childHierarchyPath: [],
-	// 	groups: {},
-	// 	tenantId: 'shikshalokam',
-	// 	orgId: 'slOrg',
-	// },
+	
 ]
 
 module.exports = {

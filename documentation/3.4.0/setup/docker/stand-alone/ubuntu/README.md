@@ -105,12 +105,11 @@ To enable the Citus extension for user services, follow these steps.
     ```
 2. Set up the citus_setup file by following the steps given below.
 
-    - **Ubuntu/Linux**
 
-        1. Enable Citus and set distribution columns for `user` database by running the `citus_setup.sh`with the following arguments.
-            ```
-            sudo ./citus_setup.sh user postgres://postgres:postgres@citus_master:5432/user
-            ```
+   1. Enable Citus and set distribution columns for `user` database by running the `citus_setup.sh`with the following arguments.
+   ```
+     sudo ./citus_setup.sh user postgres://postgres:postgres@citus_master:5432/user
+   ```
 
 ## Persistence Of Database Data In Docker Container (Optional)
 
@@ -166,19 +165,17 @@ In such cases, you can generate sample user accounts using the steps below. This
 
 > **Warning:** Use this generator only immediately after the initial system setup and before any normal user accounts are created through the portal. It should not be used under any circumstances thereafter.
 
--   **Ubuntu/Linux**
+```
+sudo ./insert_sample_data.sh user postgres://postgres:postgres@citus_master:5432/user
+```
 
-    ```
-    sudo ./insert_sample_data.sh user postgres://postgres:postgres@citus_master:5432/user
-    ```
+After successfully running the script mentioned above, the following user accounts will be created and available for login:
 
-    After successfully running the script mentioned above, the following user accounts will be created and available for login:
-
-    | Email ID               | Password   | Role                    |
-    | ---------------------- | ---------- | ----------------------- |
-    | mallanagouda@gmail.com | Password1@ | State Education Officer |
-    | prajwal@gmail.com      | Password1@ | State Education Officer |
-    | vishnu@gmail.com       | Password1@ | State Education Officer |
+| Email ID               | Password   | Role                    |
+| ---------------------- | ---------- | ----------------------- |
+| mallanagouda@gmail.com | Password1@ | State Education Officer |
+| prajwal@gmail.com      | Password1@ | State Education Officer |
+| vishnu@gmail.com       | Password1@ | State Education Officer |
 
 ## Sample Data Creation For Projects
 
@@ -186,13 +183,9 @@ This step will guide us in implementing a sample project solution following the 
 
 1. **Insert Sample Data To Database:**
 
-    - **Ubuntu/Linux**
-
-        1. Insert sample data by running the following command.
-
-            ```
-            node insert_sample_solution.js
-            ```
+      ```
+      node insert_sample_solution.js
+      ```
 
 ## Default Forms Creation for Portal Configuration
 
@@ -200,11 +193,9 @@ This step inserts configuration forms into MongoDB, enabling or disabling featur
 
 #### Insert Forms Data into Database
 
--   **Ubuntu/Linux**:
-
-    ```
-    curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/mac-linux/import_forms_mongo.sh && chmod +x import_forms_mongo.sh && sudo ./import_forms_mongo.sh mongodb://mongo:27017/elevate-project
-    ```
+```
+curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/mac-linux/import_forms_mongo.sh && chmod +x import_forms_mongo.sh && sudo ./import_forms_mongo.sh mongodb://mongo:27017/elevate-project
+```
 
 ## Explore the Portal
 

@@ -2,7 +2,7 @@ const { ObjectId } = require('mongodb')
 
 let solutionData = [
 	{
-		_id: ObjectId('68ee4bb3fb9bee08b93b6d68'),
+		_id: new ObjectId('68ee4bb3fb9bee08b93b6d68'),
 		resourceType: ['Improvement Project Solution'],
 		language: ['English'],
 		keywords: ['Improvement Project'],
@@ -35,7 +35,7 @@ let solutionData = [
 		endDate: new Date('2026-09-09T18:29:59.000Z'),
 		subType: 'improvementProject',
 		type: 'improvementProject',
-		programId: ObjectId('68ee4b79fb9bee08b93b6d34'),
+		programId: new ObjectId('68ee4b79fb9bee08b93b6d34'),
 		programName: 'custom observation as a task check on oct 14th facilitator',
 		programDescription: 'custom observation as a task check on oct 14th facilitator',
 		status: 'active',
@@ -54,25 +54,25 @@ let solutionData = [
 			cluster: ['ALL'],
 			school: ['ALL'],
 		},
-		projectTemplateId: ObjectId('68ee4bb3fb9bee08b93b6d70'),
+		projectTemplateId: new ObjectId('68ee4bb3fb9bee08b93b6d70'),
 		updatedBy: '1',
 		author: '1',
 		creator: 'Nevil',
-		certificateTemplateId: ObjectId('68ee4bf5fb9bee08b93b6d97'),
+		certificateTemplateId: new ObjectId('68ee4bf5fb9bee08b93b6d97'),
 		link: 'f8a8e9ba397a29cf75ad5057db6cb7f9',
 	},
 ]
 
 let programData = [
 	{
-		_id: ObjectId('68ee4b79fb9bee08b93b6d34'),
+		_id: new ObjectId('68ee4b79fb9bee08b93b6d34'),
 		resourceType: ['program'],
 		language: ['English'],
 		keywords: ['CBSE', 'SQAA'],
 		concepts: [],
 		components: [
 			{
-				_id: ObjectId('68ee4bb3fb9bee08b93b6d68'),
+				_id: new ObjectId('68ee4bb3fb9bee08b93b6d68'),
 				order: 1,
 			},
 		],
@@ -118,17 +118,17 @@ let programData = [
 
 let projectTemplatesData = [
 	{
-		_id: ObjectId('68ee4bb3fb9bee08b93b6d70'),
+		_id: new ObjectId('68ee4bb3fb9bee08b93b6d70'),
 		description: 'To construct a wired car using a DPDT switch.',
 		concepts: [''],
 		keywords: ['Science, Activity Based Learning, STEM Education, STEM Lab, DPDT Switch Car'],
 		isDeleted: false,
 		recommendedFor: ['Learner'],
 		tasks: [
-			ObjectId('68ee4bb4fb9bee08b93b6d7a'),
-			ObjectId('68ee4bb4fb9bee08b93b6d7e'),
-			ObjectId('68ee4bb4fb9bee08b93b6d82'),
-			ObjectId('68ee4bb4fb9bee08b93b6d86'),
+			new ObjectId('68ee4bb4fb9bee08b93b6d7a'),
+			new ObjectId('68ee4bb4fb9bee08b93b6d7e'),
+			new ObjectId('68ee4bb4fb9bee08b93b6d82'),
+			new ObjectId('68ee4bb4fb9bee08b93b6d86'),
 		],
 		createdBy: '1',
 		updatedBy: '1',
@@ -163,7 +163,7 @@ let projectTemplatesData = [
 		externalId: 'PROJ19099023DGHG789SDASDFGHR4567-1760447411369_IMPORTED',
 		categories: [
 			{
-				_id: ObjectId('685ae6a0cb7c7200145dadae'),
+				_id: new ObjectId('685ae6a0cb7c7200145dadae'),
 				externalId: 'teachers',
 				name: 'teachers',
 			},
@@ -187,18 +187,18 @@ let projectTemplatesData = [
 		updatedAt: new Date('2025-10-14T13:11:17.899Z'),
 		createdAt: new Date('2025-10-14T13:10:11.630Z'),
 		__v: 0,
-		solutionId: ObjectId('68ee4bb3fb9bee08b93b6d68'),
+		solutionId: new ObjectId('68ee4bb3fb9bee08b93b6d68'),
 		solutionExternalId: 'PROJ19099023DGHG789SDASDFGHR4567-1760447411369-PROJECT-SOLUTION',
-		programId: ObjectId('68ee4b79fb9bee08b93b6d34'),
+		programId: new ObjectId('68ee4b79fb9bee08b93b6d34'),
 		programExternalId: 'Testing_for_prTGCEBGFFRYVBDFGJ7DGDGF12SDFGHJ345CVBNMDRGYY',
-		parentTemplateId: ObjectId('68ee4bb3fb9bee08b93b6d4c'),
-		certificateTemplateId: ObjectId('68ee4bf5fb9bee08b93b6d97'),
+		parentTemplateId: new ObjectId('68ee4bb3fb9bee08b93b6d4c'),
+		certificateTemplateId: new ObjectId('68ee4bf5fb9bee08b93b6d97'),
 	},
 ]
 
 let projectTemplateTasksData = [
 	{
-		_id: ObjectId('68ee4bb4fb9bee08b93b6d7a'),
+		_id: new ObjectId('68ee4bb4fb9bee08b93b6d7a'),
 		createdBy: '1',
 		updatedBy: '1',
 		isDeleted: false,
@@ -217,7 +217,7 @@ let projectTemplateTasksData = [
 		],
 		deleted: false,
 		type: 'content',
-		projectTemplateId: ObjectId('68ee4bb3fb9bee08b93b6d70'),
+		projectTemplateId: new ObjectId('68ee4bb3fb9bee08b93b6d70'),
 		projectTemplateExternalId: 'PROJ19099023DGHG789SDASDFGHR4567-1760447411369_IMPORTED',
 		name: 'Watch the Activity Video',
 		externalId: 'DPDTSC-HandBook-1-2025-Task2-1760447411369-1760447412188',
@@ -242,7 +242,7 @@ let projectTemplateTasksData = [
 		__v: 0,
 	},
 	{
-		_id: ObjectId('68ee4bb4fb9bee08b93b6d7e'),
+		_id: new ObjectId('68ee4bb4fb9bee08b93b6d7e'),
 		createdBy: '1',
 		updatedBy: '1',
 		isDeleted: false,
@@ -254,7 +254,7 @@ let projectTemplateTasksData = [
 		learningResources: [],
 		deleted: false,
 		type: 'simple',
-		projectTemplateId: ObjectId('68ee4bb3fb9bee08b93b6d70'),
+		projectTemplateId: new ObjectId('68ee4bb3fb9bee08b93b6d70'),
 		projectTemplateExternalId: 'PROJ19099023DGHG789SDASDFGHR4567-1760447411369_IMPORTED',
 		name: 'Conduct the Activity with students',
 		externalId: 'DPDTSC-HandBook-1-2025-Task3-1760447411369-1760447412197',
@@ -279,7 +279,7 @@ let projectTemplateTasksData = [
 		__v: 0,
 	},
 	{
-		_id: ObjectId('68ee4bb4fb9bee08b93b6d82'),
+		_id: new ObjectId('68ee4bb4fb9bee08b93b6d82'),
 		createdBy: '1',
 		updatedBy: '1',
 		isDeleted: false,
@@ -298,7 +298,7 @@ let projectTemplateTasksData = [
 		],
 		deleted: false,
 		type: 'content',
-		projectTemplateId: ObjectId('68ee4bb3fb9bee08b93b6d70'),
+		projectTemplateId: new ObjectId('68ee4bb3fb9bee08b93b6d70'),
 		projectTemplateExternalId: 'PROJ19099023DGHG789SDASDFGHR4567-1760447411369_IMPORTED',
 		name: 'Conduct the Activity Assessment',
 		externalId: 'DPDTSC-HandBook-1-2025-Task4-1760447411369-1760447412206',
@@ -323,7 +323,7 @@ let projectTemplateTasksData = [
 		__v: 0,
 	},
 	{
-		_id: ObjectId('68ee4bb4fb9bee08b93b6d86'),
+		_id: new ObjectId('68ee4bb4fb9bee08b93b6d86'),
 		createdBy: '1',
 		updatedBy: '1',
 		isDeleted: false,
@@ -342,7 +342,7 @@ let projectTemplateTasksData = [
 		],
 		deleted: false,
 		type: 'content',
-		projectTemplateId: ObjectId('68ee4bb3fb9bee08b93b6d70'),
+		projectTemplateId: new ObjectId('68ee4bb3fb9bee08b93b6d70'),
 		projectTemplateExternalId: 'PROJ19099023DGHG789SDASDFGHR4567-1760447411369_IMPORTED',
 		name: "Log into the scanner app and scan the OMR sheets (check that the students' names are appearing on scanning the OMR)",
 		externalId: 'DPDTSC-HandBook-1-2025-Task5-1760447411369-1760447412214',
@@ -370,7 +370,7 @@ let projectTemplateTasksData = [
 
 let certificateTemplatesData = [
 	{
-		_id: ObjectId('68ee4bf5fb9bee08b93b6d97'),
+		_id: new ObjectId('68ee4bf5fb9bee08b93b6d97'),
 		status: 'active',
 		deleted: false,
 		criteria: {
@@ -463,9 +463,9 @@ let certificateTemplatesData = [
 		issuer: {
 			name: 'Tan90',
 		},
-		solutionId: ObjectId('68ee4bb3fb9bee08b93b6d68'),
-		programId: ObjectId('68ee4b79fb9bee08b93b6d34'),
-		baseTemplateId: ObjectId('68c008dfd113c30c11f1aca2'),
+		solutionId: new ObjectId('68ee4bb3fb9bee08b93b6d68'),
+		programId: new ObjectId('68ee4b79fb9bee08b93b6d34'),
+		baseTemplateId: new ObjectId('68c008dfd113c30c11f1aca2'),
 		tenantId: 'shikshalokam',
 		orgId: 'tan90',
 		updatedAt: new Date('2025-10-14T13:11:17.793Z'),
@@ -478,7 +478,7 @@ let certificateTemplatesData = [
 
 let certificateBaseTemplatesData = [
 	{
-		_id: ObjectId('68c008dfd113c30c11f1aca2'),
+		_id: new ObjectId('68c008dfd113c30c11f1aca2'),
 		deleted: false,
 		code: 'onelogo_onesign',
 		name: 'onelogo_onesign',
@@ -493,7 +493,7 @@ let certificateBaseTemplatesData = [
 
 let projectCategoriesData = [
 	{
-		_id: ObjectId('685ae6a0cb7c7200145dadae'),
+		_id: new ObjectId('685ae6a0cb7c7200145dadae'),
 		createdBy: 'SYSTEM',
 		updatedBy: 'SYSTEM',
 		isDeleted: false,

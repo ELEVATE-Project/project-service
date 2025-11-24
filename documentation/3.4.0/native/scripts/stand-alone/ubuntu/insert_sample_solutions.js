@@ -1,8 +1,8 @@
 const { MongoClient } = require('mongodb')
 
 const url = 'mongodb://localhost:27017/' // MongoDB URL
-const dbName = 'qadb'
-const dbName2 = 'projectService'
+const dbName = 'elevate-project'
+const dbName2 = 'elevate-entity'
 const entityData = require('./entity_sampleData.js')
 const projectData = require('./project_sampleData.js')
 

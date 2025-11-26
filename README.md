@@ -140,6 +140,61 @@ Go to the detailed Windows Native setup guide: **<a href="link/to/samiksha/nativ
 
 ---
 
+
+### 🚀 **WITH SELF CREATION PORTAL (SCP) (Integrated Deployment)**
+
+<details>
+<summary> **Click to Expand Integrated Setup Options** </summary>
+<br>
+
+This setup integrates the Projects Service and Samiksha Service with the **Self Creation Portal**, providing a full-featured, production-ready deployment environment.
+
+#### I. Docker Setup (Recommended)
+
+<details>
+<summary> 1. Ubuntu Setup </summary>
+<br>
+Go to the detailed Ubuntu Docker setup guide: **<a href="https://github.com/ELEVATE-Project/project-service/blob/setupGuideSCP/documentation/3.4.0/setup/docker/scp/ubuntu/README.md" target="_blank">SETUP_SCP_DOCKER_UBUNTU.md</a>**
+</details>
+
+<details>
+<summary> 2. macOS Setup </summary>
+<br>
+Go to the detailed macOS Docker setup guide: **<a href="link/to/scp/docker/macos/README" target="_blank">SETUP_SCP_DOCKER_MACOS.md</a>**
+</details>
+
+<details>
+<summary> 3. Windows Setup </summary>
+<br>
+Go to the detailed Windows Docker setup guide: **<a href="link/to/scp/docker/windows/README" target="_blank">SETUP_SCP_DOCKER_WINDOWS.md</a>**
+</details>
+
+<br>
+
+#### II. Native Setup (PM2 Managed Services)
+
+<details>
+<summary> 1. Ubuntu Setup </summary>
+<br>
+Go to the detailed Ubuntu Native setup guide: **<a href="link/to/samiksha/native/ubuntu/README" target="_blank">SETUP_SCP_NATIVE_UBUNTU.md</a>**
+</details>
+
+<details>
+<summary> 2. macOS Setup </summary>
+<br>
+Go to the detailed macOS Native setup guide: **<a href="link/to/samiksha/native/macos/README" target="_blank">SETUP_SCP_NATIVE_MACOS.md</a>**
+</details>
+
+<details>
+<summary> 3. Windows Setup </summary>
+<br>
+Go to the detailed Windows Native setup guide: **<a href="link/to/samiksha/native/windows/README" target="_blank">SETUP_SCP_NATIVE_WINDOWS.md</a>**
+</details>
+
+</details>
+
+---
+
 ## 📖 Related Documentation & Tools
 
 ### Versioning & Documentation Links

@@ -103,7 +103,7 @@ To enable the Citus extension for user services, follow these steps.
     ```
 2. Create a sub-directory named `survey-project-creation` and download `distributionColumns.sql` into it. (Skip this for linux)
     ```
-    mkdir scp && curl -o ./survey-project-creation/distributionColumns.sql -JL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/3.4.0/distribution-columns/survey-project-creation/distributionColumns.sql
+    mkdir survey-project-creation && curl -o ./survey-project-creation/distributionColumns.sql -JL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/3.4.0/distribution-columns/survey-project-creation/distributionColumns.sql
 3. Set up the citus_setup file by following the steps given below.
 
     1. Enable Citus and set distribution columns for `user` database by running the `citus_setup.sh`with the following arguments.

@@ -28,8 +28,6 @@ The Project building block facilitates the creation and engagement with micro-im
 
 # Native Setup - Stand Alone
 
-<summary>Natively Installed Services & Dependencies </summary>
-
 ## PM2 Managed Services & Natively Installed Dependencies
 
 ### System Requirements
@@ -48,37 +46,37 @@ Before setting up the following ELEVATE-Project application, dependencies given 
 
 1. Download dependency management scripts:
 
-   ```
-   curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/scripts/stand-alone/ubuntu/check-dependencies.sh && \
-   curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/scripts/stand-alone/ubuntu/install-dependencies.sh && \
-   curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/scripts/stand-alone/ubuntu/uninstall-dependencies.sh && \
-   chmod +x check-dependencies.sh && \
-   chmod +x install-dependencies.sh && \
-   chmod +x uninstall-dependencies.sh
-   ```
+    ```
+    curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/scripts/stand-alone/ubuntu/check-dependencies.sh && \
+    curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/scripts/stand-alone/ubuntu/install-dependencies.sh && \
+    curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/scripts/stand-alone/ubuntu/uninstall-dependencies.sh && \
+    chmod +x check-dependencies.sh && \
+    chmod +x install-dependencies.sh && \
+    chmod +x uninstall-dependencies.sh
+    ```
 
 2. Verify installed dependencies by running `check-dependencies.sh`:
 
-   ```
-   ./check-dependencies.sh
-   ```
+    ```
+    ./check-dependencies.sh
+    ```
 
-   > Note: Keep note of any missing dependencies.
+    > Note: Keep note of any missing dependencies.
 
 3. Install dependencies by running `install-dependencies.sh`:
-   ```
-   ./install-dependencies.sh
-   ```
-   > Note: Install all missing dependencies and use check-dependencies script to ensure everything is installed and running.
+    ```
+    ./install-dependencies.sh
+    ```
+    > Note: Install all missing dependencies and use check-dependencies script to ensure everything is installed and running.
 4. Uninstall dependencies by running `uninstall-dependencies.sh`:
 
-   ```
-   ./uninstall-dependencies.sh
-   ```
+    ```
+    ./uninstall-dependencies.sh
+    ```
 
-   > Warning: Due to the destructive nature of the script (without further warnings), it should only be used during the initial setup of the dependencies. For example, Uninstalling PostgreSQL/Citus using script will lead to data loss. USE EXTREME CAUTION.
+    > Warning: Due to the destructive nature of the script (without further warnings), it should only be used during the initial setup of the dependencies. For example, Uninstalling PostgreSQL/Citus using script will lead to data loss. USE EXTREME CAUTION.
 
-   > Warning: This script should only be used to uninstall dependencies that were installed via installation script in step 3. If same dependencies were installed using other methods, refrain from using this script. This script is provided in-order to reverse installation in-case issues arise from a bad install.
+    > Warning: This script should only be used to uninstall dependencies that were installed via installation script in step 3. If same dependencies were installed using other methods, refrain from using this script. This script is provided in-order to reverse installation in-case issues arise from a bad install.
 
 ## Installation
 
@@ -88,46 +86,46 @@ Before setting up the following ELEVATE-Project application, dependencies given 
 
 2.  **Git Clone Services And Portal Repositories**
 
-   ```
-   git clone -b develop https://github.com/ELEVATE-Project/project-service.git && \
-   git clone -b develop https://github.com/ELEVATE-Project/entity-management.git && \
-   git clone -b develop https://github.com/ELEVATE-Project/user.git && \
-   git clone -b master https://github.com/ELEVATE-Project/notification.git && \
-   git clone -b main https://github.com/ELEVATE-Project/interface-service.git && \
-   git clone -b master https://github.com/ELEVATE-Project/scheduler.git && \
-   git clone -b release-3.4.0 https://github.com/ELEVATE-Project/observation-survey-projects-pwa && \
-   git clone -b releaase-1.1.0 https://github.com/ELEVATE-Project/elevate-portal && \
-   git clone -b release-3.4.0 https://github.com/ELEVATE-Project/observation-portal
-   ```
+```
+git clone -b develop https://github.com/ELEVATE-Project/project-service.git && \
+git clone -b develop https://github.com/ELEVATE-Project/entity-management.git && \
+git clone -b develop https://github.com/ELEVATE-Project/user.git && \
+git clone -b master https://github.com/ELEVATE-Project/notification.git && \
+git clone -b main https://github.com/ELEVATE-Project/interface-service.git && \
+git clone -b master https://github.com/ELEVATE-Project/scheduler.git && \
+git clone -b release-3.4.0 https://github.com/ELEVATE-Project/observation-survey-projects-pwa && \
+git clone -b releaase-1.1.0 https://github.com/ELEVATE-Project/elevate-portal && \
+git clone -b release-3.4.0 https://github.com/ELEVATE-Project/observation-portal
+```
 
 3.  **Install NPM Packages**
 
-   ```
-   cd project-service && npm install && cd ../ && \
-   cd entity-management/src && npm install && cd ../.. && \
-   cd user/src && npm install && cd ../.. && \
-   cd entity-management\src && npm install && cd ..\.. && \
-   cd notification/src && npm install && cd ../.. && \
-   cd interface-service/src && npm install && cd ../.. && \
-   cd scheduler/src && npm install && cd ../.. && \
-   cd observation-survey-projects-pwa && npm install --force && cd .. && \
-   cd observation-portal && npm install --force && cd .. && \
-   cd elevate-portal && npm install --force && cd ..
-   ```
+```
+cd project-service && npm install && cd ../ && \
+cd entity-management/src && npm install && cd ../.. && \
+cd user/src && npm install && cd ../.. && \
+cd entity-management\src && npm install && cd ..\.. && \
+cd notification/src && npm install && cd ../.. && \
+cd interface-service/src && npm install && cd ../.. && \
+cd scheduler/src && npm install && cd ../.. && \
+cd observation-survey-projects-pwa && npm install --force && cd .. && \
+cd observation-portal && npm install --force && cd .. && \
+cd elevate-portal && npm install --force && cd ..
+```
 
 4.  **Download Environment Files**
 
-   ```
-   curl -L -o project-service/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/envs/stand-alone/project_env && \
-   curl -L -o entity-management/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/envs/stand-alone/entity_management_env && \
-   curl -L -o user/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/envs/stand-alone/user_env && \
-   curl -L -o notification/src/.env https://github.com/ELEVATE-Project/project-service/raw/refs/heads/main/documentation/1.0.0/native/envs/stand-alone/notification_env && \
-   curl -L -o interface-service/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/stand-alone/interface_env && \
-   curl -L -o scheduler/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/envs/stand-alone/scheduler_env && \
-   curl -L -o observation-survey-projects-pwa/src/assets/env/env.js https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/stand-alone/observation_survey_projects_pwa_env && \
-   curl -L -o elevate-portal/env.js https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/stand-alone/elevate_portal_env && \
-   curl -L -o observation-portal/src/assets/env/env.js https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/stand-alone/observation_portal_env
-   ```
+```
+curl -L -o project-service/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/envs/stand-alone/project_env && \
+curl -L -o entity-management/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/envs/stand-alone/entity_management_env && \
+curl -L -o user/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/envs/stand-alone/user_env && \
+curl -L -o notification/src/.env https://github.com/ELEVATE-Project/project-service/raw/refs/heads/main/documentation/1.0.0/native/envs/stand-alone/notification_env && \
+curl -L -o interface-service/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/stand-alone/interface_env && \
+curl -L -o scheduler/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/envs/stand-alone/scheduler_env && \
+curl -L -o observation-survey-projects-pwa/src/assets/env/env.js https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/stand-alone/observation_survey_projects_pwa_env && \
+curl -L -o elevate-portal/env.js https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/stand-alone/elevate_portal_env && \
+curl -L -o observation-portal/src/assets/env/env.js https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/stand-alone/observation_portal_env
+```
 
 > **Note:** Modify the environment files as necessary for your deployment using any text editor, ensuring that the values are appropriate for your environment. The default values provided in the current files are functional and serve as a good starting point. Refer to the sample env files provided at the [Project](https://github.com/ELEVATE-Project/project-service/blob/main/.env.sample), [User](https://github.com/ELEVATE-Project/user/blob/master/src/.env.sample), [Notification](https://github.com/ELEVATE-Project/notification/blob/master/src/.env.sample), [Scheduler](https://github.com/ELEVATE-Project/scheduler/blob/master/src/.env.sample), [Interface](https://github.com/ELEVATE-Project/interface-service/blob/main/src/.env.sample) and [Entity-Management](https://github.com/ELEVATE-Project/entity-management/blob/main/src/.env.sample) repositories for reference.
 
@@ -135,31 +133,41 @@ Before setting up the following ELEVATE-Project application, dependencies given 
 
 > **Important:** As mentioned in the above linked document, the **User SignUp** functionality may be compromised if key environment variables are not set correctly during deployment. If you opt to skip this setup, consider using the sample user account generator detailed in the `Sample User Accounts Generation` section of this document.
 
-5.  **Create Databases**
+5.  **Attaching Config File**
+
+    ```
+    curl -L -o project-service/config.json https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/scripts/stand-alone/ubuntu/config.json && \
+    curl -L -o entity-management/src/config.json https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/scripts/stand-alone/ubuntu/config.json
+    ```
+
+6.  **Create Databases**
 
     1. Download `create-databases.sh` Script File:
 
-      ```
-      curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/scripts/stand-alone/ubuntu/create-databases.sh
-      ```
+    ```
+    curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/scripts/stand-alone/ubuntu/create-databases.sh
+    ```
 
     2. Make the executable by running the following command:
-      ```
-      chmod +x create-databases.sh
-      ```
+
+    ```
+    chmod +x create-databases.sh
+    ```
+
     3. Run the script file:
-      ```
-      ./create-databases.sh
-      ```
 
-6.  **Run Migrations To Create Tables**
+    ```
+    ./create-databases.sh
+    ```
 
-      ```
-      cd user/src && npx sequelize-cli db:migrate && cd ../.. && \
-      cd notification/src && npx sequelize-cli db:migrate && cd ../..
-      ```
+7.  **Run Migrations To Create Tables**
 
-7.  **Enabling Citus And Setting Distribution Columns (Optional)**
+    ```
+    cd user/src && npx sequelize-cli db:migrate && cd ../.. && \
+    cd notification/src && npx sequelize-cli db:migrate && cd ../..
+    ```
+
+8.  **Enabling Citus And Setting Distribution Columns (Optional)**
 
     To boost performance and scalability, users can opt to enable the Citus extension. This transforms PostgreSQL into a distributed database, spreading data across multiple nodes to handle large datasets more efficiently as demand grows.
 
@@ -168,46 +176,46 @@ Before setting up the following ELEVATE-Project application, dependencies given 
     1. Download user `distributionColumns.sql` file.
 
         ```
-        curl -o ./user/distributionColumns.sql -JL https://github.com/ELEVATE-Project/project-service/raw/refs/heads/main/documentation/1.0.0/distribution-columns/user/distributionColumns.sql
+        curl -o ./user/distributionColumns.sql -JL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/distribution-columns/user/distributionColumns.sql
+
         ```
 
     2. Set up the `citus_setup` file by following the steps given below.
 
-       1. Download the `citus_setup.sh` file:
+        1. Download the `citus_setup.sh` file:
 
-           ```
-           curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/scripts/linux/citus_setup.sh
-           ```
+            ```
+            curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/scripts/linux/citus_setup.sh
+            ```
 
         2. Make the setup file executable by running the following command:
 
-           ```
-           chmod +x citus_setup.sh
-           ```
+            ```
+            chmod +x citus_setup.sh
+            ```
 
         3. Enable Citus and set distribution columns for `user` database by running the `citus_setup.sh`with the following arguments.
-           ```
-            ./citus_setup.sh user postgres://postgres:postgres@localhost:9700/users
-           ```
+            ```
+             ./citus_setup.sh user postgres://postgres:postgres@localhost:9700/users
+            ```
 
-8.  **Insert Initial Data**
+9.  **Insert Initial Data**
 
     1.  Download `entity-project-sample-data.sh` Script File:
 
-      ```
-      curl -o project_entity_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/scripts/stand-alone/ubuntu/project_entity_sample_data.sh && \
-      chmod +x insert_sample_data.sh && \
-      ./project_entity_sample_data.sh
-      ```
+    ```
+    curl -o project_entity_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/scripts/stand-alone/ubuntu/project_entity_sample_data.sh && \
+    chmod +x project_entity_sample_data.sh && \
+    ./project_entity_sample_data.sh
+    ```
 
-9.  **Insert Forms Data into Database**
+10. **Insert Forms Data into Database**
 
+    ```
+    curl -s https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/scripts/linux/import_forms.js | node
+    ```
 
-      ```
-      curl -s https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/scripts/linux/import_forms.js | node
-      ```
-
-10. **Start The Services**
+11. **Start The Services**
 
     Following the steps given below, 2 instances of each ELEVATE-Project backend service will be deployed and be managed by PM2 process manager.
 
@@ -220,39 +228,39 @@ Before setting up the following ELEVATE-Project application, dependencies given 
     (cd scheduler/src && pm2 start app.js --name scheduler && cd -)
     ```
 
-11. **Run Service Scripts**
+12. **Run Service Scripts**
 
     ```
     cd user/src/scripts && node insertDefaultOrg.js && node viewsScript.js && cd ../../..
     ```
 
-12. **Start The Portal**
+13. **Start The Portal**
 
     ELEVATE-Project portal utilizes Ionic for building the browser bundle, follow the steps given below to install them and start the portal.
 
     1. Install the Ionic framework:
 
-       ```
-       npm install -g ionic
-       ```
+        ```
+        npm install -g ionic
+        ```
 
     2. Install the Ionic client:
 
-       ```
-       npm install -g @ionic/cli
-       ```
+        ```
+        npm install -g @ionic/cli
+        ```
 
     3. Navigate to `observation-survey-projects-pwa` directory:
 
-       ```
-       cd observation-survey-projects-pwa
-       ```
+        ```
+        cd observation-survey-projects-pwa
+        ```
 
     4. Run the project on your local system using the following command:
 
-       ```
-       ionic serve
-       ```
+        ```
+        ionic serve
+        ```
 
     Navigate to http://localhost:8100 to access the ELEVATE-Project Portal.
 

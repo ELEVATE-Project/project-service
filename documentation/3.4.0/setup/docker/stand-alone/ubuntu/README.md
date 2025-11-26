@@ -28,11 +28,9 @@ The Project building block facilitates the creation and engagement with micro-im
 
 # Setup Options
 
-**Project services can be setup using two methods:**
+> Note : This guide outlines two setup methods, detailed below. For a quick, beginner-friendly setup and walkthrough of services, it is recommended to use the Dockerized Services & Dependencies setup with the Docker-
 
-> Note : This guide outlines two setup methods, detailed below. For a quick, beginner-friendly setup and walkthrough of services, it is recommended to use the Dockerized Services & Dependencies setup with the Docker-Compose file.
-
-<summary>Dockerized Services & Dependencies Using Docker-Compose File</summary>
+    Compose file.
 
 ## Dockerized Services & Dependencies
 
@@ -105,11 +103,11 @@ To enable the Citus extension for user services, follow these steps.
     ```
 2. Set up the citus_setup file by following the steps given below.
 
+    1. Enable Citus and set distribution columns for `user` database by running the `citus_setup.sh`with the following arguments.
 
-   1. Enable Citus and set distribution columns for `user` database by running the `citus_setup.sh`with the following arguments.
-   ```
-   sudo ./citus_setup.sh user postgres://postgres:postgres@citus_master:5432/user
-   ```
+    ```
+    sudo ./citus_setup.sh user postgres://postgres:postgres@citus_master:5432/user
+    ```
 
 ## Persistence Of Database Data In Docker Container (Optional)
 
@@ -183,9 +181,9 @@ This step will guide us in implementing a sample project solution following the 
 
 1. **Insert Sample Data To Database:**
 
-      ```
-      node insert_sample_solution.js
-      ```
+    ```
+    node insert_sample_solutions.js
+    ```
 
 ## Default Forms Creation for Portal Configuration
 

@@ -72,7 +72,6 @@ services:
     networks:
       - project_net
   user:
-    build: ./user
     image: shikshalokamqa/elevate-user:3.3.24
     ports:
       - '3001:3001'

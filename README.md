@@ -22,9 +22,9 @@ The Project building block facilitates the creation and engagement with micro-im
 
 ## 💻 Supported Operating Systems
 
-* **Ubuntu** (Recommended: Version 20 and above)
-* **Windows** (Recommended: Version 11 and above)
-* **macOS** (Recommended: Version 12 and above)
+-   **Ubuntu** (Recommended: Version 20 and above)
+-   **Windows** (Recommended: Version 11 and above)
+-   **macOS** (Recommended: Version 12 and above)
 
 ---
 
@@ -44,16 +44,19 @@ This setup is ideal for **local development, testing**, and deployments where on
 
 <details>
 <summary> 1. Ubuntu Setup </summary>
+<br>
 Go to the detailed Ubuntu Docker setup guide: **<a href="https://github.com/ELEVATE-Project/project-service/blob/setupGuide-3.4/documentation/3.4.0/setup/docker/stand-alone/ubuntu/README.md" target="_blank">SETUP_STANDALONE_DOCKER_UBUNTU.md</a>**
 </details>
 
 <details>
 <summary> 2. macOS Setup </summary>
+<br>
 Go to the detailed macOS Docker setup guide: **<a href="link/to/standalone/docker/macos/README" target="_blank">SETUP_STANDALONE_DOCKER_MACOS.md</a>**
 </details>
 
 <details>
 <summary> 3. Windows Setup </summary>
+<br>
 Go to the detailed Windows Docker setup guide: **<a href="link/to/standalone/docker/windows/README" target="_blank">SETUP_STANDALONE_DOCKER_WINDOWS.md</a>**
 </details>
 
@@ -63,16 +66,19 @@ Go to the detailed Windows Docker setup guide: **<a href="link/to/standalone/doc
 
 <details>
 <summary> 1. Ubuntu Setup </summary>
+<br>
 Go to the detailed Ubuntu Native setup guide: **<a href="https://github.com/ELEVATE-Project/project-service/blob/setupGuide-3.4/documentation/3.4.0/setup/native/stand-alone/ubuntu/README.md" target="_blank">SETUP_STANDALONE_NATIVE_UBUNTU.md</a>**
 </details>
 
 <details>
 <summary> 2. macOS Setup </summary>
+<br>
 Go to the detailed macOS Native setup guide: **<a href="link/to/standalone/native/macos/README" target="_blank">SETUP_STANDALONE_NATIVE_MACOS.md</a>**
 </details>
 
 <details>
 <summary> 3. Windows Setup </summary>
+<br>
 Go to the detailed Windows Native setup guide: **<a href="link/to/standalone/native/windows/README" target="_blank">SETUP_STANDALONE_NATIVE_WINDOWS.md</a>**
 </details>
 
@@ -92,16 +98,19 @@ This setup integrates the Projects Service with the **Samiksha Service**, provid
 
 <details>
 <summary> 1. Ubuntu Setup </summary>
+<br>
 Go to the detailed Ubuntu Docker setup guide: **<a href="link/to/samiksha/docker/ubuntu/README" target="_blank">SETUP_SAMIKSHA_DOCKER_UBUNTU.md</a>**
 </details>
 
 <details>
 <summary> 2. macOS Setup </summary>
+<br>
 Go to the detailed macOS Docker setup guide: **<a href="link/to/samiksha/docker/macos/README" target="_blank">SETUP_SAMIKSHA_DOCKER_MACOS.md</a>**
 </details>
 
 <details>
 <summary> 3. Windows Setup </summary>
+<br>
 Go to the detailed Windows Docker setup guide: **<a href="link/to/samiksha/docker/windows/README" target="_blank">SETUP_SAMIKSHA_DOCKER_WINDOWS.md</a>**
 </details>
 
@@ -111,16 +120,19 @@ Go to the detailed Windows Docker setup guide: **<a href="link/to/samiksha/docke
 
 <details>
 <summary> 1. Ubuntu Setup </summary>
+<br>
 Go to the detailed Ubuntu Native setup guide: **<a href="link/to/samiksha/native/ubuntu/README" target="_blank">SETUP_SAMIKSHA_NATIVE_UBUNTU.md</a>**
 </details>
 
 <details>
 <summary> 2. macOS Setup </summary>
+<br>
 Go to the detailed macOS Native setup guide: **<a href="link/to/samiksha/native/macos/README" target="_blank">SETUP_SAMIKSHA_NATIVE_MACOS.md</a>**
 </details>
 
 <details>
 <summary> 3. Windows Setup </summary>
+<br>
 Go to the detailed Windows Native setup guide: **<a href="link/to/samiksha/native/windows/README" target="_blank">SETUP_SAMIKSHA_NATIVE_WINDOWS.md</a>**
 </details>
 
@@ -129,6 +141,17 @@ Go to the detailed Windows Native setup guide: **<a href="link/to/samiksha/nativ
 ---
 
 ## 📖 Related Documentation & Tools
+
+### Versioning & Documentation Links
+
+This README is focused on the **3.4.0 Setup Guide** for the Projects Service.
+
+-   **Current Version (3.4.0) Documentation:** All setup links above point to the **3.4.0** guides.
+-   **Legacy Version (1.0.0) Documentation:** Access the documentation for the previous major release here: **<a href="https://github.com/ELEVATE-Project/project-service/blob/setupGuide-3.4/documentation/1.0.0/ReadMe.md" target="_blank">View 1.0.0 Documentation</a>**
+
+### Postman Collections
+
+-   **<a href="https://github.com/ELEVATE-Project/project-service/tree/main/api-doc" target="_blank">Projects Service API Collection</a>**
 
 ### Adding New Projects to the System
 
@@ -151,5 +174,3 @@ Several open source dependencies that have aided Projects's development:
 ![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white)
 ![Jest](https://img.shields.io/badge/-jest-%23C21325?style=for-the-badge&logo=jest&logoColor=white)
 ![Git](https://img.shields.io/badge/git-%23F05033.svg?style=for-the-badge&logo=git&logoColor=white)
-
----

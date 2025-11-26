@@ -28,11 +28,9 @@ The Project building block facilitates the creation and engagement with micro-im
 
 # Setup Options
 
-**Project services can be setup using two methods:**
+> Note : This guide outlines two setup methods, detailed below. For a quick, beginner-friendly setup and walkthrough of services, it is recommended to use the Dockerized Services & Dependencies setup with the Docker-
 
-> Note : This guide outlines two setup methods, detailed below. For a quick, beginner-friendly setup and walkthrough of services, it is recommended to use the Dockerized Services & Dependencies setup with the Docker-Compose file.
-
-<summary>Dockerized Services & Dependencies Using Docker-Compose File</summary>
+    Compose file.
 
 ## Dockerized Services & Dependencies
 
@@ -66,7 +64,7 @@ done
 
 1.  **Download and execute main setup script:** Execute the following command in your terminal from the project directory.
     ```
-    curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/mac-linux/setup_project.sh && chmod +x setup_project.sh && sudo ./setup_project.sh
+    curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/scripts/stand-alone/ubuntu/setup_project.sh && chmod +x setup_project.sh && sudo ./setup_project.sh
     ```
 
 > Note : The script will download all the essential files and launch the services in Docker. Once all services are successfully up and running, you can proceed to the next steps.
@@ -105,11 +103,11 @@ To enable the Citus extension for user services, follow these steps.
     ```
 2. Set up the citus_setup file by following the steps given below.
 
+    1. Enable Citus and set distribution columns for `user` database by running the `citus_setup.sh`with the following arguments.
 
-   1. Enable Citus and set distribution columns for `user` database by running the `citus_setup.sh`with the following arguments.
-   ```
-   sudo ./citus_setup.sh user postgres://postgres:postgres@citus_master:5432/user
-   ```
+    ```
+    sudo ./citus_setup.sh user postgres://postgres:postgres@citus_master:5432/user
+    ```
 
 ## Persistence Of Database Data In Docker Container (Optional)
 
@@ -183,9 +181,9 @@ This step will guide us in implementing a sample project solution following the 
 
 1. **Insert Sample Data To Database:**
 
-      ```
-      node insert_sample_solution.js
-      ```
+    ```
+    node insert_sample_solutions.js
+    ```
 
 ## Default Forms Creation for Portal Configuration
 

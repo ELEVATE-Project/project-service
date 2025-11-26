@@ -1,11 +1,5 @@
 #!/bin/bash
 
-# Ensure PGPASSWORD is set in your environment before running, e.g., export PGPASSWORD=postgres
-
-# --- 1. INSERT INTO public.user ---
-# FIXES:
-# - Quoted 'default' and the phone number hash which were missing quotes.
-# - Quoted the user_name variables.
 psql -h localhost -p 5432 -U postgres -d user -c "INSERT INTO public.users (id, name, email, email_verified, roles, status, password, has_accepted_terms_and_conditions, about, location, languages, preferred_language, share_link, image, custom_entity_text, meta, created_at, updated_at, deleted_at, tenant_code, phone, phone_code, configs) VALUES (1, 'Rahul R B', 'a0db5e0a39ee13db7fc5d1309e637f2c', false, '{8,2}', 'ACTIVE', '\$2a\$10\$NTzc2CjEbwB4DavjEKU11eqJXJLrODnvAwvXWor9Dz/gXr55Pvyj.', true, NULL, NULL, NULL, 'en', NULL, NULL, NULL, NULL, '2024-04-18 08:12:19.394+00', '2024-04-18 08:12:19.426+00', NULL, 'default','53bc5d0ff0c53bee460c08b8afe087455050dc7529a2f1d4f7319c0da653a7e4','+91', NULL);"
 psql -h localhost -p 5432 -U postgres -d user -c "INSERT INTO public.users (id, name, email, email_verified, roles, status, password, has_accepted_terms_and_conditions, about, location, languages, preferred_language, share_link, image, custom_entity_text, meta, created_at, updated_at, deleted_at, tenant_code, phone, phone_code, configs) VALUES (2, 'Prajwal C S', 'c4113be1bc2cef51981a6ec687302e42fc4f87f4dfac4276584844d9e3e0f5ae', false, '{8,2}', 'ACTIVE', '\$2a\$10\$NTzc2CjEbwB4DavjEKU11eqJXJLrODnvAwvXWor9Dz/gXr55Pvyj.', true, NULL, NULL, NULL, 'en', NULL, NULL, NULL, NULL, '2024-04-18 08:12:19.394+00', '2024-04-18 08:12:19.426+00', NULL, 'default','53bc5d0ff0c53bee460c08b8afe087455050dc7529a2f1d4f7319c0da653a767','+91', NULL);"
 psql -h localhost -p 5432 -U postgres -d user -c "INSERT INTO public.users (id, name, email, email_verified, roles, status, password, has_accepted_terms_and_conditions, about, location, languages, preferred_language, share_link, image, custom_entity_text, meta, created_at, updated_at, deleted_at, tenant_code, phone, phone_code, configs) VALUES (3, 'Vishnu V P', '1092be87fd483fce1deba56c8cdefa79bed4f70a4b110fc4e7947c57aacff219', false, '{8,2}', 'ACTIVE', '\$2a\$10\$NTzc2CjEbwB4DavjEKU11eqJXJLrODnvAwvXWor9Dz/gXr55Pvyj.', true, NULL, NULL, NULL, 'en', NULL, NULL, NULL, NULL, '2024-04-18 08:12:19.394+00', '2024-04-18 08:12:19.426+00', NULL, 'default','53bc5d0ff0c53bee460c08b8afe087455050dc7529a2f1d4f7319c0da653a7e0','+91', NULL);"
@@ -23,9 +17,9 @@ psql -h localhost -p 5432 -U postgres -d user -c "INSERT INTO public.user_organi
 # FIXES:
 # - Quoted the organization_code and tenant_code variables.
 psql -h localhost -p 5432 -U postgres -d user -c "INSERT INTO public.user_organization_roles (tenant_code, user_id, organization_code,role_id, created_at, updated_at, deleted_at) VALUES ('default', 2, 'default_code', 1, '2024-04-18 08:12:19.394+00', '2024-04-18 08:12:19.394+00', NULL);"
-psql -h localhost -p 5432 -U postgres -d user -c "INSERT INTO public.user_organization_roles (tenant_code, user_id, organization_code,role_id, created_at, updated_at, deleted_at) VALUES ('default', 3, 'default_code', 2, '2024-04-18 08:12:19.394+00', '2024-04-18 08:12:19.394+00', NULL);"
-psql -h localhost -p 5432 -U postgres -d user -c "INSERT INTO public.user_organization_roles (tenant_code, user_id, organization_code,role_id, created_at, updated_at, deleted_at) VALUES ('default', 2, 'default_code', 3, '2024-04-18 08:12:19.394+00', '2024-04-18 08:12:19.394+00', NULL);"
-psql -h localhost -p 5432 -U postgres -d user -c "INSERT INTO public.user_organization_roles (tenant_code, user_id, organization_code,role_id, created_at, updated_at, deleted_at) VALUES ('default', 4, 'default_code', 3, '2024-04-18 08:12:19.394+00', '2024-04-18 08:12:19.394+00', NULL);"
+psql -h localhost -p 5432 -U postgres -d user -c "INSERT INTO public.user_organization_roles (tenant_code, user_id, organization_code,role_id, created_at, updated_at, deleted_at) VALUES ('default', 3, 'default_code', 8, '2024-04-18 08:12:19.394+00', '2024-04-18 08:12:19.394+00', NULL);"
+psql -h localhost -p 5432 -U postgres -d user -c "INSERT INTO public.user_organization_roles (tenant_code, user_id, organization_code,role_id, created_at, updated_at, deleted_at) VALUES ('default', 2, 'default_code', 8, '2024-04-18 08:12:19.394+00', '2024-04-18 08:12:19.394+00', NULL);"
+psql -h localhost -p 5432 -U postgres -d user -c "INSERT INTO public.user_organization_roles (tenant_code, user_id, organization_code,role_id, created_at, updated_at, deleted_at) VALUES ('default', 4, 'default_code', 8, '2024-04-18 08:12:19.394+00', '2024-04-18 08:12:19.394+00', NULL);"
 
 # --- 4. INSERT INTO public.entity_types ---
 # FIXES:

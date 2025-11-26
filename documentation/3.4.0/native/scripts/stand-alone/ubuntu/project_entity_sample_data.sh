@@ -42,6 +42,7 @@ echo "Downloaded ${INSERT_SCRIPT}"
 echo ""
 echo "2. Installing required Node packages (mongoose)..."
 npm install mongoose
+npm install mongodb
 
 # --- 4. Run Insertion Script ---
 echo ""

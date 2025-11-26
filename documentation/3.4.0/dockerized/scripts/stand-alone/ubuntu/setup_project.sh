@@ -7,7 +7,7 @@ log() {
 
 # Step 1: Download Docker Compose file
 log "Downloading Docker Compose file..."
-curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/docker-compose-project.yml
+curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/dockerFiles/stand-alone/docker-compose-project.yml
 log "Docker Compose file downloaded."
 
 # Step 2: Download environment files
@@ -65,6 +65,13 @@ mkdir -p sample-data/user && \
 curl -L https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/sample-data/mac-linux/user/sampleData.sql -o sample-data/user/sampleData.sql
 log "Sample-data directory created and sampleData.sql downloaded."
 
+
+# Install MongoDB driver (usually needed if connecting directly to MongoDB/Citus)
+npm install mongodb
+
+# Install Mongoose (Object Data Modeling library, if the scripts use it)
+npm install mongoose
+
 # Step 11: Download additional scripts to add data
 log "Downloading sample data scripts..."
 curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/scripts/stand-alone/ubuntu/entity_sampleData.js
@@ -73,10 +80,10 @@ curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs
 curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/scripts/stand-alone/ubuntu/insert_sample_data.sh
 log "sample data scripts downloaded."
 
-# Step 13 : Run sample data insert script
-# log "Running sample data insertion..."
-# node insert_sample_solution.js
-# log "Sample data inserted."
+
+log "Downloading config.json file..."
+curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/scripts/stand-alone/ubuntu/config.json
+log "config.json file is downloaded."
 
 # Step 13: Run docker-compose-up.sh script
 log "Running docker-compose-up.sh script..."

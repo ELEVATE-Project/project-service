@@ -24,27 +24,30 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     depends_on:
       - zookeeper
+    healthcheck:
+      test: kafka-topics --bootstrap-server localhost:9092 --list || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 9
     networks:
       - project_net
-    # logging:
-    #   driver: none
   redis:
     image: 'redis:7.0.0'
     restart: 'always'
-    #ports:
-    #  - '6379:6379'
     expose:
       - 6379
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - project_net
-    # logging:
-    #   driver: none
   project:
-    build: ./project-service
+    image: shikshalokamqa/elevate-project-service:3.3.6.1
     container_name: project
     ports:
       - '6000:6000'
-    # command: ['nodemon', 'app.js']
     environment:
       - MONGODB_URL=mongodb://mongo:27017/elevate-project
     env_file:
@@ -53,26 +56,23 @@ services:
       - mongo
       - kafka
     volumes:
-      - ./project-service:/usr/app
+      - ./config.json:/opt/projects/config.json
     networks:
       - project_net
-
-  # Entity-management config
   entity_management:
-    build: ./entity-management
+    image: shikshalokamqa/elevate-entity-management:3.3.13.1
     ports:
       - '5001:5001'
-    # command: ['nodemon', 'app.js']
     env_file:
       - ./entity_management_env
     depends_on:
       - mongo
     volumes:
-      - ./entity-management:/usr/src/app
+      - ./config.json:/var/src/config.json
     networks:
       - project_net
   user:
-    build: ./user
+    image: shikshalokamqa/elevate-user:3.3.24
     ports:
       - '3001:3001'
     command: >
@@ -121,31 +121,33 @@ services:
       - kafka
       - citus
     environment:
-      - KAFKA_HOST=kafka:29092
+      - KAFKA_HOST=kafka:9092
       - DEV_DATABASE_URL=postgres://postgres:postgres@citus_master:5432/notification
     networks:
       - project_net
-    env_file:
-      - ./notification_env
+    # env_file:
+    #   - ./notification_env
 
   scheduler:
-    # Update with latest image
     image: shikshalokamqa/elevate-scheduler:2.6.1
     ports:
       - '4000:4000'
     command: ['nodemon', 'app.js']
-    environment:
-      - KAFKA_URL=kafka:29092
+    # environment:
+    #   - KAFKA_URL=kafka:9092
     depends_on:
-      - kafka
-      - redis
+      kafka:
+        condition: service_healthy
+      redis:
+        condition: service_started
     networks:
       - project_net
     env_file:
-      - scheduler_env
+      - ./scheduler_env
   interface:
     # Update with latest image
-    image: shikshalokamqa/elevate-interface:3.1.5
+    # build: ./interface-service
+    image: shikshalokamqa/elevate-interface:3.3.2
     ports:
       - '3569:3569'
     command: ['node', 'app.js']
@@ -211,7 +213,6 @@ services:
     restart: 'always'
 
   portal:
-    # Update with latest image
     image: shikshalokamqa/elevate-project-obervation-pwa:3.4.0
     container_name: portal
     ports:

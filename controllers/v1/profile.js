@@ -193,12 +193,8 @@ module.exports = class profile {
 				const userId = req.userDetails.userInformation.userId
 				const profileData = await profileHelper.read(userId, req.userDetails.userToken, req.userDetails)
 
-				// If successful, resolve the Promise with a success message and the fetched data
-				return resolve({
-					success: true,
-					message: CONSTANTS.apiResponses.DATA_FETCHED_SUCCESSFULLY,
-					result: profileData,
-				})
+				// If successful, resolve the Promise
+				return resolve(profileData)
 			} catch (error) {
 				// If an error occurs, return an error response with status, message, and the error object
 				return reject({

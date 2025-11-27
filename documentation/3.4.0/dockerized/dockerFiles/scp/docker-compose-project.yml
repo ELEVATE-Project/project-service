@@ -87,7 +87,7 @@ services:
       (while ! curl -sSf http://user:3001 > /dev/null; do
         sleep 1;
       done && echo 'Service is up' &&
-      /bin/bash -c 'cd scripts && echo Running user service scripts && node insertDefaultOrg.js && node viewsScript.js && node -r module-alias/register uploadSampleCSV.js');
+      /bin/bash -c 'cd scripts && echo Running user service scripts && node insertDefaultOrg.js && node -r module-alias/register uploadSampleCSV.js');
       tail -f /dev/null"
     depends_on:
       - kafka

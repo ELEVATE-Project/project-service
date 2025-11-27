@@ -698,6 +698,8 @@ module.exports = class ProjectTemplatesHelper {
 							_id: duplicateProjectTemplateId.data._id,
 							externalId: duplicateProjectTemplateId.data.externalId,
 							isReusable: duplicateProjectTemplateId.data.isReusable,
+							parentProjectTemplateId: projectTemplateData[0]._id,
+							solutionId: duplicateProjectTemplateId.data.solutionId,
 						})
 					} catch (innerError) {
 						// Continue even if one fails
@@ -962,6 +964,7 @@ module.exports = class ProjectTemplatesHelper {
 						_id: duplicateTemplateDocument._id,
 						externalId: newProjectTemplate.externalId,
 						isReusable: newProjectTemplate.isReusable,
+						solutionId: duplicateTemplateDocument.solutionId,
 					},
 				})
 			} catch (error) {

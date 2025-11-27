@@ -29,7 +29,7 @@ function getUpdateObjectTOAddScope(bodyData, tenantId, orgId, userDetails) {
 			// Check if user is Admin or Tenant Admin
 			if (UTILS.validateRoles(userDetails.userInformation.roles, adminTenantAdminRole)) {
 				// Fetch tenant details to validate organization codes
-				tenantDetails = await userService.fetchTenantDetails(tenantId, userDetails.userToken)
+				tenantDetails = await userService.fetchTenantDetails(tenantId)
 				if (!tenantDetails?.success || !tenantDetails?.data?.meta) {
 					throw {
 						message: CONSTANTS.apiResponses.FAILED_TO_FETCH_TENANT_DETAILS,
@@ -166,7 +166,7 @@ function getUpdateObjectToRemoveScope(currentScope, bodyData, tenantId, userDeta
 			let tenantDetails
 			if (UTILS.validateRoles(userDetails.userInformation.roles, adminTenantAdminRole)) {
 				// Fetch tenant meta details if user is admin/tenant admin
-				tenantDetails = await userService.fetchTenantDetails(tenantId, userDetails.userToken)
+				tenantDetails = await userService.fetchTenantDetails(tenantId)
 				if (!tenantDetails?.success || !tenantDetails?.data?.meta) {
 					throw {
 						message: CONSTANTS.apiResponses.FAILED_TO_FETCH_TENANT_DETAILS,

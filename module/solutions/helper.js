@@ -1354,7 +1354,7 @@ module.exports = class SolutionsHelper {
 				}
 
 				// fetch tenant domain by calling  tenant details API
-				let tenantDetailsResponse = await userService.fetchTenantDetails(solution.tenantId, token)
+				let tenantDetailsResponse = await userService.fetchTenantDetails(solution.tenantId)
 				const domains = tenantDetailsResponse?.data?.domains || []
 
 				// Error handling if API failed or no domains found

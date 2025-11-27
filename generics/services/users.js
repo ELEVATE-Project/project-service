@@ -387,7 +387,7 @@ const getOrgDetails = function (organisationIdentifier, tenantId) {
  * @returns {Promise} A promise that resolves with the organization details or rejects with an error.
  */
 
-const fetchTenantDetails = function (tenantId, userToken = '', aggregateValidOrgs = false) {
+const fetchTenantDetails = function (tenantId, aggregateValidOrgs = false) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			let url =

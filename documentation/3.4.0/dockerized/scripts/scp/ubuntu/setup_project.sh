@@ -19,6 +19,7 @@ curl -L \
     -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/dockerized/envs/notification_env \
     -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/dockerized/envs/scheduler_env \
     -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/dockerized/envs/user_env \
+    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/dockerized/envs/survey_project_creation_env \
     -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/dockerized/envs/env.js
 log "Environment files downloaded."
 

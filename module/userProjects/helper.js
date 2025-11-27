@@ -1653,6 +1653,12 @@ module.exports = class UserProjectsHelper {
 						}
 						projectCreation.data['isAPrivateProgram'] = solutionDetails.isAPrivateProgram
 						if (Object.keys(solutionDetails).length > 0) {
+							const programOrgId = await programsQueries.programsDocument(
+								{
+									_id: ObjectId(solutionDetails.programId),
+								},
+								['orgId']
+							)
 							projectCreation.data.programInformation = {
 								_id: ObjectId(solutionDetails.programId),
 								externalId: solutionDetails.programExternalId,
@@ -1660,6 +1666,7 @@ module.exports = class UserProjectsHelper {
 									? solutionDetails.programDescription
 									: '',
 								name: solutionDetails.programName,
+								orgId: programOrgId ? programOrgId[0].orgId : '',
 							}
 
 							projectCreation.data.solutionInformation = {

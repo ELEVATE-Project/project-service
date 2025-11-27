@@ -21,7 +21,7 @@ module.exports = class ProfileHelper {
 				if (!userResponse.success) {
 					throw {
 						message: CONSTANTS.apiResponses.USER_DATA_FETCH_UNSUCCESSFUL,
-						status: HTTP_STATUS_CODE.bad_request.status,
+						status: HTTP_STATUS_CODE.unauthorized.status,
 						success: false,
 					}
 				}

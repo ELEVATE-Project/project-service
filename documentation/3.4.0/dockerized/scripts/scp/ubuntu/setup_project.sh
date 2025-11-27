@@ -55,12 +55,17 @@ log "Creating user directory and downloading distributionColumns.sql..."
 mkdir -p user && curl -o ./user/distributionColumns.sql -JL https://github.com/ELEVATE-Project/project-service/raw/refs/heads/setupGuideSCP/documentation/3.4.0/distribution-columns/user/distributionColumns.sql
 log "User directory created and distributionColumns.sql downloaded."
 
-# Step 9: Download and make citus_setup.sh executable
+# Step 9: Create survey-project-creation directory and download SQL file
+log "Creating survey-project-creation directory and downloading distributionColumns.sql..."
+mkdir -p survey-project-creation && curl -o ./survey-project-creation/distributionColumns.sql -JL https://github.com/ELEVATE-Project/project-service/raw/refs/heads/setupGuideSCP/documentation/3.4.0/distribution-columns/survey-project-creation/distributionColumns.sql
+log "survey-project-creation directory created and distributionColumns.sql downloaded."
+
+# Step 10: Download and make citus_setup.sh executable
 log "Downloading citus_setup.sh..."
 curl -OJL https://github.com/ELEVATE-Project/project-service/raw/refs/heads/setupGuideSCP/documentation/3.4.0/dockerized/scripts/mac-linux/citus_setup.sh
 chmod +x citus_setup.sh
 
-# Step 10: Create sample-data directory and download SQL file
+# Step 11: Create sample-data directory and download SQL file
 log "Creating sample-data directory and downloading sampleData.sql..."
 mkdir -p sample-data/user && \
 curl -L https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/sample-data/mac-linux/user/sampleData.sql -o sample-data/user/sampleData.sql
@@ -73,7 +78,7 @@ npm install mongodb
 # Install Mongoose (Object Data Modeling library, if the scripts use it)
 npm install mongoose
 
-# Step 11: Download additional scripts to add data
+# Step 12: Download additional scripts to add data
 log "Downloading sample data scripts..."
 curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/dockerized/scripts/stand-alone/ubuntu/entity_sampleData.js
 curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/dockerized/scripts/stand-alone/ubuntu/project_sampleData.js
@@ -86,7 +91,7 @@ log "Downloading config.json file..."
 curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/dockerized/scripts/stand-alone/ubuntu/config.json
 log "config.json file is downloaded."
 
-# Step 13: Run docker-compose-up.sh script
+# Step 14: Run docker-compose-up.sh script
 log "Running docker-compose-up.sh script..."
 ./docker-compose-up.sh
 log "docker-compose-up.sh script executed."

@@ -22,10 +22,6 @@ The Project building block facilitates the creation and engagement with micro-im
 </div>
 </br>
 
-# Supported Operating Systems
-
--   **Ubuntu (Recommended: Version 20 and above)**
-
 # Native Setup - Stand Alone
 
 ## PM2 Managed Services & Natively Installed Dependencies

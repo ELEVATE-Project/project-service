@@ -22,15 +22,7 @@ The Project building block facilitates the creation and engagement with micro-im
 </div>
 </br>
 
-# Supported Operating Systems
-
--   **Ubuntu (Recommended: Version 20 and above)**
-
-# Setup Options
-
-> Note : This guide outlines two setup methods, detailed below. For a quick, beginner-friendly setup and walkthrough of services, it is recommended to use the Dockerized Services & Dependencies setup with the Docker-
-
-    Compose file.
+# Docker Setup - Stand Alone
 
 ## Dockerized Services & Dependencies
 
@@ -53,7 +45,7 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
 > **Caution:** Before proceeding, please ensure that the ports given here are available and open. It is essential to verify their availability prior to moving forward. You can run below command in your terminal to check this
 
 ```
-for port in 3000 3001 3002 6000 5001 4000 9092 5432 7007 2181 2707 3569; do
+for port in 3000 3001 3002 6000 5001 4000 9092 5432 7007 2181 27017 3569; do
     if lsof -iTCP:$port -sTCP:LISTEN &>/dev/null; then
         echo "Port $port is in use"
     else
@@ -62,7 +54,7 @@ for port in 3000 3001 3002 6000 5001 4000 9092 5432 7007 2181 2707 3569; do
 done
 ```
 
-1.  **Download and execute main setup script:** Execute the following command in your terminal from the project directory.
+1. **Download and execute main setup script:** Execute the following command in your terminal from the project directory.
     ```
     curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/scripts/stand-alone/ubuntu/setup_project.sh && chmod +x setup_project.sh && sudo ./setup_project.sh
     ```
@@ -71,15 +63,14 @@ done
 
 > **General Instructions :**
 
-1.  All containers which are part of the docker-compose can be gracefully stopped by pressing Ctrl + c in the same terminal where the services are running.
-
-2.  All docker containers can be stopped and removed by using below command.
+1. All containers which are part of the docker-compose can be gracefully stopped by pressing Ctrl + c in the same terminal where the services are running.
+2. All docker containers can be stopped and removed by using below command.
 
 ```
 sudo ./docker-compose-down.sh
 ```
 
-3.  All services and dependencies can be started using below command.
+3. All services and dependencies can be started using below command.
 
 ```
 sudo ./docker-compose-up.sh
@@ -98,9 +89,11 @@ For more information, refer **[Citus Data](https://www.citusdata.com/)**.
 To enable the Citus extension for user services, follow these steps.
 
 1. Create a sub-directory named `user` and download `distributionColumns.sql` into it. (Skip this for linux)
+
     ```
     mkdir user && curl -o ./user/distributionColumns.sql -JL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/distribution-columns/user/distributionColumns.sql
     ```
+
 2. Set up the citus_setup file by following the steps given below.
 
     1. Enable Citus and set distribution columns for `user` database by running the `citus_setup.sh`with the following arguments.

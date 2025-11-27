@@ -22,15 +22,9 @@ The Project building block facilitates the creation and engagement with micro-im
 </div>
 </br>
 
-# Supported Operating Systems
+## Supported Operating Systems
 
 -   **Ubuntu (Recommended: Version 20 and above)**
-
-# Setup Options
-
-> Note : This guide outlines two setup methods, detailed below. For a quick, beginner-friendly setup and walkthrough of services, it is recommended to use the Dockerized Services & Dependencies setup with the Docker-
-
-    Compose file.
 
 ## Dockerized Services & Dependencies
 

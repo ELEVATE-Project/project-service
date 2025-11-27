@@ -237,6 +237,10 @@ services:
       done;
       echo 'Kafka is ready.' &&
       nodemon app.js"
+    environment:
+      - KAFKA_URL=kafka:9092
+      - DEV_DATABASE_URL=postgres://postgres:postgres@citus_master:5432/scp
+      - REDIS_HOST=redis://redis:6379
     env_file:
       - ./survey_project_creation_env
     depends_on:
@@ -246,6 +250,8 @@ services:
         condition: service_started
       redis:
         condition: service_healthy
+    volumes:
+      - ./survey-project-creation-service/src/:/var/src
     networks:
       - project_net
 networks:

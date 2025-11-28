@@ -157,7 +157,7 @@ In such cases, you can generate sample user accounts using the steps below. This
 > **Warning:** Use this generator only immediately after the initial system setup and before any normal user accounts are created through the portal. It should not be used under any circumstances thereafter.
 
 ```
-sudo ./insert_sample_data.sh user postgres://postgres:postgres@citus_master:5432/user
+sudo chmod +x ./insert_sample_data.sh && sudo ./insert_sample_data.sh user postgres://postgres:postgres@citus_master:5432/user
 ```
 
 After successfully running the script mentioned above, the following user accounts will be created and available for login:

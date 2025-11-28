@@ -57,7 +57,7 @@ let solutionData = [
 		projectTemplateId: new ObjectId('68ee4bb3fb9bee08b93b6d70'),
 		updatedBy: '1',
 		author: '1',
-		creator: 'Nevil',
+		creator: 'Mallanagouda',
 		certificateTemplateId: new ObjectId('68ee4bf5fb9bee08b93b6d97'),
 		link: 'f8a8e9ba397a29cf75ad5057db6cb7f9',
 	},
@@ -117,7 +117,7 @@ let solutionData = [
 		projectTemplateId: new ObjectId('68e8c635201642091e01491c'),
 		updatedBy: '1',
 		author: '1',
-		creator: 'Nevil',
+		creator: 'Mallanagouda',
 		certificateTemplateId: new ObjectId('68e8c676201642091e014943'),
 		link: '178ac1fdff5b367ef3335ce0e1665a6c',
 	},
@@ -233,7 +233,7 @@ let solutionData = [
 		projectTemplateId: new ObjectId('68d3b9a92ba17cc3cb238829'),
 		updatedBy: '1',
 		author: '1',
-		creator: 'Nevil',
+		creator: 'Mallanagouda',
 		link: 'a0acc357edbcf3287e9767d20a7d9f12',
 	},
 ]
@@ -1601,6 +1601,30 @@ let projectCategoriesData = [
 		__v: 0,
 	},
 ]
+
+let configurationData = [
+	{
+		_id: new ObjectId('6825a1982d46aa6df0cc36a8'),
+		code: 'keysAllowedForTargeting',
+		__v: 0,
+		createdAt: new Date('2025-05-15T08:11:04.674Z'),
+		meta: {
+			profileKeys: [
+				'state',
+				'district',
+				'block',
+				'cluster',
+				'school',
+				'professional_role',
+				'professional_subroles',
+				'roles',
+				'subject',
+				'organizations',
+			],
+		},
+		updatedAt: new Date('2025-05-26T10:56:17.021Z'),
+	},
+]
 module.exports = {
 	solutionData,
 	programData,
@@ -1609,4 +1633,5 @@ module.exports = {
 	certificateTemplatesData,
 	certificateBaseTemplatesData,
 	projectCategoriesData,
+	configurationData,
 }

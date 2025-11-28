@@ -21,6 +21,19 @@ psql -h localhost -p 5432 -U postgres -d user -c "INSERT INTO public.user_organi
 psql -h localhost -p 5432 -U postgres -d user -c "INSERT INTO public.user_organization_roles (tenant_code, user_id, organization_code,role_id, created_at, updated_at, deleted_at) VALUES ('default', 2, 'default_code', 8, '2024-04-18 08:12:19.394+00', '2024-04-18 08:12:19.394+00', NULL);"
 psql -h localhost -p 5432 -U postgres -d user -c "INSERT INTO public.user_organization_roles (tenant_code, user_id, organization_code,role_id, created_at, updated_at, deleted_at) VALUES ('default', 4, 'default_code', 8, '2024-04-18 08:12:19.394+00', '2024-04-18 08:12:19.394+00', NULL);"
 
+
+psql -h localhost -p 5432 -U postgres -d user -c "
+UPDATE public.tenants
+SET meta = '{
+    \"factors\": [\"professional_role\", \"professional_subroles\"],
+    \"observableEntityKeys\": [\"professional_subroles\"],
+    \"optional_factors\": [\"state\", \"district\", \"block\", \"cluster\", \"school\"],
+    \"validationExcludedScopeKeys\": [\"language\", \"gender\"],
+    \"portalSignInUrl\": \"https://shikshagrah-qa.tekdinext.com/register\"
+}'
+WHERE code = 'default';
+"
+
 # --- 4. INSERT INTO public.entity_types ---
 # FIXES:
 # - Quoted the JSON value for the 'meta' column.

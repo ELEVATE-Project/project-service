@@ -12,6 +12,20 @@ sudo -u postgres psql -p 5432 -d users -c "INSERT INTO public.user_organizations
 sudo -u postgres psql -p 5432 -d users -c "INSERT INTO public.user_organizations (user_id,organization_code, tenant_code, created_at, updated_at, deleted_at) VALUES (3, 'default_code', 'default', '2024-04-18 08:12:19.394+00', '2024-04-18 08:12:19.394+00', NULL);"
 sudo -u postgres psql -p 5432 -d users -c "INSERT INTO public.user_organizations (user_id,organization_code, tenant_code, created_at, updated_at, deleted_at) VALUES (4, 'default_code', 'default', '2024-04-18 08:12:19.394+00', '2024-04-18 08:12:19.394+00', NULL);"
 
+
+sudo -u postgres psql -p 5432 -d user -c "
+UPDATE public.tenants
+SET meta = '{ 
+  \"factors\": [\"professional_role\", \"professional_subroles\"],
+  \"observableEntityKeys\": [\"professional_subroles\"],
+  \"optional_factors\": [\"state\", \"district\", \"block\", \"cluster\", \"school\"],
+  \"validationExcludedScopeKeys\": [\"language\", \"gender\"],
+  \"portalSignInUrl\": \"https://shikshagrah-qa.tekdinext.com/register\"
+}'
+WHERE code = 'default';
+"
+
+
 # FIXES:
 # - Quoted the organization_code and tenant_code variables.
 sudo -u postgres psql -p 5432 -d users -c "INSERT INTO public.user_organization_roles (tenant_code, user_id, organization_code,role_id, created_at, updated_at, deleted_at) VALUES ('default', 2, 'default_code', 1, '2024-04-18 08:12:19.394+00', '2024-04-18 08:12:19.394+00', NULL);"

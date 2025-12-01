@@ -7,7 +7,7 @@ log() {
 
 # Step 1: Download Docker Compose file
 log "Downloading Docker Compose file..."
-curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/dockerFiles/stand-alone/docker-compose-project.yml
+curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideWithSurvey/documentation/3.4.0/dockerized/dockerFiles/with-survey/docker-compose-project.yml
 log "Docker Compose file downloaded."
 
 # Step 2: Download environment files
@@ -19,7 +19,8 @@ curl -L \
     -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/notification_env \
     -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/envs/scheduler_env \
     -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/envs/user_env \
-    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/envs/env.js
+    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/envs/env.js \
+    -o https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideWithSurvey/documentation/3.4.0/dockerized/envs/samiksha_env
 log "Environment files downloaded."
 
 # Step 3: Download replace_volume_path.sh script
@@ -39,8 +40,8 @@ log "replace_volume_path.sh script executed."
 
 # Step 6: Download additional scripts
 log "Downloading docker-compose scripts..."
-curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/scripts/stand-alone/ubuntu/docker-compose-up.sh
-curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/scripts/stand-alone/ubuntu/docker-compose-down.sh
+curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideWithSurvey/documentation/3.4.0/dockerized/scripts/with-survey/ubuntu/docker-compose-up.sh
+curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideWithSurvey/documentation/3.4.0/dockerized/scripts/with-survey/ubuntu/docker-compose-down.sh
 log "docker-compose scripts downloaded."
 
 # Step 7: Make the scripts executable
@@ -67,15 +68,15 @@ npm install mongoose
 
 # Step 11: Download additional scripts to add data
 log "Downloading sample data scripts..."
-curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/scripts/stand-alone/ubuntu/entity_sampleData.js
-curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/scripts/stand-alone/ubuntu/project_sampleData.js
-curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/scripts/stand-alone/ubuntu/insert_sample_solutions.js
-curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/scripts/stand-alone/ubuntu/insert_sample_data.sh
+curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideWithSurvey/documentation/3.4.0/dockerized/scripts/with-survey/ubuntu/survey_sampleData.js
+curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideWithSurvey/documentation/3.4.0/dockerized/scripts/with-survey/ubuntu/entity_sampleData.js
+curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideWithSurvey/documentation/3.4.0/dockerized/scripts/with-survey/ubuntu/insert_sample_solutions.js
+curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideWithSurvey/documentation/3.4.0/dockerized/scripts/with-survey/ubuntu/insert_sample_data.sh
 log "sample data scripts downloaded."
 
 
 log "Downloading config.json file..."
-curl -L https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/scripts/stand-alone/ubuntu/configFile.json -o config.json
+curl -L https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideWithSurvey/documentation/3.4.0/dockerized/scripts/with-survey/ubuntu/configFile.json -o config.json
 log "config.json file is downloaded."
 
 # Step 13: Run docker-compose-up.sh script

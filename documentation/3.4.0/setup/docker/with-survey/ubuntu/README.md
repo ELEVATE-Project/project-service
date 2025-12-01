@@ -43,7 +43,7 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
 > **Caution:** Before proceeding, please ensure that the ports given here are available and open. It is essential to verify their availability prior to moving forward. You can run below command in your terminal to check this
 
 ```
-for port in 3000 3001 3002 6000 5001 4000 9092 5432 7007 2181 27017 3569 4301; do
+for port in 3000 3001 3002 6000 5001 4000 9092 5432 7007 2181 27017 3569; do
     if lsof -iTCP:$port -sTCP:LISTEN &>/dev/null; then
         echo "Port $port is in use"
     else

@@ -22,7 +22,7 @@ The Project building block facilitates the creation and engagement with micro-im
 </div>
 </br>
 
-# Docker Setup Project Service - Stand Alone
+# Docker Setup Project Service - With Survey
 
 Expectation: By diligently following the outlined steps, you will successfully establish a fully operational Project application setup, including both the portal and backend services.
 

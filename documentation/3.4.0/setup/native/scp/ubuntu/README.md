@@ -265,7 +265,7 @@ curl -L -o observation-portal/src/assets/env/env.js https://raw.githubuserconten
 12. **Run Service Scripts**
 
     ```
-    cd user/src/scripts && node insertDefaultOrg.js && node viewsScript.js && cd ../../..
+    cd user/src/scripts && node insertDefaultOrg.js && cd ../../..
     ```
 
 13. **Start The Portal**

@@ -42,6 +42,7 @@ async function main({ dataToBeInserted }) {
 	await insertData('certificateTemplates', dataToBeInserted.certificateTemplatesData)
 	await insertData('certificateBaseTemplates', dataToBeInserted.certificateBaseTemplatesData)
 	await insertData('projectCategories', dataToBeInserted.projectCategoriesData)
+	await insertData('configurations', dataToBeInserted.configurationData)
 }
 
 main({ dataToBeInserted: entityData })

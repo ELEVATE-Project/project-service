@@ -85,34 +85,24 @@ Before setting up the following ELEVATE-Project application, dependencies given 
 
 ```
 git clone -b release-1.0.0 https://github.com/ELEVATE-Project/survey-project-creation-service.git && \
-
 git clone -b develop https://github.com/ELEVATE-Project/project-service.git && \
-
 git clone -b develop https://github.com/ELEVATE-Project/entity-management.git && \
-
 git clone -b develop https://github.com/ELEVATE-Project/user.git && \
-
 git clone -b master https://github.com/ELEVATE-Project/notification.git && \
-
 git clone -b main https://github.com/ELEVATE-Project/interface-service.git && \
-
 git clone -b master https://github.com/ELEVATE-Project/scheduler.git && \
-
 git clone -b release-3.4.0 https://github.com/ELEVATE-Project/observation-survey-projects-pwa && \
-
 git clone -b releaase-1.1.0 https://github.com/ELEVATE-Project/elevate-portal && \
-
 git clone -b release-3.4.0 https://github.com/ELEVATE-Project/observation-portal
 ```
 
 3.  **Install NPM Packages**
 
 ```
-cd survey-project-creation-service/src && npm install && cd ../ && \
+cd survey-project-creation-service/src && npm install && cd ../.. && \
 cd project-service && npm install && cd ../ && \
 cd entity-management/src && npm install && cd ../.. && \
 cd user/src && npm install && cd ../.. && \
-cd entity-management\src && npm install && cd ..\.. && \
 cd notification/src && npm install && cd ../.. && \
 cd interface-service/src && npm install && cd ../.. && \
 cd scheduler/src && npm install && cd ../.. && \
@@ -124,24 +114,15 @@ cd elevate-portal && npm install --force && cd ..
 4.  **Download Environment Files**
 
 ```
-curl -L -o survey-project-creation-service/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/native/envs/scp/survey_project_creation_env && \
-
+curl -L -o survey-project-creation-service/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/native/envs/scp/survey_project_creation_env && \
 curl -L -o project-service/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/native/envs/scp/project_env && \
-
 curl -L -o entity-management/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/native/envs/scp/entity_management_env && \
-
 curl -L -o user/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/native/envs/scp/user_env && \
-
 curl -L -o notification/src/.env https://github.com/ELEVATE-Project/project-service/raw/refs/heads/main/documentation/3.4.0/native/envs/scp/notification_env && \
-
 curl -L -o interface-service/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/native/envs/scp/interface_env && \
-
 curl -L -o scheduler/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/native/envs/scp/scheduler_env && \
-
 curl -L -o observation-survey-projects-pwa/src/assets/env/env.js https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/native/envs/scp/observation_survey_projects_pwa_env && \
-
 curl -L -o elevate-portal/env.js https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/native/envs/scp/elevate_portal_env && \
-
 curl -L -o observation-portal/src/assets/env/env.js https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/native/envs/scp/observation_portal_env
 ```
 
@@ -157,9 +138,7 @@ curl -L -o observation-portal/src/assets/env/env.js https://raw.githubuserconten
 
     ```
     curl -L -o survey-project-creation-service/src/config.json https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/native/scripts/scp/ubuntu/configSCP.json && \
-
     curl -L -o project-service/config.json https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/native/scripts/scp/ubuntu/configProject.json && \
-
     curl -L -o entity-management/src/config.json https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/native/scripts/scp/ubuntu/configProject.json
     ```
 

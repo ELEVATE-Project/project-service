@@ -124,7 +124,7 @@ cd elevate-portal && npm install --force && cd ..
 4.  **Download Environment Files**
 
 ```
-curl -L -o project-service/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/envs/scp/survey_project_creation_env && \
+curl -L -o survey-project-creation-service/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/envs/scp/survey_project_creation_env && \
 
 curl -L -o project-service/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/envs/scp/project_env && \
 
@@ -156,7 +156,7 @@ curl -L -o observation-portal/src/assets/env/env.js https://raw.githubuserconten
 5.  **Attaching Config File**
 
     ```
-    curl -L -o project-service/config.json https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/scripts/scp/ubuntu/configSCP.json && \
+    curl -L -o survey-project-creation-service/src/config.json https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/scripts/scp/ubuntu/configSCP.json && \
 
     curl -L -o project-service/config.json https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/scripts/scp/ubuntu/configProject.json && \
 
@@ -168,7 +168,7 @@ curl -L -o observation-portal/src/assets/env/env.js https://raw.githubuserconten
     1. Download `create-databases.sh` Script File:
 
     ```
-    curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/scripts/stand-alone/ubuntu/create-databases.sh
+    curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/scripts/scp/ubuntu/create-databases.sh
     ```
 
     2. Make the executable by running the following command:
@@ -187,6 +187,7 @@ curl -L -o observation-portal/src/assets/env/env.js https://raw.githubuserconten
 
     ```
     cd user/src && npx sequelize-cli db:migrate && cd ../.. && \
+    cd survey-project-creation-service/src && npx sequelize-cli db:migrate && cd ../.. && \
     cd notification/src && npx sequelize-cli db:migrate && cd ../..
     ```
 
@@ -220,7 +221,29 @@ curl -L -o observation-portal/src/assets/env/env.js https://raw.githubuserconten
         3. Enable Citus and set distribution columns for `user` database by running the `citus_setup.sh`with the following arguments.
             ```
              ./citus_setup.sh user postgres://postgres:postgres@localhost:9700/users
+    3. Download survey-project-creation-service `distributionColumns.sql` file.
+
+        ```
+        curl -o ./survey-project-creation-service/distributionColumns.sql -JL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/distribution-columns/survey-project-creation/distributionColumns.sql
+
+        ```
+    2. Set up the `citus_setup` file by following the steps given below.
+
+        1. Download the `citus_setup.sh` file:
+
             ```
+            curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/scripts/linux/citus_setup.sh
+            ```
+
+        2. Make the setup file executable by running the following command:
+
+            ```
+            chmod +x citus_setup.sh
+            ```
+
+        3. Enable Citus and set distribution columns for `scp` database by running the `citus_setup.sh`with the following arguments.
+            ```
+             ./citus_setup.sh survey-project-creation-service postgres://postgres:postgres@localhost:9700/scp
 
 9.  **Insert Initial Data**
 
@@ -308,10 +331,15 @@ After successfully running the script mentioned above, the following user accoun
 | mallanagouda@gmail.com | Password1@ | State Education Officer |
 | prajwal@gmail.com      | Password1@ | State Education Officer |
 | vishnu@gmail.com       | Password1@ | State Education Officer |
+| priyanka@gmail.com | Password1@ | Program Designer |
+| adithya@gmail.com      | Password1@ | Content Creator |
+| praveen@gmail.com       | Password1@ | Reviewer |
 
 ## Postman Collections
 
 -   [Projects Service](https://github.com/ELEVATE-Project/project-service/tree/main/api-doc)
+
+-  [Surevy Project Creation Service](https://github.com/ELEVATE-Project/survey-project-creation-service/tree/release-1.0.0/src/api-doc)
 
 ## Adding New Projects to the System
 

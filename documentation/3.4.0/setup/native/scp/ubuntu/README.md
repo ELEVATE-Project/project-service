@@ -229,11 +229,11 @@ curl -L -o observation-portal/src/assets/env/env.js https://raw.githubuserconten
 9.  **Insert Initial Data**
     1. Once you update the cloud credentials in the survey-project-creation-service environment, please run the script below to upload the certificate base templates to the cloud.
     ```
-    cd survey-project-creation-service/src/scripts && node uploadCertificateBaseTemplate.js && cd ../../
+    cd survey-project-creation-service/src/scripts && node uploadCertificateBaseTemplate.js && cd ../../../
     ```
     2. If you are using the Self Creation Portal for the education sector, please run the script below to insert the relevant entities into the survey-project-creation-service database.
     ```
-    cd survey-project-creation-service/src/scripts && node addDefaultEntitiesForEducationSector.js && cd ../../
+    cd survey-project-creation-service/src/scripts && node addDefaultEntitiesForEducationSector.js && cd ../../../
     ```
     3.  Download `entity-project-sample-data.sh` Script File:
 

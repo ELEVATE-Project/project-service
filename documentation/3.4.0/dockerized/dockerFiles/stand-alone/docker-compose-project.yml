@@ -203,12 +203,12 @@ services:
     restart: 'always'
 
   portal:
-    image: shikshalokamqa/elevate-project-obervation-pwa:3.4.0
+    image: shikshalokamqa/elevate-project-obervation-pwa:3.4.0.1
     container_name: portal
     ports:
       - '7007:7007'
     volumes:
-      - /home/user4/project/env.js:/usr/src/app/www/assets/env/env.js
+      - ./env.js:/usr/src/app/www/ml/assets/env/env.js
     command: >
       /bin/bash -c "ionic build --prod && ionic serve --host 0.0.0.0"
     networks:

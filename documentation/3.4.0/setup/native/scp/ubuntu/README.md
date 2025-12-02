@@ -138,8 +138,8 @@ curl -L -o observation-portal/src/assets/env/env.js https://raw.githubuserconten
 
     ```
     curl -L -o survey-project-creation-service/src/config.json https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/native/scripts/scp/ubuntu/configSCP.json && \
-    curl -L -o project-service/config.json https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/native/scripts/scp/ubuntu/configProject.json && \
-    curl -L -o entity-management/src/config.json https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/native/scripts/scp/ubuntu/configProject.json
+    curl -L -o project-service/config.json https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/native/scripts/scp/ubuntu/configFile.json && \
+    curl -L -o entity-management/src/config.json https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/native/scripts/scp/ubuntu/configFile.json
     ```
 
 6.  **Create Databases**

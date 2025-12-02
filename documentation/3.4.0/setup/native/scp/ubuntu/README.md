@@ -44,9 +44,9 @@ Before setting up the following ELEVATE-Project application, dependencies given 
 1. Download dependency management scripts:
 
     ```
-    curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/scripts/scp/ubuntu/check-dependencies.sh && \
-    curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/scripts/scp/ubuntu/install-dependencies.sh && \
-    curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/scripts/scp/ubuntu/uninstall-dependencies.sh && \
+    curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/native/scripts/scp/ubuntu/check-dependencies.sh && \
+    curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/native/scripts/scp/ubuntu/install-dependencies.sh && \
+    curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/native/scripts/scp/ubuntu/uninstall-dependencies.sh && \
     chmod +x check-dependencies.sh && \
     chmod +x install-dependencies.sh && \
     chmod +x uninstall-dependencies.sh
@@ -124,19 +124,19 @@ cd elevate-portal && npm install --force && cd ..
 4.  **Download Environment Files**
 
 ```
-curl -L -o survey-project-creation-service/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/envs/scp/survey_project_creation_env && \
+curl -L -o survey-project-creation-service/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/native/envs/scp/survey_project_creation_env && \
 
-curl -L -o project-service/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/envs/scp/project_env && \
+curl -L -o project-service/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/native/envs/scp/project_env && \
 
-curl -L -o entity-management/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/envs/scp/entity_management_env && \
+curl -L -o entity-management/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/native/envs/scp/entity_management_env && \
 
-curl -L -o user/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/envs/scp/user_env && \
+curl -L -o user/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/native/envs/scp/user_env && \
 
 curl -L -o notification/src/.env https://github.com/ELEVATE-Project/project-service/raw/refs/heads/main/documentation/3.4.0/native/envs/scp/notification_env && \
 
 curl -L -o interface-service/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/native/envs/scp/interface_env && \
 
-curl -L -o scheduler/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/envs/scp/scheduler_env && \
+curl -L -o scheduler/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/native/envs/scp/scheduler_env && \
 
 curl -L -o observation-survey-projects-pwa/src/assets/env/env.js https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/native/envs/scp/observation_survey_projects_pwa_env && \
 
@@ -156,11 +156,11 @@ curl -L -o observation-portal/src/assets/env/env.js https://raw.githubuserconten
 5.  **Attaching Config File**
 
     ```
-    curl -L -o survey-project-creation-service/src/config.json https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/scripts/scp/ubuntu/configSCP.json && \
+    curl -L -o survey-project-creation-service/src/config.json https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/native/scripts/scp/ubuntu/configSCP.json && \
 
-    curl -L -o project-service/config.json https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/scripts/scp/ubuntu/configProject.json && \
+    curl -L -o project-service/config.json https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/native/scripts/scp/ubuntu/configProject.json && \
 
-    curl -L -o entity-management/src/config.json https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/scripts/scp/ubuntu/configProject.json
+    curl -L -o entity-management/src/config.json https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/native/scripts/scp/ubuntu/configProject.json
     ```
 
 6.  **Create Databases**
@@ -168,7 +168,7 @@ curl -L -o observation-portal/src/assets/env/env.js https://raw.githubuserconten
     1. Download `create-databases.sh` Script File:
 
     ```
-    curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/scripts/scp/ubuntu/create-databases.sh
+    curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/native/scripts/scp/ubuntu/create-databases.sh
     ```
 
     2. Make the executable by running the following command:
@@ -200,7 +200,7 @@ curl -L -o observation-portal/src/assets/env/env.js https://raw.githubuserconten
     1. Download user `distributionColumns.sql` file.
 
         ```
-        curl -o ./user/distributionColumns.sql -JL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/distribution-columns/user/distributionColumns.sql
+        curl -o ./user/distributionColumns.sql -JL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/distribution-columns/user/distributionColumns.sql
 
         ```
 
@@ -224,7 +224,7 @@ curl -L -o observation-portal/src/assets/env/env.js https://raw.githubuserconten
     3. Download survey-project-creation-service `distributionColumns.sql` file.
 
         ```
-        curl -o ./survey-project-creation-service/distributionColumns.sql -JL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/distribution-columns/survey-project-creation/distributionColumns.sql
+        curl -o ./survey-project-creation-service/distributionColumns.sql -JL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/distribution-columns/survey-project-creation/distributionColumns.sql
 
         ```
     2. Set up the `citus_setup` file by following the steps given below.
@@ -250,7 +250,7 @@ curl -L -o observation-portal/src/assets/env/env.js https://raw.githubuserconten
     1.  Download `entity-project-sample-data.sh` Script File:
 
     ```
-    curl -o project_entity_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/scripts/stand-alone/ubuntu/project_entity_sample_data.sh && \
+    curl -o project_entity_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/native/scripts/stand-alone/ubuntu/project_entity_sample_data.sh && \
     chmod +x project_entity_sample_data.sh && \
     ./project_entity_sample_data.sh
     ```
@@ -319,7 +319,7 @@ In such cases, you can generate sample user accounts using the steps below. This
 > **Warning:** Use this generator only immediately after the initial system setup and before any normal user accounts are created through the portal. It should not be used under any circumstances thereafter.
 
 ```
-curl -o insert_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/scripts/stand-alone/ubuntu/insert_sample_data.sh && \
+curl -o insert_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/native/scripts/stand-alone/ubuntu/insert_sample_data.sh && \
 chmod +x insert_sample_data.sh && \
 ./insert_sample_data.sh
 ```

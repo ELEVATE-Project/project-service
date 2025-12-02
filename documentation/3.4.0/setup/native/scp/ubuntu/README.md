@@ -118,11 +118,11 @@ curl -L -o survey-project-creation-service/src/.env https://raw.githubuserconten
 curl -L -o project-service/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/native/envs/scp/project_env && \
 curl -L -o entity-management/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/native/envs/scp/entity_management_env && \
 curl -L -o user/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/native/envs/scp/user_env && \
-curl -L -o notification/src/.env https://github.com/ELEVATE-Project/project-service/raw/refs/heads/main/documentation/3.4.0/native/envs/scp/notification_env && \
-curl -L -o interface-service/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/native/envs/scp/interface_env && \
+curl -L -o notification/src/.env https://github.com/ELEVATE-Project/project-service/raw/refs/heads/setupGuideSCP/documentation/3.4.0/native/envs/scp/notification_env && \
+curl -L -o interface-service/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/native/envs/scp/interface_env && \
 curl -L -o scheduler/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/native/envs/scp/scheduler_env && \
-curl -L -o observation-survey-projects-pwa/src/assets/env/env.js https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/native/envs/scp/observation_survey_projects_pwa_env && \
-curl -L -o elevate-portal/env.js https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/native/envs/scp/elevate_portal_env && \
+curl -L -o observation-survey-projects-pwa/src/assets/env/env.js https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/native/envs/scp/observation_survey_projects_pwa_env && \
+curl -L -o elevate-portal/env.js https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/native/envs/scp/elevate_portal_env && \
 curl -L -o observation-portal/src/assets/env/env.js https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/native/envs/scp/observation_portal_env
 ```
 

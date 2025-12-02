@@ -8,6 +8,11 @@ sudo -u postgres psql -p 5432 -c "CREATE DATABASE users;"
 sudo -u postgres psql -p 5432 -d users -c "GRANT ALL PRIVILEGES ON DATABASE users TO postgres;"
 sudo -u postgres psql -p 5432 -d users -c "GRANT ALL ON SCHEMA public TO postgres;"
 
+# Create the scp database and assign privileges
+sudo -u postgres psql -p 5432 -c "CREATE DATABASE scp;"
+sudo -u postgres psql -p 5432 -d scp -c "GRANT ALL PRIVILEGES ON DATABASE scp TO postgres;"
+sudo -u postgres psql -p 5432 -d scp -c "GRANT ALL ON SCHEMA public TO postgres;"
+
 # Create the notification database and assign privileges
 sudo -u postgres psql -p 5432 -c "CREATE DATABASE notification;"
 sudo -u postgres psql -p 5432 -d notification -c "GRANT ALL PRIVILEGES ON DATABASE notification TO postgres;"

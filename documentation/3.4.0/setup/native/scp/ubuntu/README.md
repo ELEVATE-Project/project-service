@@ -132,7 +132,9 @@ curl -L -o observation-portal/src/assets/env/env.js https://raw.githubuserconten
 
 > **Caution:** While the default values in the downloaded environment files enable the ELEVATE-Project Application to operate, certain features may not function correctly or could be impaired unless the adopter-specific environment variables are properly configured.
 
-> **Important:** As mentioned in the above linked document, the **User SignUp** functionality may be compromised if key environment variables are not set correctly during deployment. If you opt to skip this setup, consider using the sample user account generator detailed in the `Sample User Accounts Generation` section of this document.
+> **Important:** 
+> -  <strong>The Self Creation Portal heavily depends on the cloud, and most of the data is stored there. So please update the cloud-related environment keys with the actual values before proceeding further. </strong>
+- As mentioned in the above linked document, the **User SignUp** functionality may be compromised if key environment variables are not set correctly during deployment. If you opt to skip this setup, consider using the sample user account generator detailed in the `Sample User Accounts Generation` section of this document.
 
 5.  **Attaching Config File**
 

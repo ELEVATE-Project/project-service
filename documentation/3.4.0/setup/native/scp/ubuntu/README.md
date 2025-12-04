@@ -254,6 +254,7 @@ curl -L -o observation-portal/src/assets/env/env.js https://raw.githubuserconten
     Following the steps given below, 2 instances of each ELEVATE-Project backend service will be deployed and be managed by PM2 process manager.
 
     ```
+    (cd survey-project-creation-service/src && pm2 start app.js --name survey-project-creation-service && cd -) && \
     (cd project-service && pm2 start app.js --name project-service && cd -) && \
     (cd entity-management/src && pm2 start app.js --name entity-management && cd -) && \
     (cd user/src && pm2 start app.js --name user && cd -) && \
@@ -262,13 +263,7 @@ curl -L -o observation-portal/src/assets/env/env.js https://raw.githubuserconten
     (cd scheduler/src && pm2 start app.js --name scheduler && cd -)
     ```
 
-12. **Run Service Scripts**
-
-    ```
-    cd user/src/scripts && node insertDefaultOrg.js && cd ../../..
-    ```
-
-13. **Start The Portal**
+12. **Start The Portal**
 
     ELEVATE-Project portal utilizes Ionic for building the browser bundle, follow the steps given below to install them and start the portal.
 

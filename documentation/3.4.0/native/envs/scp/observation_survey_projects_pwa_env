@@ -1,7 +1,6 @@
 window["env"] = {
     production: true,
-    baseURL: 'https://qa.elevate-apis.shikshalokam.org',
-    // baseURL: 'https://saas-qa.tekdinext.com',
+    baseURL: 'http://localhost:3569', //interface url
     capabilities: 'all',
     restrictedPages: ['DOWNLOADS','AUTH_PAGES'],
     unauthorizedRedirectUrl: "/",

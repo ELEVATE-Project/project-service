@@ -186,4 +186,7 @@ module.exports = {
 		PUT: 'PUT',
 		DELETE: 'DELETE',
 	},
+	SESSION_VERIFICATION_METHOD: {
+		USER_SERVICE: 'user_service_authenticated',
+	},
 }

@@ -73,4 +73,5 @@ module.exports = {
 	FETCH_SOLUTION_DOCUMENT: '/v1/solutions/getDetails',
 	ACCOUNT_SEARCH: '/v1/account/search',
 	TENANT_READ_INTERNAL: '/v1/tenant/readInternal',
+	VALIDATE_SESSIONS: '/v1/account/validateUserSession',
 }

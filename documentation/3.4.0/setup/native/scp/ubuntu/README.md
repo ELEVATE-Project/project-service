@@ -164,12 +164,18 @@ curl -L -o observation-portal/src/assets/env/env.js https://raw.githubuserconten
     ./create-databases.sh
     ```
 
-7.  **Run Migrations To Create Tables**
+7.  **Run Migrations to Create Tables and Seed Default Values**
 
     ```
     cd user/src && npx sequelize-cli db:migrate && cd ../.. && \
     cd survey-project-creation-service/src && npx sequelize-cli db:migrate && cd ../.. && \
     cd notification/src && npx sequelize-cli db:migrate && cd ../..
+    ```
+
+    To seed the default values, run the following command:
+
+    ```
+    cd user/src && npx sequelize-cli db:seed:all && cd ../.. && \
     ```
 
 8.  **Enabling Citus And Setting Distribution Columns (Optional)**

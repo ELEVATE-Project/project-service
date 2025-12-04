@@ -258,7 +258,6 @@ module.exports = async function (req, res, next, token = '') {
 					}
 				}
 			} catch (error) {
-				console.error('Error validating user session:', error.status)
 				rspObj.errCode = error.status || CONSTANTS.apiResponses.USER_SERVICE_DOWN_CODE
 				rspObj.errMsg = error.message || CONSTANTS.apiResponses.USER_SERVICE_DOWN
 				rspObj.responseCode = HTTP_STATUS_CODE['unauthorized'].status

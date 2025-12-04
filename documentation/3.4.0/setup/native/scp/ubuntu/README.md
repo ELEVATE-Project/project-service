@@ -238,7 +238,7 @@ curl -L -o observation-portal/src/assets/env/env.js https://raw.githubuserconten
     3.  Download `entity-project-sample-data.sh` Script File:
 
     ```
-    curl -o project_entity_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/native/scripts/stand-alone/ubuntu/project_entity_sample_data.sh && \
+    curl -o project_entity_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/native/scripts/scp/ubuntu/project_entity_sample_data.sh && \
     chmod +x project_entity_sample_data.sh && \
     ./project_entity_sample_data.sh
     ```
@@ -246,7 +246,7 @@ curl -L -o observation-portal/src/assets/env/env.js https://raw.githubuserconten
 10. **Insert Forms Data into Database**
 
     ```
-    curl -s https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/scripts/linux/import_forms.js | node
+    curl -s https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/native/scripts/linux/import_forms.js | node
     ```
 
 11. **Start The Services**

@@ -246,7 +246,7 @@ curl -L -o observation-portal/src/assets/env/env.js https://raw.githubuserconten
 10. **Insert Forms Data into Database**
 
     ```
-    curl -s https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/native/scripts/linux/import_forms.js | node
+    curl -s https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/native/scripts/linux/import_forms.js | node
     ```
 
 11. **Start The Services**

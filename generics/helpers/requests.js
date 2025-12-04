@@ -7,7 +7,7 @@
 const request = require('request')
 const parser = require('xml2json')
 
-var post = function (
+const post = function (
 	url,
 	body,
 	token = '',
@@ -41,13 +41,21 @@ var post = function (
 					result.success = false
 				} else {
 					let response = data.body
-					if (data.headers['content-type'].split(';')[0] !== 'application/json') {
+					const contentType = data.headers['content-type']?.split(';')[0] || ''
+					if (contentType !== 'application/json') {
 						response = parser.toJson(data.body)
-					} else if (/text\/xml|application\/xml/.test(data.headers['content-type'])) {
+					} else if (/text\/xml|application\/xml/.test(contentType)) {
 						response = parser.toJson(response, { object: true })
 					}
 
-					response = JSON.parse(response)
+					if (/text\/xml|application\/xml/.test(contentType)) {
+						response = parser.toJson(response, { object: true })
+					} else if (contentType !== 'application/json') {
+						response = parser.toJson(data.body)
+						response = JSON.parse(response)
+					} else {
+						response = JSON.parse(response)
+					}
 					result.data = response
 				}
 

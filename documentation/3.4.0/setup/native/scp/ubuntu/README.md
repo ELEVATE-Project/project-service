@@ -245,9 +245,17 @@ curl -L -o observation-portal/src/assets/env/env.js https://raw.githubuserconten
 
 10. **Insert Forms Data into Database**
 
-    ```
-    curl -s https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/native/scripts/linux/import_forms.js | node
-    ```
+If the `axios` package is not available in the current project directory, install it before running the import script:
+
+```bash
+npm install axios
+```
+
+Then run the import script:
+
+```bash
+curl -s https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/native/scripts/linux/import_forms.js | node
+```
 
 11. **Start The Services**
 

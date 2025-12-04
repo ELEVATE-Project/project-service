@@ -11,6 +11,7 @@ const fs = require('fs')
 const path = require('path')
 const isBearerRequired = process.env.IS_AUTH_TOKEN_BEARER === 'true'
 const userService = require('../services/users')
+const requests = require('../helpers/requests')
 
 var respUtil = function (resp) {
 	return {
@@ -242,6 +243,26 @@ module.exports = async function (req, res, next, token = '') {
 			rspObj.errMsg = CONSTANTS.apiResponses.TOKEN_MISSING_MESSAGE
 			rspObj.responseCode = HTTP_STATUS_CODE['unauthorized'].status
 			return res.status(HTTP_STATUS_CODE['unauthorized'].status).send(respUtil(rspObj))
+		}
+
+		if (
+			!performInternalAccessTokenCheck &&
+			process.env.SESSION_VERIFICATION_METHOD === CONSTANTS.common.SESSION_VERIFICATION_METHOD.USER_SERVICE
+		) {
+			try {
+				const userSession = await validateSession(token)
+				if (!userSession.success) {
+					throw {
+						message: userSession.message,
+						status: userSession.status,
+					}
+				}
+			} catch (error) {
+				rspObj.errCode = error.status || CONSTANTS.apiResponses.USER_SERVICE_DOWN_CODE
+				rspObj.errMsg = error.message || CONSTANTS.apiResponses.USER_SERVICE_DOWN
+				rspObj.responseCode = HTTP_STATUS_CODE['unauthorized'].status
+				return res.status(HTTP_STATUS_CODE['unauthorized'].status).send(respUtil(rspObj))
+			}
 		}
 
 		// Path to config.json
@@ -651,4 +672,48 @@ module.exports = async function (req, res, next, token = '') {
 	}
 
 	next()
+}
+
+/**
+ * Validates the user's session token by calling the user service.
+ * @param {string} token - The access token extracted from the request header.
+ */
+
+async function validateSession(token) {
+	try {
+		const userBaseUrl = `${process.env.INTERFACE_SERVICE_URL}${process.env.USER_SERVICE_BASE_URL}`
+		const validateSessionEndpoint = `${userBaseUrl}${CONSTANTS.endpoints.VALIDATE_SESSIONS}`
+		const reqBody = { token }
+
+		const isSessionActive = await requests.post(
+			validateSessionEndpoint,
+			reqBody,
+			'',
+			true,
+			process.env.USER_SERVICE_INTERNAL_ACCESS_TOKEN_HEADER_KEY
+		)
+
+		// Case 1: Unauthorized token
+		if (isSessionActive?.data?.responseCode === 'UNAUTHORIZED') {
+			throw {
+				status: CONSTANTS.apiResponses.ACCESS_TOKEN_EXPIRED_CODE,
+				message: CONSTANTS.apiResponses.ACCESS_TOKEN_EXPIRED,
+			}
+		}
+		// Case 2: User service down / session inactive
+		if (!isSessionActive?.success || !isSessionActive?.data?.result?.data?.user_session_active) {
+			throw {
+				status: CONSTANTS.apiResponses.USER_SERVICE_DOWN_CODE,
+				message: CONSTANTS.apiResponses.USER_SERVICE_DOWN,
+			}
+		}
+
+		return isSessionActive
+	} catch (err) {
+		return {
+			success: false,
+			status: err.status || CONSTANTS.apiResponses.USER_SERVICE_DOWN_CODE,
+			message: err.message || CONSTANTS.apiResponses.USER_SERVICE_DOWN,
+		}
+	}
 }

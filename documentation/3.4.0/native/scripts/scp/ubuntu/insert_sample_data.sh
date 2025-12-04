@@ -40,3 +40,4 @@ sudo -u postgres psql -p 5432 -d users -c "SELECT nextval('users_id_seq'::regcla
 sudo -u postgres psql -p 5432 -d users -c "SELECT nextval('users_credentials_id_seq'::regclass) FROM public.users_credentials;"
 sudo -u postgres psql -p 5432 -d users -c "UPDATE role_permission_mapping SET role_title = 'state_education_officer' WHERE role_title = 'mentor';"
 sudo -u postgres psql -p 5432 -d users -c "SELECT NULL;"
+

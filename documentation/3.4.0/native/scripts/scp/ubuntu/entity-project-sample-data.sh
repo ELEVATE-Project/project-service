@@ -156,7 +156,7 @@ mongosh --host "$MONGO_HOST" --port "$MONGO_PORT" --quiet --eval "
 
 
 # Project database details
-PROJECT_DB_NAME="elevate-project"
+PROJECT_DB_NAME="project"
 PROJECT_CATEGORY_COLLECTION="projectCategories"
 
 PROJECT_CATEGORY_DOCUMENT=$(cat <<EOF

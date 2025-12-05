@@ -34,7 +34,6 @@ const path = require('path')
 const gotenbergService = require(SERVICES_BASE_PATH + '/gotenberg')
 const projectService = require(SERVICES_BASE_PATH + '/projects')
 const defaultUserProfileConfig = require('@config/defaultUserProfileDeleteConfig')
-const { result } = require('lodash')
 const configFilePath = process.env.AUTH_CONFIG_FILE_PATH
 const surveyService = require(SERVICES_BASE_PATH + '/survey')
 

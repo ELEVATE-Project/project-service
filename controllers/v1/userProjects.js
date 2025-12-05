@@ -1566,4 +1566,27 @@ module.exports = class UserProjects extends Abstract {
 			}
 		})
 	}
+
+	/**
+	 * Update ACL for a project if user owns the project and submission level is ENTITY.
+	 *
+	 * @method POST
+	 * @name updateAcl
+	 * @param {Object} req - request Data.
+	 * @returns {Promise<Object>} - Response object containing update status, message, and updated ACL data
+	 */
+	async updateAcl(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				const response = await userProjectsHelper.updateAcl(req.params._id, req.body, req.userDetails)
+				return resolve(response)
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
+				})
+			}
+		})
+	}
 }

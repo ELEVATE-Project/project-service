@@ -69,7 +69,7 @@ services:
     depends_on:
       - mongo
     volumes:
-      - ./config.json:/opt/survey/config.json
+      - ./config.json:/opt/samiksha/config.json
     networks:
       - project_net
   entity_management:

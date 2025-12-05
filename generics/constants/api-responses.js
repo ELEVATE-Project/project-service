@@ -322,4 +322,7 @@ module.exports = {
 	ACCESS_TOKEN_EXPIRED: 'Access Token Expired!! Please Login Again.',
 	USER_SERVICE_DOWN_CODE: 'USER_SERVICE_DOWN',
 	USER_SERVICE_DOWN: 'User service is down',
+	PROJECT_DOES_NOT_BELONG_TO_USER: 'Project does not belong to the user!!',
+	SUBMISSION_LEVEL_NOT_COMPLIED: 'Not allowed to update project. SUBMISSION_LEVEL not complied!!!',
+	PROJECT_UPDATED_SUCCESSFULLY: 'Project updated successfully.',
 }

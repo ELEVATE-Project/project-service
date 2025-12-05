@@ -27,6 +27,7 @@ const solutionsUtils = require(GENERICS_FILES_PATH + '/helpers/solutionAndProjec
 const surveyService = require(GENERICS_FILES_PATH + '/services/survey')
 
 const moment = require('moment-timezone')
+const { forEach } = require('lodash')
 /**
  * SolutionsHelper
  * @class
@@ -730,6 +731,13 @@ module.exports = class SolutionsHelper {
 						CONSTANTS.common.MANDATORY_SCOPE_FIELD,
 						CONSTANTS.common.OPTIONAL_SCOPE_FIELD
 					)
+					if (prefix != '') {
+						builtQuery['$and'] = builtQuery['$and'].map((obj) => {
+							const key = Object.keys(obj)[0]
+							const value = obj[key]
+							return { [`${prefix}.${key}`]: value }
+						})
+					}
 					filterQuery = {
 						...filterQuery,
 						...builtQuery,
@@ -2527,7 +2535,7 @@ module.exports = class SolutionsHelper {
 					)
 				})
 
-				if (process.env.SUBMISSION_LEVEL == 'ENTITY' && requestedData.hasOwnProperty('entityId')) {
+				if (process.env.SUBMISSION_LEVEL == 'ENTITY') {
 					mergedData = userCreatedProjects.data.data
 					totalCount = mergedData.length
 					if (mergedData.length > 0) {
@@ -3157,13 +3165,9 @@ module.exports = class SolutionsHelper {
 			try {
 				let query = { isDeleted: false }
 
-				if (process.env.SUBMISSION_LEVEL === 'ENTITY' && requestedData.hasOwnProperty('entityId')) {
+				if (process.env.SUBMISSION_LEVEL === 'ENTITY') {
 					// Use queryBasedOnRoleAndLocation function to form query for acl.visibility = SCOPE projects
-					let queryData = await this.queryBasedOnRoleAndLocation(
-						_.omit(requestedData, ['entityId']),
-						'',
-						'acl'
-					)
+					let queryData = await this.queryBasedOnRoleAndLocation(requestedData, '', 'acl')
 					// status of the project could be anything, hence deleting status property from the querydata
 					delete queryData.data.status
 					// isReusable field doesn't exist for projects model hence removing the key
@@ -3173,7 +3177,6 @@ module.exports = class SolutionsHelper {
 
 					// Construct query for projects accessible by the user
 					query = {
-						entityId: requestedData.entityId,
 						'solutionInformation.submissionLevel': process.env.SUBMISSION_LEVEL,
 						$or: [
 							{ 'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_ALL },

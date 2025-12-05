@@ -157,7 +157,7 @@ module.exports = class AdminHelper {
 	static deletedResourceDetails(
 		resourceId,
 		resourceType,
-		isAPrivateProgram = 'false',
+		isAPrivateProgram = false,
 		tenantId,
 		orgId,
 		deletedBy = 'SYSTEM'
@@ -184,7 +184,7 @@ module.exports = class AdminHelper {
 				// Handle deletion if the resource type is PROGRAM
 				if (resourceType === CONSTANTS.common.PROGRAM) {
 					let programFilter
-					if (UTILS.convertStringToBoolean(isAPrivateProgram)) {
+					if (isAPrivateProgram) {
 						programFilter = {
 							_id: resourceId,
 							tenantId: tenantId,
@@ -197,6 +197,8 @@ module.exports = class AdminHelper {
 							isAPrivateProgram: false,
 						}
 					}
+
+					console.log(programFilter, 'line no 201')
 
 					// Fetch the program to ensure it exists
 					const programDetails = await programsQueries.programsDocument(programFilter, ['components'])

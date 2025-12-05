@@ -27,7 +27,6 @@ const solutionsUtils = require(GENERICS_FILES_PATH + '/helpers/solutionAndProjec
 const surveyService = require(GENERICS_FILES_PATH + '/services/survey')
 
 const moment = require('moment-timezone')
-const { forEach } = require('lodash')
 /**
  * SolutionsHelper
  * @class

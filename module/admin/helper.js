@@ -188,6 +188,7 @@ module.exports = class AdminHelper {
 						programFilter = {
 							_id: resourceId,
 							tenantId: tenantId,
+							isAPrivateProgram: true,
 						}
 					} else {
 						programFilter = {

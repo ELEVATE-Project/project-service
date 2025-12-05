@@ -154,7 +154,14 @@ module.exports = class AdminHelper {
 	 *
 	 * @returns {Promise<Object>} - Result object summarizing deletion impact.
 	 */
-	static deletedResourceDetails(resourceId, resourceType, isAPrivateProgram, tenantId, orgId, deletedBy = 'SYSTEM') {
+	static deletedResourceDetails(
+		resourceId,
+		resourceType,
+		isAPrivateProgram = 'false',
+		tenantId,
+		orgId,
+		deletedBy = 'SYSTEM'
+	) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Track deletion counts for all associated resources

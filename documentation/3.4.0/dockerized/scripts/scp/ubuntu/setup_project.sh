@@ -14,12 +14,12 @@ log "Docker Compose file downloaded."
 log "Downloading environment files..."
 curl -L \
     -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/dockerized/envs/interface_env \
-    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/dockerized/envs/entity_management_env \
-    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/dockerized/envs/project_env \
-    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/dockerized/envs/notification_env \
-    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/dockerized/envs/scheduler_env \
-    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/dockerized/envs/user_env \
-    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/dockerized/envs/survey_project_creation_env \
+    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuidedocumentation/3.4.0/dockerized/envs/entity_management_env \
+    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuidedocumentation/3.4.0/dockerized/envs/project_env \
+    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuidedocumentation/3.4.0/dockerized/envs/notification_env \
+    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuidedocumentation/3.4.0/dockerized/envs/scheduler_env \
+    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuidedocumentation/3.4.0/dockerized/envs/user_env \
+    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/dockerized/envs/scp/survey_project_creation_env \
     -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/dockerized/envs/env.js
 log "Environment files downloaded."
 
@@ -62,13 +62,13 @@ log "survey-project-creation directory created and distributionColumns.sql downl
 
 # Step 10: Download and make citus_setup.sh executable
 log "Downloading citus_setup.sh..."
-curl -OJL https://github.com/ELEVATE-Project/project-service/raw/refs/heads/setupGuideSCP/documentation/3.4.0/dockerized/scripts/mac-linux/citus_setup.sh
+curl -OJL https://github.com/ELEVATE-Project/project-service/raw/refs/heads/setupGuideSCP/documentation/3.4.0/dockerized/scripts/scp/ubuntu/citus_setup.sh
 chmod +x citus_setup.sh
 
 # Step 11: Create sample-data directory and download SQL file
 log "Creating sample-data directory and downloading sampleData.sql..."
 mkdir -p sample-data/user && \
-curl -L https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/sample-data/mac-linux/user/sampleData.sql -o sample-data/user/sampleData.sql
+curl -L https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/sample-data/scp/mac-linux/user/sampleData.sql -o sample-data/user/sampleData.sql
 log "Sample-data directory created and sampleData.sql downloaded."
 
 
@@ -83,7 +83,7 @@ log "Downloading sample data scripts..."
 curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/dockerized/scripts/stand-alone/ubuntu/entity_sampleData.js
 curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/dockerized/scripts/stand-alone/ubuntu/project_sampleData.js
 curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/dockerized/scripts/stand-alone/ubuntu/insert_sample_solutions.js
-curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/dockerized/scripts/stand-alone/ubuntu/insert_sample_data.sh
+curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/dockerized/scripts/scp/ubuntu/insert_sample_data.sh
 log "sample data scripts downloaded."
 
 
@@ -91,6 +91,7 @@ log "Downloading config.json file..."
 curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/dockerized/scripts/stand-alone/ubuntu/config.json
 log "config.json file is downloaded."
 
+# remove once the docker image is generated
 log "Cloning survey-project-creation-service repository..."
 git clone -b release-1.0.0 https://github.com/ELEVATE-Project/survey-project-creation-service.git
 log "survey-project-creation-service repository cloned."

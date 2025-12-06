@@ -48,7 +48,7 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
 
 ```
 for port in 3000 3001 3002 6000 5001 4000 9092 5432 7007 2181 2707 3569 6001 27017; do
-    if lsof -iTCP:$port -sTCP:LISTEN &>/dev/null; then
+    if ss -tuln | grep ":$port " > /dev/null; then
         echo "Port $port is in use"
     else
         echo "Port $port is available"

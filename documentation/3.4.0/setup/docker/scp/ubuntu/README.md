@@ -38,7 +38,10 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
 
 **Create project Directory:** Establish a directory titled **project**.
 
-> Example Command: `mkdir project && cd project/`
+Example Command: 
+```
+mkdir project && cd project/
+```
 
 > Note: All commands are run from the project directory.
 

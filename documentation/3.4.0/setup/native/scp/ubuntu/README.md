@@ -178,7 +178,7 @@ curl -L -o observation-portal/src/assets/env/env.js https://raw.githubuserconten
     To seed the default values, run the following command:
 
     ```
-    cd user/src && npx sequelize-cli db:seed:all && cd ../.. && \
+    cd user/src && npx sequelize-cli db:seed:all && cd ../../
     ```
 
 8.  **Enabling Citus And Setting Distribution Columns (Optional)**

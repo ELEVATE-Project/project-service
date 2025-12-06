@@ -24,10 +24,7 @@ SET meta = '{
 }'
 WHERE code = 'default';
 "
-
-
-# FIXES:
-# - Quoted the organization_code and tenant_code variables.
+# --- 2. INSERT INTO public.user_organization_roles ---
 sudo -u postgres psql -p 5432 -d users -c "INSERT INTO public.user_organization_roles (tenant_code, user_id, organization_code,role_id, created_at, updated_at, deleted_at) VALUES ('default', 2, 'default_code', 1, '2024-04-18 08:12:19.394+00', '2024-04-18 08:12:19.394+00', NULL);"
 sudo -u postgres psql -p 5432 -d users -c "INSERT INTO public.user_organization_roles (tenant_code, user_id, organization_code,role_id, created_at, updated_at, deleted_at) VALUES ('default', 3, 'default_code', 2, '2024-04-18 08:12:19.394+00', '2024-04-18 08:12:19.394+00', NULL);"
 sudo -u postgres psql -p 5432 -d users -c "INSERT INTO public.user_organization_roles (tenant_code, user_id, organization_code,role_id, created_at, updated_at, deleted_at) VALUES ('default', 2, 'default_code', 3, '2024-04-18 08:12:19.394+00', '2024-04-18 08:12:19.394+00', NULL);"
@@ -42,6 +39,16 @@ sudo -u postgres psql -p 5432 -d users -c "SELECT setval('users_credentials_id_s
 sudo -u postgres psql -p 5432 -d users -c "SELECT setval(pg_get_serial_sequence('public.entity_types','id'), COALESCE((SELECT MAX(id) FROM public.entity_types), 0));"
 sudo -u postgres psql -p 5432 -d users -c "INSERT INTO public.entity_types (value, label, status, created_by, updated_by, allow_filtering, data_type, organization_id, parent_id, has_entities, allow_custom_entities, model_names, created_at, updated_at, deleted_at, meta, external_entity_type, required, regex, tenant_code, organization_code) VALUES ('state', 'State', 'ACTIVE', 0, 0, true, 'STRING', 1, NULL, true, true, '{User}', '2024-04-18 08:12:19.394+00', '2024-04-18 08:12:19.394+00', NULL, NULL, true, false, NULL, 'default', 'default_code') RETURNING id;"
 sudo -u postgres psql -p 5432 -d users -c "UPDATE public.entity_types SET status = 'INACTIVE' WHERE id = 3;"
+
+# --- 3. INSERT INTO public.user_roles  ---
+# Add new roles for content creation and program management workflows
+sudo -u postgres psql -p 5432 -d users -c "INSERT INTO public.user_roles (title, user_type, status, created_at, updated_at, deleted_at, visibility, organization_id, label, translations, tenant_code) VALUES ('content_creator', 0, 'ACTIVE', NOW(), NOW(), NULL, 'PUBLIC', 1, 'Content Creator', NULL, 'default');"
+sudo -u postgres psql -p 5432 -d users -c "INSERT INTO public.user_roles (title, user_type, status, created_at, updated_at, deleted_at, visibility, organization_id, label, translations, tenant_code) VALUES ('reviewer', 0, 'ACTIVE', NOW(), NOW(), NULL, 'PUBLIC', 1, 'Reviewer', NULL, 'default');"
+sudo -u postgres psql -p 5432 -d users -c "INSERT INTO public.user_roles (title, user_type, status, created_at, updated_at, deleted_at, visibility, organization_id, label, translations, tenant_code) VALUES ('program_designer', 0, 'ACTIVE', NOW(), NOW(), NULL, 'PUBLIC', 1, 'Program Designer', NULL, 'default');"
+sudo -u postgres psql -p 5432 -d users -c "INSERT INTO public.user_roles (title, user_type, status, created_at, updated_at, deleted_at, visibility, organization_id, label, translations, tenant_code) VALUES ('program_manager', 0, 'ACTIVE', NOW(), NOW(), NULL, 'PUBLIC', 1, 'Program Manager', NULL, 'default');"
+sudo -u postgres psql -p 5432 -d users -c "INSERT INTO public.user_roles (title, user_type, status, created_at, updated_at, deleted_at, visibility, organization_id, label, translations, tenant_code) VALUES ('rollout_manager', 0, 'ACTIVE', NOW(), NOW(), NULL, 'PUBLIC', 1, 'Rollout Manager', NULL, 'default');"
+
+# Update role_permission_mapping to reflect new role titles
 sudo -u postgres psql -p 5432 -d users -c "UPDATE role_permission_mapping SET role_title = 'state_education_officer' WHERE role_title = 'mentor';"
 sudo -u postgres psql -p 5432 -d users -c "SELECT NULL;"
 

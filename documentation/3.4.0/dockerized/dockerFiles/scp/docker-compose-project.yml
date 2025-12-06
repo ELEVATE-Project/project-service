@@ -220,7 +220,7 @@ services:
     ports:
       - '7007:7007'
     volumes:
-      - ../../envs/env.js:/usr/src/app/www/assets/env/env.js
+      - ./env.js:/usr/src/app/www/assets/env/env.js
     command: >
       /bin/bash -c "ionic build --prod && ionic serve --host 0.0.0.0"
     networks:

@@ -8,6 +8,11 @@ services:
       - ALLOW_ANONYMOUS_LOGIN=yes
       - ZOOKEEPER_CLIENT_PORT=2181
       - ZOOKEEPER_TICK_TIME=2000
+    healthcheck:
+      test: echo srvr | nc localhost 2181 || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - project_net
   kafka:
@@ -23,7 +28,8 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     depends_on:
-      - zookeeper
+      zookeeper:
+        condition: service_healthy
     healthcheck:
       test: kafka-topics --bootstrap-server localhost:9092 --list || exit 1
       interval: 10s
@@ -125,16 +131,14 @@ services:
       - DEV_DATABASE_URL=postgres://postgres:postgres@citus_master:5432/notification
     networks:
       - project_net
-    # env_file:
-    #   - ./notification_env
+    env_file:
+      - ./notification_env
 
   scheduler:
     image: shikshalokamqa/elevate-scheduler:2.6.1
     ports:
       - '4000:4000'
     command: ['nodemon', 'app.js']
-    # environment:
-    #   - KAFKA_URL=kafka:9092
     depends_on:
       kafka:
         condition: service_healthy
@@ -145,8 +149,6 @@ services:
     env_file:
       - ./scheduler_env
   interface:
-    # Update with latest image
-    # build: ./interface-service
     image: shikshalokamqa/elevate-interface:3.3.2
     ports:
       - '3569:3569'
@@ -218,7 +220,7 @@ services:
     ports:
       - '7007:7007'
     volumes:
-      - /home/user4/Workspace/Docker Image/env.js:/usr/src/app/www/assets/env/env.js
+      - ../../envs/env.js:/usr/src/app/www/assets/env/env.js
     command: >
       /bin/bash -c "ionic build --prod && ionic serve --host 0.0.0.0"
     networks:
@@ -237,19 +239,8 @@ services:
       done;
       echo 'Kafka is ready.' &&
       nodemon app.js"
-    environment:
-      - KAFKA_URL=kafka:9092
-      - DEV_DATABASE_URL=postgres://postgres:postgres@citus_master:5432/scp
-      - REDIS_HOST=redis://redis:6379
     env_file:
       - ./survey_project_creation_env
-    depends_on:
-      kafka:
-        condition: service_healthy
-      citus:
-        condition: service_started
-      redis:
-        condition: service_healthy
     volumes:
       - ./survey-project-creation-service/src/:/var/src
     networks:

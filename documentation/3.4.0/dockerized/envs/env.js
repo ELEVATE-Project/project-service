@@ -1,6 +1,6 @@
 window['env'] = {
 	production: true,
-	baseURL: 'https://qa.elevate-apis.shikshalokam.org',
+	baseURL: 'http://interface:3569',
 	capabilities: 'all',
 	restrictedPages: ['DOWNLOADS', 'AUTH_PAGES', 'PROFILE', 'EDIT_PROFILE'],
 	unauthorizedRedirectUrl: '/',

@@ -14,11 +14,11 @@ log "Docker Compose file downloaded."
 log "Downloading environment files..."
 curl -L \
     -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/dockerized/envs/scp/interface_env \
-    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/3.4.0/dockerized/envs/entity_management_env \
-    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/3.4.0/dockerized/envs/project_env \
-    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/3.4.0/dockerized/envs/notification_env \
-    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/3.4.0/dockerized/envs/scheduler_env \
-    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/3.4.0/dockerized/envs/user_env \
+    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/dockerized/envs/entity_management_env \
+    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/dockerized/envs/project_env \
+    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/dockerized/envs/notification_env \
+    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/dockerized/envs/scheduler_env \
+    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/dockerized/envs/user_env \
     -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/dockerized/envs/scp/survey_project_creation_env \
     -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/dockerized/envs/env.js
 log "Environment files downloaded."

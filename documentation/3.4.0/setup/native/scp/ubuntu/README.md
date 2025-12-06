@@ -79,7 +79,10 @@ Before setting up the following ELEVATE-Project application, dependencies given 
 
 1.  **Create ELEVATE-Project Directory:** Create a directory named **ELEVATE-Project**.
 
-    > Example Command: `mkdir ELEVATE-Project && cd ELEVATE-Project/`
+    Example Command: 
+    ``` 
+    mkdir ELEVATE-Project && cd ELEVATE-Project/ 
+    ```
 
 2.  **Git Clone Services And Portal Repositories**
 

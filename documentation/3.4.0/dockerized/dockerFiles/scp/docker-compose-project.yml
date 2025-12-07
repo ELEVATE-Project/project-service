@@ -243,12 +243,12 @@ services:
         sleep 1;
       done;
       echo 'Database is ready.';
-      echo 'Creating config.json from config.sample.json...';
-      if [ -f /var/src/config.sample.json ]; then
-        cp /var/src/config.sample.json /var/src/config.json;
+      echo 'Creating config.json from config-sample.json...';
+      if [ -f /var/src/config-sample.json ]; then
+        cp /var/src/config-sample.json /var/src/config.json;
         echo 'config.json created successfully';
       else
-        echo 'ERROR: config.sample.json not found';
+        echo 'ERROR: config-sample.json not found';
         exit 1;
       fi;
       npm run db:init &&

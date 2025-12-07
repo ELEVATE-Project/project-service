@@ -184,7 +184,7 @@ After successfully running the script mentioned above, the following user accoun
 | adithya@gmail.com      | Password1@ | Content Creator |
 | praveen@gmail.com       | Password1@ | Reviewer |
 
-<!-- ## Sample Data Creation For Projects
+## Sample Data Creation For Projects
 
 This step will guide us in implementing a sample project solution following the initial setup of the project service.
 
@@ -192,7 +192,7 @@ This step will guide us in implementing a sample project solution following the 
 
     ```
     node insert_sample_solutions.js
-    ``` -->
+    ```
 
 
 ## Default Forms Creation for Portal Configuration

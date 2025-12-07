@@ -237,12 +237,19 @@ services:
         sleep 1;
       done;
       echo 'Database is ready.';
+      echo 'Creating config.json from config.sample.json...';
+      if [ -f /var/src/config.sample.json ]; then
+        cp /var/src/config.sample.json /var/src/config.json;
+        echo 'config.json created successfully';
+      else
+        echo 'ERROR: config.sample.json not found';
+        exit 1;
+      fi;
       npm run db:init &&
       (echo 'Running nodeee' && nodemon app.js &) &&
-      (while ! curl -sSf http://scp:6001 > /dev/null; do
+      (while !  curl -sSf http://scp:6001 > /dev/null; do
         sleep 1;
       done && echo 'Service is up' &&
-      cp /var/src/config.sample.json /var/src/config.json 2>/dev/null || true &&
       /bin/bash -c 'cd scripts && echo Running scp service scripts && node addDefaultEntitiesForEducationSector.js');
       tail -f /dev/null"
     env_file:

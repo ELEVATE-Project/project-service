@@ -249,6 +249,7 @@ services:
       - ./survey_project_creation_env
     volumes:
       - ./survey-project-creation-service/src/:/var/src
+      - /var/src/node_modules
     networks:
       - project_net
 networks:

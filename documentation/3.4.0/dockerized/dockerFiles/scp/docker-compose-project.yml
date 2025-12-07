@@ -108,7 +108,7 @@ services:
       - scheduler
     environment:
       - DEV_DATABASE_URL=postgres://postgres:postgres@citus_master:5432/user
-      - KAFKA_URL=kafka:29092
+      - KAFKA_URL=kafka:9092
       - REDIS_HOST=redis://redis:6379
     volumes:
       - ./user:/usr/src/app

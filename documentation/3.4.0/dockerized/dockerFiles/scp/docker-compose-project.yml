@@ -45,6 +45,7 @@ services:
       - project_net
   redis:
     image: 'redis:7.0.0'
+    container_name: redis
     restart: 'always'
     expose:
       - 6379
@@ -73,6 +74,7 @@ services:
       - project_net
   entity_management:
     image: shikshalokamqa/elevate-entity-management:3.3.13.1
+    container_name: entity_management
     ports:
       - '5001:5001'
     env_file:
@@ -85,6 +87,7 @@ services:
       - project_net
   user:
     image: shikshalokamqa/elevate-user:3.3.24
+    container_name: user
     ports:
       - '3001:3001'
     command: >
@@ -119,6 +122,7 @@ services:
 
   notification:
     image: shikshalokamqa/elevate-notification:2.6.1
+    container_name: notification
     ports:
       - '3002:3002'
     command: >
@@ -142,6 +146,7 @@ services:
 
   scheduler:
     image: shikshalokamqa/elevate-scheduler:2.6.1
+    container_name: scheduler
     ports:
       - '4000:4000'
     command: ['nodemon', 'app.js']
@@ -156,6 +161,7 @@ services:
       - ./scheduler_env
   interface:
     image: shikshalokamqa/elevate-interface:3.3.2
+    container_name: interface
     ports:
       - '3569:3569'
     command: ['node', 'app.js']
@@ -200,7 +206,7 @@ services:
   # Mongo config
   mongo:
     image: 'mongo:4.4.14'
-    container_name: project_mongo_1
+    container_name: mongo
     restart: 'always'
     ports:
       - '27017:27017'

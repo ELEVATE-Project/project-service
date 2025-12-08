@@ -234,7 +234,7 @@ Once the services are up and the front-end app bundle is built successfully, nav
 
 -   [Projects Service](https://github.com/ELEVATE-Project/project-service/tree/main/api-doc)
 
--   [Surevy Project Creation Service](https://github.com/ELEVATE-Project/survey-project-creation-service/tree/release-1.0.0/src/api-doc)
+-   [Survey Project Creation Service](https://github.com/ELEVATE-Project/survey-project-creation-service/tree/release-1.0.0/src/api-doc)
 
 # Team
 

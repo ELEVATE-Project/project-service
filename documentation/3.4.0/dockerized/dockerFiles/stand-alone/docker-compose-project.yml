@@ -31,6 +31,22 @@ services:
       retries: 9
     networks:
       - project_net
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - '5672:5672' # Standard AMQP port
+      - '15672:15672' # Management plugin UI port
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: ['CMD', 'rabbitmqctl', 'status']
+      interval: 5s
+      timeout: 10s
+      retries: 5
+    networks:
+      - project_net
   redis:
     image: 'redis:7.0.0'
     restart: 'always'
@@ -106,7 +122,7 @@ services:
       - ./user_env
 
   notification:
-    image: shikshalokamqa/elevate-notification:2.6.1
+    image: ttpldevops/notification
     ports:
       - '3002:3002'
     command: >
@@ -116,10 +132,12 @@ services:
         sleep 1;
       done;
       echo 'Database is ready.';
-      npm run db:init && nodemon app.js"
+      npm run db:init && npx nodemon app.js"
     depends_on:
-      - kafka
-      - citus
+      citus:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
     networks:
       - project_net
     env_file:
@@ -166,6 +184,11 @@ services:
       POSTGRES_DB: 'postgres'
       POSTGRES_HOST_AUTH_METHOD: '${POSTGRES_HOST_AUTH_METHOD:-trust}'
       POSTGRES_LOG_STATEMENT: 'all' # Enable query logging (set to 'all' for all queries)
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB']
+      interval: 5s
+      timeout: 3s
+      retries: 5
     networks:
       - project_net
     #volumes:

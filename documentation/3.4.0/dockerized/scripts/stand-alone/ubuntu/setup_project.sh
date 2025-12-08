@@ -56,7 +56,7 @@ log "User directory created and distributionColumns.sql downloaded."
 
 # Step 9: Download and make citus_setup.sh executable
 log "Downloading citus_setup.sh..."
-curl -OJL https://github.com/ELEVATE-Project/project-service/blob/setupGuide-3.4/documentation/3.4.0/dockerized/scripts/stand-alone/ubuntu/citus_setup.sh
+curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideWithSurvey/documentation/3.4.0/dockerized/scripts/stand-alone/ubuntu/citus_setup.sh
 chmod +x citus_setup.sh
 
 # Install MongoDB driver (usually needed if connecting directly to MongoDB/Citus)

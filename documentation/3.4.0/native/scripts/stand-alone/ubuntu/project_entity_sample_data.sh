@@ -38,9 +38,13 @@ echo "Downloaded ${INSERT_SCRIPT}"
 # NOTE on Original Request: If you need to populate 'user/src/.env' with a specific file,
 # you would add another 'curl' command here, but the file you linked was a JS script.
 
-# --- 3. Install Dependencies ---
 echo ""
-echo "2. Installing required Node packages (mongoose)..."
+echo "2. Installing required Node packages (mongoose, mongodb)..."
+
+# Initialize a package.json file if one doesn't exist to prevent climbing up the directory tree
+if [ ! -f "package.json" ]; then
+    npm init -y > /dev/null
+fi
 npm install mongoose
 npm install mongodb
 

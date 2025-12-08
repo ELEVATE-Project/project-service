@@ -198,8 +198,6 @@ module.exports = class AdminHelper {
 						}
 					}
 
-					console.log(programFilter, 'line no 201')
-
 					// Fetch the program to ensure it exists
 					const programDetails = await programsQueries.programsDocument(programFilter, ['components'])
 					if (!programDetails || !programDetails.length) {

@@ -84,6 +84,7 @@ curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs
 curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/dockerized/scripts/stand-alone/ubuntu/project_sampleData.js
 curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/dockerized/scripts/stand-alone/ubuntu/insert_sample_solutions.js
 curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideSCP/documentation/3.4.0/dockerized/scripts/scp/ubuntu/insert_sample_data.sh
+chmod +x insert_sample_data.sh
 log "sample data scripts downloaded."
 
 

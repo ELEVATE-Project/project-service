@@ -23,10 +23,11 @@ POST /project/v1/admin/deleteResource/:id?type={program|solution}
 
 ## 📥 Request Parameters
 
-| Parameter | Type   | Description                    |
-| --------- | ------ | ------------------------------ |
-| `:id`     | String | Resource ID (Program/Solution) |
-| `type`    | String | Either `program` or `solution` |
+| Parameter           | Type    | Description                               |
+| ------------------- | ------- | ----------------------------------------- |
+| `:id`               | String  | Resource ID (Program/Solution)            |
+| `type`              | String  | Either `program` or `solution`            |
+| `isAPrivateProgram` | Boolean | If Program is Private `true` else `false` |
 
 ---
 
@@ -46,7 +47,7 @@ POST /project/v1/admin/deleteResource/:id?type={program|solution}
 ### 🔁 Delete a **Program**:
 
 ```bash
-curl --location --request POST 'http://localhost:4301/project/v1/admin/deleteResource/68260d66b063136922f947c9?type=program' \
+curl --location --request POST 'http://localhost:4301/project/v1/admin/deleteResource/68260d66b063136922f947c9?type=program&isAPrivateProgram=true' \
 --header 'x-auth-token;' \
 --header 'internal-access-token: <internal-access-token>' \
 --header 'Content-Type: application/json' \

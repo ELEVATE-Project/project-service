@@ -146,6 +146,7 @@ module.exports = class AdminHelper {
 	 *
 	 * @param {String} resourceId - ID of the resource to delete.
 	 * @param {String} resourceType - Type of the resource ('program' or 'solution').
+	 * @param {Object} isAPrivateProgram - If Program is Private `true` else `false`.
 	 * @param {String} tenantId - Tenant identifier for multitenancy.
 	 * @param {String} orgId - Organization ID performing the operation.
 	 * @param {String} [deletedBy='SYSTEM'] - User ID or system name that triggered the deletion.
@@ -153,7 +154,14 @@ module.exports = class AdminHelper {
 	 *
 	 * @returns {Promise<Object>} - Result object summarizing deletion impact.
 	 */
-	static deletedResourceDetails(resourceId, resourceType, tenantId, orgId, deletedBy = 'SYSTEM') {
+	static deletedResourceDetails(
+		resourceId,
+		resourceType,
+		isAPrivateProgram = false,
+		tenantId,
+		orgId,
+		deletedBy = 'SYSTEM'
+	) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Track deletion counts for all associated resources
@@ -175,10 +183,19 @@ module.exports = class AdminHelper {
 
 				// Handle deletion if the resource type is PROGRAM
 				if (resourceType === CONSTANTS.common.PROGRAM) {
-					const programFilter = {
-						_id: resourceId,
-						tenantId: tenantId,
-						isAPrivateProgram: false,
+					let programFilter
+					if (isAPrivateProgram) {
+						programFilter = {
+							_id: resourceId,
+							tenantId: tenantId,
+							isAPrivateProgram: true,
+						}
+					} else {
+						programFilter = {
+							_id: resourceId,
+							tenantId: tenantId,
+							isAPrivateProgram: false,
+						}
 					}
 
 					// Fetch the program to ensure it exists
@@ -241,46 +258,47 @@ module.exports = class AdminHelper {
 						projectTemplateIds = solutionDetails.map((solution) => {
 							return solution.projectTemplateId
 						})
-					}
-					// Add main program ID to deletion list
-					resourceIdsWithType.push({ id: resourceId, type: CONSTANTS.common.PROGRAM })
 
-					if (solutionIds && solutionIds.length > 0) {
-						// Delete all projects linked to the solutions
-						let projecFilter = {
-							solutionId: { $in: solutionIds },
-							isAPrivateProgram: false,
-							tenantId: tenantId,
+						// Add main program ID to deletion list
+						resourceIdsWithType.push({ id: resourceId, type: CONSTANTS.common.PROGRAM })
+
+						if (solutionIds && solutionIds.length > 0) {
+							// Delete all projects linked to the solutions
+							let projecFilter = {
+								solutionId: { $in: solutionIds },
+								isAPrivateProgram: false,
+								tenantId: tenantId,
+							}
+							let deletedProjectIds = await projectQueries.delete(projecFilter)
+							deletedProjectsCount = deletedProjectIds.deletedCount
 						}
-						let deletedProjectIds = await projectQueries.delete(projecFilter)
-						deletedProjectsCount = deletedProjectIds.deletedCount
-					}
-					// Remove program ID from user extension's programRoleMapping
-					const programObjectId = typeof resourceId === 'string' ? new ObjectId(resourceId) : resourceId
-					let programRoleMappingId = await userExtensionQueries.pullProgramIdFromProgramRoleMapping(
-						programObjectId,
-						tenantId
-					)
-					// Delete all associated entities tied to projectTemplateIds
-					pullProgramFromUserExtensionCount = programRoleMappingId.nModified || 0
-
-					// Delete all associated resources for collected projectTemplateIds
-					if (projectTemplateIds.length > 0) {
-						const result = await this.deleteAssociatedResources(
-							projectTemplateIds,
-							tenantId,
-							orgId,
-							deletedBy
+						// Remove program ID from user extension's programRoleMapping
+						const programObjectId = typeof resourceId === 'string' ? new ObjectId(resourceId) : resourceId
+						let programRoleMappingId = await userExtensionQueries.pullProgramIdFromProgramRoleMapping(
+							programObjectId,
+							tenantId
 						)
+						// Delete all associated entities tied to projectTemplateIds
+						pullProgramFromUserExtensionCount = programRoleMappingId.nModified || 0
 
-						if (result.success) {
-							deletedProjectTemplatesCount += result.result.deletedProjectTemplatesCount
-							deletedCertificateTemplatesCount += result.result.deletedCertificateTemplatesCount
-							deletedProjectTemplateTasksCount += result.result.deletedProjectTemplateTasksCount
-							deletedSurveysCount += result.result.deletedSurveysCount
-							deletedSurveySubmissionsCount += result.result.deletedSurveySubmissionsCount
-							deletedObservationsCount += result.result.deletedObservationsCount
-							deletedObservationSubmissionsCount += result.result.deletedObservationSubmissionsCount
+						// Delete all associated resources for collected projectTemplateIds
+						if (projectTemplateIds.length > 0) {
+							const result = await this.deleteAssociatedResources(
+								projectTemplateIds,
+								tenantId,
+								orgId,
+								deletedBy
+							)
+
+							if (result.success) {
+								deletedProjectTemplatesCount += result.result.deletedProjectTemplatesCount
+								deletedCertificateTemplatesCount += result.result.deletedCertificateTemplatesCount
+								deletedProjectTemplateTasksCount += result.result.deletedProjectTemplateTasksCount
+								deletedSurveysCount += result.result.deletedSurveysCount
+								deletedSurveySubmissionsCount += result.result.deletedSurveySubmissionsCount
+								deletedObservationsCount += result.result.deletedObservationsCount
+								deletedObservationSubmissionsCount += result.result.deletedObservationSubmissionsCount
+							}
 						}
 					}
 

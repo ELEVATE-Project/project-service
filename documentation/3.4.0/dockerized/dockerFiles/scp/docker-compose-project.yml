@@ -239,7 +239,6 @@ services:
     networks:
       - project_net
   scp:
-    # build: ./survey-project-creation-service
     image: shikshalokamqa/elevate-scp-service:pre-release-1.0
     container_name: survey-project-creation-service
     ports:
@@ -268,9 +267,6 @@ services:
       tail -f /dev/null"
     env_file:
       - ./survey_project_creation_env
-    # volumes:
-    #   - ./survey-project-creation-service/src/:/var/src
-    #   - /var/src/node_modules
     networks:
       - project_net
 networks:

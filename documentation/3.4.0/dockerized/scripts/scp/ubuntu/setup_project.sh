@@ -92,9 +92,9 @@ curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs
 log "config.json file is downloaded."
 
 # remove once the docker image is generated
-log "Cloning survey-project-creation-service repository..."
-git clone -b release-1.0.0 https://github.com/ELEVATE-Project/survey-project-creation-service.git
-log "survey-project-creation-service repository cloned."
+# log "Cloning survey-project-creation-service repository..."
+# git clone -b release-1.0.0 https://github.com/ELEVATE-Project/survey-project-creation-service.git
+# log "survey-project-creation-service repository cloned."
 
 # Step 14: Run docker-compose-up.sh script
 log "Running docker-compose-up.sh script..."

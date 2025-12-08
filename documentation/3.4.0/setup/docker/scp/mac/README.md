@@ -32,7 +32,7 @@ Expectation: By diligently following the outlined steps, you will successfully e
 
 ## Prerequisites
 
-To set up the Project application, ensure you have Docker and Docker Compose installed on your system. For Ubuntu users, detailed installation instructions for both can be found in the documentation here: [How To Install and Use Docker Compose on Mac](https://docs.docker.com/desktop/setup/install/mac-install/). To install and use Nodejs in Ubuntu machine, you can follow instructions here: [How To Install Nodejs in Mac](https://nodejs.org/en/download/package-manager).
+To set up the Project application, ensure you have Docker and Docker Compose installed on your system. For Mac users, detailed installation instructions for both can be found in the documentation here: [How To Install and Use Docker Compose on Mac](https://docs.docker.com/desktop/setup/install/mac-install/). To install and use Nodejs in Mac machine, you can follow instructions here: [How To Install Nodejs in Mac](https://nodejs.org/en/download/package-manager).
 
 ## Installation
 

@@ -1,0 +1,17 @@
+window["env"] = {
+    production: true,
+    baseURL: 'http://localhost:3569', //interface url
+    capabilities: 'all',
+    restrictedPages: ['DOWNLOADS','AUTH_PAGES'],
+    unauthorizedRedirectUrl: "/",
+    isAuthBypassed: true,
+    profileRedirectPath: "/profile-edit",
+    showHeader: true,
+    config:{
+        logoPath:'assets/images/logo.png',
+        faviconPath:'assets/icons/elevate-logo.png',
+        title:"Elevate",
+        redirectUrl:"/home"
+    },
+    hostPath:'/ml/'
+};

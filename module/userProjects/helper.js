@@ -152,7 +152,6 @@ module.exports = class UserProjectsHelper {
 						message: CONSTANTS.apiResponses.USER_PROJECT_NOT_FOUND,
 					}
 				}
-
 				// if entityId & entityInformation are passed through payload, ignore them
 				const blackListedPayloadItems = ['entityId', 'entityInformation', 'acl']
 				blackListedPayloadItems.map((payloadItem) => {
@@ -182,6 +181,7 @@ module.exports = class UserProjectsHelper {
 					// validate user authenticity if the acl.visibility of project is SCOPE
 					else if (userProject[0].acl.visibility == CONSTANTS.common.PROJECT_VISIBILITY_SCOPE) {
 						let scopeData = data.userProfileInformation.scope
+						scopeData['tenantId'] = tenantId
 						let queryData = await solutionsHelper.queryBasedOnRoleAndLocation(scopeData, '', 'acl')
 						if (!queryData.success) {
 							return resolve(queryData)
@@ -4519,22 +4519,30 @@ module.exports = class UserProjectsHelper {
 				// Check if project exists and belongs to the user
 				const projectData = await projectQueries.projectDocument({
 					_id: projectId,
-					userId,
+					createdBy: userId,
 					tenantId,
 				})
 
 				if (!projectData || projectData.length === 0) {
 					throw {
 						success: false,
-						message: CONSTANTS.apiResponses.PROJECT_DOES_NOT_BELONG_TO_USER,
+						message: CONSTANTS.apiResponses.PROJECT_NOT_FOUND,
+						status: HTTP_STATUS_CODE['bad_request'].status,
 					}
 				}
-
+				if (
+					bodyData.acl.visibility === CONSTANTS.common.PROJECT_VISIBILITY_SPECIFIC &&
+					bodyData.acl.users.length > 0
+				) {
+					if (!bodyData.acl.users.includes(userId.toString())) {
+						bodyData.acl.users.push(userId.toString())
+					}
+				}
 				// Update ACL field in the project
 				const updatedProject = await projectQueries.findOneAndUpdate(
 					{
 						_id: projectId,
-						userId,
+						createdBy: userId,
 						tenantId,
 					},
 					{

@@ -1568,6 +1568,34 @@ module.exports = class UserProjects extends Abstract {
 	}
 
 	/**
+     * @api {post} /v1/userProjects/updateAcl/:_id={{projectId}}
+     * @apiVersion 1.0.0
+     * @apiName Update ACL
+     * @apiHeader {String} X-auth-token Authenticity token
+     * @apiSampleRequest /v1/userProjects/updateAcl/68d38c9f69f139b91c9e57b8
+     * @apiSampleRequest {json} Request
+     *  {
+            "acl": {
+                "visibility" : "SPECIFIC",
+                "users" : ["1", "2", "3", "4"]            
+            }
+        }
+     * @apiUse successBody
+     * @apiParamExample {json} Response:
+        {
+            "success" : true,
+            "message" : "Project updated successfully.",
+            "result" : {
+                "_id" : "68d38c9f69f139b91c9e57b8",
+                "acl" : {
+                    "visibility" : "SPECIFIC",
+                    "users" : ["1", "2", "3", "4"]
+                }
+            }
+        }
+    */
+
+	/**
 	 * Update ACL for a project if user owns the project and submission level is ENTITY.
 	 *
 	 * @method POST

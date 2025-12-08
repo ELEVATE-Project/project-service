@@ -140,7 +140,6 @@ Go to the detailed Windows Native setup guide: **<a href="link/to/samiksha/nativ
 
 ---
 
-
 ### 🚀 **WITH SELF CREATION PORTAL (SCP) (Integrated Deployment)**
 
 <details>
@@ -160,7 +159,7 @@ Go to the detailed Ubuntu Docker setup guide: **<a href="https://github.com/ELEV
 <details>
 <summary> 2. macOS Setup </summary>
 <br>
-Go to the detailed macOS Docker setup guide: **<a href="link/to/scp/docker/macos/README" target="_blank">SETUP_SCP_DOCKER_MACOS.md</a>**
+Go to the detailed macOS Docker setup guide: **<a href="https://github.com/ELEVATE-Project/project-service/blob/setupGuideSCP/documentation/3.4.0/setup/docker/scp/mac/README.md" target="_blank">SETUP_SCP_DOCKER_MACOS.md</a>**
 </details>
 
 <details>

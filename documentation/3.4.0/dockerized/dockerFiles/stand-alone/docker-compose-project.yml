@@ -87,6 +87,40 @@ services:
       - ./config.json:/var/src/config.json
     networks:
       - project_net
+  # user:
+  #   image: shikshalokamqa/elevate-user:3.3.24
+  #   ports:
+  #     - '3001:3001'
+  #   command: >
+  #     bash -c "echo 'Waiting for PostgreSQL on citus_master:5432 to accept connections...' &&
+  #     while ! timeout 1 bash -c 'cat < /dev/null > /dev/tcp/citus_master/5432' 2> /dev/null; do
+  #       echo 'Waiting for citus_master to be ready...';
+  #       sleep 1;
+  #     done;
+  #     echo 'Database is ready.';
+  #     npm run db:init && npm run db:seed:all &&
+  #     (echo 'Running nodeee' && nodemon app.js &) &&
+  #     (while ! curl -sSf http://user:3001 > /dev/null; do
+  #       sleep 1;
+  #     done && echo 'Service is up' &&
+  #     /bin/bash -c 'cd scripts && echo Running user service scripts && node insertDefaultOrg.js && node viewsScript.js && node -r module-alias/register uploadSampleCSV.js');
+  #     tail -f /dev/null"
+  #   depends_on:
+  #     - kafka
+  #     - citus
+  #     - redis
+  #     - scheduler
+  #   environment:
+  #     - DEV_DATABASE_URL=postgres://postgres:postgres@citus_master:5432/user
+  #     - KAFKA_URL=kafka:29092
+  #     - REDIS_HOST=redis://redis:6379
+  #   volumes:
+  #     - ./user:/usr/src/app
+  #   networks:
+  #     - project_net
+  #   env_file:
+  #     - ./user_env
+
   user:
     image: shikshalokamqa/elevate-user:3.3.24
     ports:
@@ -98,12 +132,23 @@ services:
         sleep 1;
       done;
       echo 'Database is ready.';
-      npm run db:init && npm run db:seed:all &&
+      # --- Run Migrations ---
+      echo 'Running Migrations...' &&
+      cd user/src && npx sequelize-cli db:migrate && cd ../.. && \
+
+      # --- Run Seeds ---
+      echo 'Running Seeds...' &&
+      cd user/src && npx sequelize-cli db:seed:all && cd ../.. &&
+
+      # --- Start Service and Wait for Startup ---
       (echo 'Running nodeee' && nodemon app.js &) &&
       (while ! curl -sSf http://user:3001 > /dev/null; do
         sleep 1;
       done && echo 'Service is up' &&
-      /bin/bash -c 'cd scripts && echo Running user service scripts && node insertDefaultOrg.js && node viewsScript.js && node -r module-alias/register uploadSampleCSV.js');
+      # This section that ran extra scripts has been removed as requested.
+      echo 'Skipping user service scripts (insertDefaultOrg.js, viewsScript.js, uploadSampleCSV.js)') &&
+
+      # --- Keep Container Running ---
       tail -f /dev/null"
     depends_on:
       - kafka

@@ -124,6 +124,143 @@ module.exports = function (app) {
 	app.all(applicationBaseUrl + ':version/:controller/:method/:_id', inputValidator, router)
 	app.all(applicationBaseUrl + ':version/:controller/:file/:method/:_id', inputValidator, router)
 
+	// Route aliases for /api/categories/* endpoints (matching specification)
+	// These map to /project/v1/projectCategories/* endpoints
+	const apiBaseUrl = '/api/'
+
+	// Apply middleware to /api routes
+	app.use(apiBaseUrl, authenticator)
+	app.use(apiBaseUrl, pagination)
+	app.use(apiBaseUrl, addTenantAndOrgInRequest)
+	app.use(apiBaseUrl, checkAdminRole)
+
+	// Helper function to create API route handlers that directly call the controller
+	const createApiRouteHandler = (controllerMethod) => {
+		return async (req, res, next) => {
+			try {
+				// Validate input
+				let validationError = req.validationErrors()
+				if (validationError.length) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: validationError,
+					}
+				}
+
+				// Check if controller and method exist
+				if (!controllers['v1'] || !controllers['v1']['projectCategories']) {
+					return res.status(HTTP_STATUS_CODE['not_found'].status).json({
+						status: HTTP_STATUS_CODE['not_found'].status,
+						message: 'Controller not found',
+					})
+				}
+
+				if (!controllers['v1']['projectCategories'][controllerMethod]) {
+					return res.status(HTTP_STATUS_CODE['not_found'].status).json({
+						status: HTTP_STATUS_CODE['not_found'].status,
+						message: 'Method not found',
+					})
+				}
+
+				// Set params for compatibility
+				req.params = {
+					version: 'v1',
+					controller: 'projectCategories',
+					method: controllerMethod,
+					_id: req.params.id || req.params._id,
+				}
+
+				// Call the controller method directly
+				const result = await controllers['v1']['projectCategories'][controllerMethod](req)
+
+				// Handle response
+				if (result.isResponseAStream == true) {
+					if (result.fileNameWithPath) {
+						fs.exists(result.fileNameWithPath, function (exists) {
+							if (exists) {
+								res.setHeader(
+									'Content-disposition',
+									'attachment; filename=' + result.fileNameWithPath.split('/').pop()
+								)
+								res.set('Content-Type', 'application/octet-stream')
+								fs.createReadStream(result.fileNameWithPath).pipe(res)
+							} else {
+								throw {
+									status: 500,
+									message: 'Oops! Something went wrong!',
+								}
+							}
+						})
+					} else if (result.fileURL) {
+						let extName = path.extname(result.file)
+						let uniqueFileName = 'File_' + UTILS.generateUniqueId() + extName
+						https
+							.get(result.fileURL, (fileStream) => {
+								res.setHeader('Content-Disposition', `attachment; filename="${uniqueFileName}"`)
+								res.setHeader('Content-Type', fileStream.headers['content-type'])
+								fileStream.pipe(res)
+							})
+							.on('error', (err) => {
+								console.error('Error downloading the file:', err)
+								throw err
+							})
+					} else {
+						throw {
+							status: 500,
+							message: 'Oops! Something went wrong!',
+						}
+					}
+				} else {
+					res.status(result.status ? result.status : HTTP_STATUS_CODE['ok'].status).json({
+						message: result.message,
+						status: result.status ? result.status : HTTP_STATUS_CODE['ok'].status,
+						result: result.data,
+						result: result.result,
+						total: result.total,
+						count: result.count,
+					})
+				}
+
+				console.log('-------------------Response log starts here-------------------')
+				console.log(JSON.stringify(result))
+				console.log('-------------------Response log ends here-------------------')
+			} catch (error) {
+				res.status(error.status ? error.status : HTTP_STATUS_CODE.bad_request.status).json({
+					status: error.status ? error.status : HTTP_STATUS_CODE.bad_request.status,
+					message: error.message,
+					result: error.result,
+				})
+			}
+		}
+	}
+
+	// GET /api/categories/list -> GET /project/v1/projectCategories/list
+	app.get(apiBaseUrl + 'categories/list', inputValidator, createApiRouteHandler('list'))
+
+	// GET /api/categories/hierarchy -> GET /project/v1/projectCategories/hierarchy
+	app.get(apiBaseUrl + 'categories/hierarchy', inputValidator, createApiRouteHandler('hierarchy'))
+
+	// POST /api/categories -> POST /project/v1/projectCategories/create
+	app.post(apiBaseUrl + 'categories', inputValidator, createApiRouteHandler('create'))
+
+	// PATCH /api/categories/:id -> PATCH /project/v1/projectCategories/update/:id
+	app.patch(apiBaseUrl + 'categories/:id', inputValidator, createApiRouteHandler('update'))
+
+	// DELETE /api/categories/:id -> DELETE /project/v1/projectCategories/delete/:id
+	app.delete(apiBaseUrl + 'categories/:id', inputValidator, createApiRouteHandler('delete'))
+
+	// PATCH /api/categories/:id/move -> PATCH /project/v1/projectCategories/move/:id
+	app.patch(apiBaseUrl + 'categories/:id/move', inputValidator, createApiRouteHandler('move'))
+
+	// GET /api/categories/leaves -> GET /project/v1/projectCategories/leaves
+	app.get(apiBaseUrl + 'categories/leaves', inputValidator, createApiRouteHandler('leaves'))
+
+	// GET /api/categories/:id/can-delete -> GET /project/v1/projectCategories/canDelete/:id
+	app.get(apiBaseUrl + 'categories/:id/can-delete', inputValidator, createApiRouteHandler('canDelete'))
+
+	// POST /api/categories/bulk -> POST /project/v1/projectCategories/bulk
+	app.post(apiBaseUrl + 'categories/bulk', inputValidator, createApiRouteHandler('bulk'))
+
 	app.use((req, res, next) => {
 		res.status(HTTP_STATUS_CODE['not_found'].status).send(HTTP_STATUS_CODE['not_found'].message)
 	})

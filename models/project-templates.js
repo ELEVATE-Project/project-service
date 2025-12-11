@@ -18,14 +18,30 @@ module.exports = {
 		},
 		categories: [
 			{
-				_id: 'ObjectId',
+				_id: {
+					type: 'ObjectId',
+					ref: 'projectCategories',
+					required: true,
+					index: true,
+				},
 				externalId: {
 					type: String,
 					index: true,
 				},
 				name: String,
+				level: Number, // Category level in hierarchy
+				isLeaf: Boolean, // Is this a leaf category?
+				syncedAt: {
+					type: Date,
+					default: Date.now,
+				},
 			},
 		],
+		categorySyncedAt: {
+			type: Date,
+			default: Date.now,
+			index: true,
+		},
 		description: {
 			type: String,
 			default: '',

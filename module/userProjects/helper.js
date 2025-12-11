@@ -6,7 +6,7 @@
  */
 
 // Dependencies
-const libraryCategoriesHelper = require(MODULES_BASE_PATH + '/library/categories/helper')
+// const libraryCategoriesHelper = require(MODULES_BASE_PATH + '/library/categories/helper')
 const projectTemplatesHelper = require(MODULES_BASE_PATH + '/project/templates/helper')
 const { v4: uuidv4 } = require('uuid')
 const projectQueries = require(DB_QUERY_BASE_PATH + '/projects')
@@ -1285,14 +1285,14 @@ module.exports = class UserProjectsHelper {
 						// get solutions details based on solutionTypes
 						/*
 						******Sample response*************
-		                       {
-                                  "success": true,
+							   {
+								  "success": true,
 								   data:{
-                                     "programId": "685140cbf891ccf74e05baf9",
-                                     "observationId": "685146542054fe175c7150c8",
-                                    "solutionId": "685140d1ffc25f705c56e99e",
-					               } 
-                               }
+									 "programId": "685140cbf891ccf74e05baf9",
+									 "observationId": "685146542054fe175c7150c8",
+									"solutionId": "685140d1ffc25f705c56e99e",
+								   } 
+							   }
 
 						*/
 						const getSolutionDetails = {
@@ -4324,7 +4324,7 @@ module.exports = class UserProjectsHelper {
    * @name deleteUserPIIData
    * @param {userDeleteEvent} - userDeleteEvent message object 
    * {
-      	"entity": "user",
+			"entity": "user",
 		"eventType": "delete",
 		"entityId": 101,
 		"changes": {},
@@ -4335,7 +4335,7 @@ module.exports = class UserProjectsHelper {
 		"deleted": true,
 		"id": 101,
 		"username" : "user_shqwq1ssddw"
-    }
+	}
    * @returns {Promise} success Data.
    */
 	static deleteUserPIIData(userDeleteEvent) {

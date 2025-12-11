@@ -7,7 +7,7 @@
 
 // Dependencies
 
-const libraryCategoriesHelper = require(MODULES_BASE_PATH + '/library/categories/helper')
+const projectCategoriesHelper = require(MODULES_BASE_PATH + '/projectCategories/helper')
 
 /**
  * LibraryCategories
@@ -36,33 +36,33 @@ module.exports = class LibraryCategories extends Abstract {
 	}
 
 	/**
-    * @api {get} /improvement-project/api/v1/library/categories/projects/:categoryExternalId?page=:page&limit=:limit&search=:search&sort=:sort 
-    * List of library projects.
-    * @apiVersion 1.0.0
-    * @apiGroup Library Categories
-    * @apiSampleRequest /improvement-project/api/v1/library/categories/projects/community?page=1&limit=1&search=t&sort=importantProject
-    * @apiParamExample {json} Response:
-    * {
-    "message": "Successfully fetched projects",
-    "status": 200,
-    "result": {
-        "data" : [
-            {
-                "_id": "5f4c91b0acae343a15c39357",
-                "averageRating": 2.5,
-                "noOfRatings": 4,
-                "name": "Test-template",
-                "externalId": "Test-template1",
-                "description" : "Test template description",
-                "createdAt": "2020-08-31T05:59:12.230Z"
-            }
-        ], 
-        "count": 7
-    }
-    }
-    * @apiUse successBody
-    * @apiUse errorBody
-    */
+	* @api {get} /improvement-project/api/v1/library/categories/projects/:categoryExternalId?page=:page&limit=:limit&search=:search&sort=:sort 
+	* List of library projects.
+	* @apiVersion 1.0.0
+	* @apiGroup Library Categories
+	* @apiSampleRequest /improvement-project/api/v1/library/categories/projects/community?page=1&limit=1&search=t&sort=importantProject
+	* @apiParamExample {json} Response:
+	* {
+	"message": "Successfully fetched projects",
+	"status": 200,
+	"result": {
+		"data" : [
+			{
+				"_id": "5f4c91b0acae343a15c39357",
+				"averageRating": 2.5,
+				"noOfRatings": 4,
+				"name": "Test-template",
+				"externalId": "Test-template1",
+				"description" : "Test template description",
+				"createdAt": "2020-08-31T05:59:12.230Z"
+			}
+		], 
+		"count": 7
+	}
+	}
+	* @apiUse successBody
+	* @apiUse errorBody
+	*/
 
 	/**
 	 * List of library categories projects.
@@ -75,7 +75,7 @@ module.exports = class LibraryCategories extends Abstract {
 	async projects(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				const libraryProjects = await libraryCategoriesHelper.projects(
+				const libraryProjects = await projectCategoriesHelper.projects(
 					req.params._id ? req.params._id : '',
 					req.pageSize,
 					req.pageNo,
@@ -118,7 +118,7 @@ module.exports = class LibraryCategories extends Abstract {
 	async create(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				const libraryProjectcategory = await libraryCategoriesHelper.create(
+				const libraryProjectcategory = await projectCategoriesHelper.create(
 					req.body,
 					req.files,
 					req.userDetails
@@ -161,7 +161,7 @@ module.exports = class LibraryCategories extends Abstract {
 				const findQuery = {
 					_id: req.params._id,
 				}
-				const libraryProjectcategory = await libraryCategoriesHelper.update(
+				const libraryProjectcategory = await projectCategoriesHelper.update(
 					findQuery,
 					req.body,
 					req.files,
@@ -179,55 +179,55 @@ module.exports = class LibraryCategories extends Abstract {
 	}
 
 	/**
-    * @api {get} /improvement-project/api/v1/library/categories/list 
-    * List of library categories.
-    * @apiVersion 1.0.0
-    * @apiGroup Library Categories
-    * @apiSampleRequest /improvement-project/api/v1/library/categories/list
-    * @apiParamExample {json} Response:
-    {
-    "message": "Project categories fetched successfully",
-    "status": 200,
-    "result": [
-        {
-            "name": "Community",
-            "type": "community",
-            "updatedAt": "2020-11-18T16:03:22.563Z",
-            "projectsCount": 0,
-            "url": "https://storage.googleapis.com/download/storage/v1/b/sl-dev-storage/o/static%2FprojectCategories%2Fcommunity.png?alt=media"
-        },
-        {
-            "name": "Education Leader",
-            "type": "educationLeader",
-            "updatedAt": "2020-11-18T16:03:22.563Z",
-            "projectsCount": 0,
-            "url": "https://storage.googleapis.com/download/storage/v1/b/sl-dev-storage/o/static%2FprojectCategories%2FeducationLeader.png?alt=media"
-        },
-        {
-            "name": "Infrastructure",
-            "type": "infrastructure",
-            "updatedAt": "2020-11-18T16:03:22.563Z",
-            "projectsCount": 0,
-            "url": "https://storage.googleapis.com/download/storage/v1/b/sl-dev-storage/o/static%2FprojectCategories%2Finfrastructure.png?alt=media"
-        },
-        {
-            "name": "Students",
-            "type": "students",
-            "updatedAt": "2020-11-18T16:03:22.563Z",
-            "projectsCount": 0,
-            "url": "https://storage.googleapis.com/download/storage/v1/b/sl-dev-storage/o/static%2FprojectCategories%2Fstudents.png?alt=media"
-        },
-        {
-            "name": "Teachers",
-            "type": "teachers",
-            "updatedAt": "2020-11-18T16:03:22.563Z",
-            "projectsCount": 0,
-            "url": "https://storage.googleapis.com/download/storage/v1/b/sl-dev-storage/o/static%2FprojectCategories%2Fteachers.png?alt=media"
-        }
-    ]}
-    * @apiUse successBody
-    * @apiUse errorBody
-    */
+	* @api {get} /improvement-project/api/v1/library/categories/list 
+	* List of library categories.
+	* @apiVersion 1.0.0
+	* @apiGroup Library Categories
+	* @apiSampleRequest /improvement-project/api/v1/library/categories/list
+	* @apiParamExample {json} Response:
+	{
+	"message": "Project categories fetched successfully",
+	"status": 200,
+	"result": [
+		{
+			"name": "Community",
+			"type": "community",
+			"updatedAt": "2020-11-18T16:03:22.563Z",
+			"projectsCount": 0,
+			"url": "https://storage.googleapis.com/download/storage/v1/b/sl-dev-storage/o/static%2FprojectCategories%2Fcommunity.png?alt=media"
+		},
+		{
+			"name": "Education Leader",
+			"type": "educationLeader",
+			"updatedAt": "2020-11-18T16:03:22.563Z",
+			"projectsCount": 0,
+			"url": "https://storage.googleapis.com/download/storage/v1/b/sl-dev-storage/o/static%2FprojectCategories%2FeducationLeader.png?alt=media"
+		},
+		{
+			"name": "Infrastructure",
+			"type": "infrastructure",
+			"updatedAt": "2020-11-18T16:03:22.563Z",
+			"projectsCount": 0,
+			"url": "https://storage.googleapis.com/download/storage/v1/b/sl-dev-storage/o/static%2FprojectCategories%2Finfrastructure.png?alt=media"
+		},
+		{
+			"name": "Students",
+			"type": "students",
+			"updatedAt": "2020-11-18T16:03:22.563Z",
+			"projectsCount": 0,
+			"url": "https://storage.googleapis.com/download/storage/v1/b/sl-dev-storage/o/static%2FprojectCategories%2Fstudents.png?alt=media"
+		},
+		{
+			"name": "Teachers",
+			"type": "teachers",
+			"updatedAt": "2020-11-18T16:03:22.563Z",
+			"projectsCount": 0,
+			"url": "https://storage.googleapis.com/download/storage/v1/b/sl-dev-storage/o/static%2FprojectCategories%2Fteachers.png?alt=media"
+		}
+	]}
+	* @apiUse successBody
+	* @apiUse errorBody
+	*/
 
 	/**
 	 * List of library categories
@@ -240,7 +240,7 @@ module.exports = class LibraryCategories extends Abstract {
 	async list(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let projectCategories = await libraryCategoriesHelper.list(req)
+				let projectCategories = await projectCategoriesHelper.list(req)
 
 				projectCategories.result = projectCategories.data
 

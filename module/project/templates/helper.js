@@ -14,7 +14,7 @@ const { ObjectId } = require('mongodb')
 
 // Dependencies
 
-const libraryCategoriesHelper = require(MODULES_BASE_PATH + '/library/categories/helper')
+// const libraryCategoriesHelper = require(MODULES_BASE_PATH + '/library/categories/helper')
 const coreService = require(GENERICS_FILES_PATH + '/services/core')
 // const kafkaProducersHelper = require(GENERICS_FILES_PATH + "/kafka/producers");
 const learningResourcesHelper = require(MODULES_BASE_PATH + '/learningResources/helper')
@@ -442,19 +442,17 @@ module.exports = class ProjectTemplatesHelper {
 									return category._id
 								})
 
-								let updatedCategories = await libraryCategoriesHelper.update(
+								await projectCategoriesQueries.updateMany(
 									{
 										_id: { $in: categories },
 									},
 									{
 										$inc: { noOfProjects: 1 },
-									},
-									{},
-									userDetails
+									}
 								)
-								if (!updatedCategories.success) {
-									currentData['_SYSTEM_ID'] = updatedCategories.message
-								}
+								// if (!updatedCategories.success) {
+								// 	currentData['_SYSTEM_ID'] = updatedCategories.message
+								// }
 							}
 						}
 					}
@@ -560,7 +558,7 @@ module.exports = class ProjectTemplatesHelper {
 									return category._id
 								})
 
-								let updatedCategories = await libraryCategoriesHelper.update(
+								await projectCategoriesQueries.updateMany(
 									{
 										_id: { $in: categories },
 									},
@@ -569,9 +567,9 @@ module.exports = class ProjectTemplatesHelper {
 									}
 								)
 
-								if (!updatedCategories.success) {
-									currentData['UPDATE_STATUS'] = updatedCategories.message
-								}
+								// if (!updatedCategories.success) {
+								// 	currentData['UPDATE_STATUS'] = updatedCategories.message
+								// }
 							}
 
 							// Remove project count from existing categories
@@ -580,7 +578,7 @@ module.exports = class ProjectTemplatesHelper {
 									return category._id
 								})
 
-								let categoriesUpdated = await libraryCategoriesHelper.update(
+								await projectCategoriesQueries.updateMany(
 									{
 										_id: { $in: categoriesIds },
 									},
@@ -589,9 +587,9 @@ module.exports = class ProjectTemplatesHelper {
 									}
 								)
 
-								if (!categoriesUpdated.success) {
-									currentData['UPDATE_STATUS'] = updatedCategories.message
-								}
+								// if (!categoriesUpdated.success) {
+								// 	currentData['UPDATE_STATUS'] = updatedCategories.message
+								// }
 							}
 
 							currentData['UPDATE_STATUS'] = CONSTANTS.common.SUCCESS

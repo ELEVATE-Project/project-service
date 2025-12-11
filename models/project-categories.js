@@ -2,7 +2,7 @@
  * name : project-categories.js.
  * author : Aman Karki.
  * created-date : 14-July-2020.
- * Description : Schema for project categories.
+ * Description : Schema for project categories with hierarchical support.
  */
 
 module.exports = {
@@ -15,6 +15,7 @@ module.exports = {
 		name: {
 			type: String,
 			required: true,
+			maxlength: 100,
 		},
 		createdBy: {
 			type: String,
@@ -24,9 +25,54 @@ module.exports = {
 			type: String,
 			default: 'SYSTEM',
 		},
+		// ========== HIERARCHY FIELDS ==========
+		parent_id: {
+			type: 'ObjectId',
+			ref: 'projectCategories',
+			default: null,
+			index: true, // CRITICAL for hierarchy queries
+		},
+		level: {
+			type: Number,
+			default: 0,
+			min: 0,
+			max: 3, // Enforce max depth via config
+			index: true,
+		},
+		path: {
+			type: String, // Materialized path: "root_id/parent_id/self_id"
+			default: '',
+			index: true, // IMPORTANT: Enables efficient subtree queries
+		},
+		pathArray: {
+			type: Array, // [root_id, parent_id, self_id]
+			default: [],
+		},
+		hasChildren: {
+			type: Boolean,
+			default: false,
+			index: true, // Quick leaf identification
+		},
+		childCount: {
+			type: Number,
+			default: 0,
+		},
+		displayOrder: {
+			type: Number,
+			default: 0,
+			index: true,
+		},
+		// Program Association
+		programId: {
+			type: 'ObjectId',
+			ref: 'programs',
+			index: true,
+		},
+		// ==========================================
 		isDeleted: {
 			type: Boolean,
 			default: false,
+			index: true,
 		},
 		isVisible: {
 			type: Boolean,
@@ -34,7 +80,9 @@ module.exports = {
 		},
 		status: {
 			type: String,
+			enum: ['active', 'inactive', 'archived'],
 			default: 'active',
+			index: true,
 		},
 		icon: {
 			type: String,
@@ -66,11 +114,27 @@ module.exports = {
 			default: [],
 			index: true,
 		},
+		metadata: {
+			type: Object,
+			default: {},
+		},
 	},
 	compoundIndex: [
 		{
 			name: { externalId: 1, tenantId: 1 },
 			indexType: { unique: true },
+		},
+		{
+			name: { parent_id: 1, tenantId: 1, orgId: 1, displayOrder: 1 },
+			indexType: {}, // For fetching sorted children
+		},
+		{
+			name: { level: 1, tenantId: 1, isDeleted: 1, isVisible: 1, hasChildren: 1 },
+			indexType: {}, // For fetching by level
+		},
+		{
+			name: { path: 1, tenantId: 1 },
+			indexType: {}, // For subtree queries
 		},
 	],
 }

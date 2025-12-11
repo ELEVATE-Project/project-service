@@ -6,7 +6,7 @@
  */
 
 // dependencies
-const libraryCategoriesHelper = require(MODULES_BASE_PATH + '/library/categories/helper')
+const projectCategoriesHelper = require(MODULES_BASE_PATH + '/projectCategories/helper')
 
 /**
  * UserExtension service.
@@ -28,8 +28,8 @@ module.exports = class Template {
 * @apiUse errorBody
 * @apiParamExample {json} Response:
 * {
-    "message": "Successfully fetched projects",
-    "status": 200
+	"message": "Successfully fetched projects",
+	"status": 200
 }
 */
 	async list(req) {
@@ -40,7 +40,7 @@ module.exports = class Template {
 				if (req.query.duration) options.duration = req.query.duration
 				if (req.query.role) options.roles = req.query.role
 
-				const libraryProjects = await libraryCategoriesHelper.projects(
+				const projects = await projectCategoriesHelper.projects(
 					req.params._id ? req.params._id : '',
 					req.pageSize,
 					req.pageNo,

@@ -142,6 +142,33 @@ let entities = [
 		},
 	},
 	{
+		_id: new ObjectId('6852c8de7248c20014b38a9d'),
+		metaInformation: {
+			targetedEntityTypes: [],
+			externalId: '160101',
+			name: 'AGARTALA MUNICIPAL COORPORATION',
+		},
+		childHierarchyPath: ['cluster', 'school'],
+		createdBy: '20',
+		updatedBy: '20',
+		deleted: false,
+		entityTypeId: new ObjectId('6825915597b5680013e6a144'),
+		entityType: 'block',
+		registryDetails: {
+			code: '160101',
+			locationId: '160101',
+		},
+		tenantId: 'default',
+		orgId: 'default_code',
+		updatedAt: new Date('2025-06-18T14:24:30.469Z'),
+		createdAt: new Date('2025-06-18T14:10:38.736Z'),
+		__v: 0,
+		groups: {
+			cluster: [new ObjectId('6852c9027248c20014b38c34')],
+			school: [new ObjectId('6852c9237248c20014b39fa0')],
+		},
+	},
+	{
 		_id: new ObjectId('6852c9027248c20014b38c34'),
 		metaInformation: {
 			targetedEntityTypes: [],

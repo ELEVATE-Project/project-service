@@ -328,11 +328,6 @@ module.exports = class ProjectCategoriesHelper {
 					query.parent_id = null
 				}
 
-				// Filter by programId if provided
-				if (req.query.programId) {
-					query.programId = req.query.programId
-				}
-
 				// Handle currentOrgOnly filter
 				if (req.query.currentOrgOnly) {
 					let currentOrgOnly = UTILS.convertStringToBoolean(req.query.currentOrgOnly)
@@ -446,10 +441,6 @@ module.exports = class ProjectCategoriesHelper {
 					// visibleToOrganizations: { $in: [organizationId] },
 					status: CONSTANTS.common.ACTIVE_STATUS,
 					isDeleted: false,
-				}
-
-				if (req.query.programId) {
-					query.programId = req.query.programId
 				}
 
 				if (req.query.categoryId) {
@@ -825,10 +816,6 @@ module.exports = class ProjectCategoriesHelper {
 					status: CONSTANTS.common.ACTIVE_STATUS,
 					isDeleted: false,
 					hasChildren: false,
-				}
-
-				if (req.query.programId) {
-					query.programId = req.query.programId
 				}
 
 				let leafCategories = await projectCategoriesQueries.getLeafCategories(query)

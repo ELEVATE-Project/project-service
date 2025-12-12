@@ -62,12 +62,6 @@ module.exports = {
 			default: 0,
 			index: true,
 		},
-		// Program Association
-		programId: {
-			type: 'ObjectId',
-			ref: 'programs',
-			index: true,
-		},
 		// ==========================================
 		isDeleted: {
 			type: Boolean,

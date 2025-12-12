@@ -48,6 +48,10 @@ module.exports = (req) => {
 			req.checkQuery('tenantId').exists().withMessage('tenantId is required')
 			req.checkQuery('orgId').exists().withMessage('orgId is required')
 		},
+		details: function () {
+			req.checkParams('_id').exists().withMessage('required category id')
+			req.checkParams('_id').isMongoId().withMessage('Invalid category id')
+		},
 	}
 
 	if (projectCategoriesValidator[req.params.method]) {

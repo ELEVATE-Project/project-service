@@ -298,4 +298,44 @@ module.exports = class ProjectCategories extends Abstract {
 			}
 		}
 	}
+
+	/**
+	 * @api {get} /project/v1/projectCategories/details/:id
+	 * @apiVersion 1.0.0
+	 * @apiName details
+	 * @apiGroup ProjectCategories
+	 * @apiHeader {String} X-auth-token Authenticity token
+	 * @apiUse successBody
+	 * @apiUse errorBody
+	 */
+	async details(req) {
+		try {
+			const categoryId = req.params._id
+			let tenantId = req.headers.tenantid
+
+			if (req.userDetails && req.userDetails.tenantAndOrgInfo) {
+				tenantId = req.userDetails.tenantAndOrgInfo.tenantId
+			}
+
+			if (!tenantId) {
+				throw {
+					message: 'Tenant ID is required',
+					status: HTTP_STATUS_CODE.bad_request.status,
+				}
+			}
+
+			const result = await projectCategoriesHelper.details(categoryId, tenantId)
+			return {
+				success: true,
+				message: result.message,
+				result: result.data,
+			}
+		} catch (error) {
+			return {
+				status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+				message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+				errorObject: error,
+			}
+		}
+	}
 }

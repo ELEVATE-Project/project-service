@@ -75,11 +75,28 @@ module.exports = class LibraryCategories extends Abstract {
 	async projects(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				// 2. LIMIT: Prioritize new query/body limit, fallback to old pageSize.
+				// Ensure limit is converted to a number.
+				const limit = Number(req.query.limit || req.body.limit || req.pageSize)
+
+				// 3. OFFSET: Prioritize new query/body offset.
+				// Fallback logic: If old pageNo/pageSize is present, calculate offset.
+				let offset
+				if (req.query.offset || req.body.offset) {
+					// Use new offset if available
+					offset = Number(req.query.offset || req.body.offset)
+				} else if (req.pageNo && req.pageSize) {
+					// Fallback: Calculate offset from old pageNo (assuming pageNo is 1-based)
+					offset = (Number(req.pageNo) - 1) * limit
+				} else {
+					offset = 0 // Default to start
+				}
+
 				const libraryProjects = await projectCategoriesHelper.projects(
 					req.params._id ? req.params._id : '',
-					req.pageSize,
-					req.pageNo,
-					req.searchText,
+					limit,
+					offset,
+					req.query.searchText || req.body.searchText || req.searchText,
 					req.query.sort,
 					req.userDetails
 				)
@@ -251,6 +268,96 @@ module.exports = class LibraryCategories extends Abstract {
 					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
 					errorObject: error,
 				})
+			}
+		})
+	}
+
+	/**
+	 * Get category details
+	 * @method
+	 * @name details
+	 * @param {Object} req - requested data
+	 * @returns {Object} Category details.
+	 */
+	async details(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				const categoryId = req.params._id
+				let tenantId = req.headers.tenantid
+
+				if (req.userDetails && req.userDetails.tenantAndOrgInfo) {
+					tenantId = req.userDetails.tenantAndOrgInfo.tenantId
+				}
+
+				if (!tenantId) {
+					throw {
+						message: 'Tenant ID is required',
+						status: HTTP_STATUS_CODE.bad_request.status,
+					}
+				}
+
+				const result = await projectCategoriesHelper.details(categoryId, tenantId)
+
+				return resolve({
+					message: result.message,
+					result: result.data,
+				})
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
+				})
+			}
+		})
+	}
+
+	/**
+	 * @api {post} /project/v1/library/categories/projects/list
+	 * List of library projects by multiple category IDs.
+	 * @apiVersion 1.0.0
+	 * @apiGroup Library Categories
+	 * @apiSampleRequest /project/v1/library/categories/projects/list
+	 * {
+	 *   "categoryExternalIds": ["cat1", "cat2"],
+	 *   "searchText": "math"
+	 * }
+	 * @apiParamExample {json} Response:
+	 * {
+	 *   "message": "Successfully fetched projects",
+	 *   "status": 200,
+	 *   "result": {
+	 *     "data": [...],
+	 *     "count": 10
+	 *   }
+	 * }
+	 * @apiUse successBody
+	 * @apiUse errorBody
+	 */
+	/**
+	 * List of library categories projects.
+	 * @method
+	 * @name projectList
+	 * @param {Object} req - requested data
+	 * @returns {Array} Library Categories project.
+	 */
+	async projectList(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				const libraryProjects = await projectCategoriesHelper.projectsByExternalIds(
+					req.body.categoryExternalIds,
+					req.body.limit || req.query.limit,
+					req.body.offset || req.query.offset,
+					req.body.searchText || req.query.searchText,
+					req.userDetails
+				)
+
+				return resolve({
+					message: libraryProjects.message,
+					result: libraryProjects.data,
+				})
+			} catch (error) {
+				return reject(error)
 			}
 		})
 	}

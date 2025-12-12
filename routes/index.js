@@ -258,8 +258,78 @@ module.exports = function (app) {
 	// GET /api/categories/:id/can-delete -> GET /project/v1/projectCategories/canDelete/:id
 	app.get(apiBaseUrl + 'categories/:id/can-delete', inputValidator, createApiRouteHandler('canDelete'))
 
+	// GET /api/categories/:id -> GET /project/v1/projectCategories/details/:id
+	app.get(apiBaseUrl + 'categories/:id', inputValidator, createApiRouteHandler('details'))
+
 	// POST /api/categories/bulk -> POST /project/v1/projectCategories/bulk
 	app.post(apiBaseUrl + 'categories/bulk', inputValidator, createApiRouteHandler('bulk'))
+
+	// Helper function for library category routes
+	const createLibraryApiRouteHandler = (controllerMethod) => {
+		return async (req, res, next) => {
+			try {
+				let validationError = req.validationErrors()
+				if (validationError.length) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: validationError,
+					}
+				}
+
+				if (
+					!controllers['v1'] ||
+					!controllers['v1']['library'] ||
+					!controllers['v1']['library']['categories']
+				) {
+					return res.status(HTTP_STATUS_CODE['not_found'].status).json({
+						status: HTTP_STATUS_CODE['not_found'].status,
+						message: 'Controller not found',
+					})
+				}
+
+				if (!controllers['v1']['library']['categories'][controllerMethod]) {
+					return res.status(HTTP_STATUS_CODE['not_found'].status).json({
+						status: HTTP_STATUS_CODE['not_found'].status,
+						message: 'Method not found',
+					})
+				}
+
+				req.params = {
+					version: 'v1',
+					controller: 'library',
+					file: 'categories',
+					method: controllerMethod,
+					_id: req.params.id || req.params._id,
+				}
+
+				const result = await controllers['v1']['library']['categories'][controllerMethod](req)
+
+				res.status(result.status ? result.status : HTTP_STATUS_CODE['ok'].status).json({
+					message: result.message,
+					status: result.status ? result.status : HTTP_STATUS_CODE['ok'].status,
+					result: result.data || result.result,
+					total: result.total,
+					count: result.count,
+				})
+			} catch (error) {
+				res.status(error.status ? error.status : HTTP_STATUS_CODE.bad_request.status).json({
+					status: error.status ? error.status : HTTP_STATUS_CODE.bad_request.status,
+					message: error.message,
+					result: error.result,
+				})
+			}
+		}
+	}
+
+	// GET /api/categories/projects/:id -> GET /project/v1/library/categories/projects/:id
+	app.get(apiBaseUrl + 'categories/projects/:id', inputValidator, createLibraryApiRouteHandler('projects'))
+
+	// POST /project/v1/library/categories/projects/list -> Bulk fetch projects
+	app.post(
+		applicationBaseUrl + 'v1/library/categories/projects/list',
+		inputValidator,
+		createLibraryApiRouteHandler('projectList')
+	)
 
 	app.use((req, res, next) => {
 		res.status(HTTP_STATUS_CODE['not_found'].status).send(HTTP_STATUS_CODE['not_found'].message)

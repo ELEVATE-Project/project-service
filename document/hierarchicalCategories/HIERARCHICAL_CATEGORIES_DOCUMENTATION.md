@@ -9,6 +9,7 @@ This document provides comprehensive technical documentation for implementing **
 -   ✅ **Multi-level Hierarchy**: Configurable depth (default: 3 levels).
 -   ✅ **Materialized Path**: Optimized for efficient subtree queries.
 -   ✅ **Backward Compatibility**: Fully compatible with existing API clients.
+-   ✅ **Template Sync**: Automatic background synchronization of project templates when categories are updated or moved.
 -   ✅ **API Aliases**: Supports both concise `/api/categories/*` and traditional `/project/v1/projectCategories/*` routes.
 -   ✅ **Data Integrity**: cascading deletes, cycle detection, and strict validation.
 
@@ -40,17 +41,19 @@ The original endpoints are fully supported and route to the new logic. Use these
 
 -   Base Path: `/project/v1/library/categories/*`
 
-| Action          | Specification Alias                  | Standard Internal Route                           | Legacy Library Route                             |
-| --------------- | ------------------------------------ | ------------------------------------------------- | ------------------------------------------------ |
-| **List**        | `GET /api/categories/list`           | `GET /project/v1/projectCategories/list`          | `GET /project/v1/library/categories/list`        |
-| **Create**      | `POST /api/categories`               | `POST /project/v1/projectCategories/create`       | `POST /project/v1/library/categories/create`     |
-| **Update**      | `PATCH /api/categories/:id`          | `PATCH /project/v1/projectCategories/update/:id`  | `POST /project/v1/library/categories/update/:id` |
-| **Hierarchy**   | `GET /api/categories/hierarchy`      | `GET /project/v1/projectCategories/hierarchy`     | -                                                |
-| **Move**        | `PATCH /api/categories/:id/move`     | `PATCH /project/v1/projectCategories/move/:id`    | -                                                |
-| **Delete**      | `DELETE /api/categories/:id`         | `DELETE /project/v1/projectCategories/delete/:id` | -                                                |
-| **Leaves**      | `GET /api/categories/leaves`         | `GET /project/v1/projectCategories/leaves`        | -                                                |
-| **Can Delete**  | `GET /api/categories/:id/can-delete` | `GET /project/v1/projectCategories/canDelete/:id` | -                                                |
-| **Bulk Create** | `POST /api/categories/bulk`          | `POST /project/v1/projectCategories/bulk`         | -                                                |
+| Action            | Specification Alias                  | Standard Internal Route                           | Legacy Library Route                                |
+| ----------------- | ------------------------------------ | ------------------------------------------------- | --------------------------------------------------- |
+| **List**          | `GET /api/categories/list`           | `GET /project/v1/projectCategories/list`          | `GET /project/v1/library/categories/list`           |
+| **Create**        | `POST /api/categories`               | `POST /project/v1/projectCategories/create`       | `POST /project/v1/library/categories/create`        |
+| **Update**        | `PATCH /api/categories/:id`          | `PATCH /project/v1/projectCategories/update/:id`  | `POST /project/v1/library/categories/update/:id`    |
+| **Hierarchy**     | `GET /api/categories/hierarchy`      | `GET /project/v1/projectCategories/hierarchy`     | -                                                   |
+| **Move**          | `PATCH /api/categories/:id/move`     | `PATCH /project/v1/projectCategories/move/:id`    | -                                                   |
+| **Delete**        | `DELETE /api/categories/:id`         | `DELETE /project/v1/projectCategories/delete/:id` | -                                                   |
+| **Leaves**        | `GET /api/categories/leaves`         | `GET /project/v1/projectCategories/leaves`        | -                                                   |
+| **Can Delete**    | `GET /api/categories/:id/can-delete` | `GET /project/v1/projectCategories/canDelete/:id` | -                                                   |
+| **Bulk Create**   | `POST /api/categories/bulk`          | `POST /project/v1/projectCategories/bulk`         | -                                                   |
+| **Projects**      | `GET /api/categories/projects/:id`   | -                                                 | `GET /project/v1/library/categories/projects/:id`   |
+| **Bulk Projects** | -                                    | -                                                 | `POST /project/v1/library/categories/projects/list` |
 
 > **Note**: Legacy `update` uses `POST` method in some clients, while new endpoints use `PATCH`. Both are supported on the legacy route if implemented, but strictly `PATCH` on new routes is recommended.
 

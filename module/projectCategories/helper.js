@@ -273,6 +273,7 @@ module.exports = class ProjectCategoriesHelper {
 				// Update parent counters
 				if (parentId) {
 					await this.updateParentCounts(parentId, tenantId, 1)
+					this.syncTemplatesForCategory(parentId, tenantId).catch(console.error)
 				}
 
 				createdCategory = await projectCategoriesQueries.findOne({
@@ -546,8 +547,15 @@ module.exports = class ProjectCategoriesHelper {
 	static update(filterQuery, updateData, files, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let matchQuery = { _id: filterQuery._id }
-				matchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+				// Find category to update
+				let matchQuery = { tenantId: userDetails.tenantAndOrgInfo.tenantId, isDeleted: false }
+				if (ObjectId.isValid(filterQuery._id)) {
+					matchQuery['$or'] = [{ _id: new ObjectId(filterQuery._id) }, { externalId: filterQuery._id }]
+				} else {
+					matchQuery['externalId'] = filterQuery._id
+				}
+				// Remove _id from filterQuery as we constructed matchQuery
+				delete filterQuery._id
 
 				let categoryData = await projectCategoriesQueries.categoryDocuments(matchQuery, 'all')
 
@@ -665,7 +673,14 @@ module.exports = class ProjectCategoriesHelper {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Get category to move
-				const category = await projectCategoriesQueries.findOne({ _id: categoryId, tenantId })
+				let matchQuery = { tenantId: tenantId }
+				if (ObjectId.isValid(categoryId)) {
+					matchQuery['$or'] = [{ _id: new ObjectId(categoryId) }, { externalId: categoryId }]
+				} else {
+					matchQuery['externalId'] = categoryId
+				}
+
+				const category = await projectCategoriesQueries.findOne(matchQuery)
 
 				if (!category) {
 					throw {
@@ -749,10 +764,18 @@ module.exports = class ProjectCategoriesHelper {
 				// Update parent counts
 				if (oldParentId) {
 					await this.updateParentCounts(oldParentId, tenantId, -1)
+					this.syncTemplatesForCategory(oldParentId, tenantId).catch(console.error)
 				}
 				if (newParentId) {
 					await this.updateParentCounts(newParentId, tenantId, 1)
+					this.syncTemplatesForCategory(newParentId, tenantId).catch(console.error)
 				}
+
+				// Sync moved category and all descendants
+				this.syncTemplatesForCategory(categoryId, tenantId).catch(console.error)
+				descendants.forEach((descendant) => {
+					this.syncTemplatesForCategory(descendant._id, tenantId).catch(console.error)
+				})
 
 				return resolve({
 					success: true,
@@ -838,7 +861,14 @@ module.exports = class ProjectCategoriesHelper {
 	static canDelete(categoryId, tenantId, orgId) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				const category = await projectCategoriesQueries.findOne({ _id: categoryId, tenantId })
+				let matchQuery = { tenantId: tenantId }
+				if (ObjectId.isValid(categoryId)) {
+					matchQuery['$or'] = [{ _id: new ObjectId(categoryId) }, { externalId: categoryId }]
+				} else {
+					matchQuery['externalId'] = categoryId
+				}
+
+				const category = await projectCategoriesQueries.findOne(matchQuery)
 
 				if (!category) {
 					throw {
@@ -997,8 +1027,8 @@ module.exports = class ProjectCategoriesHelper {
 
 	static projects(
 		categoryId,
-		pageSize,
-		pageNo,
+		limit,
+		offset,
 		search,
 		sortedData,
 		userDetails,
@@ -1035,7 +1065,19 @@ module.exports = class ProjectCategoriesHelper {
 				matchQuery = this.applyVisibilityConditions(matchQuery, orgExtension, userDetails)
 
 				if (categoryId && categoryId !== '') {
-					matchQuery['$match']['categories.externalId'] = categoryId
+					if (ObjectId.isValid(categoryId)) {
+						if (!matchQuery['$match']['$and']) {
+							matchQuery['$match']['$and'] = []
+						}
+						matchQuery['$match']['$and'].push({
+							$or: [
+								{ 'categories.externalId': categoryId },
+								{ 'categories._id': new ObjectId(categoryId) },
+							],
+						})
+					} else {
+						matchQuery['$match']['categories.externalId'] = categoryId
+					}
 				}
 
 				let aggregateData = []
@@ -1215,7 +1257,7 @@ module.exports = class ProjectCategoriesHelper {
 					{
 						$facet: {
 							totalCount: [{ $count: 'count' }],
-							data: [{ $skip: pageSize * (pageNo - 1) }, { $limit: pageSize }],
+							data: [{ $skip: Number(offset) || 0 }, { $limit: Number(limit) || 20 }],
 						},
 					},
 					{
@@ -1569,6 +1611,132 @@ module.exports = class ProjectCategoriesHelper {
 			}
 		} catch (error) {
 			console.error('Error syncing templates for category:', error)
+		}
+	}
+
+	static details(categoryId, tenantId) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let matchQuery = {
+					tenantId: tenantId,
+					isDeleted: false,
+				}
+
+				if (ObjectId.isValid(categoryId)) {
+					matchQuery['$or'] = [{ _id: new ObjectId(categoryId) }, { externalId: categoryId }]
+				} else {
+					matchQuery['externalId'] = categoryId
+				}
+
+				const category = await projectCategoriesQueries.findOne(matchQuery)
+
+				if (!category) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.CATEGORY_NOT_FOUND,
+					}
+				}
+
+				return resolve({
+					success: true,
+					message: CONSTANTS.apiResponses.PROJECT_CATEGORIES_FETCHED,
+					data: category,
+				})
+			} catch (error) {
+				return reject({
+					success: false,
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message,
+					data: {},
+				})
+			}
+		})
+	}
+
+	/**
+	 * Fetches paginated, reusable projects based on category external IDs.
+	 *
+	 * @param {string[]} categoryExternalIds - Array of category external IDs to match.
+	 * @param {number} limit - The requested page size (limit).
+	 * @param {number} offset - The requested number of documents to skip (offset).
+	 * @param {string} searchText - Optional text to search across title, description, and externalId.
+	 * @param {object} userDetails - Details of the user for visibility logic.
+	 * @returns {Promise<object>} The structured success response with paginated data and total count.
+	 */
+	static async projectsByExternalIds(categoryExternalIds, limit, offset, searchText, userDetails) {
+		try {
+			// --- 1. VALIDATE PAGINATION ---
+			const defaultLimit = hierarchyConfig.pagination?.defaultLimit || 20
+			const maxLimit = hierarchyConfig.pagination?.maxLimit || 100
+
+			let finalLimit = Number(limit) || defaultLimit
+			if (finalLimit < 1) finalLimit = defaultLimit
+			if (finalLimit > maxLimit) finalLimit = maxLimit
+
+			let finalOffset = Number(offset)
+			if (isNaN(finalOffset) || finalOffset < 0) finalOffset = 0
+
+			// --- 2. BUILD MATCH QUERY ---
+			let matchQuery = {
+				$match: {
+					isReusable: true,
+					status: CONSTANTS.common.PUBLISHED_STATUS,
+					'categories.externalId': { $in: categoryExternalIds },
+					isDeleted: false,
+				},
+			}
+
+			if (searchText?.trim()) {
+				const regex = new RegExp(searchText.trim(), 'i')
+				matchQuery.$match.$or = [{ title: regex }, { description: regex }, { externalId: regex }]
+			}
+
+			matchQuery = this.applyVisibilityConditions(
+				matchQuery,
+				await orgExtensionQueries.orgExtenDocuments({
+					tenantId: userDetails.tenantAndOrgInfo.tenantId,
+					orgId: userDetails.tenantAndOrgInfo.orgId[0],
+				}),
+				userDetails
+			)
+
+			// --- 3. AGGREGATION PIPELINE (Strict Pagination) ---
+			const pipeline = [
+				matchQuery,
+				{ $sort: { categorySyncedAt: -1 } },
+				{
+					$facet: {
+						totalCount: [{ $count: 'count' }],
+						data: [{ $skip: finalOffset }, { $limit: finalLimit }],
+					},
+				},
+				{
+					$project: {
+						data: 1,
+						count: { $arrayElemAt: ['$totalCount.count', 0] },
+					},
+				},
+			]
+
+			const results = await projectTemplateQueries.getAggregate(pipeline)
+			const response = results?.[0] || { data: [], count: 0 }
+
+			// --- 4. RETURN RESPONSE ---
+			// If offset >= totalCount, data will naturally be empty array
+			return {
+				success: true,
+				message: CONSTANTS.apiResponses.PROJECTS_FETCHED,
+				data: {
+					data: response.data,
+					count: response.count || 0,
+				},
+			}
+		} catch (error) {
+			throw {
+				status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+				message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+				errorObject: error,
+			}
 		}
 	}
 }

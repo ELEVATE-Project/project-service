@@ -2,7 +2,7 @@ module.exports = {
 	maxHierarchyDepth: 3, // Maximum levels allowed (0 = root, 1 = level 1, etc.)
 
 	pagination: {
-		defaultLimit: 2,
+		defaultLimit: 20,
 		maxLimit: 100,
 	},
 

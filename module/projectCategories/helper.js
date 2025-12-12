@@ -920,6 +920,123 @@ module.exports = class ProjectCategoriesHelper {
 	}
 
 	/**
+	 * Delete category
+	 * @method
+	 * @name delete
+	 * @param {ObjectId} categoryId - Category ID
+	 * @param {String} tenantId - Tenant ID
+	 * @param {String} orgId - Org ID
+	 * @returns {Object} Delete result
+	 */
+	static delete(categoryId, tenantId, orgId) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				// 1. Check if category can be deleted
+				const canDeleteResult = await this.canDelete(categoryId, tenantId, orgId)
+				if (!canDeleteResult.data.canDelete) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: canDeleteResult.data.reason,
+					}
+				}
+
+				// 2. Get category details
+				let matchQuery = { tenantId: tenantId, isDeleted: false }
+				if (ObjectId.isValid(categoryId)) {
+					matchQuery['$or'] = [{ _id: new ObjectId(categoryId) }, { externalId: categoryId }]
+				} else {
+					matchQuery['externalId'] = categoryId
+				}
+
+				const category = await projectCategoriesQueries.findOne(matchQuery)
+
+				if (!category) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.CATEGORY_NOT_FOUND,
+					}
+				}
+
+				// 3. Soft delete the category
+				await projectCategoriesQueries.updateOne(
+					{ _id: category._id, tenantId },
+					{ $set: { isDeleted: true, deletedAt: new Date() } }
+				)
+
+				// 4. Remove category from all templates
+				const templatesUpdated = await this.removeCategoryFromTemplates(category._id, tenantId)
+
+				// 5. Update parent counts
+				if (category.parent_id) {
+					await this.updateParentCounts(category.parent_id, tenantId, -1)
+				}
+
+				return resolve({
+					success: true,
+					message: CONSTANTS.apiResponses.CATEGORY_DELETED || 'Category deleted successfully',
+					data: {
+						categoryId: category._id,
+						templatesUpdated: templatesUpdated,
+					},
+				})
+			} catch (error) {
+				return reject({
+					success: false,
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message,
+					data: {},
+				})
+			}
+		})
+	}
+
+	/**
+	 * Remove category from all templates
+	 * @method
+	 * @name removeCategoryFromTemplates
+	 * @param {ObjectId} categoryId - Category ID
+	 * @param {String} tenantId - Tenant ID
+	 * @returns {Number} Number of templates updated
+	 */
+	static async removeCategoryFromTemplates(categoryId, tenantId) {
+		try {
+			// Find all templates with this category
+			const templates = await projectTemplateQueries.templateDocument(
+				{
+					'categories._id': categoryId,
+					tenantId,
+					isDeleted: false,
+				},
+				['_id', 'categories']
+			)
+
+			console.log(`Removing category ${categoryId} from ${templates.length} templates`)
+
+			// Remove category from each template
+			for (const template of templates) {
+				const updatedCategories = template.categories.filter(
+					(cat) => cat._id && cat._id.toString() !== categoryId.toString()
+				)
+
+				await projectTemplateQueries.updateProjectTemplateDocument(
+					{ _id: template._id },
+					{
+						$set: {
+							categories: updatedCategories,
+							categorySyncedAt: new Date(),
+						},
+					}
+				)
+			}
+
+			return templates.length
+		} catch (error) {
+			console.error('Error removing category from templates:', error)
+			throw error
+		}
+	}
+
+	/**
 	 * Bulk create categories
 	 * @method
 	 * @name bulkCreate

@@ -1558,51 +1558,6 @@ let projectTemplateTasksData = [
     __v: 0,
   },
   {
-    _id: new ObjectId("68ee4bb4fb9bee08b93b6d7a"),
-    createdBy: "1",
-    updatedBy: "1",
-    isDeleted: false,
-    isDeletable: false,
-    taskSequence: [],
-    children: [],
-    visibleIf: [],
-    hasSubTasks: false,
-    learningResources: [
-      {
-        name: "Activity Steps (Video)",
-        link: "https://youtu.be/MNvM_H9zD3Y?si=BdfslSzCkmDCggih",
-        app: "projectService",
-        id: "MNvM_H9zD3Y?si=BdfslSzCkmDCggih",
-      },
-    ],
-    deleted: false,
-    type: "content",
-    projectTemplateId: new ObjectId("68ee4bb3fb9bee08b93b6d70"),
-    projectTemplateExternalId:
-      "PROJ19099023DGHG789SDASDFGHR4567-1760447411369_IMPORTED",
-    name: "Watch the Activity Video",
-    externalId: "DPDTSC-HandBook-1-2025-Task2-1760447411369-1760447412188",
-    description: "",
-    sequenceNumber: "2",
-    tenantId: "default",
-    orgId: "default_code",
-    metaInformation: {
-      hasAParentTask: "NO",
-      parentTaskOperator: "",
-      parentTaskValue: "",
-      parentTaskId: "",
-      startDate: "01/08/2025",
-      endDate: "31/12/2025",
-      isAnExternalTask: "",
-      minNoOfSubmissionsRequired: "",
-      redirectLink: "",
-      buttonLabel: "",
-    },
-    updatedAt: new Date("2025-10-14T13:10:12.192Z"),
-    createdAt: new Date("2025-10-14T13:10:11.805Z"),
-    __v: 0,
-  },
-  {
     _id: new ObjectId("68ee4bb4fb9bee08b93b6d7e"),
     createdBy: "1",
     updatedBy: "1",
@@ -1953,6 +1908,33 @@ let projectCategoriesData = [
     __v: 0,
   },
 ];
+
+
+let configurationData = [
+	{
+		_id: new ObjectId('6825a1982d46aa6df0cc36a8'),
+		code: 'keysAllowedForTargeting',
+		__v: 0,
+		createdAt: new Date('2025-05-15T08:11:04.674Z'),
+		meta: {
+			profileKeys: [
+				'state',
+				'district',
+				'block',
+				'cluster',
+				'school',
+				'professional_role',
+				'professional_subroles',
+				'roles',
+				'subject',
+				'organizations',
+			],
+		},
+		updatedAt: new Date('2025-05-26T10:56:17.021Z'),
+	},
+]
+
+
 module.exports = {
   solutionData,
   programData,
@@ -1961,4 +1943,5 @@ module.exports = {
   certificateTemplatesData,
   certificateBaseTemplatesData,
   projectCategoriesData,
+  configurationData
 };

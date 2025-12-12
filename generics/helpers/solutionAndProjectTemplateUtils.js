@@ -70,6 +70,7 @@ function createSolution(
 					'endDate',
 					'startDate',
 					'components',
+					'externalId',
 				])
 			} else {
 				programData = await programQueries.programsDocument(programMatchQuery, [
@@ -79,6 +80,7 @@ function createSolution(
 					'endDate',
 					'startDate',
 					'components',
+					'externalId',
 				])
 			}
 			if (!programData.length > 0) {
@@ -91,6 +93,7 @@ function createSolution(
 			solutionData.programId = programData[0]._id
 			solutionData.programName = programData[0].name
 			solutionData.programDescription = programData[0].description
+			solutionData.programExternalId = programData[0].externalId
 
 			if (solutionData.type == CONSTANTS.common.COURSE && !solutionData.linkUrl) {
 				return resolve({

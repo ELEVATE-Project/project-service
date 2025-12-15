@@ -134,6 +134,8 @@ async function main({ dataToBeInserted }) {
     	{ name: "criteriaQuestions", data: dataToBeInserted.criteriaQuestionsData, db : dbName3},
     	{ name: "frameworks", data: dataToBeInserted.frameworkData, db : dbName3},
     	{ name: "questions", data: dataToBeInserted.questionsData, db : dbName3},
+		{ name: "observation", data: dataToBeInserted.observation, db : dbName3},
+    	{ name: "survey", data: dataToBeInserted.survey, db : dbName3},
 
 	]
 

@@ -22,7 +22,7 @@ The Project building block facilitates the creation and engagement with micro-im
 </div>
 </br>
 
-# Native Setup - Stand Alone
+# Native Setup Project Service - Stand Alone
 
 ## PM2 Managed Services & Natively Installed Dependencies
 
@@ -86,12 +86,8 @@ Before setting up the following ELEVATE-Project application, dependencies given 
 git clone -b develop https://github.com/ELEVATE-Project/project-service.git && \
 git clone -b develop https://github.com/ELEVATE-Project/entity-management.git && \
 git clone -b develop https://github.com/ELEVATE-Project/user.git && \
-git clone -b master https://github.com/ELEVATE-Project/notification.git && \
 git clone -b main https://github.com/ELEVATE-Project/interface-service.git && \
-git clone -b master https://github.com/ELEVATE-Project/scheduler.git && \
-git clone -b release-3.4.0 https://github.com/ELEVATE-Project/observation-survey-projects-pwa && \
-git clone -b releaase-1.1.0 https://github.com/ELEVATE-Project/elevate-portal && \
-git clone -b release-3.4.0 https://github.com/ELEVATE-Project/observation-portal
+git clone -b master https://github.com/ELEVATE-Project/scheduler.git
 ```
 
 3.  **Install NPM Packages**
@@ -100,13 +96,8 @@ git clone -b release-3.4.0 https://github.com/ELEVATE-Project/observation-portal
 cd project-service && npm install && cd ../ && \
 cd entity-management/src && npm install && cd ../.. && \
 cd user/src && npm install && cd ../.. && \
-cd entity-management\src && npm install && cd ..\.. && \
-cd notification/src && npm install && cd ../.. && \
 cd interface-service/src && npm install && cd ../.. && \
-cd scheduler/src && npm install && cd ../.. && \
-cd observation-survey-projects-pwa && npm install --force && cd .. && \
-cd observation-portal && npm install --force && cd .. && \
-cd elevate-portal && npm install --force && cd ..
+cd scheduler/src && npm install && cd ../..
 ```
 
 4.  **Download Environment Files**
@@ -115,12 +106,8 @@ cd elevate-portal && npm install --force && cd ..
 curl -L -o project-service/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/envs/stand-alone/project_env && \
 curl -L -o entity-management/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/envs/stand-alone/entity_management_env && \
 curl -L -o user/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/envs/stand-alone/user_env && \
-curl -L -o notification/src/.env https://github.com/ELEVATE-Project/project-service/raw/refs/heads/main/documentation/1.0.0/native/envs/stand-alone/notification_env && \
-curl -L -o interface-service/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/stand-alone/interface_env && \
-curl -L -o scheduler/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/envs/stand-alone/scheduler_env && \
-curl -L -o observation-survey-projects-pwa/src/assets/env/env.js https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/stand-alone/observation_survey_projects_pwa_env && \
-curl -L -o elevate-portal/env.js https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/stand-alone/elevate_portal_env && \
-curl -L -o observation-portal/src/assets/env/env.js https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/envs/stand-alone/observation_portal_env
+curl -L -o interface-service/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/envs/stand-alone/interface_env && \
+curl -L -o scheduler/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/envs/stand-alone/scheduler_env
 ```
 
 > **Note:** Modify the environment files as necessary for your deployment using any text editor, ensuring that the values are appropriate for your environment. The default values provided in the current files are functional and serve as a good starting point. Refer to the sample env files provided at the [Project](https://github.com/ELEVATE-Project/project-service/blob/main/.env.sample), [User](https://github.com/ELEVATE-Project/user/blob/master/src/.env.sample), [Notification](https://github.com/ELEVATE-Project/notification/blob/master/src/.env.sample), [Scheduler](https://github.com/ELEVATE-Project/scheduler/blob/master/src/.env.sample), [Interface](https://github.com/ELEVATE-Project/interface-service/blob/main/src/.env.sample) and [Entity-Management](https://github.com/ELEVATE-Project/entity-management/blob/main/src/.env.sample) repositories for reference.
@@ -132,8 +119,8 @@ curl -L -o observation-portal/src/assets/env/env.js https://raw.githubuserconten
 5.  **Attaching Config File**
 
     ```
-    curl -L -o project-service/config.json https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/scripts/stand-alone/ubuntu/config.json && \
-    curl -L -o entity-management/src/config.json https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/scripts/stand-alone/ubuntu/config.json
+    curl -L -o project-service/config.json https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/scripts/stand-alone/ubuntu/configFile.json && \
+    curl -L -o entity-management/src/config.json https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/scripts/stand-alone/ubuntu/configFile.json
     ```
 
 6.  **Create Databases**
@@ -156,12 +143,18 @@ curl -L -o observation-portal/src/assets/env/env.js https://raw.githubuserconten
     ./create-databases.sh
     ```
 
-7.  **Run Migrations To Create Tables**
+7.  **Run Migrations and Seed To Create Tables**
 
-    ```
-    cd user/src && npx sequelize-cli db:migrate && cd ../.. && \
-    cd notification/src && npx sequelize-cli db:migrate && cd ../..
-    ```
+    1. run migrations
+
+        ```
+        cd user/src && npx sequelize-cli db:migrate && cd ../..
+        ```
+
+    2. run Seed
+        ```
+        cd user/src && npx sequelize-cli db:seed:all && cd ../../
+        ```
 
 8.  **Enabling Citus And Setting Distribution Columns (Optional)**
 
@@ -195,7 +188,26 @@ curl -L -o observation-portal/src/assets/env/env.js https://raw.githubuserconten
              ./citus_setup.sh user postgres://postgres:postgres@localhost:9700/users
             ```
 
-9.  **Insert Initial Data**
+9.  **Update Cloud Credentials for Project Service**
+
+    To enable full functionality, including certificate generation and report storage, you must configure cloud credentials in the Project Service environment file.
+
+        Path: ./ELEVATE-Project/project-service/.env
+
+    Add or update the following variables in the .env file, substituting the example values with your actual cloud credentials:
+
+    CLOUD_STORAGE_PROVIDER=gcloud
+    CLOUD_STORAGE_ACCOUNTNAME=your_account_name
+    CLOUD_STORAGE_SECRET="-----BEGIN PRIVATE KEY-----\n..."
+    CLOUD_STORAGE_PROJECT=your_cloud_project_id
+    CLOUD_STORAGE_BUCKETNAME=your_bucket_name
+    CLOUD_STORAGE_BUCKET_TYPE=private
+
+    > NOTE : This service is designed to support multiple cloud storage providers and offers flexible cloud integration capabilities. Based on your selected cloud provider, the service can be configured accordingly to enable seamless storage, certificate generation, and report handling.
+
+    For detailed configuration options, supported cloud providers, and integration guidelines, please refer to the official documentation available in this [ReadMe](https://www.npmjs.com/package/client-cloud-services?activeTab=readme)
+
+10. **Insert Initial Data**
 
     1.  Download `entity-project-sample-data.sh` Script File:
 
@@ -203,12 +215,6 @@ curl -L -o observation-portal/src/assets/env/env.js https://raw.githubuserconten
     curl -o project_entity_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/scripts/stand-alone/ubuntu/project_entity_sample_data.sh && \
     chmod +x project_entity_sample_data.sh && \
     ./project_entity_sample_data.sh
-    ```
-
-10. **Insert Forms Data into Database**
-
-    ```
-    curl -s https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/scripts/linux/import_forms.js | node
     ```
 
 11. **Start The Services**
@@ -219,46 +225,18 @@ curl -L -o observation-portal/src/assets/env/env.js https://raw.githubuserconten
     (cd project-service && pm2 start app.js --name project-service && cd -) && \
     (cd entity-management/src && pm2 start app.js --name entity-management && cd -) && \
     (cd user/src && pm2 start app.js --name user && cd -) && \
-    (cd notification/src && pm2 start app.js --name notification && cd -) && \
     (cd interface-service/src && pm2 start app.js --name interface && cd -) && \
     (cd scheduler/src && pm2 start app.js --name scheduler && cd -)
     ```
 
-12. **Run Service Scripts**
+## 🌐 Micro-Frontend (FE) Setup
 
-    ```
-    cd user/src/scripts && node insertDefaultOrg.js && node viewsScript.js && cd ../../..
-    ```
+The ELEVATE application uses a micro-frontend architecture. After setting up the backend services, you must configure and run the frontend repositories to access the application via the portal.
 
-13. **Start The Portal**
+Follow the setup guides for the frontend repositories:
 
-    ELEVATE-Project portal utilizes Ionic for building the browser bundle, follow the steps given below to install them and start the portal.
-
-    1. Install the Ionic framework:
-
-        ```
-        npm install -g ionic
-        ```
-
-    2. Install the Ionic client:
-
-        ```
-        npm install -g @ionic/cli
-        ```
-
-    3. Navigate to `observation-survey-projects-pwa` directory:
-
-        ```
-        cd observation-survey-projects-pwa
-        ```
-
-    4. Run the project on your local system using the following command:
-
-        ```
-        ionic serve
-        ```
-
-    Navigate to http://localhost:8100 to access the ELEVATE-Project Portal.
+-   **Login Portal:** [elevate-portal](https://github.com/ELEVATE-Project/elevate-portal/tree/releaase-1.1.0)
+-   **Projects Program Module (PWA):** [observation-survey-projects-pwa](https://github.com/ELEVATE-Project/observation-survey-projects-pwa/tree/release-3.4.0)
 
 ## Sample User Accounts Generation
 

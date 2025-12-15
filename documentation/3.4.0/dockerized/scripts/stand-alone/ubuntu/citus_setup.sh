@@ -1,106 +1,129 @@
 #!/bin/bash
 
-# Exit on error
+# Exit immediately if a command exits with a non-zero status.
 set -e
 
-# Ensure correct number of arguments are provided
+# --- 1. ARGUMENT VALIDATION ---
 if [ $# -lt 2 ]; then
-    echo "Error: Folder name and database URL not provided. Usage: $0 <folder_name> <database_url>"
+    echo "Error: Folder name and database URL not provided." >&2
+    echo "Usage: $0 <folder_name> <database_url>" >&2
     exit 1
 fi
 
 # Use the provided folder name
 FOLDER_NAME="$1"
+DEV_DATABASE_URL="$2"
 
 # Check if folder exists
 if [ ! -d "$FOLDER_NAME" ]; then
-    echo "Error: Folder '$FOLDER_NAME' not found."
+    echo "Error: Folder '$FOLDER_NAME' not found." >&2
     exit 1
 fi
 
-# Use the provided database URL
-DEV_DATABASE_URL="$2"
+# --- 2. HIGHLY RELIABLE DATABASE URL PARSING ---
+echo "Parsing database URL..."
 
-# Extract database credentials and connection details using awk for portability
-DB_USER=$(echo $DEV_DATABASE_URL | awk -F '[:@/]' '{print $4}')
-DB_PASSWORD=$(echo $DEV_DATABASE_URL | awk -F '[:@/]' '{print $5}')
-DB_HOST=$(echo $DEV_DATABASE_URL | awk -F '[:@/]' '{print $6}')
-DB_PORT=$(echo $DEV_DATABASE_URL | awk -F '[:@/]' '{split($7,a,"/"); print a[1]}')
-DB_NAME=$(echo $DEV_DATABASE_URL | awk -F '/' '{print $NF}')
+# Remove the protocol part (e.g., 'postgres://')
+DB_CLEAN_URL=$(echo "$DEV_DATABASE_URL" | sed 's/.*:\/\///')
 
-# Log database variables
+# 1. Extract DB_NAME (last part after the final slash)
+DB_NAME=$(echo "$DB_CLEAN_URL" | awk -F '/' '{print $NF}')
+# 2. Extract HOST and PORT (remove DB_NAME and the preceding slash)
+HOST_PORT_PATH=$(echo "$DB_CLEAN_URL" | sed "s/\/$DB_NAME//")
+
+# 3. Use standard ':' and '@' delimiters on the remaining string
+DB_USER=$(echo "$HOST_PORT_PATH" | awk -F '[:@]' '{print $1}')
+DB_PASSWORD=$(echo "$HOST_PORT_PATH" | awk -F '[:@]' '{print $2}')
+DB_HOST=$(echo "$HOST_PORT_PATH" | awk -F '[:@]' '{print $3}')
+DB_PORT=$(echo "$HOST_PORT_PATH" | awk -F '[:@]' '{print $4}')
+
+# Define the container name (assumes container name is the DB_HOST, which is 'citus_master')
+CONTAINER_NAME="$DB_HOST"
+
+# Log database variables (excluding password)
 echo "Extracted Database Variables:"
 echo "DB_USER: $DB_USER"
-echo "DB_PASSWORD: $DB_PASSWORD"
 echo "DB_HOST: $DB_HOST"
 echo "DB_PORT: $DB_PORT"
 echo "DB_NAME: $DB_NAME"
+echo ""
 
-# Define the container name (same as DB_HOST)
-CONTAINER_NAME="$DB_HOST"
+# Check the extracted port
+if [[ -z "$DB_PORT" ]]; then
+    echo "Error: Could not extract database port. Check URL format." >&2
+    exit 1
+fi
+
+# --- 3. WAIT FOR CONTAINER AND DATABASE ---
 
 # Wait for Docker container to be up
 echo "Waiting for Docker container '$CONTAINER_NAME' to be up..."
-while ! docker inspect "$CONTAINER_NAME" &>/dev/null; do
-    echo "Waiting for container..."
+until docker inspect "$CONTAINER_NAME" &>/dev/null; do
+    echo -n "."
     sleep 1
 done
-echo "Container is now up."
+echo -e "\nContainer is now up."
 
 # Wait for PostgreSQL to be ready to accept connections
+# Use DB_USER for the check, as it must be a valid user
 echo "Waiting for PostgreSQL on '$DB_HOST:$DB_PORT' to accept connections..."
-until docker exec "$CONTAINER_NAME" bash -c "pg_isready -h localhost -p $DB_PORT -U $DB_USER"; do
-    echo "Waiting for database to be ready..."
+until docker exec "$CONTAINER_NAME" bash -c "pg_isready -h localhost -p $DB_PORT -U $DB_USER > /dev/null 2>&1"; do
+    echo -n "."
     sleep 1
 done
-echo "Database is ready."
+echo -e "\nDatabase server is ready."
 
-# Function to check if the database exists
-check_database() {
-    docker exec "$CONTAINER_NAME" bash -c "PGPASSWORD='$DB_PASSWORD' psql -h localhost -U $DB_USER -p $DB_PORT -lqt | cut -d \| -f 1 | grep -qw '$DB_NAME'"
-}
-
+# Check and wait for the target database to exist
 echo "Checking existence of database '$DB_NAME'..."
-until check_database; do
-    echo "Database '$DB_NAME' does not exist, waiting..."
+until docker exec "$CONTAINER_NAME" bash -c "PGPASSWORD='$DB_PASSWORD' psql -h localhost -U $DB_USER -d postgres -p $DB_PORT -lqt | grep -qw '$DB_NAME'"; do
+    echo -n "."
     sleep 5
 done
-echo "Database '$DB_NAME' exists, proceeding with script."
+echo -e "\nDatabase '$DB_NAME' exists, proceeding with script."
 
-# Retrieve and prepare SQL file operations
+# --- 4. CITUS EXTENSION SETUP ---
+
 DISTRIBUTION_COLUMNS_FILE="$FOLDER_NAME/distributionColumns.sql"
 if [ ! -f "$DISTRIBUTION_COLUMNS_FILE" ]; then
-    echo "Error: distributionColumns.sql not found in folder '$FOLDER_NAME'."
+    echo "Error: distributionColumns.sql not found in folder '$FOLDER_NAME'." >&2
     exit 1
 fi
+
 echo "Copying distributionColumns.sql to container '$CONTAINER_NAME'..."
-docker cp "$DISTRIBUTION_COLUMNS_FILE" "$CONTAINER_NAME:/distributionColumns.sql"
+CONTAINER_SQL_PATH="/tmp/distributionColumns.sql"
+docker cp "$DISTRIBUTION_COLUMNS_FILE" "$CONTAINER_NAME:$CONTAINER_SQL_PATH"
 
 echo "Creating Citus extension in the database..."
-docker exec --user "$DB_USER" "$CONTAINER_NAME" bash -c "PGPASSWORD='$DB_PASSWORD' psql -h localhost -U $DB_USER -d $DB_NAME -p $DB_PORT -c 'CREATE EXTENSION IF NOT EXISTS citus;'"
+docker exec "$CONTAINER_NAME" bash -c "PGPASSWORD='$DB_PASSWORD' psql -h localhost -U $DB_USER -d $DB_NAME -p $DB_PORT --set ON_ERROR_STOP=1 -c 'CREATE EXTENSION IF NOT EXISTS citus;'"
 
-# Function to check if table exists
+# --- 5. EXECUTE SQL FILE WITH ROBUST TABLE CHECK ---
+
 check_table() {
-    local table=$1
-    local exists=$(docker exec "$CONTAINER_NAME" bash -c "PGPASSWORD='$DB_PASSWORD' psql -h localhost -U $DB_USER -d $DB_NAME -p $DB_PORT -t -c \"SELECT EXISTS(SELECT 1 FROM pg_tables WHERE schemaname = 'public' AND tablename = '$table');\"")
-    exists=$(echo "$exists" | tr -d '[:space:]')             # Trim whitespace
-    echo "Debug: exists result for table $table = '$exists'" # Debug line
-    [[ "$exists" == "t" ]]                                   # Checking specifically for 't'
+    local table_name=$1
+    # Check if we can select from the table. If we can't, it returns non-zero.
+    docker exec "$CONTAINER_NAME" bash -c "PGPASSWORD='$DB_PASSWORD' psql -h localhost -U $DB_USER -d $DB_NAME -p $DB_PORT -q -t --set ON_ERROR_STOP=1 -c \"SELECT 1 FROM $table_name LIMIT 1;\"" > /dev/null 2>&1
 }
 
-# Execute the SQL file with checks for table existence
-echo "Creating distribution columns..."
-while IFS= read -r line; do
-    if [[ $line =~ create_distributed_table\(\'([^\']+)\', ]]; then
+echo "Starting creation of distributed tables..."
+docker exec "$CONTAINER_NAME" bash -c "cat $CONTAINER_SQL_PATH" | while IFS= read -r line; do
+    trimmed_line=$(echo "$line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+    
+    if [[ "$trimmed_line" =~ ^create_distributed_table\(\'([^\']+)\', ]]; then
         table="${BASH_REMATCH[1]}"
-        echo "Checking existence of table '$table'..."
+        echo "Processing table: '$table'"
+        
+        # Robust wait loop for the table to be created by the preceding process (e.g., migration)
         until check_table "$table"; do
-            echo "Table '$table' does not exist, waiting..."
+            echo "Table '$table' does not exist yet (waiting for migration to finish)..."
             sleep 1
         done
-        echo "Table '$table' exists, executing: $line"
-        docker exec --user "$DB_USER" "$CONTAINER_NAME" bash -c "PGPASSWORD='$DB_PASSWORD' psql -h localhost -U $DB_USER -d $DB_NAME -p $DB_PORT -c \"$line\""
+        
+        echo "Table '$table' exists. Executing Citus distribution command..."
+        docker exec "$CONTAINER_NAME" bash -c "PGPASSWORD='$DB_PASSWORD' psql -h localhost -U $DB_USER -d $DB_NAME -p $DB_PORT --set ON_ERROR_STOP=1 -c \"$trimmed_line\""
     fi
-done <"$DISTRIBUTION_COLUMNS_FILE"
+done
 
-echo "Citus extension setup complete."
+# Clean up temporary file in the container
+docker exec "$CONTAINER_NAME" rm "$CONTAINER_SQL_PATH"
+
+echo "✅ Citus extension setup and distribution columns complete successfully!"

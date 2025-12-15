@@ -244,7 +244,7 @@ let solutionData = [
 			school: ['ALL'],
 		},
     startDate: new Date("2025-11-17T00:00:00.000Z"),
-    endDate: new Date("2025-11-28T18:29:59.000Z"),
+    endDate: new Date("2030-11-28T18:29:59.000Z"),
   },
   {
     _id: new ObjectId("691b17ae1ce3f5956e9f319d"),
@@ -356,7 +356,7 @@ let solutionData = [
 			school: ['ALL'],
 		},
     startDate: new Date("2025-11-17T00:00:00.000Z"),
-    endDate: new Date("2025-11-28T18:29:59.000Z"),
+    endDate: new Date("2030-11-28T18:29:59.000Z"),
   },
   {
     _id: new ObjectId("691b179e7b8c31191b8facee"),
@@ -448,7 +448,7 @@ let solutionData = [
 			school: ['ALL'],
 		},
     startDate: new Date("2025-11-17T00:00:00.000Z"),
-    endDate: new Date("2025-11-28T18:29:59.000Z"),
+    endDate: new Date("2030-11-28T18:29:59.000Z"),
   },
   {
     _id: new ObjectId("691ac8ae1ce3f5956e9f220a"),
@@ -540,7 +540,7 @@ let solutionData = [
 			school: ['ALL'],
 		},
     startDate: new Date("2025-11-03T00:00:00.000Z"),
-    endDate: new Date("2026-05-04T18:29:59.000Z"),
+    endDate: new Date("2030-05-04T18:29:59.000Z"),
   },
   {
     _id: new ObjectId("68ee4bb440fd155dceef08a9"),

@@ -29,18 +29,33 @@ async function migrateToHierarchy(tenantId = null, dryRun = false) {
 		}
 		console.log('='.repeat(60))
 
+		// Filter to get only categories that don't have hierarchy fields yet (safe for multiple runs)
 		const filter = tenantId ? { tenantId, isDeleted: false } : { isDeleted: false }
+
+		// Check if parent_id field exists to determine if already migrated
 		const categories = await projectCategoriesQueries.categoryDocuments(filter, [
 			'_id',
 			'tenantId',
 			'orgId',
 			'externalId',
 			'name',
+			'parent_id', // Include to check if already migrated
 		])
 
-		console.log(`Found ${categories.length} categories to migrate`)
+		// Filter out categories that already have parent_id fields (safe for multiple runs)
+		const categoriesToMigrate = categories.filter(
+			(category) => category.parent_id === undefined || category.parent_id === null
+		)
 
-		if (categories.length === 0) {
+		console.log(`Found ${categories.length} total categories`)
+		console.log(`Found ${categoriesToMigrate.length} categories to migrate (without hierarchy fields)`)
+
+		if (categories.length > 0 && categoriesToMigrate.length === 0) {
+			console.log('✅ All categories already have hierarchy fields. Migration not needed.')
+			return { success: true, count: 0, alreadyMigrated: true }
+		}
+
+		if (categoriesToMigrate.length === 0) {
 			console.log('No categories found. Migration complete.')
 			return { success: true, count: 0 }
 		}
@@ -48,7 +63,7 @@ async function migrateToHierarchy(tenantId = null, dryRun = false) {
 		let migratedCount = 0
 		let errorCount = 0
 
-		for (const category of categories) {
+		for (const category of categoriesToMigrate) {
 			try {
 				const updateData = {
 					parent_id: null, // All existing = roots
@@ -58,7 +73,6 @@ async function migrateToHierarchy(tenantId = null, dryRun = false) {
 					hasChildren: false, // Will update after child creation
 					childCount: 0,
 					displayOrder: migratedCount,
-					programId: null, // Manually set later if needed
 				}
 
 				if (!dryRun) {
@@ -67,7 +81,7 @@ async function migrateToHierarchy(tenantId = null, dryRun = false) {
 
 				migratedCount++
 				if (migratedCount % 100 === 0) {
-					console.log(`Progress: ${migratedCount}/${categories.length} categories processed`)
+					console.log(`Progress: ${migratedCount}/${categoriesToMigrate.length} categories processed`)
 				}
 			} catch (error) {
 				errorCount++
@@ -78,6 +92,7 @@ async function migrateToHierarchy(tenantId = null, dryRun = false) {
 		console.log('='.repeat(60))
 		console.log('Migration Summary:')
 		console.log(`Total Categories: ${categories.length}`)
+		console.log(`Categories Needing Migration: ${categoriesToMigrate.length}`)
 		console.log(`Successfully Migrated: ${migratedCount}`)
 		console.log(`Errors: ${errorCount}`)
 		if (dryRun) {
@@ -124,9 +139,7 @@ async function main() {
 	}
 }
 
-// Run if executed directly
-if (require.main === module) {
-	main()
-}
+// Direct execution (consistent with other migration files)
+main()
 
 module.exports = { migrateToHierarchy }

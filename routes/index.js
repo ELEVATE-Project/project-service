@@ -124,15 +124,13 @@ module.exports = function (app) {
 	app.all(applicationBaseUrl + ':version/:controller/:method/:_id', inputValidator, router)
 	app.all(applicationBaseUrl + ':version/:controller/:file/:method/:_id', inputValidator, router)
 
-	// Route aliases for /api/categories/* endpoints (matching specification)
+	// Route aliases for /categories/* endpoints (matching specification)
 	// These map to /project/v1/projectCategories/* endpoints
-	const apiBaseUrl = '/api/'
-
-	// Apply middleware to /api routes
-	app.use(apiBaseUrl, authenticator)
-	app.use(apiBaseUrl, pagination)
-	app.use(apiBaseUrl, addTenantAndOrgInRequest)
-	app.use(apiBaseUrl, checkAdminRole)
+	// Apply middleware to /categories routes
+	app.use('/categories', authenticator)
+	app.use('/categories', pagination)
+	app.use('/categories', addTenantAndOrgInRequest)
+	app.use('/categories', checkAdminRole)
 
 	// Helper function to create API route handlers that directly call the controller
 	const createApiRouteHandler = (controllerMethod) => {
@@ -234,35 +232,41 @@ module.exports = function (app) {
 		}
 	}
 
-	// GET /api/categories/list -> GET /project/v1/projectCategories/list
-	app.get(apiBaseUrl + 'categories/list', inputValidator, createApiRouteHandler('list'))
+	// IMPORTANT: Specific routes must come BEFORE generic :id routes to avoid conflicts
 
-	// GET /api/categories/hierarchy -> GET /project/v1/projectCategories/hierarchy
-	app.get(apiBaseUrl + 'categories/hierarchy', inputValidator, createApiRouteHandler('hierarchy'))
+	// Special endpoints (must come first)
+	// GET /categories/hierarchy -> Get complete category tree
+	app.get('/categories/hierarchy', inputValidator, createApiRouteHandler('hierarchy'))
 
-	// POST /api/categories -> POST /project/v1/projectCategories/create
-	app.post(apiBaseUrl + 'categories', inputValidator, createApiRouteHandler('create'))
+	// GET /categories/leaves -> Get leaf categories only
+	app.get('/categories/leaves', inputValidator, createApiRouteHandler('leaves'))
 
-	// PATCH /api/categories/:id -> PATCH /project/v1/projectCategories/update/:id
-	app.patch(apiBaseUrl + 'categories/:id', inputValidator, createApiRouteHandler('update'))
+	// POST /categories/bulk -> Bulk create categories
+	app.post('/categories/bulk', inputValidator, createApiRouteHandler('bulk'))
 
-	// DELETE /api/categories/:id -> DELETE /project/v1/projectCategories/delete/:id
-	app.delete(apiBaseUrl + 'categories/:id', inputValidator, createApiRouteHandler('delete'))
+	// Standard REST endpoints
+	// GET /categories -> List all categories (with query params for filtering)
+	app.get('/categories', inputValidator, createApiRouteHandler('list'))
 
-	// PATCH /api/categories/:id/move -> PATCH /project/v1/projectCategories/move/:id
-	app.patch(apiBaseUrl + 'categories/:id/move', inputValidator, createApiRouteHandler('move'))
+	// POST /categories -> Create new category
+	app.post('/categories', inputValidator, createApiRouteHandler('create'))
 
-	// GET /api/categories/leaves -> GET /project/v1/projectCategories/leaves
-	app.get(apiBaseUrl + 'categories/leaves', inputValidator, createApiRouteHandler('leaves'))
+	// Action endpoints with :id (must come before generic GET /categories/:id)
+	// PATCH /categories/:id/move -> Move category to different parent
+	app.patch('/categories/:id/move', inputValidator, createApiRouteHandler('move'))
 
-	// GET /api/categories/:id/can-delete -> GET /project/v1/projectCategories/canDelete/:id
-	app.get(apiBaseUrl + 'categories/:id/can-delete', inputValidator, createApiRouteHandler('canDelete'))
+	// GET /categories/:id/can-delete -> Check if category can be deleted
+	app.get('/categories/:id/can-delete', inputValidator, createApiRouteHandler('canDelete'))
 
-	// GET /api/categories/:id -> GET /project/v1/projectCategories/details/:id
-	app.get(apiBaseUrl + 'categories/:id', inputValidator, createApiRouteHandler('details'))
+	// Generic :id endpoints (must come last)
+	// GET /categories/:id -> Get single category details
+	app.get('/categories/:id', inputValidator, createApiRouteHandler('details'))
 
-	// POST /api/categories/bulk -> POST /project/v1/projectCategories/bulk
-	app.post(apiBaseUrl + 'categories/bulk', inputValidator, createApiRouteHandler('bulk'))
+	// PATCH /categories/:id -> Update category
+	app.patch('/categories/:id', inputValidator, createApiRouteHandler('update'))
+
+	// DELETE /categories/:id -> Delete category
+	app.delete('/categories/:id', inputValidator, createApiRouteHandler('delete'))
 
 	// Helper function for library category routes
 	const createLibraryApiRouteHandler = (controllerMethod) => {
@@ -321,8 +325,8 @@ module.exports = function (app) {
 		}
 	}
 
-	// GET /api/categories/projects/:id -> GET /project/v1/library/categories/projects/:id
-	app.get(apiBaseUrl + 'categories/projects/:id', inputValidator, createLibraryApiRouteHandler('projects'))
+	// GET /categories/projects/:id -> GET /project/v1/library/categories/projects/:id
+	app.get('/categories/projects/:id', inputValidator, createLibraryApiRouteHandler('projects'))
 
 	// POST /project/v1/library/categories/projects/list -> Bulk fetch projects
 	app.post(

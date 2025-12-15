@@ -17,20 +17,14 @@ module.exports = (req) => {
 		},
 		move: function () {
 			req.checkParams('_id').exists().withMessage('required category id')
-			req.checkBody('tenantId').exists().withMessage('tenantId is required')
-			req.checkBody('orgId').exists().withMessage('orgId is required')
 			// newParentId is optional - null means move to root
 		},
 		canDelete: function () {
 			req.checkParams('_id').exists().withMessage('required category id')
-			req.checkQuery('tenantId').exists().withMessage('tenantId is required')
-			req.checkQuery('orgId').exists().withMessage('orgId is required')
 		},
 		bulk: function () {
 			req.checkBody('categories').exists().withMessage('categories array is required')
 			req.checkBody('categories').isArray().withMessage('categories must be an array')
-			req.checkBody('tenantId').exists().withMessage('tenantId is required')
-			req.checkBody('orgId').exists().withMessage('orgId is required')
 		},
 		list: function () {
 			// Optional validations for query params
@@ -44,13 +38,9 @@ module.exports = (req) => {
 				req.checkQuery('maxDepth').isInt().withMessage('maxDepth must be an integer')
 			}
 		},
-		leaves: function () {
-			req.checkQuery('tenantId').exists().withMessage('tenantId is required')
-			req.checkQuery('orgId').exists().withMessage('orgId is required')
-		},
+		leaves: function () {},
 		details: function () {
 			req.checkParams('_id').exists().withMessage('required category id')
-			req.checkParams('_id').isMongoId().withMessage('Invalid category id')
 		},
 	}
 

@@ -28,16 +28,6 @@ let enviromentVariables = {
 		message: 'Required internal access token',
 		optional: false,
 	},
-	DISABLE_INTERNAL_TOKEN_CHECK: {
-		message: 'Disable internal token check for testing (set to true to skip)',
-		optional: true,
-		default: 'false',
-	},
-	DISABLE_USER_AUTH_CHECK: {
-		message: 'Disable user authentication check for testing in development mode (set to true to skip)',
-		optional: true,
-		default: 'false',
-	},
 	GOTENBERG_URL: {
 		message: 'Gotenberg url required',
 		optional: false,

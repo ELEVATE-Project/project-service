@@ -100,6 +100,25 @@ To enable the Citus extension for user services, follow these steps.
     sudo ./citus_setup.sh user postgres://postgres:postgres@citus_master:5432/user
     ```
 
+## Update Cloud Credentials for Project Service
+
+To enable full functionality, including certificate generation and report storage, you must configure cloud credentials in the Project Service environment file.
+
+    Path: project_env
+
+Add or update the following variables in the .env file, substituting the example values with your actual cloud credentials:
+
+    CLOUD_STORAGE_PROVIDER=gcloud
+    CLOUD_STORAGE_ACCOUNTNAME=your_account_name
+    CLOUD_STORAGE_SECRET="-----BEGIN PRIVATE KEY-----\n..."
+    CLOUD_STORAGE_PROJECT=your_cloud_project_id
+    CLOUD_STORAGE_BUCKETNAME=your_bucket_name
+    CLOUD_STORAGE_BUCKET_TYPE=private
+
+> NOTE : This service is designed to support multiple cloud storage providers and offers flexible cloud integration capabilities. Based on your selected cloud provider, the service can be configured accordingly to enable seamless storage, certificate generation, and report handling.
+
+For detailed configuration options, supported cloud providers, and integration guidelines, please refer to the official documentation available in this [ReadMe](https://www.npmjs.com/package/client-cloud-services?activeTab=readme)
+
 ## Persistence Of Database Data In Docker Container (Optional)
 
 To ensure the persistence of database data when running `docker compose down`, it is necessary to modify the `docker-compose-project.yml` file according to the steps given below:
@@ -176,19 +195,14 @@ This step will guide us in implementing a sample project solution following the 
     node insert_sample_solutions.js
     ```
 
-## Default Forms Creation for Portal Configuration
+## 🌐 Micro-Frontend (FE) Setup
 
-This step inserts configuration forms into MongoDB, enabling or disabling features and fields on portal pages.
+The ELEVATE application uses a micro-frontend architecture. After setting up the backend services, you must configure and run the frontend repositories to access the application via the portal.
 
-#### Insert Forms Data into Database
+Follow the setup guides for the frontend repositories:
 
-```
-curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/mac-linux/import_forms_mongo.sh && chmod +x import_forms_mongo.sh && sudo ./import_forms_mongo.sh mongodb://mongo:27017/elevate-project
-```
-
-## Explore the Portal
-
-Once the services are up and the front-end app bundle is built successfully, navigate to **[localhost:7007](http://localhost:7007/)** to access the Project app.
+-   **Login Portal:** [elevate-portal](https://github.com/ELEVATE-Project/elevate-portal/tree/releaase-1.1.0)
+-   **Projects Program Module (PWA):** [observation-survey-projects-pwa](https://github.com/ELEVATE-Project/observation-survey-projects-pwa/tree/release-3.4.0)
 
 > **Warning:** In this setup, features such as **Sign-Up, Project Certificate, Project Sharing, and Project PDF Report** will not be available because cloud storage credentials have been masked in the environment files for security reasons.
 

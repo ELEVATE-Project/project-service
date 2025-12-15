@@ -5245,7 +5245,7 @@ let observatioData = [
   },
 ];
 
-let surveyObservationData = [
+let surveyData = [
   {
     _id: new Object("6825966dcfa7cfe32cd8353d"),
     name: "survey-May14",
@@ -5300,4 +5300,6 @@ module.exports = {
   criteriaQuestionsData,
   questionsData,
   frameworkData,
+  surveyData,
+  observatioData
 };

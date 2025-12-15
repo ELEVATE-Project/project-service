@@ -4865,16 +4865,16 @@ let frameworkData = [
   },
 ];
 
-let observatioData = [
+let observationData = [
   {
-    _id: new Object("68259459cfa7cfe32cd8341b"),
+    _id: new ObjectId("68259459cfa7cfe32cd8341b"),
     name: "DEV OBS - 1 may 14 2250",
     description: "Observation Without Rubric",
-    createdBy: "18",
-    frameworkId: new Object("691c1b15266ef5649ce41004"),
+    createdBy: "3",
+    frameworkId: new ObjectId("691c1b15266ef5649ce41004"),
     frameworkExternalId: "2dd7053d-c44d-11f0-b1c9-4cd717431bdb",
-    solutionId: new Object("691c1b17266ef5649ce4104c"),
-    programId: new Object("691c1b06e71d83091cf9c336"),
+    solutionId: new ObjectId("691c1b17266ef5649ce4104c"),
+    programId: new ObjectId("691c1b06e71d83091cf9c336"),
     programExternalId: "Survey_Program_newmay_14_2245",
     solutionExternalId: "691c1b15266ef5649ce4100d_CHILD",
     startDate: new Date("2025-05-15T07:14:32.871Z"),
@@ -4898,14 +4898,14 @@ let observatioData = [
     __v: 0,
   },
   {
-    _id: new Object("6825958bcfa7cfe32cd834dd"),
+    _id: new ObjectId("6825958bcfa7cfe32cd834dd"),
     name: "DEV OBS - 1 may 14 2250",
     description: "Observation Without Rubric",
-    createdBy: "18",
-    frameworkId: new Object("691b17a67b8c31191b8facf6"),
+    createdBy: "2",
+    frameworkId: new ObjectId("691b17a67b8c31191b8facf6"),
     frameworkExternalId: "8bb9c6e2-c3b2-11f0-a72f-4cd717431bdb",
-    solutionId: new Object("691b17ae1ce3f5956e9f319d"),
-    programId: new Object("691b10a0dbb768073d67328c"),
+    solutionId: new ObjectId("691b17ae1ce3f5956e9f319d"),
+    programId: new ObjectId("691b10a0dbb768073d67328c"),
     programExternalId: "Survey_Program_newmay_14_2245",
     solutionExternalId: "691b17a71ce3f5956e9f313b_CHILD",
     startDate: new Date("2025-05-15T07:19:39.047Z"),
@@ -5075,14 +5075,14 @@ let observatioData = [
     __v: 0,
   },
   {
-    _id: new Object("68259642cfa7cfe32cd834fd"),
+    _id: new ObjectId("68259642cfa7cfe32cd834fd"),
     name: "DEV OBS - 1 may 14 2250",
     description: "Observation Without Rubric",
-    createdBy: "35",
-    frameworkId: new Object("68ee4b7940fd155dceef086a"),
+    createdBy: "1",
+    frameworkId: new ObjectId("68ee4b7940fd155dceef086a"),
     frameworkExternalId: "fb34d196-a8fe-11f0-9793-553f35f97dd1",
-    solutionId: new Object("68ee4bb440fd155dceef08a9"),
-    programId: new Object("68ee4b79fb9bee08b93b6d34"),
+    solutionId: new ObjectId("68ee4bb440fd155dceef08a9"),
+    programId: new ObjectId("68ee4b79fb9bee08b93b6d34"),
     programExternalId: "Survey_Program_newmay_14_2245",
     solutionExternalId:
       "fb34d196-a8fe-11f0-9793-553f35f97dd1-OBSERVATION-TEMPLATE-1760447411986",
@@ -5247,12 +5247,12 @@ let observatioData = [
 
 let surveyData = [
   {
-    _id: new Object("6825966dcfa7cfe32cd8353d"),
+    _id: new ObjectId("6825966dcfa7cfe32cd8353d"),
     name: "survey-May14",
     description: "This is a survey for school performance",
-    createdBy: "35",
-    solutionId: new Object("691ac8ae1ce3f5956e9f220a"),
-    programId: new Object("691ac38fdbb768073d672c7f"),
+    createdBy: "3",
+    solutionId: new ObjectId("691ac8ae1ce3f5956e9f220a"),
+    programId: new ObjectId("691ac38fdbb768073d672c7f"),
     programExternalId: "idddoohjhjsss",
     solutionExternalId: "797d3540-c383-11f0-829d-c906cd7c8b97-1763362990221",
     startDate: new Date("2025-05-15T07:23:25.039Z"),
@@ -5270,12 +5270,12 @@ let surveyData = [
     __v: 0,
   },
   {
-    _id: new Object("6825f6c67ede10836e7e118c"),
+    _id: new ObjectId("6825f6c67ede10836e7e118c"),
     name: "survey-May14",
     description: "This is a survey for school performance",
-    createdBy: "35",
-    solutionId: new Object("691b179e7b8c31191b8facee"),
-    programId: new Object("691b10a0dbb768073d67328c"),
+    createdBy: "2",
+    solutionId: new ObjectId("691b179e7b8c31191b8facee"),
+    programId: new ObjectId("691b10a0dbb768073d67328c"),
     programExternalId: "Testing_for_creation_sup_17_11",
     solutionExternalId: "85ee00e1-c3b2-11f0-b41e-4cd717431bdb-1763383198090",
     startDate: new Date("2025-05-15T14:14:30.698Z"),
@@ -5301,5 +5301,5 @@ module.exports = {
   questionsData,
   frameworkData,
   surveyData,
-  observatioData
+  observationData
 };

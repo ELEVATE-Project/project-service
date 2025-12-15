@@ -200,12 +200,12 @@ curl -L -o scheduler/src/.env https://raw.githubusercontent.com/ELEVATE-Project/
 
     Add or update the following variables in the .env file, substituting the example values with your actual cloud credentials:
 
-    CLOUD_STORAGE_PROVIDER=gcloud
-    CLOUD_STORAGE_ACCOUNTNAME=your_account_name
-    CLOUD_STORAGE_SECRET="-----BEGIN PRIVATE KEY-----\n..."
-    CLOUD_STORAGE_PROJECT=your_cloud_project_id
-    CLOUD_STORAGE_BUCKETNAME=your_bucket_name
-    CLOUD_STORAGE_BUCKET_TYPE=private
+        CLOUD_STORAGE_PROVIDER=gcloud
+        CLOUD_STORAGE_ACCOUNTNAME=your_account_name
+        CLOUD_STORAGE_SECRET="-----BEGIN PRIVATE KEY-----\n..."
+        CLOUD_STORAGE_PROJECT=your_cloud_project_id
+        CLOUD_STORAGE_BUCKETNAME=your_bucket_name
+        CLOUD_STORAGE_BUCKET_TYPE=private
 
     > NOTE : This service is designed to support multiple cloud storage providers and offers flexible cloud integration capabilities. Based on your selected cloud provider, the service can be configured accordingly to enable seamless storage, certificate generation, and report handling.
 
@@ -216,7 +216,7 @@ curl -L -o scheduler/src/.env https://raw.githubusercontent.com/ELEVATE-Project/
     1.  Download `entity-project-sample-data.sh` Script File:
 
     ```
-    curl -o project_entity_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/scripts/stand-alone/ubuntu/project_entity_sample_data.sh && \
+    curl -o project_entity_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideWithSurvey/documentation/3.4.0/native/scripts/with-survey/ubuntu/project_entity_sample_data.sh && \
     chmod +x project_entity_sample_data.sh && \
     ./project_entity_sample_data.sh
     ```

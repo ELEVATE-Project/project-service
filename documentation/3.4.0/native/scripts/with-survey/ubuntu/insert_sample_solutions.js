@@ -129,11 +129,11 @@ async function main({ dataToBeInserted }) {
 		{ name: 'certificateBaseTemplates', data: dataToBeInserted.certificateBaseTemplatesData, db: dbName },
 		{ name: 'projectCategories', data: dataToBeInserted.projectCategoriesData, db: dbName },
 		{ name: 'configurations', data: dataToBeInserted.configurationData, db: dbName },
-    	{ name: "solutions", data: dataToBeInserted.solutionData, dbName3},
-    	{ name: "criteria",  data:dataToBeInserted.criteriaData, dbName3},
-    	{ name: "criteriaQuestions", data: dataToBeInserted.criteriaQuestionsData,dbName3},
-    	{ name: "frameworks", data: dataToBeInserted.frameworkData,dbName3},
-    	{ name: "questions", data: dataToBeInserted.questionsData,dbName3},
+    	{ name: "solutions", data: dataToBeInserted.solutionData, db:dbName3},
+    	{ name: "criteria",  data:dataToBeInserted.criteriaData, db : dbName3},
+    	{ name: "criteriaQuestions", data: dataToBeInserted.criteriaQuestionsData, db : dbName3},
+    	{ name: "frameworks", data: dataToBeInserted.frameworkData, db : dbName3},
+    	{ name: "questions", data: dataToBeInserted.questionsData, db : dbName3},
 
 	]
 

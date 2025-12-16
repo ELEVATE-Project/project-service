@@ -174,6 +174,47 @@ curl --location 'http://localhost:5003/categories/hierarchy' \
 --header 'X-auth-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoyMDAzLCJuYW1lIjoidGFuZnVuY29mZmljaWFsIHNsZGlyZWN0b3IiLCJzZXNzaW9uX2lkIjoyMjcwNiwib3JnYW5pemF0aW9uX2lkcyI6WyIzMyJdLCJvcmdhbml6YXRpb25fY29kZXMiOlsidGFuOTAiXSwidGVuYW50X2NvZGUiOiJzaGlrc2hhbG9rYW0iLCJvcmdhbml6YXRpb25zIjpbeyJpZCI6MzMsIm5hbWUiOiJ0YW45MCIsImNvZGUiOiJ0YW45MCIsImRlc2NyaXB0aW9uIjoiVGFuOTAgc3BlY2lhbGl6ZXMgaW4gcHJvdmlkaW5nIGVkdWNhdGlvbmFsIFNURUFNIiwic3RhdHVzIjoiQUNUSVZFIiwicmVsYXRlZF9vcmdzIjpbMzRdLCJ0ZW5hbnRfY29kZSI6InNoaWtzaGFsb2thbSIsIm1ldGEiOm51bGwsImNyZWF0ZWRfYnkiOjEsInVwZGF0ZWRfYnkiOjE3MDksInJvbGVzIjpbeyJpZCI6MjMsInRpdGxlIjoibWVudGVlIiwibGFiZWwiOiJtZW50ZWUiLCJ1c2VyX3R5cGUiOjAsInN0YXR1cyI6IkFDVElWRSIsIm9yZ2FuaXphdGlvbl9pZCI6MTAsInZpc2liaWxpdHkiOiJQVUJMSUMiLCJ0ZW5hbnRfY29kZSI6InNoaWtzaGFsb2thbSIsInRyYW5zbGF0aW9ucyI6bnVsbH1dfV19LCJpYXQiOjE3NjU4NjUzMDYsImV4cCI6MTc2NTk1MTcwNn0.TRuLHBD5sjkIgowCVnQC_3GgSZJnbJhpXU3rQKhfIdE'
 ```
 
+### Validation Examples
+
+**Create with Parent Validation:**
+
+```bash
+# Create child category (validates parent exists)
+curl --location 'http://localhost:5003/categories' \
+--header 'X-auth-token: YOUR_TOKEN' \
+--header 'Content-Type: application/json' \
+--data '{
+  "name": "Livestock",
+  "externalId": "livestock",
+  "parentId": "693ffb88159e0b0eaa4cc328"
+}'
+```
+
+**Move with Validation:**
+
+```bash
+# Move category (validates new parent exists, prevents circular references)
+curl --location 'http://localhost:5003/categories/693ffb64159e0b0eaa4cc314/move' \
+--header 'X-auth-token: YOUR_TOKEN' \
+--header 'Content-Type: application/json' \
+--data '{
+  "newParentId": "693ffb88159e0b0eaa4cc328"
+}'
+```
+
+**Delete with Project Check:**
+
+```bash
+# Check if safe to delete (validates no projects/children/templates)
+curl --location 'http://localhost:5003/categories/693ffb64159e0b0eaa4cc314/can-delete' \
+--header 'X-auth-token: YOUR_TOKEN'
+
+# Delete only if can-delete returns true
+curl --location 'http://localhost:5003/categories/693ffb64159e0b0eaa4cc314' \
+--header 'X-auth-token: YOUR_TOKEN' \
+-X DELETE
+```
+
 ### Quick Test Commands
 
 ```bash
@@ -185,9 +226,6 @@ curl --location 'http://localhost:5003/categories/hierarchy' --header 'X-auth-to
 
 # Test leaves
 curl --location 'http://localhost:5003/categories/leaves' --header 'X-auth-token: YOUR_TOKEN'
-
-# Test projects by single category
-curl --location 'http://localhost:5003/categories/projects/CATEGORY_ID' --header 'X-auth-token: YOUR_TOKEN'
 
 # Test projects by multiple categories
 curl --location 'http://localhost:5003/categories/projects/list' \
@@ -350,7 +388,7 @@ _Warning: This requires expensive path recalculation for all descendants._
 
 ### 6. Delete Category
 
-Deletes a category and all its descendants.
+Deletes a category after comprehensive validation.
 
 **Request:**
 
@@ -358,11 +396,48 @@ Deletes a category and all its descendants.
 DELETE /categories/:id
 Headers:
   X-auth-token: <user-token>
-  tenantId: <tenant-id>
-  orgId: <org-id>
 ```
 
-_Note: Fails if templates are attached to any deleted category._
+**Validation Checks (in order):**
+
+1. **Projects Check**: Ensures category and all children have no associated projects
+2. **Children Check**: Ensures category has no child categories
+3. **Templates Check**: Ensures no templates reference the category
+
+**Success Response:**
+
+```json
+{
+	"message": "Category deleted successfully",
+	"result": {
+		"deletedCategory": {
+			"_id": "64f1...",
+			"name": "Agriculture",
+			"externalId": "agriculture"
+		}
+	}
+}
+```
+
+**Error Response (Has Projects):**
+
+```json
+{
+	"status": 400,
+	"message": "Category or its children are used by 5 projects",
+	"result": {
+		"categoriesWithProjects": [
+			{
+				"categoryName": "Agriculture",
+				"projectCount": 3,
+				"projectTitles": ["Smart Farming", "Crop Management"]
+			}
+		]
+	}
+}
+```
+
+_Note: Always use `GET /categories/:id/can-delete` first to check if deletion is safe._
 
 ### 7. Get Leaf Categories
 
@@ -384,16 +459,61 @@ Headers:
   X-auth-token: <user-token>
 ```
 
-**Response:**
+**Response (Can Delete):**
 
 ```json
 {
 	"message": "Category can be deleted",
 	"result": {
 		"canDelete": true,
-		"reason": "Category can be deleted",
+		"reason": "Category can be deleted safely",
 		"childCount": 0,
-		"templateCount": 0
+		"templateCount": 0,
+		"projectCount": 0
+	}
+}
+```
+
+**Response (Cannot Delete - Has Projects):**
+
+```json
+{
+	"message": "Category cannot be deleted",
+	"result": {
+		"canDelete": false,
+		"reason": "Category or its children are used by 5 projects",
+		"childCount": 2,
+		"templateCount": 0,
+		"projectCount": 5,
+		"categoriesWithProjects": [
+			{
+				"categoryId": "64f1...",
+				"categoryName": "Agriculture",
+				"projectCount": 3,
+				"projectTitles": ["Smart Farming", "Crop Management", "Irrigation System"]
+			},
+			{
+				"categoryId": "64f2...",
+				"categoryName": "Livestock",
+				"projectCount": 2,
+				"projectTitles": ["Cattle Management", "Dairy Automation"]
+			}
+		]
+	}
+}
+```
+
+**Response (Cannot Delete - Has Children):**
+
+```json
+{
+	"message": "Category cannot be deleted",
+	"result": {
+		"canDelete": false,
+		"reason": "Has 3 children. Delete children first.",
+		"childCount": 3,
+		"templateCount": 0,
+		"projectCount": 0
 	}
 }
 ```
@@ -650,6 +770,29 @@ The following fixes have been implemented in `generics/middleware/authenticator.
 4. **Header Case Sensitivity:**
     - Added support for both `x-auth-token` and `X-auth-token`
 
+## 📋 Operations & Validation Matrix
+
+### Category Operations Table
+
+| Operation           | Endpoint                      | What Gets Updated                                                                                                                                                                                                                              | Validation Checks                                                                                    |
+| ------------------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| **Create Category** | `POST /categories`            | • Auto-sets level<br>• Calculates path<br>• Calculates pathArray<br>• Updates parent's childCount<br>• Updates parent's hasChildren                                                                                                            | • Parent exists<br>• Max depth not exceeded<br>• Unique externalId<br>• Valid tenant/org             |
+| **Move Category**   | `PATCH /categories/{id}/move` | • Recalculates level for category + all descendants<br>• Recalculates path for category + all descendants<br>• Recalculates pathArray for category + all descendants<br>• Updates old parent's childCount<br>• Updates new parent's childCount | • New parent exists<br>• Not moving to own descendant<br>• Max depth not exceeded for new position   |
+| **Delete Category** | `DELETE /categories/{id}`     | • Sets isDeleted: true<br>• Updates parent's childCount<br>• Updates parent's hasChildren if last child                                                                                                                                        | • No children exist<br>• No projects use category/children<br>• No templates reference this category |
+| **Update Category** | `PATCH /categories/{id}`      | • Updates specified fields only<br>• Does NOT recalculate hierarchy fields                                                                                                                                                                     | • Category exists<br>• Valid field values                                                            |
+
+### Data Integrity Rules Table
+
+| Rule                       | Enforced By           | Description                                                     | Example                                                                          |
+| -------------------------- | --------------------- | --------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| **Unique ExternalId**      | Database + Validation | externalId must be unique within tenant                         | Cannot create two categories with externalId="education"                         |
+| **Valid Parent**           | Validation            | parent_id must exist and not be deleted                         | Cannot set parent_id to non-existent category                                    |
+| **Max Depth**              | Validation            | Cannot exceed configured max hierarchy depth (default: 3)       | Cannot create level 4 category if max depth is 3                                 |
+| **No Circular References** | Validation            | Cannot move category to its own descendant                      | Cannot move "Agriculture" under "Livestock" if Livestock is child of Agriculture |
+| **Delete Protection**      | Validation            | Cannot delete if has children, projects, or template references | Cannot delete "Livelihood" if it has "Agriculture" child or active projects      |
+| **Tenant Isolation**       | Query Filters         | All operations filtered by tenantId from JWT                    | User from tenant "brac" cannot see categories from tenant "shikshagraha"         |
+| **Soft Delete**            | Application Logic     | Deleted categories have isDeleted=true                          | Deleted categories remain in database but excluded from queries                  |
+
 ## ⚠️ Critical Implementation Notes
 
 1.  **Circular References**: The `move` logic prevents moving a category into its own descendant.
@@ -658,3 +801,4 @@ The following fixes have been implemented in `generics/middleware/authenticator.
 4.  **Legacy Support**: `module/library/categories/helper.js` has been **removed**. All legacy endpoints now route through `projectCategories/helper.js`.
 5.  **Token Compatibility**: Middleware has been updated to handle the new token structure with nested organization roles.
 6.  **Multi-Category Projects**: The `POST /categories/projects/list` endpoint allows fetching projects from multiple categories in a single request, improving performance for complex filtering scenarios.
+7.  **Parent Validation**: All create and move operations validate parent existence before proceeding with hierarchy calculations.

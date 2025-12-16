@@ -837,6 +837,103 @@ module.exports = class ProjectCategoriesHelper {
 	}
 
 	/**
+	 * Get all descendant category IDs for a given category
+	 * @method
+	 * @name getAllDescendantIds
+	 * @param {ObjectId} categoryId - Parent category ID
+	 * @param {String} tenantId - Tenant ID
+	 * @returns {Array} Array of descendant category IDs
+	 */
+	static async getAllDescendantIds(categoryId, tenantId) {
+		try {
+			const descendants = await projectCategoriesQueries.findAll(
+				{
+					tenantId: tenantId,
+					pathArray: categoryId,
+					isDeleted: false,
+				},
+				['_id']
+			)
+			return descendants.map((cat) => cat._id)
+		} catch (error) {
+			console.error('Error getting descendant IDs:', error)
+			return []
+		}
+	}
+
+	/**
+	 * Check if categories have any projects associated
+	 * @method
+	 * @name checkCategoriesHaveProjects
+	 * @param {Array} categoryIds - Array of category IDs to check
+	 * @param {String} tenantId - Tenant ID
+	 * @returns {Object} Result with hasProjects flag and details
+	 */
+	static async checkCategoriesHaveProjects(categoryIds, tenantId) {
+		try {
+			// Build aggregation pipeline to count projects for each category
+			const pipeline = [
+				{
+					$match: {
+						tenantId: tenantId,
+						isReusable: true,
+						status: CONSTANTS.common.PUBLISHED_STATUS,
+						isDeleted: false,
+						'categories._id': { $in: categoryIds },
+					},
+				},
+				{
+					$unwind: '$categories',
+				},
+				{
+					$match: {
+						'categories._id': { $in: categoryIds },
+					},
+				},
+				{
+					$group: {
+						_id: '$categories._id',
+						categoryName: { $first: '$categories.name' },
+						projectCount: { $sum: 1 },
+						projectTitles: { $push: '$title' },
+					},
+				},
+			]
+
+			const results = await projectTemplateQueries.getAggregate(pipeline)
+
+			if (!results || results.length === 0) {
+				return {
+					hasProjects: false,
+					totalProjects: 0,
+					categoriesWithProjects: [],
+				}
+			}
+
+			const totalProjects = results.reduce((sum, cat) => sum + cat.projectCount, 0)
+			const categoriesWithProjects = results.map((cat) => ({
+				categoryId: cat._id,
+				categoryName: cat.categoryName,
+				projectCount: cat.projectCount,
+				projectTitles: cat.projectTitles.slice(0, 5), // Limit to first 5 project names
+			}))
+
+			return {
+				hasProjects: true,
+				totalProjects,
+				categoriesWithProjects,
+			}
+		} catch (error) {
+			console.error('Error checking categories for projects:', error)
+			return {
+				hasProjects: false,
+				totalProjects: 0,
+				categoriesWithProjects: [],
+			}
+		}
+	}
+
+	/**
 	 * Check if category can be deleted
 	 * @method
 	 * @name canDelete
@@ -864,15 +961,37 @@ module.exports = class ProjectCategoriesHelper {
 					}
 				}
 
-				// Check if has children
+				// Get all descendant categories (including the category itself)
+				const allCategoryIds = await this.getAllDescendantIds(category._id, tenantId)
+				allCategoryIds.push(category._id) // Include the category itself
+
+				// Check if any category (parent or children) has projects
+				const projectsCheck = await this.checkCategoriesHaveProjects(allCategoryIds, tenantId)
+
+				if (projectsCheck.hasProjects) {
+					return resolve({
+						success: true,
+						data: {
+							canDelete: false,
+							reason: `Category or its children are used by ${projectsCheck.totalProjects} projects`,
+							childCount: category.childCount || 0,
+							templateCount: 0,
+							projectCount: projectsCheck.totalProjects,
+							categoriesWithProjects: projectsCheck.categoriesWithProjects,
+						},
+					})
+				}
+
+				// Check if has children (after project check)
 				if (category.hasChildren || category.childCount > 0) {
 					return resolve({
 						success: true,
 						data: {
 							canDelete: false,
-							reason: `Has ${category.childCount} children`,
+							reason: `Has ${category.childCount} children. Delete children first.`,
 							childCount: category.childCount,
 							templateCount: 0,
+							projectCount: 0,
 						},
 					})
 				}
@@ -880,11 +999,11 @@ module.exports = class ProjectCategoriesHelper {
 				// Check if referenced by templates
 				const templates = await projectTemplateQueries.templateDocument(
 					{
-						'categories._id': categoryId,
+						'categories._id': category._id,
 						tenantId,
 						isDeleted: false,
 					},
-					['_id']
+					['_id', 'title']
 				)
 
 				if (templates && templates.length > 0) {
@@ -895,6 +1014,8 @@ module.exports = class ProjectCategoriesHelper {
 							reason: `Referenced by ${templates.length} templates`,
 							childCount: 0,
 							templateCount: templates.length,
+							projectCount: 0,
+							templates: templates.map((t) => ({ id: t._id, title: t.title })),
 						},
 					})
 				}
@@ -903,9 +1024,10 @@ module.exports = class ProjectCategoriesHelper {
 					success: true,
 					data: {
 						canDelete: true,
-						reason: 'Category can be deleted',
+						reason: 'Category can be deleted safely',
 						childCount: 0,
 						templateCount: 0,
+						projectCount: 0,
 					},
 				})
 			} catch (error) {

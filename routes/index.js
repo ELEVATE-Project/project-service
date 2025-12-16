@@ -328,6 +328,9 @@ module.exports = function (app) {
 	// GET /categories/projects/:id -> GET /project/v1/library/categories/projects/:id
 	app.get('/categories/projects/:id', inputValidator, createLibraryApiRouteHandler('projects'))
 
+	// POST /categories/projects/list -> Bulk fetch projects from multiple categories
+	app.post('/categories/projects/list', inputValidator, createLibraryApiRouteHandler('projectList'))
+
 	// POST /project/v1/library/categories/projects/list -> Bulk fetch projects
 	app.post(
 		applicationBaseUrl + 'v1/library/categories/projects/list',

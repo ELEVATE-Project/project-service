@@ -344,8 +344,18 @@ module.exports = class LibraryCategories extends Abstract {
 	async projectList(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				const libraryProjects = await projectCategoriesHelper.projectsByExternalIds(
-					req.body.categoryExternalIds,
+				// Support both categoryIds (ObjectIds) and categoryExternalIds (external IDs)
+				const categoryIds = req.body.categoryIds || req.body.categoryExternalIds
+
+				if (!categoryIds || !Array.isArray(categoryIds) || categoryIds.length === 0) {
+					return reject({
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: 'categoryIds or categoryExternalIds array is required',
+					})
+				}
+
+				const libraryProjects = await projectCategoriesHelper.projectsByMultipleIds(
+					categoryIds,
 					req.body.limit || req.query.limit,
 					req.body.offset || req.query.offset,
 					req.body.searchText || req.query.searchText,

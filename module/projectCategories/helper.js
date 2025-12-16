@@ -1758,6 +1758,136 @@ module.exports = class ProjectCategoriesHelper {
 	}
 
 	/**
+	 * Fetches paginated, reusable projects based on multiple category IDs (ObjectIds or external IDs).
+	 *
+	 * @param {string[]} categoryIds - Array of category IDs (ObjectIds) or external IDs to match.
+	 * @param {number} limit - Maximum number of projects to return per page.
+	 * @param {number} offset - Number of projects to skip for pagination.
+	 * @param {string} searchText - Optional search term to filter projects by title/description.
+	 * @param {object} userDetails - User details for tenant/org filtering.
+	 * @returns {Promise<object>} The structured success response with paginated data and total count.
+	 */
+	static async projectsByMultipleIds(categoryIds, limit, offset, searchText, userDetails) {
+		try {
+			// --- 1. VALIDATE PAGINATION ---
+			const defaultLimit = hierarchyConfig.pagination?.defaultLimit || 20
+			const maxLimit = hierarchyConfig.pagination?.maxLimit || 100
+
+			let finalLimit = Number(limit) || defaultLimit
+			if (finalLimit < 1) finalLimit = defaultLimit
+			if (finalLimit > maxLimit) finalLimit = maxLimit
+
+			let finalOffset = Number(offset)
+			if (isNaN(finalOffset) || finalOffset < 0) finalOffset = 0
+
+			// --- 2. BUILD MATCH QUERY ---
+			// Support both ObjectIds and external IDs
+			const objectIds = []
+			const externalIds = []
+
+			categoryIds.forEach((id) => {
+				if (ObjectId.isValid(id)) {
+					objectIds.push(new ObjectId(id))
+				} else {
+					externalIds.push(id)
+				}
+			})
+
+			let categoryConditions = []
+			if (objectIds.length > 0) {
+				categoryConditions.push({ 'categories._id': { $in: objectIds } })
+			}
+			if (externalIds.length > 0) {
+				categoryConditions.push({ 'categories.externalId': { $in: externalIds } })
+			}
+
+			if (categoryConditions.length === 0) {
+				throw {
+					status: HTTP_STATUS_CODE.bad_request.status,
+					message: 'No valid category IDs provided',
+				}
+			}
+
+			let matchQuery = {
+				$match: {
+					isReusable: true,
+					status: CONSTANTS.common.PUBLISHED_STATUS,
+					$or: categoryConditions,
+					isDeleted: false,
+				},
+			}
+
+			if (searchText?.trim()) {
+				const regex = new RegExp(searchText.trim(), 'i')
+				matchQuery.$match.$and = [
+					{ $or: categoryConditions },
+					{ $or: [{ title: regex }, { description: regex }, { externalId: regex }] },
+				]
+				delete matchQuery.$match.$or
+			}
+
+			matchQuery = this.applyVisibilityConditions(
+				matchQuery,
+				await orgExtensionQueries
+					.orgExtenDocuments({
+						tenantId: userDetails.userInformation.tenantId,
+						orgId: userDetails.userInformation.organizationId,
+					})
+					.then((docs) => docs?.[0] || null),
+				userDetails
+			)
+
+			// --- 3. BUILD AGGREGATION PIPELINE ---
+			const pipeline = [
+				matchQuery,
+				{
+					$addFields: {
+						averageRating: { $ifNull: ['$averageRating', 0] },
+						noOfRatings: { $ifNull: ['$noOfRatings', 0] },
+					},
+				},
+				{
+					$sort: { updatedAt: -1 },
+				},
+				{
+					$facet: {
+						data: [{ $skip: finalOffset }, { $limit: finalLimit }],
+						totalCount: [{ $count: 'count' }],
+					},
+				},
+			]
+
+			// --- 4. EXECUTE QUERY ---
+			const result = await projectTemplateQueries.getAggregate(pipeline)
+			const projects = result[0]?.data || []
+			const totalCount = result[0]?.totalCount?.[0]?.count || 0
+
+			// --- 5. PROCESS DOWNLOADABLE URLS ---
+			if (projects.length > 0) {
+				const downloadableUrlsCall = await filesHelper.getDownloadableUrl(projects, userDetails.userInformation)
+				if (downloadableUrlsCall.success) {
+					projects.forEach((project, index) => {
+						if (downloadableUrlsCall.data[index] && downloadableUrlsCall.data[index].url) {
+							project.url = downloadableUrlsCall.data[index].url
+						}
+					})
+				}
+			}
+
+			return {
+				success: true,
+				message: CONSTANTS.apiResponses.PROJECTS_FETCHED,
+				data: {
+					data: projects,
+					count: totalCount,
+				},
+			}
+		} catch (error) {
+			throw error
+		}
+	}
+
+	/**
 	 * Fetches paginated, reusable projects based on category external IDs.
 	 *
 	 * @param {string[]} categoryExternalIds - Array of category external IDs to match.

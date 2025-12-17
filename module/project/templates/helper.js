@@ -1282,7 +1282,7 @@ module.exports = class ProjectTemplatesHelper {
 						? solution.allowMultipleAssessemts
 						: false,
 				}),
-				parentProjectTemplateTaskId: newProjectTemplateTaskId,
+				parentTaskId: newProjectTemplateTaskId,
 			})
 
 			//fetchSolution details

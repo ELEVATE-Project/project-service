@@ -4859,7 +4859,7 @@ async function _projectTask(
 						singleTask.type
 					)
 				)
-					singleTask.referenceId = singleTask.solutionDetails.parentProjectTemplateTaskId
+					singleTask.referenceId = singleTask.solutionDetails.parentTaskId
 				else singleTask.referenceId = singleTask._id.toString()
 			}
 			singleTask.createdAt = singleTask.createdAt ? singleTask.createdAt : new Date()

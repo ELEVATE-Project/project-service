@@ -43,7 +43,7 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
 > **Caution:** Before proceeding, please ensure that the ports given here are available and open. It is essential to verify their availability prior to moving forward. You can run below command in your terminal to check this
 
 ```
-for port in 3001 3002 6000 5001 4000 9092 5432 7007 2181 27017 3569; do
+for port in 3001 3002 6000 5001 4000 9092 5432 7007 2181 27017 3569 4301; do
     if sudo lsof -iTCP:$port -sTCP:LISTEN &>/dev/null; then
         echo "Port $port is IN USE"
     else
@@ -99,6 +99,26 @@ To enable the Citus extension for user services, follow these steps.
     ```
     sudo ./citus_setup.sh user postgres://postgres:postgres@citus_master:5432/user
     ```
+
+
+## Update Cloud Credentials for Project Service
+
+To enable full functionality, including certificate generation and report storage, you must configure cloud credentials in the Project Service environment file.
+
+    Path: project_env
+
+Add or update the following variables in the .env file, substituting the example values with your actual cloud credentials:
+
+    CLOUD_STORAGE_PROVIDER=gcloud
+    CLOUD_STORAGE_ACCOUNTNAME=your_account_name
+    CLOUD_STORAGE_SECRET="-----BEGIN PRIVATE KEY-----\n..."
+    CLOUD_STORAGE_PROJECT=your_cloud_project_id
+    CLOUD_STORAGE_BUCKETNAME=your_bucket_name
+    CLOUD_STORAGE_BUCKET_TYPE=private
+
+> NOTE : This service is designed to support multiple cloud storage providers and offers flexible cloud integration capabilities. Based on your selected cloud provider, the service can be configured accordingly to enable seamless storage, certificate generation, and report handling.
+
+For detailed configuration options, supported cloud providers, and integration guidelines, please refer to the official documentation available in this [ReadMe](https://www.npmjs.com/package/client-cloud-services?activeTab=readme)
 
 ## Persistence Of Database Data In Docker Container (Optional)
 
@@ -166,7 +186,7 @@ After successfully running the script mentioned above, the following user accoun
 | prajwal@gmail.com      | Password1@ | State Education Officer |
 | vishnu@gmail.com       | Password1@ | State Education Officer |
 
-## Sample Data Creation For Projects
+## Sample Data Creation For Projects and Survey
 
 This step will guide us in implementing a sample project solution following the initial setup of the project service.
 
@@ -176,19 +196,15 @@ This step will guide us in implementing a sample project solution following the 
     node insert_sample_solutions.js
     ```
 
-## Default Forms Creation for Portal Configuration
+## 🌐 Micro-Frontend (FE) Setup
 
-This step inserts configuration forms into MongoDB, enabling or disabling features and fields on portal pages.
+The ELEVATE application uses a micro-frontend architecture. After setting up the backend services, you must configure and run the frontend repositories to access the application via the portal.
 
-#### Insert Forms Data into Database
+Follow the setup guides for the frontend repositories:
 
-```
-curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/mac-linux/import_forms_mongo.sh && chmod +x import_forms_mongo.sh && sudo ./import_forms_mongo.sh mongodb://mongo:27017/elevate-project
-```
-
-## Explore the Portal
-
-Once the services are up and the front-end app bundle is built successfully, navigate to **[localhost:7007](http://localhost:7007/)** to access the Project app.
+-   **Login Portal:** [elevate-portal](https://github.com/ELEVATE-Project/elevate-portal/tree/releaase-1.1.0)
+-   **Projects Program Module (PWA):** [observation-survey-projects-pwa](https://github.com/ELEVATE-Project/observation-survey-projects-pwa/tree/release-3.4.0)
+-   **Observtaion/Survey Portal:** [observation-survey-projects-pwa](https://github.com/ELEVATE-Project/observation-portal/tree/release-3.4.0)
 
 > **Warning:** In this setup, features such as **Sign-Up, Project Certificate, Project Sharing, and Project PDF Report** will not be available because cloud storage credentials have been masked in the environment files for security reasons.
 

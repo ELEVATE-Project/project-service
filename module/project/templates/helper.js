@@ -1235,7 +1235,7 @@ module.exports = class ProjectTemplatesHelper {
 	) {
 		try {
 			const taskType = newProjectTemplateTask.type
-
+			const newProjectTemplateTaskId = newProjectTemplateTask._id
 			let duplicateTemplateTaskId
 
 			let programs = await programQueries.programsDocument(
@@ -1282,6 +1282,7 @@ module.exports = class ProjectTemplatesHelper {
 						? solution.allowMultipleAssessemts
 						: false,
 				}),
+				parentTaskId: newProjectTemplateTaskId,
 			})
 
 			//fetchSolution details

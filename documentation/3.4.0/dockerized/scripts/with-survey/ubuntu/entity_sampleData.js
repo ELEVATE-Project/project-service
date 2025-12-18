@@ -254,13 +254,17 @@ let entities = [
     metaInformation: {
       targetedEntityTypes: [
         {
-          entityType: "Handbook1_Activity",
-          entityTypeId: "688762feb19aea00144c2a81",
-        },
-        {
-          entityType: "Handbook2_Activity",
-          entityTypeId: "68887766b19aea00144c3631",
-        },
+          "entityType" : "state",
+          "entityTypeId" : "6852c86c7248c20014b38a4d"
+      }, 
+      {
+          "entityType" : "district",
+          "entityTypeId" : "6852c8ae7248c20014b38a57"
+      }, 
+      {
+          "entityType" : "school",
+          "entityTypeId" : "6852c9237248c20014b39fa0"
+      }
       ],
       externalId: "facilitator",
       name: "Facilitator",

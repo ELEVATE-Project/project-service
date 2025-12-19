@@ -45,7 +45,8 @@ module.exports = async function (req, res, next) {
 	}
 
 	// If the user is normal which doesn't have admin and system admin role then this logic will help to assign tenantAndOrgInfo
-	if (addTenantAndOrgDetails) {
+	// If the user is normal which doesn't have admin and system admin role then this logic will help to assign tenantAndOrgInfo
+	if (req.userDetails && req.userDetails.userInformation && !req.userDetails.tenantAndOrgInfo) {
 		req.userDetails.tenantAndOrgInfo = {}
 		req.userDetails.tenantAndOrgInfo.tenantId = req.userDetails.userInformation.tenantId
 		req.userDetails.tenantAndOrgInfo.orgId = [req.userDetails.userInformation.organizationId]

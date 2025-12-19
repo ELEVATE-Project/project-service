@@ -19,6 +19,7 @@ const _ = require('lodash')
 const entitiesService = require(GENERICS_FILES_PATH + '/services/entity-management')
 const projectTemplateTaskQueries = require(DB_QUERY_BASE_PATH + '/projectTemplateTask')
 const projectAttributesQueries = require(DB_QUERY_BASE_PATH + '/projectAttributes')
+const kafkaProducersHelper = require(GENERICS_FILES_PATH + '/kafka/producers')
 
 /**
  * ProjectCategoriesHelper
@@ -1252,7 +1253,7 @@ module.exports = class ProjectCategoriesHelper {
 	 */
 
 	static projects(
-		categoryId,
+		categoryIds,
 		limit,
 		offset,
 		search,
@@ -1290,19 +1291,31 @@ module.exports = class ProjectCategoriesHelper {
 
 				matchQuery = this.applyVisibilityConditions(matchQuery, orgExtension, userDetails)
 
-				if (categoryId && categoryId !== '') {
-					if (ObjectId.isValid(categoryId)) {
+				if (categoryIds && categoryIds.length > 0) {
+					const objectIds = []
+					const externalIds = []
+
+					categoryIds.forEach((id) => {
+						if (ObjectId.isValid(id)) {
+							objectIds.push(new ObjectId(id))
+						} else {
+							externalIds.push(id)
+						}
+					})
+
+					let categoryConditions = []
+					if (objectIds.length > 0) {
+						categoryConditions.push({ 'categories._id': { $in: objectIds } })
+					}
+					if (externalIds.length > 0) {
+						categoryConditions.push({ 'categories.externalId': { $in: externalIds } })
+					}
+
+					if (categoryConditions.length > 0) {
 						if (!matchQuery['$match']['$and']) {
 							matchQuery['$match']['$and'] = []
 						}
-						matchQuery['$match']['$and'].push({
-							$or: [
-								{ 'categories.externalId': categoryId },
-								{ 'categories._id': new ObjectId(categoryId) },
-							],
-						})
-					} else {
-						matchQuery['$match']['categories.externalId'] = categoryId
+						matchQuery['$match']['$and'].push({ $or: categoryConditions })
 					}
 				}
 
@@ -1809,31 +1822,27 @@ module.exports = class ProjectCategoriesHelper {
 				['_id', 'categories']
 			)
 
-			// Update template categories
+			// Instead of updating templates directly here, publish a kafka event so
+			// downstream template sync workers can handle updates in a decoupled way.
 			for (const template of templates) {
-				const updatedCategories = template.categories.map((cat) => {
-					if (cat._id && cat._id.toString() === categoryId.toString()) {
-						return {
-							...cat,
-							name: category.name,
-							externalId: category.externalId,
-							level: category.level,
-							isLeaf: !category.hasChildren,
-							syncedAt: new Date(),
-						}
-					}
-					return cat
-				})
+				const message = {
+					templateId: template._id,
+					tenantId: tenantId,
+					category: {
+						_id: category._id,
+						name: category.name,
+						externalId: category.externalId,
+						level: category.level,
+						isLeaf: !category.hasChildren,
+						updatedAt: new Date(),
+					},
+					action: 'category_updated',
+				}
 
-				await projectTemplateQueries.updateProjectTemplateDocument(
-					{ _id: template._id },
-					{
-						$set: {
-							categories: updatedCategories,
-							categorySyncedAt: new Date(),
-						},
-					}
-				)
+				// fire and forget - log error if kafka push fails
+				kafkaProducersHelper.pushCategoryChangeEvent(message).catch((err) => {
+					console.error('Failed to push category change event for template', template._id, err)
+				})
 			}
 		} catch (error) {
 			console.error('Error syncing templates for category:', error)
@@ -2006,93 +2015,6 @@ module.exports = class ProjectCategoriesHelper {
 			}
 		} catch (error) {
 			throw error
-		}
-	}
-
-	/**
-	 * Fetches paginated, reusable projects based on category external IDs.
-	 *
-	 * @param {string[]} categoryExternalIds - Array of category external IDs to match.
-	 * @param {number} limit - The requested page size (limit).
-	 * @param {number} offset - The requested number of documents to skip (offset).
-	 * @param {string} searchText - Optional text to search across title, description, and externalId.
-	 * @param {object} userDetails - Details of the user for visibility logic.
-	 * @returns {Promise<object>} The structured success response with paginated data and total count.
-	 */
-	static async projectsByExternalIds(categoryExternalIds, limit, offset, searchText, userDetails) {
-		try {
-			// --- 1. VALIDATE PAGINATION ---
-			const defaultLimit = hierarchyConfig.pagination?.defaultLimit || 20
-			const maxLimit = hierarchyConfig.pagination?.maxLimit || 100
-
-			let finalLimit = Number(limit) || defaultLimit
-			if (finalLimit < 1) finalLimit = defaultLimit
-			if (finalLimit > maxLimit) finalLimit = maxLimit
-
-			let finalOffset = Number(offset)
-			if (isNaN(finalOffset) || finalOffset < 0) finalOffset = 0
-
-			// --- 2. BUILD MATCH QUERY ---
-			let matchQuery = {
-				$match: {
-					isReusable: true,
-					status: CONSTANTS.common.PUBLISHED_STATUS,
-					'categories.externalId': { $in: categoryExternalIds },
-					isDeleted: false,
-				},
-			}
-
-			if (searchText?.trim()) {
-				const regex = new RegExp(searchText.trim(), 'i')
-				matchQuery.$match.$or = [{ title: regex }, { description: regex }, { externalId: regex }]
-			}
-
-			matchQuery = this.applyVisibilityConditions(
-				matchQuery,
-				await orgExtensionQueries.orgExtenDocuments({
-					tenantId: userDetails.tenantAndOrgInfo.tenantId,
-					orgId: userDetails.tenantAndOrgInfo.orgId[0],
-				}),
-				userDetails
-			)
-
-			// --- 3. AGGREGATION PIPELINE (Strict Pagination) ---
-			const pipeline = [
-				matchQuery,
-				{ $sort: { categorySyncedAt: -1 } },
-				{
-					$facet: {
-						totalCount: [{ $count: 'count' }],
-						data: [{ $skip: finalOffset }, { $limit: finalLimit }],
-					},
-				},
-				{
-					$project: {
-						data: 1,
-						count: { $arrayElemAt: ['$totalCount.count', 0] },
-					},
-				},
-			]
-
-			const results = await projectTemplateQueries.getAggregate(pipeline)
-			const response = results?.[0] || { data: [], count: 0 }
-
-			// --- 4. RETURN RESPONSE ---
-			// If offset >= totalCount, data will naturally be empty array
-			return {
-				success: true,
-				message: CONSTANTS.apiResponses.PROJECTS_FETCHED,
-				data: {
-					data: response.data,
-					count: response.count || 0,
-				},
-			}
-		} catch (error) {
-			throw {
-				status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
-				message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
-				errorObject: error,
-			}
 		}
 	}
 }

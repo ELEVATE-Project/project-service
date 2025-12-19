@@ -45,7 +45,7 @@ module.exports = async function (req, res, next, token = '') {
 	if (!req.rspObj) req.rspObj = {}
 	var rspObj = req.rspObj
 
-	token = req.headers['x-auth-token'] || req.headers['X-auth-token']
+	token = req.headers['x-auth-token']
 
 	// Allow search endpoints for non-logged in users.
 	let guestAccess = false
@@ -73,8 +73,6 @@ module.exports = async function (req, res, next, token = '') {
 		'/templates/update',
 		'/projectAttributes/update',
 		'/scp/publishTemplateAndTasks',
-		'/library/categories/create',
-		'/library/categories/update',
 		'/projectCategories/create',
 		'/projectCategories/update',
 		'/projectCategories/move',
@@ -306,7 +304,7 @@ module.exports = async function (req, res, next, token = '') {
 
 		// performing default token data extraction
 		if (defaultTokenExtraction) {
-			if (!decodedToken.data.organization_ids || !decodedToken.data.tenant_code) {
+			if (!decodedToken.data.organization_ids || !decodedToken.data.tenant_id) {
 				rspObj.errCode = CONSTANTS.apiResponses.TENANTID_AND_ORGID_REQUIRED_IN_TOKEN_CODE
 				rspObj.errMsg = CONSTANTS.apiResponses.TENANTID_AND_ORGID_REQUIRED_IN_TOKEN_MESSAGE
 				rspObj.responseCode = HTTP_STATUS_CODE['bad_request'].status
@@ -315,7 +313,7 @@ module.exports = async function (req, res, next, token = '') {
 
 			//here assuming that req.headers['orgid'] will be a single value if multiple passed first element of the array will be taken
 			let fetchSingleOrgIdFunc = await fetchSingleOrgIdFromProvidedData(
-				decodedToken.data.tenant_code.toString(),
+				decodedToken.data.tenant_id.toString(),
 				decodedToken.data.organization_ids,
 				req.headers['orgid'],
 				token
@@ -330,13 +328,8 @@ module.exports = async function (req, res, next, token = '') {
 				userName: decodedToken.data.name,
 				organizationId: fetchSingleOrgIdFunc.orgId,
 				firstName: decodedToken.data.name,
-				roles:
-					decodedToken.data.organizations &&
-					decodedToken.data.organizations[0] &&
-					decodedToken.data.organizations[0].roles
-						? decodedToken.data.organizations[0].roles.map((role) => role.title)
-						: [],
-				tenantId: decodedToken.data.tenant_code.toString(),
+				roles: decodedToken.data.roles.map((role) => role.title),
+				tenantId: decodedToken.data.tenant_id.toString(),
 			}
 		} else {
 			for (let key in configData) {
@@ -365,7 +358,7 @@ module.exports = async function (req, res, next, token = '') {
 
 					// For each key in config, assign the corresponding value from decodedToken
 					decodedToken.data[key] = keyValue
-					if (key == 'tenant_code') {
+					if (key == 'tenant_id') {
 						userInformation[`tenantId`] = keyValue.toString()
 					} else {
 						userInformation[`${key}`] = keyValue
@@ -377,12 +370,12 @@ module.exports = async function (req, res, next, token = '') {
 			}
 		}
 
-		// throw error if tenant_code or organization_ids is not present in the decoded token
+		// throw error if tenant_id or organization_id is not present in the decoded token
 		if (
-			!decodedToken.data.tenant_code ||
-			!(decodedToken.data.tenant_code.toString().length > 0) ||
-			!decodedToken.data.organization_ids ||
-			!(decodedToken.data.organization_ids.length > 0)
+			!decodedToken.data.tenant_id ||
+			!(decodedToken.data.tenant_id.toString().length > 0) ||
+			!decodedToken.data.organization_id ||
+			!(decodedToken.data.organization_id.toString().length > 0)
 		) {
 			rspObj.errCode = CONSTANTS.apiResponses.TENANTID_AND_ORGID_REQUIRED_IN_TOKEN_CODE
 			rspObj.errMsg = CONSTANTS.apiResponses.TENANTID_AND_ORGID_REQUIRED_IN_TOKEN_MESSAGE
@@ -514,12 +507,7 @@ module.exports = async function (req, res, next, token = '') {
 			return { sucess: false }
 		}
 
-		let userRoles =
-			decodedToken.data.organizations &&
-			decodedToken.data.organizations[0] &&
-			decodedToken.data.organizations[0].roles
-				? decodedToken.data.organizations[0].roles.map((role) => role.title)
-				: []
+		let userRoles = decodedToken.data.roles.map((role) => role.title)
 		if (performInternalAccessTokenCheck) {
 			decodedToken.data['tenantAndOrgInfo'] = {}
 			// validate SUPER_ADMIN
@@ -527,14 +515,7 @@ module.exports = async function (req, res, next, token = '') {
 				if (adminHeader != process.env.ADMIN_ACCESS_TOKEN) {
 					return res.status(HTTP_STATUS_CODE['unauthorized'].status).send(respUtil(rspObj))
 				}
-				if (
-					decodedToken.data.organizations &&
-					decodedToken.data.organizations[0] &&
-					decodedToken.data.organizations[0].roles
-				) {
-					decodedToken.data.organizations[0].roles.push({ title: CONSTANTS.common.ADMIN_ROLE })
-				}
-
+				decodedToken.data.roles.push({ title: CONSTANTS.common.ADMIN_ROLE })
 				let result = getTenantIdAndOrgIdFromTheTheReqIntoHeaders(req, decodedToken.data)
 				if (!result.success) {
 					rspObj.errCode = CONSTANTS.apiResponses.ADMIN_TOKEN_MISSING_CODE
@@ -560,7 +541,7 @@ module.exports = async function (req, res, next, token = '') {
 
 				req.headers['orgid'] = validateOrgsResult.validOrgIds
 			} else if (userRoles.includes(CONSTANTS.common.TENANT_ADMIN)) {
-				req.headers['tenantid'] = UTILS.lowerCase(decodedToken.data.tenant_code.toString())
+				req.headers['tenantid'] = UTILS.lowerCase(decodedToken.data.tenant_id.toString())
 
 				let orgId = req.body.orgId || req.headers['orgid']
 
@@ -587,8 +568,8 @@ module.exports = async function (req, res, next, token = '') {
 				}
 				req.headers['orgid'] = validateOrgsResult.validOrgIds
 			} else if (userRoles.includes(CONSTANTS.common.ORG_ADMIN)) {
-				req.headers['tenantid'] = UTILS.lowerCase(decodedToken.data.tenant_code.toString())
-				req.headers['orgid'] = [UTILS.lowerCase(decodedToken.data.organization_ids[0].toString())]
+				req.headers['tenantid'] = UTILS.lowerCase(decodedToken.data.tenant_id.toString())
+				req.headers['orgid'] = [UTILS.lowerCase(decodedToken.data.organization_id.toString())]
 			} else {
 				rspObj.errCode = CONSTANTS.apiResponses.TOKEN_MISSING_CODE
 				rspObj.errMsg = CONSTANTS.apiResponses.TOKEN_MISSING_MESSAGE

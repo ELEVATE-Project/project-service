@@ -14,6 +14,8 @@ const fs = require('fs')
 const inputValidator = require(PROJECT_ROOT_DIRECTORY + '/generics/middleware/validator')
 const path = require('path')
 const https = require('https')
+const { elevateLog } = require('elevate-logger')
+const logger = elevateLog.init()
 
 module.exports = function (app) {
 	const applicationBaseUrl = process.env.APPLICATION_BASE_URL || '/project/'
@@ -106,9 +108,13 @@ module.exports = function (app) {
 					})
 				}
 
-				console.log('-------------------Response log starts here-------------------')
-				console.log(JSON.stringify(result))
-				console.log('-------------------Response log ends here-------------------')
+				logger.debug('-------------------Response log starts here-------------------')
+				try {
+					logger.debug(JSON.stringify(result))
+				} catch (e) {
+					logger.debug(result)
+				}
+				logger.debug('-------------------Response log ends here-------------------')
 			} catch (error) {
 				res.status(error.status ? error.status : HTTP_STATUS_CODE.bad_request.status).json({
 					status: error.status ? error.status : HTTP_STATUS_CODE.bad_request.status,
@@ -219,9 +225,13 @@ module.exports = function (app) {
 					})
 				}
 
-				console.log('-------------------Response log starts here-------------------')
-				console.log(JSON.stringify(result))
-				console.log('-------------------Response log ends here-------------------')
+				logger.debug('-------------------Response log starts here-------------------')
+				try {
+					logger.debug(JSON.stringify(result))
+				} catch (e) {
+					logger.debug(result)
+				}
+				logger.debug('-------------------Response log ends here-------------------')
 			} catch (error) {
 				res.status(error.status ? error.status : HTTP_STATUS_CODE.bad_request.status).json({
 					status: error.status ? error.status : HTTP_STATUS_CODE.bad_request.status,
@@ -280,18 +290,15 @@ module.exports = function (app) {
 					}
 				}
 
-				if (
-					!controllers['v1'] ||
-					!controllers['v1']['library'] ||
-					!controllers['v1']['library']['categories']
-				) {
+				// Route library/category requests to projectCategories controller for unified handling
+				if (!controllers['v1'] || !controllers['v1']['projectCategories']) {
 					return res.status(HTTP_STATUS_CODE['not_found'].status).json({
 						status: HTTP_STATUS_CODE['not_found'].status,
 						message: 'Controller not found',
 					})
 				}
 
-				if (!controllers['v1']['library']['categories'][controllerMethod]) {
+				if (!controllers['v1']['projectCategories'][controllerMethod]) {
 					return res.status(HTTP_STATUS_CODE['not_found'].status).json({
 						status: HTTP_STATUS_CODE['not_found'].status,
 						message: 'Method not found',
@@ -300,13 +307,13 @@ module.exports = function (app) {
 
 				req.params = {
 					version: 'v1',
-					controller: 'library',
-					file: 'categories',
+					controller: 'projectCategories',
+					file: 'projectCategories',
 					method: controllerMethod,
 					_id: req.params.id || req.params._id,
 				}
 
-				const result = await controllers['v1']['library']['categories'][controllerMethod](req)
+				const result = await controllers['v1']['projectCategories'][controllerMethod](req)
 
 				res.status(result.status ? result.status : HTTP_STATUS_CODE['ok'].status).json({
 					message: result.message,
@@ -326,7 +333,14 @@ module.exports = function (app) {
 	}
 
 	// GET /categories/projects/:id -> GET /project/v1/library/categories/projects/:id
-	app.get('/categories/projects/:id', inputValidator, createLibraryApiRouteHandler('projects'))
+	app.get('/categories/projects/:id', inputValidator, createLibraryApiRouteHandler('projectsByCategoryId'))
+
+	// Legacy library category routes compatibility - Projects by Category ID
+	app.get(
+		applicationBaseUrl + 'v1/library/categories/projects/:id',
+		inputValidator,
+		createLibraryApiRouteHandler('projectsByCategoryId')
+	)
 
 	// POST /categories/projects/list -> Bulk fetch projects from multiple categories
 	app.post('/categories/projects/list', inputValidator, createLibraryApiRouteHandler('projectList'))
@@ -336,6 +350,31 @@ module.exports = function (app) {
 		applicationBaseUrl + 'v1/library/categories/projects/list',
 		inputValidator,
 		createLibraryApiRouteHandler('projectList')
+	)
+
+	// Legacy library category routes compatibility
+	// GET /project/v1/library/categories/list -> List categories
+	app.get(applicationBaseUrl + 'v1/library/categories/list', inputValidator, createLibraryApiRouteHandler('list'))
+
+	// POST /project/v1/library/categories/create -> Create category
+	app.post(
+		applicationBaseUrl + 'v1/library/categories/create',
+		inputValidator,
+		createLibraryApiRouteHandler('create')
+	)
+
+	// GET /project/v1/library/categories/details/:id -> Get category details
+	app.get(
+		applicationBaseUrl + 'v1/library/categories/details/:id',
+		inputValidator,
+		createLibraryApiRouteHandler('details')
+	)
+
+	// POST /project/v1/library/categories/update/:id -> Update category
+	app.post(
+		applicationBaseUrl + 'v1/library/categories/update/:id',
+		inputValidator,
+		createLibraryApiRouteHandler('update')
 	)
 
 	app.use((req, res, next) => {

@@ -31,10 +31,6 @@ module.exports = {
 				name: String,
 				level: Number, // Category level in hierarchy
 				isLeaf: Boolean, // Is this a leaf category?
-				syncedAt: {
-					type: Date,
-					default: Date.now,
-				},
 			},
 		],
 		categorySyncedAt: {

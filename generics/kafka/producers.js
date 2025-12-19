@@ -183,10 +183,40 @@ const pushUserCoursesToKafka = function (message) {
 	})
 }
 
+/**
+ * Push category change event to Kafka.
+ * @function
+ * @name pushCategoryChangeEvent
+ * @param {Object} message - The message payload to be pushed to Kafka.
+ * @returns {Promise<Object>} Kafka push status response.
+ */
+const pushCategoryChangeEvent = function (message) {
+	return new Promise(async (resolve, reject) => {
+		try {
+			const categoryChangeTopic =
+				process.env.CATEGORY_CHANGE_TOPIC && process.env.CATEGORY_CHANGE_TOPIC != 'OFF'
+					? process.env.CATEGORY_CHANGE_TOPIC
+					: 'category_change_topic'
+
+			let kafkaPushStatus = await pushMessageToKafka([
+				{
+					topic: categoryChangeTopic,
+					messages: JSON.stringify(message),
+				},
+			])
+
+			return resolve(kafkaPushStatus)
+		} catch (error) {
+			return reject(error)
+		}
+	})
+}
+
 module.exports = {
 	pushProjectToKafka: pushProjectToKafka,
 	pushUserActivitiesToKafka: pushUserActivitiesToKafka,
 	pushProgramOperationEvent: pushProgramOperationEvent,
 	pushResourceDeleteKafkaEvent: pushResourceDeleteKafkaEvent,
 	pushUserCoursesToKafka: pushUserCoursesToKafka,
+	pushCategoryChangeEvent: pushCategoryChangeEvent,
 }

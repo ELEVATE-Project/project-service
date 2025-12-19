@@ -6,7 +6,11 @@
  */
 
 // Dependencies
-// const libraryCategoriesHelper = require(MODULES_BASE_PATH + '/library/categories/helper')
+// Legacy `module/library/categories/helper.js` was removed and its
+// functionality moved to `module/projectCategories/helper.js`.
+// Keep the `libraryCategoriesHelper` variable name for backwards
+// compatibility with existing calls in this file.
+const libraryCategoriesHelper = require(MODULES_BASE_PATH + '/projectCategories/helper')
 const projectTemplatesHelper = require(MODULES_BASE_PATH + '/project/templates/helper')
 const { v4: uuidv4 } = require('uuid')
 const projectQueries = require(DB_QUERY_BASE_PATH + '/projects')

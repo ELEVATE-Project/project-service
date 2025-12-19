@@ -338,4 +338,88 @@ module.exports = class ProjectCategories extends Abstract {
 			}
 		}
 	}
+
+	/**
+	 * Wrapper for listing projects under a category (alias of helper.projects)
+	 * Maintains compatibility with legacy /library/categories/projects endpoints.
+	 */
+	async projectsByCategoryId(req) {
+		try {
+			// use standard pagination middleware values
+			const limit = req.pageSize
+			const offset = (req.pageNo - 1) * limit
+			const search = req.searchText
+
+			const categoryId = req.params._id ? req.params._id : ''
+			const sort = req.query.sort
+
+			const libraryProjects = await projectCategoriesHelper.projects(
+				[categoryId], // Pass single ID as array
+				limit,
+				offset,
+				search,
+				sort,
+				req.userDetails
+			)
+
+			return {
+				success: true,
+				message: libraryProjects.message,
+				result: libraryProjects.data,
+			}
+		} catch (error) {
+			return {
+				status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+				message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+				errorObject: error,
+			}
+		}
+	}
+
+	/**
+	 * Wrapper for bulk fetching projects by multiple category IDs
+	 * Maintains compatibility with legacy /project/v1/library/categories/projects/list
+	 */
+	async projectList(req) {
+		try {
+			const categoryIds = req.body.categoryIds || req.body.categoryExternalIds
+
+			if (!categoryIds || !Array.isArray(categoryIds) || categoryIds.length === 0) {
+				throw {
+					status: HTTP_STATUS_CODE.bad_request.status,
+					message: 'categoryIds or categoryExternalIds array is required',
+				}
+			}
+
+			const limit = req.body.limit || req.pageSize
+			let offset = req.body.offset
+			if (!offset) {
+				const pageNo = req.body.page || req.pageNo
+				offset = (pageNo - 1) * limit
+			}
+			const searchText = req.body.searchText || req.searchText // here we can get the searchtext on post and get request
+
+			// Call the same consolidated helper.projects method
+			const libraryProjects = await projectCategoriesHelper.projects(
+				categoryIds,
+				limit,
+				offset,
+				searchText,
+				null,
+				req.userDetails
+			)
+
+			return {
+				success: true,
+				message: libraryProjects.message,
+				result: libraryProjects.data,
+			}
+		} catch (error) {
+			return {
+				status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+				message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+				errorObject: error,
+			}
+		}
+	}
 }

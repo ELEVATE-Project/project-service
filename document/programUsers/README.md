@@ -212,21 +212,37 @@ Response (Invalid Transition):
 
 ### 3. List Program Users
 
-This works for offset also
+Supports both page-based and offset-based pagination.
+
+#### Query Parameters (Pagination Only)
+
+-   `page`: Page number (default: 1) - **use for page-based pagination**
+-   `limit`: Items per page (default: 10, max: 100)
+-   `offset`: Number of documents to skip (default: 0) - **use for offset-based pagination instead of page**
+
+#### Filter Parameters (Pass in POST Body)
+
+-   `programId`: Filter by program ID
+-   `userId`: Filter by user ID
+-   `status`: Filter by status (supports single or multiple comma-separated values)
+-   `createdBy`: Filter by creator
+-   `templateExternalId`: Filter by template external ID (supports single or multiple comma-separated values)
+
+**Note:** `orgId` is automatically extracted from the authentication token and cannot be overridden.
+
+#### Basic List with Page-Based Pagination
 
 ```bash
-POST /project/v1/programUsers/list?page=1&limit=10&programId=xxx&status=ONBOARDED
+POST /project/v1/programUsers/list?page=1&limit=10
 Headers:
   x-auth-token: <token>
+  Content-Type: application/json
 
-Query Parameters:
-  - page: Page number (default: 1)
-  - limit: Items per page (default: 10, max: 100)
-  - programId: Filter by program ID
-  - userId: Filter by user ID
-  - status: Filter by status
-  - createdBy: Filter by creator
-  - orgId: Filter by organization
+Body:
+{
+  "programId": "507f1f77bcf86cd799439012",
+  "status": "ONBOARDED"
+}
 
 Response:
 {
@@ -238,6 +254,180 @@ Response:
   "page": 1,
   "limit": 10,
   "totalPages": 10
+}
+```
+
+#### List with Offset-Based Pagination
+
+```bash
+POST /project/v1/programUsers/list?offset=0&limit=10
+Headers:
+  x-auth-token: <token>
+  Content-Type: application/json
+
+Body:
+{
+  "programId": "507f1f77bcf86cd799439012"
+}
+
+Response:
+{
+  "success": true,
+  "message": "Program users fetched successfully",
+  "result": [...],
+  "count": 100,
+  "totalCount": 100,
+  "page": 1,
+  "limit": 10,
+  "offset": 0,
+  "totalPages": 10
+}
+```
+
+#### Filter by Single Status
+
+```bash
+POST /project/v1/programUsers/list?page=1&limit=10
+Headers:
+  x-auth-token: <token>
+  Content-Type: application/json
+
+Body:
+{
+  "programId": "507f1f77bcf86cd799439012",
+  "status": "ONBOARDED"
+}
+```
+
+#### Filter by Multiple Statuses
+
+```bash
+POST /project/v1/programUsers/list?page=1&limit=10
+Headers:
+  x-auth-token: <token>
+  Content-Type: application/json
+
+Body:
+{
+  "programId": "507f1f77bcf86cd799439012",
+  "status": "ONBOARDED,IN_PROGRESS,COMPLETED"
+}
+```
+
+#### Filter by Single templateExternalId
+
+The `templateExternalId` filter allows you to search for program users based on the templates they have in their metadata. Pass as an array or string format.
+
+**Array format (recommended):**
+
+```bash
+POST /project/v1/programUsers/list?page=1&limit=10
+Headers:
+  x-auth-token: <token>
+  Content-Type: application/json
+
+Body:
+{
+  "programId": "507f1f77bcf86cd799439012",
+  "templateExternalId": ["onboarding-template-002"]
+}
+```
+
+**String format:**
+
+```bash
+POST /project/v1/programUsers/list?page=1&limit=10
+Headers:
+  x-auth-token: <token>
+  Content-Type: application/json
+
+Body:
+{
+  "programId": "507f1f77bcf86cd799439012",
+  "templateExternalId": "onboarding-template-002"
+}
+```
+
+#### Filter by Multiple templateExternalIds
+
+**Array format (recommended):**
+
+```bash
+POST /project/v1/programUsers/list?page=1&limit=10
+Headers:
+  x-auth-token: <token>
+  Content-Type: application/json
+
+Body:
+{
+  "programId": "507f1f77bcf86cd799439012",
+  "templateExternalId": ["onboarding-template-002", "onboarding-template-003"]
+}
+```
+
+**Comma-separated string format:**
+
+```bash
+POST /project/v1/programUsers/list?page=1&limit=10
+Headers:
+  x-auth-token: <token>
+  Content-Type: application/json
+
+Body:
+{
+  "programId": "507f1f77bcf86cd799439012",
+  "templateExternalId": "onboarding-template-002,onboarding-template-003"
+}
+```
+
+#### Combination of Multiple Filters
+
+```bash
+POST /project/v1/programUsers/list?page=1&limit=10
+Headers:
+  x-auth-token: <token>
+  Content-Type: application/json
+
+Body:
+{
+  "programId": "507f1f77bcf86cd799439012",
+  "status": "ONBOARDED,IN_PROGRESS",
+  "templateExternalId": ["onboarding-template-002", "training-template-001"],
+  "userId": "user-uuid-1223"
+}
+```
+
+#### Response Example
+
+```json
+{
+	"success": true,
+	"message": "Program users fetched successfully",
+	"result": [
+		{
+			"_id": "6944e556ba76a72c3bb73003",
+			"programId": "507f1f77bcf86cd799439012",
+			"userId": "user-uuid-1223",
+			"status": "ONBOARDED",
+			"metadata": {
+				"externalIdOfBoardingCompletionCategory": {
+					"templateExternalId": "onboarding-template-002",
+					"tasks": [
+						{
+							"taskId": "task-001",
+							"completed": true,
+							"completedAt": "2024-12-18T10:00:00Z"
+						}
+					]
+				}
+			}
+		}
+	],
+	"count": 50,
+	"totalCount": 50,
+	"page": 1,
+	"limit": 10,
+	"totalPages": 5
 }
 ```
 

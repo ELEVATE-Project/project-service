@@ -410,68 +410,138 @@ module.exports = class ProgramUsersHelper {
 			try {
 				const tenantId = userDetails.userInformation.tenantId
 
-				// Build filter query
+				// 1. Build base filter query
 				const filter = {
 					tenantId: tenantId,
 				}
 
-				// Add optional filters from query params
-				if (queryParams.programId) {
-					filter.programId = ObjectId(queryParams.programId)
-				}
-
-				if (queryParams.userId) {
-					filter.userId = queryParams.userId
-				}
-
-				if (queryParams.status) {
-					filter.status = queryParams.status
-				}
-
-				if (queryParams.createdBy) {
-					filter.createdBy = queryParams.createdBy
-				}
-
-				if (queryParams.orgId) {
-					filter.orgId = queryParams.orgId
-				}
-
-				// Add filters from body if provided
+				// 2. Add filters from body
 				if (bodyData && Object.keys(bodyData).length > 0) {
 					Object.keys(bodyData).forEach((key) => {
+						if (['page', 'limit', 'offset', 'templateExternalId'].includes(key)) {
+							return
+						}
+
 						if (key === 'programId') {
 							filter.programId = ObjectId(bodyData.programId)
-						} else if (!['page', 'limit'].includes(key)) {
+						} else if (key === 'status') {
+							const statusValue = bodyData.status
+							const statuses =
+								typeof statusValue === 'string'
+									? statusValue.split(',').map((s) => s.trim())
+									: Array.isArray(statusValue)
+									? statusValue
+									: [statusValue]
+
+							filter.status = statuses.length === 1 ? statuses[0] : { $in: statuses }
+						} else if (['userId', 'createdBy', 'orgId'].includes(key)) {
+							filter[key] = bodyData[key]
+						} else if (
+							![
+								'userProfile',
+								'userRoleInformation',
+								'appInformation',
+								'consentShared',
+								'resourcesStarted',
+								'metadata',
+								'prevStatus',
+								'statusReason',
+								'deleted',
+								'tenantId',
+								'updatedBy',
+								'createdAt',
+								'updatedAt',
+							].includes(key)
+						) {
 							filter[key] = bodyData[key]
 						}
 					})
 				}
 
-				// Pagination - support both page/limit and offset/limit formats
-				let page, limit, offset
+				// 3. Handle templateExternalId filter (The ObjectToArray Fix)
+				let templateExternalIds = []
+				if (bodyData && bodyData.templateExternalId) {
+					const bodyValue = bodyData.templateExternalId
+					if (Array.isArray(bodyValue)) {
+						templateExternalIds = bodyValue.filter((id) => (id && id.trim ? id.trim() : id)).filter(Boolean)
+					} else if (typeof bodyValue === 'string') {
+						templateExternalIds = bodyValue
+							.split(',')
+							.map((id) => id.trim())
+							.filter(Boolean)
+					} else {
+						templateExternalIds = [bodyValue]
+					}
+				}
 
-				// Get limit (required for both formats)
-				limit = parseInt(queryParams.limit) || parseInt(bodyData?.limit) || 10
+				if (templateExternalIds.length > 0) {
+					/* Logic: Convert metadata object to array to ignore dynamic keys.
+					   Matches templateExternalId at Level 1 or Level 2 of metadata.
+					*/
+					filter.$expr = {
+						$gt: [
+							{
+								$size: {
+									$filter: {
+										input: { $objectToArray: { $ifNull: ['$metadata', {}] } },
+										as: 'item',
+										cond: {
+											$or: [
+												// Check Level 1: metadata.dynamicKey.templateExternalId
+												{ $in: ['$$item.v.templateExternalId', templateExternalIds] },
+												// Check Level 2: metadata.dynamicKey.subDynamicKey.templateExternalId
+												{
+													$anyElementTrue: {
+														$map: {
+															input: {
+																$cond: [
+																	{ $eq: [{ $type: '$$item.v' }, 'object'] },
+																	{ $objectToArray: '$$item.v' },
+																	[],
+																],
+															},
+															as: 'subItem',
+															in: {
+																$in: [
+																	'$$subItem.v.templateExternalId',
+																	templateExternalIds,
+																],
+															},
+														},
+													},
+												},
+											],
+										},
+									},
+								},
+							},
+							0,
+						],
+					}
+				}
 
-				// Check if offset is provided (offset/limit format)
+				console.log('Final filter for program users list:', JSON.stringify(filter))
+
+				// 4. Pagination Logic
+				let limit = parseInt(queryParams.limit) || parseInt(bodyData?.limit) || 10
+				let offset = 0
+				let page = 1
+
 				if (queryParams.offset !== undefined || bodyData?.offset !== undefined) {
 					offset = parseInt(queryParams.offset) || parseInt(bodyData?.offset) || 0
 					page = Math.floor(offset / limit) + 1
 				} else {
-					// Use page/limit format (default)
 					page = parseInt(queryParams.page) || parseInt(bodyData?.page) || 1
 					offset = (page - 1) * limit
 				}
 
-				// Sort
+				// 5. Execute Query
 				const sortData = { createdAt: -1 }
-
-				// Get paginated results using offset-based pagination
 				const result = await programUsersQueries.listWithOffset(filter, 'all', 'none', offset, limit, sortData)
 
 				return resolve({
 					success: true,
-					message: CONSTANTS.apiResponses.PROGRAM_USERS_FETCHED,
+					message: 'Program users fetched successfully',
 					data: result.data,
 					result: result.data,
 					count: result.totalCount,
@@ -481,10 +551,11 @@ module.exports = class ProgramUsersHelper {
 					totalPages: result.totalPages,
 				})
 			} catch (error) {
+				console.error('List Error:', error)
 				return resolve({
 					success: false,
 					message: error.message,
-					status: HTTP_STATUS_CODE.internal_server_error.status,
+					status: 500,
 				})
 			}
 		})

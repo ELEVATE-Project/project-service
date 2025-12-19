@@ -45,7 +45,6 @@ module.exports = (req) => {
 
 			// Metadata is optional
 			if (req.body.metadata) {
-				// Instead of .isObject(), we use a custom check
 				req.checkBody('metadata')
 					.custom((val) => typeof val === 'object' && !Array.isArray(val) && val !== null)
 					.withMessage('metadata must be an object')
@@ -80,7 +79,10 @@ module.exports = (req) => {
 
 			// Metadata is optional
 			if (req.body.metadata) {
-				req.checkBody('metadata').isObject().withMessage('metadata must be an object')
+				// FIXED: Replaced .isObject() with .custom()
+				req.checkBody('metadata')
+					.custom((val) => typeof val === 'object' && !Array.isArray(val) && val !== null)
+					.withMessage('metadata must be an object')
 			}
 		},
 
@@ -183,7 +185,8 @@ module.exports = (req) => {
 				.withMessage('metadata is required')
 				.notEmpty()
 				.withMessage('metadata cannot be empty')
-				.isObject()
+				// FIXED: Replaced .isObject() with .custom()
+				.custom((val) => typeof val === 'object' && !Array.isArray(val) && val !== null)
 				.withMessage('metadata must be an object')
 		},
 

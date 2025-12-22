@@ -260,7 +260,14 @@ module.exports = class ProjectCategoriesHelper {
 				categoryData.orgId = orgId[0]
 				categoryData.hasChildren = false
 				categoryData.childCount = 0
-				categoryData.displayOrder = categoryData.displayOrder || 0
+				// sequenceNumber replaces legacy displayOrder
+				categoryData.sequenceNumber = categoryData.sequenceNumber || categoryData.displayOrder || 0
+				// ensure icon (if provided at root) moves under metadata for storage
+				if (categoryData.icon) {
+					categoryData.metadata = categoryData.metadata || {}
+					categoryData.metadata.icon = categoryData.icon
+					delete categoryData.icon
+				}
 
 				// Create category
 				let createdCategory = await projectCategoriesQueries.create(categoryData)
@@ -271,15 +278,25 @@ module.exports = class ProjectCategoriesHelper {
 				// Update hierarchy fields
 				await projectCategoriesQueries.updateOne({ _id: createdCategory._id }, { $set: hierarchyFields })
 
-				// Update parent counters
+				// Update parent counters and add to children array
 				if (parentId) {
 					await this.updateParentCounts(parentId, tenantId, 1)
+					// add to parent's children array
+					await projectCategoriesQueries.updateOne(
+						{ _id: parentId },
+						{ $addToSet: { children: createdCategory._id } }
+					)
 					this.syncTemplatesForCategory(parentId, tenantId).catch(console.error)
 				}
 
 				createdCategory = await projectCategoriesQueries.findOne({
 					_id: createdCategory._id,
 				})
+
+				// normalize icon for backward compatibility
+				if (createdCategory && createdCategory.metadata && createdCategory.metadata.icon !== undefined) {
+					createdCategory.icon = createdCategory.metadata.icon
+				}
 
 				return resolve({
 					success: true,
@@ -365,7 +382,7 @@ module.exports = class ProjectCategoriesHelper {
 					skip = pageSize * (pageNo - 1)
 				}
 
-				const sort = { displayOrder: 1, name: 1 }
+				const sort = { sequenceNumber: 1, name: 1 }
 
 				// Use new paginated list query
 				let projectCategories = await projectCategoriesQueries.list(
@@ -373,14 +390,14 @@ module.exports = class ProjectCategoriesHelper {
 					{
 						externalId: 1,
 						name: 1,
-						icon: 1,
+						'metadata.icon': 1,
 						updatedAt: 1,
 						noOfProjects: 1,
 						level: 1,
 						parent_id: 1,
 						hasChildren: 1,
 						childCount: 1,
-						displayOrder: 1,
+						sequenceNumber: 1,
 						path: 1,
 					},
 					sort,
@@ -397,10 +414,20 @@ module.exports = class ProjectCategoriesHelper {
 					})
 				}
 
+				// Normalize icon from metadata and ensure sequenceNumber exists for compatibility
+				const normalizedData = projectCategories.data.map((cat) => {
+					const copy = { ...cat }
+					if (copy.metadata && copy.metadata.icon !== undefined) {
+						copy.icon = copy.metadata.icon
+					}
+					copy.sequenceNumber = copy.sequenceNumber || 0
+					return copy
+				})
+
 				return resolve({
 					success: true,
 					message: CONSTANTS.apiResponses.PROJECT_CATEGORIES_FETCHED || 'Categories fetched successfully',
-					data: projectCategories.data,
+					data: normalizedData,
 					count: projectCategories.count,
 				})
 			} catch (error) {
@@ -455,12 +482,12 @@ module.exports = class ProjectCategoriesHelper {
 					'_id',
 					'externalId',
 					'name',
-					'icon',
+					'metadata.icon',
 					'level',
 					'parent_id',
 					'hasChildren',
 					'childCount',
-					'displayOrder',
+					'sequenceNumber',
 					'path',
 					'pathArray',
 				])
@@ -495,17 +522,30 @@ module.exports = class ProjectCategoriesHelper {
 					}
 				})
 
-				// Sort by displayOrder
-				const sortByDisplayOrder = (categories) => {
-					categories.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
+				// Sort by sequenceNumber (replaces legacy displayOrder)
+				const sortBySequenceNumber = (categories) => {
+					categories.sort((a, b) => (a.sequenceNumber || 0) - (b.sequenceNumber || 0))
 					categories.forEach((cat) => {
 						if (cat.children.length > 0) {
-							sortByDisplayOrder(cat.children)
+							sortBySequenceNumber(cat.children)
 						}
 					})
 				}
 
-				sortByDisplayOrder(rootCategories)
+				// normalize icon field from metadata to top-level for backward compatibility
+				const normalizeIcon = (categories) => {
+					categories.forEach((cat) => {
+						if (cat.metadata && cat.metadata.icon !== undefined) {
+							cat.icon = cat.metadata.icon
+						}
+						if (cat.children && cat.children.length) {
+							normalizeIcon(cat.children)
+						}
+					})
+				}
+
+				sortBySequenceNumber(rootCategories)
+				normalizeIcon(rootCategories)
 
 				return resolve({
 					success: true,
@@ -753,13 +793,22 @@ module.exports = class ProjectCategoriesHelper {
 					)
 				}
 
-				// Update parent counts
+				// Update old parent: decrement count and remove from children array (both atomically)
 				if (oldParentId) {
 					await this.updateParentCounts(oldParentId, tenantId, -1)
+					// remove from old parent's children array
+					await projectCategoriesQueries.updateOne({ _id: oldParentId }, { $pull: { children: categoryId } })
 					this.syncTemplatesForCategory(oldParentId, tenantId).catch(console.error)
 				}
+
+				// Update new parent: increment count and add to children array (both atomically)
 				if (newParentId) {
 					await this.updateParentCounts(newParentId, tenantId, 1)
+					// add to new parent's children array
+					await projectCategoriesQueries.updateOne(
+						{ _id: newParentId },
+						{ $addToSet: { children: categoryId } }
+					)
 					this.syncTemplatesForCategory(newParentId, tenantId).catch(console.error)
 				}
 
@@ -1092,6 +1141,11 @@ module.exports = class ProjectCategoriesHelper {
 				// 5. Update parent counts
 				if (category.parent_id) {
 					await this.updateParentCounts(category.parent_id, tenantId, -1)
+					// remove from parent's children array
+					await projectCategoriesQueries.updateOne(
+						{ _id: category.parent_id },
+						{ $pull: { children: category._id } }
+					)
 				}
 
 				return resolve({
@@ -1870,6 +1924,11 @@ module.exports = class ProjectCategoriesHelper {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.CATEGORY_NOT_FOUND,
 					}
+				}
+
+				// normalize icon for backward compatibility
+				if (category && category.metadata && category.metadata.icon !== undefined) {
+					category.icon = category.metadata.icon
 				}
 
 				return resolve({

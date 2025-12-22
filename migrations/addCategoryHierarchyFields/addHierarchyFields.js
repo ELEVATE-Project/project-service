@@ -72,7 +72,8 @@ async function migrateToHierarchy(tenantId = null, dryRun = false) {
 					pathArray: [category._id],
 					hasChildren: false, // Will update after child creation
 					childCount: 0,
-					displayOrder: migratedCount,
+					sequenceNumber: migratedCount,
+					children: [],
 				}
 
 				if (!dryRun) {

@@ -57,7 +57,11 @@ module.exports = {
 			type: Number,
 			default: 0,
 		},
-		displayOrder: {
+		children: {
+			type: Array,
+			default: [],
+		},
+		sequenceNumber: {
 			type: Number,
 			default: 0,
 			index: true,
@@ -78,10 +82,7 @@ module.exports = {
 			default: 'active',
 			index: true,
 		},
-		icon: {
-			type: String,
-			default: '',
-		},
+		// icon moved under `metadata.icon` to keep category metadata together
 		noOfProjects: {
 			type: Number,
 			default: 0,
@@ -110,7 +111,9 @@ module.exports = {
 		},
 		metadata: {
 			type: Object,
-			default: {},
+			default: {
+				icon: '',
+			},
 		},
 	},
 	compoundIndex: [
@@ -119,7 +122,7 @@ module.exports = {
 			indexType: { unique: true },
 		},
 		{
-			name: { parent_id: 1, tenantId: 1, orgId: 1, displayOrder: 1 },
+			name: { parent_id: 1, tenantId: 1, orgId: 1, sequenceNumber: 1 },
 			indexType: {}, // For fetching sorted children
 		},
 		{

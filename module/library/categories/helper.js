@@ -47,8 +47,8 @@ module.exports = class ProjectCategoriesHelper {
 	 */
 	static projects(
 		categoryIds,
-		limit = 20,
-		pageNo = 1,
+		limit,
+		pageNo,
 		search,
 		sortedData,
 		userDetails,
@@ -71,13 +71,17 @@ module.exports = class ProjectCategoriesHelper {
 					},
 				}
 
-				// Fetch the organization extension document
+				// Fetch the organization extension document of the loggedin user
 				let orgExtension = await orgExtensionQueries.orgExtenDocuments({
 					tenantId: userDetails.userInformation.tenantId,
 					orgId: userDetails.userInformation.organizationId,
 				})
 
-				orgExtension = orgExtension && orgExtension.length > 0 ? orgExtension[0] : null
+				if (!orgExtension || orgExtension.length === 0) {
+					orgExtension = null
+				} else {
+					orgExtension = orgExtension[0]
+				}
 
 				matchQuery['$match']['tenantId'] = userDetails.userInformation.tenantId
 				matchQuery = this.applyVisibilityConditions(matchQuery, orgExtension, userDetails)
@@ -175,13 +179,13 @@ module.exports = class ProjectCategoriesHelper {
 						if (minDays !== Infinity && exactDurationFiltersInDays.length > 0) {
 							matchQuery['$match']['$and'] = [
 								...(matchQuery['$match']['$and'] || []),
-								{ durationInDays: { $gt: minDays } },
-								{ durationInDays: { $in: exactDurationFiltersInDays } },
+								{ durationInDays: { $gt: minDays } }, // Use $gt for greater than
+								{ durationInDays: { $in: exactDurationFiltersInDays } }, // For exact durations
 							]
 						} else if (minDays !== Infinity) {
-							matchQuery['$match']['durationInDays'] = { $gt: minDays }
+							matchQuery['$match']['durationInDays'] = { $gt: minDays } // Use $gt for greater than
 						} else if (exactDurationFiltersInDays.length > 0) {
-							matchQuery['$match']['durationInDays'] = { $in: exactDurationFiltersInDays }
+							matchQuery['$match']['durationInDays'] = { $in: exactDurationFiltersInDays } // Handle $in independently
 						}
 					}
 

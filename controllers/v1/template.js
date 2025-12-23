@@ -6,7 +6,7 @@
  */
 
 // dependencies
-const projectCategoriesHelper = require(MODULES_BASE_PATH + '/projectCategories/helper')
+const libraryCategoriesHelper = require(MODULES_BASE_PATH + '/library/categories/helper')
 
 /**
  * UserExtension service.
@@ -40,7 +40,7 @@ module.exports = class Template {
 				if (req.query.duration) options.duration = req.query.duration
 				if (req.query.role) options.roles = req.query.role
 
-				const projects = await projectCategoriesHelper.projects(
+				const projects = await libraryCategoriesHelper.projects(
 					req.params._id ? req.params._id : '',
 					req.pageSize,
 					req.pageNo,

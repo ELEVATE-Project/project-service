@@ -131,14 +131,14 @@ module.exports = function (app) {
 	app.all(applicationBaseUrl + ':version/:controller/:file/:method/:_id', inputValidator, router)
 
 	// Route aliases for /categories/* endpoints (matching specification)
-	// These map to /project/v1/projectCategories/* endpoints
+	// These map to /project/v1/library/categories/* endpoints
 	// Apply middleware to /categories routes
 	app.use('/categories', authenticator)
 	app.use('/categories', pagination)
 	app.use('/categories', addTenantAndOrgInRequest)
 	app.use('/categories', checkAdminRole)
 
-	// Helper function to create API route handlers that directly call the controller
+	// Helper function to create API route handlers that directly call the library controller
 	const createApiRouteHandler = (controllerMethod) => {
 		return async (req, res, next) => {
 			try {
@@ -152,14 +152,18 @@ module.exports = function (app) {
 				}
 
 				// Check if controller and method exist
-				if (!controllers['v1'] || !controllers['v1']['projectCategories']) {
+				if (
+					!controllers['v1'] ||
+					!controllers['v1']['library'] ||
+					!controllers['v1']['library']['categories']
+				) {
 					return res.status(HTTP_STATUS_CODE['not_found'].status).json({
 						status: HTTP_STATUS_CODE['not_found'].status,
 						message: 'Controller not found',
 					})
 				}
 
-				if (!controllers['v1']['projectCategories'][controllerMethod]) {
+				if (!controllers['v1']['library']['categories'][controllerMethod]) {
 					return res.status(HTTP_STATUS_CODE['not_found'].status).json({
 						status: HTTP_STATUS_CODE['not_found'].status,
 						message: 'Method not found',
@@ -169,13 +173,14 @@ module.exports = function (app) {
 				// Set params for compatibility
 				req.params = {
 					version: 'v1',
-					controller: 'projectCategories',
+					controller: 'library',
+					file: 'categories',
 					method: controllerMethod,
 					_id: req.params.id || req.params._id,
 				}
 
-				// Call the controller method directly
-				const result = await controllers['v1']['projectCategories'][controllerMethod](req)
+				// Call the library controller method directly
+				const result = await controllers['v1']['library']['categories'][controllerMethod](req)
 
 				// Handle response
 				if (result.isResponseAStream == true) {
@@ -290,15 +295,19 @@ module.exports = function (app) {
 					}
 				}
 
-				// Route library/category requests to projectCategories controller for unified handling
-				if (!controllers['v1'] || !controllers['v1']['projectCategories']) {
+				// Route library/category requests to library/categories controller
+				if (
+					!controllers['v1'] ||
+					!controllers['v1']['library'] ||
+					!controllers['v1']['library']['categories']
+				) {
 					return res.status(HTTP_STATUS_CODE['not_found'].status).json({
 						status: HTTP_STATUS_CODE['not_found'].status,
 						message: 'Controller not found',
 					})
 				}
 
-				if (!controllers['v1']['projectCategories'][controllerMethod]) {
+				if (!controllers['v1']['library']['categories'][controllerMethod]) {
 					return res.status(HTTP_STATUS_CODE['not_found'].status).json({
 						status: HTTP_STATUS_CODE['not_found'].status,
 						message: 'Method not found',
@@ -307,13 +316,13 @@ module.exports = function (app) {
 
 				req.params = {
 					version: 'v1',
-					controller: 'projectCategories',
-					file: 'projectCategories',
+					controller: 'library',
+					file: 'categories',
 					method: controllerMethod,
 					_id: req.params.id || req.params._id,
 				}
 
-				const result = await controllers['v1']['projectCategories'][controllerMethod](req)
+				const result = await controllers['v1']['library']['categories'][controllerMethod](req)
 
 				res.status(result.status ? result.status : HTTP_STATUS_CODE['ok'].status).json({
 					message: result.message,
@@ -342,14 +351,21 @@ module.exports = function (app) {
 		createLibraryApiRouteHandler('projectsByCategoryId')
 	)
 
-	// POST /categories/projects/list -> Bulk fetch projects from multiple categories
+	// POST /categories/projects/list -> Fetch projects from multiple categories (with pagination)
 	app.post('/categories/projects/list', inputValidator, createLibraryApiRouteHandler('projectList'))
 
-	// POST /project/v1/library/categories/projects/list -> Bulk fetch projects
+	// POST /project/v1/library/categories/projects/list -> Fetch projects from multiple categories
 	app.post(
 		applicationBaseUrl + 'v1/library/categories/projects/list',
 		inputValidator,
 		createLibraryApiRouteHandler('projectList')
+	)
+
+	// POST /project/v1/library/categories/projects/bulk -> Bulk fetch projects (without pagination limits)
+	app.post(
+		applicationBaseUrl + 'v1/library/categories/projects/bulk',
+		inputValidator,
+		createLibraryApiRouteHandler('bulkProjects')
 	)
 
 	// Legacy library category routes compatibility
@@ -375,6 +391,47 @@ module.exports = function (app) {
 		applicationBaseUrl + 'v1/library/categories/update/:id',
 		inputValidator,
 		createLibraryApiRouteHandler('update')
+	)
+
+	// GET /project/v1/library/categories/leaves -> Get leaf categories
+	app.get(applicationBaseUrl + 'v1/library/categories/leaves', inputValidator, createLibraryApiRouteHandler('leaves'))
+
+	// GET /project/v1/library/categories/hierarchy -> Get complete category hierarchy
+	app.get(
+		applicationBaseUrl + 'v1/library/categories/hierarchy',
+		inputValidator,
+		createLibraryApiRouteHandler('hierarchy')
+	)
+
+	// GET /project/v1/library/categories/:id/hierarchy -> Get hierarchy for specific category
+	app.get(
+		applicationBaseUrl + 'v1/library/categories/:id/hierarchy',
+		inputValidator,
+		createLibraryApiRouteHandler('categoryHierarchy')
+	)
+
+	// POST /project/v1/library/categories/bulk -> Bulk create categories
+	app.post(applicationBaseUrl + 'v1/library/categories/bulk', inputValidator, createLibraryApiRouteHandler('bulk'))
+
+	// PATCH /project/v1/library/categories/move/:id -> Move category
+	app.patch(
+		applicationBaseUrl + 'v1/library/categories/move/:id',
+		inputValidator,
+		createLibraryApiRouteHandler('move')
+	)
+
+	// GET /project/v1/library/categories/canDelete/:id -> Check if category can be deleted
+	app.get(
+		applicationBaseUrl + 'v1/library/categories/canDelete/:id',
+		inputValidator,
+		createLibraryApiRouteHandler('canDelete')
+	)
+
+	// DELETE /project/v1/library/categories/delete/:id -> Delete category
+	app.delete(
+		applicationBaseUrl + 'v1/library/categories/delete/:id',
+		inputValidator,
+		createLibraryApiRouteHandler('delete')
 	)
 
 	app.use((req, res, next) => {

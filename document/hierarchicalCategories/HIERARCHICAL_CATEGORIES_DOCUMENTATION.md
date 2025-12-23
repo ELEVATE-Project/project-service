@@ -7,7 +7,7 @@ This document provides comprehensive technical documentation for implementing **
 ### Key Features
 
 -   ✅ **Multi-level Hierarchy**: Configurable depth (default: 3 levels).
--   ✅ **Materialized Path**: Optimized for efficient subtree queries.
+-   ✅ **Hierarchical Structure**: Optimized for efficient tree traversal and queries.
 -   ✅ **Backward Compatibility**: Fully compatible with existing API clients.
 -   ✅ **Template Sync**: Automatic background synchronization of project templates when categories are updated or moved.
 -   ✅ **API Aliases**: Supports both concise `/api/categories/*` and traditional `/project/v1/projectCategories/*` routes.
@@ -15,47 +15,32 @@ This document provides comprehensive technical documentation for implementing **
 
 ---
 
-## 🔄 Endpoint Mapping & Aliases
+## 🔄 Endpoint Mapping
 
-The system supports two URL patterns for accessing category resources. You can use them interchangeably.
+The system uses library endpoints for all category operations.
 
-## 🔄 Endpoint Mapping & Aliases
+### Library Endpoints (Primary)
 
-The system supports multiple URL patterns to ensure backward compatibility and future-proofing.
-
-### 1. Standard Hierarchical Endpoints (Recommended)
-
-These are the primary routes for the new hierarchical functionality.
-
--   Base Path: `/project/v1/projectCategories/*`
-
-### 2. Specification Aliases (Concise)
-
-Shortened aliases for the standard endpoints.
-
--   Base Path: `/categories/*`
-
-### 3. Legacy Library Endpoints (Backward Compatible)
-
-The original endpoints are fully supported and route to the new logic. Use these for existing clients.
+All category operations use the library controller.
 
 -   Base Path: `/project/v1/library/categories/*`
 
-| Action             | REST Endpoint                    | Standard Internal Route                           | Legacy Library Route                                |
-| ------------------ | -------------------------------- | ------------------------------------------------- | --------------------------------------------------- |
-| **List**           | `GET /categories`                | `GET /project/v1/projectCategories/list`          | `GET /project/v1/library/categories/list`           |
-| **Create**         | `POST /categories`               | `POST /project/v1/projectCategories/create`       | `POST /project/v1/library/categories/create`        |
-| **Get Single**     | `GET /categories/:id`            | `GET /project/v1/projectCategories/details/:id`   | `GET /project/v1/library/categories/details/:id`    |
-| **Update**         | `PATCH /categories/:id`          | `PATCH /project/v1/projectCategories/update/:id`  | `POST /project/v1/library/categories/update/:id`    |
-| **Delete**         | `DELETE /categories/:id`         | `DELETE /project/v1/projectCategories/delete/:id` | -                                                   |
-| **Hierarchy**      | `GET /categories/hierarchy`      | `GET /project/v1/projectCategories/hierarchy`     | -                                                   |
-| **Leaves**         | `GET /categories/leaves`         | `GET /project/v1/projectCategories/leaves`        | -                                                   |
-| **Bulk Create**    | `POST /categories/bulk`          | `POST /project/v1/projectCategories/bulk`         | -                                                   |
-| **Move**           | `PATCH /categories/:id/move`     | `PATCH /project/v1/projectCategories/move/:id`    | -                                                   |
-| **Can Delete**     | `GET /categories/:id/can-delete` | `GET /project/v1/projectCategories/canDelete/:id` | -                                                   |
-| **Projects**       | `GET /categories/projects/:id`   | -                                                 | `GET /project/v1/library/categories/projects/:id`   |
-| **Multi Projects** | `POST /categories/projects/list` | -                                                 | `POST /project/v1/library/categories/projects/list` |
-| **Bulk Projects**  | -                                | -                                                 | `POST /project/v1/library/categories/projects/list` |
+| Action                 | Library Route (Primary)                                                                        |
+| ---------------------- | ---------------------------------------------------------------------------------------------- |
+| **List**               | `GET /project/v1/library/categories/list`                                                      |
+| **Create**             | `POST /project/v1/library/categories/create`                                                   |
+| **Get Single**         | `GET /project/v1/library/categories/details/:id`                                               |
+| **Update**             | `PATCH /project/v1/library/categories/:id` or `POST /project/v1/library/categories/update/:id` |
+| **Delete**             | `DELETE /project/v1/library/categories/delete/:id`                                             |
+| **Hierarchy**          | `GET /project/v1/library/categories/hierarchy`                                                 |
+| **Category Hierarchy** | `GET /project/v1/library/categories/:id/hierarchy`                                             |
+| **Leaves**             | `GET /project/v1/library/categories/leaves`                                                    |
+| **Bulk Create**        | `POST /project/v1/library/categories/bulk`                                                     |
+| **Move**               | `PATCH /project/v1/library/categories/move/:id`                                                |
+| **Can Delete**         | `GET /project/v1/library/categories/canDelete/:id`                                             |
+| **Projects**           | `GET /project/v1/library/categories/projects/:id`                                              |
+| **Multi Projects**     | `POST /project/v1/library/categories/projects/list`                                            |
+| **Bulk Projects**      | `POST /project/v1/library/categories/projects/bulk`                                            |
 
 > **Note**: Legacy `update` uses `POST` method in some clients, while new endpoints use `PATCH`. Both are supported on the legacy route if implemented, but strictly `PATCH` on new routes is recommended.
 
@@ -159,18 +144,18 @@ The system automatically handles tenant and organization context:
 
 ```bash
 # Using User Token (Public API) - Working Example
-curl --location 'http://localhost:5003/categories' \
+curl --location 'http://localhost:5003/project/v1/library/categories/list' \
 --header 'X-auth-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoyMDAzLCJuYW1lIjoidGFuZnVuY29mZmljaWFsIHNsZGlyZWN0b3IiLCJzZXNzaW9uX2lkIjoyMjcwNiwib3JnYW5pemF0aW9uX2lkcyI6WyIzMyJdLCJvcmdhbml6YXRpb25fY29kZXMiOlsidGFuOTAiXSwidGVuYW50X2NvZGUiOiJzaGlrc2hhbG9rYW0iLCJvcmdhbml6YXRpb25zIjpbeyJpZCI6MzMsIm5hbWUiOiJ0YW45MCIsImNvZGUiOiJ0YW45MCIsImRlc2NyaXB0aW9uIjoiVGFuOTAgc3BlY2lhbGl6ZXMgaW4gcHJvdmlkaW5nIGVkdWNhdGlvbmFsIFNURUFNIiwic3RhdHVzIjoiQUNUSVZFIiwicmVsYXRlZF9vcmdzIjpbMzRdLCJ0ZW5hbnRfY29kZSI6InNoaWtzaGFsb2thbSIsIm1ldGEiOm51bGwsImNyZWF0ZWRfYnkiOjEsInVwZGF0ZWRfYnkiOjE3MDksInJvbGVzIjpbeyJpZCI6MjMsInRpdGxlIjoibWVudGVlIiwibGFiZWwiOiJtZW50ZWUiLCJ1c2VyX3R5cGUiOjAsInN0YXR1cyI6IkFDVElWRSIsIm9yZ2FuaXphdGlvbl9pZCI6MTAsInZpc2liaWxpdHkiOiJQVUJMSUMiLCJ0ZW5hbnRfY29kZSI6InNoaWtzaGFsb2thbSIsInRyYW5zbGF0aW9ucyI6bnVsbH1dfV19LCJpYXQiOjE3NjU4NjUzMDYsImV4cCI6MTc2NTk1MTcwNn0.TRuLHBD5sjkIgowCVnQC_3GgSZJnbJhpXU3rQKhfIdE'
 
 # Using Admin Token (Admin API)
-curl --location 'http://localhost:5003/categories' \
+curl --location 'http://localhost:5003/project/v1/library/categories/list' \
 --header 'internal-access-token: Fqn0m0HQ0gXydRtBCg5l' \
 --header 'tenantId: brac' \
 --header 'orgId: brac_gbl' \
 --header 'Content-Type: application/json'
 
 # Test all endpoints with working token
-curl --location 'http://localhost:5003/categories/hierarchy' \
+curl --location 'http://localhost:5003/project/v1/library/categories/hierarchy' \
 --header 'X-auth-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoyMDAzLCJuYW1lIjoidGFuZnVuY29mZmljaWFsIHNsZGlyZWN0b3IiLCJzZXNzaW9uX2lkIjoyMjcwNiwib3JnYW5pemF0aW9uX2lkcyI6WyIzMyJdLCJvcmdhbml6YXRpb25fY29kZXMiOlsidGFuOTAiXSwidGVuYW50X2NvZGUiOiJzaGlrc2hhbG9rYW0iLCJvcmdhbml6YXRpb25zIjpbeyJpZCI6MzMsIm5hbWUiOiJ0YW45MCIsImNvZGUiOiJ0YW45MCIsImRlc2NyaXB0aW9uIjoiVGFuOTAgc3BlY2lhbGl6ZXMgaW4gcHJvdmlkaW5nIGVkdWNhdGlvbmFsIFNURUFNIiwic3RhdHVzIjoiQUNUSVZFIiwicmVsYXRlZF9vcmdzIjpbMzRdLCJ0ZW5hbnRfY29kZSI6InNoaWtzaGFsb2thbSIsIm1ldGEiOm51bGwsImNyZWF0ZWRfYnkiOjEsInVwZGF0ZWRfYnkiOjE3MDksInJvbGVzIjpbeyJpZCI6MjMsInRpdGxlIjoibWVudGVlIiwibGFiZWwiOiJtZW50ZWUiLCJ1c2VyX3R5cGUiOjAsInN0YXR1cyI6IkFDVElWRSIsIm9yZ2FuaXphdGlvbl9pZCI6MTAsInZpc2liaWxpdHkiOiJQVUJMSUMiLCJ0ZW5hbnRfY29kZSI6InNoaWtzaGFsb2thbSIsInRyYW5zbGF0aW9ucyI6bnVsbH1dfV19LCJpYXQiOjE3NjU4NjUzMDYsImV4cCI6MTc2NTk1MTcwNn0.TRuLHBD5sjkIgowCVnQC_3GgSZJnbJhpXU3rQKhfIdE'
 ```
 
@@ -180,7 +165,7 @@ curl --location 'http://localhost:5003/categories/hierarchy' \
 
 ```bash
 # Create child category (validates parent exists)
-curl --location 'http://localhost:5003/categories' \
+curl --location 'http://localhost:5003/project/v1/library/categories/create' \
 --header 'X-auth-token: YOUR_TOKEN' \
 --header 'Content-Type: application/json' \
 --data '{
@@ -194,7 +179,7 @@ curl --location 'http://localhost:5003/categories' \
 
 ```bash
 # Move category (validates new parent exists, prevents circular references)
-curl --location 'http://localhost:5003/categories/693ffb64159e0b0eaa4cc314/move' \
+curl --location --request PATCH 'http://localhost:5003/project/v1/library/categories/move/693ffb64159e0b0eaa4cc314' \
 --header 'X-auth-token: YOUR_TOKEN' \
 --header 'Content-Type: application/json' \
 --data '{
@@ -206,33 +191,35 @@ curl --location 'http://localhost:5003/categories/693ffb64159e0b0eaa4cc314/move'
 
 ```bash
 # Check if safe to delete (validates no projects/children/templates)
-curl --location 'http://localhost:5003/categories/693ffb64159e0b0eaa4cc314/can-delete' \
+curl --location 'http://localhost:5003/project/v1/library/categories/canDelete/693ffb64159e0b0eaa4cc314' \
 --header 'X-auth-token: YOUR_TOKEN'
 
 # Delete only if can-delete returns true
-curl --location 'http://localhost:5003/categories/693ffb64159e0b0eaa4cc314' \
---header 'X-auth-token: YOUR_TOKEN' \
--X DELETE
+curl --location --request DELETE 'http://localhost:5003/project/v1/library/categories/delete/693ffb64159e0b0eaa4cc314' \
+--header 'X-auth-token: YOUR_TOKEN'
 ```
 
 ### Quick Test Commands
 
 ```bash
 # Test basic list
-curl --location 'http://localhost:5003/categories' --header 'X-auth-token: YOUR_TOKEN'
+curl --location 'http://localhost:5003/project/v1/library/categories/list' --header 'X-auth-token: YOUR_TOKEN'
 
-# Test hierarchy
-curl --location 'http://localhost:5003/categories/hierarchy' --header 'X-auth-token: YOUR_TOKEN'
+# Test complete hierarchy
+curl --location 'http://localhost:5003/project/v1/library/categories/hierarchy' --header 'X-auth-token: YOUR_TOKEN'
+
+# Test category-specific hierarchy
+curl --location 'http://localhost:5003/project/v1/library/categories/693ffb64159e0b0eaa4cc314/hierarchy' --header 'X-auth-token: YOUR_TOKEN'
 
 # Test leaves
-curl --location 'http://localhost:5003/categories/leaves' --header 'X-auth-token: YOUR_TOKEN'
+curl --location 'http://localhost:5003/project/v1/library/categories/leaves' --header 'X-auth-token: YOUR_TOKEN'
 
 # Test projects by multiple categories
-curl --location 'http://localhost:5003/categories/projects/list' \
+curl --location 'http://localhost:5003/project/v1/library/categories/projects/list' \
 --header 'X-auth-token: YOUR_TOKEN' \
 --header 'Content-Type: application/json' \
 --data '{
-  "categoryIds": ["64f1a2b3c4d5e6f7g8h9i0j1", "64f2b3c4d5e6f7g8h9i0j1k2"],
+  "categoryIds": ["694a31935b9cdcad6475ebd2", "64f2b3c4d5e6f7g8h9i0j1k2"],
   "page": 1,
   "limit": 10
 }'
@@ -242,14 +229,14 @@ curl --location 'http://localhost:5003/categories/projects/list' \
 
 ## 🚀 API Reference
 
-### 1. List Categories (REST Standard)
+### 1. List Categories
 
 Retrieves categories with optional filtering and pagination.
 
 **Request:**
 
 ```http
-GET /categories?page=1&limit=20&level=0&parentId=64f1...
+GET /project/v1/library/categories/list?page=1&limit=20&level=0&parentId=64f1...
 Headers:
   X-auth-token: <user-token>
 ```
@@ -267,7 +254,7 @@ Headers:
 			"level": 0,
 			"hasChildren": true,
 			"childCount": 3,
-			"displayOrder": 1
+			"sequenceNumber": 1
 		}
 	],
 	"count": 15
@@ -281,7 +268,7 @@ Retrieves details of a specific category.
 **Request:**
 
 ```http
-GET /categories/:id
+GET /project/v1/library/categories/details/:id
 Headers:
   X-auth-token: <user-token>
 ```
@@ -299,7 +286,7 @@ Headers:
     "parent_id": null,
     "hasChildren": true,
     "childCount": 3,
-    "displayOrder": 1,
+    "sequenceNumber": 1,
     "evidences": [...],
     "createdAt": "2023-09-01T10:00:00Z"
   }
@@ -313,9 +300,45 @@ Retrieves the full category tree structure.
 **Request:**
 
 ```http
-GET /categories/hierarchy?maxDepth=3
+GET /project/v1/library/categories/hierarchy?maxDepth=3
 Headers:
   X-auth-token: <user-token>
+```
+
+### 3a. Get Category-Specific Hierarchy
+
+Retrieves the hierarchy subtree starting from a specific category.
+
+**Request:**
+
+```http
+GET /project/v1/library/categories/:id/hierarchy
+Headers:
+  X-auth-token: <user-token>
+```
+
+**Response:**
+
+```json
+{
+	"message": "Category hierarchy fetched successfully",
+	"result": {
+		"tree": {
+			"_id": "64f1...",
+			"name": "Agriculture",
+			"level": 0,
+			"children": [
+				{
+					"_id": "64f2...",
+					"name": "Crops",
+					"level": 1,
+					"children": []
+				}
+			]
+		},
+		"totalCategories": 2
+	}
+}
 ```
 
 **Response:**
@@ -348,7 +371,7 @@ Headers:
 **Request:**
 
 ```http
-POST /categories
+POST /project/v1/library/categories/create
 Content-Type: application/json
 Headers:
   X-auth-token: <user-token>
@@ -359,7 +382,7 @@ Headers:
   "externalId": "cat-irrigation",
   "name": "Irrigation",
   "parentId": "64f1...",
-  "displayOrder": 1
+  "sequenceNumber": 1
 }
 ```
 
@@ -372,7 +395,7 @@ Moves a category and its entire subtree to a new parent.
 **Request:**
 
 ```http
-PATCH /categories/:id/move
+PATCH /project/v1/library/categories/move/:id
 Content-Type: application/json
 Headers:
   X-auth-token: <user-token>
@@ -384,7 +407,7 @@ Headers:
 }
 ```
 
-_Warning: This requires expensive path recalculation for all descendants._
+_Warning: This requires expensive level recalculation for all descendants._
 
 ### 6. Delete Category
 
@@ -393,7 +416,7 @@ Deletes a category after comprehensive validation.
 **Request:**
 
 ```http
-DELETE /categories/:id
+DELETE /project/v1/library/categories/delete/:id
 Headers:
   X-auth-token: <user-token>
 ```
@@ -444,7 +467,7 @@ _Note: Always use `GET /categories/:id/can-delete` first to check if deletion is
 **Request:**
 
 ```http
-GET /categories/leaves
+GET /project/v1/library/categories/leaves
 Headers:
   X-auth-token: <user-token>
 ```
@@ -454,7 +477,7 @@ Headers:
 **Request:**
 
 ```http
-GET /categories/:id/can-delete
+GET /project/v1/library/categories/canDelete/:id
 Headers:
   X-auth-token: <user-token>
 ```
@@ -523,7 +546,7 @@ Headers:
 **Request:**
 
 ```http
-POST /categories/bulk
+POST /project/v1/library/categories/bulk
 Headers:
   X-auth-token: <user-token>
 Content-Type: application/json
@@ -549,7 +572,7 @@ Content-Type: application/json
 **Request:**
 
 ```http
-GET /categories/projects/:categoryId?page=1&limit=10&search=irrigation
+GET /project/v1/library/categories/projects/:categoryId?page=1&limit=10&search=irrigation
 Headers:
   X-auth-token: <user-token>
 ```
@@ -580,7 +603,7 @@ Headers:
 **Request:**
 
 ```http
-POST /categories/projects/list
+POST /project/v1/library/categories/projects/list
 Headers:
   X-auth-token: <user-token>
 Content-Type: application/json
@@ -647,6 +670,71 @@ Content-Type: application/json
 -   `limit` (optional): Number of projects per page (default: 10, max: 50)
 -   `search` (optional): Search term to filter projects by title/description
 
+### 12. Get Projects by Multiple Categories (Bulk)
+
+Bulk fetch projects from multiple categories without strict pagination limits. Use this endpoint for bulk operations that need to retrieve larger datasets.
+
+**Request:**
+
+```http
+POST /project/v1/library/categories/projects/bulk
+Headers:
+  X-auth-token: <user-token>
+Content-Type: application/json
+
+{
+  "categoryIds": [
+    "64f1a2b3c4d5e6f7g8h9i0j1",
+    "64f2b3c4d5e6f7g8h9i0j1k2",
+    "64f3c4d5e6f7g8h9i0j1k2l3"
+  ],
+  "limit": 1000,
+  "offset": 0,
+  "search": "agriculture"
+}
+```
+
+**Response:**
+
+```json
+{
+	"message": "Bulk projects fetched successfully",
+	"result": {
+		"data": [
+			{
+				"_id": "64f2...",
+				"title": "Smart Agriculture System",
+				"description": "IoT-based farming management",
+				"averageRating": 4.7,
+				"noOfRatings": 18,
+				"categories": [
+					{
+						"_id": "64f1a2b3c4d5e6f7g8h9i0j1",
+						"name": "Agriculture",
+						"externalId": "agriculture"
+					}
+				]
+			}
+		],
+		"count": 45,
+		"totalProjects": 45,
+		"categoriesQueried": 3
+	}
+}
+```
+
+**Parameters:**
+
+-   `categoryIds` (required): Array of category IDs to fetch projects from
+-   `limit` (optional): Number of projects to fetch (default: 1000, higher limit for bulk operations)
+-   `offset` (optional): Offset for pagination (default: 0)
+-   `search` (optional): Search term to filter projects by title/description
+
+**Difference between Multi Projects and Bulk Projects:**
+
+-   **Multi Projects** (`/projects/list`): Standard pagination with lower default limits (default: 10, max: 50). Use for regular API calls with pagination.
+-   **Bulk Projects** (`/projects/bulk`): Higher default limit (default: 1000) for bulk operations. Use when you need to fetch larger datasets without strict pagination constraints.
+
 ---
 
 ## 📊 Database Schema Changes
@@ -655,14 +743,11 @@ Content-Type: application/json
 
 **Location:** `models/project-categories.js`
 
-| Field         | Type            | Description                                             |
-| ------------- | --------------- | ------------------------------------------------------- |
-| `parent_id`   | ObjectId        | Reference to parent category (null for root)            |
-| `level`       | Number          | Depth in hierarchy (0 = root)                           |
-| `path`        | String          | Materialized path (e.g., "rootId/childId/grandchildId") |
-| `pathArray`   | Array<ObjectId> | Array of ancestor IDs for easy filtering                |
-| `hasChildren` | Boolean         | Optimization flag for leaf detection                    |
-| `childCount`  | Number          | Number of direct children                               |
+| Field         | Type     | Description                                  |
+| ------------- | -------- | -------------------------------------------- |
+| `parent_id`   | ObjectId | Reference to parent category (null for root) |
+| `hasChildren` | Boolean  | Optimization flag for leaf detection         |
+| `childCount`  | Number   | Number of direct children                    |
 
 ---
 
@@ -705,12 +790,15 @@ node migrations/addHierarchyFields/addHierarchyFields.js
 
 ```
 module/
-└── projectCategories/
-    ├── helper.js              # Core logic (Move, Create, Delete, Hierarchy)
+└── library/
+    └── categories/
+        ├── helper.js          # Core logic (Move, Create, Delete, Hierarchy)
+        └── validator/
+            └── v1.js
 controllers/
 └── v1/
-    ├── projectCategories.js   # Main controller
-    └── library/categories.js  # Legacy controller (redirects to new helper)
+    └── library/
+        └── categories.js      # Library controller
 models/
 └── project-categories.js      # Mongoose schema
 databaseQueries/
@@ -774,12 +862,12 @@ The following fixes have been implemented in `generics/middleware/authenticator.
 
 ### Category Operations Table
 
-| Operation           | Endpoint                      | What Gets Updated                                                                                                                                                                                                                              | Validation Checks                                                                                    |
-| ------------------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| **Create Category** | `POST /categories`            | • Auto-sets level<br>• Calculates path<br>• Calculates pathArray<br>• Updates parent's childCount<br>• Updates parent's hasChildren                                                                                                            | • Parent exists<br>• Max depth not exceeded<br>• Unique externalId<br>• Valid tenant/org             |
-| **Move Category**   | `PATCH /categories/{id}/move` | • Recalculates level for category + all descendants<br>• Recalculates path for category + all descendants<br>• Recalculates pathArray for category + all descendants<br>• Updates old parent's childCount<br>• Updates new parent's childCount | • New parent exists<br>• Not moving to own descendant<br>• Max depth not exceeded for new position   |
-| **Delete Category** | `DELETE /categories/{id}`     | • Sets isDeleted: true<br>• Updates parent's childCount<br>• Updates parent's hasChildren if last child                                                                                                                                        | • No children exist<br>• No projects use category/children<br>• No templates reference this category |
-| **Update Category** | `PATCH /categories/{id}`      | • Updates specified fields only<br>• Does NOT recalculate hierarchy fields                                                                                                                                                                     | • Category exists<br>• Valid field values                                                            |
+| Operation           | Endpoint                      | What Gets Updated                                                                                                             | Validation Checks                                                                                    |
+| ------------------- | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| **Create Category** | `POST /categories`            | • Auto-sets level<br>• Updates parent's childCount<br>• Updates parent's hasChildren                                          | • Parent exists<br>• Max depth not exceeded<br>• Unique externalId<br>• Valid tenant/org             |
+| **Move Category**   | `PATCH /categories/{id}/move` | • Recalculates level for category + all descendants<br>• Updates old parent's childCount<br>• Updates new parent's childCount | • New parent exists<br>• Not moving to own descendant<br>• Max depth not exceeded for new position   |
+| **Delete Category** | `DELETE /categories/{id}`     | • Sets isDeleted: true<br>• Updates parent's childCount<br>• Updates parent's hasChildren if last child                       | • No children exist<br>• No projects use category/children<br>• No templates reference this category |
+| **Update Category** | `PATCH /categories/{id}`      | • Updates specified fields only<br>• Does NOT recalculate hierarchy fields                                                    | • Category exists<br>• Valid field values                                                            |
 
 ### Data Integrity Rules Table
 
@@ -798,7 +886,7 @@ The following fixes have been implemented in `generics/middleware/authenticator.
 1.  **Circular References**: The `move` logic prevents moving a category into its own descendant.
 2.  **Orphans**: `getHierarchy` gracefully handles orphan nodes (nodes whose parent is missing) by treating them as roots for display.
 3.  **Data Integrity**: `delete` is cascading. Always check `can-delete` endpoint first in UI.
-4.  **Legacy Support**: `module/library/categories/helper.js` has been **removed**. All legacy endpoints now route through `projectCategories/helper.js`.
+4.  **Library Controller**: All library endpoints (`/project/v1/library/categories/*`) are handled by `controllers/v1/library/categories.js`, which uses the `library/categories/helper.js` for core logic.
 5.  **Token Compatibility**: Middleware has been updated to handle the new token structure with nested organization roles.
-6.  **Multi-Category Projects**: The `POST /categories/projects/list` endpoint allows fetching projects from multiple categories in a single request, improving performance for complex filtering scenarios.
+6.  **Multi-Category Projects**: The `POST /project/v1/library/categories/projects/list` endpoint allows fetching projects from multiple categories with standard pagination. For bulk operations, use `POST /project/v1/library/categories/projects/bulk` which supports higher limits.
 7.  **Parent Validation**: All create and move operations validate parent existence before proceeding with hierarchy calculations.

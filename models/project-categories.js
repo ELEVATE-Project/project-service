@@ -32,22 +32,7 @@ module.exports = {
 			default: null,
 			index: true, // CRITICAL for hierarchy queries
 		},
-		level: {
-			type: Number,
-			default: 0,
-			min: 0,
-			max: 3, // Enforce max depth via config
-			index: true,
-		},
-		path: {
-			type: String, // Materialized path: "root_id/parent_id/self_id"
-			default: '',
-			index: true, // IMPORTANT: Enables efficient subtree queries
-		},
-		pathArray: {
-			type: Array, // [root_id, parent_id, self_id]
-			default: [],
-		},
+
 		hasChildren: {
 			type: Boolean,
 			default: false,
@@ -124,14 +109,6 @@ module.exports = {
 		{
 			name: { parent_id: 1, tenantId: 1, orgId: 1, sequenceNumber: 1 },
 			indexType: {}, // For fetching sorted children
-		},
-		{
-			name: { level: 1, tenantId: 1, isDeleted: 1, isVisible: 1, hasChildren: 1 },
-			indexType: {}, // For fetching by level
-		},
-		{
-			name: { path: 1, tenantId: 1 },
-			indexType: {}, // For subtree queries
 		},
 	],
 }

@@ -28,12 +28,9 @@ node migrations/addHierarchyFields/addHierarchyFields.js --tenant=shikshalokam
 2. Sets them as root categories (level 0, parent_id: null)
 3. Initializes hierarchy fields:
     - `parent_id`: null
-    - `level`: 0
-    - `path`: category ID
-    - `pathArray`: [category ID]
     - `hasChildren`: false
     - `childCount`: 0
-    - `displayOrder`: sequential number
+    - `sequenceNumber`: sequential number
 
 ## Important Notes
 

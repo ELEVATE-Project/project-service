@@ -67,9 +67,6 @@ async function migrateToHierarchy(tenantId = null, dryRun = false) {
 			try {
 				const updateData = {
 					parent_id: null, // All existing = roots
-					level: 0,
-					path: String(category._id),
-					pathArray: [category._id],
 					hasChildren: false, // Will update after child creation
 					childCount: 0,
 					sequenceNumber: migratedCount,

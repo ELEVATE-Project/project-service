@@ -2,7 +2,7 @@
  * name : helper.js
  * author : Implementation Team
  * created-date : December 2025
- * Description : Project categories helper with hierarchical support.
+ * Description : Library categories helper with hierarchical support.
  */
 
 // Dependencies
@@ -26,63 +26,6 @@ const kafkaProducersHelper = require(GENERICS_FILES_PATH + '/kafka/producers')
  * @class
  */
 module.exports = class ProjectCategoriesHelper {
-	/**
-	 * Calculate path and level for a category
-	 * @method
-	 * @name calculateHierarchyFields
-	 * @param {ObjectId} parentId - Parent category ID
-	 * @param {String} tenantId - Tenant ID
-	 * @param {ObjectId} categoryId - Current category ID
-	 * @returns {Object} Hierarchy fields (path, pathArray, level)
-	 */
-	static async calculateHierarchyFields(parentId, tenantId, categoryId) {
-		try {
-			if (!parentId) {
-				// Root category
-				return {
-					parent_id: null,
-					level: 0,
-					path: String(categoryId),
-					pathArray: [categoryId],
-				}
-			}
-
-			// Get parent category
-			const parent = await projectCategoriesQueries.findOne(
-				{ _id: parentId, tenantId, isDeleted: false },
-				{ path: 1, pathArray: 1, level: 1 }
-			)
-
-			if (!parent) {
-				throw {
-					status: HTTP_STATUS_CODE.bad_request.status,
-					message: CONSTANTS.apiResponses.PARENT_CATEGORY_NOT_FOUND || 'Parent category not found',
-				}
-			}
-
-			// Check max depth
-			if (parent.level >= hierarchyConfig.maxHierarchyDepth) {
-				throw {
-					status: HTTP_STATUS_CODE.bad_request.status,
-					message: `Maximum hierarchy depth of ${hierarchyConfig.maxHierarchyDepth} reached`,
-				}
-			}
-
-			// Build path and pathArray
-			const newPath = parent.path ? `${parent.path}/${categoryId}` : `${parentId}/${categoryId}`
-			const newPathArray = [...(parent.pathArray || [parentId]), categoryId]
-
-			return {
-				parent_id: parentId,
-				level: parent.level + 1,
-				path: newPath,
-				pathArray: newPathArray,
-			}
-		} catch (error) {
-			throw error
-		}
-	}
-
 	/**
 	 * Update parent's hasChildren and childCount
 	 * @method
@@ -138,33 +81,6 @@ module.exports = class ProjectCategoriesHelper {
 		}
 
 		return parent
-	}
-
-	/**
-	 * Calculate hierarchy fields for child calculation
-	 * @method
-	 * @name calculateChildHierarchyFields
-	 * @param {Object} parent - Parent category object
-	 * @param {ObjectId} childId - Child category ID
-	 * @returns {Object} Hierarchy fields
-	 */
-	static async calculateChildHierarchyFields(parent, childId) {
-		if (!parent) {
-			// Root category
-			return {
-				parent_id: null,
-				level: 0,
-				path: `${childId}`,
-				pathArray: [childId],
-			}
-		}
-
-		return {
-			parent_id: parent._id,
-			level: parent.level + 1,
-			path: `${parent.path}/${childId}`,
-			pathArray: [...parent.pathArray, childId],
-		}
 	}
 
 	/**
@@ -260,8 +176,7 @@ module.exports = class ProjectCategoriesHelper {
 				categoryData.orgId = orgId[0]
 				categoryData.hasChildren = false
 				categoryData.childCount = 0
-				// sequenceNumber replaces legacy displayOrder
-				categoryData.sequenceNumber = categoryData.sequenceNumber || categoryData.displayOrder || 0
+				categoryData.sequenceNumber = categoryData.sequenceNumber || 0
 				// ensure icon (if provided at root) moves under metadata for storage
 				if (categoryData.icon) {
 					categoryData.metadata = categoryData.metadata || {}
@@ -271,12 +186,6 @@ module.exports = class ProjectCategoriesHelper {
 
 				// Create category
 				let createdCategory = await projectCategoriesQueries.create(categoryData)
-
-				// Calculate hierarchy
-				const hierarchyFields = await this.calculateChildHierarchyFields(parent, createdCategory._id)
-
-				// Update hierarchy fields
-				await projectCategoriesQueries.updateOne({ _id: createdCategory._id }, { $set: hierarchyFields })
 
 				// Update parent counters and add to children array
 				if (parentId) {
@@ -333,16 +242,11 @@ module.exports = class ProjectCategoriesHelper {
 					isDeleted: false,
 				}
 
-				// Filter by level if provided
-				if (req.query.level !== undefined) {
-					query.level = parseInt(req.query.level)
-				}
-
 				// Filter by parentId if provided
 				if (req.query.parentId) {
 					query.parent_id = req.query.parentId
-				} else if (req.query.level === '0' || req.query.level === 0) {
-					// Root categories
+				} else if (req.query.rootOnly === 'true' || req.query.rootOnly === true) {
+					// Root categories only
 					query.parent_id = null
 				}
 
@@ -393,12 +297,10 @@ module.exports = class ProjectCategoriesHelper {
 						'metadata.icon': 1,
 						updatedAt: 1,
 						noOfProjects: 1,
-						level: 1,
 						parent_id: 1,
 						hasChildren: 1,
 						childCount: 1,
 						sequenceNumber: 1,
-						path: 1,
 					},
 					sort,
 					skip,
@@ -471,31 +373,17 @@ module.exports = class ProjectCategoriesHelper {
 					isDeleted: false,
 				}
 
-				if (req.query.categoryId) {
-					query.pathArray = new ObjectId(req.query.categoryId)
-				}
-
-				const maxDepth = req.query.maxDepth ? parseInt(req.query.maxDepth) : null
-
 				// Get all categories
 				let allCategories = await projectCategoriesQueries.categoryDocuments(query, [
 					'_id',
 					'externalId',
 					'name',
 					'metadata.icon',
-					'level',
 					'parent_id',
 					'hasChildren',
 					'childCount',
 					'sequenceNumber',
-					'path',
-					'pathArray',
 				])
-
-				// Filter by maxDepth if provided
-				if (maxDepth !== null) {
-					allCategories = allCategories.filter((cat) => cat.level <= maxDepth)
-				}
 
 				// Build tree structure
 				const categoryMap = {}
@@ -522,7 +410,7 @@ module.exports = class ProjectCategoriesHelper {
 					}
 				})
 
-				// Sort by sequenceNumber (replaces legacy displayOrder)
+				// Sort by sequenceNumber
 				const sortBySequenceNumber = (categories) => {
 					categories.sort((a, b) => (a.sequenceNumber || 0) - (b.sequenceNumber || 0))
 					categories.forEach((cat) => {
@@ -552,6 +440,151 @@ module.exports = class ProjectCategoriesHelper {
 					message: 'Category hierarchy fetched successfully',
 					data: {
 						tree: rootCategories,
+						totalCategories: allCategories.length,
+					},
+				})
+			} catch (error) {
+				return reject({
+					success: false,
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message,
+					data: {},
+				})
+			}
+		})
+	}
+
+	/**
+	 * Get hierarchy for a specific category (subtree starting from category)
+	 * @method
+	 * @name getCategoryHierarchy
+	 * @param {String} categoryId - Category ID
+	 * @param {Object} req - Request object
+	 * @returns {Object} Category subtree
+	 */
+	static getCategoryHierarchy(categoryId, req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let tenantId =
+					req.headers['tenantId'] ||
+					req.body.tenantId ||
+					req.query.tenantId ||
+					req.query.tenantCode ||
+					req.userDetails.userInformation.tenantId
+
+				// Find the category
+				let matchQuery = { tenantId: tenantId, isDeleted: false }
+				if (ObjectId.isValid(categoryId)) {
+					matchQuery['$or'] = [{ _id: new ObjectId(categoryId) }, { externalId: categoryId }]
+				} else {
+					matchQuery['externalId'] = categoryId
+				}
+
+				const category = await projectCategoriesQueries.findOne(matchQuery)
+
+				if (!category) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.CATEGORY_NOT_FOUND || 'Category not found',
+					}
+				}
+
+				// Get all descendant categories recursively
+				const descendantIds = await this.getAllDescendantIds(category._id, tenantId)
+				const allCategoryIds = [category._id, ...descendantIds]
+
+				// Convert all IDs to ObjectId for query
+				const objectIdArray = allCategoryIds.map((id) => {
+					if (id instanceof ObjectId) return id
+					if (ObjectId.isValid(id)) return new ObjectId(id)
+					return id
+				})
+
+				// Get all categories in the subtree
+				let query = {
+					tenantId: tenantId,
+					_id: { $in: objectIdArray },
+					status: CONSTANTS.common.ACTIVE_STATUS,
+					isDeleted: false,
+				}
+
+				let allCategories = await projectCategoriesQueries.categoryDocuments(query, [
+					'_id',
+					'externalId',
+					'name',
+					'metadata.icon',
+					'parent_id',
+					'hasChildren',
+					'childCount',
+					'sequenceNumber',
+				])
+
+				// Build tree structure starting from the requested category
+				const categoryMap = {}
+				let rootCategory = null
+
+				// Create map of all categories
+				allCategories.forEach((cat) => {
+					const catIdStr = cat._id.toString()
+					categoryMap[catIdStr] = { ...cat, children: [] }
+					const categoryIdStr = category._id.toString()
+					if (catIdStr === categoryIdStr) {
+						rootCategory = categoryMap[catIdStr]
+					}
+				})
+
+				// Build tree - only add children that are in our map
+				allCategories.forEach((cat) => {
+					const categoryNode = categoryMap[cat._id.toString()]
+					if (cat.parent_id) {
+						// Handle both ObjectId and string formats
+						let parentIdStr
+						if (cat.parent_id instanceof ObjectId) {
+							parentIdStr = cat.parent_id.toString()
+						} else if (cat.parent_id._id) {
+							parentIdStr = cat.parent_id._id.toString()
+						} else {
+							parentIdStr = cat.parent_id.toString()
+						}
+
+						if (categoryMap[parentIdStr]) {
+							categoryMap[parentIdStr].children.push(categoryNode)
+						}
+					}
+				})
+
+				// Sort by sequenceNumber
+				const sortBySequenceNumber = (categoryNode) => {
+					if (categoryNode.children && categoryNode.children.length > 0) {
+						categoryNode.children.sort((a, b) => (a.sequenceNumber || 0) - (b.sequenceNumber || 0))
+						categoryNode.children.forEach((child) => {
+							if (child.children && child.children.length > 0) {
+								sortBySequenceNumber(child)
+							}
+						})
+					}
+				}
+
+				// normalize icon field from metadata to top-level for backward compatibility
+				const normalizeIcon = (categoryNode) => {
+					if (categoryNode.metadata && categoryNode.metadata.icon !== undefined) {
+						categoryNode.icon = categoryNode.metadata.icon
+					}
+					if (categoryNode.children && categoryNode.children.length) {
+						categoryNode.children.forEach((child) => normalizeIcon(child))
+					}
+				}
+
+				if (rootCategory) {
+					sortBySequenceNumber(rootCategory)
+					normalizeIcon(rootCategory)
+				}
+
+				return resolve({
+					success: true,
+					message: 'Category hierarchy fetched successfully',
+					data: {
+						tree: rootCategory,
 						totalCategories: allCategories.length,
 					},
 				})
@@ -652,9 +685,6 @@ module.exports = class ProjectCategoriesHelper {
 				delete updateData.tenantId
 				delete updateData.orgId
 				delete updateData.parent_id
-				delete updateData.path
-				delete updateData.pathArray
-				delete updateData.level
 				delete updateData.hasChildren
 				delete updateData.childCount
 
@@ -742,56 +772,18 @@ module.exports = class ProjectCategoriesHelper {
 				// Get old parent
 				const oldParentId = category.parent_id
 
-				// Calculate new hierarchy fields with actual category ID
-				const hierarchyFields = await this.calculateHierarchyFields(newParentId, tenantId, categoryId)
-
-				// Get all descendants
+				// Get all descendants (for syncing templates later)
 				const descendants = await projectCategoriesQueries.getDescendants(categoryId, tenantId)
-				const levelDiff = hierarchyFields.level - category.level
 
-				// Calculate new path and pathArray
-				const newPath = hierarchyFields.path
-				const newPathArray = hierarchyFields.pathArray
-
-				// Update category
+				// Update category with new parent only
 				await projectCategoriesQueries.updateOne(
 					{ _id: categoryId },
 					{
 						$set: {
-							parent_id: hierarchyFields.parent_id,
-							level: hierarchyFields.level,
-							path: newPath,
-							pathArray: newPathArray,
+							parent_id: newParentId,
 						},
 					}
 				)
-
-				// Update all descendants
-				for (const descendant of descendants) {
-					const newLevel = descendant.level + levelDiff
-					const oldPathPrefix = category.path
-					const newPathPrefix = hierarchyFields.path
-					const newPath = descendant.path.replace(oldPathPrefix, newPathPrefix)
-
-					// Recalculate pathArray
-					const pathArrayIndex = category.pathArray ? category.pathArray.length : 1
-					const newPathArray = [
-						...hierarchyFields.pathArray.slice(0, -1),
-						categoryId,
-						...descendant.pathArray.slice(pathArrayIndex),
-					]
-
-					await projectCategoriesQueries.updateOne(
-						{ _id: descendant._id },
-						{
-							$set: {
-								level: newLevel,
-								path: newPath,
-								pathArray: newPathArray,
-							},
-						}
-					)
-				}
 
 				// Update old parent: decrement count and remove from children array (both atomically)
 				if (oldParentId) {
@@ -868,12 +860,65 @@ module.exports = class ProjectCategoriesHelper {
 					hasChildren: false,
 				}
 
-				let leafCategories = await projectCategoriesQueries.getLeafCategories(query)
+				// Pagination logic using hierarchy.config.js
+				const defaultLimit = hierarchyConfig.pagination.defaultLimit || 20
+				const maxLimit = hierarchyConfig.pagination.maxLimit || 100
+
+				let pageSize = defaultLimit
+				if (req.pageSize && req.pageSize > 0) {
+					pageSize = parseInt(req.pageSize)
+				} else if (req.query.limit && req.query.limit > 0) {
+					pageSize = parseInt(req.query.limit)
+				}
+
+				if (pageSize > maxLimit) pageSize = maxLimit
+
+				let skip = 0
+				if (req.query.offset && parseInt(req.query.offset) >= 0) {
+					skip = parseInt(req.query.offset)
+				} else {
+					let pageNo = 1
+					if (req.pageNo && req.pageNo > 0) {
+						pageNo = parseInt(req.pageNo)
+					} else if (req.query.page && req.query.page > 0) {
+						pageNo = parseInt(req.query.page)
+					}
+					skip = pageSize * (pageNo - 1)
+				}
+
+				const sort = { sequenceNumber: 1, name: 1 }
+
+				// Use list query with pagination
+				let leafCategoriesResult = await projectCategoriesQueries.list(
+					query,
+					{
+						externalId: 1,
+						name: 1,
+						'metadata.icon': 1,
+						parent_id: 1,
+						hasChildren: 1,
+						childCount: 1,
+						sequenceNumber: 1,
+					},
+					sort,
+					skip,
+					pageSize
+				)
+
+				// Normalize icon from metadata
+				const normalizedData = leafCategoriesResult.data.map((cat) => {
+					const copy = { ...cat }
+					if (copy.metadata && copy.metadata.icon !== undefined) {
+						copy.icon = copy.metadata.icon
+					}
+					return copy
+				})
 
 				return resolve({
 					success: true,
 					message: 'Leaf categories fetched successfully',
-					data: leafCategories,
+					data: normalizedData,
+					count: leafCategoriesResult.count,
 				})
 			} catch (error) {
 				return reject({
@@ -887,7 +932,7 @@ module.exports = class ProjectCategoriesHelper {
 	}
 
 	/**
-	 * Get all descendant category IDs for a given category
+	 * Get all descendant category IDs for a given category (recursive)
 	 * @method
 	 * @name getAllDescendantIds
 	 * @param {ObjectId} categoryId - Parent category ID
@@ -896,15 +941,52 @@ module.exports = class ProjectCategoriesHelper {
 	 */
 	static async getAllDescendantIds(categoryId, tenantId) {
 		try {
-			const descendants = await projectCategoriesQueries.findAll(
-				{
-					tenantId: tenantId,
-					pathArray: categoryId,
-					isDeleted: false,
-				},
-				['_id']
-			)
-			return descendants.map((cat) => cat._id)
+			const allDescendantIds = []
+			const processedIds = new Set()
+
+			// Recursive function to get all descendants
+			const getDescendants = async (parentId) => {
+				// Normalize parentId to string for comparison
+				const parentIdStr = parentId instanceof ObjectId ? parentId.toString() : parentId.toString()
+
+				// Avoid infinite loops
+				if (processedIds.has(parentIdStr)) {
+					return
+				}
+				processedIds.add(parentIdStr)
+
+				// Convert to ObjectId for query - MongoDB can match ObjectId with ObjectId or string
+				const parentObjectId =
+					parentId instanceof ObjectId
+						? parentId
+						: ObjectId.isValid(parentId)
+						? new ObjectId(parentId)
+						: parentId
+
+				// Query for direct children - try both ObjectId and string formats
+				const children = await projectCategoriesQueries.categoryDocuments(
+					{
+						tenantId: tenantId,
+						$or: [{ parent_id: parentObjectId }, { parent_id: parentIdStr }],
+						isDeleted: false,
+						status: CONSTANTS.common.ACTIVE_STATUS,
+					},
+					['_id', 'parent_id']
+				)
+
+				for (const child of children) {
+					const childIdStr = child._id.toString()
+					// Only add if not already in the list
+					if (!allDescendantIds.some((id) => id.toString() === childIdStr)) {
+						allDescendantIds.push(child._id)
+						// Recursively get children of this child
+						await getDescendants(child._id)
+					}
+				}
+			}
+
+			await getDescendants(categoryId)
+			return allDescendantIds
 		} catch (error) {
 			console.error('Error getting descendant IDs:', error)
 			return []
@@ -1886,7 +1968,6 @@ module.exports = class ProjectCategoriesHelper {
 						_id: category._id,
 						name: category.name,
 						externalId: category.externalId,
-						level: category.level,
 						isLeaf: !category.hasChildren,
 						updatedAt: new Date(),
 					},

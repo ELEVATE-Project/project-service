@@ -1,35 +1,35 @@
 /**
- * name : projectCategories.js
+ * name : categories.js
  * author : Implementation Team
  * created-date : December 2025
- * Description : Project categories controller with hierarchical support.
+ * Description : Library categories controller with hierarchical support.
  */
 
 // Dependencies
-const projectCategoriesHelper = require(MODULES_BASE_PATH + '/projectCategories/helper')
+const libraryCategoriesHelper = require(MODULES_BASE_PATH + '/library/categories/helper')
 
 /**
- * ProjectCategories service.
+ * Library Categories service.
  * @class
  */
-module.exports = class ProjectCategories extends Abstract {
+module.exports = class LibraryCategories extends Abstract {
 	// Adding model schema
 	constructor() {
 		super('project-categories')
 	}
 
 	/**
-	 * @api {post} /project/v1/projectCategories/create
+	 * @api {post} /project/v1/library/categories/create
 	 * @apiVersion 1.0.0
 	 * @apiName create
-	 * @apiGroup ProjectCategories
+	 * @apiGroup LibraryCategories
 	 * @apiHeader {String} X-auth-token Authenticity token
 	 * @apiUse successBody
 	 * @apiUse errorBody
 	 */
 	async create(req) {
 		try {
-			const result = await projectCategoriesHelper.create(req.body, req.files, req.userDetails)
+			const result = await libraryCategoriesHelper.create(req.body, req.files, req.userDetails)
 			if (result.success) {
 				return {
 					success: true,
@@ -52,17 +52,17 @@ module.exports = class ProjectCategories extends Abstract {
 	}
 
 	/**
-	 * @api {get} /project/v1/projectCategories/list
+	 * @api {get} /project/v1/library/categories/list
 	 * @apiVersion 1.0.0
 	 * @apiName list
-	 * @apiGroup ProjectCategories
+	 * @apiGroup LibraryCategories
 	 * @apiHeader {String} X-auth-token Authenticity token
 	 * @apiUse successBody
 	 * @apiUse errorBody
 	 */
 	async list(req) {
 		try {
-			const result = await projectCategoriesHelper.list(req)
+			const result = await libraryCategoriesHelper.list(req)
 			return {
 				success: true,
 				message: result.message,
@@ -78,17 +78,17 @@ module.exports = class ProjectCategories extends Abstract {
 	}
 
 	/**
-	 * @api {get} /project/v1/projectCategories/hierarchy
+	 * @api {get} /project/v1/library/categories/hierarchy
 	 * @apiVersion 1.0.0
 	 * @apiName hierarchy
-	 * @apiGroup ProjectCategories
+	 * @apiGroup LibraryCategories
 	 * @apiHeader {String} X-auth-token Authenticity token
 	 * @apiUse successBody
 	 * @apiUse errorBody
 	 */
 	async hierarchy(req) {
 		try {
-			const result = await projectCategoriesHelper.getHierarchy(req)
+			const result = await libraryCategoriesHelper.getHierarchy(req)
 			return {
 				success: true,
 				message: result.message,
@@ -104,10 +104,37 @@ module.exports = class ProjectCategories extends Abstract {
 	}
 
 	/**
-	 * @api {patch} /project/v1/projectCategories/update/:id
+	 * @api {get} /project/v1/library/categories/:id/hierarchy
+	 * @apiVersion 1.0.0
+	 * @apiName categoryHierarchy
+	 * @apiGroup LibraryCategories
+	 * @apiHeader {String} X-auth-token Authenticity token
+	 * @apiUse successBody
+	 * @apiUse errorBody
+	 */
+	async categoryHierarchy(req) {
+		try {
+			const categoryId = req.params._id
+			const result = await libraryCategoriesHelper.getCategoryHierarchy(categoryId, req)
+			return {
+				success: true,
+				message: result.message,
+				result: result.data,
+			}
+		} catch (error) {
+			return {
+				status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+				message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+				errorObject: error,
+			}
+		}
+	}
+
+	/**
+	 * @api {post} /project/v1/library/categories/update/:id
 	 * @apiVersion 1.0.0
 	 * @apiName update
-	 * @apiGroup ProjectCategories
+	 * @apiGroup LibraryCategories
 	 * @apiHeader {String} X-auth-token Authenticity token
 	 * @apiUse successBody
 	 * @apiUse errorBody
@@ -117,7 +144,7 @@ module.exports = class ProjectCategories extends Abstract {
 			const findQuery = {
 				_id: req.params._id,
 			}
-			const result = await projectCategoriesHelper.update(findQuery, req.body, req.files, req.userDetails)
+			const result = await libraryCategoriesHelper.update(findQuery, req.body, req.files, req.userDetails)
 			if (result.success) {
 				return {
 					success: true,
@@ -139,10 +166,10 @@ module.exports = class ProjectCategories extends Abstract {
 	}
 
 	/**
-	 * @api {patch} /project/v1/projectCategories/move/:id
+	 * @api {patch} /project/v1/library/categories/move/:id
 	 * @apiVersion 1.0.0
 	 * @apiName move
-	 * @apiGroup ProjectCategories
+	 * @apiGroup LibraryCategories
 	 * @apiHeader {String} X-auth-token Authenticity token
 	 * @apiUse successBody
 	 * @apiUse errorBody
@@ -154,7 +181,7 @@ module.exports = class ProjectCategories extends Abstract {
 			const tenantId = req.body.tenantId || req.userDetails.tenantAndOrgInfo.tenantId
 			const orgId = req.body.orgId || req.userDetails.tenantAndOrgInfo.orgId[0]
 
-			const result = await projectCategoriesHelper.move(categoryId, newParentId, tenantId, orgId)
+			const result = await libraryCategoriesHelper.move(categoryId, newParentId, tenantId, orgId)
 			if (result.success) {
 				return {
 					success: true,
@@ -177,17 +204,17 @@ module.exports = class ProjectCategories extends Abstract {
 	}
 
 	/**
-	 * @api {get} /project/v1/projectCategories/leaves
+	 * @api {get} /project/v1/library/categories/leaves
 	 * @apiVersion 1.0.0
 	 * @apiName leaves
-	 * @apiGroup ProjectCategories
+	 * @apiGroup LibraryCategories
 	 * @apiHeader {String} X-auth-token Authenticity token
 	 * @apiUse successBody
 	 * @apiUse errorBody
 	 */
 	async leaves(req) {
 		try {
-			const result = await projectCategoriesHelper.getLeaves(req)
+			const result = await libraryCategoriesHelper.getLeaves(req)
 			return {
 				success: true,
 				message: result.message,
@@ -203,10 +230,10 @@ module.exports = class ProjectCategories extends Abstract {
 	}
 
 	/**
-	 * @api {get} /project/v1/projectCategories/canDelete/:id
+	 * @api {get} /project/v1/library/categories/canDelete/:id
 	 * @apiVersion 1.0.0
 	 * @apiName canDelete
-	 * @apiGroup ProjectCategories
+	 * @apiGroup LibraryCategories
 	 * @apiHeader {String} X-auth-token Authenticity token
 	 * @apiUse successBody
 	 * @apiUse errorBody
@@ -217,7 +244,7 @@ module.exports = class ProjectCategories extends Abstract {
 			const tenantId = req.query.tenantId || req.userDetails.tenantAndOrgInfo.tenantId
 			const orgId = req.query.orgId || req.userDetails.tenantAndOrgInfo.orgId[0]
 
-			const result = await projectCategoriesHelper.canDelete(categoryId, tenantId, orgId)
+			const result = await libraryCategoriesHelper.canDelete(categoryId, tenantId, orgId)
 			return {
 				success: true,
 				message: result.data.canDelete ? 'Category can be deleted' : 'Category cannot be deleted',
@@ -233,19 +260,40 @@ module.exports = class ProjectCategories extends Abstract {
 	}
 
 	/**
-	 * @api {post} /project/v1/projectCategories/bulk
+	 * @api {post} /project/v1/library/categories/bulk
 	 * @apiVersion 1.0.0
 	 * @apiName bulk
-	 * @apiGroup ProjectCategories
+	 * @apiGroup LibraryCategories
 	 * @apiHeader {String} X-auth-token Authenticity token
 	 * @apiUse successBody
 	 * @apiUse errorBody
 	 */
+	async bulk(req) {
+		try {
+			const categories = req.body.categories || []
+			const tenantId = req.body.tenantId || req.userDetails.tenantAndOrgInfo.tenantId
+			const orgId = req.body.orgId || req.userDetails.tenantAndOrgInfo.orgId[0]
+
+			const result = await libraryCategoriesHelper.bulkCreate(categories, tenantId, orgId, req.userDetails)
+			return {
+				success: true,
+				message: result.message,
+				result: result.data,
+			}
+		} catch (error) {
+			return {
+				status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+				message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+				errorObject: error,
+			}
+		}
+	}
+
 	/**
-	 * @api {delete} /project/v1/projectCategories/delete/:id
+	 * @api {delete} /project/v1/library/categories/delete/:id
 	 * @apiVersion 1.0.0
 	 * @apiName delete
-	 * @apiGroup ProjectCategories
+	 * @apiGroup LibraryCategories
 	 * @apiHeader {String} X-auth-token Authenticity token
 	 * @apiUse successBody
 	 * @apiUse errorBody
@@ -256,7 +304,7 @@ module.exports = class ProjectCategories extends Abstract {
 			const tenantId = req.query.tenantId || req.userDetails.tenantAndOrgInfo.tenantId
 			const orgId = req.query.orgId || req.userDetails.tenantAndOrgInfo.orgId[0]
 
-			const result = await projectCategoriesHelper.delete(categoryId, tenantId, orgId)
+			const result = await libraryCategoriesHelper.delete(categoryId, tenantId, orgId)
 			if (result.success) {
 				return {
 					success: true,
@@ -278,32 +326,11 @@ module.exports = class ProjectCategories extends Abstract {
 		}
 	}
 
-	async bulk(req) {
-		try {
-			const categories = req.body.categories || []
-			const tenantId = req.body.tenantId || req.userDetails.tenantAndOrgInfo.tenantId
-			const orgId = req.body.orgId || req.userDetails.tenantAndOrgInfo.orgId[0]
-
-			const result = await projectCategoriesHelper.bulkCreate(categories, tenantId, orgId, req.userDetails)
-			return {
-				success: true,
-				message: result.message,
-				result: result.data,
-			}
-		} catch (error) {
-			return {
-				status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
-				message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
-				errorObject: error,
-			}
-		}
-	}
-
 	/**
-	 * @api {get} /project/v1/projectCategories/details/:id
+	 * @api {get} /project/v1/library/categories/details/:id
 	 * @apiVersion 1.0.0
 	 * @apiName details
-	 * @apiGroup ProjectCategories
+	 * @apiGroup LibraryCategories
 	 * @apiHeader {String} X-auth-token Authenticity token
 	 * @apiUse successBody
 	 * @apiUse errorBody
@@ -324,7 +351,7 @@ module.exports = class ProjectCategories extends Abstract {
 				}
 			}
 
-			const result = await projectCategoriesHelper.details(categoryId, tenantId)
+			const result = await libraryCategoriesHelper.details(categoryId, tenantId)
 			return {
 				success: true,
 				message: result.message,
@@ -340,8 +367,13 @@ module.exports = class ProjectCategories extends Abstract {
 	}
 
 	/**
-	 * Wrapper for listing projects under a category (alias of helper.projects)
-	 * Maintains compatibility with legacy /library/categories/projects endpoints.
+	 * @api {get} /project/v1/library/categories/projects/:id
+	 * @apiVersion 1.0.0
+	 * @apiName projectsByCategoryId
+	 * @apiGroup LibraryCategories
+	 * @apiHeader {String} X-auth-token Authenticity token
+	 * @apiUse successBody
+	 * @apiUse errorBody
 	 */
 	async projectsByCategoryId(req) {
 		try {
@@ -353,7 +385,7 @@ module.exports = class ProjectCategories extends Abstract {
 			const categoryId = req.params._id ? req.params._id : ''
 			const sort = req.query.sort
 
-			const libraryProjects = await projectCategoriesHelper.projects(
+			const libraryProjects = await libraryCategoriesHelper.projects(
 				[categoryId], // Pass single ID as array
 				limit,
 				offset,
@@ -377,8 +409,13 @@ module.exports = class ProjectCategories extends Abstract {
 	}
 
 	/**
-	 * Wrapper for bulk fetching projects by multiple category IDs
-	 * Maintains compatibility with legacy /project/v1/library/categories/projects/list
+	 * @api {post} /project/v1/library/categories/projects/list
+	 * @apiVersion 1.0.0
+	 * @apiName projectList
+	 * @apiGroup LibraryCategories
+	 * @apiHeader {String} X-auth-token Authenticity token
+	 * @apiUse successBody
+	 * @apiUse errorBody
 	 */
 	async projectList(req) {
 		try {
@@ -400,7 +437,7 @@ module.exports = class ProjectCategories extends Abstract {
 			const searchText = req.body.searchText || req.searchText // here we can get the searchtext on post and get request
 
 			// Call the same consolidated helper.projects method
-			const libraryProjects = await projectCategoriesHelper.projects(
+			const libraryProjects = await libraryCategoriesHelper.projects(
 				categoryIds,
 				limit,
 				offset,
@@ -412,6 +449,56 @@ module.exports = class ProjectCategories extends Abstract {
 			return {
 				success: true,
 				message: libraryProjects.message,
+				result: libraryProjects.data,
+			}
+		} catch (error) {
+			return {
+				status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+				message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+				errorObject: error,
+			}
+		}
+	}
+
+	/**
+	 * @api {post} /project/v1/library/categories/projects/bulk
+	 * @apiVersion 1.0.0
+	 * @apiName bulkProjects
+	 * @apiGroup LibraryCategories
+	 * @apiHeader {String} X-auth-token Authenticity token
+	 * @apiUse successBody
+	 * @apiUse errorBody
+	 * @apiDescription Bulk fetch projects from multiple categories without pagination limits (for bulk operations)
+	 */
+	async bulkProjects(req) {
+		try {
+			const categoryIds = req.body.categoryIds || req.body.categoryExternalIds
+
+			if (!categoryIds || !Array.isArray(categoryIds) || categoryIds.length === 0) {
+				throw {
+					status: HTTP_STATUS_CODE.bad_request.status,
+					message: 'categoryIds or categoryExternalIds array is required',
+				}
+			}
+
+			// For bulk operations, use a high limit or no limit
+			const limit = req.body.limit || 1000 // Higher default for bulk operations
+			let offset = req.body.offset || 0
+			const searchText = req.body.searchText || req.searchText
+
+			// Call the same consolidated helper.projects method
+			const libraryProjects = await libraryCategoriesHelper.projects(
+				categoryIds,
+				limit,
+				offset,
+				searchText,
+				null,
+				req.userDetails
+			)
+
+			return {
+				success: true,
+				message: libraryProjects.message || 'Bulk projects fetched successfully',
 				result: libraryProjects.data,
 			}
 		} catch (error) {

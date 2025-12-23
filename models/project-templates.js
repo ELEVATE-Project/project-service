@@ -29,8 +29,6 @@ module.exports = {
 					index: true,
 				},
 				name: String,
-				level: Number, // Category level in hierarchy
-				isLeaf: Boolean, // Is this a leaf category?
 			},
 		],
 		categorySyncedAt: {

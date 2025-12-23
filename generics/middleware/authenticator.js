@@ -73,6 +73,8 @@ module.exports = async function (req, res, next, token = '') {
 		'/templates/update',
 		'/projectAttributes/update',
 		'/scp/publishTemplateAndTasks',
+		'/library/categories/create',
+		'/library/categories/update',
 		'/programs/create',
 		'/programs/update',
 		'/programs/read',

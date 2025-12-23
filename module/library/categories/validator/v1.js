@@ -98,13 +98,8 @@ module.exports = (req) => {
 		},
 
 		/**
-		 * Hierarchy: Optional query parameters
+		 * (removed) Hierarchy validator: full-tree hierarchy endpoint removed
 		 */
-		hierarchy: function () {
-			if (req.query.maxDepth) {
-				req.checkQuery('maxDepth').isInt({ min: 1, max: 10 }).withMessage('maxDepth must be between 1 and 10')
-			}
-		},
 
 		/**
 		 * CategoryHierarchy: Validate category ID
@@ -170,38 +165,6 @@ module.exports = (req) => {
 			}
 			if (req.body.limit) {
 				req.checkBody('limit').isInt({ min: 1, max: 1000 }).withMessage('limit must be between 1 and 1000')
-			}
-		},
-
-		/**
-		 * BulkProjects: Validate categoryIds array (similar to projectList but for bulk operations)
-		 */
-		bulkProjects: function () {
-			// At least one of categoryIds or categoryExternalIds must be provided
-			if (!req.body.categoryIds && !req.body.categoryExternalIds) {
-				req.checkBody('categoryIds')
-					.exists()
-					.withMessage('categoryIds or categoryExternalIds array is required')
-			}
-			if (req.body.categoryIds) {
-				if (!Array.isArray(req.body.categoryIds)) {
-					req.checkBody('categoryIds')
-						.custom(() => false)
-						.withMessage('categoryIds must be an array')
-				}
-			}
-			if (req.body.categoryExternalIds) {
-				if (!Array.isArray(req.body.categoryExternalIds)) {
-					req.checkBody('categoryExternalIds')
-						.custom(() => false)
-						.withMessage('categoryExternalIds must be an array')
-				}
-			}
-			if (req.body.limit) {
-				req.checkBody('limit').isInt({ min: 1, max: 10000 }).withMessage('limit must be between 1 and 10000')
-			}
-			if (req.body.offset) {
-				req.checkBody('offset').isInt({ min: 0 }).withMessage('offset must be a non-negative integer')
 			}
 		},
 	}

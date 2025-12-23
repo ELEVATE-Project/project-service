@@ -53,8 +53,8 @@ module.exports = class Template {
 				)
 
 				return resolve({
-					message: libraryProjects.message,
-					result: libraryProjects.data,
+					message: projects.message,
+					result: projects.data,
 				})
 			} catch (error) {
 				return reject({

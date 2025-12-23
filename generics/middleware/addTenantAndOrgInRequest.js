@@ -17,7 +17,11 @@ module.exports = async function (req, res, next) {
 		'userProjects/details',
 		'users/solutions',
 	]
-	let normalUserInternalAccessPath = ['/programs/publishToLibrary', '/programs/ProgramUpdateForLibrary']
+	let normalUserInternalAccessPath = [
+		'/programs/publishToLibrary',
+		'/programs/ProgramUpdateForLibrary',
+		'library/categories',
+	]
 
 	let addTenantAndOrgDetails = false
 
@@ -46,7 +50,7 @@ module.exports = async function (req, res, next) {
 
 	// If the user is normal which doesn't have admin and system admin role then this logic will help to assign tenantAndOrgInfo
 	// If the user is normal which doesn't have admin and system admin role then this logic will help to assign tenantAndOrgInfo
-	if (req.userDetails && req.userDetails.userInformation && !req.userDetails.tenantAndOrgInfo) {
+	if (addTenantAndOrgDetails) {
 		req.userDetails.tenantAndOrgInfo = {}
 		req.userDetails.tenantAndOrgInfo.tenantId = req.userDetails.userInformation.tenantId
 		req.userDetails.tenantAndOrgInfo.orgId = [req.userDetails.userInformation.organizationId]

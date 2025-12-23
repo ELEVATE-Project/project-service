@@ -67,10 +67,10 @@ async function migrateToHierarchy(tenantId = null, dryRun = false) {
 			try {
 				const updateData = {
 					parent_id: null, // All existing = roots
-					hasChildren: false, // Will update after child creation
-					childCount: 0,
+					hasChildCategories: false, // Will update after child creation
 					sequenceNumber: migratedCount,
 					children: [],
+					metaInformation: { icon: '' },
 				}
 
 				if (!dryRun) {

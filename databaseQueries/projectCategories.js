@@ -153,51 +153,6 @@ module.exports = class ProjectCategories {
 	}
 
 	/**
-	 * Get category hierarchy using aggregation.
-	 * @method
-	 * @name getHierarchy
-	 * @param {Object} filterQuery - filtered Query.
-	 * @param {Number} maxDepth - Maximum depth to fetch.
-	 * @returns {Array} - Category hierarchy tree.
-	 */
-	static getHierarchy(filterQuery, maxDepth = null) {
-		return new Promise(async (resolve, reject) => {
-			try {
-				let pipeline = [
-					{ $match: filterQuery },
-					{
-						$graphLookup: {
-							from: 'projectCategories',
-							startWith: '$_id',
-							connectFromField: '_id',
-							connectToField: 'parent_id',
-							as: 'children',
-							maxDepth: maxDepth || 10,
-							depthField: 'depth',
-						},
-					},
-					{
-						$addFields: {
-							children: {
-								$filter: {
-									input: '$children',
-									as: 'child',
-									cond: { $eq: ['$$child.parent_id', '$_id'] },
-								},
-							},
-						},
-					},
-				]
-
-				let hierarchy = await database.models.projectCategories.aggregate(pipeline)
-				return resolve(hierarchy)
-			} catch (error) {
-				return reject(error)
-			}
-		})
-	}
-
-	/**
 	 * Get all descendants of a category using path.
 	 * @method
 	 * @name getDescendants
@@ -208,22 +163,28 @@ module.exports = class ProjectCategories {
 	static getDescendants(categoryId, tenantId) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let category = await database.models.projectCategories.findOne({ _id: categoryId, tenantId }).lean()
+				// If the collection does not maintain a `path` field, compute descendants
+				// by walking children via `parent_id`. This performs breadth-first
+				// traversal and returns all descendant documents.
+				const root = await database.models.projectCategories.findOne({ _id: categoryId, tenantId }).lean()
 
-				if (!category) {
-					return resolve([])
+				if (!root) return resolve([])
+
+				const descendants = []
+				let queue = [root._id]
+
+				while (queue.length) {
+					// Find direct children of all nodes in the current queue
+					const children = await database.models.projectCategories
+						.find({ parent_id: { $in: queue }, tenantId, isDeleted: false })
+						.lean()
+
+					if (!children || children.length === 0) break
+
+					// Add to results and prepare next level
+					descendants.push(...children)
+					queue = children.map((c) => c._id)
 				}
-
-				// Use path to find all descendants
-				let pathPattern = new RegExp(`^${category.path || categoryId}`)
-				let descendants = await database.models.projectCategories
-					.find({
-						path: pathPattern,
-						_id: { $ne: categoryId },
-						tenantId,
-						isDeleted: false,
-					})
-					.lean()
 
 				return resolve(descendants)
 			} catch (error) {
@@ -242,8 +203,25 @@ module.exports = class ProjectCategories {
 	static getLeafCategories(filterQuery) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				filterQuery.hasChildren = false
-				let leafCategories = await database.models.projectCategories.find(filterQuery).lean()
+				// Treat as leaf when either:
+				// - hasChildCategories is explicitly false
+				// - hasChildCategories field is missing
+				// - children array is missing or empty
+				const leafFilter = {
+					$and: [
+						filterQuery,
+						{
+							$or: [
+								{ hasChildCategories: false },
+								{ hasChildCategories: { $exists: false } },
+								{ children: { $exists: true, $size: 0 } },
+								{ children: { $exists: false } },
+							],
+						},
+					],
+				}
+
+				let leafCategories = await database.models.projectCategories.find(leafFilter).lean()
 				return resolve(leafCategories)
 			} catch (error) {
 				return reject(error)

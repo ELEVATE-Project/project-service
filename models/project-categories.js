@@ -25,22 +25,16 @@ module.exports = {
 			type: String,
 			default: 'SYSTEM',
 		},
-		// ========== HIERARCHY FIELDS ==========
 		parent_id: {
 			type: 'ObjectId',
 			ref: 'projectCategories',
 			default: null,
 			index: true, // CRITICAL for hierarchy queries
 		},
-
-		hasChildren: {
+		hasChildCategories: {
 			type: Boolean,
 			default: false,
 			index: true, // Quick leaf identification
-		},
-		childCount: {
-			type: Number,
-			default: 0,
 		},
 		children: {
 			type: Array,
@@ -67,7 +61,6 @@ module.exports = {
 			default: 'active',
 			index: true,
 		},
-		// icon moved under `metadata.icon` to keep category metadata together
 		noOfProjects: {
 			type: Number,
 			default: 0,
@@ -94,7 +87,7 @@ module.exports = {
 			default: [],
 			index: true,
 		},
-		metadata: {
+		metaInformation: {
 			type: Object,
 			default: {
 				icon: '',

@@ -32,14 +32,13 @@ All category operations use the library controller.
 | **Get Single**         | `GET /project/v1/library/categories/details/:id`                                               |
 | **Update**             | `PATCH /project/v1/library/categories/:id` or `POST /project/v1/library/categories/update/:id` |
 | **Delete**             | `DELETE /project/v1/library/categories/delete/:id`                                             |
-| **Category Hierarchy** | `GET /project/v1/library/categories/:id/hierarchy`                                             |
+| **Category Hierarchy** | `GET /project/v1/library/categories/hierarchy/:id`                                             |
 | **Leaves**             | `GET /project/v1/library/categories/leaves`                                                    |
 | **Bulk Create**        | `POST /project/v1/library/categories/bulk`                                                     |
 | **Move**               | `PATCH /project/v1/library/categories/move/:id`                                                |
 | **Can Delete**         | `GET /project/v1/library/categories/canDelete/:id`                                             |
 | **Projects**           | `GET /project/v1/library/categories/projects/:id`                                              |
-| **Multi Projects**     | `POST /project/v1/library/categories/projects/list`                                            |
-| **Bulk Projects**      | _(removed)_                                                                                    |
+| **Multi Projects**     | `POST /project/v1/library/categories/projectList`                                              |
 
 > **Note**: Legacy `update` uses `POST` method in some clients, while new endpoints use `PATCH`. Both are supported on the legacy route if implemented, but strictly `PATCH` on new routes is recommended.
 

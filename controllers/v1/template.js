@@ -40,7 +40,7 @@ module.exports = class Template {
 				if (req.query.duration) options.duration = req.query.duration
 				if (req.query.role) options.roles = req.query.role
 
-				const projects = await libraryCategoriesHelper.projects(
+				const libraryProjects = await libraryCategoriesHelper.projects(
 					req.params._id ? req.params._id : '',
 					req.pageSize,
 					req.pageNo,
@@ -53,8 +53,8 @@ module.exports = class Template {
 				)
 
 				return resolve({
-					message: projects.message,
-					result: projects.data,
+					message: libraryProjects.message,
+					result: libraryProjects.data,
 				})
 			} catch (error) {
 				return reject({

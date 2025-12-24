@@ -28,8 +28,8 @@ module.exports = class Template {
 * @apiUse errorBody
 * @apiParamExample {json} Response:
 * {
-	"message": "Successfully fetched projects",
-	"status": 200
+    "message": "Successfully fetched projects",
+    "status": 200
 }
 */
 	async list(req) {

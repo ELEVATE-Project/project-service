@@ -54,16 +54,6 @@ module.exports = (req) => {
 		},
 
 		/**
-		 * Move: Validate category ID and newParentId
-		 */
-		move: function () {
-			req.checkParams('_id').exists().withMessage('required category id')
-			if (req.body.newParentId !== null && req.body.newParentId !== undefined) {
-				req.checkBody('newParentId').isMongoId().withMessage('newParentId must be a valid MongoDB ObjectId')
-			}
-		},
-
-		/**
 		 * Bulk: Validate categories array
 		 */
 		bulk: function () {
@@ -78,9 +68,6 @@ module.exports = (req) => {
 		list: function () {
 			if (req.query.parentId) {
 				req.checkQuery('parentId').isMongoId().withMessage('parentId must be a valid MongoDB ObjectId')
-			}
-			if (req.query.level !== undefined) {
-				req.checkQuery('level').isInt().withMessage('level must be an integer')
 			}
 			if (req.query.page) {
 				req.checkQuery('page').isInt({ min: 1 }).withMessage('page must be a positive integer')
@@ -121,12 +108,6 @@ module.exports = (req) => {
 		 */
 		projectsByCategoryId: function () {
 			req.checkParams('_id').exists().withMessage('required category id')
-			if (req.query.page) {
-				req.checkQuery('page').isInt({ min: 1 }).withMessage('page must be a positive integer')
-			}
-			if (req.query.limit) {
-				req.checkQuery('limit').isInt({ min: 1, max: 100 }).withMessage('limit must be between 1 and 100')
-			}
 		},
 
 		/**

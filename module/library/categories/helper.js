@@ -411,6 +411,10 @@ module.exports = class ProjectCategoriesHelper {
 					}
 				}
 
+				// Extract parent_id if provided (move operation)
+				const newParentId = updateData.parent_id || null
+				const hasParentChange = updateData.parent_id !== undefined
+
 				// Handle evidence upload if files provided
 				if (files && files.cover_image) {
 					let evidenceUploadData = await handleEvidenceUpload(files, userDetails.userInformation.userId)
@@ -461,11 +465,80 @@ module.exports = class ProjectCategoriesHelper {
 					}
 				}
 
-				// Remove tenantId & orgId from updateData
+				// Handle parent_id change (move operation) if provided
+				if (hasParentChange) {
+					// Prevent circular reference
+					if (newParentId) {
+						const categoryId = categoryData[0]._id
+						if (newParentId.toString() === categoryId.toString()) {
+							throw {
+								status: HTTP_STATUS_CODE.bad_request.status,
+								message: 'Cannot move category to itself',
+							}
+						}
+						const descendants = await projectCategoriesQueries.getDescendants(
+							categoryId,
+							userDetails.tenantAndOrgInfo.tenantId
+						)
+						const descendantIds = descendants.map((d) => d._id.toString())
+						if (descendantIds.includes(newParentId.toString())) {
+							throw {
+								status: HTTP_STATUS_CODE.bad_request.status,
+								message: 'Cannot move category to its own descendant',
+							}
+						}
+					}
+
+					// Get old parent
+					const oldParentId = categoryData[0].parent_id
+					const categoryId = categoryData[0]._id
+
+					// Get all descendants (for syncing templates later)
+					const descendants = await projectCategoriesQueries.getDescendants(
+						categoryId,
+						userDetails.tenantAndOrgInfo.tenantId
+					)
+
+					// Update old parent: decrement count and remove from children array
+					if (oldParentId) {
+						await this.updateParentCounts(oldParentId, userDetails.tenantAndOrgInfo.tenantId, -1)
+						await projectCategoriesQueries.updateOne(
+							{ _id: oldParentId },
+							{ $pull: { children: categoryId } }
+						)
+						this.syncTemplatesForCategory(oldParentId, userDetails.tenantAndOrgInfo.tenantId).catch(
+							console.error
+						)
+					}
+
+					// Update new parent: increment count and add to children array
+					if (newParentId) {
+						await this.updateParentCounts(newParentId, userDetails.tenantAndOrgInfo.tenantId, 1)
+						await projectCategoriesQueries.updateOne(
+							{ _id: newParentId },
+							{ $addToSet: { children: categoryId } }
+						)
+						this.syncTemplatesForCategory(newParentId, userDetails.tenantAndOrgInfo.tenantId).catch(
+							console.error
+						)
+					}
+
+					// Sync moved category and all descendants
+					this.syncTemplatesForCategory(categoryId, userDetails.tenantAndOrgInfo.tenantId).catch(
+						console.error
+					)
+					descendants.forEach((descendant) => {
+						this.syncTemplatesForCategory(descendant._id, userDetails.tenantAndOrgInfo.tenantId).catch(
+							console.error
+						)
+					})
+				}
+
+				// Remove tenantId, orgId, hasChildCategories from updateData
 				delete updateData.tenantId
 				delete updateData.orgId
-				delete updateData.parent_id
 				delete updateData.hasChildCategories
+				delete updateData.parent_id
 
 				// Update category - use the constructed matchQuery so only the targeted category is updated
 				let categoriesUpdated = await projectCategoriesQueries.updateMany(matchQuery, { $set: updateData })
@@ -488,6 +561,11 @@ module.exports = class ProjectCategoriesHelper {
 				return resolve({
 					success: true,
 					message: CONSTANTS.apiResponses.PROJECT_CATEGORIES_UPDATED,
+					data: {
+						categoryId: categoryData[0]._id,
+						movedCategory: hasParentChange ? categoryData[0]._id : null,
+						newParentId: hasParentChange ? newParentId : null,
+					},
 				})
 			} catch (error) {
 				return reject({
@@ -1037,114 +1115,6 @@ module.exports = class ProjectCategoriesHelper {
 					data: {
 						tree: rootCategory,
 						totalCategories: allCategories.length,
-					},
-				})
-			} catch (error) {
-				return reject({
-					success: false,
-					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
-					message: error.message,
-					data: {},
-				})
-			}
-		})
-	}
-
-	/**
-	 * Move category to different parent
-	 * @method
-	 * @name move
-	 * @param {ObjectId} categoryId - Category ID to move
-	 * @param {ObjectId} newParentId - New parent ID (null for root)
-	 * @param {String} tenantId - Tenant ID
-	 * @param {String} orgId - Org ID
-	 * @returns {Object} Move result
-	 */
-	static move(categoryId, newParentId, tenantId, orgId) {
-		return new Promise(async (resolve, reject) => {
-			try {
-				// Get category to move
-				let matchQuery = { tenantId: tenantId }
-				if (ObjectId.isValid(categoryId)) {
-					matchQuery['$or'] = [{ _id: new ObjectId(categoryId) }, { externalId: categoryId }]
-				} else {
-					matchQuery['externalId'] = categoryId
-				}
-
-				const category = await projectCategoriesQueries.findOne(matchQuery)
-
-				if (!category) {
-					throw {
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: CONSTANTS.apiResponses.CATEGORY_NOT_FOUND,
-					}
-				}
-
-				// Prevent circular reference
-				if (newParentId) {
-					if (newParentId.toString() === categoryId.toString()) {
-						throw {
-							status: HTTP_STATUS_CODE.bad_request.status,
-							message: 'Cannot move category to itself',
-						}
-					}
-					const descendants = await projectCategoriesQueries.getDescendants(categoryId, tenantId)
-					const descendantIds = descendants.map((d) => d._id.toString())
-					if (descendantIds.includes(newParentId.toString())) {
-						throw {
-							status: HTTP_STATUS_CODE.bad_request.status,
-							message: 'Cannot move category to its own descendant',
-						}
-					}
-				}
-
-				// Get old parent
-				const oldParentId = category.parent_id
-
-				// Get all descendants (for syncing templates later)
-				const descendants = await projectCategoriesQueries.getDescendants(categoryId, tenantId)
-
-				// Update category with new parent only
-				await projectCategoriesQueries.updateOne(
-					{ _id: categoryId },
-					{
-						$set: {
-							parent_id: newParentId,
-						},
-					}
-				)
-
-				// Update old parent: decrement count and remove from children array (both atomically)
-				if (oldParentId) {
-					await this.updateParentCounts(oldParentId, tenantId, -1)
-					// remove from old parent's children array
-					await projectCategoriesQueries.updateOne({ _id: oldParentId }, { $pull: { children: categoryId } })
-					this.syncTemplatesForCategory(oldParentId, tenantId).catch(console.error)
-				}
-
-				// Update new parent: increment count and add to children array (both atomically)
-				if (newParentId) {
-					await this.updateParentCounts(newParentId, tenantId, 1)
-					// add to new parent's children array
-					await projectCategoriesQueries.updateOne(
-						{ _id: newParentId },
-						{ $addToSet: { children: categoryId } }
-					)
-					this.syncTemplatesForCategory(newParentId, tenantId).catch(console.error)
-				}
-
-				// Sync moved category and all descendants
-				this.syncTemplatesForCategory(categoryId, tenantId).catch(console.error)
-				descendants.forEach((descendant) => {
-					this.syncTemplatesForCategory(descendant._id, tenantId).catch(console.error)
-				})
-
-				return resolve({
-					success: true,
-					message: 'Category moved successfully',
-					data: {
-						movedCategory: categoryId,
-						affectedDescendants: descendants.length,
 					},
 				})
 			} catch (error) {

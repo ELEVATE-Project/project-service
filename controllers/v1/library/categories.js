@@ -332,44 +332,6 @@ module.exports = class LibraryCategories extends Abstract {
 	 * @apiUse successBody
 	 * @apiUse errorBody
 	 */
-	async move(req) {
-		try {
-			const categoryId = req.params._id
-			const newParentId = req.body.newParentId || null
-			const tenantId = req.body.tenantId || req.userDetails.tenantAndOrgInfo.tenantId
-			const orgId = req.body.orgId || req.userDetails.tenantAndOrgInfo.orgId[0]
-
-			const result = await libraryCategoriesHelper.move(categoryId, newParentId, tenantId, orgId)
-			if (result.success) {
-				return {
-					success: true,
-					message: result.message,
-					result: result.data,
-				}
-			} else {
-				throw {
-					message: result.message,
-					status: result.status || HTTP_STATUS_CODE.bad_request.status,
-				}
-			}
-		} catch (error) {
-			return {
-				status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
-				message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
-				errorObject: error,
-			}
-		}
-	}
-
-	/**
-	 * @api {get} /project/v1/library/categories/leaves
-	 * @apiVersion 1.0.0
-	 * @apiName leaves
-	 * @apiGroup LibraryCategories
-	 * @apiHeader {String} X-auth-token Authenticity token
-	 * @apiUse successBody
-	 * @apiUse errorBody
-	 */
 	async leaves(req) {
 		try {
 			const result = await libraryCategoriesHelper.getLeaves(req)

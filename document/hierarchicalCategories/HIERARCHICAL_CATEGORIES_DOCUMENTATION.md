@@ -30,16 +30,15 @@ All category operations use the library controller.
 | **List**               | `GET /project/v1/library/categories/list`                                                      |
 | **Create**             | `POST /project/v1/library/categories/create`                                                   |
 | **Get Single**         | `GET /project/v1/library/categories/details/:id`                                               |
-| **Update**             | `PATCH /project/v1/library/categories/:id` or `POST /project/v1/library/categories/update/:id` |
+| **Update / Move**      | `PATCH /project/v1/library/categories/:id` or `POST /project/v1/library/categories/update/:id` |
 | **Delete**             | `DELETE /project/v1/library/categories/delete/:id`                                             |
 | **Category Hierarchy** | `GET /project/v1/library/categories/hierarchy/:id`                                             |
 | **Leaves**             | `GET /project/v1/library/categories/leaves`                                                    |
 | **Bulk Create**        | `POST /project/v1/library/categories/bulk`                                                     |
-| **Move**               | `PATCH /project/v1/library/categories/move/:id`                                                |
 | **Projects**           | `GET /project/v1/library/categories/projects/:id`                                              |
 | **Multi Projects**     | `POST /project/v1/library/categories/projectList`                                              |
 
-> **Note**: Legacy `update` uses `POST` method in some clients, while new endpoints use `PATCH`. Both are supported on the legacy route if implemented, but strictly `PATCH` on new routes is recommended.
+> **Note**: Legacy `update` uses `POST` method in some clients, while new endpoints use `PATCH`. Both are supported on the legacy route if implemented, but strictly `PATCH` on new routes is recommended. To move a category, include `parent_id` in the update request body.
 
 ---
 
@@ -366,14 +365,14 @@ Headers:
 
 _Note: Omit `parentId` to create a root category._
 
-### 5. Move Category
+### 5. Update Category (including Move)
 
-Moves a category and its entire subtree to a new parent.
+Updates category details and/or moves it to a new parent.
 
-**Request:**
+**Request (Update fields only):**
 
 ```http
-PATCH /project/v1/library/categories/move/:id
+PATCH /project/v1/library/categories/:id
 Content-Type: application/json
 Headers:
   X-auth-token: <user-token>
@@ -381,11 +380,43 @@ Headers:
   orgId: <org-id>
 
 {
-  "newParentId": "64f5..."
+  "name": "Updated Name",
+  "externalId": "new-external-id"
 }
 ```
 
-_Warning: This requires expensive level recalculation for all descendants._
+**Request (Move to new parent):**
+
+```http
+PATCH /project/v1/library/categories/:id
+Content-Type: application/json
+Headers:
+  X-auth-token: <user-token>
+  tenantId: <tenant-id>
+  orgId: <org-id>
+
+{
+  "parent_id": "64f5..."
+}
+```
+
+**Request (Update + Move combined):**
+
+```http
+PATCH /project/v1/library/categories/:id
+Content-Type: application/json
+Headers:
+  X-auth-token: <user-token>
+  tenantId: <tenant-id>
+  orgId: <org-id>
+
+{
+  "name": "Updated Name",
+  "parent_id": "64f5..."
+}
+```
+
+_Note: When moving a category, circular reference checks are performed. Cannot move a category to itself or into its own descendant._
 
 ### 6. Delete Category
 
@@ -706,12 +737,11 @@ The following fixes have been implemented in `generics/middleware/authenticator.
 
 ### Category Operations Table
 
-| Operation           | Endpoint                      | What Gets Updated                                                                                                                             | Validation Checks                                                                                    |
-| ------------------- | ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| **Create Category** | `POST /categories`            | • Auto-sets level<br>• Updates parent's hasChildCategories                                                                                    | • Parent exists<br>• Max depth not exceeded<br>• Unique externalId<br>• Valid tenant/org             |
-| **Move Category**   | `PATCH /categories/{id}/move` | • Recalculates level for category + all descendants<br>• Updates old parent's hasChildCategories<br>• Updates new parent's hasChildCategories | • New parent exists<br>• Not moving to own descendant<br>• Max depth not exceeded for new position   |
-| **Delete Category** | `DELETE /categories/{id}`     | • Sets isDeleted: true<br>• Updates parent's hasChildCategories if last child                                                                 | • No children exist<br>• No projects use category/children<br>• No templates reference this category |
-| **Update Category** | `PATCH /categories/{id}`      | • Updates specified fields only<br>• Does NOT recalculate hierarchy fields                                                                    | • Category exists<br>• Valid field values                                                            |
+| Operation           | Endpoint                  | What Gets Updated                                                                                                                          | Validation Checks                                                                                    |
+| ------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| **Create Category** | `POST /categories`        | • Auto-sets level<br>• Updates parent's hasChildCategories                                                                                 | • Parent exists<br>• Max depth not exceeded<br>• Unique externalId<br>• Valid tenant/org             |
+| **Update Category** | `PATCH /categories/{id}`  | • Updates specified fields<br>• If parent_id included: moves to new parent, recalculates levels, updates old/new parent hasChildCategories | • Category exists<br>• Valid field values<br>• If moving: new parent exists, not to own descendant   |
+| **Delete Category** | `DELETE /categories/{id}` | • Sets isDeleted: true<br>• Updates parent's hasChildCategories if last child                                                              | • No children exist<br>• No projects use category/children<br>• No templates reference this category |
 
 ### Data Integrity Rules Table
 

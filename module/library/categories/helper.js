@@ -13,9 +13,6 @@ const projectTemplateQueries = require(DB_QUERY_BASE_PATH + '/projectTemplates')
 const orgExtensionQueries = require(DB_QUERY_BASE_PATH + '/organizationExtension')
 const filesHelpers = require(MODULES_BASE_PATH + '/cloud-services/files/helper')
 const axios = require('axios')
-// hierarchyConfig removed — use local defaults instead
-const DEFAULT_PAGINATION_LIMIT = 20
-const MAX_PAGINATION_LIMIT = 100
 const { ObjectId } = require('mongodb')
 const moment = require('moment-timezone')
 const _ = require('lodash')

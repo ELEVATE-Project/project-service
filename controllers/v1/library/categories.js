@@ -73,11 +73,31 @@ module.exports = class LibraryCategories extends Abstract {
 	 */
 	async projects(req) {
 		try {
-			// use standard pagination middleware values
-			const categoryId = req.params._id ? req.params._id : ''
+			// Support both single and multiple category IDs
+			let categoryIds = []
+
+			// Method 1: Single ID from path parameter (GET /categories/:id/projects)
+			if (req.params._id) {
+				categoryIds = [req.params._id]
+			}
+			// Method 2: Comma-separated IDs from query string (GET /categories/projects?ids=id1,id2,id3)
+			else if (req.query.ids) {
+				categoryIds = req.query.ids
+					.split(',')
+					.map((id) => id.trim())
+					.filter((id) => id)
+			}
+
+			if (!categoryIds || categoryIds.length === 0) {
+				throw {
+					status: HTTP_STATUS_CODE.bad_request.status,
+					message:
+						'categoryIds required - provide as path param, query string (comma-separated), or request body array',
+				}
+			}
 
 			const libraryProjects = await libraryCategoriesHelper.projects(
-				[categoryId], // Pass single ID as array
+				categoryIds,
 				req.pageSize,
 				req.pageNo,
 				req.searchText,
@@ -446,50 +466,6 @@ module.exports = class LibraryCategories extends Abstract {
 				success: true,
 				message: result.message,
 				result: result.data,
-			}
-		} catch (error) {
-			return {
-				status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
-				message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
-				errorObject: error,
-			}
-		}
-	}
-
-	/**
-	 * @api {post} /project/v1/library/categories/projects/list
-	 * @apiVersion 1.0.0
-	 * @apiName projectList
-	 * @apiGroup LibraryCategories
-	 * @apiHeader {String} X-auth-token Authenticity token
-	 * @apiUse successBody
-	 * @apiUse errorBody
-	 */
-	async projectList(req) {
-		try {
-			const categoryIds = req.body.categoryIds || req.body.categoryExternalIds
-
-			if (!categoryIds || !Array.isArray(categoryIds) || categoryIds.length === 0) {
-				throw {
-					status: HTTP_STATUS_CODE.bad_request.status,
-					message: 'categoryIds or categoryExternalIds array is required',
-				}
-			}
-
-			// Call the same consolidated helper.projects method
-			const libraryProjects = await libraryCategoriesHelper.projects(
-				categoryIds,
-				req.pageSize,
-				req.pageNo,
-				req.searchText,
-				req.query.sort,
-				req.userDetails
-			)
-
-			return {
-				success: true,
-				message: libraryProjects.message,
-				result: libraryProjects.data,
 			}
 		} catch (error) {
 			return {

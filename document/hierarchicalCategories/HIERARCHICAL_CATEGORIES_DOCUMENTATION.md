@@ -25,20 +25,19 @@ All category operations use the library controller.
 
 -   Base Path: `/project/v1/library/categories/*`
 
-| Action                 | Library Route (Primary)                                                                        |
-| ---------------------- | ---------------------------------------------------------------------------------------------- |
-| **List**               | `GET /project/v1/library/categories/list`                                                      |
-| **Create**             | `POST /project/v1/library/categories/create`                                                   |
-| **Get Single**         | `GET /project/v1/library/categories/details/:id`                                               |
-| **Update / Move**      | `PATCH /project/v1/library/categories/:id` or `POST /project/v1/library/categories/update/:id` |
-| **Delete**             | `DELETE /project/v1/library/categories/delete/:id`                                             |
-| **Category Hierarchy** | `GET /project/v1/library/categories/hierarchy/:id`                                             |
-| **Leaves**             | `GET /project/v1/library/categories/leaves`                                                    |
-| **Bulk Create**        | `POST /project/v1/library/categories/bulk`                                                     |
-| **Projects**           | `GET /project/v1/library/categories/projects/:id`                                              |
-| **Multi Projects**     | `POST /project/v1/library/categories/projectList`                                              |
+| Action                 | Library Route (Primary)                                                                                    |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------- |
+| **List**               | `GET /project/v1/library/categories/list`                                                                  |
+| **Create**             | `POST /project/v1/library/categories/create`                                                               |
+| **Get Single**         | `GET /project/v1/library/categories/details/:id`                                                           |
+| **Update / Move**      | `PATCH /project/v1/library/categories/:id` or `POST /project/v1/library/categories/update/:id`             |
+| **Delete**             | `DELETE /project/v1/library/categories/delete/:id`                                                         |
+| **Category Hierarchy** | `GET /project/v1/library/categories/hierarchy/:id`                                                         |
+| **Leaves**             | `GET /project/v1/library/categories/leaves`                                                                |
+| **Bulk Create**        | `POST /project/v1/library/categories/bulk`                                                                 |
+| **Projects**           | `GET /project/v1/library/categories/projects/:id?ids=id1,id2,id3` (supports single or comma-separated IDs) |
 
-> **Note**: Legacy `update` uses `POST` method in some clients, while new endpoints use `PATCH`. Both are supported on the legacy route if implemented, but strictly `PATCH` on new routes is recommended. To move a category, include `parent_id` in the update request body.
+> **Note**: Legacy `update` uses `POST` method in some clients, while new endpoints use `PATCH`. Both are supported on the legacy route if implemented, but strictly `PATCH` on new routes is recommended. To move a category, include `parent_id` in the update request body. For the Projects endpoint, you can provide categoryIds as: path parameter (single ID), query string (comma-separated), or request body (array).
 
 ---
 
@@ -205,8 +204,14 @@ curl --location 'http://localhost:5003/project/v1/library/categories/693ffb64159
 # Test leaves
 curl --location 'http://localhost:5003/project/v1/library/categories/leaves' --header 'X-auth-token: YOUR_TOKEN'
 
-# Test projects by multiple categories
-curl --location 'http://localhost:5003/project/v1/library/categories/projects/list' \
+# Test projects by single category
+curl --location 'http://localhost:5003/project/v1/library/categories/projects/693ffb64159e0b0eaa4cc314?page=1&limit=10' --header 'X-auth-token: YOUR_TOKEN'
+
+# Test projects by multiple categories (comma-separated query string)
+curl --location 'http://localhost:5003/project/v1/library/categories/projects?ids=694a31935b9cdcad6475ebd2,64f2b3c4d5e6f7g8h9i0j1k2&page=1&limit=10' --header 'X-auth-token: YOUR_TOKEN'
+
+# Test projects by multiple categories (POST with array)
+curl --location 'http://localhost:5003/project/v1/library/categories/projects' \
 --header 'X-auth-token: YOUR_TOKEN' \
 --header 'Content-Type: application/json' \
 --data '{
@@ -505,9 +510,9 @@ Content-Type: application/json
 }
 ```
 
-### 9. Get Projects by Single Category
+### 9. Get Projects by Category (Single or Multiple)
 
-**Request:**
+**Request (Single Category via Path):**
 
 ```http
 GET /project/v1/library/categories/projects/:categoryId?page=1&limit=10&search=irrigation
@@ -515,33 +520,18 @@ Headers:
   X-auth-token: <user-token>
 ```
 
-**Response:**
-
-```json
-{
-  "message": "Successfully fetched projects",
-  "result": {
-    "data": [
-      {
-        "_id": "64f2...",
-        "title": "Smart Irrigation System",
-        "description": "IoT-based irrigation management",
-        "averageRating": 4.5,
-        "noOfRatings": 12,
-        "categories": [...]
-      }
-    ],
-    "count": 25
-  }
-}
-```
-
-### 10. Get Projects by Multiple Categories
-
-**Request:**
+**Request (Multiple Categories via Query String):**
 
 ```http
-POST /project/v1/library/categories/projects/list
+GET /project/v1/library/categories/projects?ids=64f1a2b3c4d5e6f7g8h9i0j1,64f2b3c4d5e6f7g8h9i0j1k2,64f3c4d5e6f7g8h9i0j1k2l3&page=1&limit=20&search=agriculture
+Headers:
+  X-auth-token: <user-token>
+```
+
+**Request (Multiple Categories via Request Body - POST):**
+
+```http
+POST /project/v1/library/categories/projects
 Headers:
   X-auth-token: <user-token>
 Content-Type: application/json
@@ -558,19 +548,19 @@ Content-Type: application/json
 }
 ```
 
-**Response:**
+**Response (Single or Multiple):**
 
 ```json
 {
-	"message": "Successfully fetched projects from multiple categories",
+	"message": "Successfully fetched projects",
 	"result": {
 		"data": [
 			{
 				"_id": "64f2...",
-				"title": "Smart Agriculture System",
-				"description": "IoT-based farming management",
-				"averageRating": 4.7,
-				"noOfRatings": 18,
+				"title": "Smart Irrigation System",
+				"description": "IoT-based irrigation management",
+				"averageRating": 4.5,
+				"noOfRatings": 12,
 				"categories": [
 					{
 						"_id": "64f1a2b3c4d5e6f7g8h9i0j1",
@@ -603,12 +593,14 @@ Content-Type: application/json
 
 **Parameters:**
 
--   `categoryIds` (required): Array of category IDs to fetch projects from
+-   `ids` (query string): Comma-separated category IDs for multiple categories (e.g., `?ids=id1,id2,id3`)
+-   `categoryIds` (request body): Array of category IDs for POST requests
+-   `:categoryId` (path): Single category ID for GET requests
 -   `page` (optional): Page number for pagination (default: 1)
 -   `limit` (optional): Number of projects per page (default: 10, max: 50)
 -   `search` (optional): Search term to filter projects by title/description
 
-_(removed) Bulk projects endpoint and examples — use `POST /project/v1/library/categories/projects/list` (paginated) instead._
+**Note:** The same endpoint supports all three input formats. Choose the one that best fits your client implementation.
 
 ---
 

@@ -104,42 +104,12 @@ module.exports = (req) => {
 		},
 
 		/**
-		 * ProjectsByCategoryId: Validate category ID
+		 * Projects: Validate category IDs (supports single, comma-separated, or array)
 		 */
-		projectsByCategoryId: function () {
-			req.checkParams('_id').exists().withMessage('required category id')
-		},
-
-		/**
-		 * ProjectList: Validate categoryIds array
-		 */
-		projectList: function () {
-			// At least one of categoryIds or categoryExternalIds must be provided
-			if (!req.body.categoryIds && !req.body.categoryExternalIds) {
-				req.checkBody('categoryIds')
-					.exists()
-					.withMessage('categoryIds or categoryExternalIds array is required')
-			}
-			if (req.body.categoryIds) {
-				if (!Array.isArray(req.body.categoryIds)) {
-					req.checkBody('categoryIds')
-						.custom(() => false)
-						.withMessage('categoryIds must be an array')
-				}
-			}
-			if (req.body.categoryExternalIds) {
-				if (!Array.isArray(req.body.categoryExternalIds)) {
-					req.checkBody('categoryExternalIds')
-						.custom(() => false)
-						.withMessage('categoryExternalIds must be an array')
-				}
-			}
-			if (req.body.page) {
-				req.checkBody('page').isInt({ min: 1 }).withMessage('page must be a positive integer')
-			}
-			if (req.body.limit) {
-				req.checkBody('limit').isInt({ min: 1, max: 1000 }).withMessage('limit must be between 1 and 1000')
-			}
+		projects: function () {
+			// Validation happens in controller - supports multiple input formats
+			// Format 1: Path parameter (:id) - single ID
+			// Format 2: Query string (?ids=id1,id2,id3) - comma-separated
 		},
 	}
 

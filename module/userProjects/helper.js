@@ -36,6 +36,7 @@ const projectService = require(SERVICES_BASE_PATH + '/projects')
 const defaultUserProfileConfig = require('@config/defaultUserProfileDeleteConfig')
 const configFilePath = process.env.AUTH_CONFIG_FILE_PATH
 const surveyService = require(SERVICES_BASE_PATH + '/survey')
+const programActivityLogHelper = require(MODULES_BASE_PATH + `/programActivityLogs/helper`)
 
 /**
  * UserProjectsHelper
@@ -1921,6 +1922,10 @@ module.exports = class UserProjectsHelper {
 						await this.attachEntityInformationIfExists(project)
 						await kafkaProducersHelper.pushProjectToKafka(project)
 						await kafkaProducersHelper.pushUserActivitiesToKafka(kafkaUserProject)
+						await programActivityLogHelper.addProgramActivityLog(
+							projectCreation.data.programId,
+							projectCreation.data.solutionId
+						)
 						// update submission data for project as task
 						if (project.project && project.referenceFrom === CONSTANTS.common.PROJECT) {
 							let updateTaskSubmissionData = {

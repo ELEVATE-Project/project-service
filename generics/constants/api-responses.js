@@ -322,4 +322,6 @@ module.exports = {
 	ACCESS_TOKEN_EXPIRED: 'Access Token Expired!! Please Login Again.',
 	USER_SERVICE_DOWN_CODE: 'USER_SERVICE_DOWN',
 	USER_SERVICE_DOWN: 'User service is down',
+	INVALID_PROGRAMID_OR_SOLUTIONID: 'Invalida programId or solutionId proivided',
+	PROGRAM_ACTIVITY_LOG_UPDATED: 'Program activity log updated',
 }

@@ -1,8 +1,8 @@
 /**
  * name : v1.js
- * author : Implementation Team
- * created-date : December 2025
- * Description : Library categories validation with hierarchy support.
+ * author : Aman
+ * created-date : 05-Aug-2020
+ * Description : Projects categories validation.
  */
 
 module.exports = (req) => {

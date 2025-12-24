@@ -875,12 +875,6 @@ module.exports = class LibraryCategoriesHelper {
 				categoryData.orgId = orgId[0]
 				categoryData.hasChildCategories = false
 				categoryData.sequenceNumber = categoryData.sequenceNumber || 0
-				// ensure icon (if provided at root) moves under metaInformation for storage
-				if (categoryData.icon) {
-					categoryData.metaInformation = categoryData.metaInformation || {}
-					categoryData.metaInformation.icon = categoryData.icon
-					delete categoryData.icon
-				}
 
 				// Create category
 				let createdCategory = await projectCategoriesQueries.create(categoryData)
@@ -898,13 +892,15 @@ module.exports = class LibraryCategoriesHelper {
 
 				createdCategory = await projectCategoriesQueries.findOne({ _id: createdCategory._id })
 
-				// normalize icon for backward compatibility
-				if (
-					createdCategory &&
-					createdCategory.metaInformation &&
-					createdCategory.metaInformation.icon !== undefined
-				) {
-					createdCategory.icon = createdCategory.metaInformation.icon
+				// Normalize icon: prefer root `icon`, fallback to legacy `metaInformation.icon`
+				if (createdCategory) {
+					if (
+						(createdCategory.icon === undefined || createdCategory.icon === '') &&
+						createdCategory.metaInformation &&
+						createdCategory.metaInformation.icon !== undefined
+					) {
+						createdCategory.icon = createdCategory.metaInformation.icon
+					}
 				}
 
 				return resolve({
@@ -969,6 +965,7 @@ module.exports = class LibraryCategoriesHelper {
 					{
 						externalId: 1,
 						name: 1,
+						icon: 1,
 						'metaInformation.icon': 1,
 						updatedAt: 1,
 						noOfProjects: 1,
@@ -993,7 +990,12 @@ module.exports = class LibraryCategoriesHelper {
 				// Normalize icon from metaInformation and ensure sequenceNumber exists for compatibility
 				const normalizedData = projectCategories.data.map((cat) => {
 					const copy = { ...cat }
-					if (copy.metaInformation && copy.metaInformation.icon !== undefined) {
+					// Prefer root icon; if missing, fallback to legacy metaInformation.icon
+					if (
+						(copy.icon === undefined || copy.icon === '') &&
+						copy.metaInformation &&
+						copy.metaInformation.icon !== undefined
+					) {
 						copy.icon = copy.metaInformation.icon
 					}
 					copy.sequenceNumber = copy.sequenceNumber || 0
@@ -1132,6 +1134,7 @@ module.exports = class LibraryCategoriesHelper {
 					'_id',
 					'externalId',
 					'name',
+					'icon',
 					'metaInformation.icon',
 					'parent_id',
 					'hasChildCategories',
@@ -1186,7 +1189,11 @@ module.exports = class LibraryCategoriesHelper {
 
 				// normalize icon field from metaInformation to top-level for backward compatibility
 				const normalizeIcon = (categoryNode) => {
-					if (categoryNode.metaInformation && categoryNode.metaInformation.icon !== undefined) {
+					if (
+						(categoryNode.icon === undefined || categoryNode.icon === '') &&
+						categoryNode.metaInformation &&
+						categoryNode.metaInformation.icon !== undefined
+					) {
 						categoryNode.icon = categoryNode.metaInformation.icon
 					}
 					if (categoryNode.children && categoryNode.children.length) {
@@ -1196,7 +1203,21 @@ module.exports = class LibraryCategoriesHelper {
 
 				if (rootCategory) {
 					sortBySequenceNumber(rootCategory)
+					// Ensure icon exists at root (fallback from legacy metaInformation.icon)
 					normalizeIcon(rootCategory)
+					const applyFallback = (node) => {
+						if (
+							(node.icon === undefined || node.icon === '') &&
+							node.metaInformation &&
+							node.metaInformation.icon !== undefined
+						) {
+							node.icon = node.metaInformation.icon
+						}
+						if (node.children && node.children.length) {
+							node.children.forEach((c) => applyFallback(c))
+						}
+					}
+					applyFallback(rootCategory)
 				}
 
 				return resolve({
@@ -1273,7 +1294,11 @@ module.exports = class LibraryCategoriesHelper {
 				// Normalize icon from metaInformation
 				const normalizedData = leafCategoriesResult.data.map((cat) => {
 					const copy = { ...cat }
-					if (copy.metaInformation && copy.metaInformation.icon !== undefined) {
+					if (
+						(copy.icon === undefined || copy.icon === '') &&
+						copy.metaInformation &&
+						copy.metaInformation.icon !== undefined
+					) {
 						copy.icon = copy.metaInformation.icon
 					}
 					return copy
@@ -1727,9 +1752,15 @@ module.exports = class LibraryCategoriesHelper {
 					}
 				}
 
-				// normalize icon for backward compatibility
-				if (category && category.metaInformation && category.metaInformation.icon !== undefined) {
-					category.icon = category.metaInformation.icon
+				// Normalize icon: prefer root `icon`, fallback to legacy `metaInformation.icon`
+				if (category) {
+					if (
+						(category.icon === undefined || category.icon === '') &&
+						category.metaInformation &&
+						category.metaInformation.icon !== undefined
+					) {
+						category.icon = category.metaInformation.icon
+					}
 				}
 
 				return resolve({

@@ -61,6 +61,10 @@ module.exports = {
 			default: 'active',
 			index: true,
 		},
+		icon: {
+			type: String,
+			default: '',
+		},
 		noOfProjects: {
 			type: Number,
 			default: 0,
@@ -89,9 +93,7 @@ module.exports = {
 		},
 		metaInformation: {
 			type: Object,
-			default: {
-				icon: '',
-			},
+			default: {},
 		},
 	},
 	compoundIndex: [

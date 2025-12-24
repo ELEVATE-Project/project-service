@@ -24,15 +24,15 @@ const projectAttributesQueries = require(DB_QUERY_BASE_PATH + '/projectAttribute
 const kafkaProducersHelper = require(GENERICS_FILES_PATH + '/kafka/producers')
 
 /**
- * ProjectCategoriesHelper
+ * LibraryCategoriesHelper
  * @class
  */
-module.exports = class ProjectCategoriesHelper {
+module.exports = class LibraryCategoriesHelper {
 	/**
 	 * List of library projects.
 	 * @method
 	 * @name projects
-	 * @param categoryId - category external id.
+	 * @param categoryIds - category external id.
 	 * @param pageSize - Size of page.
 	 * @param pageNo - Recent page no.
 	 * @param search - search text.
@@ -45,9 +45,10 @@ module.exports = class ProjectCategoriesHelper {
 	 * @param filter - Data to be filtered
 	 * @returns {Object} List of library projects.
 	 */
+
 	static projects(
 		categoryIds,
-		limit,
+		pageSize,
 		pageNo,
 		search,
 		sortedData,
@@ -60,9 +61,6 @@ module.exports = class ProjectCategoriesHelper {
 			try {
 				const defaultLanguage = 'en'
 				const userLanguage = language
-
-				// Calculate skip based on pageNo
-				const skipValue = (Number(pageNo) > 0 ? Number(pageNo) - 1 : 0) * Number(limit)
 
 				let matchQuery = {
 					$match: {
@@ -84,34 +82,90 @@ module.exports = class ProjectCategoriesHelper {
 				}
 
 				matchQuery['$match']['tenantId'] = userDetails.userInformation.tenantId
-				matchQuery = this.applyVisibilityConditions(matchQuery, orgExtension, userDetails)
-
-				// Category Filtering logic
-				if (categoryIds && categoryIds.length > 0) {
-					const objectIds = []
-					const externalIds = []
-
-					categoryIds.forEach((id) => {
-						if (ObjectId.isValid(id)) {
-							objectIds.push(new ObjectId(id))
-						} else {
-							externalIds.push(id)
+				/**
+				 * 
+					Sample for matchQuery obj when orgExtension.externalProjectResourceVisibilityPolicy = CURRENT
+					{
+						"$match": {
+							"status": "published",
+							"isReusable": true,
+							"tenantId": "shikshalokam",
+							"orgId": "slorg"
 						}
-					})
-
-					let categoryConditions = []
-					if (objectIds.length > 0) {
-						categoryConditions.push({ 'categories._id': { $in: objectIds } })
 					}
-					if (externalIds.length > 0) {
-						categoryConditions.push({ 'categories.externalId': { $in: externalIds } })
-					}
-
-					if (categoryConditions.length > 0) {
-						if (!matchQuery['$match']['$and']) {
-							matchQuery['$match']['$and'] = []
+				*/
+				/**
+				 * 
+					Sample for matchQuery obj when orgExtension.externalProjectResourceVisibilityPolicy = ASSOCIATED
+					{
+						"$match": {
+							"status": "published",
+							"isReusable": true,
+							"tenantId": "shikshalokam",
+							"$and": [
+								{
+								"$or": [
+									{
+										"visibility": {
+											"$ne": "CURRENT"
+										},
+										"visibleToOrganizations": {
+											"$in": [
+												"sot"
+											]
+										}
+									},
+									{
+										"orgId": "sot"
+									}
+								]
+								}
+							]
 						}
-						matchQuery['$match']['$and'].push({ $or: categoryConditions })
+					}
+				*/
+				/**
+				 * 
+					Sample for matchQuery obj when orgExtension.externalProjectResourceVisibilityPolicy = ALL
+					{
+						"$match": {
+						"status": "published",
+						"isReusable": true,
+						"tenantId": "shikshalokam",
+						"$and": [
+							{
+							"$or": [
+								{
+									"visibility": "ALL"
+								},
+								{
+									"visibility": {
+										"$ne": "CURRENT"
+									},
+									"visibleToOrganizations": {
+										"$in": [
+											"mys"
+										]
+									}
+								},
+								{
+									"orgId": "mys"
+								}
+							]
+							}
+						]
+						}
+					}
+				*/
+				matchQuery = applyVisibilityConditions(matchQuery, orgExtension, userDetails)
+
+				if (categoryIds) {
+					// Ensure categoryIds is an array (handles both single string or array)
+					const idsToFilter = Array.isArray(categoryIds) ? categoryIds : [categoryIds]
+
+					if (idsToFilter.length > 0) {
+						// Use $in to support multiple IDs
+						matchQuery['$match']['categories.externalId'] = { $in: idsToFilter }
 					}
 				}
 
@@ -122,15 +176,16 @@ module.exports = class ProjectCategoriesHelper {
 					matchQuery['$match']['hasSpotlight'] = true
 				}
 
-				// Duration and Roles Filter Processing
 				if (Object.keys(filter).length >= 1) {
 					let duration = filter.duration || ''
 					let roles = filter.roles || ''
 
+					// Split duration only if it has a value
 					if (duration) {
 						const durationArray = duration.split(',')
 						let defaultDurationAttributes
 
+						// Fetch the project attributes document for the duration
 						const projectAttributesDocument = await projectAttributesQueries.projectAttributesDocument({
 							code: 'duration',
 							deleted: false,
@@ -145,13 +200,14 @@ module.exports = class ProjectCategoriesHelper {
 						}
 
 						const entities = defaultDurationAttributes?.entities || []
+
 						const matchingDurations = entities
 							.map((entity) => entity.value)
 							.filter((value) => durationArray.includes(value))
 
 						let upperBoundDurationFilter = []
 						let exactDurationFilters = []
-
+						// Separate values that start with "More than" into `upperBoundDurationFilter`, others into `exactDurationFilters`
 						matchingDurations.forEach((value) => {
 							if (value.startsWith('More than')) {
 								upperBoundDurationFilter.push(value.replace('More than ', '').trim())
@@ -162,20 +218,26 @@ module.exports = class ProjectCategoriesHelper {
 
 						let minDays = Infinity
 						let exactDurationFiltersInDays = []
-
 						if (upperBoundDurationFilter.length > 0) {
-							upperBoundDurationFilter.forEach((item) => {
-								const days = UTILS.convertDurationToDays(item)
-								minDays = Math.min(minDays, days)
-							})
+							// Initialize with a large number
+
+							// Convert to days and find the lowest duration
+							if (upperBoundDurationFilter.length > 0) {
+								upperBoundDurationFilter.forEach((item) => {
+									const days = UTILS.convertDurationToDays(item) // Convert duration to days
+									minDays = Math.min(minDays, days) // Keep track of the minimum days
+								})
+							}
 						}
 
+						// Convert exact duration filters to days
 						if (exactDurationFilters.length > 0) {
 							exactDurationFiltersInDays = exactDurationFilters.map((item) =>
 								UTILS.convertDurationToDays(item)
 							)
 						}
 
+						// construct the match query for filters
 						if (minDays !== Infinity && exactDurationFiltersInDays.length > 0) {
 							matchQuery['$match']['$and'] = [
 								...(matchQuery['$match']['$and'] || []),
@@ -189,27 +251,34 @@ module.exports = class ProjectCategoriesHelper {
 						}
 					}
 
+					// Split roles only if it has a value
 					if (roles) {
-						const rolesArray = roles.split(',')
-						let userRoleInformation = await entitiesService.getUserRoleExtensionDocuments(
-							{
-								code: { $in: rolesArray },
-								tenantId: userDetails.userInformation.tenantId,
-								orgId: { $in: [userDetails.userInformation.organizationId] },
-							},
-							['title']
-						)
-
-						if (userRoleInformation.success) {
-							let userRoles = userRoleInformation.data.map((eachRole) => eachRole.title)
+						roles = roles.split(',')
+						if (roles.length > 0) {
+							//Getting roles from the entity service
+							let userRoleInformation = await entitiesService.getUserRoleExtensionDocuments(
+								{
+									code: { $in: roles },
+									tenantId: userDetails.userInformation.tenantId,
+									orgId: { $in: [userDetails.userInformation.organizationId] },
+								},
+								['title']
+							)
+							if (!userRoleInformation.success) {
+								throw {
+									message: CONSTANTS.apiResponses.FAILED_TO_FETCH_USERROLE,
+									status: HTTP_STATUS_CODE.bad_request.status,
+								}
+							}
+							// Extract titles
+							let userRoles = await userRoleInformation.data.map((eachRole) => eachRole.title)
 							matchQuery['$match']['recommendedFor'] = { $in: userRoles }
 						}
 					}
 				}
 
-				// Search Logic
-				if (search && search !== '') {
-					const searchConditions = []
+				const searchConditions = []
+				if (search !== '') {
 					if (userLanguage === defaultLanguage) {
 						searchConditions.push(
 							{ title: new RegExp(search, 'i') },
@@ -225,26 +294,44 @@ module.exports = class ProjectCategoriesHelper {
 							{ categories: new RegExp(search, 'i') }
 						)
 					}
+
+					// Add into $and instead of overwriting
 					matchQuery.$match.$and = [...(matchQuery.$match.$and || []), { $or: searchConditions }]
 				}
 
-				// Sorting
-				let sortedQuery = { $sort: { createdAt: -1 } }
-				if (sortedData === CONSTANTS.common.IMPORTANT_PROJECT) {
-					sortedQuery['$sort'] = { noOfRatings: -1 }
+				let sortedQuery = {
+					$sort: {
+						createdAt: -1,
+					},
 				}
+				if (sortedData && sortedData === CONSTANTS.common.IMPORTANT_PROJECT) {
+					sortedQuery['$sort'] = {}
+					sortedQuery['$sort']['noOfRatings'] = -1
+				}
+
 				aggregateData.push(sortedQuery)
 
-				// Projecting and Faceting (Pagination)
 				aggregateData.push(
 					{
 						$project: {
-							title: { $ifNull: [`$translations.${language}.title`, '$title'] },
-							description: { $ifNull: [`$translations.${language}.description`, '$description'] },
-							impact: { $ifNull: [`$translations.${language}.impact`, '$impact'] },
-							summary: { $ifNull: [`$translations.${language}.summary`, '$summary'] },
-							story: { $ifNull: [`$translations.${language}.story`, '$story'] },
-							author: { $ifNull: [`$translations.${language}.author`, '$author'] },
+							title: {
+								$ifNull: [`$translations.${language}.title`, '$title'],
+							},
+							description: {
+								$ifNull: [`$translations.${language}.description`, '$description'],
+							},
+							impact: {
+								$ifNull: [`$translations.${language}.impact`, '$impact'],
+							},
+							summary: {
+								$ifNull: [`$translations.${language}.summary`, '$summary'],
+							},
+							story: {
+								$ifNull: [`$translations.${language}.story`, '$story'],
+							},
+							author: {
+								$ifNull: [`$translations.${language}.author`, '$author'],
+							},
 							externalId: 1,
 							noOfRatings: 1,
 							averageRating: 1,
@@ -259,120 +346,166 @@ module.exports = class ProjectCategoriesHelper {
 					{
 						$facet: {
 							totalCount: [{ $count: 'count' }],
-							data: [{ $skip: skipValue }, { $limit: Number(limit) }],
+							data: [{ $skip: pageSize * (pageNo - 1) }, { $limit: pageSize }],
 						},
 					},
 					{
 						$project: {
 							data: 1,
-							count: { $arrayElemAt: ['$totalCount.count', 0] },
+							count: {
+								$arrayElemAt: ['$totalCount.count', 0],
+							},
 						},
 					}
 				)
-
 				let result = await projectTemplateQueries.getAggregate(aggregateData)
-				let projectTemplates = result[0].data || []
 
-				if (projectTemplates.length > 0) {
-					// Process "New" tag and signed URLs for evidence
-					for (const resultedData of projectTemplates) {
+				if (result[0].data.length > 0) {
+					for (const resultedData of result[0].data) {
+						// add as new if its created within 7 days
 						let timeDifference = moment().diff(moment(resultedData.createdAt), 'days')
-						resultedData.new = timeDifference <= 7
-
+						resultedData.new = false
+						if (timeDifference <= 7) {
+							resultedData.new = true
+						}
+						// Process evidences
 						if (resultedData.evidences && resultedData.evidences.length > 0) {
 							for (const eachEvidence of resultedData.evidences) {
 								try {
 									const downloadableUrl = await filesHelpers.getDownloadableUrl([eachEvidence.link])
 									eachEvidence.downloadableUrl = downloadableUrl.result[0].url
 								} catch (error) {
-									console.error('Error signing evidence URL:', error)
+									console.error('Error fetching downloadable URL:', error)
+								}
+							}
+						}
+					}
+				}
+
+				let projectTemplates = result[0].data
+				let allCategoryId = []
+				let filePathsArray = []
+
+				for (let project of projectTemplates) {
+					let categories = project.categories
+					if (categories.length > 0) {
+						let categoryIdArray = categories.map((category) => {
+							if (category._id) {
+								return category._id
+							}
+						})
+						allCategoryId.push(...categoryIdArray)
+					}
+				}
+
+				let allCategoryInfo = await projectCategoriesQueries.categoryDocuments({
+					_id: { $in: allCategoryId },
+					tenantId: userDetails.userInformation.tenantId,
+				})
+				for (let singleCategoryInfo of allCategoryInfo) {
+					if (singleCategoryInfo.evidences && singleCategoryInfo.evidences.length > 0) {
+						let filePaths = singleCategoryInfo.evidences.map((evidenceInfo) => {
+							return evidenceInfo.filepath
+						})
+						filePathsArray.push({
+							categoryId: singleCategoryInfo._id,
+							filePaths,
+						})
+					}
+				}
+
+				for (let project of projectTemplates) {
+					let categories = project.categories
+
+					if (categories.length > 0) {
+						for (let projectCategory of categories) {
+							let filteredCategory = allCategoryInfo.filter((category) => {
+								return category._id.toString() == projectCategory._id.toString()
+							})
+							if (filteredCategory.length > 0) {
+								let singleCategoryInfo = filteredCategory[0]
+								projectCategory.evidences = singleCategoryInfo.evidences
+							}
+						}
+					}
+				}
+
+				let allFilePaths = filePathsArray.map((project) => {
+					return project.filePaths
+				})
+				// `allFilePaths` is an array of arrays containing file paths.
+				// Use Lodash's `_.flatten` to convert this into a single, flat array of file paths.
+				// Example: [[path1, path2], [path3]] => [path1, path2, path3]
+				let flattenedFilePathArr = _.flatten(allFilePaths)
+
+				if (flattenedFilePathArr.length > 0) {
+					let downloadableUrlsCall = await filesHelpers.getDownloadableUrl(flattenedFilePathArr)
+					if (downloadableUrlsCall.message !== CONSTANTS.apiResponses.CLOUD_SERVICE_SUCCESS_MESSAGE) {
+						throw {
+							message: CONSTANTS.apiResponses.PROJECTS_FETCHED,
+							data: {
+								data: [],
+								count: 0,
+							},
+						}
+					}
+
+					let downloadableUrls = downloadableUrlsCall.result
+
+					let urlDictionary = {}
+					for (let singleURL of downloadableUrls) {
+						let url = singleURL.url
+						let filePath = singleURL.filePath
+						urlDictionary[filePath] = url
+					}
+
+					for (const template of projectTemplates) {
+						const { categories } = template
+
+						if (categories.length > 0) {
+							for (const category of categories) {
+								const { evidences } = category
+								if (!evidences || evidences.length === 0) {
+									continue
+								}
+
+								for (const [index, singleEvidence] of evidences.entries()) {
+									const downloadablePath = urlDictionary[singleEvidence.filepath]
+									category.evidences[index].downloadableUrl = downloadablePath
 								}
 							}
 						}
 					}
 
-					// Process Category Evidences
-					let allCategoryId = []
-					let filePathsArray = []
-
-					projectTemplates.forEach((project) => {
-						if (project.categories) {
-							project.categories.forEach((cat) => {
-								if (cat._id) allCategoryId.push(cat._id)
-							})
-						}
-					})
-
-					let allCategoryInfo = await projectCategoriesQueries.categoryDocuments({
-						_id: { $in: allCategoryId },
-						tenantId: userDetails.userInformation.tenantId,
-					})
-
-					// Map category evidence filepaths
-					allCategoryInfo.forEach((catInfo) => {
-						if (catInfo.evidences && catInfo.evidences.length > 0) {
-							filePathsArray.push({
-								categoryId: catInfo._id,
-								filePaths: catInfo.evidences.map((e) => e.filepath),
-							})
-						}
-					})
-
-					// Attach category evidence to project categories
-					projectTemplates.forEach((project) => {
-						if (project.categories) {
-							project.categories.forEach((projCat) => {
-								let match = allCategoryInfo.find((c) => c._id.toString() === projCat._id.toString())
-								if (match) projCat.evidences = match.evidences
-							})
-						}
-					})
-
-					// Sign Category Evidence URLs
-					let flattenedPaths = _.flatten(filePathsArray.map((f) => f.filePaths))
-					if (flattenedPaths.length > 0) {
-						let signedUrls = await filesHelpers.getDownloadableUrl(flattenedPaths)
-						if (signedUrls.message === CONSTANTS.apiResponses.CLOUD_SERVICE_SUCCESS_MESSAGE) {
-							let urlMap = {}
-							signedUrls.result.forEach((res) => {
-								urlMap[res.filePath] = res.url
-							})
-
-							projectTemplates.forEach((project) => {
-								project.categories?.forEach((cat) => {
-									cat.evidences?.forEach((ev) => {
-										ev.downloadableUrl = urlMap[ev.filepath]
-									})
-								})
-							})
-						}
-					}
-
-					// Handle Meta-information flattening and translation
-					for (const template of projectTemplates) {
-						if (template.metaInformation) {
-							if (language !== 'en' && template.translations?.[language]) {
-								await UTILS.getTranslatedData(template.metaInformation, template.translations[language])
-							}
-							Object.assign(template, template.metaInformation)
-							delete template.metaInformation
-						}
-						delete template.translations
-					}
+					result[0].data = projectTemplates
 				}
-
+				result[0].data.map(async (projectTemplate) => {
+					if (projectTemplate.metaInformation) {
+						const metaInformation = projectTemplate.metaInformation
+						// get the translated data if language is other than 'en'
+						if (language != 'en') {
+							await UTILS.getTranslatedData(metaInformation, projectTemplate.translations[language])
+						}
+						// add metaInformation keys to the root of the project
+						Object.keys(metaInformation).map((key) => {
+							projectTemplate[key] = metaInformation[key]
+						})
+						delete projectTemplate.metaInformation
+					}
+					delete projectTemplate.translations
+				})
 				return resolve({
 					success: true,
 					message: CONSTANTS.apiResponses.PROJECTS_FETCHED,
 					data: {
-						data: projectTemplates,
-						count: result[0].count || 0,
+						data: result[0].data,
+						count: result[0].count ? result[0].count : 0,
 					},
 				})
 			} catch (error) {
 				return reject({
 					success: false,
-					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					status: HTTP_STATUS_CODE.not_found.status,
 					message: error.message,
 				})
 			}

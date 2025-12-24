@@ -624,7 +624,11 @@ module.exports = class LibraryCategoriesHelper {
 
 					// Update old parent: decrement count and remove from children array
 					if (oldParentId) {
-						await this.updateParentCounts(oldParentId, userDetails.tenantAndOrgInfo.tenantId, -1)
+						await this.updateParentHasChildCategories(
+							oldParentId,
+							userDetails.tenantAndOrgInfo.tenantId,
+							-1
+						)
 						await projectCategoriesQueries.updateOne(
 							{ _id: oldParentId },
 							{ $pull: { children: categoryId } }
@@ -636,7 +640,7 @@ module.exports = class LibraryCategoriesHelper {
 
 					// Update new parent: increment count and add to children array
 					if (newParentId) {
-						await this.updateParentCounts(newParentId, userDetails.tenantAndOrgInfo.tenantId, 1)
+						await this.updateParentHasChildCategories(newParentId, userDetails.tenantAndOrgInfo.tenantId, 1)
 						await projectCategoriesQueries.updateOne(
 							{ _id: newParentId },
 							{ $addToSet: { children: categoryId } }
@@ -815,8 +819,8 @@ module.exports = class LibraryCategoriesHelper {
 				if (!orgExtension || orgExtension.length === 0) {
 					throw {
 						success: false,
-						status: 404,
-						message: 'ORG_EXTENSION_NOT_FOUND',
+						status: HTTP_STATUS_CODE.not_found.status,
+						message: CONSTANTS.apiResponses.ORG_EXTENSION_NOT_FOUND,
 					}
 				}
 
@@ -883,7 +887,7 @@ module.exports = class LibraryCategoriesHelper {
 
 				// Update parent counters and add to children array
 				if (parentId) {
-					await this.updateParentCounts(parentId, tenantId, 1)
+					await this.updateParentHasChildCategories(parentId, tenantId, 1)
 					// add to parent's children array
 					await projectCategoriesQueries.updateOne(
 						{ _id: parentId },
@@ -932,7 +936,7 @@ module.exports = class LibraryCategoriesHelper {
 				let tenantId = req.userDetails.userInformation.tenantId
 				let organizationId = req.userDetails.userInformation.organizationId
 				let query = {
-					// visibleToOrganizations: { $in: [organizationId] },
+					// visibleToOrganizations: { $in: [organizationId] } // We have handle this in below condition,
 					tenantId: tenantId,
 					status: CONSTANTS.common.ACTIVE_STATUS,
 					isDeleted: false,
@@ -946,7 +950,7 @@ module.exports = class LibraryCategoriesHelper {
 					query.parent_id = null
 				}
 
-				// Handle currentOrgOnly filter
+				// handle currentOrgOnly filter
 				if (req.query.currentOrgOnly) {
 					let currentOrgOnly = UTILS.convertStringToBoolean(req.query.currentOrgOnly)
 					if (currentOrgOnly) {
@@ -1016,12 +1020,12 @@ module.exports = class LibraryCategoriesHelper {
 	/**
 	 * Update parent's hasChildCategories
 	 * @method
-	 * @name updateParentCounts
+	 * @name updateParentHasChildCategories
 	 * @param {ObjectId} parentId - Parent category ID
 	 * @param {String} tenantId - Tenant ID
 	 * @param {Number} increment - Increment value (1 or -1)
 	 */
-	static async updateParentCounts(parentId, tenantId, increment = 1) {
+	static async updateParentHasChildCategories(parentId, tenantId, increment = 1) {
 		if (!parentId) return
 
 		try {
@@ -1504,7 +1508,7 @@ module.exports = class LibraryCategoriesHelper {
 
 				// 5. Update parent counts
 				if (category.parent_id) {
-					await this.updateParentCounts(category.parent_id, tenantId, -1)
+					await this.updateParentHasChildCategories(category.parent_id, tenantId, -1)
 					// remove from parent's children array
 					await projectCategoriesQueries.updateOne(
 						{ _id: category.parent_id },
@@ -1653,57 +1657,6 @@ module.exports = class LibraryCategoriesHelper {
 	}
 
 	/**
-	 * Apply visibility conditions to the match query.
-	 * @method
-	 * @name applyVisibilityConditions
-	 * @param {Object} matchQuery - The current match query.
-	 * @param {Object} orgExtension - Organization extension document.
-	 * @param {Object} userDetails - User details.
-	 * @returns {Object} Updated match query.
-	 */
-	static applyVisibilityConditions(matchQuery, orgExtension, userDetails) {
-		let matchConditions = []
-
-		// allow ALL templates
-		if (
-			orgExtension &&
-			orgExtension.externalProjectResourceVisibilityPolicy === CONSTANTS.common.ORG_EXTENSION_VISIBILITY.ALL
-		) {
-			matchConditions.push({ visibility: CONSTANTS.common.ORG_EXTENSION_VISIBILITY.ALL })
-		}
-
-		// allow ASSOCIATED templates with orgId match (for both ALL and ASSOCIATED cases)
-		if (
-			orgExtension &&
-			[
-				CONSTANTS.common.ORG_EXTENSION_VISIBILITY.ALL,
-				CONSTANTS.common.ORG_EXTENSION_VISIBILITY.ASSOCIATED,
-			].includes(orgExtension.externalProjectResourceVisibilityPolicy)
-		) {
-			matchConditions.push({
-				visibility: { $ne: CONSTANTS.common.ORG_EXTENSION_VISIBILITY.CURRENT },
-				visibleToOrganizations: {
-					$in: [userDetails.userInformation.organizationId],
-				},
-			})
-		}
-
-		// Build a single `$or` array for visibility, then add it into `$and`
-		const visibilityOr =
-			matchConditions.length > 0
-				? [...matchConditions, { orgId: userDetails.userInformation.organizationId }]
-				: null
-		if (visibilityOr) {
-			// Preserve any existing $and clauses and append the visibility OR
-			matchQuery.$match.$and = [...(matchQuery.$match.$and || []), { $or: visibilityOr }]
-		} else {
-			// Fallback to a simple orgId match when there are no other visibility conditions
-			matchQuery.$match.orgId = userDetails.userInformation.organizationId
-		}
-		return matchQuery
-	}
-
-	/**
 	 * Sync templates for a category (background job)
 	 * @method
 	 * @name syncTemplatesForCategory
@@ -1800,9 +1753,9 @@ module.exports = class LibraryCategoriesHelper {
  * Handle evidence upload
  * @name handleEvidenceUpload
  * @param {Array} files - files
- * @param {String} userId - user id
- * @returns {Object} returns evidences array
+ * @returns {Array} returns evidences array
  */
+
 function handleEvidenceUpload(files, userId) {
 	return new Promise(async (resolve, reject) => {
 		try {
@@ -1813,9 +1766,10 @@ function handleEvidenceUpload(files, userId) {
 				if (!Array.isArray(coverImages)) {
 					coverImages = [coverImages]
 				}
-
+				// Generate a unique ID for the file upload
 				let uniqueId = await UTILS.generateUniqueId()
 
+				// Prepare the request data for the file upload
 				let requestData = {
 					[uniqueId]: {
 						files: [],
@@ -1840,6 +1794,7 @@ function handleEvidenceUpload(files, userId) {
 							return fileData.file == fileFromRequest.name
 						})
 
+						// Upload evidences to cloud
 						const uploadData = await axios.put(fileUploadUrl[0].url, fileFromRequest.data, {
 							headers: {
 								'x-ms-blob-type': process.env.CLOUD_STORAGE_PROVIDER === 'azure' ? 'BlockBlob' : null,
@@ -1847,6 +1802,7 @@ function handleEvidenceUpload(files, userId) {
 							},
 						})
 
+						// Throw error if evidence upload fails
 						if (!(uploadData.status == 200 || uploadData.status == 201)) {
 							throw {
 								success: false,
@@ -1856,6 +1812,7 @@ function handleEvidenceUpload(files, userId) {
 					}
 				}
 
+				// Attach sequence number to each evidence.
 				let sequenceNumber = 0
 				evidences = signedUrl.data[uniqueId].files.map((fileInfo) => {
 					return {
@@ -1873,11 +1830,143 @@ function handleEvidenceUpload(files, userId) {
 			})
 		} catch (error) {
 			return reject({
-				status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+				status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
 				success: false,
 				message: error.message,
 				data: {},
 			})
 		}
 	})
+}
+
+/**
+ * Helper to build visibility conditions and mutate matchQuery
+ * @name applyVisibilityConditions
+ * @param {Object} matchQuery - matchQuery
+ * @param {Object} orgExtension - orgExtension
+ * @param {Object} userDetails - userDetails
+ * @returns {Object} returns modified matchQuery
+ */
+/**
+ * 
+	Sample for matchQuery obj when orgExtension.externalProjectResourceVisibilityPolicy = CURRENT
+	{
+		"$match": {
+			"status": "published",
+			"isReusable": true,
+			"tenantId": "shikshalokam",
+			"orgId": "slorg"
+		}
+	}
+ */
+/**
+ * 
+	Sample for matchQuery obj when orgExtension.externalProjectResourceVisibilityPolicy = ASSOCIATED
+	{
+		"$match": {
+			"status": "published",
+			"isReusable": true,
+			"tenantId": "shikshalokam",
+			"$and": [
+				{
+				"$or": [
+					{
+						"visibility": {
+							"$ne": "CURRENT"
+						},
+						"visibleToOrganizations": {
+							"$in": [
+								"sot"
+							]
+						}
+					},
+					{
+						"orgId": "sot"
+					}
+				]
+				}
+			]
+		}
+	}
+ */
+/**
+ * 
+	Sample for matchQuery obj when orgExtension.externalProjectResourceVisibilityPolicy = ALL
+	{
+		"$match": {
+		"status": "published",
+		"isReusable": true,
+		"tenantId": "shikshalokam",
+		"$and": [
+			{
+			"$or": [
+				{
+					"visibility": "ALL"
+				},
+				{
+					"visibility": {
+						"$ne": "CURRENT"
+					},
+					"visibleToOrganizations": {
+						"$in": [
+							"mys"
+						]
+					}
+				},
+				{
+					"orgId": "mys"
+				}
+			]
+			}
+		]
+		}
+	}
+*/
+
+/**
+ * Apply visibility conditions to the match query.
+ * @method
+ * @name applyVisibilityConditions
+ * @param {Object} matchQuery - The current match query.
+ * @param {Object} orgExtension - Organization extension document.
+ * @param {Object} userDetails - User details.
+ * @returns {Object} Updated match query.
+ */
+function applyVisibilityConditions(matchQuery, orgExtension, userDetails) {
+	let matchConditions = []
+
+	// allow ALL templates
+	if (
+		orgExtension &&
+		orgExtension.externalProjectResourceVisibilityPolicy === CONSTANTS.common.ORG_EXTENSION_VISIBILITY.ALL
+	) {
+		matchConditions.push({ visibility: CONSTANTS.common.ORG_EXTENSION_VISIBILITY.ALL })
+	}
+
+	// allow ASSOCIATED templates with orgId match (for both ALL and ASSOCIATED cases)
+	if (
+		orgExtension &&
+		[CONSTANTS.common.ORG_EXTENSION_VISIBILITY.ALL, CONSTANTS.common.ORG_EXTENSION_VISIBILITY.ASSOCIATED].includes(
+			orgExtension.externalProjectResourceVisibilityPolicy
+		)
+	) {
+		matchConditions.push({
+			visibility: { $ne: CONSTANTS.common.ORG_EXTENSION_VISIBILITY.CURRENT },
+			visibleToOrganizations: {
+				$in: [userDetails.userInformation.organizationId],
+			},
+		})
+	}
+
+	// Build a single `$or` array for visibility, then add it into `$and`
+	const visibilityOr =
+		matchConditions.length > 0 ? [...matchConditions, { orgId: userDetails.userInformation.organizationId }] : null
+	if (visibilityOr) {
+		// Preserve any existing $and clauses and append the visibility OR
+		matchQuery.$match.$and = [...(matchQuery.$match.$and || []), { $or: visibilityOr }]
+	} else {
+		// Fallback to a simple orgId match when there are no other visibility conditions
+		matchQuery.$match.orgId = userDetails.userInformation.organizationId
+	}
+	return matchQuery
 }

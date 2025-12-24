@@ -514,6 +514,7 @@ module.exports = async function (req, res, next, token = '') {
 					return res.status(HTTP_STATUS_CODE['unauthorized'].status).send(respUtil(rspObj))
 				}
 				decodedToken.data.roles.push({ title: CONSTANTS.common.ADMIN_ROLE })
+
 				let result = getTenantIdAndOrgIdFromTheTheReqIntoHeaders(req, decodedToken.data)
 				if (!result.success) {
 					rspObj.errCode = CONSTANTS.apiResponses.ADMIN_TOKEN_MISSING_CODE

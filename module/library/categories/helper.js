@@ -13,8 +13,9 @@ const projectTemplateQueries = require(DB_QUERY_BASE_PATH + '/projectTemplates')
 const orgExtensionQueries = require(DB_QUERY_BASE_PATH + '/organizationExtension')
 const filesHelpers = require(MODULES_BASE_PATH + '/cloud-services/files/helper')
 const axios = require('axios')
-const hierarchyConfig = require(PROJECT_ROOT_DIRECTORY + '/config/hierarchy.config')
-const templateCategoryConfig = require(PROJECT_ROOT_DIRECTORY + '/config/template-category.config')
+// hierarchyConfig removed — use local defaults instead
+const DEFAULT_PAGINATION_LIMIT = 20
+const MAX_PAGINATION_LIMIT = 100
 const { ObjectId } = require('mongodb')
 const moment = require('moment-timezone')
 const _ = require('lodash')
@@ -566,16 +567,8 @@ module.exports = class LibraryCategoriesHelper {
 					}
 				}
 
-				// Validate max name length if name is being updated
-				if (updateData.name && updateData.name.length > hierarchyConfig.validation.maxNameLength) {
-					throw {
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: `Name length exceeds maximum limit of ${hierarchyConfig.validation.maxNameLength}`,
-					}
-				}
-
 				// Check for duplicate name if name is being updated
-				if (updateData.name && !hierarchyConfig.validation.allowDuplicateNames) {
+				if (updateData.name) {
 					const parentId = categoryData[0].parent_id
 					const duplicateCheck = await projectCategoriesQueries.findOne(
 						{
@@ -830,35 +823,23 @@ module.exports = class LibraryCategoriesHelper {
 					}
 				}
 
-				// Validate max name length
-				if (categoryData.name && categoryData.name.length > hierarchyConfig.validation.maxNameLength) {
+				const parentId = categoryData.parentId || categoryData.parent_id || null
+
+				// Duplicate category check — always enforce duplicate name prevention
+				const nameFilter = {
+					name: categoryData.name,
+					tenantId: tenantId,
+					isDeleted: false,
+					parent_id: parentId ? new ObjectId(parentId) : null,
+				}
+				const duplicateName = await projectCategoriesQueries.findOne(nameFilter, { _id: 1 })
+				if (duplicateName) {
 					throw {
 						success: false,
 						status: HTTP_STATUS_CODE.bad_request.status,
-						message: `Name length exceeds maximum limit of ${hierarchyConfig.validation.maxNameLength}`,
-					}
-				}
-
-				const parentId = categoryData.parentId || categoryData.parent_id || null
-
-				// Duplicate category check
-				// Check duplicate name within the same parent (if default allowDuplicateNames is false)
-				if (!hierarchyConfig.validation.allowDuplicateNames) {
-					const nameFilter = {
-						name: categoryData.name,
-						tenantId: tenantId,
-						isDeleted: false,
-						parent_id: parentId ? new ObjectId(parentId) : null,
-					}
-					const duplicateName = await projectCategoriesQueries.findOne(nameFilter, { _id: 1 })
-					if (duplicateName) {
-						throw {
-							success: false,
-							status: HTTP_STATUS_CODE.bad_request.status,
-							message:
-								CONSTANTS.apiResponses.CATEGORY_ALREADY_EXISTS ||
-								'Category with this name already exists in this level',
-						}
+						message:
+							CONSTANTS.apiResponses.CATEGORY_ALREADY_EXISTS ||
+							'Category with this name already exists in this level',
 					}
 				}
 
@@ -876,8 +857,8 @@ module.exports = class LibraryCategoriesHelper {
 				if (existingCategory.length > 0) {
 					throw {
 						success: false,
-						status: 400,
-						message: 'CATEGORY_ALREADY_EXISTS',
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.CATEGORY_ALREADY_EXISTS,
 					}
 				}
 
@@ -927,12 +908,12 @@ module.exports = class LibraryCategoriesHelper {
 
 				return resolve({
 					success: true,
-					message: 'CATEGORY_CREATED',
+					message: CONSTANTS.apiResponses.PROJECT_CATEGORIES_ADDED,
 					data: createdCategory,
 				})
 			} catch (error) {
 				return reject({
-					status: error.status || 500,
+					status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
 					success: false,
 					message: error.message,
 					data: {},
@@ -977,33 +958,8 @@ module.exports = class LibraryCategoriesHelper {
 				}
 
 				// Pagination logic
-				const defaultLimit = hierarchyConfig.pagination.defaultLimit || 20
-				const maxLimit = hierarchyConfig.pagination.maxLimit || 100
-
-				let pageSize = defaultLimit
-				if (req.pageSize && req.pageSize > 0) {
-					pageSize = parseInt(req.pageSize)
-				} else if (req.query.limit && req.query.limit > 0) {
-					pageSize = parseInt(req.query.limit)
-				}
-
-				if (pageSize > maxLimit) pageSize = maxLimit
-
-				let skip = 0
-				if (req.query.offset && parseInt(req.query.offset) >= 0) {
-					// Offset based pagination
-					skip = parseInt(req.query.offset)
-				} else {
-					// Page based pagination
-					let pageNo = 1
-					if (req.pageNo && req.pageNo > 0) {
-						pageNo = parseInt(req.pageNo)
-					} else if (req.query.page && req.query.page > 0) {
-						pageNo = parseInt(req.query.page)
-					}
-					skip = pageSize * (pageNo - 1)
-				}
-
+				const pageSize = req.pageSize
+				const skip = pageSize * (req.pageNo - 1)
 				const sort = { sequenceNumber: 1, name: 1 }
 
 				// Use new paginated list query
@@ -1109,7 +1065,7 @@ module.exports = class LibraryCategoriesHelper {
 
 		if (!parent) {
 			throw {
-				status: 400,
+				status: HTTP_STATUS_CODE.bad_request.status,
 				message: 'PARENT_CATEGORY_NOT_FOUND',
 			}
 		}
@@ -1292,32 +1248,9 @@ module.exports = class LibraryCategoriesHelper {
 					hasChildCategories: false,
 				}
 
-				// Pagination logic using hierarchy.config.js
-				const defaultLimit = hierarchyConfig.pagination.defaultLimit || 20
-				const maxLimit = hierarchyConfig.pagination.maxLimit || 100
-
-				let pageSize = defaultLimit
-				if (req.pageSize && req.pageSize > 0) {
-					pageSize = parseInt(req.pageSize)
-				} else if (req.query.limit && req.query.limit > 0) {
-					pageSize = parseInt(req.query.limit)
-				}
-
-				if (pageSize > maxLimit) pageSize = maxLimit
-
-				let skip = 0
-				if (req.query.offset && parseInt(req.query.offset) >= 0) {
-					skip = parseInt(req.query.offset)
-				} else {
-					let pageNo = 1
-					if (req.pageNo && req.pageNo > 0) {
-						pageNo = parseInt(req.pageNo)
-					} else if (req.query.page && req.query.page > 0) {
-						pageNo = parseInt(req.query.page)
-					}
-					skip = pageSize * (pageNo - 1)
-				}
-
+				// Pagination logic using defaults
+				const pageSize = req.pageSize
+				const skip = pageSize * (req.pageNo - 1)
 				const sort = { sequenceNumber: 1, name: 1 }
 
 				// Use list query with pagination
@@ -1863,136 +1796,6 @@ module.exports = class LibraryCategoriesHelper {
 				})
 			}
 		})
-	}
-
-	/**
-	 * Fetches paginated, reusable projects based on multiple category IDs (ObjectIds or external IDs).
-	 *
-	 * @param {string[]} categoryIds - Array of category IDs (ObjectIds) or external IDs to match.
-	 * @param {number} limit - Maximum number of projects to return per page.
-	 * @param {number} offset - Number of projects to skip for pagination.
-	 * @param {string} searchText - Optional search term to filter projects by title/description.
-	 * @param {object} userDetails - User details for tenant/org filtering.
-	 * @returns {Promise<object>} The structured success response with paginated data and total count.
-	 */
-	static async projectsByMultipleIds(categoryIds, limit, offset, searchText, userDetails) {
-		try {
-			// --- 1. VALIDATE PAGINATION ---
-			const defaultLimit = hierarchyConfig.pagination?.defaultLimit || 20
-			const maxLimit = hierarchyConfig.pagination?.maxLimit || 100
-
-			let finalLimit = Number(limit) || defaultLimit
-			if (finalLimit < 1) finalLimit = defaultLimit
-			if (finalLimit > maxLimit) finalLimit = maxLimit
-
-			let finalOffset = Number(offset)
-			if (isNaN(finalOffset) || finalOffset < 0) finalOffset = 0
-
-			// --- 2. BUILD MATCH QUERY ---
-			// Support both ObjectIds and external IDs
-			const objectIds = []
-			const externalIds = []
-
-			categoryIds.forEach((id) => {
-				if (ObjectId.isValid(id)) {
-					objectIds.push(new ObjectId(id))
-				} else {
-					externalIds.push(id)
-				}
-			})
-
-			let categoryConditions = []
-			if (objectIds.length > 0) {
-				categoryConditions.push({ 'categories._id': { $in: objectIds } })
-			}
-			if (externalIds.length > 0) {
-				categoryConditions.push({ 'categories.externalId': { $in: externalIds } })
-			}
-
-			if (categoryConditions.length === 0) {
-				throw {
-					status: HTTP_STATUS_CODE.bad_request.status,
-					message: 'No valid category IDs provided',
-				}
-			}
-
-			let matchQuery = {
-				$match: {
-					isReusable: true,
-					status: CONSTANTS.common.PUBLISHED_STATUS,
-					$or: categoryConditions,
-					isDeleted: false,
-				},
-			}
-
-			if (searchText?.trim()) {
-				const regex = new RegExp(searchText.trim(), 'i')
-				matchQuery.$match.$and = [
-					{ $or: categoryConditions },
-					{ $or: [{ title: regex }, { description: regex }, { externalId: regex }] },
-				]
-				delete matchQuery.$match.$or
-			}
-
-			matchQuery = this.applyVisibilityConditions(
-				matchQuery,
-				await orgExtensionQueries
-					.orgExtenDocuments({
-						tenantId: userDetails.userInformation.tenantId,
-						orgId: userDetails.userInformation.organizationId,
-					})
-					.then((docs) => docs?.[0] || null),
-				userDetails
-			)
-
-			// --- 3. BUILD AGGREGATION PIPELINE ---
-			const pipeline = [
-				matchQuery,
-				{
-					$addFields: {
-						averageRating: { $ifNull: ['$averageRating', 0] },
-						noOfRatings: { $ifNull: ['$noOfRatings', 0] },
-					},
-				},
-				{
-					$sort: { updatedAt: -1 },
-				},
-				{
-					$facet: {
-						data: [{ $skip: finalOffset }, { $limit: finalLimit }],
-						totalCount: [{ $count: 'count' }],
-					},
-				},
-			]
-
-			// --- 4. EXECUTE QUERY ---
-			const result = await projectTemplateQueries.getAggregate(pipeline)
-			const projects = result[0]?.data || []
-			const totalCount = result[0]?.totalCount?.[0]?.count || 0
-
-			// --- 5. PROCESS DOWNLOADABLE URLS ---
-			if (projects.length > 0) {
-				const downloadableUrlsCall = await filesHelper.getDownloadableUrl(projects, userDetails.userInformation)
-				if (downloadableUrlsCall.success) {
-					projects.forEach((project, index) => {
-						if (downloadableUrlsCall.data[index] && downloadableUrlsCall.data[index].url) {
-							project.url = downloadableUrlsCall.data[index].url
-						}
-					})
-				}
-			}
-
-			return {
-				success: true,
-				message: CONSTANTS.apiResponses.PROJECTS_FETCHED,
-				data: {
-					data: projects,
-					count: totalCount,
-				},
-			}
-		} catch (error) {
-			throw error
-		}
 	}
 }
 

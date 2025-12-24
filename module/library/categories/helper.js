@@ -1394,110 +1394,6 @@ module.exports = class ProjectCategoriesHelper {
 	}
 
 	/**
-	 * Check if category can be deleted
-	 * @method
-	 * @name canDelete
-	 * @param {ObjectId} categoryId - Category ID
-	 * @param {String} tenantId - Tenant ID
-	 * @param {String} orgId - Org ID
-	 * @returns {Object} Deletion validation result
-	 */
-	static canDelete(categoryId, tenantId, orgId) {
-		return new Promise(async (resolve, reject) => {
-			try {
-				let matchQuery = { tenantId: tenantId }
-				if (ObjectId.isValid(categoryId)) {
-					matchQuery['$or'] = [{ _id: new ObjectId(categoryId) }, { externalId: categoryId }]
-				} else {
-					matchQuery['externalId'] = categoryId
-				}
-
-				const category = await projectCategoriesQueries.findOne(matchQuery)
-
-				if (!category) {
-					throw {
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: CONSTANTS.apiResponses.CATEGORY_NOT_FOUND,
-					}
-				}
-
-				// Get all descendant categories (including the category itself)
-				const allCategoryIds = await this.getAllDescendantIds(category._id, tenantId)
-				allCategoryIds.push(category._id) // Include the category itself
-
-				// Check if any category (parent or children) has projects
-				const projectsCheck = await this.checkCategoriesHaveProjects(allCategoryIds, tenantId)
-
-				if (projectsCheck.hasProjects) {
-					return resolve({
-						success: true,
-						data: {
-							canDelete: false,
-							reason: `Category or its children are used by ${projectsCheck.totalProjects} projects`,
-							templateCount: 0,
-							projectCount: projectsCheck.totalProjects,
-							categoriesWithProjects: projectsCheck.categoriesWithProjects,
-						},
-					})
-				}
-
-				// Check if has children (after project check)
-				if (category.hasChildCategories) {
-					return resolve({
-						success: true,
-						data: {
-							canDelete: false,
-							reason: `Has child categories. Delete children first.`,
-							templateCount: 0,
-							projectCount: 0,
-						},
-					})
-				}
-
-				// Check if referenced by templates
-				const templates = await projectTemplateQueries.templateDocument(
-					{
-						'categories._id': category._id,
-						tenantId,
-						isDeleted: false,
-					},
-					['_id', 'title']
-				)
-
-				if (templates && templates.length > 0) {
-					return resolve({
-						success: true,
-						data: {
-							canDelete: false,
-							reason: `Referenced by ${templates.length} templates`,
-							templateCount: templates.length,
-							projectCount: 0,
-							templates: templates.map((t) => ({ id: t._id, title: t.title })),
-						},
-					})
-				}
-
-				return resolve({
-					success: true,
-					data: {
-						canDelete: true,
-						reason: 'Category can be deleted safely',
-						templateCount: 0,
-						projectCount: 0,
-					},
-				})
-			} catch (error) {
-				return reject({
-					success: false,
-					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
-					message: error.message,
-					data: {},
-				})
-			}
-		})
-	}
-
-	/**
 	 * Delete category
 	 * @method
 	 * @name delete
@@ -1509,16 +1405,7 @@ module.exports = class ProjectCategoriesHelper {
 	static delete(categoryId, tenantId, orgId) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				// 1. Check if category can be deleted
-				const canDeleteResult = await this.canDelete(categoryId, tenantId, orgId)
-				if (!canDeleteResult.data.canDelete) {
-					throw {
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: canDeleteResult.data.reason,
-					}
-				}
-
-				// 2. Get category details
+				// 1. Get category details
 				let matchQuery = { tenantId: tenantId, isDeleted: false }
 				if (ObjectId.isValid(categoryId)) {
 					matchQuery['$or'] = [{ _id: new ObjectId(categoryId) }, { externalId: categoryId }]
@@ -1532,6 +1419,44 @@ module.exports = class ProjectCategoriesHelper {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.CATEGORY_NOT_FOUND,
+					}
+				}
+
+				// 2. Validate deletion eligibility
+				const allCategoryIds = await this.getAllDescendantIds(category._id, tenantId)
+				allCategoryIds.push(category._id) // Include the category itself
+
+				// Check if any category (parent or children) has projects
+				const projectsCheck = await this.checkCategoriesHaveProjects(allCategoryIds, tenantId)
+				if (projectsCheck.hasProjects) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: `Category or its children are used by ${projectsCheck.totalProjects} projects`,
+					}
+				}
+
+				// Check if has children
+				if (category.hasChildCategories) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: 'Has child categories. Delete children first.',
+					}
+				}
+
+				// Check if referenced by templates
+				const templates = await projectTemplateQueries.templateDocument(
+					{
+						'categories._id': category._id,
+						tenantId,
+						isDeleted: false,
+					},
+					['_id', 'title']
+				)
+
+				if (templates && templates.length > 0) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: `Referenced by ${templates.length} templates`,
 					}
 				}
 

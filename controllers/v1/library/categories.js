@@ -388,36 +388,6 @@ module.exports = class LibraryCategories extends Abstract {
 	}
 
 	/**
-	 * @api {get} /project/v1/library/categories/canDelete/:id
-	 * @apiVersion 1.0.0
-	 * @apiName canDelete
-	 * @apiGroup LibraryCategories
-	 * @apiHeader {String} X-auth-token Authenticity token
-	 * @apiUse successBody
-	 * @apiUse errorBody
-	 */
-	async canDelete(req) {
-		try {
-			const categoryId = req.params._id
-			const tenantId = req.query.tenantId || req.userDetails.tenantAndOrgInfo.tenantId
-			const orgId = req.query.orgId || req.userDetails.tenantAndOrgInfo.orgId[0]
-
-			const result = await libraryCategoriesHelper.canDelete(categoryId, tenantId, orgId)
-			return {
-				success: true,
-				message: result.data.canDelete ? 'Category can be deleted' : 'Category cannot be deleted',
-				result: result.data,
-			}
-		} catch (error) {
-			return {
-				status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
-				message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
-				errorObject: error,
-			}
-		}
-	}
-
-	/**
 	 * @api {post} /project/v1/library/categories/bulk
 	 * @apiVersion 1.0.0
 	 * @apiName bulk

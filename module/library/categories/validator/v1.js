@@ -64,13 +64,6 @@ module.exports = (req) => {
 		},
 
 		/**
-		 * CanDelete: Validate category ID
-		 */
-		canDelete: function () {
-			req.checkParams('_id').exists().withMessage('required category id')
-		},
-
-		/**
 		 * Bulk: Validate categories array
 		 */
 		bulk: function () {

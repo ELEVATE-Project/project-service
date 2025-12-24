@@ -36,7 +36,6 @@ All category operations use the library controller.
 | **Leaves**             | `GET /project/v1/library/categories/leaves`                                                    |
 | **Bulk Create**        | `POST /project/v1/library/categories/bulk`                                                     |
 | **Move**               | `PATCH /project/v1/library/categories/move/:id`                                                |
-| **Can Delete**         | `GET /project/v1/library/categories/canDelete/:id`                                             |
 | **Projects**           | `GET /project/v1/library/categories/projects/:id`                                              |
 | **Multi Projects**     | `POST /project/v1/library/categories/projectList`                                              |
 
@@ -185,14 +184,10 @@ curl --location --request PATCH 'http://localhost:5003/project/v1/library/catego
 }'
 ```
 
-**Delete with Project Check:**
+**Delete Category:**
 
 ```bash
-# Check if safe to delete (validates no projects/children/templates)
-curl --location 'http://localhost:5003/project/v1/library/categories/canDelete/693ffb64159e0b0eaa4cc314' \
---header 'X-auth-token: YOUR_TOKEN'
-
-# Delete only if can-delete returns true
+# Delete category (validates no projects/children/templates)
 curl --location --request DELETE 'http://localhost:5003/project/v1/library/categories/delete/693ffb64159e0b0eaa4cc314' \
 --header 'X-auth-token: YOUR_TOKEN'
 ```
@@ -443,8 +438,6 @@ Headers:
 }
 ```
 
-_Note: Always use `GET /categories/:id/can-delete` first to check if deletion is safe._
-
 ### 7. Get Leaf Categories
 
 **Request:**
@@ -455,73 +448,7 @@ Headers:
   X-auth-token: <user-token>
 ```
 
-### 8. Check if Category Can Be Deleted
-
-**Request:**
-
-```http
-GET /project/v1/library/categories/canDelete/:id
-Headers:
-  X-auth-token: <user-token>
-```
-
-**Response (Can Delete):**
-
-```json
-{
-	"message": "Category can be deleted",
-	"result": {
-		"canDelete": true,
-		"reason": "Category can be deleted safely",
-		"templateCount": 0,
-		"projectCount": 0
-	}
-}
-```
-
-**Response (Cannot Delete - Has Projects):**
-
-```json
-{
-	"message": "Category cannot be deleted",
-	"result": {
-		"canDelete": false,
-		"reason": "Category or its children are used by 5 projects",
-		"templateCount": 0,
-		"projectCount": 5,
-		"categoriesWithProjects": [
-			{
-				"categoryId": "64f1...",
-				"categoryName": "Agriculture",
-				"projectCount": 3,
-				"projectTitles": ["Smart Farming", "Crop Management", "Irrigation System"]
-			},
-			{
-				"categoryId": "64f2...",
-				"categoryName": "Livestock",
-				"projectCount": 2,
-				"projectTitles": ["Cattle Management", "Dairy Automation"]
-			}
-		]
-	}
-}
-```
-
-**Response (Cannot Delete - Has Children):**
-
-```json
-{
-	"message": "Category cannot be deleted",
-	"result": {
-		"canDelete": false,
-		"reason": "Has child categories. Delete children first.",
-		"templateCount": 0,
-		"projectCount": 0
-	}
-}
-```
-
-### 9. Bulk Create Categories
+### 8. Bulk Create Categories
 
 **Request:**
 
@@ -547,7 +474,7 @@ Content-Type: application/json
 }
 ```
 
-### 10. Get Projects by Single Category
+### 9. Get Projects by Single Category
 
 **Request:**
 
@@ -578,7 +505,7 @@ Headers:
 }
 ```
 
-### 11. Get Projects by Multiple Categories
+### 10. Get Projects by Multiple Categories
 
 **Request:**
 
@@ -802,7 +729,7 @@ The following fixes have been implemented in `generics/middleware/authenticator.
 
 1.  **Circular References**: The `move` logic prevents moving a category into its own descendant.
 2.  **Orphans**: `getCategoryHierarchy` gracefully handles orphan nodes (nodes whose parent is missing) by treating them as roots for display when returning a subtree.
-3.  **Data Integrity**: `delete` is cascading. Always check `can-delete` endpoint first in UI.
+3.  **Data Integrity**: `delete` performs validation checks and prevents deletion if projects, children, or templates reference the category.
 4.  **Library Controller**: All library endpoints (`/project/v1/library/categories/*`) are handled by `controllers/v1/library/categories.js`, which uses the `library/categories/helper.js` for core logic.
 5.  **Token Compatibility**: Middleware has been updated to handle the new token structure with nested organization roles.
 6.  **Multi-Category Projects**: The `POST /project/v1/library/categories/projects/list` endpoint allows fetching projects from multiple categories with standard pagination. Use this endpoint for multi-category project queries.

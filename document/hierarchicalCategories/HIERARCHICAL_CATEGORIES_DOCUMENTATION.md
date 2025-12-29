@@ -29,7 +29,7 @@ All category operations use the library controller.
 | ---------------------- | ---------------------------------------------------------------------------------------------------------- |
 | **List**               | `GET /project/v1/library/categories/list`                                                                  |
 | **Create**             | `POST /project/v1/library/categories/create`                                                               |
-| **Get Single**         | `GET /project/v1/library/categories/details/:id`                                                           |
+| **Get Single**         | `GET /project/v1/library/categories/:id`                                                                   |
 | **Update / Move**      | `PATCH /project/v1/library/categories/:id` or `POST /project/v1/library/categories/update/:id`             |
 | **Delete**             | `DELETE /project/v1/library/categories/delete/:id`                                                         |
 | **Category Hierarchy** | `GET /project/v1/library/categories/hierarchy/:id`                                                         |
@@ -263,7 +263,7 @@ Retrieves details of a specific category.
 **Request:**
 
 ```http
-GET /project/v1/library/categories/details/:id
+GET /project/v1/library/categories/:id
 Headers:
   X-auth-token: <user-token>
 ```

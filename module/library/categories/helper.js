@@ -1460,13 +1460,26 @@ module.exports = class LibraryCategoriesHelper {
 	 * @method
 	 * @name delete
 	 * @param {ObjectId} categoryId - Category ID
-	 * @param {String} tenantId - Tenant ID
-	 * @param {String} orgId - Org ID
+	 * @param {Object} userDetails - User details (used to derive tenantId and orgId)
 	 * @returns {Object} Delete result
 	 */
-	static delete(categoryId, tenantId, orgId) {
+	static delete(categoryId, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				// derive tenantId and orgId from userDetails
+				const tenantId =
+					userDetails?.tenantAndOrgInfo?.tenantId || userDetails?.userInformation?.tenantId || null
+				const orgId = Array.isArray(userDetails?.tenantAndOrgInfo?.orgId)
+					? userDetails.tenantAndOrgInfo.orgId[0]
+					: userDetails?.tenantAndOrgInfo?.orgId || userDetails?.userInformation?.organizationId || null
+
+				if (!tenantId) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: 'Tenant ID is required',
+					}
+				}
+
 				// 1. Get category details
 				let matchQuery = { tenantId: tenantId, isDeleted: false }
 				if (ObjectId.isValid(categoryId)) {
@@ -1611,14 +1624,18 @@ module.exports = class LibraryCategoriesHelper {
 	 * @method
 	 * @name bulkCreate
 	 * @param {Array} categories - Array of category data
-	 * @param {String} tenantId - Tenant ID
-	 * @param {String} orgId - Org ID
 	 * @param {Object} userDetails - User details
 	 * @returns {Object} Bulk create result
 	 */
-	static bulkCreate(categories, tenantId, orgId, userDetails) {
+	static bulkCreate(categories, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				// derive tenant & org from userDetails
+				const tenantId = userDetails?.tenantAndOrgInfo?.tenantId
+				const orgId = Array.isArray(userDetails?.tenantAndOrgInfo?.orgId)
+					? userDetails.tenantAndOrgInfo.orgId[0]
+					: userDetails?.tenantAndOrgInfo?.orgId
+
 				let created = 0
 				let failed = 0
 				const errors = []
@@ -1729,9 +1746,19 @@ module.exports = class LibraryCategoriesHelper {
 		}
 	}
 
-	static details(categoryId, tenantId) {
+	static details(categoryId, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				const tenantId =
+					userDetails?.tenantAndOrgInfo?.tenantId || userDetails?.userInformation?.tenantId || null
+
+				if (!tenantId) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: 'Tenant ID is required',
+					}
+				}
+
 				let matchQuery = {
 					tenantId: tenantId,
 					isDeleted: false,

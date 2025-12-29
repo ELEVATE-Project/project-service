@@ -381,10 +381,8 @@ module.exports = class LibraryCategories extends Abstract {
 	async bulk(req) {
 		try {
 			const categories = req.body.categories || []
-			const tenantId = req.body.tenantId || req.userDetails.tenantAndOrgInfo.tenantId
-			const orgId = req.body.orgId || req.userDetails.tenantAndOrgInfo.orgId[0]
 
-			const result = await libraryCategoriesHelper.bulkCreate(categories, tenantId, orgId, req.userDetails)
+			const result = await libraryCategoriesHelper.bulkCreate(categories, req.userDetails)
 			return {
 				success: true,
 				message: result.message,
@@ -411,10 +409,7 @@ module.exports = class LibraryCategories extends Abstract {
 	async delete(req) {
 		try {
 			const categoryId = req.params._id
-			const tenantId = req.query.tenantId || req.userDetails.tenantAndOrgInfo.tenantId
-			const orgId = req.query.orgId || req.userDetails.tenantAndOrgInfo.orgId[0]
-
-			const result = await libraryCategoriesHelper.delete(categoryId, tenantId, orgId)
+			const result = await libraryCategoriesHelper.delete(categoryId, req.userDetails)
 			if (result.success) {
 				return {
 					success: true,
@@ -437,7 +432,7 @@ module.exports = class LibraryCategories extends Abstract {
 	}
 
 	/**
-	 * @api {get} /project/v1/library/categories/details/:id
+	 * @api {get} /project/v1/library/categories/:id
 	 * @apiVersion 1.0.0
 	 * @apiName details
 	 * @apiGroup LibraryCategories
@@ -448,20 +443,8 @@ module.exports = class LibraryCategories extends Abstract {
 	async details(req) {
 		try {
 			const categoryId = req.params._id
-			let tenantId = req.headers.tenantid
 
-			if (req.userDetails && req.userDetails.tenantAndOrgInfo) {
-				tenantId = req.userDetails.tenantAndOrgInfo.tenantId
-			}
-
-			if (!tenantId) {
-				throw {
-					message: 'Tenant ID is required',
-					status: HTTP_STATUS_CODE.bad_request.status,
-				}
-			}
-
-			const result = await libraryCategoriesHelper.details(categoryId, tenantId)
+			const result = await libraryCategoriesHelper.details(categoryId, req.userDetails)
 			return {
 				success: true,
 				message: result.message,

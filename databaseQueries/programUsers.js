@@ -15,7 +15,11 @@ module.exports = class ProgramUsers {
 	 * @param {Array} [skipFields = "none"] - fields not to include.
 	 * @returns {Array} program users details.
 	 */
-	static async programUsersDocument(filterData = 'all', fieldsArray = 'all', skipFields = 'none') {
+	static async programUsersDocument(
+		filterData = 'all', 
+		fieldsArray = 'all', 
+		skipFields = 'none'
+	) {
 		try {
 			let queryObject = filterData != 'all' ? filterData : {}
 			let projection = {}
@@ -64,7 +68,11 @@ module.exports = class ProgramUsers {
 	 * @param {Array} [skipFields = "none"] - fields not to include.
 	 * @returns {Object} program user details.
 	 */
-	static async findOne(filterData = 'all', fieldsArray = 'all', skipFields = 'none') {
+	static async findOne(
+		filterData = 'all', 
+		fieldsArray = 'all', 
+		skipFields = 'none'
+	) {
 		try {
 			let queryObject = filterData != 'all' ? filterData : {}
 			let projection = {}
@@ -97,7 +105,11 @@ module.exports = class ProgramUsers {
 	 * @param {Object} [options = { new: true }] - options for the update.
 	 * @returns {Object} updated program user document.
 	 */
-	static async findOneAndUpdate(filterData, updateData, options = { new: true }) {
+	static async findOneAndUpdate(
+		filterData, 
+		updateData, 
+		options = { new: true }
+	) {
 		try {
 			let updatedDocument = await database.models.programUsers
 				.findOneAndUpdate(filterData, updateData, options)
@@ -116,7 +128,10 @@ module.exports = class ProgramUsers {
 	 * @param {Object} updateData - data to update.
 	 * @returns {Object} update result.
 	 */
-	static async updateMany(filterData, updateData) {
+	static async updateMany(
+		filterData, 
+		updateData
+	) {
 		try {
 			let updateResult = await database.models.programUsers.updateMany(filterData, updateData)
 			return updateResult
@@ -313,7 +328,10 @@ module.exports = class ProgramUsers {
 	 * @param {Object} [options = {}] - bulk write options.
 	 * @returns {Object} bulk write result.
 	 */
-	static async bulkWrite(operations, options = {}) {
+	static async bulkWrite(
+		operations, 
+		options = {}
+	) {
 		try {
 			let result = await database.models.programUsers.bulkWrite(operations, options)
 			return result

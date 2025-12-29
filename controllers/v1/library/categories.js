@@ -145,7 +145,7 @@ module.exports = class LibraryCategories extends Abstract {
 	 * @apiVersion 1.0.0
 	 * @apiName create
 	 * @apiGroup LibraryCategories
-	 * @apiHeader {String} X-auth-token Authenticity token
+	 * @apiHeader {String} x-auth-token Authenticity token
 	 * @apiUse successBody
 	 * @apiUse errorBody
 	 */
@@ -199,7 +199,7 @@ module.exports = class LibraryCategories extends Abstract {
 	 * @apiVersion 1.0.0
 	 * @apiName update
 	 * @apiGroup LibraryCategories
-	 * @apiHeader {String} X-auth-token Authenticity token
+	 * @apiHeader {String} x-auth-token Authenticity token
 	 * @apiUse successBody
 	 * @apiUse errorBody
 	 */
@@ -290,7 +290,7 @@ module.exports = class LibraryCategories extends Abstract {
 	 * @apiVersion 1.0.0
 	 * @apiName list
 	 * @apiGroup LibraryCategories
-	 * @apiHeader {String} X-auth-token Authenticity token
+	 * @apiHeader {String} x-auth-token Authenticity token
 	 * @apiUse successBody
 	 * @apiUse errorBody
 	 */
@@ -316,7 +316,7 @@ module.exports = class LibraryCategories extends Abstract {
 	 * @apiVersion 1.0.0
 	 * @apiName categoryHierarchy
 	 * @apiGroup LibraryCategories
-	 * @apiHeader {String} X-auth-token Authenticity token
+	 * @apiHeader {String} x-auth-token Authenticity token
 	 * @apiUse successBody
 	 * @apiUse errorBody
 	 */
@@ -342,7 +342,7 @@ module.exports = class LibraryCategories extends Abstract {
 	 * @apiVersion 1.0.0
 	 * @apiName leaves
 	 * @apiGroup LibraryCategories
-	 * @apiHeader {String} X-auth-token Authenticity token
+	 * @apiHeader {String} x-auth-token Authenticity token
 	 * @apiUse successBody
 	 * @apiUse errorBody
 	 */
@@ -368,7 +368,7 @@ module.exports = class LibraryCategories extends Abstract {
 	 * @apiVersion 1.0.0
 	 * @apiName bulk
 	 * @apiGroup LibraryCategories
-	 * @apiHeader {String} X-auth-token Authenticity token
+	 * @apiHeader {String} x-auth-token Authenticity token
 	 * @apiUse successBody
 	 * @apiUse errorBody
 	 */
@@ -403,7 +403,7 @@ module.exports = class LibraryCategories extends Abstract {
 	 * @apiVersion 1.0.0
 	 * @apiName delete
 	 * @apiGroup LibraryCategories
-	 * @apiHeader {String} X-auth-token Authenticity token
+	 * @apiHeader {String} x-auth-token Authenticity token
 	 * @apiUse successBody
 	 * @apiUse errorBody
 	 */
@@ -436,7 +436,7 @@ module.exports = class LibraryCategories extends Abstract {
 	 * @apiVersion 1.0.0
 	 * @apiName details
 	 * @apiGroup LibraryCategories
-	 * @apiHeader {String} X-auth-token Authenticity token
+	 * @apiHeader {String} x-auth-token Authenticity token
 	 * @apiUse successBody
 	 * @apiUse errorBody
 	 */

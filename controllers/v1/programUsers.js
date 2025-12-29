@@ -68,18 +68,16 @@ module.exports = class ProgramUsers extends Abstract {
 	 * @returns {JSON} - program user creation response.
 	 */
 	async create(req) {
-		return new Promise(async (resolve, reject) => {
-			try {
-				const result = await programUsersHelper.create(req.body, req.userDetails)
-				return resolve(result)
-			} catch (error) {
-				return resolve({
-					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
-					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
-					errorObject: error,
-				})
+		try {
+			const result = await programUsersHelper.create(req.body, req.userDetails)
+			return result
+		} catch (error) {
+			return {
+				status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+				message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+				errorObject: error,
 			}
-		})
+		}
 	}
 
 	/**
@@ -120,18 +118,16 @@ module.exports = class ProgramUsers extends Abstract {
 	 * @returns {JSON} - program user update response.
 	 */
 	async update(req) {
-		return new Promise(async (resolve, reject) => {
-			try {
-				const result = await programUsersHelper.update(req.params._id, req.body, req.userDetails)
-				return resolve(result)
-			} catch (error) {
-				return resolve({
-					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
-					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
-					errorObject: error,
-				})
+		try {
+			const result = await programUsersHelper.update(req.params._id, req.body, req.userDetails)
+			return result
+		} catch (error) {
+			return {
+				status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+				message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+				errorObject: error,
 			}
-		})
+		}
 	}
 
 	/**
@@ -171,35 +167,33 @@ module.exports = class ProgramUsers extends Abstract {
 	 * @returns {JSON} - program user details.
 	 */
 	async read(req) {
-		return new Promise(async (resolve, reject) => {
-			try {
-				// Check if it's a programId:userId pattern
-				if (req.params.programId && req.params.userId && !req.params._id) {
-					// Pattern: /read/:programId/:userId
-					const result = await programUsersHelper.readByProgramAndUserId(
-						req.params.programId,
-						req.params.userId,
-						req.userDetails
-					)
-					return resolve(result)
-				} else if (req.params._id) {
-					// Pattern: /read/:_id
-					const result = await programUsersHelper.read(req.params._id, req.userDetails)
-					return resolve(result)
-				} else {
-					throw {
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: 'Invalid parameters. Use either /:_id or /:programId/:userId',
-					}
+		try {
+			// Check if it's a programId:userId pattern
+			if (req.params.programId && req.params.userId && !req.params._id) {
+				// Pattern: /read/:programId/:userId
+				const result = await programUsersHelper.readByProgramAndUserId(
+					req.params.programId,
+					req.params.userId,
+					req.userDetails
+				)
+				return result
+			} else if (req.params._id) {
+				// Pattern: /read/:_id
+				const result = await programUsersHelper.read(req.params._id, req.userDetails)
+				return result
+			} else {
+				throw {
+					status: HTTP_STATUS_CODE.bad_request.status,
+					message: 'Invalid parameters. Use either /:_id or /:programId/:userId',
 				}
-			} catch (error) {
-				return resolve({
-					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
-					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
-					errorObject: error,
-				})
 			}
-		})
+		} catch (error) {
+			return {
+				status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+				message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+				errorObject: error,
+			}
+		}
 	}
 
 	/**
@@ -238,18 +232,16 @@ module.exports = class ProgramUsers extends Abstract {
 	 * @returns {JSON} - paginated list of program users.
 	 */
 	async list(req) {
-		return new Promise(async (resolve, reject) => {
-			try {
-				const result = await programUsersHelper.list(req.query, req.body, req.userDetails)
-				return resolve(result)
-			} catch (error) {
-				return resolve({
-					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
-					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
-					errorObject: error,
-				})
+		try {
+			const result = await programUsersHelper.list(req)
+			return result
+		} catch (error) {
+			return {
+				status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+				message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+				errorObject: error,
 			}
-		})
+		}
 	}
 
 	/**
@@ -284,121 +276,19 @@ module.exports = class ProgramUsers extends Abstract {
 	 * @returns {JSON} - deletion response.
 	 */
 	async delete(req) {
-		return new Promise(async (resolve, reject) => {
-			try {
-				const result = await programUsersHelper.deleteResource(req.params._id, req.userDetails)
-				return resolve(result)
-			} catch (error) {
-				return resolve({
-					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
-					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
-					errorObject: error,
-				})
+		try {
+			const result = await programUsersHelper.deleteResource(req.params._id, req.userDetails)
+			return result
+		} catch (error) {
+			return {
+				status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+				message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+				errorObject: error,
 			}
-		})
+		}
 	}
 
-	/**
-	 * @api {patch} /project/v1/programUsers/updateStatus/:_id
-	 * @apiVersion 1.0.0
-	 * @apiName updateStatus
-	 * @apiGroup ProgramUsers
-	 * @apiHeader {String} x-auth-token Authenticity token
-	 * @apiSampleRequest /project/v1/programUsers/updateStatus/60a5e5d8f1b2c3d4e5f6a7b9
-	 * @apiUse successBody
-	 * @apiUse errorBody
-	 * @apiParamExample {json} Request-Body:
-	 * {
-	 *   "status": "GRADUATED",
-	 *   "statusReason": "Completed all requirements"
-	 * }
-	 * @apiParamExample {json} Response:
-	 * {
-	 *   "message": "Program user status updated successfully",
-	 *   "status": 200,
-	 *   "result": {
-	 *     "_id": "60a5e5d8f1b2c3d4e5f6a7b9",
-	 *     "status": "GRADUATED",
-	 *     "prevStatus": "COMPLETED"
-	 *   }
-	 * }
-	 */
-
-	/**
-	 * Update program user status.
-	 * @method
-	 * @name updateStatus
-	 * @param {Object} req - request object.
-	 * @param {String} req.params._id - program user id.
-	 * @param {Object} req.body - request body with status.
-	 * @param {Object} req.userDetails - logged in user details.
-	 * @returns {JSON} - status update response.
-	 */
-	async updateStatus(req) {
-		return new Promise(async (resolve, reject) => {
-			try {
-				const result = await programUsersHelper.updateStatus(req.params._id, req.body, req.userDetails)
-				return resolve(result)
-			} catch (error) {
-				return resolve({
-					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
-					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
-					errorObject: error,
-				})
-			}
-		})
-	}
-
-	/**
-	 * @api {patch} /project/v1/programUsers/updateMetadata/:_id
-	 * @apiVersion 1.0.0
-	 * @apiName updateMetadata
-	 * @apiGroup ProgramUsers
-	 * @apiHeader {String} x-auth-token Authenticity token
-	 * @apiSampleRequest /project/v1/programUsers/updateMetadata/60a5e5d8f1b2c3d4e5f6a7b9
-	 * @apiUse successBody
-	 * @apiUse errorBody
-	 * @apiParamExample {json} Request-Body:
-	 * {
-	 *   "metadata": {
-	 *     "externalIdOfBoardingCompletionCategory": {
-	 *       "templateExternalId": "template-123",
-	 *       "tasks": [{ "taskId": "task1", "completed": true }]
-	 *     }
-	 *   }
-	 * }
-	 * @apiParamExample {json} Response:
-	 * {
-	 *   "message": "Program user metadata updated successfully",
-	 *   "status": 200,
-	 *   "result": {...}
-	 * }
-	 */
-
-	/**
-	 * Update program user metadata.
-	 * @method
-	 * @name updateMetadata
-	 * @param {Object} req - request object.
-	 * @param {String} req.params._id - program user id.
-	 * @param {Object} req.body - request body with metadata.
-	 * @param {Object} req.userDetails - logged in user details.
-	 * @returns {JSON} - metadata update response.
-	 */
-	async updateMetadata(req) {
-		return new Promise(async (resolve, reject) => {
-			try {
-				const result = await programUsersHelper.updateMetadata(req.params._id, req.body, req.userDetails)
-				return resolve(result)
-			} catch (error) {
-				return resolve({
-					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
-					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
-					errorObject: error,
-				})
-			}
-		})
-	}
+	// Consolidated: status and metadata updates are handled by the `update` endpoint
 
 	/**
 	 * @api {get} /project/v1/programUsers/getByProgramId/:_id
@@ -432,17 +322,15 @@ module.exports = class ProgramUsers extends Abstract {
 	 * @returns {JSON} - list of program users for a program.
 	 */
 	async getByProgramId(req) {
-		return new Promise(async (resolve, reject) => {
-			try {
-				const result = await programUsersHelper.getByProgramId(req.params._id, req.query, req.userDetails)
-				return resolve(result)
-			} catch (error) {
-				return resolve({
-					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
-					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
-					errorObject: error,
-				})
+		try {
+			const result = await programUsersHelper.getByProgramId(req.params._id, req.query, req.userDetails)
+			return result
+		} catch (error) {
+			return {
+				status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+				message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+				errorObject: error,
 			}
-		})
+		}
 	}
 }

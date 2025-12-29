@@ -116,17 +116,15 @@ The token is decoded to extract:
 
 ### Endpoints Summary
 
-| Method | Endpoint                   | Description                                         |
-| ------ | -------------------------- | --------------------------------------------------- |
-| POST   | `/create`                  | Create new program user                             |
-| PATCH  | `/update/:_id`             | Update program user                                 |
-| GET    | `/read/:_id`               | Get program user by ID                              |
-| GET    | `/read/:programId/:userId` | Read particular program user by program and user ID |
-| POST   | `/list`                    | List program users with filters                     |
-| DELETE | `/delete/:_id`             | Delete program user                                 |
-| PATCH  | `/updateStatus/:_id`       | Update status with validation                       |
-| PATCH  | `/updateMetadata/:_id`     | Update metadata                                     |
-| GET    | `/getByProgramId/:_id`     | Get users by program ID                             |
+| Method | Endpoint                   | Description                                          |
+| ------ | -------------------------- | ---------------------------------------------------- |
+| POST   | `/create`                  | Create new program user                              |
+| PATCH  | `/update/:_id`             | Update program user (status, metadata, other fields) |
+| GET    | `/read/:_id`               | Get program user by ID                               |
+| GET    | `/read/:programId/:userId` | Read particular program user by program and user ID  |
+| POST   | `/list`                    | List program users with filters                      |
+| DELETE | `/delete/:_id`             | Delete program user                                  |
+| GET    | `/getByProgramId/:_id`     | Get users by program ID                              |
 
 ---
 
@@ -170,42 +168,44 @@ Response:
 }
 ```
 
-### 2. Update Status
+### 2. Update (Status or Metadata)
+
+Note: The separate `updateStatus` API has been removed. Use the consolidated `PATCH /project/v1/programUsers/update/:_id` endpoint for status and metadata updates.
+
+Use the single update endpoint to modify status, metadata, or other mutable fields. When changing `status`, the request MUST include a non-empty `statusReason` string explaining the reason for the change.
 
 ```bash
-PATCH /project/v1/programUsers/updateStatus/507f1f77bcf86cd799439011
+PATCH /project/v1/programUsers/update/507f1f77bcf86cd799439011
 Headers:
   x-auth-token: <token>
   Content-Type: application/json
 
-Body:
+Body (update status):
 {
   "status": "ONBOARDED",
   "statusReason": "Completed onboarding process"
 }
 
-Response (Success):
+Body (update metadata):
 {
-  "success": true,
-  "message": "Program user status updated successfully",
-  "result": {
-    "_id": "507f1f77bcf86cd799439011",
-    "status": "ONBOARDED",
-    "prevStatus": "NOT_ONBOARDED",
-    "validNextStatuses": ["IN_PROGRESS", "DROPPED_OUT"],
-    ...
+  "metadata": {
+    "externalIdOfBoardingCompletionCategory": {
+      "templateExternalId": "onboarding-template-001",
+      "tasks": [
+        { "taskId": "task-001", "completed": true, "completedAt": "2024-12-18T10:00:00Z" }
+      ]
+    }
   }
 }
 
-Response (Invalid Transition):
+Response (Success):
 {
-  "success": false,
-  "message": "Cannot skip status. Current: NOT_ONBOARDED, Expected next: ONBOARDED, Attempted: COMPLETED",
-  "data": {
-    "currentStatus": "NOT_ONBOARDED",
-    "attemptedStatus": "COMPLETED",
-    "validNextStatuses": ["ONBOARDED", "DROPPED_OUT"],
-    "statusFlow": "NOT_ONBOARDED → ONBOARDED → IN_PROGRESS → COMPLETED → GRADUATED (DROPPED_OUT from any except GRADUATED)"
+  "success": true,
+  "message": "Program user updated successfully",
+  "result": {
+    "_id": "507f1f77bcf86cd799439011",
+    "status": "ONBOARDED",
+    ...
   }
 }
 ```
@@ -428,38 +428,6 @@ Body:
 	"page": 1,
 	"limit": 10,
 	"totalPages": 5
-}
-```
-
-### 4. Update Metadata
-
-```bash
-PATCH /project/v1/programUsers/updateMetadata/507f1f77bcf86cd799439011
-Headers:
-  x-auth-token: <token>
-  Content-Type: application/json
-
-Body:
-{
-  "metadata": {
-    "externalIdOfBoardingCompletionCategory": {
-      "templateExternalId": "onboarding-template-001",
-      "tasks": [
-        { "taskId": "task-001", "completed": true, "completedAt": "2024-12-18T10:00:00Z" }
-      ]
-    },
-    "observationInfo": {
-      "midlineSurveyCount": 1,
-      "midlineSurveyComplete": true
-    }
-  }
-}
-
-Response:
-{
-  "success": true,
-  "message": "Program user metadata updated successfully",
-  "result": {...}
 }
 ```
 

@@ -273,19 +273,44 @@ module.exports = class ProgramUsersHelper {
 
 				// Validate status transition if status is being changed
 				if (bodyData.status && bodyData.status !== currentProgramUser.status) {
-					const validation = this.validateStatusTransition(currentProgramUser.status, bodyData.status)
-					if (!validation.valid) {
-						const validNextStatuses = this.getValidNextStatuses(currentProgramUser.status)
+					// Ensure reason for status change is provided
+					if (
+						!bodyData.statusReason ||
+						(typeof bodyData.statusReason === 'string' && bodyData.statusReason.trim() === '')
+					) {
 						return resolve({
 							success: false,
 							status: HTTP_STATUS_CODE.bad_request.status,
-							message: validation.message,
-							data: {
-								currentStatus: currentProgramUser.status,
-								attemptedStatus: bodyData.status,
-								validNextStatuses: validNextStatuses,
-							},
+							message: CONSTANTS.apiResponses.STATUS_REASON_REQUIRED,
 						})
+					}
+					// Allow override by admins or tenant admins, or by supervisors when explicit 'force' is provided
+					const roles =
+						(userDetails && userDetails.userInformation && userDetails.userInformation.roles) || []
+					const isAdmin =
+						roles.includes(CONSTANTS.common.ADMIN_ROLE) || roles.includes(CONSTANTS.common.TENANT_ADMIN)
+					const isSupervisor = roles.some(
+						(r) => typeof r === 'string' && r.toLowerCase().includes('supervisor')
+					)
+					const allowBypass = isAdmin || (isSupervisor && bodyData.force === true)
+
+					if (!allowBypass) {
+						const validation = this.validateStatusTransition(currentProgramUser.status, bodyData.status)
+						if (!validation.valid) {
+							const validNextStatuses = this.getValidNextStatuses(currentProgramUser.status)
+							return resolve({
+								success: false,
+								status: HTTP_STATUS_CODE.bad_request.status,
+								message: validation.message,
+								data: {
+									currentStatus: currentProgramUser.status,
+									attemptedStatus: bodyData.status,
+									validNextStatuses: validNextStatuses,
+								},
+							})
+						}
+					} else {
+						// Bypass allowed: continue and let updateData record prevStatus as usual
 					}
 				}
 
@@ -400,14 +425,23 @@ module.exports = class ProgramUsersHelper {
 	 * List program users with filters and pagination.
 	 * @method
 	 * @name list
-	 * @param {Object} queryParams - query parameters for filtering.
-	 * @param {Object} bodyData - request body data for additional filters.
-	 * @param {Object} userDetails - logged in user details (from decoded token).
+	 * @param {Object} req - Express request object with query, body, userDetails
 	 * @returns {Object} paginated list of program users.
 	 */
-	static list(queryParams, bodyData, userDetails) {
+	static list(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				// Extract from request
+				const queryParams = req.query || {}
+				const bodyData = req.body || {}
+				const userDetails = req.userDetails || {}
+
+				// Extract pagination and filter params
+				const pageSize = req.pageSize || parseInt(queryParams.limit) || parseInt(bodyData?.limit) || 20
+				const pageNo = req.pageNo || parseInt(queryParams.page) || parseInt(bodyData?.page) || 1
+				const searchText = req.searchText || queryParams.search || bodyData?.search || ''
+				const sortData = queryParams.sort || bodyData?.sort || { createdAt: -1 }
+
 				const tenantId = userDetails.userInformation.tenantId
 
 				// 1. Build base filter query
@@ -520,24 +554,19 @@ module.exports = class ProgramUsersHelper {
 					}
 				}
 
-				console.log('Final filter for program users list:', JSON.stringify(filter))
-
-				// 4. Pagination Logic
-				let limit = parseInt(queryParams.limit) || parseInt(bodyData?.limit) || 10
-				let offset = 0
-				let page = 1
-
-				if (queryParams.offset !== undefined || bodyData?.offset !== undefined) {
-					offset = parseInt(queryParams.offset) || parseInt(bodyData?.offset) || 0
-					page = Math.floor(offset / limit) + 1
-				} else {
-					page = parseInt(queryParams.page) || parseInt(bodyData?.page) || 1
-					offset = (page - 1) * limit
-				}
+				// 4. Calculate offset from page and limit
+				const offset = (pageNo - 1) * pageSize
 
 				// 5. Execute Query
-				const sortData = { createdAt: -1 }
-				const result = await programUsersQueries.listWithOffset(filter, 'all', 'none', offset, limit, sortData)
+				const finalSort = typeof sortData === 'string' ? { createdAt: -1 } : sortData || { createdAt: -1 }
+				const result = await programUsersQueries.listWithOffset(
+					filter,
+					'all',
+					'none',
+					offset,
+					pageSize,
+					finalSort
+				)
 
 				return resolve({
 					success: true,
@@ -677,6 +706,18 @@ module.exports = class ProgramUsersHelper {
 						success: false,
 						status: HTTP_STATUS_CODE.not_found.status,
 						message: CONSTANTS.apiResponses.PROGRAM_USER_NOT_FOUND,
+					})
+				}
+
+				// Ensure reason for status change is provided
+				if (
+					!bodyData.statusReason ||
+					(typeof bodyData.statusReason === 'string' && bodyData.statusReason.trim() === '')
+				) {
+					return resolve({
+						success: false,
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.STATUS_REASON_REQUIRED,
 					})
 				}
 

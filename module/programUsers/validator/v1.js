@@ -41,6 +41,15 @@ module.exports = (req) => {
 					.withMessage(
 						'status must be one of: NOT_ONBOARDED, ONBOARDED, IN_PROGRESS, COMPLETED, GRADUATED, DROPPED_OUT'
 					)
+
+				// Require reason for status change
+				req.checkBody('statusReason')
+					.exists()
+					.withMessage('statusReason is required')
+					.notEmpty()
+					.withMessage('statusReason cannot be empty')
+					.isString()
+					.withMessage('statusReason must be a string')
 			}
 
 			// Metadata is optional
@@ -75,6 +84,15 @@ module.exports = (req) => {
 					.withMessage(
 						'status must be one of: NOT_ONBOARDED, ONBOARDED, IN_PROGRESS, COMPLETED, GRADUATED, DROPPED_OUT'
 					)
+
+				// Require reason for status change
+				req.checkBody('statusReason')
+					.exists()
+					.withMessage('statusReason is required')
+					.notEmpty()
+					.withMessage('statusReason cannot be empty')
+					.isString()
+					.withMessage('statusReason must be a string')
 			}
 
 			// Metadata is optional
@@ -141,34 +159,6 @@ module.exports = (req) => {
 		},
 
 		/**
-		 * Validator for updateStatus endpoint
-		 */
-		updateStatus: function () {
-			req.checkParams('_id')
-				.exists()
-				.withMessage('_id is required')
-				.notEmpty()
-				.withMessage('_id cannot be empty')
-				.isMongoId()
-				.withMessage('_id must be a valid MongoDB ObjectId')
-
-			req.checkBody('status')
-				.exists()
-				.withMessage('status is required')
-				.notEmpty()
-				.withMessage('status cannot be empty')
-				.isIn(['NOT_ONBOARDED', 'ONBOARDED', 'IN_PROGRESS', 'COMPLETED', 'GRADUATED', 'DROPPED_OUT'])
-				.withMessage(
-					'status must be one of: NOT_ONBOARDED, ONBOARDED, IN_PROGRESS, COMPLETED, GRADUATED, DROPPED_OUT'
-				)
-
-			// StatusReason is optional
-			if (req.body.statusReason) {
-				req.checkBody('statusReason').isString().withMessage('statusReason must be a string')
-			}
-		},
-
-		/**
 		 * Validator for updateMetadata endpoint
 		 */
 		updateMetadata: function () {
@@ -225,13 +215,6 @@ module.exports = (req) => {
 		 * Validator for getStatusFlow endpoint - no validation needed
 		 */
 		getStatusFlow: function () {
-			// No validation required for this endpoint
-		},
-
-		/**
-		 * Validator for mock endpoint - no validation needed
-		 */
-		mock: function () {
 			// No validation required for this endpoint
 		},
 	}

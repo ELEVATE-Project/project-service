@@ -337,6 +337,7 @@ module.exports = {
 	PROGRAM_USER_ID_REQUIRED: 'Program user ID is required',
 	PROGRAM_ID_REQUIRED: 'Program ID is required',
 	STATUS_REQUIRED: 'Status is required',
+	STATUS_REASON_REQUIRED: 'Status reason is required',
 	METADATA_REQUIRED: 'Metadata is required',
 	PROGRAM_USER_STATUS_UPDATED: 'Program user status updated successfully',
 	PROGRAM_USER_STATUS_NOT_UPDATED: 'Failed to update program user status',

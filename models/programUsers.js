@@ -15,37 +15,28 @@ module.exports = {
 		},
 		userId: {
 			type: String,
-			required: true,
 			index: true,
+			required: true,
 		},
 		resourcesStarted: {
 			type: Boolean,
-			default: false,
 			index: true,
+			default: false,
 		},
 		userProfile: {
 			type: Object,
 			required: true,
 		},
-		userRoleInformation: {
-			type: Object,
-		},
-
-		// Unified hierarchical metadata structure (project categories → templates → tasks)
-		// Optional: If passed during creation, use it; otherwise keep empty
-		metadata: {
-			type: Object,
-			default: {},
-		},
-
-		appInformation: {
-			type: Object,
-		},
+		userRoleInformation: Object,
+		appInformation: Object,
 		consentShared: {
 			type: Boolean,
 			default: false,
 		},
-
+		metadata: {
+			type: Object,
+			default: {},
+		},
 		// User status in the program
 		status: {
 			type: String,

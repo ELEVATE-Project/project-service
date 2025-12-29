@@ -333,6 +333,18 @@ module.exports = class ProgramUsersHelper {
 				updateData.$set.updatedBy = tokenUserId
 
 				// Add remaining fields to update
+				// If metadata is provided, merge with existing metadata instead of replacing
+				if (bodyData.metadata && typeof bodyData.metadata === 'object') {
+					const existingMetadata = currentProgramUser.metadata || {}
+					const mergedMetadata = {
+						...existingMetadata,
+						...bodyData.metadata,
+					}
+					updateData.$set.metadata = mergedMetadata
+					// remove from bodyData so it's not copied again
+					delete bodyData.metadata
+				}
+
 				Object.keys(bodyData).forEach((key) => {
 					updateData.$set[key] = bodyData[key]
 				})
@@ -645,217 +657,6 @@ module.exports = class ProgramUsersHelper {
 					success: true,
 					message: CONSTANTS.apiResponses.PROGRAM_USER_DELETED,
 					data: { _id: _id },
-				})
-			} catch (error) {
-				return resolve({
-					success: false,
-					message: error.message,
-					status: HTTP_STATUS_CODE.internal_server_error.status,
-				})
-			}
-		})
-	}
-
-	/**
-	 * Update program user status with validation.
-	 * Status must follow order: NOT_ONBOARDED → ONBOARDED → IN_PROGRESS → COMPLETED → GRADUATED
-	 * DROPPED_OUT can happen from any state except GRADUATED
-	 * No rollback allowed
-	 * @method
-	 * @name updateStatus
-	 * @param {String} _id - program user id.
-	 * @param {Object} bodyData - request body with new status.
-	 * @param {Object} userDetails - logged in user details (from decoded token).
-	 * @returns {Object} updated program user document.
-	 */
-	static updateStatus(_id, bodyData, userDetails) {
-		return new Promise(async (resolve, reject) => {
-			try {
-				// Validate _id field
-				_id = _id === ':_id' ? null : _id
-
-				if (!_id) {
-					return resolve({
-						success: false,
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: CONSTANTS.apiResponses.PROGRAM_USER_ID_REQUIRED,
-					})
-				}
-
-				if (!bodyData.status) {
-					return resolve({
-						success: false,
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: CONSTANTS.apiResponses.STATUS_REQUIRED,
-					})
-				}
-
-				const tokenUserId = userDetails.userInformation.userId
-				const tenantId = userDetails.userInformation.tenantId
-
-				const filter = {
-					_id: ObjectId(_id),
-					tenantId: tenantId,
-				}
-
-				// Get current program user
-				const currentProgramUser = await programUsersQueries.findOne(filter)
-
-				if (!currentProgramUser || !currentProgramUser._id) {
-					return resolve({
-						success: false,
-						status: HTTP_STATUS_CODE.not_found.status,
-						message: CONSTANTS.apiResponses.PROGRAM_USER_NOT_FOUND,
-					})
-				}
-
-				// Ensure reason for status change is provided
-				if (
-					!bodyData.statusReason ||
-					(typeof bodyData.statusReason === 'string' && bodyData.statusReason.trim() === '')
-				) {
-					return resolve({
-						success: false,
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: CONSTANTS.apiResponses.STATUS_REASON_REQUIRED,
-					})
-				}
-
-				// Validate status transition
-				const validation = this.validateStatusTransition(currentProgramUser.status, bodyData.status)
-				if (!validation.valid) {
-					const validNextStatuses = this.getValidNextStatuses(currentProgramUser.status)
-					return resolve({
-						success: false,
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: validation.message,
-						data: {
-							currentStatus: currentProgramUser.status,
-							attemptedStatus: bodyData.status,
-							validNextStatuses: validNextStatuses,
-							statusFlow:
-								STATUS_ORDER.slice(0, 5).join(' → ') + ' (DROPPED_OUT from any except GRADUATED)',
-						},
-					})
-				}
-
-				// Prepare update data
-				const updateData = {
-					$set: {
-						prevStatus: currentProgramUser.status,
-						status: bodyData.status,
-						statusReason: bodyData.statusReason || null,
-						updatedBy: tokenUserId,
-					},
-				}
-
-				const updatedProgramUser = await programUsersQueries.findOneAndUpdate(filter, updateData, { new: true })
-
-				if (!updatedProgramUser || !updatedProgramUser._id) {
-					return resolve({
-						success: false,
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: CONSTANTS.apiResponses.PROGRAM_USER_STATUS_NOT_UPDATED,
-					})
-				}
-
-				// Add valid next statuses to response
-				updatedProgramUser.validNextStatuses = this.getValidNextStatuses(updatedProgramUser.status)
-
-				return resolve({
-					success: true,
-					message: CONSTANTS.apiResponses.PROGRAM_USER_STATUS_UPDATED,
-					data: updatedProgramUser,
-					result: updatedProgramUser,
-				})
-			} catch (error) {
-				return resolve({
-					success: false,
-					message: error.message,
-					status: HTTP_STATUS_CODE.internal_server_error.status,
-				})
-			}
-		})
-	}
-
-	/**
-	 * Update program user metadata.
-	 * @method
-	 * @name updateMetadata
-	 * @param {String} _id - program user id.
-	 * @param {Object} bodyData - request body with metadata updates.
-	 * @param {Object} userDetails - logged in user details (from decoded token).
-	 * @returns {Object} updated program user document.
-	 */
-	static updateMetadata(_id, bodyData, userDetails) {
-		return new Promise(async (resolve, reject) => {
-			try {
-				// Validate _id field
-				_id = _id === ':_id' ? null : _id
-
-				if (!_id) {
-					return resolve({
-						success: false,
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: CONSTANTS.apiResponses.PROGRAM_USER_ID_REQUIRED,
-					})
-				}
-
-				if (!bodyData.metadata) {
-					return resolve({
-						success: false,
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: CONSTANTS.apiResponses.METADATA_REQUIRED,
-					})
-				}
-
-				const tokenUserId = userDetails.userInformation.userId
-				const tenantId = userDetails.userInformation.tenantId
-
-				const filter = {
-					_id: ObjectId(_id),
-					tenantId: tenantId,
-				}
-
-				// Check if program user exists
-				const programUser = await programUsersQueries.findOne(filter)
-
-				if (!programUser || !programUser._id) {
-					return resolve({
-						success: false,
-						status: HTTP_STATUS_CODE.not_found.status,
-						message: CONSTANTS.apiResponses.PROGRAM_USER_NOT_FOUND,
-					})
-				}
-
-				// Merge metadata with existing metadata
-				const updatedMetadata = {
-					...programUser.metadata,
-					...bodyData.metadata,
-				}
-
-				const updateData = {
-					$set: {
-						metadata: updatedMetadata,
-						updatedBy: tokenUserId,
-					},
-				}
-
-				const updatedProgramUser = await programUsersQueries.findOneAndUpdate(filter, updateData, { new: true })
-
-				if (!updatedProgramUser || !updatedProgramUser._id) {
-					return resolve({
-						success: false,
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: CONSTANTS.apiResponses.PROGRAM_USER_METADATA_NOT_UPDATED,
-					})
-				}
-
-				return resolve({
-					success: true,
-					message: CONSTANTS.apiResponses.PROGRAM_USER_METADATA_UPDATED,
-					data: updatedProgramUser,
-					result: updatedProgramUser,
 				})
 			} catch (error) {
 				return resolve({

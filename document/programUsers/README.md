@@ -174,6 +174,17 @@ Note: The separate `updateStatus` API has been removed. Use the consolidated `PA
 
 Use the single update endpoint to modify status, metadata, or other mutable fields. When changing `status`, the request MUST include a non-empty `statusReason` string explaining the reason for the change.
 
+Behavior details:
+
+-   **Status validation & bypass:** Status transitions are validated to ensure they follow the allowed flow (no rollback, no skipping). By default, invalid transitions are rejected. However, the API allows controlled bypasses:
+
+    -   **Admins / Tenant Admins:** bypass validation automatically.
+    -   **Supervisors:** may bypass only when the request includes `"force": true` in the body. Use bypasses sparingly and with audit controls.
+
+-   **Metadata updates (merge behavior):** When `metadata` is provided in the `PATCH /update/:_id` body, the server performs a shallow merge between the existing `metadata` object and the incoming `metadata` object. The merge is performed as `{ ...existingMetadata, ...incomingMetadata }` — i.e., keys in the incoming `metadata` override top-level keys in the existing object. If you expect nested/deep merges, request a change to use a deep-merge strategy (e.g., `lodash.merge`).
+
+-   **Audit recommendation:** Because bypasses allow skipping status validation, it is recommended to record an audit entry whenever a bypass occurs. Useful audit fields: `performedBy`, `performedByRoles`, `prevStatus`, `newStatus`, `statusReason`, `force` (true/false), and `timestamp`.
+
 ```bash
 PATCH /project/v1/programUsers/update/507f1f77bcf86cd799439011
 Headers:

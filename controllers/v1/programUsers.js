@@ -2,7 +2,7 @@
  * name : programUsers.js
  * author : Ankit Shahu
  * created-date : 9-Jan-2023
- * Description : Program Users Controller - CRUD operations for program-user mappings.
+ * Description : PII data related controller.
  */
 
 // Dependencies
@@ -287,8 +287,6 @@ module.exports = class ProgramUsers extends Abstract {
 			}
 		}
 	}
-
-	// Consolidated: status and metadata updates are handled by the `update` endpoint
 
 	/**
 	 * @api {get} /project/v1/programUsers/getByProgramId/:_id

@@ -159,28 +159,6 @@ module.exports = (req) => {
 		},
 
 		/**
-		 * Validator for updateMetadata endpoint
-		 */
-		updateMetadata: function () {
-			req.checkParams('_id')
-				.exists()
-				.withMessage('_id is required')
-				.notEmpty()
-				.withMessage('_id cannot be empty')
-				.isMongoId()
-				.withMessage('_id must be a valid MongoDB ObjectId')
-
-			req.checkBody('metadata')
-				.exists()
-				.withMessage('metadata is required')
-				.notEmpty()
-				.withMessage('metadata cannot be empty')
-				// FIXED: Replaced .isObject() with .custom()
-				.custom((val) => typeof val === 'object' && !Array.isArray(val) && val !== null)
-				.withMessage('metadata must be an object')
-		},
-
-		/**
 		 * Validator for getByProgramId endpoint
 		 */
 		getByProgramId: function () {
@@ -209,13 +187,6 @@ module.exports = (req) => {
 					.isInt({ min: 1, max: 100 })
 					.withMessage('limit must be a positive integer between 1 and 100')
 			}
-		},
-
-		/**
-		 * Validator for getStatusFlow endpoint - no validation needed
-		 */
-		getStatusFlow: function () {
-			// No validation required for this endpoint
 		},
 	}
 

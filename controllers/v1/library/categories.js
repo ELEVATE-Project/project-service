@@ -205,10 +205,7 @@ module.exports = class LibraryCategories extends Abstract {
 	 */
 	async update(req) {
 		try {
-			const findQuery = {
-				_id: req.params._id,
-			}
-			const result = await libraryCategoriesHelper.update(findQuery, req.body, req.files, req.userDetails)
+			const result = await libraryCategoriesHelper.update(req)
 			if (result.success) {
 				return {
 					success: true,
@@ -327,8 +324,7 @@ module.exports = class LibraryCategories extends Abstract {
 	 */
 	async hierarchy(req) {
 		try {
-			const categoryId = req.params._id
-			const result = await libraryCategoriesHelper.getCategoryHierarchy(categoryId, req)
+			const result = await libraryCategoriesHelper.getCategoryHierarchy(req)
 			return {
 				success: true,
 				message: result.message,
@@ -382,6 +378,13 @@ module.exports = class LibraryCategories extends Abstract {
 		try {
 			const categories = req.body.categories || []
 
+			if (!Array.isArray(categories) || categories.length === 0) {
+				throw {
+					status: HTTP_STATUS_CODE.bad_request.status,
+					message: 'categories required - provide a non-empty array in request body',
+				}
+			}
+
 			const result = await libraryCategoriesHelper.bulkCreate(categories, req.userDetails)
 			return {
 				success: true,
@@ -408,8 +411,7 @@ module.exports = class LibraryCategories extends Abstract {
 	 */
 	async delete(req) {
 		try {
-			const categoryId = req.params._id
-			const result = await libraryCategoriesHelper.delete(categoryId, req.userDetails)
+			const result = await libraryCategoriesHelper.delete(req)
 			if (result.success) {
 				return {
 					success: true,

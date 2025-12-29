@@ -517,12 +517,18 @@ module.exports = class LibraryCategoriesHelper {
 	 * @param {Object} filterQuery - Filter query
 	 * @param {Object} updateData - Update data
 	 * @param {Object} files - Files
-	 * @param {Object} userDetails - User details
+	 * @param {Object} req - Express request object (controller passes the full `req`)
 	 * @returns {Object} Updated category
 	 */
-	static update(filterQuery, updateData, files, userDetails) {
+	static update(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				// Extract inputs from req
+				const filterQuery = { _id: req.params._id }
+				const updateData = req.body || {}
+				const files = req.files || {}
+				const userDetails = req.userDetails
+
 				// Find category to update
 				let matchQuery = { tenantId: userDetails.tenantAndOrgInfo.tenantId, isDeleted: false }
 				if (ObjectId.isValid(filterQuery._id)) {
@@ -1080,19 +1086,19 @@ module.exports = class LibraryCategoriesHelper {
 	 * Get hierarchy for a specific category (subtree starting from category)
 	 * @method
 	 * @name getCategoryHierarchy
-	 * @param {String} categoryId - Category ID
-	 * @param {Object} req - Request object
+	 * @param {Object} req - Request object (contains params, headers, query, body and userDetails)
 	 * @returns {Object} Category subtree
 	 */
-	static getCategoryHierarchy(categoryId, req) {
+	static getCategoryHierarchy(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				const categoryId = req.params._id
 				let tenantId =
 					req.headers['tenantId'] ||
 					req.body.tenantId ||
 					req.query.tenantId ||
 					req.query.tenantCode ||
-					req.userDetails.userInformation.tenantId
+					req.userDetails?.userInformation?.tenantId
 
 				// Find the category
 				let matchQuery = { tenantId: tenantId, isDeleted: false }
@@ -1459,13 +1465,16 @@ module.exports = class LibraryCategoriesHelper {
 	 * Delete category
 	 * @method
 	 * @name delete
-	 * @param {ObjectId} categoryId - Category ID
-	 * @param {Object} userDetails - User details (used to derive tenantId and orgId)
+	 * @param {Object} req - Express request object. `req.params._id` should contain categoryId and `req.userDetails` contains user info
 	 * @returns {Object} Delete result
 	 */
-	static delete(categoryId, userDetails) {
+	static delete(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				// extract categoryId and userDetails from req
+				const categoryId = req.params?._id || req.params?.id || null
+				const userDetails = req.userDetails || {}
+
 				// derive tenantId and orgId from userDetails
 				const tenantId =
 					userDetails?.tenantAndOrgInfo?.tenantId || userDetails?.userInformation?.tenantId || null

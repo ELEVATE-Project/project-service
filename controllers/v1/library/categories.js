@@ -151,7 +151,8 @@ module.exports = class LibraryCategories extends Abstract {
 	 */
 	async create(req) {
 		try {
-			const result = await libraryCategoriesHelper.create(req.body, 
+			const result = await libraryCategoriesHelper.create(
+				req.body, 
 				req.files, 
 				req.userDetails
 			)
@@ -386,7 +387,8 @@ module.exports = class LibraryCategories extends Abstract {
 				}
 			}
 
-			const result = await libraryCategoriesHelper.bulkCreate(categories, 
+			const result = await libraryCategoriesHelper.bulkCreate(
+				categories, 
 				req.userDetails
 			)
 			return {
@@ -449,7 +451,8 @@ module.exports = class LibraryCategories extends Abstract {
 		try {
 			const categoryId = req.params._id
 
-			const result = await libraryCategoriesHelper.details(categoryId, 
+			const result = await libraryCategoriesHelper.details(
+				categoryId, 
 				req.userDetails
 			)
 			return {

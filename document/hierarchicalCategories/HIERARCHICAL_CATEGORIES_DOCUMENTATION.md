@@ -98,7 +98,7 @@ The JWT token must contain the following structure in the payload:
 
     ```http
     Headers:
-      X-auth-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+      x-auth-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
     ```
 
     - Token contains user details, tenant, and organization information
@@ -117,11 +117,11 @@ The JWT token must contain the following structure in the payload:
 
 ### Authentication Header Format
 
-**Important:** Header name must be exactly `X-auth-token` (capital X)
+**Important:** Header name must be exactly `x-auth-token` (capital X)
 
 ```bash
 # Correct
-curl -H "X-auth-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+curl -H "x-auth-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 
 # Incorrect (will fail)
 curl -H "x-auth-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
@@ -140,7 +140,7 @@ The system automatically handles tenant and organization context:
 ```bash
 # Using User Token (Public API) - Working Example
 curl --location 'http://localhost:5003/project/v1/library/categories/list' \
---header 'X-auth-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoyMDAzLCJuYW1lIjoidGFuZnVuY29mZmljaWFsIHNsZGlyZWN0b3IiLCJzZXNzaW9uX2lkIjoyMjcwNiwib3JnYW5pemF0aW9uX2lkcyI6WyIzMyJdLCJvcmdhbml6YXRpb25fY29kZXMiOlsidGFuOTAiXSwidGVuYW50X2NvZGUiOiJzaGlrc2hhbG9rYW0iLCJvcmdhbml6YXRpb25zIjpbeyJpZCI6MzMsIm5hbWUiOiJ0YW45MCIsImNvZGUiOiJ0YW45MCIsImRlc2NyaXB0aW9uIjoiVGFuOTAgc3BlY2lhbGl6ZXMgaW4gcHJvdmlkaW5nIGVkdWNhdGlvbmFsIFNURUFNIiwic3RhdHVzIjoiQUNUSVZFIiwicmVsYXRlZF9vcmdzIjpbMzRdLCJ0ZW5hbnRfY29kZSI6InNoaWtzaGFsb2thbSIsIm1ldGEiOm51bGwsImNyZWF0ZWRfYnkiOjEsInVwZGF0ZWRfYnkiOjE3MDksInJvbGVzIjpbeyJpZCI6MjMsInRpdGxlIjoibWVudGVlIiwibGFiZWwiOiJtZW50ZWUiLCJ1c2VyX3R5cGUiOjAsInN0YXR1cyI6IkFDVElWRSIsIm9yZ2FuaXphdGlvbl9pZCI6MTAsInZpc2liaWxpdHkiOiJQVUJMSUMiLCJ0ZW5hbnRfY29kZSI6InNoaWtzaGFsb2thbSIsInRyYW5zbGF0aW9ucyI6bnVsbH1dfV19LCJpYXQiOjE3NjU4NjUzMDYsImV4cCI6MTc2NTk1MTcwNn0.TRuLHBD5sjkIgowCVnQC_3GgSZJnbJhpXU3rQKhfIdE'
+--header 'x-auth-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoyMDAzLCJuYW1lIjoidGFuZnVuY29mZmljaWFsIHNsZGlyZWN0b3IiLCJzZXNzaW9uX2lkIjoyMjcwNiwib3JnYW5pemF0aW9uX2lkcyI6WyIzMyJdLCJvcmdhbml6YXRpb25fY29kZXMiOlsidGFuOTAiXSwidGVuYW50X2NvZGUiOiJzaGlrc2hhbG9rYW0iLCJvcmdhbml6YXRpb25zIjpbeyJpZCI6MzMsIm5hbWUiOiJ0YW45MCIsImNvZGUiOiJ0YW45MCIsImRlc2NyaXB0aW9uIjoiVGFuOTAgc3BlY2lhbGl6ZXMgaW4gcHJvdmlkaW5nIGVkdWNhdGlvbmFsIFNURUFNIiwic3RhdHVzIjoiQUNUSVZFIiwicmVsYXRlZF9vcmdzIjpbMzRdLCJ0ZW5hbnRfY29kZSI6InNoaWtzaGFsb2thbSIsIm1ldGEiOm51bGwsImNyZWF0ZWRfYnkiOjEsInVwZGF0ZWRfYnkiOjE3MDksInJvbGVzIjpbeyJpZCI6MjMsInRpdGxlIjoibWVudGVlIiwibGFiZWwiOiJtZW50ZWUiLCJ1c2VyX3R5cGUiOjAsInN0YXR1cyI6IkFDVElWRSIsIm9yZ2FuaXphdGlvbl9pZCI6MTAsInZpc2liaWxpdHkiOiJQVUJMSUMiLCJ0ZW5hbnRfY29kZSI6InNoaWtzaGFsb2thbSIsInRyYW5zbGF0aW9ucyI6bnVsbH1dfV19LCJpYXQiOjE3NjU4NjUzMDYsImV4cCI6MTc2NTk1MTcwNn0.TRuLHBD5sjkIgowCVnQC_3GgSZJnbJhpXU3rQKhfIdE'
 
 # Using Admin Token (Admin API)
 curl --location 'http://localhost:5003/project/v1/library/categories/list' \
@@ -151,7 +151,7 @@ curl --location 'http://localhost:5003/project/v1/library/categories/list' \
 
 # Test all endpoints with working token
 # (note) Global full-tree hierarchy endpoint removed; use category-specific hierarchy:
-# curl --location 'http://localhost:5003/project/v1/library/categories/<categoryId>/hierarchy' --header 'X-auth-token: YOUR_TOKEN'
+# curl --location 'http://localhost:5003/project/v1/library/categories/<categoryId>/hierarchy' --header 'x-auth-token: YOUR_TOKEN'
 ```
 
 ### Validation Examples
@@ -161,7 +161,7 @@ curl --location 'http://localhost:5003/project/v1/library/categories/list' \
 ```bash
 # Create child category (validates parent exists)
 curl --location 'http://localhost:5003/project/v1/library/categories/create' \
---header 'X-auth-token: YOUR_TOKEN' \
+--header 'x-auth-token: YOUR_TOKEN' \
 --header 'Content-Type: application/json' \
 --data '{
   "name": "Livestock",
@@ -175,7 +175,7 @@ curl --location 'http://localhost:5003/project/v1/library/categories/create' \
 ```bash
 # Move category (validates new parent exists, prevents circular references)
 curl --location --request PATCH 'http://localhost:5003/project/v1/library/categories/move/693ffb64159e0b0eaa4cc314' \
---header 'X-auth-token: YOUR_TOKEN' \
+--header 'x-auth-token: YOUR_TOKEN' \
 --header 'Content-Type: application/json' \
 --data '{
   "newParentId": "693ffb88159e0b0eaa4cc328"
@@ -187,32 +187,32 @@ curl --location --request PATCH 'http://localhost:5003/project/v1/library/catego
 ```bash
 # Delete category (validates no projects/children/templates)
 curl --location --request DELETE 'http://localhost:5003/project/v1/library/categories/delete/693ffb64159e0b0eaa4cc314' \
---header 'X-auth-token: YOUR_TOKEN'
+--header 'x-auth-token: YOUR_TOKEN'
 ```
 
 ### Quick Test Commands
 
 ```bash
 # Test basic list
-curl --location 'http://localhost:5003/project/v1/library/categories/list' --header 'X-auth-token: YOUR_TOKEN'
+curl --location 'http://localhost:5003/project/v1/library/categories/list' --header 'x-auth-token: YOUR_TOKEN'
 
 # (removed) Test complete hierarchy endpoint — use category-specific hierarchy (`:id/hierarchy`)
 
 # Test category-specific hierarchy
-curl --location 'http://localhost:5003/project/v1/library/categories/693ffb64159e0b0eaa4cc314/hierarchy' --header 'X-auth-token: YOUR_TOKEN'
+curl --location 'http://localhost:5003/project/v1/library/categories/693ffb64159e0b0eaa4cc314/hierarchy' --header 'x-auth-token: YOUR_TOKEN'
 
 # Test leaves
-curl --location 'http://localhost:5003/project/v1/library/categories/leaves' --header 'X-auth-token: YOUR_TOKEN'
+curl --location 'http://localhost:5003/project/v1/library/categories/leaves' --header 'x-auth-token: YOUR_TOKEN'
 
 # Test projects by single category
-curl --location 'http://localhost:5003/project/v1/library/categories/projects/693ffb64159e0b0eaa4cc314?page=1&limit=10' --header 'X-auth-token: YOUR_TOKEN'
+curl --location 'http://localhost:5003/project/v1/library/categories/projects/693ffb64159e0b0eaa4cc314?page=1&limit=10' --header 'x-auth-token: YOUR_TOKEN'
 
 # Test projects by multiple categories (comma-separated query string)
-curl --location 'http://localhost:5003/project/v1/library/categories/projects?ids=694a31935b9cdcad6475ebd2,64f2b3c4d5e6f7g8h9i0j1k2&page=1&limit=10' --header 'X-auth-token: YOUR_TOKEN'
+curl --location 'http://localhost:5003/project/v1/library/categories/projects?ids=694a31935b9cdcad6475ebd2,64f2b3c4d5e6f7g8h9i0j1k2&page=1&limit=10' --header 'x-auth-token: YOUR_TOKEN'
 
 # Test projects by multiple categories (POST with array)
 curl --location 'http://localhost:5003/project/v1/library/categories/projects' \
---header 'X-auth-token: YOUR_TOKEN' \
+--header 'x-auth-token: YOUR_TOKEN' \
 --header 'Content-Type: application/json' \
 --data '{
   "categoryIds": ["694a31935b9cdcad6475ebd2", "64f2b3c4d5e6f7g8h9i0j1k2"],
@@ -234,7 +234,7 @@ Retrieves categories with optional filtering and pagination.
 ```http
 GET /project/v1/library/categories/list?page=1&limit=20&level=0&parentId=64f1...
 Headers:
-  X-auth-token: <user-token>
+  x-auth-token: <user-token>
 ```
 
 **Response:**
@@ -265,7 +265,7 @@ Retrieves details of a specific category.
 ```http
 GET /project/v1/library/categories/:id
 Headers:
-  X-auth-token: <user-token>
+  x-auth-token: <user-token>
 ```
 
 **Response:**
@@ -296,7 +296,7 @@ Retrieves the hierarchy subtree starting from a specific category.
 ```http
 GET /project/v1/library/categories/:id/hierarchy
 Headers:
-  X-auth-token: <user-token>
+  x-auth-token: <user-token>
 ```
 
 **Response:**
@@ -356,7 +356,7 @@ Headers:
 POST /project/v1/library/categories/create
 Content-Type: application/json
 Headers:
-  X-auth-token: <user-token>
+  x-auth-token: <user-token>
   tenantId: <tenant-id>
   orgId: <org-id>
 
@@ -380,7 +380,7 @@ Updates category details and/or moves it to a new parent.
 PATCH /project/v1/library/categories/:id
 Content-Type: application/json
 Headers:
-  X-auth-token: <user-token>
+  x-auth-token: <user-token>
   tenantId: <tenant-id>
   orgId: <org-id>
 
@@ -396,7 +396,7 @@ Headers:
 PATCH /project/v1/library/categories/:id
 Content-Type: application/json
 Headers:
-  X-auth-token: <user-token>
+  x-auth-token: <user-token>
   tenantId: <tenant-id>
   orgId: <org-id>
 
@@ -411,7 +411,7 @@ Headers:
 PATCH /project/v1/library/categories/:id
 Content-Type: application/json
 Headers:
-  X-auth-token: <user-token>
+  x-auth-token: <user-token>
   tenantId: <tenant-id>
   orgId: <org-id>
 
@@ -432,7 +432,7 @@ Deletes a category after comprehensive validation.
 ```http
 DELETE /project/v1/library/categories/delete/:id
 Headers:
-  X-auth-token: <user-token>
+  x-auth-token: <user-token>
 ```
 
 **Validation Checks (in order):**
@@ -481,7 +481,7 @@ Headers:
 ```http
 GET /project/v1/library/categories/leaves
 Headers:
-  X-auth-token: <user-token>
+  x-auth-token: <user-token>
 ```
 
 ### 8. Bulk Create Categories
@@ -491,7 +491,7 @@ Headers:
 ```http
 POST /project/v1/library/categories/bulk
 Headers:
-  X-auth-token: <user-token>
+  x-auth-token: <user-token>
 Content-Type: application/json
 
 {
@@ -517,7 +517,7 @@ Content-Type: application/json
 ```http
 GET /project/v1/library/categories/projects/:categoryId?page=1&limit=10&search=irrigation
 Headers:
-  X-auth-token: <user-token>
+  x-auth-token: <user-token>
 ```
 
 **Request (Multiple Categories via Query String):**
@@ -525,7 +525,7 @@ Headers:
 ```http
 GET /project/v1/library/categories/projects?ids=64f1a2b3c4d5e6f7g8h9i0j1,64f2b3c4d5e6f7g8h9i0j1k2,64f3c4d5e6f7g8h9i0j1k2l3&page=1&limit=20&search=agriculture
 Headers:
-  X-auth-token: <user-token>
+  x-auth-token: <user-token>
 ```
 
 **Request (Multiple Categories via Request Body - POST):**
@@ -533,7 +533,7 @@ Headers:
 ```http
 POST /project/v1/library/categories/projects
 Headers:
-  X-auth-token: <user-token>
+  x-auth-token: <user-token>
 Content-Type: application/json
 
 {
@@ -679,8 +679,8 @@ databaseQueries/
 **Error:** `"Required field token is missing"`
 
 -   **Cause:** Header name incorrect or token not sent
--   **Solution:** Use `X-auth-token` (capital X) header name
--   **Example:** `curl -H "X-auth-token: your_token"`
+-   **Solution:** Use `x-auth-token` (capital X) header name
+-   **Example:** `curl -H "x-auth-token: your_token"`
 
 **Error:** `"TenantId and OrgnizationId required in the token"`
 
@@ -723,7 +723,7 @@ The following fixes have been implemented in `generics/middleware/authenticator.
     - Changed from `decodedToken.data.roles` to `decodedToken.data.organizations[0].roles`
 
 4. **Header Case Sensitivity:**
-    - Added support for both `x-auth-token` and `X-auth-token`
+    - Added support for both `x-auth-token` and `x-auth-token`
 
 ## 📋 Operations & Validation Matrix
 

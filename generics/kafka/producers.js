@@ -194,8 +194,8 @@ const pushCategoryChangeEvent = function (message) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			const categoryChangeTopic =
-				process.env.CATEGORY_CHANGE_TOPIC && process.env.CATEGORY_CHANGE_TOPIC != 'OFF'
-					? process.env.CATEGORY_CHANGE_TOPIC
+				process.env.KAFKA_CATEGORY_TOPIC && process.env.ENABLE_CATEGORY_KAFKA_EVENTS != 'OFF'
+					? process.env.KAFKA_CATEGORY_TOPIC
 					: 'category_change_topic'
 
 			let kafkaPushStatus = await pushMessageToKafka([

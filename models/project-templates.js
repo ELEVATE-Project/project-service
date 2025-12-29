@@ -29,13 +29,17 @@ module.exports = {
 					index: true,
 				},
 				name: String,
+				syncAt: {
+					type: Date,
+					default: Date.now,
+					index: true,
+				},
 			},
 		],
-		categorySyncedAt: {
-			type: Date,
-			default: Date.now,
-			index: true,
-		},
+		// Per-category sync timestamp. Tracks when this template's category entry
+		// was last synchronized with category changes (e.g., name/update/remove).
+		// Useful when a template has multiple categories and consumers update
+		// category-specific sync timestamps independently.
 		description: {
 			type: String,
 			default: '',

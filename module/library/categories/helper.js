@@ -1615,7 +1615,6 @@ module.exports = class LibraryCategoriesHelper {
 					{
 						$set: {
 							categories: updatedCategories,
-							categorySyncedAt: new Date(),
 						},
 					}
 				)
@@ -1740,7 +1739,7 @@ module.exports = class LibraryCategoriesHelper {
 						name: category.name,
 						externalId: category.externalId,
 						isLeaf: !category.hasChildCategories,
-						updatedAt: new Date(),
+						syncAt: new Date(),
 					},
 					action: 'category_updated',
 				}

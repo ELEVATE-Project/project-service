@@ -311,8 +311,6 @@ module.exports = class LibraryCategories extends Abstract {
 		}
 	}
 
-	// (removed) Global hierarchy endpoint: implementation removed to keep only category-specific hierarchy
-
 	/**
 	 * @api {get} /project/v1/library/categories/:id/hierarchy
 	 * @apiVersion 1.0.0
@@ -340,9 +338,9 @@ module.exports = class LibraryCategories extends Abstract {
 	}
 
 	/**
-	 * @api {patch} /project/v1/library/categories/move/:id
+	 * @api {patch} /project/v1/library/categories/leaves
 	 * @apiVersion 1.0.0
-	 * @apiName move
+	 * @apiName leaves
 	 * @apiGroup LibraryCategories
 	 * @apiHeader {String} X-auth-token Authenticity token
 	 * @apiUse successBody

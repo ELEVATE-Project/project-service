@@ -21,6 +21,9 @@ module.exports = (req) => {
 			if (req.body.parentId) {
 				req.checkBody('parentId').isMongoId().withMessage('parentId must be a valid MongoDB ObjectId')
 			}
+			if (req.body.description !== undefined) {
+				req.checkBody('description').isString().withMessage('description must be a string')
+			}
 			if (req.body.sequenceNumber !== undefined) {
 				req.checkBody('sequenceNumber').isInt().withMessage('sequenceNumber must be an integer')
 			}
@@ -36,6 +39,9 @@ module.exports = (req) => {
 			}
 			if (req.body.externalId !== undefined) {
 				req.checkBody('externalId').notEmpty().withMessage('externalId cannot be empty')
+			}
+			if (req.body.description !== undefined) {
+				req.checkBody('description').isString().withMessage('description must be a string')
 			}
 		},
 

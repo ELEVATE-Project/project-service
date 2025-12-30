@@ -881,6 +881,7 @@ module.exports = class LibraryCategoriesHelper {
 				categoryData.orgId = orgId[0]
 				categoryData.hasChildCategories = false
 				categoryData.sequenceNumber = categoryData.sequenceNumber || 0
+				categoryData.description = categoryData.description || '' // Ensure description is set with empty default
 
 				// Create category
 				let createdCategory = await projectCategoriesQueries.create(categoryData)
@@ -944,12 +945,21 @@ module.exports = class LibraryCategoriesHelper {
 					isDeleted: false,
 				}
 
-				// Filter by parentId if provided
-				if (req.query.parentId) {
-					query.parent_id = req.query.parentId
+				// Filter by parentId if provided (supports both parentId and parent_id)
+				const parentIdParam = req.query.parentId || req.query.parent_id
+				if (parentIdParam) {
+					query.parent_id = parentIdParam
 				} else if (req.query.rootOnly === 'true' || req.query.rootOnly === true) {
 					// Root categories only
 					query.parent_id = null
+				}
+
+				// Filter by noOfProjects if provided
+				if (req.query.noOfProjects !== undefined) {
+					const noOfProjects = parseInt(req.query.noOfProjects)
+					if (!isNaN(noOfProjects)) {
+						query.noOfProjects = noOfProjects
+					}
 				}
 
 				// handle currentOrgOnly filter
@@ -959,7 +969,6 @@ module.exports = class LibraryCategoriesHelper {
 						query['orgId'] = { $in: ['ALL', organizationId] }
 					}
 				}
-
 				// Pagination logic
 				const pageSize = req.pageSize
 				const skip = pageSize * (req.pageNo - 1)
@@ -971,6 +980,7 @@ module.exports = class LibraryCategoriesHelper {
 					{
 						externalId: 1,
 						name: 1,
+						description: 1,
 						icon: 1,
 						'metaInformation.icon': 1,
 						updatedAt: 1,
@@ -1140,6 +1150,7 @@ module.exports = class LibraryCategoriesHelper {
 					'_id',
 					'externalId',
 					'name',
+					'description',
 					'icon',
 					'metaInformation.icon',
 					'parent_id',
@@ -1287,6 +1298,7 @@ module.exports = class LibraryCategoriesHelper {
 					{
 						externalId: 1,
 						name: 1,
+						description: 1,
 						'metaInformation.icon': 1,
 						parent_id: 1,
 						hasChildCategories: 1,
@@ -1296,7 +1308,6 @@ module.exports = class LibraryCategoriesHelper {
 					skip,
 					pageSize
 				)
-
 				// Normalize icon from metaInformation
 				const normalizedData = leafCategoriesResult.data.map((cat) => {
 					const copy = { ...cat }

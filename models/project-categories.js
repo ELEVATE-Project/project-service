@@ -65,6 +65,10 @@ module.exports = {
 			type: String,
 			default: '',
 		},
+		description: {
+			type: String,
+			default: '',
+		},
 		noOfProjects: {
 			type: Number,
 			default: 0,

@@ -23,6 +23,34 @@ const STATUS_ORDER = ['NOT_ONBOARDED', 'ONBOARDED', 'IN_PROGRESS', 'COMPLETED', 
 
 module.exports = class ProgramUsersHelper {
 	/**
+	 * Deep merge two objects recursively.
+	 * Used for metadata merging so that when a user sends partial metadata
+	 * (e.g., only one category), it merges into existing metadata at all levels.
+	 * @static
+	 * @param {Object} target - existing object
+	 * @param {Object} source - incoming object to merge
+	 * @returns {Object} merged object
+	 */
+	static deepMerge(target, source) {
+		if (!source || typeof source !== 'object') return target
+		if (!target || typeof target !== 'object') return source
+
+		const result = { ...target }
+
+		Object.keys(source).forEach((key) => {
+			if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+				// Recursively merge nested objects
+				result[key] = this.deepMerge(result[key] || {}, source[key])
+			} else {
+				// For primitives and arrays, replace with source value
+				result[key] = source[key]
+			}
+		})
+
+		return result
+	}
+
+	/**
 	 * Validate status transition
 	 * Rules:
 	 * 1. Status must follow order: NOT_ONBOARDED → ONBOARDED → IN_PROGRESS → COMPLETED → GRADUATED
@@ -333,18 +361,14 @@ module.exports = class ProgramUsersHelper {
 				updateData.$set.updatedBy = tokenUserId
 
 				// Add remaining fields to update
-				// If metadata is provided, merge with existing metadata instead of replacing
+				// If metadata is provided, deep merge with existing metadata instead of replacing
 				if (bodyData.metadata && typeof bodyData.metadata === 'object') {
 					const existingMetadata = currentProgramUser.metadata || {}
-					const mergedMetadata = {
-						...existingMetadata,
-						...bodyData.metadata,
-					}
+					const mergedMetadata = this.deepMerge(existingMetadata, bodyData.metadata)
 					updateData.$set.metadata = mergedMetadata
 					// remove from bodyData so it's not copied again
 					delete bodyData.metadata
 				}
-
 				Object.keys(bodyData).forEach((key) => {
 					updateData.$set[key] = bodyData[key]
 				})
@@ -566,19 +590,9 @@ module.exports = class ProgramUsersHelper {
 					}
 				}
 
-				// 4. Calculate offset from page and limit
-				const offset = (pageNo - 1) * pageSize
-
-				// 5. Execute Query
+				// 4. Execute Query
 				const finalSort = typeof sortData === 'string' ? { createdAt: -1 } : sortData || { createdAt: -1 }
-				const result = await programUsersQueries.listWithOffset(
-					filter,
-					'all',
-					'none',
-					offset,
-					pageSize,
-					finalSort
-				)
+				const result = await programUsersQueries.list(filter, 'all', 'none', pageNo, pageSize, finalSort)
 
 				return resolve({
 					success: true,

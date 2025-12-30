@@ -15,11 +15,7 @@ module.exports = class ProgramUsers {
 	 * @param {Array} [skipFields = "none"] - fields not to include.
 	 * @returns {Array} program users details.
 	 */
-	static async programUsersDocument(
-		filterData = 'all', 
-		fieldsArray = 'all', 
-		skipFields = 'none'
-	) {
+	static async programUsersDocument(filterData = 'all', fieldsArray = 'all', skipFields = 'none') {
 		try {
 			let queryObject = filterData != 'all' ? filterData : {}
 			let projection = {}
@@ -68,11 +64,7 @@ module.exports = class ProgramUsers {
 	 * @param {Array} [skipFields = "none"] - fields not to include.
 	 * @returns {Object} program user details.
 	 */
-	static async findOne(
-		filterData = 'all', 
-		fieldsArray = 'all', 
-		skipFields = 'none'
-	) {
+	static async findOne(filterData = 'all', fieldsArray = 'all', skipFields = 'none') {
 		try {
 			let queryObject = filterData != 'all' ? filterData : {}
 			let projection = {}
@@ -105,11 +97,7 @@ module.exports = class ProgramUsers {
 	 * @param {Object} [options = { new: true }] - options for the update.
 	 * @returns {Object} updated program user document.
 	 */
-	static async findOneAndUpdate(
-		filterData, 
-		updateData, 
-		options = { new: true }
-	) {
+	static async findOneAndUpdate(filterData, updateData, options = { new: true }) {
 		try {
 			let updatedDocument = await database.models.programUsers
 				.findOneAndUpdate(filterData, updateData, options)
@@ -128,10 +116,7 @@ module.exports = class ProgramUsers {
 	 * @param {Object} updateData - data to update.
 	 * @returns {Object} update result.
 	 */
-	static async updateMany(
-		filterData, 
-		updateData
-	) {
+	static async updateMany(filterData, updateData) {
 		try {
 			let updateResult = await database.models.programUsers.updateMany(filterData, updateData)
 			return updateResult
@@ -243,68 +228,6 @@ module.exports = class ProgramUsers {
 	}
 
 	/**
-	 * Get paginated program users using offset-based pagination.
-	 * @method
-	 * @name listWithOffset
-	 * @param {Object} [filterData = {}] - filter query.
-	 * @param {Array} [fieldsArray = "all"] - projected fields.
-	 * @param {Array} [skipFields = "none"] - fields not to include.
-	 * @param {Number} [offset = 0] - number of documents to skip.
-	 * @param {Number} [limit = 10] - number of documents to return.
-	 * @param {Object} [sortData = { createdAt: -1 }] - sort criteria.
-	 * @returns {Object} paginated program users data with count.
-	 */
-	static async listWithOffset(
-		filterData = {},
-		fieldsArray = 'all',
-		skipFields = 'none',
-		offset = 0,
-		limit = 10,
-		sortData = { createdAt: -1 }
-	) {
-		try {
-			let projection = {}
-
-			if (fieldsArray != 'all') {
-				fieldsArray.forEach((field) => {
-					projection[field] = 1
-				})
-			}
-
-			if (skipFields !== 'none') {
-				skipFields.forEach((field) => {
-					projection[field] = 0
-				})
-			}
-
-			const [data, totalCount] = await Promise.all([
-				database.models.programUsers
-					.find(filterData, projection)
-					.sort(sortData)
-					.skip(offset)
-					.limit(limit)
-					.lean(),
-				database.models.programUsers.countDocuments(filterData),
-			])
-
-			// Calculate page info for response
-			const page = Math.floor(offset / limit) + 1
-			const totalPages = Math.ceil(totalCount / limit)
-
-			return {
-				data,
-				totalCount,
-				page,
-				limit,
-				offset,
-				totalPages,
-			}
-		} catch (error) {
-			throw error
-		}
-	}
-
-	/**
 	 * Aggregate program users.
 	 * @method
 	 * @name aggregate
@@ -328,10 +251,7 @@ module.exports = class ProgramUsers {
 	 * @param {Object} [options = {}] - bulk write options.
 	 * @returns {Object} bulk write result.
 	 */
-	static async bulkWrite(
-		operations, 
-		options = {}
-	) {
+	static async bulkWrite(operations, options = {}) {
 		try {
 			let result = await database.models.programUsers.bulkWrite(operations, options)
 			return result

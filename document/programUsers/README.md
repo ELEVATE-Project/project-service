@@ -97,7 +97,7 @@ NOT_ONBOARDED → ONBOARDED → IN_PROGRESS → COMPLETED → GRADUATED
 ### Base URL
 
 ```
-/project/v1/programUsers
+/project/v1/program/users
 ```
 
 ### Authentication
@@ -133,7 +133,7 @@ The token is decoded to extract:
 ### 1. Create Program User
 
 ```bash
-POST /project/v1/programUsers/create
+POST /project/v1/program/users/create
 Headers:
   x-auth-token: <token>
   Content-Type: application/json
@@ -170,7 +170,7 @@ Response:
 
 ### 2. Update (Status or Metadata)
 
-Note: The separate `updateStatus` API has been removed. Use the consolidated `PATCH /project/v1/programUsers/update/:_id` endpoint for status and metadata updates.
+Note: The separate `updateStatus` API has been removed. Use the consolidated `PATCH /project/v1/program/users/update/:_id` endpoint for status and metadata updates.
 
 Use the single update endpoint to modify status, metadata, or other mutable fields. When changing `status`, the request MUST include a non-empty `statusReason` string explaining the reason for the change.
 
@@ -192,7 +192,7 @@ Behavior details:
 -   **Audit recommendation:** Because bypasses allow skipping status validation, it is recommended to record an audit entry whenever a bypass occurs. Useful audit fields: `performedBy`, `performedByRoles`, `prevStatus`, `newStatus`, `statusReason`, `force` (true/false), and `timestamp`.
 
 ```bash
-PATCH /project/v1/programUsers/update/507f1f77bcf86cd799439011
+PATCH /project/v1/program/users/update/507f1f77bcf86cd799439011
 Headers:
   x-auth-token: <token>
   Content-Type: application/json
@@ -250,7 +250,7 @@ Supports both page-based and offset-based pagination.
 #### Basic List with Page-Based Pagination
 
 ```bash
-POST /project/v1/programUsers/list?page=1&limit=10
+POST /project/v1/program/users/list?page=1&limit=10
 Headers:
   x-auth-token: <token>
   Content-Type: application/json
@@ -277,7 +277,7 @@ Response:
 #### List with Offset-Based Pagination
 
 ```bash
-POST /project/v1/programUsers/list?offset=0&limit=10
+POST /project/v1/program/users/list?offset=0&limit=10
 Headers:
   x-auth-token: <token>
   Content-Type: application/json
@@ -304,7 +304,7 @@ Response:
 #### Filter by Single Status
 
 ```bash
-POST /project/v1/programUsers/list?page=1&limit=10
+POST /project/v1/program/users/list?page=1&limit=10
 Headers:
   x-auth-token: <token>
   Content-Type: application/json
@@ -319,7 +319,7 @@ Body:
 #### Filter by Multiple Statuses
 
 ```bash
-POST /project/v1/programUsers/list?page=1&limit=10
+POST /project/v1/program/users/list?page=1&limit=10
 Headers:
   x-auth-token: <token>
   Content-Type: application/json
@@ -338,7 +338,7 @@ The `templateExternalId` filter allows you to search for program users based on 
 **Array format (recommended):**
 
 ```bash
-POST /project/v1/programUsers/list?page=1&limit=10
+POST /project/v1/program/users/list?page=1&limit=10
 Headers:
   x-auth-token: <token>
   Content-Type: application/json
@@ -353,7 +353,7 @@ Body:
 **String format:**
 
 ```bash
-POST /project/v1/programUsers/list?page=1&limit=10
+POST /project/v1/program/users/list?page=1&limit=10
 Headers:
   x-auth-token: <token>
   Content-Type: application/json
@@ -370,7 +370,7 @@ Body:
 **Array format (recommended):**
 
 ```bash
-POST /project/v1/programUsers/list?page=1&limit=10
+POST /project/v1/program/users/list?page=1&limit=10
 Headers:
   x-auth-token: <token>
   Content-Type: application/json
@@ -385,7 +385,7 @@ Body:
 **Comma-separated string format:**
 
 ```bash
-POST /project/v1/programUsers/list?page=1&limit=10
+POST /project/v1/program/users/list?page=1&limit=10
 Headers:
   x-auth-token: <token>
   Content-Type: application/json
@@ -400,7 +400,7 @@ Body:
 #### Combination of Multiple Filters
 
 ```bash
-POST /project/v1/programUsers/list?page=1&limit=10
+POST /project/v1/program/users/list?page=1&limit=10
 Headers:
   x-auth-token: <token>
   Content-Type: application/json
@@ -451,7 +451,7 @@ Body:
 ### 5. Delete Program User (Standard DELETE Pattern)
 
 ```bash
-DELETE /project/v1/programUsers/delete/507f1f77bcf86cd799439011
+DELETE /project/v1/program/users/delete/507f1f77bcf86cd799439011
 Headers:
   x-auth-token: <token>
 
@@ -586,13 +586,13 @@ project-service/
 │           └── v1.js                # Request validation
 ├── controllers/
 │   └── v1/
-│       └── programUsers.js          # API endpoints
+│       └── program/users.js         # API endpoints (canonical)
 ├── generics/
 │   └── constants/
 │       └── api-responses.js         # Response messages
 └── document/
-    └── programUsers/
-        └── README.md                # This documentation
+  └── programUsers/
+    └── README.md                # This documentation
 ```
 
 ---

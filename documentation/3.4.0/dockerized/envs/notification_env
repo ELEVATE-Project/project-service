@@ -1,0 +1,12 @@
+# Database
+POSTGRES_HOST=citus_master
+POSTGRES_PORT=5432
+POSTGRES_DATABASE=notification
+POSTGRES_USERNAME=postgres
+
+RABBITMQ_URL=amqp://rabbitmq:5672
+
+
+# Application
+PORT=3002
+NODE_ENV=development

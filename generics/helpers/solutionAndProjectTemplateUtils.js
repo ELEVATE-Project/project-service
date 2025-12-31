@@ -206,7 +206,7 @@ function update(solutionId, solutionData, userDetails, checkDate = false) {
 			if (
 				checkDate &&
 				(solutionData.hasOwnProperty(CONSTANTS.common.END_DATE) ||
-					solutionData.hasOwnProperty(CONSTANTS.common.END_DATE))
+					solutionData.hasOwnProperty(CONSTANTS.common.START_DATE))
 			) {
 				let programData = await programQueries.programsDocument(
 					{

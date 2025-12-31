@@ -233,13 +233,14 @@ module.exports = class SolutionsHelper {
 
 				if (!updateSolution.success) {
 					throw {
+						success: false,
 						status: HTTP_STATUS_CODE.bad_request.status,
-						message: CONSTANTS.apiResponses.SOLUTION_NOT_UPDATED,
+						message: updateSolution.message || CONSTANTS.apiResponses.SOLUTION_NOT_UPDATED,
 					}
 				}
 				return resolve(updateSolution)
 			} catch (error) {
-				return resolve({
+				return reject({
 					success: false,
 					message: error.message,
 					data: {},

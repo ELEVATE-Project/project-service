@@ -34,9 +34,95 @@ The Project building block facilitates the creation and engagement with micro-im
 -   **MongoDB:** 4.4.14
 -   **Gotenberg:** 8.5.0
 
-Expectation: Upon following the prescribed steps, you will achieve a fully operational ELEVATE-Project application setup. Both the portal and backend services are managed using PM2, with all dependencies installed natively on the host system.
+Expectation: By following these steps, you will establish a unified environment for the Project Service, integrated with the Survey and Observation modules. This setup focuses purely on the backend API infrastructure required to manage data collection and reporting.
 
-## Prerequisites
+## Prerequisites<div align="center">
+        cd user/src && npx sequelize-cli db:migrate && cd ../..
+        ```
+
+    2. run Seed
+        ```
+        cd user/src && npx sequelize-cli db:seed:all && cd ../../
+        ```
+
+8.  **Enabling Citus And Setting Distribution Columns (Optional)**
+
+    To boost performance and scalability, users can opt to enable the Citus extension. This transforms PostgreSQL into a distributed database, spreading data across multiple nodes to handle large datasets more efficiently as demand grows.
+
+    > NOTE: Currently only available for Linux based operation systems.
+
+    1. Download user `distributionColumns.sql` file.
+
+        ```
+        curl -o ./user/distributionColumns.sql -JL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/distribution-columns/user/distributionColumns.sql
+
+        ```
+
+    2. Set up the `citus_setup` file by following the steps given below.
+
+        1. Download the `citus_setup.sh` file:
+
+            ```
+            curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/native/scripts/linux/citus_setup.sh
+            ```
+
+        2. Make the setup file executable by running the following command:
+
+            ```
+            chmod +x citus_setup.sh
+            ```
+
+        3. Enable Citus and set distribution columns for `user` database by running the `citus_setup.sh`with the following arguments.
+            ```
+             ./citus_setup.sh user postgres://postgres:postgres@localhost:9700/users
+            ```
+
+9.  **Update Cloud Credentials for Project Service**
+
+    To enable full functionality—including certificate generation, attachment uploads, and report storage—you must configure cloud credentials in the environment files for both services.
+
+    A. Project Service Configuration Path:
+    	```./ELEVATE-Project/project-service/.env
+    	```
+
+    B. Samiksha (Survey & Observation) Service Configuration Path:
+    	```./ELEVATE-Project/samiksha-service/.env
+    	```
+
+
+
+       Add or update the following variables in the .env file, substituting the example values with your actual cloud credentials:
+
+        CLOUD_STORAGE_PROVIDER=gcloud
+        CLOUD_STORAGE_ACCOUNTNAME=your_account_name
+        CLOUD_STORAGE_SECRET="-----BEGIN PRIVATE KEY-----\n..."
+        CLOUD_STORAGE_PROJECT=your_cloud_project_id
+        CLOUD_STORAGE_BUCKETNAME=your_bucket_name
+        CLOUD_STORAGE_BUCKET_TYPE=private
+
+    > NOTE : This service is designed to support multiple cloud storage providers and offers flexible cloud integration capabilities. Based on your selected cloud provider, the service can be configured accordingly to enable seamless storage, certificate generation, and report handling.
+
+    For detailed configuration options, supported cloud providers, and integration guidelines, please refer to the official documentation available in this [ReadMe](https://www.npmjs.com/package/client-cloud-services?activeTab=readme)
+
+11. **Insert Initial Data**
+
+    1.  Download `entity-project-sample-data.sh` Script File:
+
+    ```
+    curl -o project_entity_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideWithSurvey/documentation/3.4.0/native/scripts/project-with-survey/ubuntu/project_entity_sample_data.sh && \
+    chmod +x project_entity_sample_data.sh && \
+    ./project_entity_sample_data.sh
+    ```
+
+12. **Start The Services**
+
+    Following the steps given below, 2 instances of each ELEVATE-Project backend service will be deployed and be managed by PM2 process manager.
+
+    ```
+    (cd project-service && pm2 start app.js --name project-service && cd -) && \
+    (cd samiksha-service && pm2 start app.js --name samiksha-service && cd -) && \
+    (cd entity-management/src && pm2 start app.js --name entity-management && cd -) && \
+
 
 Before setting up the following ELEVATE-Project application, dependencies given below should be installed and verified to be running. Refer to the steps given below to install them and verify.
 
@@ -106,10 +192,10 @@ cd scheduler/src && npm install && cd ../..
 
 ```
 curl -L -o project-service/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/envs/stand-alone/project_env && \
-curl -L -o samiksha-service/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideWithSurvey/documentation/3.4.0/native/envs/with-survey/samiksha_env && \
+curl -L -o samiksha-service/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideWithSurvey/documentation/3.4.0/native/envs/project-with-survey/samiksha_env && \
 curl -L -o entity-management/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/envs/stand-alone/entity_management_env && \
 curl -L -o user/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/envs/stand-alone/user_env && \
-curl -L -o interface-service/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideWithSurvey/documentation/3.4.0/native/envs/with-survey/interface_env && \
+curl -L -o interface-service/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideWithSurvey/documentation/3.4.0/native/envs/project-with-survey/interface_env && \
 curl -L -o scheduler/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/envs/stand-alone/scheduler_env
 ```
 
@@ -194,11 +280,19 @@ curl -L -o scheduler/src/.env https://raw.githubusercontent.com/ELEVATE-Project/
 
 9.  **Update Cloud Credentials for Project Service**
 
-    To enable full functionality, including certificate generation and report storage, you must configure cloud credentials in the Project Service environment file.
+    To enable full functionality—including certificate generation, attachment uploads, and report storage—you must configure cloud credentials in the environment files for both services.
 
-        Path: ./ELEVATE-Project/project-service/.env
+    A. Project Service Configuration Path:
+    	```./ELEVATE-Project/project-service/.env
+    	```
 
-    Add or update the following variables in the .env file, substituting the example values with your actual cloud credentials:
+    B. Samiksha (Survey & Observation) Service Configuration Path:
+    	```./ELEVATE-Project/samiksha-service/.env
+    	```
+
+
+
+       Add or update the following variables in the .env file, substituting the example values with your actual cloud credentials:
 
         CLOUD_STORAGE_PROVIDER=gcloud
         CLOUD_STORAGE_ACCOUNTNAME=your_account_name
@@ -211,17 +305,17 @@ curl -L -o scheduler/src/.env https://raw.githubusercontent.com/ELEVATE-Project/
 
     For detailed configuration options, supported cloud providers, and integration guidelines, please refer to the official documentation available in this [ReadMe](https://www.npmjs.com/package/client-cloud-services?activeTab=readme)
 
-10. **Insert Initial Data**
+11. **Insert Initial Data**
 
     1.  Download `entity-project-sample-data.sh` Script File:
 
     ```
-    curl -o project_entity_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideWithSurvey/documentation/3.4.0/native/scripts/with-survey/ubuntu/project_entity_sample_data.sh && \
+    curl -o project_entity_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideWithSurvey/documentation/3.4.0/native/scripts/project-with-survey/ubuntu/project_entity_sample_data.sh && \
     chmod +x project_entity_sample_data.sh && \
     ./project_entity_sample_data.sh
     ```
 
-11. **Start The Services**
+12. **Start The Services**
 
     Following the steps given below, 2 instances of each ELEVATE-Project backend service will be deployed and be managed by PM2 process manager.
 

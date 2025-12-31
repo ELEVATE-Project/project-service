@@ -24,7 +24,7 @@ The Project building block facilitates the creation and engagement with micro-im
 
 # Docker Setup Project Service - With Survey
 
-Expectation: By diligently following the outlined steps, you will successfully establish a fully operational Project application setup, including both the portal and backend services.
+Expectation: By following these steps, you will establish a unified environment for the Project Service, integrated with the Survey and Observation modules. This setup focuses purely on the backend API infrastructure required to manage data collection and reporting.
 
 ## Prerequisites
 
@@ -54,7 +54,7 @@ done
 
 1. **Download and execute main setup script:** Execute the following command in your terminal from the project directory.
     ```
-    curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideWithSurvey/documentation/3.4.0/dockerized/scripts/with-survey/ubuntu/setup_project.sh && chmod +x setup_project.sh && sudo ./setup_project.sh
+    curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideWithSurvey/documentation/3.4.0/dockerized/scripts/project-with-survey/ubuntu/setup_project.sh && chmod +x setup_project.sh && sudo ./setup_project.sh
     ```
 
 > Note : The script will download all the essential files and launch the services in Docker. Once all services are successfully up and running, you can proceed to the next steps.
@@ -103,9 +103,15 @@ To enable the Citus extension for user services, follow these steps.
 
 ## Update Cloud Credentials for Project Service
 
-To enable full functionality, including certificate generation and report storage, you must configure cloud credentials in the Project Service environment file.
+To enable full functionality—including certificate generation, attachment uploads, and report storage—you must configure cloud credentials in the environment files for both services.
 
-    Path: project_env
+A. Project Service Configuration Path:
+    ```./ELEVATE-Project/project-service/.env
+    ```
+
+B. Samiksha (Survey & Observation) Service Configuration Path:
+    ```./ELEVATE-Project/samiksha-service/.env
+    ```
 
 Add or update the following variables in the .env file, substituting the example values with your actual cloud credentials:
 
@@ -119,6 +125,7 @@ Add or update the following variables in the .env file, substituting the example
 > NOTE : This service is designed to support multiple cloud storage providers and offers flexible cloud integration capabilities. Based on your selected cloud provider, the service can be configured accordingly to enable seamless storage, certificate generation, and report handling.
 
 For detailed configuration options, supported cloud providers, and integration guidelines, please refer to the official documentation available in this [ReadMe](https://www.npmjs.com/package/client-cloud-services?activeTab=readme)
+
 
 ## Persistence Of Database Data In Docker Container (Optional)
 

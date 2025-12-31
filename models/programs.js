@@ -49,12 +49,10 @@ const programSchema = new Schema({
 	startDate: {
 		type: Date,
 		index: true,
-		required: true,
 	},
 	endDate: {
 		type: Date,
 		index: true,
-		required: true,
 	},
 	translations: Object,
 	source: {

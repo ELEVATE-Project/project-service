@@ -35,12 +35,10 @@ const solutionSchema = new Schema({
 	startDate: {
 		type: Date,
 		index: true,
-		required: true,
 	},
 	endDate: {
 		type: Date,
 		index: true,
-		required: true,
 	},
 	status: String,
 	evidenceMethods: Object,

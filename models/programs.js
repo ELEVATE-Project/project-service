@@ -49,10 +49,12 @@ const programSchema = new Schema({
 	startDate: {
 		type: Date,
 		index: true,
+		required: true,
 	},
 	endDate: {
 		type: Date,
 		index: true,
+		required: true,
 	},
 	translations: Object,
 	source: {
@@ -71,16 +73,10 @@ const programSchema = new Schema({
 	},
 })
 
-const normalizeDate = (date) => (date ? new Date(date) : date)
-
 // pre hook invoked before creating a document
 programSchema.pre('validate', function (next) {
-	if (this.startDate && this.endDate) {
-		const startDate = normalizeDate(this.startDate)
-		const endDate = normalizeDate(this.endDate)
-		if (startDate >= endDate) {
-			return next(new Error('startDate must be less than endDate'))
-		}
+	if (this.startDate && this.endDate && this.startDate >= this.endDate) {
+		return next(new Error('startDate must be less than endDate'))
 	}
 	next()
 })
@@ -90,8 +86,8 @@ programSchema.pre(['findOneAndUpdate', 'updateOne'], async function (next) {
 	const update = this.getUpdate()
 	const set = update.$set || {}
 
-	const startDate = normalizeDate(set.startDate ?? update.startDate)
-	const endDate = normalizeDate(set.endDate ?? update.endDate)
+	const startDate = set.startDate ?? update.startDate
+	const endDate = set.endDate ?? update.endDate
 
 	// If both provided in update, validate directly
 	if (startDate && endDate && new Date(startDate) >= new Date(endDate)) {

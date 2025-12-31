@@ -99,7 +99,7 @@ This setup integrates the Projects Service with the **Samiksha Service**, provid
 <details>
 <summary> 1. Ubuntu Setup </summary>
 <br>
-Go to the detailed Ubuntu Docker setup guide: **<a href="link/to/samiksha/docker/ubuntu/README" target="_blank">SETUP_SAMIKSHA_DOCKER_UBUNTU.md</a>**
+Go to the detailed Ubuntu Docker setup guide: **<a href="https://github.com/ELEVATE-Project/project-service/blob/setupGuideWithSurvey/documentation/3.4.0/setup/docker/project-with-survey/ubuntu/README.md" target="_blank">SETUP_SAMIKSHA_DOCKER_UBUNTU.md</a>**
 </details>
 
 <details>
@@ -121,7 +121,7 @@ Go to the detailed Windows Docker setup guide: **<a href="link/to/samiksha/docke
 <details>
 <summary> 1. Ubuntu Setup </summary>
 <br>
-Go to the detailed Ubuntu Native setup guide: **<a href="link/to/samiksha/native/ubuntu/README" target="_blank">SETUP_SAMIKSHA_NATIVE_UBUNTU.md</a>**
+Go to the detailed Ubuntu Native setup guide: **<a href="https://github.com/ELEVATE-Project/project-service/blob/setupGuideWithSurvey/documentation/3.4.0/setup/native/project-with-survey/ubuntu/README.md" target="_blank">SETUP_SAMIKSHA_NATIVE_UBUNTU.md</a>**
 </details>
 
 <details>

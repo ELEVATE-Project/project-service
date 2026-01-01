@@ -149,6 +149,40 @@ This README is focused on the **3.4.0 Setup Guide** for the Projects Service.
 -   **Current Version (3.4.0) Documentation:** All setup links above point to the **3.4.0** guides.
 -   **Legacy Version (1.0.0) Documentation:** Access the documentation for the previous major release here: **<a href="https://github.com/ELEVATE-Project/project-service/blob/setupGuide-3.4/documentation/1.0.0/ReadMe.md" target="_blank">View 1.0.0 Documentation</a>**
 
+# 📊 Database Architecture Diagrams
+
+Explore the database schemas for the ELEVATE-Project services below. Click on a service name to expand and view the diagram.
+
+---
+
+<details>
+<summary>📂 <b>Entity Management Service (EMS)</b></summary>
+<br>
+<p align="center">
+  <img src="https://github.com/ELEVATE-Project/project-service/raw/MainReadMe/documentation/3.4.0/database-diagram/EMS-Entity-Service.drawio.png" alt="Entity Management Diagram" width="100%">
+</p>
+</details>
+
+<details>
+<summary>📂 <b>Project Service</b></summary>
+<br>
+<p align="center">
+  <img src="https://github.com/ELEVATE-Project/project-service/raw/MainReadMe/documentation/3.4.0/database-diagram/EMS-Project-Service.drawio.png" alt="Project Service Diagram" width="100%">
+</p>
+</details>
+
+<details>
+<summary>📂 <b>Samiksha Service (Survey & Observation)</b></summary>
+<br>
+<p align="center">
+  <img src="https://github.com/ELEVATE-Project/project-service/raw/MainReadMe/documentation/3.4.0/database-diagram/EMS-Samiksha-Service.drawio.png" alt="Samiksha Service Diagram" width="100%">
+</p>
+</details>
+
+---
+
+> **Tip:** If the diagrams appear too small, you can right-click the image and select "Open image in new tab" to view the full-resolution architectural details.
+
 ### Postman Collections
 
 -   **<a href="https://github.com/ELEVATE-Project/project-service/tree/main/api-doc" target="_blank">Projects Service API Collection</a>**
@@ -158,8 +192,6 @@ This README is focused on the **3.4.0 Setup Guide** for the Projects Service.
 With implementation scripts, you can seamlessly add new projects to the system. Once a project is successfully added, it becomes visible on the portal, ready for use and interaction. For a comprehensive guide on setting up and using the implementation script, please refer to the **<a href="https://github.com/ELEVATE-Project/project-service/tree/main/Project-Service-implementation-Script" target="_blank">documentation here</a>**.
 
 ---
-
-![Architecture Diagram](documentation/3.4.0/database-diagram/EMS-Project-Service.drawio.png)
 
 ## 🤝 Team
 

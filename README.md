@@ -159,6 +159,8 @@ With implementation scripts, you can seamlessly add new projects to the system. 
 
 ---
 
+![Architecture Diagram](documentation/3.4.0/database-diagram/EMS-Project-Service.drawio.png)
+
 ## 🤝 Team
 
 <a href="https://github.com/ELEVATE-Project/project-service/graphs/contributors">

@@ -99,7 +99,7 @@ This setup integrates the Projects Service with the **Samiksha Service**, provid
 <details>
 <summary> 1. Ubuntu Setup </summary>
 <br>
-Go to the detailed Ubuntu Docker setup guide: **<a href="link/to/samiksha/docker/ubuntu/README" target="_blank">SETUP_SAMIKSHA_DOCKER_UBUNTU.md</a>**
+Go to the detailed Ubuntu Docker setup guide: **<a href="https://github.com/ELEVATE-Project/project-service/blob/setupGuideWithSurvey/documentation/3.4.0/setup/docker/project-with-survey/ubuntu/README.md" target="_blank">SETUP_SAMIKSHA_DOCKER_UBUNTU.md</a>**
 </details>
 
 <details>
@@ -121,7 +121,7 @@ Go to the detailed Windows Docker setup guide: **<a href="link/to/samiksha/docke
 <details>
 <summary> 1. Ubuntu Setup </summary>
 <br>
-Go to the detailed Ubuntu Native setup guide: **<a href="link/to/samiksha/native/ubuntu/README" target="_blank">SETUP_SAMIKSHA_NATIVE_UBUNTU.md</a>**
+Go to the detailed Ubuntu Native setup guide: **<a href="https://github.com/ELEVATE-Project/project-service/blob/setupGuideWithSurvey/documentation/3.4.0/setup/native/project-with-survey/ubuntu/README.md" target="_blank">SETUP_SAMIKSHA_NATIVE_UBUNTU.md</a>**
 </details>
 
 <details>
@@ -148,6 +148,40 @@ This README is focused on the **3.4.0 Setup Guide** for the Projects Service.
 
 -   **Current Version (3.4.0) Documentation:** All setup links above point to the **3.4.0** guides.
 -   **Legacy Version (1.0.0) Documentation:** Access the documentation for the previous major release here: **<a href="https://github.com/ELEVATE-Project/project-service/blob/setupGuide-3.4/documentation/1.0.0/ReadMe.md" target="_blank">View 1.0.0 Documentation</a>**
+
+# 📊 Database Architecture Diagrams
+
+Explore the database schemas for the ELEVATE-Project services below. Click on a service name to expand and view the diagram.
+
+---
+
+<details>
+<summary>📂 <b>Entity Management Service (EMS)</b></summary>
+<br>
+<p align="center">
+  <img src="https://github.com/ELEVATE-Project/project-service/raw/MainReadMe/documentation/3.4.0/database-diagram/EMS-Entity-Service.drawio.png" alt="Entity Management Diagram" width="100%">
+</p>
+</details>
+
+<details>
+<summary>📂 <b>Project Service</b></summary>
+<br>
+<p align="center">
+  <img src="https://github.com/ELEVATE-Project/project-service/raw/MainReadMe/documentation/3.4.0/database-diagram/EMS-Project-Service.drawio.png" alt="Project Service Diagram" width="100%">
+</p>
+</details>
+
+<details>
+<summary>📂 <b>Samiksha Service (Survey & Observation)</b></summary>
+<br>
+<p align="center">
+  <img src="https://github.com/ELEVATE-Project/project-service/raw/MainReadMe/documentation/3.4.0/database-diagram/EMS-Samiksha-Service.drawio.png" alt="Samiksha Service Diagram" width="100%">
+</p>
+</details>
+
+---
+
+> **Tip:** If the diagrams appear too small, you can right-click the image and select "Open image in new tab" to view the full-resolution architectural details.
 
 ### Postman Collections
 

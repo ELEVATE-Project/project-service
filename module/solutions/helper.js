@@ -2538,27 +2538,6 @@ module.exports = class SolutionsHelper {
 					)
 				})
 
-				// if (process.env.SUBMISSION_LEVEL == 'ENTITY') {
-				// 	mergedData = userCreatedProjects.data.data
-				// 	totalCount = mergedData.length
-				// 	if (mergedData.length > 0) {
-				// 		let startIndex = pageSize * (pageNo - 1)
-				// 		let endIndex = startIndex + pageSize
-				// 		mergedData = mergedData.slice(startIndex, endIndex)
-				// 	}
-				// 	return resolve({
-				// 		success: true,
-				// 		message: CONSTANTS.apiResponses.TARGETED_SOLUTIONS_FETCHED,
-				// 		data: {
-				// 			data: mergedData,
-				// 			count: totalCount,
-				// 		},
-				// 		result: {
-				// 			data: mergedData,
-				// 			count: totalCount,
-				// 		},
-				// 	})
-				// }
 				// Add program data to the fetched projects
 				if (userCreatedProjects.success && userCreatedProjects.data) {
 					totalCount = userCreatedProjects.data.count

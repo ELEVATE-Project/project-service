@@ -731,6 +731,18 @@ module.exports = class SolutionsHelper {
 						CONSTANTS.common.MANDATORY_SCOPE_FIELD,
 						CONSTANTS.common.OPTIONAL_SCOPE_FIELD
 					)
+
+					// If a prefix is provided, modify all query conditions to apply on nested fields.
+					// Example: if prefix = "acl", a condition like { "scope": {...} }
+					// becomes { "acl.scope": {...} }.
+					// This ensures the targeting rules apply inside a specific nested object.
+					if (prefix != '') {
+						builtQuery['$and'] = builtQuery['$and'].map((obj) => {
+							const key = Object.keys(obj)[0] // Extract the field name in the condition
+							const value = obj[key] // Extract the condition value
+							return { [`${prefix}.${key}`]: value }
+						})
+					}
 					filterQuery = {
 						...filterQuery,
 						...builtQuery,
@@ -2115,7 +2127,6 @@ module.exports = class SolutionsHelper {
 				}
 
 				matchQuery['$match']['tenantId'] = userDetails.userInformation.tenantId
-				matchQuery['$match']['orgId'] = userDetails.userInformation.organizationId
 
 				if (currentOrgOnly) {
 					let organizationId = userDetails.userInformation.organizationId
@@ -2528,27 +2539,6 @@ module.exports = class SolutionsHelper {
 					)
 				})
 
-				if (process.env.SUBMISSION_LEVEL == 'ENTITY' && requestedData.hasOwnProperty('entityId')) {
-					mergedData = userCreatedProjects.data.data
-					totalCount = mergedData.length
-					if (mergedData.length > 0) {
-						let startIndex = pageSize * (pageNo - 1)
-						let endIndex = startIndex + pageSize
-						mergedData = mergedData.slice(startIndex, endIndex)
-					}
-					return resolve({
-						success: true,
-						message: CONSTANTS.apiResponses.TARGETED_SOLUTIONS_FETCHED,
-						data: {
-							data: mergedData,
-							count: totalCount,
-						},
-						result: {
-							data: mergedData,
-							count: totalCount,
-						},
-					})
-				}
 				// Add program data to the fetched projects
 				if (userCreatedProjects.success && userCreatedProjects.data) {
 					totalCount = userCreatedProjects.data.count
@@ -3158,13 +3148,9 @@ module.exports = class SolutionsHelper {
 			try {
 				let query = { isDeleted: false }
 
-				if (process.env.SUBMISSION_LEVEL === 'ENTITY' && requestedData.hasOwnProperty('entityId')) {
+				if (process.env.SUBMISSION_LEVEL === 'ENTITY') {
 					// Use queryBasedOnRoleAndLocation function to form query for acl.visibility = SCOPE projects
-					let queryData = await this.queryBasedOnRoleAndLocation(
-						_.omit(requestedData, ['entityId']),
-						'',
-						'acl'
-					)
+					let queryData = await this.queryBasedOnRoleAndLocation(requestedData, '', 'acl')
 					// status of the project could be anything, hence deleting status property from the querydata
 					delete queryData.data.status
 					// isReusable field doesn't exist for projects model hence removing the key
@@ -3174,16 +3160,15 @@ module.exports = class SolutionsHelper {
 
 					// Construct query for projects accessible by the user
 					query = {
-						entityId: requestedData.entityId,
 						'solutionInformation.submissionLevel': process.env.SUBMISSION_LEVEL,
 						$or: [
 							{ 'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_ALL },
 							{
 								'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_SPECIFIC,
-								'acl.users': { $in: [userId] },
+								'acl.users': { $in: [userId.toString()] },
 							},
 							{ 'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_SCOPE, ...matchQuery },
-							{ 'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_SELF, userId: userId },
+							{ createdBy: userId },
 						],
 					}
 				} else {

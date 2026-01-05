@@ -72,6 +72,13 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
    curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/windows/docker-compose-down.bat
    ```
 
+3.  **Download `Config` File**
+
+   ```
+   curl -L https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsStandAlone/documentation/3.4.0/dockerized/scripts/stand-alone/windows/configFile.json -o config.json
+   ```
+
+
 6.  **Run All Services & Dependencies**:All services and dependencies can be started using the `docker-compose-up` script file.
 
    ```

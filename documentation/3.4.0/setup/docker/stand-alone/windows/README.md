@@ -204,17 +204,17 @@ This step will guide us in implementing a sample project solution following the 
 
 1. **Insert Sample Data To Database:**
 
-   1. Download `entity-project-sample-data.bat` Script File:
+   1. Download `insert_project_data.bat` Script File:
 
       ```
       curl -L ^
-      -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/windows/entity-project-sample-data.bat ^
+      -O https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsStandAlone/documentation/3.4.0/dockerized/scripts/stand-alone/windows/insert_project_data.bat ^
       ```
 
     2. Make the setup file executable by running the following command.
 
        ```
-       entity-project-sample-data.bat
+       node insert_sample_solutions.js
        ```
 
 </details>

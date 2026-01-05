@@ -54,7 +54,7 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
    curl -L ^
    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/envs/stand-alone/project_env ^
    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/envs/stand-alone/entity_management_env ^
-   -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/envs/stand-alone/user_en ^
+   -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/envs/stand-alone/user_env ^
    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/envs/stand-alone/interface_env ^
    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/envs/stand-alone/scheduler_env
    ```

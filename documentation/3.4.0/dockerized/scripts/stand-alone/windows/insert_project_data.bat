@@ -42,18 +42,13 @@ echo.
 echo Installing mongodb npm package...
 npm -v >nul 2>&1
 
-IF ERRORLEVEL 1 (
-    echo npm is not available. Please restart terminal after Node.js installation.
-) ELSE (
-    npm install mongodb
-)
 
 REM ------------------------------------------------
 REM Check and install MongoDB Server
 REM ------------------------------------------------
 echo.
 echo Checking MongoDB installation...
-mongod --version >nul 2>&1
+npm install mongodb
 
 IF ERRORLEVEL 1 (
     echo MongoDB not found. Installing MongoDB Server...

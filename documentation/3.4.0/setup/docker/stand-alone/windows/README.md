@@ -254,12 +254,13 @@ This step will guide us in implementing a sample project solution following the 
     2. Make the setup file executable by running the following command.
 
        ```
-       node insert_sample_solutions.js       
+       insert_project_data.bat
        ```
     3. Insert Sample Data To Database.
 
        ```
        node insert_sample_solutions.js
+       ```
 
 </details>
 ## 🌐 Micro-Frontend (FE) Setup

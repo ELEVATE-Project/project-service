@@ -43,13 +43,14 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
 > **Caution:** Before proceeding, please ensure that the ports given here are available and open. It is essential to verify their availability prior to moving forward. You can run below command in your terminal to check this
 
 ```
-for port in 3001 3002 6000 5001 4000 9092 5432 7007 2181 27017 3569; do
-    if sudo lsof -iTCP:$port -sTCP:LISTEN &>/dev/null; then
-        echo "Port $port is IN USE"
-    else
-        echo "Port $port is available"
-    fi
-done
+for %p in (3001 3002 6000 5001 4000 9092 5432 7007 2181 27017 3569) do @(
+  netstat -ano | findstr /R /C:":%p " /C:":%p$" >nul
+  if errorlevel 1 (
+    echo Port %p is available
+  ) else (
+    echo Port %p is IN USE
+  )
+)
 ```
 
 1.  **Download Docker Compose File:** Retrieve the **[docker-compose-project.yml](https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/docker-compose-project.yml)** file from the Project service repository and save it to the project directory.

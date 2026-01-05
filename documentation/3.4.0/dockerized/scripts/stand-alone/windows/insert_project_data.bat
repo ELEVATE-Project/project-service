@@ -1,0 +1,82 @@
+@echo off
+SETLOCAL ENABLEDELAYEDEXPANSION
+
+echo ==========================================
+echo Project Standalone Setup - Windows
+echo ==========================================
+
+REM Create a directory for downloaded files
+SET DOWNLOAD_DIR=%CD%\downloads
+if not exist "%DOWNLOAD_DIR%" (
+    mkdir "%DOWNLOAD_DIR%"
+)
+
+cd "%DOWNLOAD_DIR%"
+
+echo.
+echo Downloading entity sample data files...
+echo ------------------------------------------
+
+curl -L -o entity_sampleData.js ^
+https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsStandAlone/documentation/3.4.0/dockerized/scripts/stand-alone/windows/entity_sampleData.js
+
+curl -L -o entity_sampleData2.js ^
+https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsStandAlone/documentation/3.4.0/dockerized/scripts/stand-alone/windows/project_sampleData.js
+
+curl -L -o entity_sampleData3.js ^
+https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsStandAlone/documentation/3.4.0/dockerized/scripts/stand-alone/windows/insert_sample_solutions.js
+
+echo.
+echo Files downloaded successfully.
+echo.
+
+REM ------------------------------------------------
+REM Check and install Node.js
+REM ------------------------------------------------
+echo Checking Node.js installation...
+node -v >nul 2>&1
+
+IF ERRORLEVEL 1 (
+    echo Node.js not found. Installing Node.js...
+    winget install OpenJS.NodeJS.LTS --accept-package-agreements --accept-source-agreements
+) ELSE (
+    echo Node.js is already installed.
+)
+
+REM ------------------------------------------------
+REM Check and install MongoDB Server
+REM ------------------------------------------------
+echo.
+echo Checking MongoDB installation...
+mongod --version >nul 2>&1
+
+IF ERRORLEVEL 1 (
+    echo MongoDB not found. Installing MongoDB...
+    winget install MongoDB.Server --accept-package-agreements --accept-source-agreements
+) ELSE (
+    echo MongoDB is already installed.
+)
+
+REM ------------------------------------------------
+REM Check and install MongoDB Shell (mongosh)
+REM ------------------------------------------------
+echo.
+echo Checking MongoDB Shell (mongosh)...
+mongosh --version >nul 2>&1
+
+IF ERRORLEVEL 1 (
+    echo MongoDB Shell not found. Installing mongosh...
+    winget install MongoDB.Shell --accept-package-agreements --accept-source-agreements
+) ELSE (
+    echo MongoDB Shell is already installed.
+)
+
+echo.
+echo ==========================================
+echo Setup completed successfully!
+echo Downloaded files location:
+echo %DOWNLOAD_DIR%
+echo ==========================================
+
+pause
+ENDLOCAL

@@ -174,13 +174,13 @@ In such cases, you can generate sample user accounts using the steps below. This
 
       ```
       mkdir sample-data\user 2>nul & ^
-      curl -L "https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/sample-data/windows/user/sampleData.sql" -o sample-data\user\sampleData.sql
+      curl -L "https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsStandAlone/documentation/3.4.0/dockerized/scripts/stand-alone/windows/sampleData.sql" -o sample-data\user\sampleData.sql
       ```
 
 2. **Download The `insert_sample_data` Script File:**
 
    ```
-   curl -L -o insert_sample_data.bat https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/dockerized/scripts/windows/insert_sample_data.bat
+   curl -L -o insert_sample_data.bat https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsStandAlone/documentation/3.4.0/dockerized/scripts/stand-alone/windows/insert_sample_data.bat
    ```
 
 3. **Run The `insert_sample_data` Script File:**

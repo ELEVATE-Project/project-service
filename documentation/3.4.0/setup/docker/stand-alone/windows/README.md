@@ -43,88 +43,55 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
 1.  **Download Docker Compose File:** Retrieve the **[docker-compose-project.yml](https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/docker-compose-project.yml)** file from the Project service repository and save it to the project directory.
 
     ```
-    curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/docker-compose-project.yml
+    curl -OJL https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsStandAlone/documentation/3.4.0/dockerized/dockerFiles/stand-alone/docker-compose-project.yml
     ```
 
     > Note: All commands are run from the project directory.
 
 2.  **Download Environment Files**: Using the OS specific commands given below, download environment files for all the services.
 
-    -   **Windows**
+   ```
+   curl -L ^
+   -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/interface_env ^
+   -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/entity_management_env ^
+   -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/project_env ^
+   -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/notification_env ^
+   -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/scheduler_env ^
+   -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/user_env ^
+   -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/env.js
+   ```
 
-        ```
-        curl -L ^
-         -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/interface_env ^
-         -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/entity_management_env ^
-         -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/project_env ^
-         -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/notification_env ^
-         -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/scheduler_env ^
-         -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/user_env ^
-         -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/env.js
-        ```
+> **Note:** Modify the environment files as necessary for your deployment using any text editor, ensuring that the values are appropriate for your environment. The default values provided in the current files are functional and serve as a good starting point. Refer to the sample env files provided at the [Project](https://github.com/ELEVATE-Project/project-service/blob/main/.env.sample), [User](https://github.com/ELEVATE-Project/user/blob/master/src/.env.sample), [Notification](https://github.com/ELEVATE-Project/notification/blob/master/src/.env.sample), [Scheduler](https://github.com/ELEVATE-Project/scheduler/blob/master/src/.env.sample), [Interface](https://github.com/ELEVATE-Project/interface-service/blob/main/src/.env.sample) and [Entity-management](https://github.com/ELEVATE-Project/entity-management/blob/main/src/.env.sample) repositories for reference.
 
-    > **Note:** Modify the environment files as necessary for your deployment using any text editor, ensuring that the values are appropriate for your environment. The default values provided in the current files are functional and serve as a good starting point. Refer to the sample env files provided at the [Project](https://github.com/ELEVATE-Project/project-service/blob/main/.env.sample), [User](https://github.com/ELEVATE-Project/user/blob/master/src/.env.sample), [Notification](https://github.com/ELEVATE-Project/notification/blob/master/src/.env.sample), [Scheduler](https://github.com/ELEVATE-Project/scheduler/blob/master/src/.env.sample), [Interface](https://github.com/ELEVATE-Project/interface-service/blob/main/src/.env.sample) and [Entity-management](https://github.com/ELEVATE-Project/entity-management/blob/main/src/.env.sample) repositories for reference.
+> **Caution:** While the default values in the downloaded environment files enable the Project Application to operate, certain features may not function correctly or could be impaired unless the adopter-specific environment variables are properly configured.
 
-    > **Caution:** While the default values in the downloaded environment files enable the Project Application to operate, certain features may not function correctly or could be impaired unless the adopter-specific environment variables are properly configured.
+3.  **Download `docker-compose-up` & `docker-compose-down` Script Files**
 
-3.  **Download `replace_volume_path` Script File**
-
-    -   **Windows**
-
-        ```
-        curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/dockerized/scripts/windows/replace_volume_path.bat
-        ```
-
-4.  **Run `replace_volume_path` Script File**
-
-    -   **Windows**
-
-        Run the script file either by double clicking it or by executing the following command from the terminal.
-
-        ```
-        replace_volume_path.bat
-        ```
-
-        > **Note**: The provided script file replaces the host path for the **portal** service container volume in the `docker-compose-project.yml` file with your current directory path.
-        >
-        > volumes:
-        >
-        > \- /home/shikshalokam/elevate/single-click/linux/env.js:/usr/src/app/www/assets/env/env.js
-
-5.  **Download `docker-compose-up` & `docker-compose-down` Script Files**
-
-    -   **Windows**
-
-        ```
-        curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/windows/docker-compose-up.bat
-        ```
-
-        ```
-        curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/windows/docker-compose-down.bat
-        ```
+   ```
+   curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/windows/docker-compose-up.bat
+   ```
+   ```
+   curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/windows/docker-compose-down.bat
+   ```
 
 6.  **Run All Services & Dependencies**:All services and dependencies can be started using the `docker-compose-up` script file.
 
-    -   **Windows**
+   ```
+   docker-compose-up.bat
+   ```
 
-        ```
-        docker-compose-up.bat
-        ```
+> Double-click the file or run the above command from the terminal.
 
-        > Double-click the file or run the above command from the terminal.
-
-        > **Note**: During the first Docker Compose run, the database, migration seeder files, and the script to set the default organization will be executed automatically.
+> **Note**: During the first Docker Compose run, the database, migration seeder files, and the script to set the default organization will be executed automatically.
 
 7.  **Remove All Service & Dependency Containers**:
     All docker containers can be stopped and removed by using the `docker-compose-down` file.
+    
+   ```
+   docker-compose-down.bat
+   ```
 
-    -   **Windows**
-
-        ```
-        docker-compose-down.bat
-        ```
-
-    > **Caution**: As per the default configuration in the `docker-compose-project.yml` file, using the `down` command will lead to data loss since the database container does not persist data. To persist data across `down` commands and subsequent container removals, refer to the "Persistence of Database Data in Docker Containers" section of this documentation.
+> **Caution**: As per the default configuration in the `docker-compose-project.yml` file, using the `down` command will lead to data loss since the database container does not persist data. To persist data across `down` commands and subsequent container removals, refer to the "Persistence of Database Data in Docker Containers" section of this documentation.
 
 ## Enable Citus Extension (Optional)
 
@@ -140,16 +107,15 @@ To enable the Citus extension for user services, follow these steps.
     ```
 2. Set up the citus_setup file by following the steps given below.
 
-   
-        1. Download the `citus_setup.bat` file.
-            ```
-             curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/windows/citus_setup.bat
-            ```
-        2. Enable Citus and set distribution columns for `user` database by running the `citus_setup.bat`with the following arguments.
-            ```
-            citus_setup.bat user postgres://postgres:postgres@citus_master:5432/user
-            ```
-            > **Note:** Since the `citus_setup.bat` file requires arguments, it must be run from a terminal.
+   1. Download the `citus_setup.bat` file.
+      ```
+      curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/windows/citus_setup.bat
+      ```
+   2. Enable Citus and set distribution columns for `user` database by running the `citus_setup.bat`with the following arguments.
+      ```
+      citus_setup.bat user postgres://postgres:postgres@citus_master:5432/user
+      ```
+      > **Note:** Since the `citus_setup.bat` file requires arguments, it must be run from a terminal.
 
 ## Persistence Of Database Data In Docker Container (Optional)
 
@@ -204,39 +170,33 @@ During the initial setup of Project services with the default configuration, you
 In such cases, you can generate sample user accounts using the steps below. This allows you to explore the Project services and portal immediately after setup.
 
 > **Warning:** Use this generator only immediately after the initial system setup and before any normal user accounts are created through the portal. It should not be used under any circumstances thereafter.
+  1. **Download The `sampleData.sql` Files:**
 
--   **Ubuntu/Linux/Mac**
+      ```
+      mkdir sample-data\user 2>nul & ^
+      curl -L "https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/sample-data/windows/user/sampleData.sql" -o sample-data\user\sampleData.sql
+      ```
 
-    ```
-    sudo ./insert_sample_data.sh user postgres://postgres:postgres@citus_master:5432/user
-    ```
+2. **Download The `insert_sample_data` Script File:**
 
-    1. **Download The `sampleData.sql` Files:**
+   ```
+   curl -L -o insert_sample_data.bat https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/dockerized/scripts/windows/insert_sample_data.bat
+   ```
 
-        ```
-        mkdir sample-data\user 2>nul & ^
-        curl -L "https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/sample-data/windows/user/sampleData.sql" -o sample-data\user\sampleData.sql
-        ```
+3. **Run The `insert_sample_data` Script File:**
 
-    2. **Download The `insert_sample_data` Script File:**
-
-        ```
-        curl -L -o insert_sample_data.bat https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/1.0.0/dockerized/scripts/windows/insert_sample_data.bat
-        ```
-
-    3. **Run The `insert_sample_data` Script File:**
-
-        ```
-        insert_sample_data.bat user postgres://postgres:postgres@citus_master:5432/user
-        ```
+   ```
+   insert_sample_data.bat user postgres://postgres:postgres@citus_master:5432/user
+   ```
 
     After successfully running the script mentioned above, the following user accounts will be created and available for login:
 
-    | Email ID                 | Password   | Role                    |
-    | ------------------------ | ---------- | ----------------------- |
-    | aaravpatel@example.com   | Password1@ | State Education Officer |
-    | arunimareddy@example.com | Password1@ | State Education Officer |
-    | devikasingh@example.com  | Password1@ | State Education Officer |
+    | Email ID               | Password   | Role                    |
+    | ---------------------- | ---------- | ----------------------- |
+    | mallanagouda@gmail.com | Password1@ | State Education Officer |
+    | prajwal@gmail.com      | Password1@ | State Education Officer |
+    | vishnu@gmail.com       | Password1@ | State Education Officer |
+
 
 ## Sample Data Creation For Projects
 
@@ -244,35 +204,18 @@ This step will guide us in implementing a sample project solution following the 
 
 1. **Insert Sample Data To Database:**
 
-        1. Download `entity-project-sample-data.bat` Script File:
+   1. Download `entity-project-sample-data.bat` Script File:
 
-            ```
-            curl -L ^
-            -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/windows/entity-project-sample-data.bat ^
-            ```
+      ```
+      curl -L ^
+      -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/windows/entity-project-sample-data.bat ^
+      ```
 
-        2. Make the setup file executable by running the following command.
+    2. Make the setup file executable by running the following command.
 
-            ```
-            entity-project-sample-data.bat
-            ```
-
-## Default Forms Creation for Portal Configuration
-
-This step inserts configuration forms into MongoDB, enabling or disabling features and fields on portal pages.
-
-#### Insert Forms Data into Database
-
--   **Windows**:
-    1. Download the `import_forms_mongo.bat` file:
-        ```cmd
-        curl -L -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/windows/import_forms_mongo.bat
-        ```
-    2. Run the script:
-        ```cmd
-        import_forms_mongo.bat mongodb://localhost:27017/elevate-project
-        ```
-
+       ```
+       entity-project-sample-data.bat
+       ```
 
 </details>
 ## 🌐 Micro-Frontend (FE) Setup

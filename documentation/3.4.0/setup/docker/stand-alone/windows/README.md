@@ -40,6 +40,18 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
 
 ## Operating Systems: Windows
 
+> **Caution:** Before proceeding, please ensure that the ports given here are available and open. It is essential to verify their availability prior to moving forward. You can run below command in your terminal to check this
+
+```
+for port in 3001 3002 6000 5001 4000 9092 5432 7007 2181 27017 3569; do
+    if sudo lsof -iTCP:$port -sTCP:LISTEN &>/dev/null; then
+        echo "Port $port is IN USE"
+    else
+        echo "Port $port is available"
+    fi
+done
+```
+
 1.  **Download Docker Compose File:** Retrieve the **[docker-compose-project.yml](https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/docker-compose-project.yml)** file from the Project service repository and save it to the project directory.
 
     ```
@@ -54,6 +66,7 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
    curl -L ^
     -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/envs/interface_env ^
     -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/envs/entity_management_env ^
+    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/envs/notification_env ^
     -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/envs/project_env ^
     -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/envs/scheduler_env ^
     -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/envs/user_env ^
@@ -73,14 +86,14 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
    curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/windows/docker-compose-down.bat
    ```
 
-3.  **Download `Config` File**
+4.  **Download `Config` File**
 
    ```
    curl -L https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsStandAlone/documentation/3.4.0/dockerized/scripts/stand-alone/windows/configFile.json -o config.json
    ```
 
 
-6.  **Run All Services & Dependencies**:All services and dependencies can be started using the `docker-compose-up` script file.
+5.  **Run All Services & Dependencies**:All services and dependencies can be started using the `docker-compose-up` script file.
 
    ```
    docker-compose-up.bat
@@ -90,7 +103,7 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
 
 > **Note**: During the first Docker Compose run, the database, migration seeder files, and the script to set the default organization will be executed automatically.
 
-7.  **Remove All Service & Dependency Containers**:
+6.  **Remove All Service & Dependency Containers**:
     All docker containers can be stopped and removed by using the `docker-compose-down` file.
     
    ```
@@ -122,6 +135,26 @@ To enable the Citus extension for user services, follow these steps.
       citus_setup.bat user postgres://postgres:postgres@citus_master:5432/user
       ```
       > **Note:** Since the `citus_setup.bat` file requires arguments, it must be run from a terminal.
+
+
+## Update Cloud Credentials for Project Service
+
+To enable full functionality, including certificate generation and report storage, you must configure cloud credentials in the Project Service environment file.
+
+    Path: project_env
+
+Add or update the following variables in the .env file, substituting the example values with your actual cloud credentials:
+
+    CLOUD_STORAGE_PROVIDER=gcloud
+    CLOUD_STORAGE_ACCOUNTNAME=your_account_name
+    CLOUD_STORAGE_SECRET="-----BEGIN PRIVATE KEY-----\n..."
+    CLOUD_STORAGE_PROJECT=your_cloud_project_id
+    CLOUD_STORAGE_BUCKETNAME=your_bucket_name
+    CLOUD_STORAGE_BUCKET_TYPE=private
+
+> NOTE : This service is designed to support multiple cloud storage providers and offers flexible cloud integration capabilities. Based on your selected cloud provider, the service can be configured accordingly to enable seamless storage, certificate generation, and report handling.
+
+For detailed configuration options, supported cloud providers, and integration guidelines, please refer to the official documentation available in this [ReadMe](https://www.npmjs.com/package/client-cloud-services?activeTab=readme)
 
 ## Persistence Of Database Data In Docker Container (Optional)
 
@@ -214,14 +247,18 @@ This step will guide us in implementing a sample project solution following the 
 
       ```
       curl -L ^
-      -O https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsStandAlone/documentation/3.4.0/dockerized/scripts/stand-alone/windows/insert_project_data.bat ^
+      -O https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsStandAlone/documentation/3.4.0/dockerized/scripts/stand-alone/windows/insert_project_data.bat
       ```
 
     2. Make the setup file executable by running the following command.
 
        ```
-       node insert_sample_solutions.js
+       node insert_sample_solutions.js       
        ```
+    3. Insert Sample Data To Database.
+
+       ```
+       node insert_sample_solutions.js
 
 </details>
 ## 🌐 Micro-Frontend (FE) Setup

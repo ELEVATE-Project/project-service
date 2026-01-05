@@ -5,14 +5,6 @@ echo ==========================================
 echo Project Standalone Setup - Windows
 echo ==========================================
 
-REM Create a directory for downloaded files
-SET DOWNLOAD_DIR=%CD%\downloads
-if not exist "%DOWNLOAD_DIR%" (
-    mkdir "%DOWNLOAD_DIR%"
-)
-
-cd "%DOWNLOAD_DIR%"
-
 echo.
 echo Downloading entity sample data files...
 echo ------------------------------------------
@@ -20,10 +12,10 @@ echo ------------------------------------------
 curl -L -o entity_sampleData.js ^
 https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsStandAlone/documentation/3.4.0/dockerized/scripts/stand-alone/windows/entity_sampleData.js
 
-curl -L -o entity_sampleData2.js ^
+curl -L -o project_sampleData.js ^
 https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsStandAlone/documentation/3.4.0/dockerized/scripts/stand-alone/windows/project_sampleData.js
 
-curl -L -o entity_sampleData3.js ^
+curl -L -o insert_sample_solutions.js ^
 https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsStandAlone/documentation/3.4.0/dockerized/scripts/stand-alone/windows/insert_sample_solutions.js
 
 echo.
@@ -44,6 +36,19 @@ IF ERRORLEVEL 1 (
 )
 
 REM ------------------------------------------------
+REM Install mongodb npm package
+REM ------------------------------------------------
+echo.
+echo Installing mongodb npm package...
+npm -v >nul 2>&1
+
+IF ERRORLEVEL 1 (
+    echo npm is not available. Please restart terminal after Node.js installation.
+) ELSE (
+    npm install mongodb
+)
+
+REM ------------------------------------------------
 REM Check and install MongoDB Server
 REM ------------------------------------------------
 echo.
@@ -51,10 +56,10 @@ echo Checking MongoDB installation...
 mongod --version >nul 2>&1
 
 IF ERRORLEVEL 1 (
-    echo MongoDB not found. Installing MongoDB...
+    echo MongoDB not found. Installing MongoDB Server...
     winget install MongoDB.Server --accept-package-agreements --accept-source-agreements
 ) ELSE (
-    echo MongoDB is already installed.
+    echo MongoDB Server is already installed.
 )
 
 REM ------------------------------------------------
@@ -74,8 +79,6 @@ IF ERRORLEVEL 1 (
 echo.
 echo ==========================================
 echo Setup completed successfully!
-echo Downloaded files location:
-echo %DOWNLOAD_DIR%
 echo ==========================================
 
 pause

@@ -217,15 +217,15 @@ services:
       - project_net
     restart: 'always'
 
-  portal:
-    image: shikshalokamqa/elevate-project-obervation-pwa:3.4.0.1
-    container_name: portal
-    ports:
-      - '7007:7007'
-    volumes:
-      - ./env.js:/usr/src/app/www/ml/assets/env/env.js
-    networks:
-      - project_net
+  # portal:
+  #   image: shikshalokamqa/elevate-project-obervation-pwa:3.4.0.1
+  #   container_name: portal
+  #   ports:
+  #     - '7007:7007'
+  #   volumes:
+  #     - ./env.js:/usr/src/app/www/ml/assets/env/env.js
+  #   networks:
+  #     - project_net
 
 networks:
   project_net:

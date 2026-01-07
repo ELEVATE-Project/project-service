@@ -138,12 +138,17 @@ To enable the Citus extension for user services, follow these steps.
       ```
       > **Note:** Since the `citus_setup.bat` file requires arguments, it must be run from a terminal.
 
-
 ## Update Cloud Credentials for Project Service
 
-To enable full functionality, including certificate generation and report storage, you must configure cloud credentials in the Project Service environment file.
+To enable full functionality—including certificate generation, attachment uploads, and report storage—you must configure cloud credentials in the environment files for both services.
 
-    Path: project_env
+A. Project Service Configuration Path:
+    ```./project/project_env
+    ```
+
+B. Samiksha (Survey & Observation) Service Configuration Path:
+    ```.project/samiksha_env
+    ```
 
 Add or update the following variables in the .env file, substituting the example values with your actual cloud credentials:
 

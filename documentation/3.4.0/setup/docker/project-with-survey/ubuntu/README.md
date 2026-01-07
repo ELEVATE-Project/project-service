@@ -106,11 +106,11 @@ To enable the Citus extension for user services, follow these steps.
 To enable full functionality—including certificate generation, attachment uploads, and report storage—you must configure cloud credentials in the environment files for both services.
 
 A. Project Service Configuration Path:
-    ```./ELEVATE-Project/project-service/.env
+    ```./project/project_env
     ```
 
 B. Samiksha (Survey & Observation) Service Configuration Path:
-    ```./ELEVATE-Project/samiksha-service/.env
+    ```.project/samiksha_env
     ```
 
 Add or update the following variables in the .env file, substituting the example values with your actual cloud credentials:

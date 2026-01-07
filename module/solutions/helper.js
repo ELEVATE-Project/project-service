@@ -1425,7 +1425,7 @@ module.exports = class SolutionsHelper {
 					},
 					['type', 'status', 'endDate', 'startDate']
 				)
-
+				//------------------------->
 				// updated condition, if solution is inactive no need to check further
 				if (!Array.isArray(solutionData) || solutionData.length < 1) {
 					return resolve({
@@ -1441,7 +1441,7 @@ module.exports = class SolutionsHelper {
 						result: [],
 					})
 				}
-
+				//------------------------->
 				if (solutionData[0].endDate && new Date() > new Date(solutionData[0].endDate)) {
 					if (solutionData[0].status === CONSTANTS.common.ACTIVE_STATUS) {
 						let updateSolution = await this.update(
@@ -1472,7 +1472,7 @@ module.exports = class SolutionsHelper {
 						success: false,
 					})
 				}
-
+				//------------------------->
 				// check start date is greater than current date
 				if (solutionData[0].startDate && new Date() < new Date(solutionData[0].startDate)) {
 					//isValidStartDate is passed in this situation and based on that key only verifyLink function should return message
@@ -1488,6 +1488,7 @@ module.exports = class SolutionsHelper {
 						returnError: true,
 					})
 				}
+				//------------------------->
 				response.verified = true
 				return resolve({
 					success: true,
@@ -1731,11 +1732,12 @@ module.exports = class SolutionsHelper {
 
 				queryData.data['link'] = link
 				let matchQuery = queryData.data
+				//------------------------->
 				// here we have to identify if the solution is targetted or not regardless of time (solution active or not)
 				if (matchQuery.status) {
 					delete matchQuery.status
 				}
-
+				//------------------------->
 				matchQuery['tenantId'] = userDetails.userInformation.tenantId
 
 				let solutionData = await solutionsQueries.solutionsDocument(matchQuery, [
@@ -1770,7 +1772,9 @@ module.exports = class SolutionsHelper {
 					? solutionDetails[0].projectTemplateId
 					: ''
 				response.programName = solutionDetails[0].programName
+				//------------------------->
 				response.status = solutionDetails[0].status // this status is required to know whether the solution is active or inactive at verifyLink function.
+				//------------------------->
 				delete response._id
 
 				return resolve({
@@ -2849,6 +2853,7 @@ module.exports = class SolutionsHelper {
 			try {
 				let verifySolution = await this.verifySolutionDetails(link, userId, userToken, userDetails)
 
+				//------------------------->
 				// if link access is requested before start date return error
 				if (verifySolution.returnError) {
 					throw {
@@ -2858,7 +2863,7 @@ module.exports = class SolutionsHelper {
 							: messageConstants.apiResponses.INVALID_LINK,
 					}
 				}
-
+				//------------------------->
 				let checkForTargetedSolution = await this.checkForTargetedSolution(link, bodyData, userDetails)
 
 				if (!checkForTargetedSolution || Object.keys(checkForTargetedSolution.result).length <= 0) {

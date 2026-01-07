@@ -10,13 +10,16 @@ echo Downloading entity sample data files...
 echo ------------------------------------------
 
 curl -L -o entity_sampleData.js ^
-https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsStandAlone/documentation/3.4.0/dockerized/scripts/stand-alone/windows/entity_sampleData.js
+https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsWithSurvey/documentation/3.4.0/dockerized/scripts/project-with-survey/windows/entity_sampleData.js
 
 curl -L -o project_sampleData.js ^
-https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsStandAlone/documentation/3.4.0/dockerized/scripts/stand-alone/windows/project_sampleData.js
+https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsWithSurvey/documentation/3.4.0/dockerized/scripts/project-with-survey/windows/project_sampleData.js
+
+curl -L -o survey_sampleData.js ^
+https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsWithSurvey/documentation/3.4.0/dockerized/scripts/project-with-survey/windows/survey_sampleData.js
 
 curl -L -o insert_sample_solutions.js ^
-https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsStandAlone/documentation/3.4.0/dockerized/scripts/stand-alone/windows/insert_sample_solutions.js
+https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsWithSurvey/documentation/3.4.0/dockerized/scripts/project-with-survey/windows/insert_sample_solutions.js
 
 echo.
 echo Files downloaded successfully.

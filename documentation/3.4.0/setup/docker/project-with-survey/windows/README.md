@@ -56,7 +56,7 @@ for %p in (3001 3002 6000 5001 4000 9092 5432 7007 2181 27017 3569 4301) do @(
 1.  **Download Docker Compose File:** Retrieve the **[docker-compose-project.yml](https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/docker-compose-project.yml)** file from the Project service repository and save it to the project directory.
 
     ```
-    curl -OJL https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsStandAlone/documentation/3.4.0/dockerized/dockerFiles/stand-alone/docker-compose-project.yml
+    curl -OJL https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsWithSurvey/documentation/3.4.0/dockerized/dockerFiles/project-with-survey/docker-compose-project.yml
     ```
 
     > Note: All commands are run from the project directory.
@@ -82,10 +82,10 @@ for %p in (3001 3002 6000 5001 4000 9092 5432 7007 2181 27017 3569 4301) do @(
 3.  **Download `docker-compose-up` & `docker-compose-down` Script Files**
 
    ```
-   curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/windows/docker-compose-up.bat
+   curl -OJL https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsWithSurvey/documentation/3.4.0/dockerized/scripts/project-with-survey/windows/docker-compose-up.bat
    ```
    ```
-   curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/windows/docker-compose-down.bat
+   curl -OJL https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsWithSurvey/documentation/3.4.0/dockerized/scripts/project-with-survey/windows/docker-compose-down.bat
    ```
 
 4.  **Download `Config` File**
@@ -215,13 +215,13 @@ In such cases, you can generate sample user accounts using the steps below. This
 
       ```
       mkdir sample-data\user 2>nul & ^
-      curl -L "https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsStandAlone/documentation/3.4.0/dockerized/scripts/stand-alone/windows/sampleData.sql" -o sample-data\user\sampleData.sql
+      curl -L "https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsWithSurvey/documentation/3.4.0/dockerized/scripts/project-with-survey/windows/sampleData.sql" -o sample-data\user\sampleData.sql
       ```
 
 2. **Download The `insert_sample_data` Script File:**
 
    ```
-   curl -L -o insert_sample_data.bat https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsStandAlone/documentation/3.4.0/dockerized/scripts/stand-alone/windows/insert_sample_data.bat
+   curl -L -o insert_sample_data.bat https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsWithSurvey/documentation/3.4.0/dockerized/scripts/project-with-survey/windows/insert_sample_data.bat
    ```
 
 3. **Run The `insert_sample_data` Script File:**
@@ -249,7 +249,7 @@ This step will guide us in implementing a sample project solution following the 
 
       ```
       curl -L ^
-      -O https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsStandAlone/documentation/3.4.0/dockerized/scripts/stand-alone/windows/insert_project_data.bat
+      -O https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsWithSurvey/documentation/3.4.0/dockerized/scripts/project-with-survey/windows/insert_project_data.bat
       ```
 
     2. Make the setup file executable by running the following command.

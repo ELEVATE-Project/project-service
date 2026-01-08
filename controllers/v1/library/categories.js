@@ -256,7 +256,7 @@ module.exports = class LibraryCategories extends Abstract {
 	}
 
 	/**
-	 * List of library categories
+	 * delete a library category
 	 * @method
 	 * @name list
 	 * @param {Object} req - requested data
@@ -270,6 +270,36 @@ module.exports = class LibraryCategories extends Abstract {
 					_id: req.params._id,
 				}
 				let projectCategories = await libraryCategoriesHelper.delete(filterQuery, req.userDetails)
+
+				projectCategories.result = projectCategories.data
+
+				return resolve(projectCategories)
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
+				})
+			}
+		})
+	}
+
+	/**
+	 * read a library category
+	 * @method
+	 * @name list
+	 * @param {Object} req - requested data
+	 * @returns {Array} Library categories.
+	 */
+
+	async details(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				const filterQuery = {
+					_id: req.params._id,
+					getChildren: req.query.getChildren === 'true',
+				}
+				let projectCategories = await libraryCategoriesHelper.details(filterQuery, req.userDetails)
 
 				projectCategories.result = projectCategories.data
 

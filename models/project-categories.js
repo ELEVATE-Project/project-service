@@ -103,7 +103,7 @@ module.exports = {
 			indexType: { unique: true },
 		},
 		{
-			name: { parent_id: 1, tenantId: 1, sequenceNumber: 1 },
+			name: { parentId: 1, tenantId: 1, sequenceNumber: 1 },
 		},
 		{
 			name: { tenantId: 1, hasChildCategories: 1 },

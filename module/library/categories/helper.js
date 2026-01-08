@@ -916,11 +916,11 @@ module.exports = class LibraryCategoriesHelper {
 
 				// Auto-assign sequenceNumber based on siblings under same parent
 				let sequenceNumber = 0
-				if (categoryData.parent_id) {
+				if (categoryData.parentId) {
 					// Find max sequenceNumber among siblings
 					const siblings = await projectCategoriesQueries.categoryDocuments(
 						{
-							parent_id: categoryData.parent_id,
+							parentId: categoryData.parentId,
 							tenantId: tenantId,
 							isDeleted: false,
 						},
@@ -935,7 +935,7 @@ module.exports = class LibraryCategoriesHelper {
 					// For root level categories, find max sequenceNumber among root categories
 					const rootCategories = await projectCategoriesQueries.categoryDocuments(
 						{
-							parent_id: null,
+							parentId: null,
 							tenantId: tenantId,
 							isDeleted: false,
 						},
@@ -1175,7 +1175,7 @@ module.exports = class LibraryCategoriesHelper {
 				// Check if category has associated projects
 				const associatedTemplates = categoryData.noOfProjects || 0
 
-				if (associatedTemplates && associatedTemplates.length > 0) {
+				if (associatedTemplates > 0) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message:

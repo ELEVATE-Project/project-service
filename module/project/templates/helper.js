@@ -2017,16 +2017,21 @@ module.exports = class ProjectTemplatesHelper {
 				}
 
 				// If 'categoryIds' are provided, add a filter for categories.
+				let categoryIdArray
+
 				if (categoryIds && categoryIds !== '') {
-					const categoryIdArray = categoryIds
+					categoryIdArray = categoryIds
 						.split(',')
 						.map((id) => id.trim())
 						.filter((id) => id !== '')
 					if (categoryIdArray.length > 0) {
 						// Convert category IDs to ObjectIds if needed
 						const categoryObjectIds = categoryIdArray.map((id) => {
-							return UTILS.convertStringToObjectId(id) || id
+							const objectId = UTILS.convertStringToObjectId(id) || id
+							//requestedCategorySet.add(id);
+							return objectId
 						})
+
 						// Filter by categories._id to match category objects within the categories array
 						queryObject['categories._id'] = { $in: categoryObjectIds }
 					}
@@ -2058,15 +2063,24 @@ module.exports = class ProjectTemplatesHelper {
 				}
 
 				if (groupByCategory) {
-					let groupedTemplates = {}
 					paginatedResults.forEach((template) => {
 						if (template.categories && template.categories.length > 0) {
-							template.categories.forEach((category) => {
-								const catId = category._id.toString() // Convert ObjectId to string for key
-								if (!groupedTemplates[catId]) {
-									groupedTemplates[catId] = []
+							template.categories.forEach((categoryId) => {
+								const catId = categoryId.toString() // Convert ObjectId to string for key
+								if (categoryIdArray && categoryIdArray.length > 0) {
+									// Check if the current categoryId is in the requestedCategorySet
+									if (categoryIdArray.includes(catId)) {
+										if (!groupedTemplates[catId]) {
+											groupedTemplates[catId] = []
+										}
+										groupedTemplates[catId].push(template)
+									}
+								} else {
+									if (!groupedTemplates[catId]) {
+										groupedTemplates[catId] = []
+									}
+									groupedTemplates[catId].push(template)
 								}
-								groupedTemplates[catId].push(template)
 							})
 						}
 					})

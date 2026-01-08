@@ -1997,7 +1997,8 @@ module.exports = class ProjectTemplatesHelper {
 				// Create a query object with the 'isReusable' property set to true.
 				let queryObject = { isReusable: true }
 				currentOrgOnly = UTILS.convertStringToBoolean(currentOrgOnly)
-
+				groupByCategory = UTILS.convertStringToBoolean(groupByCategory)
+				taskDetails = UTILS.convertStringToBoolean(taskDetails)
 				queryObject['tenantId'] = userDetails.userInformation.tenantId
 
 				// handle currentOrgOnly filter

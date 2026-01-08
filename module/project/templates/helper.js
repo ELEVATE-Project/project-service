@@ -1989,7 +1989,8 @@ module.exports = class ProjectTemplatesHelper {
 		currentOrgOnly = false,
 		userDetails,
 		categoryIds = '',
-		groupByCategory = false
+		groupByCategory = false,
+		taskDetails = false
 	) {
 		return new Promise(async (resolve, reject) => {
 			try {
@@ -2040,6 +2041,20 @@ module.exports = class ProjectTemplatesHelper {
 
 				// Slice the 'templates' array to get paginated results.
 				let paginatedResults = templates.slice(startIndex, endIndex)
+
+				if (taskDetails) {
+					for (const template of paginatedResults) {
+						// Fetch tasks and subtasks for each template in paginated results
+						if (template.tasks && template.tasks.length > 0) {
+							template.tasks = await this.tasksAndSubTasks(
+								template._id,
+								'',
+								userDetails.userInformation.tenantId,
+								userDetails.userInformation.organizationId
+							)
+						}
+					}
+				}
 
 				if (groupByCategory) {
 					let groupedTemplates = {}

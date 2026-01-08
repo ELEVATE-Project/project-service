@@ -824,7 +824,8 @@ module.exports = class ProjectTemplates extends Abstract {
 					req.query.currentOrgOnly ? req.query.currentOrgOnly : false,
 					req.userDetails,
 					req.query.categoryIds ? req.query.categoryIds : '',
-					req.query.groupByCategory ? req.query.groupByCategory : false
+					req.query.groupByCategory ? req.query.groupByCategory : false,
+					req.query.taskDetails ? req.query.taskDetails : false
 				)
 
 				// Assign the 'data' property of 'projectTemplates' to 'result'.

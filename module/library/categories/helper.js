@@ -999,11 +999,11 @@ module.exports = class LibraryCategoriesHelper {
 	 * @returns {Object} category details
 	 */
 
-	static list(req) {
+	static list(searchText, params, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let tenantId = req.userDetails.userInformation.tenantId
-				let organizationId = req.userDetails.userInformation.organizationId
+				let tenantId = userDetails.userInformation.tenantId
+				let organizationId = userDetails.userInformation.organizationId
 				let query = {
 					visibleToOrganizations: { $in: [organizationId] },
 				}
@@ -1014,16 +1014,16 @@ module.exports = class LibraryCategoriesHelper {
 				query['isDeleted'] = false
 
 				// handle currentOrgOnly filter
-				if (req.query['currentOrgOnly']) {
-					let currentOrgOnly = UTILS.convertStringToBoolean(req.query['currentOrgOnly'])
+				if (params['currentOrgOnly']) {
+					let currentOrgOnly = UTILS.convertStringToBoolean(params['currentOrgOnly'])
 					if (currentOrgOnly) {
 						query['orgId'] = { $in: ['ALL', req.userDetails.userInformation.organizationId] }
 					}
 				}
 				// Handle parentId query param. Accepts: actual id, omitted, or the string 'null' (for root)
 				let parentCategory = null
-				if (req.query.parentId) {
-					const rawParent = req.query.parentId
+				if (params.parentId) {
+					const rawParent = params.parentId
 					// if client sends ?parentId=null or empty string, treat as root (parentId === null)
 					if (rawParent === 'null' || rawParent === null || rawParent === '') {
 						query['parentId'] = null
@@ -1055,8 +1055,8 @@ module.exports = class LibraryCategoriesHelper {
 				}
 
 				// Add keywords filter - categories must have at least one of the specified keywords
-				if (req.query.keywords && req.query.keywords.trim() !== '') {
-					const keywordsArray = req.query.keywords
+				if (params.keywords && params.keywords.trim() !== '') {
+					const keywordsArray = params.keywords
 						.split(',')
 						.map((k) => k.trim())
 						.filter((k) => k !== '')
@@ -1066,8 +1066,8 @@ module.exports = class LibraryCategoriesHelper {
 				}
 
 				// Add search functionality for name and description (separate from keywords filter)
-				if (req.searchText && req.searchText.trim() !== '') {
-					const searchTerm = req.searchText.trim()
+				if (searchText && searchText.trim() !== '') {
+					const searchTerm = searchText.trim()
 					query['$or'] = [
 						{ name: new RegExp(searchTerm, 'i') },
 						{ description: new RegExp(searchTerm, 'i') },
@@ -1075,24 +1075,34 @@ module.exports = class LibraryCategoriesHelper {
 					]
 				}
 
-				let categoryData = await projectCategoriesQueries.categoryDocuments(query, [
-					'externalId',
-					'name',
-					'icon',
-					'updatedAt',
-					'noOfProjects',
-					'description',
-					'keywords',
-					'parentId',
-					'hasChildCategories',
-					'sequenceNumber',
-					'metaInformation',
-				])
+				const skipFields = ['__v', 'createdAt', 'updatedAt', 'createdBy', 'updatedBy']
+				let categoryData = await projectCategoriesQueries.categoryDocuments(query, 'all', skipFields)
 
 				if (!categoryData.length > 0) {
 					throw {
 						status: HTTP_STATUS_CODE.ok.status,
 						message: CONSTANTS.apiResponses.LIBRARY_CATEGORIES_NOT_FOUND,
+					}
+				}
+
+				// If getChildren is true, fetch immediate children for each category
+				if (params.getChildren) {
+					for (let category of categoryData) {
+						let childrenQuery = {
+							parentId: category._id,
+							tenantId: tenantId,
+							status: CONSTANTS.common.ACTIVE_STATUS,
+							isDeleted: false,
+						}
+
+						let children = await projectCategoriesQueries.categoryDocuments(
+							childrenQuery,
+							'all',
+							skipFields
+						)
+
+						category.children = children
+						category.childrenCount = children.length
 					}
 				}
 

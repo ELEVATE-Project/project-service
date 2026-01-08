@@ -92,6 +92,10 @@ module.exports = {
 			default: 0,
 			index: true,
 		},
+		metaInformation: {
+			type: Object,
+			default: {},
+		},
 	},
 	compoundIndex: [
 		{

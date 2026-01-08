@@ -240,7 +240,7 @@ module.exports = class LibraryCategories extends Abstract {
 	async list(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let projectCategories = await libraryCategoriesHelper.list(req)
+				let projectCategories = await libraryCategoriesHelper.list(req.searchText, req.query, req.userDetails)
 
 				projectCategories.result = projectCategories.data
 
@@ -287,7 +287,7 @@ module.exports = class LibraryCategories extends Abstract {
 	/**
 	 * read a library category
 	 * @method
-	 * @name list
+	 * @name details
 	 * @param {Object} req - requested data
 	 * @returns {Array} Library categories.
 	 */

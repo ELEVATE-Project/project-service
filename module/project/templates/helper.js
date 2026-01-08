@@ -1982,7 +1982,15 @@ module.exports = class ProjectTemplatesHelper {
 	 * @returns {Object}            - project templates list.
 	 */
 
-	static list(pageNo = '', pageSize = '', searchText = '', currentOrgOnly = false, userDetails) {
+	static list(
+		pageNo = '',
+		pageSize = '',
+		searchText = '',
+		currentOrgOnly = false,
+		userDetails,
+		categoryIds = '',
+		groupByCategory = false
+	) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Create a query object with the 'isReusable' property set to true.
@@ -2006,6 +2014,22 @@ module.exports = class ProjectTemplatesHelper {
 					]
 				}
 
+				// If 'categoryIds' are provided, add a filter for categories.
+				if (categoryIds && categoryIds !== '') {
+					const categoryIdArray = categoryIds
+						.split(',')
+						.map((id) => id.trim())
+						.filter((id) => id !== '')
+					if (categoryIdArray.length > 0) {
+						// Convert category IDs to ObjectIds if needed
+						const categoryObjectIds = categoryIdArray.map((id) => {
+							return UTILS.convertStringToObjectId(id) || id
+						})
+						// Filter by categories._id to match category objects within the categories array
+						queryObject['categories._id'] = { $in: categoryObjectIds }
+					}
+				}
+
 				// Call the 'templateDocument' function from 'projectTemplateQueries'
 				// using the 'queryObject' to fetch templates.
 				const templates = await projectTemplateQueries.templateDocument(queryObject)
@@ -2015,8 +2039,23 @@ module.exports = class ProjectTemplatesHelper {
 				const endIndex = pageNo * pageSize
 
 				// Slice the 'templates' array to get paginated results.
-				const paginatedResults = templates.slice(startIndex, endIndex)
+				let paginatedResults = templates.slice(startIndex, endIndex)
 
+				if (groupByCategory) {
+					let groupedTemplates = {}
+					paginatedResults.forEach((template) => {
+						if (template.categories && template.categories.length > 0) {
+							template.categories.forEach((category) => {
+								const catId = category._id.toString() // Convert ObjectId to string for key
+								if (!groupedTemplates[catId]) {
+									groupedTemplates[catId] = []
+								}
+								groupedTemplates[catId].push(template)
+							})
+						}
+					})
+					paginatedResults = groupedTemplates
+				}
 				// Resolve the promise with success, message, and paginated data.
 				return resolve({
 					success: true,

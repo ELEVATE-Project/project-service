@@ -26,6 +26,144 @@ const orgExtensionQueries = require(DB_QUERY_BASE_PATH + '/organizationExtension
 
 module.exports = class LibraryCategoriesHelper {
 	/**
+	 * Validate parentId for category operations
+	 * @method
+	 * @name validateParentId
+	 * @param {String} parentId - parent category id
+	 * @param {String} categoryId - current category id (for update operations)
+	 * @param {String} tenantId - tenant id
+	 * @returns {Object} validation result
+	 */
+	static async validateParentId(parentId, categoryId = null, tenantId) {
+		if (!parentId) {
+			return { success: true, parentCategory: null }
+		}
+
+		// Convert to ObjectId safely
+		const parentObjectId = UTILS.convertStringToObjectId(parentId)
+		if (!parentObjectId) {
+			throw {
+				success: false,
+				status: HTTP_STATUS_CODE.bad_request.status,
+				message: 'Invalid parentId format',
+			}
+		}
+
+		// Check if parent category exists, is not deleted, and is in the same tenant
+		const parentCategory = await projectCategoriesQueries.categoryDocuments(
+			{
+				_id: parentObjectId,
+				tenantId: tenantId,
+				isDeleted: false,
+			},
+			['_id', 'hasChildCategories', 'parentId']
+		)
+
+		if (!parentCategory || parentCategory.length === 0) {
+			throw {
+				success: false,
+				status: HTTP_STATUS_CODE.bad_request.status,
+				message: 'Parent category not found or does not belong to the same tenant',
+			}
+		}
+
+		const parent = parentCategory[0]
+
+		if (categoryId) {
+			// Cannot set category as its own parent
+			if (parentId.toString() === categoryId.toString()) {
+				throw {
+					success: false,
+					status: HTTP_STATUS_CODE.bad_request.status,
+					message: 'Category cannot be its own parent',
+				}
+			}
+
+			// Cannot move category to its own descendant (circular reference)
+			const isDescendant = await this.isDescendant(parentId, categoryId, tenantId)
+			if (isDescendant) {
+				throw {
+					success: false,
+					status: HTTP_STATUS_CODE.bad_request.status,
+					message: 'Cannot move category to its own descendant - would create circular reference',
+				}
+			}
+		}
+
+		return { success: true, parentCategory: parent }
+	}
+
+	/**
+	 * Check if a category is a descendant of another category
+	 * @method
+	 * @name isDescendant
+	 * @param {String} potentialDescendantId - category to check if it's a descendant
+	 * @param {String} ancestorId - potential ancestor category
+	 * @param {String} tenantId - tenant id
+	 * @returns {Boolean} true if potentialDescendantId is a descendant of ancestorId
+	 */
+	static async isDescendant(potentialDescendantId, ancestorId, tenantId) {
+		let currentId = potentialDescendantId
+
+		while (currentId) {
+			if (currentId.toString() === ancestorId.toString()) {
+				return true
+			}
+
+			const category = await projectCategoriesQueries.categoryDocuments(
+				{
+					_id: UTILS.convertStringToObjectId(currentId),
+					tenantId: tenantId,
+					isDeleted: false,
+				},
+				['parentId']
+			)
+
+			if (!category || category.length === 0 || !category[0].parentId) {
+				break
+			}
+
+			currentId = category[0].parentId
+		}
+
+		return false
+	}
+
+	/**
+	 * Get the hierarchy depth for a given category
+	 * @method
+	 * @name getHierarchyDepth
+	 * @param {String} categoryId - category id
+	 * @param {String} tenantId - tenant id
+	 * @returns {Number} hierarchy depth
+	 */
+	static async getHierarchyDepth(categoryId, tenantId) {
+		let depth = 0
+		let currentId = categoryId
+
+		while (currentId && depth < 10) {
+			// Safety limit to prevent infinite loops
+			const category = await projectCategoriesQueries.categoryDocuments(
+				{
+					_id: UTILS.convertStringToObjectId(currentId),
+					tenantId: tenantId,
+					isDeleted: false,
+				},
+				['parentId']
+			)
+
+			if (!category || category.length === 0 || !category[0].parentId) {
+				break
+			}
+
+			currentId = category[0].parentId
+			depth++
+		}
+
+		return depth
+	}
+
+	/**
 	 * List of library projects.
 	 * @method
 	 * @name projects
@@ -80,7 +218,7 @@ module.exports = class LibraryCategoriesHelper {
 
 				matchQuery['$match']['tenantId'] = userDetails.userInformation.tenantId
 				/**
-				 * 
+				 *
 					Sample for matchQuery obj when orgExtension.externalProjectResourceVisibilityPolicy = CURRENT
 					{
 						"$match": {
@@ -92,7 +230,7 @@ module.exports = class LibraryCategoriesHelper {
 					}
 				*/
 				/**
-				 * 
+				 *
 					Sample for matchQuery obj when orgExtension.externalProjectResourceVisibilityPolicy = ASSOCIATED
 					{
 						"$match": {
@@ -122,7 +260,7 @@ module.exports = class LibraryCategoriesHelper {
 					}
 				*/
 				/**
-				 * 
+				 *
 					Sample for matchQuery obj when orgExtension.externalProjectResourceVisibilityPolicy = ALL
 					{
 						"$match": {
@@ -521,6 +659,7 @@ module.exports = class LibraryCategoriesHelper {
 				matchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
 
 				let categoryData = await projectCategoriesQueries.categoryDocuments(matchQuery, 'all')
+
 				// Throw error if category is not found
 				if (
 					!categoryData ||
@@ -534,6 +673,18 @@ module.exports = class LibraryCategoriesHelper {
 					}
 				}
 
+				// Validate parent_id if provided in updateData
+				if (updateData.parentId !== undefined) {
+					let parentCategory
+					const validationResult = await this.validateParentId(
+						updateData.parentId,
+						categoryData[0]._id.toString(),
+						userDetails.tenantAndOrgInfo.tenantId
+					)
+					parentCategory = validationResult.parentCategory
+				}
+
+				// Handle evidence uploads
 				let evidenceUploadData = await handleEvidenceUpload(files, userDetails.userInformation.userId)
 				evidenceUploadData = evidenceUploadData.data
 
@@ -563,6 +714,38 @@ module.exports = class LibraryCategoriesHelper {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.PROJECT_CATEGORIES_NOT_UPDATED,
+					}
+				}
+
+				// Update hasChildCategories for old and new parents
+				if (updateData.parentId !== undefined) {
+					const tenantId = userDetails.tenantAndOrgInfo.tenantId
+					const categoryId = categoryData[0]._id.toString()
+
+					// Handle old parent: check if it has any other children
+					if (categoryData[0].parentId && categoryData[0].parentId.toString() !== updateData.parentId) {
+						const otherChildren = await projectCategoriesQueries.categoryDocuments(
+							{
+								parentId: categoryData[0].parentId,
+								tenantId: tenantId,
+								isDeleted: false,
+								status: CONSTANTS.common.ACTIVE,
+							},
+							['_id']
+						)
+
+						await projectCategoriesQueries.updateMany(
+							{ _id: categoryData[0].parentId },
+							{ hasChildCategories: otherChildren && otherChildren.length > 0 }
+						)
+					}
+
+					// Handle new parent: set hasChildCategories to true
+					if (updateData.parentId) {
+						await projectCategoriesQueries.updateMany(
+							{ _id: updateData.parentId },
+							{ hasChildCategories: true }
+						)
 					}
 				}
 
@@ -724,6 +907,48 @@ module.exports = class LibraryCategoriesHelper {
 					}
 				}
 
+				// Validate parent_id if provided
+				let parentCategory = null
+				if (categoryData.parentId) {
+					const validationResult = await this.validateParentId(categoryData.parentId, null, tenantId)
+					parentCategory = validationResult.parentCategory
+				}
+
+				// Auto-assign sequenceNumber based on siblings under same parent
+				let sequenceNumber = 0
+				if (categoryData.parent_id) {
+					// Find max sequenceNumber among siblings
+					const siblings = await projectCategoriesQueries.categoryDocuments(
+						{
+							parent_id: categoryData.parent_id,
+							tenantId: tenantId,
+							isDeleted: false,
+						},
+						['sequenceNumber']
+					)
+
+					if (siblings && siblings.length > 0) {
+						const maxSequence = Math.max(...siblings.map((sibling) => sibling.sequenceNumber || 0))
+						sequenceNumber = maxSequence + 1
+					}
+				} else {
+					// For root level categories, find max sequenceNumber among root categories
+					const rootCategories = await projectCategoriesQueries.categoryDocuments(
+						{
+							parent_id: null,
+							tenantId: tenantId,
+							isDeleted: false,
+						},
+						['sequenceNumber']
+					)
+
+					if (rootCategories && rootCategories.length > 0) {
+						const maxSequence = Math.max(...rootCategories.map((category) => category.sequenceNumber || 0))
+						sequenceNumber = maxSequence + 1
+					}
+				}
+				categoryData.sequenceNumber = sequenceNumber
+
 				// Fetch the signed urls from handleEvidenceUpload function
 				const evidences = await handleEvidenceUpload(files, userDetails.userInformation.userId)
 				categoryData['evidences'] = evidences.data
@@ -740,6 +965,14 @@ module.exports = class LibraryCategoriesHelper {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.PROJECT_CATEGORIES_NOT_ADDED,
 					}
+				}
+
+				// Update parent's hasChildCategories to true if parent exists
+				if (parentCategory && !parentCategory.hasChildCategories) {
+					await projectCategoriesQueries.updateMany(
+						{ _id: parentCategory._id, tenantId: tenantId },
+						{ hasChildCategories: true }
+					)
 				}
 
 				return resolve({
@@ -777,6 +1010,8 @@ module.exports = class LibraryCategoriesHelper {
 
 				// create query to fetch assets
 				query['tenantId'] = tenantId
+				query['status'] = CONSTANTS.common.ACTIVE_STATUS
+				query['isDeleted'] = false
 
 				// handle currentOrgOnly filter
 				if (req.query['currentOrgOnly']) {
@@ -785,13 +1020,73 @@ module.exports = class LibraryCategoriesHelper {
 						query['orgId'] = { $in: ['ALL', req.userDetails.userInformation.organizationId] }
 					}
 				}
-				query['status'] = CONSTANTS.common.ACTIVE_STATUS
+				// Handle parentId query param. Accepts: actual id, omitted, or the string 'null' (for root)
+				let parentCategory = null
+				if (req.query.parentId) {
+					const rawParent = req.query.parentId
+					// if client sends ?parentId=null or empty string, treat as root (parentId === null)
+					if (rawParent === 'null' || rawParent === null || rawParent === '') {
+						query['parentId'] = null
+					} else {
+						// Convert to ObjectId safely to avoid mongoose casting errors
+						const parentObjectId = UTILS.convertStringToObjectId(rawParent)
+						if (!parentObjectId) {
+							throw {
+								success: false,
+								status: HTTP_STATUS_CODE.bad_request.status,
+								message: 'Invalid parentId provided',
+							}
+						}
+						// Check if parent category exists, is not deleted, and is in the same tenant
+						parentCategory = await projectCategoriesQueries.categoryDocuments(
+							{ _id: parentObjectId, tenantId: tenantId, isDeleted: false },
+							['_id', 'hasChildCategories']
+						)
+
+						if (!parentCategory || parentCategory.length === 0) {
+							throw {
+								success: false,
+								status: HTTP_STATUS_CODE.bad_request.status,
+								message: 'Parent category not found or does not belong to the same tenant',
+							}
+						}
+						query['parentId'] = parentObjectId
+					}
+				}
+
+				// Add keywords filter - categories must have at least one of the specified keywords
+				if (req.query.keywords && req.query.keywords.trim() !== '') {
+					const keywordsArray = req.query.keywords
+						.split(',')
+						.map((k) => k.trim())
+						.filter((k) => k !== '')
+					if (keywordsArray.length > 0) {
+						query['keywords'] = { $in: keywordsArray }
+					}
+				}
+
+				// Add search functionality for name and description (separate from keywords filter)
+				if (req.searchText && req.searchText.trim() !== '') {
+					const searchTerm = req.searchText.trim()
+					query['$or'] = [
+						{ name: new RegExp(searchTerm, 'i') },
+						{ description: new RegExp(searchTerm, 'i') },
+						{ externalId: new RegExp(searchTerm, 'i') },
+					]
+				}
+
 				let categoryData = await projectCategoriesQueries.categoryDocuments(query, [
 					'externalId',
 					'name',
 					'icon',
 					'updatedAt',
 					'noOfProjects',
+					'description',
+					'keywords',
+					'parentId',
+					'hasChildCategories',
+					'sequenceNumber',
+					'metaInformation',
 				])
 
 				if (!categoryData.length > 0) {
@@ -805,6 +1100,188 @@ module.exports = class LibraryCategoriesHelper {
 					success: true,
 					message: CONSTANTS.apiResponses.PROJECT_CATEGORIES_FETCHED,
 					data: categoryData,
+				})
+			} catch (error) {
+				return resolve({
+					success: false,
+					message: error.message,
+					data: {},
+				})
+			}
+		})
+	}
+
+	/**
+	 * Delete library category.
+	 * @method
+	 * @name delete
+	 * @param {Object} filterQuery - filter query
+	 * @param {Object} userDetails - user details
+	 * @returns {Object} Delete operation result
+	 */
+	static delete(filterQuery, userDetails) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				const tenantId = userDetails.userInformation.tenantId
+				const categoryId = filterQuery._id
+
+				// Find the category to delete
+				let categoryData = await projectCategoriesQueries.categoryDocuments(
+					{
+						_id: categoryId,
+						tenantId: tenantId,
+						isDeleted: false,
+					},
+					'all'
+				)
+
+				if (!categoryData || categoryData.length === 0) {
+					throw {
+						status: HTTP_STATUS_CODE.not_found.status,
+						message: CONSTANTS.apiResponses.CATEGORY_NOT_FOUND,
+					}
+				}
+
+				categoryData = categoryData[0]
+
+				// Check if category has children
+				const children = await projectCategoriesQueries.categoryDocuments(
+					{
+						parentId: categoryId,
+						tenantId: tenantId,
+						isDeleted: false,
+					},
+					['_id']
+				)
+
+				if (children && children.length > 0) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message:
+							'Cannot delete category that has child categories. Please delete or move child categories first.',
+					}
+				}
+
+				// Check if category has associated projects
+				const associatedTemplates = categoryData.noOfProjects || 0
+
+				if (associatedTemplates && associatedTemplates.length > 0) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message:
+							'Cannot delete category that has associated project templates. Please remove the category from templates first.',
+					}
+				}
+
+				// Soft delete the category
+				const updateResult = await projectCategoriesQueries.updateMany(
+					{ _id: categoryId, tenantId: tenantId },
+					{
+						isDeleted: true,
+						updatedBy: userDetails.userInformation.userId,
+						updatedAt: new Date(),
+					}
+				)
+
+				if (!updateResult) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.PROJECT_CATEGORIES_NOT_DELETED,
+					}
+				}
+
+				// Update parent's hasChildCategories if this was the last child
+				if (categoryData.parentId) {
+					const siblings = await projectCategoriesQueries.categoryDocuments(
+						{
+							parentId: categoryData.parentId,
+							tenantId: tenantId,
+							isDeleted: false,
+							_id: { $ne: categoryId }, // Exclude the deleted category
+						},
+						['_id']
+					)
+
+					await projectCategoriesQueries.updateMany(
+						{ _id: categoryData.parentId },
+						{ hasChildCategories: siblings && siblings.length > 0 }
+					)
+				}
+
+				return resolve({
+					success: true,
+					message: CONSTANTS.apiResponses.PROJECT_CATEGORIES_DELETED,
+				})
+			} catch (error) {
+				return resolve({
+					success: false,
+					message: error.message,
+					data: {},
+				})
+			}
+		})
+	}
+
+	/**
+	 * Get library category.
+	 * @method
+	 * @name details
+	 * @param {Object} filterQuery - filter query
+	 * @param {Object} userDetails - user details
+	 * @returns {Object} Category result
+	 */
+	static details(filterQuery, userDetails) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let tenantId = userDetails.userInformation.tenantId
+				let organizationId = userDetails.userInformation.organizationId
+
+				let matchQuery = {
+					_id: filterQuery._id,
+					tenantId: tenantId,
+					status: CONSTANTS.common.ACTIVE_STATUS,
+					isDeleted: false,
+				}
+
+				let categoryData = await projectCategoriesQueries.categoryDocuments(matchQuery, 'all')
+
+				if (!categoryData || categoryData.length === 0) {
+					throw {
+						status: HTTP_STATUS_CODE.not_found.status,
+						message: CONSTANTS.apiResponses.CATEGORY_NOT_FOUND,
+					}
+				}
+
+				// If getChildren is true, fetch immediate children
+				if (filterQuery.getChildren) {
+					let childrenQuery = {
+						parentId: filterQuery._id,
+						tenantId: tenantId,
+						status: CONSTANTS.common.ACTIVE_STATUS,
+						isDeleted: false,
+					}
+
+					let children = await projectCategoriesQueries.categoryDocuments(childrenQuery, [
+						'externalId',
+						'name',
+						'icon',
+						'updatedAt',
+						'noOfProjects',
+						'description',
+						'keywords',
+						'parentId',
+						'hasChildCategories',
+						'sequenceNumber',
+						'metaInformation',
+					])
+
+					categoryData[0].children = children
+				}
+
+				return resolve({
+					success: true,
+					message: CONSTANTS.apiResponses.PROJECT_CATEGORIES_FETCHED,
+					data: categoryData[0],
 				})
 			} catch (error) {
 				return resolve({
@@ -916,7 +1393,7 @@ function handleEvidenceUpload(files, userId) {
  * @returns {Object} returns modified matchQuery
  */
 /**
- * 
+ *
 	Sample for matchQuery obj when orgExtension.externalProjectResourceVisibilityPolicy = CURRENT
 	{
 		"$match": {
@@ -928,7 +1405,7 @@ function handleEvidenceUpload(files, userId) {
 	}
  */
 /**
- * 
+ *
 	Sample for matchQuery obj when orgExtension.externalProjectResourceVisibilityPolicy = ASSOCIATED
 	{
 		"$match": {
@@ -958,7 +1435,7 @@ function handleEvidenceUpload(files, userId) {
 	}
  */
 /**
- * 
+ *
 	Sample for matchQuery obj when orgExtension.externalProjectResourceVisibilityPolicy = ALL
 	{
 		"$match": {

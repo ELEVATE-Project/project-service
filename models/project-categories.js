@@ -66,11 +66,43 @@ module.exports = {
 			default: [],
 			index: true,
 		},
+		description: {
+			type: String,
+			index: true,
+			required: true,
+			default: 'default',
+		},
+		keywords: {
+			type: Array,
+			default: [],
+			index: true,
+		},
+		parentId: {
+			type: 'ObjectId',
+			default: null,
+			index: true, // CRITICAL for hierarchy queries
+		},
+		hasChildCategories: {
+			type: Boolean,
+			default: false,
+			index: true, // Quick leaf identification
+		},
+		sequenceNumber: {
+			type: Number,
+			default: 0,
+			index: true,
+		},
 	},
 	compoundIndex: [
 		{
 			name: { externalId: 1, tenantId: 1 },
 			indexType: { unique: true },
+		},
+		{
+			name: { parent_id: 1, tenantId: 1, sequenceNumber: 1 },
+		},
+		{
+			name: { tenantId: 1, hasChildCategories: 1 },
 		},
 	],
 }

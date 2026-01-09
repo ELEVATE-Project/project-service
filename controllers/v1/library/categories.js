@@ -258,7 +258,7 @@ module.exports = class LibraryCategories extends Abstract {
 	/**
 	 * delete a library category
 	 * @method
-	 * @name list
+	 * @name delete
 	 * @param {Object} req - requested data
 	 * @returns {Array} Library categories.
 	 */

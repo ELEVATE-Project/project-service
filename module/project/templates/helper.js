@@ -81,10 +81,7 @@ module.exports = class ProjectTemplatesHelper {
 					matchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
 					matchQuery['externalId'] = { $in: categoryIds }
 					// what is category documents
-					let categories = await projectCategoriesQueries.categoryDocuments(matchQuery, [
-						'externalId',
-						'name',
-					])
+					let categories = await projectCategoriesQueries.categoryDocuments(matchQuery, ['externalId'])
 
 					if (!categories.length > 0) {
 						throw {
@@ -99,7 +96,6 @@ module.exports = class ProjectTemplatesHelper {
 							[category.externalId]: {
 								_id: ObjectId(category._id),
 								externalId: category.externalId,
-								name: category.name,
 							},
 						}),
 						{}
@@ -2063,10 +2059,12 @@ module.exports = class ProjectTemplatesHelper {
 				}
 
 				if (groupByCategory) {
+					let groupedTemplates = {}
 					paginatedResults.forEach((template) => {
 						if (template.categories && template.categories.length > 0) {
-							template.categories.forEach((categoryId) => {
-								const catId = categoryId.toString() // Convert ObjectId to string for key
+							template.categories.forEach((category) => {
+								let catId = category._id.toString()
+
 								if (categoryIdArray && categoryIdArray.length > 0) {
 									// Check if the current categoryId is in the requestedCategorySet
 									if (categoryIdArray.includes(catId)) {

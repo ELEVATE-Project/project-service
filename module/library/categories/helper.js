@@ -1017,7 +1017,7 @@ module.exports = class LibraryCategoriesHelper {
 				if (params['currentOrgOnly']) {
 					let currentOrgOnly = UTILS.convertStringToBoolean(params['currentOrgOnly'])
 					if (currentOrgOnly) {
-						query['orgId'] = { $in: ['ALL', req.userDetails.userInformation.organizationId] }
+						query['orgId'] = { $in: ['ALL', organizationId] }
 					}
 				}
 				// Handle parentId query param. Accepts: actual id, omitted, or the string 'null' (for root)
@@ -1271,19 +1271,8 @@ module.exports = class LibraryCategoriesHelper {
 						isDeleted: false,
 					}
 
-					let children = await projectCategoriesQueries.categoryDocuments(childrenQuery, [
-						'externalId',
-						'name',
-						'icon',
-						'updatedAt',
-						'noOfProjects',
-						'description',
-						'keywords',
-						'parentId',
-						'hasChildCategories',
-						'sequenceNumber',
-						'metaInformation',
-					])
+					const skipFields = ['__v', 'createdAt', 'updatedAt', 'createdBy', 'updatedBy']
+					let children = await projectCategoriesQueries.categoryDocuments(childrenQuery, 'all', skipFields)
 
 					categoryData[0].children = children
 				}

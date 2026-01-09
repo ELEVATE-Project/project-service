@@ -68,7 +68,6 @@ module.exports = {
 		},
 		description: {
 			type: String,
-			index: true,
 			required: true,
 			default: 'default',
 		},
@@ -102,11 +101,9 @@ module.exports = {
 			name: { externalId: 1, tenantId: 1 },
 			indexType: { unique: true },
 		},
+		// For Query (parentId + tenantId queries)
 		{
-			name: { parentId: 1, tenantId: 1, sequenceNumber: 1 },
-		},
-		{
-			name: { tenantId: 1, hasChildCategories: 1 },
+			name: { parentId: 1, tenantId: 1 },
 		},
 	],
 }

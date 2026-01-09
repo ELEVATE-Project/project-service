@@ -53,7 +53,6 @@ const entityDocuments = function (
 					$in: filterData._id,
 				}
 			}
-
 			let requestJSON = {
 				query: filterData,
 				projection: projection,
@@ -65,6 +64,7 @@ const entityDocuments = function (
 				headers: {
 					'content-type': 'application/json',
 					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
+					tenantId: filterData.tenantId ? filterData.tenantId : '',
 				},
 				json: requestJSON,
 			}

@@ -1017,6 +1017,17 @@ module.exports = class UserProjectsHelper {
 
 				let projects = await projectQueries.getAggregate(aggregatedData)
 
+				// Process tasks to handle buttonLabel fallback
+				if (projects && projects.length > 0 && projects[0].tasks) {
+					projects[0].tasks.forEach((task) => {
+						if (task.metaInformation) {
+							if (task.metaInformation.buttonLabel === '' || !task.metaInformation.buttonLabel) {
+								task.metaInformation.buttonLabel = task.name
+							}
+						}
+					})
+				}
+
 				return resolve({
 					success: true,
 					data: projects,
@@ -2120,6 +2131,13 @@ module.exports = class UserProjectsHelper {
 							) {
 								result.assesmentOrObservationTask = true
 							}
+
+							// Ensure buttonLabel fallback for retrieval
+							if (task.metaInformation) {
+								if (task.metaInformation.buttonLabel === '' || !task.metaInformation.buttonLabel) {
+									task.metaInformation.buttonLabel = task.name
+								}
+							}
 						})
 
 						let taskReport = {
@@ -3089,7 +3107,10 @@ module.exports = class UserProjectsHelper {
 				// If it is valid make sure we add those data to newly creating projects
 				if (requestedData.entityId && requestedData.entityId !== '') {
 					let entityInformation = await entitiesService.entityDocuments(
-						{ _id: requestedData.entityId },
+						{
+							_id: requestedData.entityId,
+							tenantId: tenantId,
+						},
 						CONSTANTS.common.ALL
 					)
 
@@ -4631,6 +4652,17 @@ function _projectInformation(project, language) {
 					}
 					//Once modified remove translations from response
 					project.tasks[task] = _.omit(project.tasks[task], 'translations')
+
+					// Ensure buttonLabel fallback for retrieval
+					if (project.tasks[task].metaInformation) {
+						if (
+							project.tasks[task].metaInformation.buttonLabel === '' ||
+							!project.tasks[task].metaInformation.buttonLabel
+						) {
+							project.tasks[task].metaInformation.buttonLabel = project.tasks[task].name
+						}
+					}
+
 					let currentTask = project.tasks[task]
 
 					if (currentTask.attachments && currentTask.attachments.length > 0) {
@@ -4867,6 +4899,13 @@ async function _projectTask(
 			singleTask._id = UTILS.isValidMongoId(singleTask._id.toString()) ? uuidv4() : singleTask._id
 			singleTask.isImportedFromLibrary = isImportedFromLibrary
 			singleTask.syncedAt = new Date()
+
+			// Handle buttonLabel in metaInformation - fallback to task name if empty
+			if (singleTask.metaInformation && singleTask.metaInformation.buttonLabel === '') {
+				singleTask.metaInformation.buttonLabel = singleTask.name
+			} else if (singleTask.metaInformation && !singleTask.metaInformation.buttonLabel) {
+				singleTask.metaInformation.buttonLabel = singleTask.name
+			}
 
 			if (singleTask.startDate) {
 				singleTask.startDate = singleTask.startDate

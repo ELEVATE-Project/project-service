@@ -1087,22 +1087,25 @@ module.exports = class LibraryCategoriesHelper {
 
 				// If getChildren is true, fetch immediate children for each category
 				if (params.getChildren) {
-					for (let category of categoryData) {
-						let childrenQuery = {
-							parentId: category._id,
-							tenantId: tenantId,
-							status: CONSTANTS.common.ACTIVE_STATUS,
-							isDeleted: false,
+					let getChildren = UTILS.convertStringToBoolean(params['getChildren'])
+					if (getChildren) {
+						for (let category of categoryData) {
+							let childrenQuery = {
+								parentId: category._id,
+								tenantId: tenantId,
+								status: CONSTANTS.common.ACTIVE_STATUS,
+								isDeleted: false,
+							}
+
+							let children = await projectCategoriesQueries.categoryDocuments(
+								childrenQuery,
+								'all',
+								skipFields
+							)
+
+							category.children = children
+							category.childrenCount = children.length
 						}
-
-						let children = await projectCategoriesQueries.categoryDocuments(
-							childrenQuery,
-							'all',
-							skipFields
-						)
-
-						category.children = children
-						category.childrenCount = children.length
 					}
 				}
 

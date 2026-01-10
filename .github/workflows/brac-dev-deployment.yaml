@@ -62,6 +62,10 @@ jobs:
           script: |
             set -e
 
+            # Export AWS variables explicitly
+            export AWS_REGION="${{ secrets.AWS_REGION }}"
+            export AWS_ACCOUNT_ID="${{ secrets.AWS_ACCOUNT_ID }}"
+
             cd ${{ secrets.TARGET_DIR_DEV }}
 
             if [ -f .env ]; then
@@ -70,8 +74,8 @@ jobs:
 
             echo '${{ secrets.DEV_ENV_BRAC }}' > .env
 
-            aws ecr get-login-password --region $AWS_REGION \
+            aws ecr get-login-password --region "$AWS_REGION" \
               | docker login --username AWS \
-                --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+                --password-stdin "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com"
 
             ./deploy.sh

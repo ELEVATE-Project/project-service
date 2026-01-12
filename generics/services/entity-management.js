@@ -65,7 +65,6 @@ const entityDocuments = function (
 				headers: {
 					'content-type': 'application/json',
 					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
-					'tenant-id': filterData.tenantId ? filterData.tenantId : '',
 				},
 				json: requestJSON,
 			}

@@ -1900,6 +1900,23 @@ let configurationData = [
 		updatedAt: new Date('2025-05-26T10:56:17.021Z'),
 	},
 ]
+
+let organizationExtensionData = [
+	{
+		_id: new ObjectId('68d397cac4872dbaf23b7a15'),
+		projectResourceVisibilityPolicy: 'CURRENT',
+		externalProjectResourceVisibilityPolicy: 'CURRENT',
+		createdBy: 'SYSTEM',
+		updatedBy: 'SYSTEM',
+		deleted: false,
+		tenantId: 'default',
+		orgId: 'default_code',
+		updatedAt: new Date('2025-09-24T07:03:38.171Z'),
+		createdAt: new Date('2025-09-24T07:03:38.171Z'),
+		__v: 0,
+	},
+]
+
 module.exports = {
 	solutionData,
 	programData,
@@ -1909,4 +1926,5 @@ module.exports = {
 	certificateBaseTemplatesData,
 	projectCategoriesData,
 	configurationData,
+	organizationExtensionData
 }

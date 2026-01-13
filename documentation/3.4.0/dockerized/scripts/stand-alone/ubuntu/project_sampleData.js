@@ -1567,7 +1567,7 @@ let certificateBaseTemplatesData = [
 		name: 'onelogo_onesign',
 		url: 'certificate/ef2058a1-92e0-4a63-af5f-b712f992bf90/1/81fc35ad-9519-4ec4-87bb-6cef64b940f0/9-8-2025-1757415647754_sl_s1l1.svg',
 		tenantId: 'default',
-		orgId: 'slorg',
+		orgId: 'default_code',
 		updatedAt: new Date('2025-09-09T11:00:47.878Z'),
 		createdAt: new Date('2025-09-09T11:00:47.878Z'),
 		__v: 0,
@@ -1589,10 +1589,11 @@ let projectCategoriesData = [
 		name: 'teachers',
 		externalId: 'teachers',
 		tenantId: 'default',
-		orgId: 'slorg',
+		orgId: 'default_code',
 		updatedAt: new Date('2025-06-24T17:55:44.720Z'),
 		createdAt: new Date('2025-06-24T17:55:44.720Z'),
 		__v: 0,
+		visibleToOrganizations: ['default_code'],
 	},
 ]
 
@@ -1619,6 +1620,22 @@ let configurationData = [
 		updatedAt: new Date('2025-05-26T10:56:17.021Z'),
 	},
 ]
+
+let organizationExtensionData = [
+	{
+		_id: new ObjectId('68d397cac4872dbaf23b7a15'),
+		projectResourceVisibilityPolicy: 'CURRENT',
+		externalProjectResourceVisibilityPolicy: 'CURRENT',
+		createdBy: 'SYSTEM',
+		updatedBy: 'SYSTEM',
+		deleted: false,
+		tenantId: 'default',
+		orgId: 'default_code',
+		updatedAt: new Date('2025-09-24T07:03:38.171Z'),
+		createdAt: new Date('2025-09-24T07:03:38.171Z'),
+		__v: 0,
+	},
+]
 module.exports = {
 	solutionData,
 	programData,
@@ -1628,4 +1645,5 @@ module.exports = {
 	certificateBaseTemplatesData,
 	projectCategoriesData,
 	configurationData,
+	organizationExtensionData,
 }

@@ -13,9 +13,6 @@
 ![GitHub package.json version (subfolder of monorepo)](https://img.shields.io/github/package-json/v/ELEVATE-Project/mentoring?filename=src%2Fpackage.json)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-</details>
-</details>
-
 </br>
 The Project building block facilitates the creation and engagement with micro-improvement projects.
 

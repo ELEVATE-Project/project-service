@@ -61,6 +61,6 @@ USER_COURSES_SUBMISSION_TOPIC=elevate_user_courses_dev
 USER_COURSES_TOPIC=elevate_user_courses_raw
 USER_DELETE_ON_OFF=ON
 USER_DELETE_TOPIC=dev.userCreate
-USER_SERVICE_URL=http://user:3569/user
+USER_SERVICE_URL=http://interface:3569/user
 VALIDATE_ENTITIES=ON
 VALIDATE_ROLE=ON

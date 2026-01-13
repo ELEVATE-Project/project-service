@@ -13,8 +13,6 @@
 ![GitHub package.json version (subfolder of monorepo)](https://img.shields.io/github/package-json/v/ELEVATE-Project/mentoring?filename=src%2Fpackage.json)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-</details>
-</details>
 
 </br>
 The Project building block facilitates the creation and engagement with micro-improvement projects.
@@ -121,9 +119,9 @@ For more information, refer **[Citus Data](https://www.citusdata.com/)**.
 
 To enable the Citus extension for user services, follow these steps.
 
-1. Create a sub-directory named `user` and download `distributionColumns.sql` into it. (Skip this for linux/macOs)
+1. Create a sub-directory named `user` and download `distributionColumns.sql` into it.
     ```
-    mkdir user && curl -o ./user/distributionColumns.sql -JL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/distribution-columns/user/distributionColumns.sql
+    mkdir user && curl -o ./user/distributionColumns.sql -JL https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsStandAlone/documentation/3.4.0/distribution-columns/user/distributionColumns.sql
     ```
 2. Set up the citus_setup file by following the steps given below.
 

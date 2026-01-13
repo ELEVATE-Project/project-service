@@ -134,6 +134,7 @@ async function main({ dataToBeInserted }) {
 		{ name: 'certificateBaseTemplates', data: dataToBeInserted.certificateBaseTemplatesData, db: dbName },
 		{ name: 'projectCategories', data: dataToBeInserted.projectCategoriesData, db: dbName },
 		{ name: 'configurations', data: dataToBeInserted.configurationData, db: dbName },
+		{ name: 'organizationExtension', data: dataToBeInserted.organizationExtensionData, db: dbName },
 	]
 
 	console.log(`\n=================================================`)

@@ -107,7 +107,6 @@ curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs
 curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/scripts/stand-alone/ubuntu/project_sampleData.js
 curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/scripts/stand-alone/ubuntu/insert_sample_solutions.js
 curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/macSetupForStandAlone/documentation/3.4.0/dockerized/scripts/stand-alone/mac-os/insert_sample_data.sql
-chmod +x insert_sample_data.sh
 log "Sample data scripts downloaded."
 
 # -----------------------------

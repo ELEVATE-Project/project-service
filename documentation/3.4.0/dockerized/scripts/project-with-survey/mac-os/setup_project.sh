@@ -108,7 +108,7 @@ curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs
 curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideWithSurvey/documentation/3.4.0/dockerized/scripts/project-with-survey/ubuntu/entity_sampleData.js
 curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideWithSurvey/documentation/3.4.0/dockerized/scripts/project-with-survey/ubuntu/project_sampleData.js
 curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideWithSurvey/documentation/3.4.0/dockerized/scripts/project-with-survey/ubuntu/insert_sample_solutions.js
-curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideWithSurvey/documentation/3.4.0/dockerized/scripts/project-with-survey/ubuntu/insert_sample_data.sh
+curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/macSetupWithSurvey/documentation/3.4.0/dockerized/scripts/project-with-survey/mac-os/insert_sample_data.sql
 log "sample data scripts downloaded."
 
 # -----------------------------

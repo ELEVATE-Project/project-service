@@ -40,7 +40,7 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
 > **Caution:** Before proceeding, please ensure that the ports given here are available and open. It is essential to verify their availability prior to moving forward. You can run below command in your terminal to check this
 
 ```
-for port in 3001 3002 6000 5001 4000 9092 5432 7007 2181 27017 3569; do
+for port in 3001 3002 6000 5001 4000 9092 5432 7007 2181 27017 3569 4301; do
     if sudo lsof -iTCP:$port -sTCP:LISTEN &>/dev/null; then
         echo "Port $port is IN USE"
     else
@@ -101,9 +101,15 @@ To enable the Citus extension for user services, follow these steps.
 
 ## Update Cloud Credentials for Project Service
 
-To enable full functionality, including certificate generation and report storage, you must configure cloud credentials in the Project Service environment file.
+To enable full functionality—including certificate generation, attachment uploads, and report storage—you must configure cloud credentials in the environment files for both services.
 
-    Path: project_env
+A. Project Service Configuration Path:
+    ```./project_env
+    ```
+
+B. Samiksha (Survey & Observation) Service Configuration Path:
+    ```./samiksha_env
+    ```
 
 Add or update the following variables in the .env file, substituting the example values with your actual cloud credentials:
 
@@ -117,6 +123,8 @@ Add or update the following variables in the .env file, substituting the example
 > NOTE : This service is designed to support multiple cloud storage providers and offers flexible cloud integration capabilities. Based on your selected cloud provider, the service can be configured accordingly to enable seamless storage, certificate generation, and report handling.
 
 For detailed configuration options, supported cloud providers, and integration guidelines, please refer to the official documentation available in this [ReadMe](https://www.npmjs.com/package/client-cloud-services?activeTab=readme)
+
+
 
 ## Persistence Of Database Data In Docker Container (Optional)
 

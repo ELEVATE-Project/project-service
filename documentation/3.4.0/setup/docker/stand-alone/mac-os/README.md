@@ -54,8 +54,7 @@ done
 
 1. **Download and execute main setup script:** Execute the following command in your terminal from the project directory.
     ```
-    curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/dockerized/scripts/mac-linux/setup_project.sh \
-    && chmod +x setup_project.sh \
+    curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/macSetupForStandAlone/documentation/3.4.0/dockerized/scripts/stand-alone/mac-os/setup_project.sh \
     && ./setup_project.sh
     ```
 

@@ -373,7 +373,14 @@ module.exports = class UserProjectsHelper {
 				if (data.tasks) {
 					let taskReport = {}
 
-					updateProject.tasks = await _projectTask(data.tasks, false, '', '', data.programId, userDetails)
+					updateProject.tasks = await _projectTask(
+						data.tasks, 
+						false, 
+						'', 
+						'', 
+						data.programId, 
+						userDetails
+					);
 
 					if (userProject[0].tasks && userProject[0].tasks.length > 0) {
 						updateProject.tasks.forEach((task) => {

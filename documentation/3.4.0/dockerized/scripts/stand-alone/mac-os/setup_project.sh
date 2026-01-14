@@ -12,14 +12,16 @@ log() {
 # Step 0: Install Homebrew, Node.js, MongoDB
 # -----------------------------
 log "Installing Homebrew (if missing)..."
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+if ! command -v brew >/dev/null 2>&1; then
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+fi
 
 log "Installing Node.js..."
-brew install node
+brew install node || true
 
 log "Installing MongoDB Community 7.0..."
-brew tap mongodb/brew
-brew install mongodb-community@7.0
+brew tap mongodb/brew || true
+brew install mongodb-community@7.0 || true
 brew services start mongodb-community@7.0
 log "Node.js and MongoDB installation completed."
 
@@ -55,41 +57,33 @@ curl -L \
     -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/envs/project_env \
     -O https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/envs/notification_env \
     -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/envs/scheduler_env \
-    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/envs/user_env \
-    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/envs/env.js
+    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/envs/user_env
 log "Environment files downloaded."
 
 # -----------------------------
 # Step 4: replace_volume_path.sh
 # -----------------------------
-log "Downloading replace_volume_path.sh script..."
+log "Downloading replace_volume_path.sh..."
 curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/dockerized/scripts/mac-linux/replace_volume_path.sh
 chmod +x replace_volume_path.sh
-
-log "Running replace_volume_path.sh..."
 ./replace_volume_path.sh
 log "Volume paths updated."
 
 # -----------------------------
-# Step 5: docker-compose scripts
+# Step 5: docker-compose scripts (mac-safe)
 # -----------------------------
 log "Downloading docker-compose scripts..."
-curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/scripts/stand-alone/ubuntu/docker-compose-up.sh
-curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/scripts/stand-alone/ubuntu/docker-compose-down.sh
+curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/macSetupForStandAlone/documentation/3.4.0/dockerized/scripts/stand-alone/mac-os/docker-compose-up.sh
+curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/macSetupForStandAlone/documentation/3.4.0/dockerized/scripts/stand-alone/mac-os/docker-compose-down.sh
 chmod +x docker-compose-up.sh docker-compose-down.sh
 
-# -----------------------------
-# Step 6: Patch scripts for macOS Docker Compose v2
-# -----------------------------
-log "Patching docker-compose scripts for macOS (docker compose)..."
-sed -i '' 's/docker-compose/docker compose/g' docker-compose-up.sh
-sed -i '' 's/docker-compose/docker compose/g' docker-compose-down.sh
-sed -i '' 's/docker -f/docker compose -f/g' docker-compose-up.sh
-sed -i '' 's/docker -f/docker compose -f/g' docker-compose-down.sh
-log "docker-compose scripts patched."
+# ---- SAFE patch (command only, filenames untouched)
+sed -i '' 's/^docker-compose /docker compose /g' docker-compose-up.sh
+sed -i '' 's/^docker-compose /docker compose /g' docker-compose-down.sh
+log "docker-compose scripts patched safely."
 
 # -----------------------------
-# Step 7: SQL distribution file
+# Step 6: SQL distribution file
 # -----------------------------
 log "Downloading distributionColumns.sql..."
 mkdir -p user
@@ -98,7 +92,7 @@ https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/set
 log "distributionColumns.sql downloaded."
 
 # -----------------------------
-# Step 8: Citus setup script
+# Step 7: Citus setup script
 # -----------------------------
 log "Downloading citus_setup.sh..."
 curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/scripts/stand-alone/ubuntu/citus_setup.sh
@@ -106,15 +100,25 @@ chmod +x citus_setup.sh
 log "citus_setup.sh downloaded."
 
 # -----------------------------
-# Step 9: Sample data scripts
+# Step 8: Sample data scripts
 # -----------------------------
 log "Downloading sample data scripts..."
 curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/scripts/stand-alone/ubuntu/entity_sampleData.js
 curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/scripts/stand-alone/ubuntu/project_sampleData.js
 curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/scripts/stand-alone/ubuntu/insert_sample_solutions.js
-curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/scripts/stand-alone/ubuntu/insert_sample_data.sh
+curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/macSetupForStandAlone/documentation/3.4.0/dockerized/scripts/stand-alone/mac-os/insert_sample_data.sql
 chmod +x insert_sample_data.sh
 log "Sample data scripts downloaded."
+
+# -----------------------------
+# Step 9: Node dependencies (FIX)
+# -----------------------------
+log "Installing Node dependencies..."
+if [ ! -f package.json ]; then
+    npm init -y
+fi
+npm install mongodb
+log "MongoDB Node driver installed."
 
 # -----------------------------
 # Step 10: config.json

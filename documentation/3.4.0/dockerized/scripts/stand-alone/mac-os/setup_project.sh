@@ -22,7 +22,6 @@ brew install node || true
 log "Installing MongoDB Community 7.0..."
 brew tap mongodb/brew || true
 brew install mongodb-community@7.0 || true
-brew services start mongodb-community@7.0
 log "Node.js and MongoDB installation completed."
 
 # -----------------------------

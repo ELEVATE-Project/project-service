@@ -1291,7 +1291,7 @@ module.exports = class UserProjectsHelper {
                                      "programId": "685140cbf891ccf74e05baf9",
                                      "observationId": "685146542054fe175c7150c8",
                                     "solutionId": "685140d1ffc25f705c56e99e",
-					               } 
+					               }
                                }
 
 						*/
@@ -3089,7 +3089,7 @@ module.exports = class UserProjectsHelper {
 				// If it is valid make sure we add those data to newly creating projects
 				if (requestedData.entityId && requestedData.entityId !== '') {
 					let entityInformation = await entitiesService.entityDocuments(
-						{ _id: requestedData.entityId },
+						{ _id: requestedData.entityId, tenantId: tenantId },
 						CONSTANTS.common.ALL
 					)
 
@@ -4322,7 +4322,7 @@ module.exports = class UserProjectsHelper {
    * deleteUserPIIData function to delete users Data.
    * @method
    * @name deleteUserPIIData
-   * @param {userDeleteEvent} - userDeleteEvent message object 
+   * @param {userDeleteEvent} - userDeleteEvent message object
    * {
       	"entity": "user",
 		"eventType": "delete",

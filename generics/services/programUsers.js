@@ -151,6 +151,7 @@ module.exports = class ProgramUsersService {
 		programExternalId,
 		page = 1,
 		limit = 20,
+		status,
 		searchQuery = '',
 		userDetails
 	) {
@@ -170,15 +171,30 @@ module.exports = class ProgramUsersService {
 
 			// Get entities from the found document
 			let filteredEntities = docData.entities || []
+
+			// Filter by status if provided
+			if (status) {
+				filteredEntities = filteredEntities.filter((entity) => entity.status == status)
+			}
+
+			// Filter by search query if provided
+			if (searchQuery) {
+				const lowerSearch = searchQuery.toLowerCase()
+				filteredEntities = filteredEntities.filter((entity) => {
+					// Assuming entity has a 'name' field to search against
+					return entity.name && entity.name.toLowerCase().includes(lowerSearch)
+				})
+			}
+
 			// Apply pagination
 			const totalCount = filteredEntities.length
 			const paginatedEntities = filteredEntities.slice(skip, skip + limit)
 
 			const userIds = paginatedEntities.map((entity) => entity.userId).filter(Boolean)
-			// if (process.env.PROGRAM_USERS_ENTITIES === 'users') {
 			// Fetch user details from user service
 			const { success, data } =
 				(await userService.accountSearch(userIds, userDetails.userInformation.tenantId)) || {}
+
 			// Throw error if no valid users returned from service
 			if (!success || !data || data.count === 0) {
 				throw {
@@ -187,12 +203,22 @@ module.exports = class ProgramUsersService {
 					message: 'No valid users found for the provided entity user IDs.',
 				}
 			}
+
+			// Map accountSearch data with entity data from docData and filter by searchQuery
+			const filteredData = paginatedEntities.map((entity) => {
+				const userData = data.data.find((user) => user.id == entity.userId)
+				return {
+					...entity,
+					userDetails: userData || null,
+				}
+			})
+
 			return {
 				status: 200,
 				message: 'Entities retrieved successfully',
-				data: { data: data.data, overview: docData.overview || {} },
-				result: { data: data.data, overview: docData.overview || {} },
-				count: data.count,
+				data: { data: filteredData, overview: docData.overview || {} },
+				result: { data: filteredData, overview: docData.overview || {} },
+				count: filteredData.length,
 				total: totalCount,
 			}
 		} catch (error) {

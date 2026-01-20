@@ -253,6 +253,7 @@ module.exports = class ProgramUsersHelper {
 		programExternalId,
 		page = 1,
 		limit = 20,
+		status,
 		search = '',
 		userDetails
 	) {
@@ -264,6 +265,7 @@ module.exports = class ProgramUsersHelper {
 				programExternalId,
 				page,
 				limit,
+				status,
 				search,
 				userDetails
 			)

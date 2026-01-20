@@ -1588,13 +1588,6 @@ module.exports = class UserProjects extends Abstract {
 	async createProjectPlan(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				// Check if userDetails is properly set by authentication middleware
-				if (!req.userDetails || !req.userDetails.userInformation) {
-					return resolve({
-						status: HTTP_STATUS_CODE.unauthorized.status,
-						message: 'Authentication failed - user details not available',
-					})
-				}
 				let result = await userProjectsHelper.createProjectPlan(
 					req.body,
 					req.userDetails.userInformation.userId,

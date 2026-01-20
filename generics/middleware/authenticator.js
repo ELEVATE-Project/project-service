@@ -75,6 +75,7 @@ module.exports = async function (req, res, next, token = '') {
 		'/scp/publishTemplateAndTasks',
 		'/library/categories/create',
 		'/library/categories/update',
+		'/library/categories/delete',
 		'/programs/create',
 		'/programs/update',
 		'/programs/read',
@@ -112,6 +113,7 @@ module.exports = async function (req, res, next, token = '') {
 		'/organizationExtension/updateRelatedOrgs',
 		'/userExtension/update',
 		'/solutions/fetchLinkInternal',
+		'/programUsers/createOrUpdate',
 	]
 	let performInternalAccessTokenCheck = false
 	let adminHeader = false
@@ -138,7 +140,6 @@ module.exports = async function (req, res, next, token = '') {
 			return
 		}
 	}
-
 	if (!token) {
 		rspObj.errCode = CONSTANTS.apiResponses.TOKEN_MISSING_CODE
 		rspObj.errMsg = CONSTANTS.apiResponses.TOKEN_MISSING_MESSAGE
@@ -165,7 +166,7 @@ module.exports = async function (req, res, next, token = '') {
 	rspObj.responseCode = HTTP_STATUS_CODE['unauthorized'].status
 
 	// <---- For Elevate user service user compactibility ---->
-	let decodedToken = null
+	let errdecodedToken = null
 	let userInformation = {}
 	try {
 		if (process.env.AUTH_METHOD === CONSTANTS.common.AUTH_METHOD.NATIVE) {

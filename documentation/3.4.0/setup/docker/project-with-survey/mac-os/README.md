@@ -25,7 +25,7 @@ Expectation: By diligently following the outlined steps, you will successfully e
 
 ## Prerequisites
 
-To set up the Project application, ensure you have Docker and Docker Compose installed on your system. For Linux users, detailed installation instructions for both can be found in the documentation here: [How To Install and Use Docker Compose on Linux](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-compose-on-ubuntu-20-04). To install and use Nodejs in Linux machine, you can follow instructions here: [How To Install Nodejs in Linux](https://nodejs.org/en/download/package-manager).
+To set up the Project application, ensure you have Docker and Docker Compose installed on your system. For Mac users, detailed installation instructions for both can be found in the documentation here: [How To Install and Use Docker Compose on Mac](https://docs.docker.com/desktop/setup/install/mac-install/). To install and use Nodejs in Mac machine, you can follow instructions here: [How To Install Nodejs in Mac](https://nodejs.org/en/download/package-manager).
 
 ## Installation
 
@@ -35,7 +35,7 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
 
 > Note: All commands are run from the project directory.
 
-## Operating Systems: Linux
+## Operating Systems: Mac
 
 > **Caution:** Before proceeding, please ensure that the ports given here are available and open. It is essential to verify their availability prior to moving forward. You can run below command in your terminal to check this
 
@@ -85,7 +85,7 @@ For more information, refer **[Citus Data](https://www.citusdata.com/)**.
 
 To enable the Citus extension for user services, follow these steps.
 
-1. Create a sub-directory named `user` and download `distributionColumns.sql` into it. (Skip this for linux)
+1. Create a sub-directory named `user` and download `distributionColumns.sql` into it.
 
     ```
     mkdir user && curl -o ./user/distributionColumns.sql -JL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/distribution-columns/user/distributionColumns.sql
@@ -122,7 +122,7 @@ Add or update the following variables in the .env file, substituting the example
 
 > NOTE : This service is designed to support multiple cloud storage providers and offers flexible cloud integration capabilities. Based on your selected cloud provider, the service can be configured accordingly to enable seamless storage, certificate generation, and report handling.
 
-For detailed configuration options, supported cloud providers, and integration guidelines, please refer to the official documentation available in this [ReadMe](https://www.npmjs.com/package/client-cloud-services?activeTab=readme)
+For detailed configuration options, supported cloud providers, and integration guidelines, please refer to the official documentation available [here](https://www.npmjs.com/package/client-cloud-services?activeTab=readme)
 
 
 
@@ -212,14 +212,6 @@ Follow the setup guides for the frontend repositories:
 -   **Projects Program Module (PWA):** [observation-survey-projects-pwa](https://github.com/ELEVATE-Project/observation-survey-projects-pwa/tree/release-3.4.0)
 
 > **Warning:** In this setup, features such as **Sign-Up, Project Certificate, Project Sharing, and Project PDF Report** will not be available because cloud storage credentials have been masked in the environment files for security reasons.
-
-## Postman Collections
-
--   [Projects Service](https://github.com/ELEVATE-Project/project-service/tree/main/api-doc)
-
-## Adding New Projects to the System
-
-With implementation scripts, you can seamlessly add new projects to the system. Once a project is successfully added, it becomes visible on the portal, ready for use and interaction. For a comprehensive guide on setting up and using the implementation script, please refer to the [documentation here](https://github.com/ELEVATE-Project/project-service/tree/main/Project-Service-implementation-Script).
 
 # Team
 

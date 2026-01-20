@@ -4495,8 +4495,35 @@ module.exports = class UserProjectsHelper {
 						status: CONSTANTS.common.PUBLISHED,
 						tenantId: tenantId,
 					},
-					['_id', 'title', 'categories', 'solutionId', 'solutionExternalId', 'externalId']
+					['_id', 'title', 'categories', 'solutionId', 'solutionExternalId', 'externalId', 'taskSequence']
 				)
+
+				// Collect all unique category IDs from templates
+				let allCategoryIds = []
+				const categoryIdSet = new Set() // To avoid duplicates
+				validTemplates.forEach((template) => {
+					if (template.categories && Array.isArray(template.categories)) {
+						template.categories.forEach((category) => {
+							const categoryId = category._id?.toString() || category
+							if (categoryId && !categoryIdSet.has(categoryId)) {
+								categoryIdSet.add(categoryId)
+								allCategoryIds.push(categoryId)
+							}
+						})
+					}
+				})
+
+				// Fetch full category documents from projectCategories collection
+				let allCategories = []
+				if (allCategoryIds.length > 0) {
+					allCategories = await projectCategoriesQueries.categoryDocuments(
+						{
+							_id: { $in: allCategoryIds },
+							tenantId: tenantId,
+						},
+						['_id', 'name', 'externalId', 'evidences']
+					)
+				}
 
 				if (validTemplates.length !== templates.length) {
 					throw {
@@ -4559,6 +4586,7 @@ module.exports = class UserProjectsHelper {
 					},
 					tenantId: tenantId,
 					orgId: orgId,
+					categories: allCategories, // Add categories from all templates
 					tasks: [],
 					taskSequence: [],
 					userProfile: participantProfile.data,
@@ -4574,7 +4602,7 @@ module.exports = class UserProjectsHelper {
 					)
 					if (entityInfo?.success && entityInfo?.data?.length > 0) {
 						const entity = entityInfo.data[0]
-						masterProjectData.entityInformation = {
+						projectData.entityInformation = {
 							_id: entity._id,
 							entityType: entity.entityType,
 							entityTypeId: entity.entityTypeId,
@@ -4582,7 +4610,7 @@ module.exports = class UserProjectsHelper {
 							externalId: entity?.metaInformation?.externalId || '',
 							entityName: entity?.metaInformation?.name || '',
 						}
-						masterProjectData.entityId = entity._id
+						projectData.entityId = entity._id
 					}
 				}
 
@@ -4718,6 +4746,43 @@ module.exports = class UserProjectsHelper {
 					// g. Combine template tasks and custom tasks as children
 					const allSubTasks = [...processedTemplateTasks, ...processedCustomTasks]
 
+					// h. Build taskSequence for improvementTask based on template's taskSequence
+					let improvementTaskSequence = []
+
+					// If template has taskSequence, use it to order the subtasks
+					if (templateData.taskSequence && templateData.taskSequence.length > 0) {
+						// Create a map of externalId to task for quick lookup
+						const taskMap = new Map()
+						allSubTasks.forEach((task) => {
+							if (task && task.externalId) {
+								taskMap.set(task.externalId, task)
+							}
+						})
+
+						// First, add tasks in template's taskSequence order
+						templateData.taskSequence.forEach((templateTaskExternalId) => {
+							const task = taskMap.get(templateTaskExternalId)
+							if (task && task.externalId) {
+								improvementTaskSequence.push(task.externalId)
+								taskMap.delete(templateTaskExternalId) // Remove to avoid duplicates
+							}
+						})
+
+						// Then, add any remaining tasks (custom tasks or tasks not in template sequence)
+						taskMap.forEach((task) => {
+							if (task && task.externalId) {
+								improvementTaskSequence.push(task.externalId)
+							}
+						})
+					} else {
+						// If no template taskSequence, use the order of processed tasks
+						allSubTasks.forEach((subTask) => {
+							if (subTask && subTask.externalId) {
+								improvementTaskSequence.push(subTask.externalId)
+							}
+						})
+					}
+
 					let improvementTask = {
 						_id: improvementTaskId,
 						externalId: taskExternalId,
@@ -4733,7 +4798,11 @@ module.exports = class UserProjectsHelper {
 						updatedAt: new Date(),
 						createdBy: userId,
 						updatedBy: userId,
+						tenantId: tenantId,
+						orgId: orgId,
+						syncedAt: new Date(),
 						children: allSubTasks, // Template tasks + custom tasks as subtasks
+						taskSequence: improvementTaskSequence, // Children's externalIds in correct order
 						attachments: [],
 						projectTemplateDetails: {
 							_id: template.templateId,
@@ -4743,21 +4812,9 @@ module.exports = class UserProjectsHelper {
 					}
 
 					// Add improvementProject task to project
+					// Root taskSequence should only contain improvementTask externalIds (not subtasks)
 					projectData.tasks.push(improvementTask)
 					projectData.taskSequence.push(taskExternalId)
-
-					// Add subtask externalIds to taskSequence (after improvementProject task)
-					if (allSubTasks && Array.isArray(allSubTasks)) {
-						allSubTasks.forEach((subTask) => {
-							if (
-								subTask &&
-								subTask.externalId &&
-								!projectData.taskSequence.includes(subTask.externalId)
-							) {
-								projectData.taskSequence.push(subTask.externalId)
-							}
-						})
-					}
 				}
 
 				// Step 5: Initialize task report for Project

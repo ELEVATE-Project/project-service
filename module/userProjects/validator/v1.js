@@ -185,7 +185,10 @@ module.exports = (req) => {
 				.withMessage('isPrivateProgram is required')
 				.isBoolean()
 				.withMessage('isPrivateProgram must be a boolean')
-				.equals(true)
+				.custom((value) => {
+					// Explicitly check for boolean true or string "true"
+					return value === true || value === 'true'
+				})
 				.withMessage('isPrivateProgram must always be true')
 		},
 	}

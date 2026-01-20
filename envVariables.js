@@ -205,6 +205,46 @@ let enviromentVariables = {
 		optional: true,
 		default: 'elevate-improvement-project-submission-dev',
 	},
+	RESOURCE_DELETION_TOPIC: {
+		message: 'Required RESOURCE_DELETION_TOPIC',
+		optional: false,
+		default: 'resource_deletion_topic',
+	},
+	USER_COURSES_SUBMISSION_TOPIC: {
+		message: 'Required USER_COURSES_SUBMISSION_TOPIC',
+		optional: true,
+		default: 'elevate_user_courses_dev',
+	},
+	USER_COURSES_TOPIC: {
+		message: 'Required USER_COURSES_TOPIC',
+		optional: true,
+		default: 'elevate_user_courses_raw',
+	},
+	KAFKA_HEALTH_CHECK_TOPIC: {
+		message: 'Required KAFKA_HEALTH_CHECK_TOPIC',
+		optional: false,
+		default: 'project-health-check-topic-check',
+	},
+	ORG_UPDATES_TOPIC: {
+		message: 'Required ORG_UPDATES_TOPIC',
+		optional: true,
+		default: 'elevate_project_org_extension_event_listener',
+	},
+	USER_ACCOUNT_EVENT_TOPIC: {
+		message: 'Required USER_ACCOUNT_EVENT_TOPIC',
+		optional: true,
+		default: 'elevate_user_account_event_listener',
+	},
+	SESSION_VERIFICATION_METHOD: {
+		message: 'Required Session Verification Method',
+		optional: true,
+		default: 'user_service_authenticated',
+	},
+	USER_SERVICE_INTERNAL_ACCESS_TOKEN_HEADER_KEY: {
+		message: 'Required User Service Internal Access Token Header Key',
+		optional: true,
+		default: 'internal_access_token',
+	},
 }
 
 let success = true

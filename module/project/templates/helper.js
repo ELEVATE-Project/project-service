@@ -33,6 +33,8 @@ const testimonialsHelper = require(MODULES_BASE_PATH + '/testimonials/helper')
 const surveyService = require(SERVICES_BASE_PATH + '/survey')
 const solutionsUtils = require(GENERICS_FILES_PATH + '/helpers/solutionAndProjectTemplateUtils')
 const entitiesService = require(GENERICS_FILES_PATH + '/services/entity-management')
+const orgExtensionQueries = require(DB_QUERY_BASE_PATH + '/organizationExtension')
+const adminHelper = require(MODULES_BASE_PATH + '/admin/helper')
 
 module.exports = class ProjectTemplatesHelper {
 	/**
@@ -327,6 +329,25 @@ module.exports = class ProjectTemplatesHelper {
 	static bulkCreate(templates, userDetails, translationFiles = {}) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				const tenantId = userDetails.tenantAndOrgInfo.tenantId
+				const orgId = userDetails.tenantAndOrgInfo.orgId[0]
+
+				// Check if organization extension exists for the loggedin user
+				let orgExtension
+				orgExtension = await orgExtensionQueries.orgExtenDocuments({
+					tenantId,
+					orgId,
+				})
+
+				//Throw error if org policy is not found
+				if (!orgExtension || orgExtension.length === 0) {
+					throw {
+						success: false,
+						status: HTTP_STATUS_CODE.not_found.status,
+						message: CONSTANTS.apiResponses.ORG_EXTENSION_NOT_FOUND,
+					}
+				}
+				orgExtension = Array.isArray(orgExtension) ? orgExtension[0] : orgExtension
 				if (templates[0].solutionId && templates[0].solutionId !== '') {
 					const isSolutionExist = await solutionsQueries.solutionsDocument({ _id: templates[0].solutionId })
 					if (!isSolutionExist.length > 0) {
@@ -368,11 +389,20 @@ module.exports = class ProjectTemplatesHelper {
 					}
 				}
 
+				let relatedOrgs = await solutionsUtils.organizationDetails(userDetails)
+				if (!relatedOrgs || !relatedOrgs.success || !relatedOrgs.result) {
+					throw {
+						success: false,
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.ORG_DETAILS_FETCH_UNSUCCESSFUL,
+					}
+				}
+
 				for (let template = 0; template < templates.length; template++) {
 					let currentData = templates[template]
 					// create match query
 					let matchQuery = {}
-					matchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+					matchQuery['tenantId'] = tenantId
 					matchQuery['status'] = CONSTANTS.common.PUBLISHED
 					matchQuery['externalId'] = currentData.externalId
 					matchQuery['isReusable'] = true
@@ -395,8 +425,10 @@ module.exports = class ProjectTemplatesHelper {
 							templateData.userId =
 								userDetails.userInformation.userId
 						templateData.isReusable = true
-						templateData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-						templateData['orgId'] = userDetails.tenantAndOrgInfo.orgId[0]
+						templateData['tenantId'] = tenantId
+						templateData['orgId'] = orgId
+						templateData['visibility'] = orgExtension.projectResourceVisibilityPolicy
+						templateData['visibleToOrganizations'] = [orgId, ...relatedOrgs.result]
 
 						let createdTemplate = await projectTemplateQueries.createTemplate(templateData)
 
@@ -577,6 +609,220 @@ module.exports = class ProjectTemplatesHelper {
 	}
 
 	/**
+	 * @function createChildProjectTemplate
+	 * @description Creates child project templates by duplicating existing project templates
+	 *              and linking them to a program solution.
+	 *
+	 * @param {Array<string>} projectTemplateExternalIds - List of external IDs of project templates to duplicate.
+	 * @param {Object} userDetails - Information about the user performing the operation.
+	 * @param {string} programExternalId - External ID of the program the templates belong to.
+	 * @param {boolean} isExternalProgram - Flag to determine if the program is external.
+	 * @param {string} entityType - Type of entity to be created.
+	 * @returns {Promise<Object>} Resolves with:
+	 *   - `success: true`, message, and `data` containing array of newly created project templates.
+	 *   - `success: false` and error details if operation fails.
+	 */
+	static createChildProjectTemplate(
+		projectTemplateExternalIds,
+		userDetails,
+		programExternalId,
+		isExternalProgram,
+		entityType = ''
+	) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let responseData = []
+				let failedTemplates = []
+				let solutionIdsToDelete = []
+				let childTemplateIds = []
+
+				let taskTypes = [
+					CONSTANTS.common.OBSERVATION,
+					CONSTANTS.common.SURVEY,
+					CONSTANTS.common.IMPROVEMENT_PROJECT,
+				]
+				for (const templateId of projectTemplateExternalIds) {
+					try {
+						let projectTemplateData = await projectTemplateQueries.templateDocument({
+							status: CONSTANTS.common.PUBLISHED,
+							externalId: templateId,
+							isReusable: true,
+						})
+						if (!projectTemplateData?.length) {
+							throw new Error(CONSTANTS.apiResponses.PROJECT_TEMPLATE_NOT_FOUND)
+						}
+
+						// Prepare solution data based on project template
+						const solutionData = {
+							name: projectTemplateData[0].title,
+							programExternalId: programExternalId,
+							externalId: projectTemplateData[0].externalId + UTILS.generateUniqueId(),
+							referenceFrom: CONSTANTS.common.OBSERVATION,
+							entityType: projectTemplateData?.entityType ? projectTemplateData?.entityType : entityType,
+						}
+
+						// Create a solution for this project template
+						let createdSolution = await solutionsUtils.createSolution(
+							solutionData,
+							true,
+							userDetails,
+							isExternalProgram,
+							false
+						)
+
+						if (!createdSolution?.result?._id) {
+							throw new Error(CONSTANTS.apiResponses.SOLUTION_NOT_CREATED)
+						}
+						// Store solution ID
+						solutionIdsToDelete.push(createdSolution.result._id)
+						// Import project template into the newly created solution
+						let duplicateProjectTemplateId = await this.importProjectTemplate(
+							templateId,
+							userDetails.userInformation.userId,
+							userDetails.userToken,
+							createdSolution.result._id,
+							{},
+							userDetails,
+							false
+						)
+
+						if (!duplicateProjectTemplateId?.success || !duplicateProjectTemplateId?.data?._id) {
+							throw new Error(CONSTANTS.apiResponses.DUPLICATE_PROJECT_TEMPLATES_NOT_CREATED)
+						}
+
+						childTemplateIds.push(duplicateProjectTemplateId.data._id)
+
+						// Add success
+						responseData.push({
+							parentExternalId: templateId,
+							_id: duplicateProjectTemplateId.data._id,
+							externalId: duplicateProjectTemplateId.data.externalId,
+							isReusable: duplicateProjectTemplateId.data.isReusable,
+							parentProjectTemplateId: projectTemplateData[0]._id,
+							solutionId: duplicateProjectTemplateId.data.solutionId,
+						})
+					} catch (innerError) {
+						// Continue even if one fails
+						failedTemplates.push({
+							parentExternalId: templateId,
+							error: innerError.message,
+						})
+					}
+				}
+
+				// Determine final message
+				let message = ''
+				if (responseData.length && failedTemplates.length) {
+					message = CONSTANTS.apiResponses.PARTIAL_CHILD_PROJECT_TEMPLATES_CREATED
+				} else if (responseData.length && !failedTemplates.length) {
+					message = CONSTANTS.apiResponses.DUPLICATE_PROJECT_TEMPLATES_CREATED
+				} else {
+					message = CONSTANTS.apiResponses.FAILED_TO_CREATE_TEMPLATE
+				}
+
+				// If anythings fail in between this logic will revert back those created data
+				if (failedTemplates.length > 0) {
+					for (const _id of solutionIdsToDelete) {
+						await adminHelper.deletedResourceDetails(
+							_id,
+							CONSTANTS.common.SOLUTION,
+							userDetails.tenantAndOrgInfo.tenantId,
+							userDetails.tenantAndOrgInfo[0],
+							userDetails.userInformation.userId
+						)
+					}
+				}
+				let programMatchQuery = {}
+				if (UTILS.strictObjectIdCheck(programExternalId)) {
+					programMatchQuery['_id'] = programExternalId
+				} else {
+					programMatchQuery['externalId'] = programExternalId
+				}
+				let programData = await programQueries.programsDocument(programMatchQuery, ['components'])
+				if (!programData.length > 0) {
+					throw {
+						message: CONSTANTS.apiResponses.PROGRAM_NOT_FOUND,
+					}
+				}
+				const allSolutionDetails = await projectTemplateQueries.getAggregate([
+					// Match required templates
+					{ $match: { _id: { $in: childTemplateIds } } },
+
+					// Lookup tasks
+					{
+						$lookup: {
+							from: 'projectTemplateTasks', // collection name
+							localField: 'tasks',
+							foreignField: '_id',
+							as: 'taskData',
+						},
+					},
+
+					{ $unwind: '$taskData' },
+
+					// Filter by allowed types
+					{ $match: { 'taskData.type': { $in: taskTypes } } },
+
+					// Project only solutionDetails
+					{ $project: { solutionDetails: '$taskData.solutionDetails', _id: 0 } },
+
+					// Flatten into one array
+					{
+						$group: {
+							_id: null,
+							allSolutions: { $push: '$solutionDetails' },
+						},
+					},
+
+					// Remove any nulls
+					{
+						$project: {
+							_id: 0,
+							allSolutions: {
+								$filter: { input: '$allSolutions', as: 's', cond: { $ne: ['$$s', null] } },
+							},
+						},
+					},
+				])
+				// Extract only IDs as strings
+				let taskSolutionIds = []
+
+				if (allSolutionDetails?.[0]?.allSolutions?.length) {
+					taskSolutionIds = allSolutionDetails[0].allSolutions.map((s) => s._id)
+				}
+
+				let componentsWithOrders = UTILS.addSolutionsWithOrdersForProgramComponent(
+					programData?.[0]?.components,
+					[...solutionIdsToDelete, ...taskSolutionIds]
+				)
+				let updateProgram = await programQueries.findAndUpdate(programMatchQuery, {
+					$addToSet: {
+						components: componentsWithOrders,
+					},
+				})
+				if (updateProgram) {
+					return resolve({
+						success: true,
+						message,
+						data: {
+							successfulTemplates: responseData,
+							failedTemplates: failedTemplates,
+							solutionIdsToUpdate: [...solutionIdsToDelete, ...taskSolutionIds],
+						},
+					})
+				}
+			} catch (error) {
+				return resolve({
+					status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
+					success: false,
+					message: error.message,
+					data: {},
+				})
+			}
+		})
+	}
+
+	/**
 	 * Bulk update project templates.
 	 * @method
 	 * @name importProjectTemplate - import templates from existing project templates.
@@ -585,10 +831,19 @@ module.exports = class ProjectTemplatesHelper {
 	 * @param {String} userToken - logged in user token.
 	 * @param {String} solutionId - solution id.
 	 * @param {Object} updateData - template update data.
+	 * @param {Boolean} isProgramUpdateRequired - if true then update program component.
 	 * @returns {Object} imported templates data.
 	 */
 
-	static importProjectTemplate(templateId, userId, userToken, solutionId = '', updateData = {}, userDetails) {
+	static importProjectTemplate(
+		templateId,
+		userId,
+		userToken,
+		solutionId = '',
+		updateData = {},
+		userDetails,
+		isProgramUpdateRequired = true
+	) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let projectTemplateData = await projectTemplateQueries.templateDocument({
@@ -685,7 +940,8 @@ module.exports = class ProjectTemplatesHelper {
 						programDetails,
 						userToken,
 						duplicateTemplateDocument.taskSequence,
-						userDetails
+						userDetails,
+						isProgramUpdateRequired
 					)
 				}
 
@@ -707,6 +963,8 @@ module.exports = class ProjectTemplatesHelper {
 					data: {
 						_id: duplicateTemplateDocument._id,
 						externalId: newProjectTemplate.externalId,
+						isReusable: newProjectTemplate.isReusable,
+						solutionId: duplicateTemplateDocument.solutionId,
 					},
 				})
 			} catch (error) {
@@ -832,6 +1090,7 @@ module.exports = class ProjectTemplatesHelper {
 	 * @param {String} userToken-userToken
 	 * @param {Array} taskSequence - task Sequence array of parent template
 	 * @param {Object} userDetails - This is req.userDetails
+	 * @param {Boolean} isProgramUpdateRequired - if true then update program component.
 	 * @returns {Object} Duplicated tasks.
 	 */
 
@@ -842,7 +1101,8 @@ module.exports = class ProjectTemplatesHelper {
 		programDetails,
 		userToken,
 		taskSequence,
-		userDetails
+		userDetails,
+		isProgramUpdateRequired = true
 	) {
 		return new Promise(async (resolve, reject) => {
 			try {
@@ -873,7 +1133,8 @@ module.exports = class ProjectTemplatesHelper {
 							newProjectTemplateTask,
 							taskData,
 							taskSequence,
-							userDetails
+							userDetails,
+							isProgramUpdateRequired
 						)
 						newTaskId.push(duplicateTemplateTask)
 
@@ -945,7 +1206,6 @@ module.exports = class ProjectTemplatesHelper {
 						}
 					)
 				}
-
 				return resolve(updateDuplicateTemplate)
 			} catch (error) {
 				return reject(error)
@@ -962,12 +1222,30 @@ module.exports = class ProjectTemplatesHelper {
 	 * @param {Object} taskData - parent templatetask Details
 	 * @param {Array} taskSequence - task Sequence array of parent template
 	 * @param {Object} userDetails - This is req.userDetails
+	 * @param {Boolean} isProgramUpdateRequired - if true then update program component.
 	 * @returns {Object} Duplicated tasks.
 	 */
-	static async handleDuplicateTemplateTask(userToken, newProjectTemplateTask, taskData, taskSequence, userDetails) {
+	static async handleDuplicateTemplateTask(
+		userToken,
+		newProjectTemplateTask,
+		taskData,
+		taskSequence,
+		userDetails,
+		isProgramUpdateRequired = true
+	) {
 		try {
 			const taskType = newProjectTemplateTask.type
+			const newProjectTemplateTaskId = newProjectTemplateTask._id
 			let duplicateTemplateTaskId
+
+			let programs = await programQueries.programsDocument(
+				{
+					_id: newProjectTemplateTask.programId,
+				},
+				['components']
+			)
+
+			let nextComponentOrder = programs && programs.length > 0 ? programs[0]?.components?.length || 0 : 0
 
 			const updateTaskSequence = () => {
 				const index = taskSequence.indexOf(taskData.externalId)
@@ -1000,7 +1278,11 @@ module.exports = class ProjectTemplatesHelper {
 					minNoOfSubmissionsRequired:
 						newProjectTemplateTask?.solutionDetails?.minNoOfSubmissionsRequired ??
 						CONSTANTS.common.DEFAULT_SUBMISSION_REQUIRED,
+					allowMultipleAssessemts: solution.allowMultipleAssessemts
+						? solution.allowMultipleAssessemts
+						: false,
 				}),
+				parentTaskId: newProjectTemplateTaskId,
 			})
 
 			//fetchSolution details
@@ -1076,7 +1358,13 @@ module.exports = class ProjectTemplatesHelper {
 					externalId: newProjectTemplateTask.projectTemplateExternalId + '-' + UTILS.epochTime(),
 					excludeScope: true, // excluding scope for creation
 				}
-				let newSolution = await solutionsUtils.createSolution(solutionData, false, userDetails)
+				let newSolution = await solutionsUtils.createSolution(
+					solutionData,
+					false,
+					userDetails,
+					false,
+					isProgramUpdateRequired
+				)
 				if (newSolution?.data && !newSolution?.data?._id) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
@@ -1090,7 +1378,8 @@ module.exports = class ProjectTemplatesHelper {
 					userToken,
 					newSolution?.data?._id.toString(),
 					'',
-					userDetails
+					userDetails,
+					isProgramUpdateRequired
 				)
 
 				if (!createChildTemplateforTask.success || !createChildTemplateforTask?.data?._id) {
@@ -1125,9 +1414,9 @@ module.exports = class ProjectTemplatesHelper {
 					newProjectTemplateTask.solutionDetails._id,
 					'',
 					{
-						name: `${newProjectTemplateTask.solutionDetails.name}-${timestamp}`,
+						name: `${newProjectTemplateTask.solutionDetails.name}`,
 						externalId: `${newProjectTemplateTask.solutionDetails.externalId}-${timestamp}`,
-						description: `${newProjectTemplateTask.solutionDetails.name}-${timestamp}`,
+						description: `${newProjectTemplateTask.solutionDetails.name}`,
 						programExternalId: newProjectTemplateTask.programId,
 						status: CONSTANTS.common.PUBLISHED_STATUS,
 					},
@@ -1159,14 +1448,21 @@ module.exports = class ProjectTemplatesHelper {
 				)
 
 				//updating programComponents
-				await programQueries.findAndUpdate(
-					{
-						_id: newProjectTemplateTask.programId,
-					},
-					{
-						$addToSet: { components: newProjectTemplateTask.solutionDetails._id },
-					}
-				)
+				if (isProgramUpdateRequired) {
+					await programQueries.findAndUpdate(
+						{
+							_id: newProjectTemplateTask.programId,
+						},
+						{
+							$addToSet: {
+								components: {
+									_id: new ObjectId(newProjectTemplateTask.solutionDetails._id),
+									order: ++nextComponentOrder,
+								},
+							},
+						}
+					)
+				}
 			} else if (taskType === CONSTANTS.common.SURVEY && newProjectTemplateTask?.solutionDetails?.isReusable) {
 				//Create child solutions for solutiontype survey
 				let importSolutionsResponse = await surveyService.importTemplateToSolution(
@@ -1199,14 +1495,21 @@ module.exports = class ProjectTemplatesHelper {
 					importSolutionsResponse.result.solutionExternalId
 				)
 				//updating programComponents
-				await programQueries.findAndUpdate(
-					{
-						_id: newProjectTemplateTask.programId,
-					},
-					{
-						$addToSet: { components: newProjectTemplateTask.solutionDetails._id },
-					}
-				)
+				if (isProgramUpdateRequired) {
+					await programQueries.findAndUpdate(
+						{
+							_id: newProjectTemplateTask.programId,
+						},
+						{
+							$addToSet: {
+								components: {
+									_id: new ObjectId(newProjectTemplateTask.solutionDetails._id),
+									order: ++nextComponentOrder,
+								},
+							},
+						}
+					)
+				}
 			} else {
 				// Default fallback task creation
 				duplicateTemplateTaskId = await createTemplateTask()
@@ -1236,7 +1539,7 @@ module.exports = class ProjectTemplatesHelper {
 						externalId: { $in: externalIds },
 						tenantId,
 					},
-					['title', 'metaInformation.goal', 'externalId', 'solutionId']
+					['title', 'metaInformation.goal', 'externalId', 'solutionId', 'isReusable']
 				)
 
 				if (!templateData.length > 0) {

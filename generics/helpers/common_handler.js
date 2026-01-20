@@ -191,7 +191,7 @@ const improvementProjectTaskPdfGeneration = async function (responseData, userId
 
 			let obj = {
 				response: responseData,
-				tasksArray: responseData.tasks,
+				tasksArray: responseData.filteredTasks,
 			}
 
 			ejs.renderFile(path.resolve(__dirname + '/../../views/improvementProjectTaskTemplate.ejs'), {

@@ -153,6 +153,12 @@ module.exports = class UserProjectsHelper {
 					}
 				}
 
+				// if entityId & entityInformation are passed through payload, ignore them
+				const blackListedPayloadItems = ['entityId', 'entityInformation']
+				blackListedPayloadItems.map((payloadItem) => {
+					if (data.hasOwnProperty(payloadItem)) delete data[payloadItem]
+				})
+
 				if (process.env.SUBMISSION_LEVEL == 'USER') {
 					if (!(userProject[0].userId == userId)) {
 						throw {
@@ -324,29 +330,6 @@ module.exports = class UserProjectsHelper {
 				//     }
 				// }
 
-				// let addOrUpdateEntityToProject = false
-
-				// if (data.entityId) {
-				// 	// If entity is not present in project or new entity is updated.
-				// 	if (
-				// 		!userProject[0].entityInformation ||
-				// 		(userProject[0].entityInformation && userProject[0].entityInformation._id !== data.entityId)
-				// 	) {
-				// 		addOrUpdateEntityToProject = true
-				// 	}
-				// }
-
-				// if (addOrUpdateEntityToProject) {
-				// 	let entityInformation = await entitiesService.entityDocuments({ _id: entityId }, 'all')
-
-				// 	if (!entityInformation.success) {
-				// 		return resolve(entityInformation)
-				// 	}
-
-				// 	updateProject['entityInformation'] = entityInformation.data[0]
-				// 	updateProject.entityId = entityInformation.data[0]._id
-				// }
-
 				// if (createNewProgramAndSolution || solutionExists) {
 
 				//     let programAndSolutionInformation =
@@ -486,6 +469,7 @@ module.exports = class UserProjectsHelper {
 					})
 					updateProject['updateHistory'] = userProject[0].updateHistory
 				}
+
 				let projectUpdated = await projectQueries.findOneAndUpdate(
 					{
 						_id: userProject[0]._id,
@@ -564,6 +548,13 @@ module.exports = class UserProjectsHelper {
 	 * @param {String} userToken - Logged in user token.
 	 * @param {String} [ programId = "" ] - Program Id.
 	 * @param {String} [ programName = "" ] - Program Name.
+	 * @param {Array} entities - List of entity IDs.
+	 * @param {String} userId - Logged in user id.
+	 * @param {String} solutionId - Solution id.
+	 * @param {Boolean|String} [ isATargetedSolution = "" ] - Flag to check if it is a targeted solution.
+	 * @param {Object} userDetails - User details object.
+	 * @param {Boolean} isExternalProgram - Flag to check if it is an external program.
+	 * @returns {Object} Created program and solution data.
 	 * @returns {Object} Created program and solution data.
 	 */
 
@@ -574,7 +565,8 @@ module.exports = class UserProjectsHelper {
 		userId,
 		solutionId,
 		isATargetedSolution = '',
-		userDetails
+		userDetails,
+		isExternalProgram
 	) {
 		return new Promise(async (resolve, reject) => {
 			try {
@@ -594,14 +586,13 @@ module.exports = class UserProjectsHelper {
 				if (programId !== '') {
 					programAndSolutionData['programId'] = programId
 				}
-
 				let solutionAndProgramCreation = await solutionsHelper.createProgramAndSolution(
 					userId,
 					programAndSolutionData,
 					isATargetedSolution,
-					userDetails
+					userDetails,
+					isExternalProgram
 				)
-
 				if (!solutionAndProgramCreation.success) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
@@ -735,8 +726,10 @@ module.exports = class UserProjectsHelper {
 					solution = await solutionsQueries.createSolution(solution)
 					solutionsCreated.push(solution)
 				}
-				const solutionIds = solutionsCreated.map((solution) => {
-					return solution._id
+
+				let componentLength = userPrivateProgram.components.length || 0
+				const componentArray = solutionsCreated.map((solution) => {
+					return { _id: new ObjectId(solution._id), order: ++componentLength }
 				})
 
 				// Update the program components
@@ -746,7 +739,7 @@ module.exports = class UserProjectsHelper {
 						tenantId: userDetails.userInformation.tenantId,
 					},
 					{
-						$addToSet: { components: solutionIds },
+						$addToSet: { components: componentArray },
 					}
 				)
 				const solutionsAndProgramData = {}
@@ -1286,6 +1279,7 @@ module.exports = class UserProjectsHelper {
 								_id: projectId,
 								taskId: taskId,
 							},
+							entityId: assessmentOrObservationData?.entityId,
 						}
 
 						// get solutions details based on solutionTypes
@@ -1462,9 +1456,6 @@ module.exports = class UserProjectsHelper {
 				let defaultACL = _.cloneDeep(CONSTANTS.common.DEFAULT_ACL)
 				let tenantId = userDetails.userInformation.tenantId
 				let orgId = userDetails.userInformation.organizationId
-
-				console.log('==========================>userId', userId, '\n')
-				console.log('==========================>defaultAcl', defaultACL, '\n')
 
 				if (templateId !== '') {
 					templateDocuments = await projectTemplateQueries.templateDocument({
@@ -1662,6 +1653,12 @@ module.exports = class UserProjectsHelper {
 						}
 						projectCreation.data['isAPrivateProgram'] = solutionDetails.isAPrivateProgram
 						if (Object.keys(solutionDetails).length > 0) {
+							const programOrgId = await programsQueries.programsDocument(
+								{
+									_id: ObjectId(solutionDetails.programId),
+								},
+								['orgId']
+							)
 							projectCreation.data.programInformation = {
 								_id: ObjectId(solutionDetails.programId),
 								externalId: solutionDetails.programExternalId,
@@ -1669,6 +1666,7 @@ module.exports = class UserProjectsHelper {
 									? solutionDetails.programDescription
 									: '',
 								name: solutionDetails.programName,
+								orgId: programOrgId ? programOrgId[0].orgId : '',
 							}
 
 							projectCreation.data.solutionInformation = {
@@ -1682,6 +1680,8 @@ module.exports = class UserProjectsHelper {
 								scope: solutionDetails.scope,
 								// referenceFrom: solutionDetails.referenceFrom ? solutionDetails.referenceFrom : '', // added for project as a task
 								// project: solutionDetails.project ? solutionDetails.project : '',
+								entityType: solutionDetails.entityType,
+								parentEntityKey: solutionDetails.parentEntityKey,
 							}
 
 							projectCreation.data['programId'] = projectCreation.data.programInformation._id
@@ -1706,7 +1706,6 @@ module.exports = class UserProjectsHelper {
 								defaultACL.users.push(userId)
 								defaultACL.scope = solutionDetails.scope
 								projectCreation.data['acl'] = defaultACL
-								console.log('=========================>', projectCreation.data.acl, '\n')
 							}
 							projectCreation.data['updateHistory'] = [
 								{
@@ -1784,24 +1783,27 @@ module.exports = class UserProjectsHelper {
 							}
 							// Adding entityInformation in Project
 							if (solutionDetails.entityType && bodyData[solutionDetails.entityType]) {
-								let entityDetails = await entitiesService.entityDocuments({
+								const res = await entitiesService.entityDocuments({
 									_id: bodyData[solutionDetails.entityType],
-									tenantId: tenantId,
-									orgIds: { $in: ['ALL', orgId] },
+									tenantId,
 								})
-
-								if (!entityDetails?.success || !entityDetails?.data.length > 0) {
+								const entitiesList = Array.isArray(res) ? res : res?.data
+								if (!Array.isArray(entitiesList) || entitiesList.length === 0) {
 									throw {
 										message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
 										status: HTTP_STATUS_CODE.bad_request.status,
 									}
 								}
-								if (entityDetails && entityDetails?.data.length > 0) {
-									projectCreation.data['entityInformation'] = {
-										..._.pick(entityDetails.data[0], ['_id', 'entityType', 'entityTypeId']),
-										externalId: entityDetails.data[0]?.metaInformation?.externalId,
-									}
+								const entity = entitiesList[0]
+								projectCreation.data.entityInformation = {
+									_id: entity._id,
+									entityType: entity.entityType,
+									entityTypeId: entity.entityTypeId,
+									entityId: entity._id,
+									externalId: entity?.metaInformation?.externalId || '',
+									entityName: entity?.metaInformation?.name || '',
 								}
+								projectCreation.data.entityId = entity._id
 							}
 						}
 
@@ -1896,9 +1898,7 @@ module.exports = class UserProjectsHelper {
 								projectCreation.data.userProfile = updatedUserProfile.data
 							}
 						}
-						if (bodyData.entityId !== '') {
-							projectCreation.data['entityId'] = bodyData.entityId
-						}
+
 						if (bodyData.project) {
 							projectCreation.data['project'] = bodyData.project
 							projectCreation.data['referenceFrom'] = CONSTANTS.common.PROJECT
@@ -2509,7 +2509,8 @@ module.exports = class UserProjectsHelper {
 								remarks: 1,
 								attachments: 1,
 								'taskReport.completed': 1,
-								tasks: {
+								tasks: 1,
+								filteredTasks: {
 									$filter: {
 										input: '$tasks',
 										as: 'tasks',
@@ -2545,7 +2546,7 @@ module.exports = class UserProjectsHelper {
 
 				//store tasks and attachment data into object
 				let projectFilter = {
-					tasks: projectDocument.tasks,
+					tasks: projectDocument.filteredTasks ? projectDocument.filteredTasks : projectDocument.tasks,
 					attachments: projectDocument.attachments,
 				}
 
@@ -2559,7 +2560,11 @@ module.exports = class UserProjectsHelper {
 					projectDataWithUrl.data.tasks &&
 					projectDataWithUrl.data.tasks.length > 0
 				) {
-					projectDocument.tasks = projectDataWithUrl.data.tasks
+					if (projectDocument.filteredTasks) {
+						projectDocument.filteredTasks = projectDataWithUrl.data.tasks
+					} else {
+						projectDocument.tasks = projectDataWithUrl.data.tasks
+					}
 				}
 
 				if (
@@ -3044,6 +3049,7 @@ module.exports = class UserProjectsHelper {
 	 * @param {String} language - language code
 	 * @param {Object} userDetails - loggedin user's info
 	 * @returns {Object} Project created information.
+	 * @param {Boolean} isExternalProgram - Flag to check if it is an external program (If true then program is present in survey service.If false program is present in project service).
 	 */
 
 	static importFromLibrary(
@@ -3053,7 +3059,8 @@ module.exports = class UserProjectsHelper {
 		userId,
 		isATargetedSolution = false,
 		language,
-		userDetails
+		userDetails,
+		isExternalProgram
 	) {
 		return new Promise(async (resolve, reject) => {
 			try {
@@ -3102,7 +3109,8 @@ module.exports = class UserProjectsHelper {
 						userId,
 						requestedData.solutionId,
 						isATargetedSolution,
-						userDetails
+						userDetails,
+						isExternalProgram
 					)
 
 					if (!programAndSolutionInformation.success) {
@@ -3123,7 +3131,8 @@ module.exports = class UserProjectsHelper {
 						userId,
 						'',
 						false,
-						userDetails
+						userDetails,
+						isExternalProgram
 					)
 
 					if (!programAndSolutionInformation.success) {
@@ -4558,6 +4567,10 @@ function _projectInformation(project, language) {
 			if (project.entityInformation) {
 				project.entityId = project.entityInformation._id
 				project.entityName = project.entityInformation.name
+			} else if (project.solutionInformation && project.solutionInformation.entityType) {
+				project['entityInformation'] = {
+					entityType: project.solutionInformation.entityType,
+				}
 			}
 
 			if (project.programInformation) {
@@ -4699,8 +4712,6 @@ function _projectInformation(project, language) {
 
 			delete project.metaInformation
 			delete project.__v
-			delete project.entityInformation
-			// delete project.solutionInformation
 			delete project.programInformation
 
 			return resolve({
@@ -4843,7 +4854,13 @@ async function _projectTask(
 				singleTask.isDeletable = true
 			}
 			if (UTILS.isValidMongoId(singleTask._id.toString())) {
-				singleTask.referenceId = singleTask._id.toString()
+				if (
+					[CONSTANTS.common.OBSERVATION, CONSTANTS.common.SURVEY, CONSTANTS.common.PROJECT].includes(
+						singleTask.type
+					)
+				)
+					singleTask.referenceId = singleTask.solutionDetails.parentTaskId
+				else singleTask.referenceId = singleTask._id.toString()
 			}
 			singleTask.createdAt = singleTask.createdAt ? singleTask.createdAt : new Date()
 			singleTask.updatedAt = new Date()
@@ -4869,6 +4886,14 @@ async function _projectTask(
 			let importSolutionsResponse
 			// create a child solution if solutionDetails has isReusable true solution details
 			if (singleTask?.solutionDetails?.isReusable) {
+				let programInformation = await programQueries.programsDocument({
+					_id: programId,
+					tenantId: userDetails.userInformation.tenantId,
+				})
+
+				programInformation = programInformation[0]
+
+				let componentLength = programInformation?.components?.length || 0
 				userDetails.tenantAndOrgInfo = {
 					tenantId: userDetails.userInformation.tenantId,
 					orgId: [userDetails.userInformation.organizationId],
@@ -4913,7 +4938,12 @@ async function _projectTask(
 							_id: programId,
 						},
 						{
-							$addToSet: { components: importSolutionsResponse.result._id },
+							$addToSet: {
+								components: {
+									_id: ObjectId(importSolutionsResponse.result._id),
+									order: ++componentLength,
+								},
+							},
 						}
 					)
 				} else if (singleTask.solutionDetails.type === CONSTANTS.common.SURVEY) {
@@ -4948,7 +4978,12 @@ async function _projectTask(
 							_id: programId,
 						},
 						{
-							$addToSet: { components: importSolutionsResponse.result.solutionId },
+							$addToSet: {
+								components: {
+									_id: ObjectId(importSolutionsResponse.result.solutionId),
+									order: ++componentLength,
+								},
+							},
 						}
 					)
 				}
@@ -4958,7 +4993,14 @@ async function _projectTask(
 			})
 
 			if (singleTask.children) {
-				await _projectTask(singleTask.children, isImportedFromLibrary, singleTask._id)
+				await _projectTask(
+					singleTask.children,
+					isImportedFromLibrary,
+					singleTask._id,
+					userToken,
+					programId,
+					userDetails
+				)
 			} else {
 				singleTask.children = []
 			}
@@ -5361,7 +5403,6 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 					observationData.project.taskId = templateTasks[0]._id
 				}
 			}
-
 			let startDate = new Date()
 			let endDate = new Date()
 			endDate.setFullYear(endDate.getFullYear() + 1)
@@ -5371,14 +5412,16 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 				status: CONSTANTS.common.PUBLISHED_STATUS,
 				startDate: startDate,
 				endDate: endDate,
-				...(userRoleAndProfileInformation[observationData.solutionDetails.subType] && {
-					entities: observationData.entityId
-						? [observationData.entityId]
-						: [userRoleAndProfileInformation[observationData.solutionDetails.subType]],
+				...((observationData.entityId ||
+					userRoleAndProfileInformation[observationData.solutionDetails.subType]) && {
+					entities: [
+						observationData.entityId ||
+							userRoleAndProfileInformation[observationData.solutionDetails.subType],
+					],
 				}),
+
 				project: observationData.project,
 			}
-
 			let observationCreated = await surveyService.createObservation(
 				observationData.token,
 				observationData.solutionDetails._id,
@@ -5391,7 +5434,7 @@ function _observationDetails(observationData, userRoleAndProfileInformation = {}
 			if (!observationCreated.success || !observationCreated?.data?._id) {
 				throw {
 					status: HTTP_STATUS_CODE.bad_request.status,
-					message: CONSTANTS.apiResponses.OBSERVATION_NOT_CREATED,
+					message: observationCreated.message || CONSTANTS.apiResponses.OBSERVATION_NOT_CREATED,
 				}
 			} else {
 				result['observationId'] = observationCreated.data._id
@@ -5450,9 +5493,7 @@ function _surveyDetails(surveyData, userRoleAndProfileInformation = {}) {
 					message: CONSTANTS.apiResponses.SURVEY_NOT_CREATED,
 				}
 			}
-
 			result['surveySubmissionId'] = surveyCreated.data.assessment.submissionId
-
 			result['solutionId'] = surveyData.solutionDetails._id
 
 			return resolve({

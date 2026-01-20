@@ -9,6 +9,7 @@
 const authenticator = require(PROJECT_ROOT_DIRECTORY + '/generics/middleware/authenticator')
 const pagination = require(PROJECT_ROOT_DIRECTORY + '/generics/middleware/pagination')
 const addTenantAndOrgInRequest = require(PROJECT_ROOT_DIRECTORY + '/generics/middleware/addTenantAndOrgInRequest')
+const checkAdminRole = require(PROJECT_ROOT_DIRECTORY + '/generics/middleware/checkAdminRole')
 const fs = require('fs')
 const inputValidator = require(PROJECT_ROOT_DIRECTORY + '/generics/middleware/validator')
 const path = require('path')
@@ -19,6 +20,7 @@ module.exports = function (app) {
 	app.use(applicationBaseUrl, authenticator)
 	app.use(applicationBaseUrl, pagination)
 	app.use(applicationBaseUrl, addTenantAndOrgInRequest)
+	app.use(applicationBaseUrl, checkAdminRole)
 
 	var router = async function (req, res, next) {
 		if (!req.params.version) {

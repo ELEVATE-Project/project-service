@@ -166,6 +166,7 @@ module.exports = class ProgramUsersHelper {
 						const entities = result.result.entities || []
 						// Count entities by status
 						const statusCounts = {
+							notonboarded: 0,
 							onboarded: 0,
 							inprogress: 0,
 							completed: 0,
@@ -178,6 +179,9 @@ module.exports = class ProgramUsersHelper {
 							switch (entity.status) {
 								case 'ONBOARDED':
 									statusCounts.onboarded++
+									break
+								case 'NOT_ONBOARDED':
+									statusCounts.notonboarded++
 									break
 								case 'IN_PROGRESS':
 									statusCounts.inprogress++
@@ -199,6 +203,7 @@ module.exports = class ProgramUsersHelper {
 							.updateOverview(result.result._id, {
 								$set: {
 									'overview.assigned': statusCounts.total,
+									'overview.notonboarded': statusCounts.notonboarded,
 									'overview.onboarded': statusCounts.onboarded,
 									'overview.inprogress': statusCounts.inprogress,
 									'overview.completed': statusCounts.completed,

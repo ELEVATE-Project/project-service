@@ -1407,6 +1407,20 @@
 			"service": "project"
 		},
 		{
+			"sourceRoute": "/project/v1/userProjects/createProjectPlan",
+			"type": "POST",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "sunbird-project"
+				}
+			],
+			"service": "project"
+		},
+		{
 			"sourceRoute": "/project/v1/userProjects/update",
 			"type": "POST",
 			"priority": "MUST_HAVE",

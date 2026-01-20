@@ -1546,6 +1546,74 @@ module.exports = class UserProjects extends Abstract {
     */
 
 	/**
+	 * @api {post} /project/v1/userProjects/createProjectPlan
+	 * @apiVersion 1.0.0
+	 * @apiGroup User Projects
+	 * @apiName createProjectPlan
+	 * @apiParamExample {json} Request:
+	 * {
+	 *   "templates": [
+	 *     {
+	 *       "templateId": "5f5b32cef16777642d51aaf0",
+	 *       "targetTaskName": "Social Empowerment",
+	 *       "customTasks": []
+	 *     }
+	 *   ],
+	 *   "userId": "participantId",
+	 *   "entityId": "participantEntityId",
+	 *   "programName": "Program Name",
+	 *   "projectConfig": {
+	 *     "name": "IDP Name",
+	 *     "description": "IDP Description"
+	 *   }
+	 * }
+	 * @apiSuccessExample {json} Response:
+	 * {
+	 *   "message": "Project Plan created successfully",
+	 *   "status": 200,
+	 *   "result": {
+	 *     "projectId": "master-project-id"
+	 *   }
+	 * }
+	 * @apiUse successBody
+	 * @apiUse errorBody
+	 */
+	/**
+	 * Create project plan.
+	 * @method
+	 * @name createProjectPlan
+	 * @param {Object} req - request data.
+	 * @returns {JSON} Project Plan created successfully.
+	 */
+	async createProjectPlan(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				// Check if userDetails is properly set by authentication middleware
+				if (!req.userDetails || !req.userDetails.userInformation) {
+					return resolve({
+						status: HTTP_STATUS_CODE.unauthorized.status,
+						message: 'Authentication failed - user details not available',
+					})
+				}
+				let result = await userProjectsHelper.createProjectPlan(
+					req.body,
+					req.userDetails.userInformation.userId,
+					req.userDetails.userToken,
+					req.userDetails
+				)
+
+				return resolve(result)
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
+				})
+			}
+		})
+	}
+
+	/**
 	 * Add entities in project.
 	 * @method
 	 * @name addEntity

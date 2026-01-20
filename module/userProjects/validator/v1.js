@@ -132,6 +132,62 @@ module.exports = (req) => {
 			}
 			req.checkQuery(existId).exists().withMessage('required solution or projectId Id')
 		},
+		createProjectPlan: function () {
+			// Validate templates array
+			req.checkBody('templates')
+				.exists()
+				.withMessage('templates array is required')
+				.isArray()
+				.withMessage('templates must be an array')
+				.custom((templates) => {
+					if (!templates || templates.length === 0) {
+						throw new Error('templates array cannot be empty')
+					}
+					return templates.every((template) => {
+						if (!template.templateId) {
+							throw new Error('Each template must have a templateId')
+						}
+						return true
+					})
+				})
+
+			// Validate userId - must be provided and not empty
+			req.checkBody('userId')
+				.exists()
+				.withMessage('userId is required')
+				.notEmpty()
+				.withMessage('userId cannot be empty')
+
+			// Validate entityId - must be provided and not empty
+			req.checkBody('entityId')
+				.exists()
+				.withMessage('entityId is required')
+				.notEmpty()
+				.withMessage('entityId cannot be empty')
+
+			// Validate projectConfig
+			req.checkBody('projectConfig')
+				.exists()
+				.withMessage('projectConfig is required')
+				.custom((config) => {
+					if (!config || typeof config !== 'object') {
+						throw new Error('projectConfig must be an object')
+					}
+					if (!config.name) {
+						throw new Error('projectConfig.name is required')
+					}
+					return true
+				})
+
+			// Validate isPrivateProgram - must always be true
+			req.checkBody('isPrivateProgram')
+				.exists()
+				.withMessage('isPrivateProgram is required')
+				.isBoolean()
+				.withMessage('isPrivateProgram must be a boolean')
+				.equals(true)
+				.withMessage('isPrivateProgram must always be true')
+		},
 	}
 
 	if (projectsValidator[req.params.method]) {

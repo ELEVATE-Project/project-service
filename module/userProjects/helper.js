@@ -152,9 +152,8 @@ module.exports = class UserProjectsHelper {
 						message: CONSTANTS.apiResponses.USER_PROJECT_NOT_FOUND,
 					}
 				}
-
 				// if entityId & entityInformation are passed through payload, ignore them
-				const blackListedPayloadItems = ['entityId', 'entityInformation']
+				const blackListedPayloadItems = ['entityId', 'entityInformation', 'acl']
 				blackListedPayloadItems.map((payloadItem) => {
 					if (data.hasOwnProperty(payloadItem)) delete data[payloadItem]
 				})
@@ -182,6 +181,7 @@ module.exports = class UserProjectsHelper {
 					// validate user authenticity if the acl.visibility of project is SCOPE
 					else if (userProject[0].acl.visibility == CONSTANTS.common.PROJECT_VISIBILITY_SCOPE) {
 						let scopeData = data.userProfileInformation.scope
+						scopeData['tenantId'] = tenantId
 						let queryData = await solutionsHelper.queryBasedOnRoleAndLocation(scopeData, '', 'acl')
 						if (!queryData.success) {
 							return resolve(queryData)
@@ -274,7 +274,7 @@ module.exports = class UserProjectsHelper {
 
 				const projectsModel = Object.keys(schemas['projects'].schema)
 
-				let keysToRemoveFromUpdation = ['userRoleInformation', 'userProfile', 'certificate']
+				let keysToRemoveFromUpdation = ['userRoleInformation', 'userProfile', 'certificate', 'acl']
 				keysToRemoveFromUpdation.forEach((key) => {
 					if (data[key]) delete data[key]
 				})
@@ -302,70 +302,6 @@ module.exports = class UserProjectsHelper {
 				if (projectData && projectData.success == true) {
 					updateProject = _.merge(updateProject, projectData.data)
 				}
-				// let createNewProgramAndSolution = false;
-				// let solutionExists = false;
-
-				// if (data.programId && data.programId !== "") {
-
-				//     // Check if program already existed in project and if its not an existing program.
-				//     if (!userProject[0].programInformation) {
-				//         createNewProgramAndSolution = true;
-				//     } else if (
-				//         userProject[0].programInformation &&
-				//         userProject[0].programInformation._id &&
-				//         userProject[0].programInformation._id.toString() !== data.programId
-				//     ) {
-				//         // Not an existing program.
-
-				//         solutionExists = true;
-				//     }
-
-				// } else if (data.programName) {
-
-				//     if (!userProject[0].solutionInformation) {
-				//         createNewProgramAndSolution = true;
-				//     } else {
-				//         solutionExists = true;
-				//         // create new program using current name and add existing solution and remove program from it.
-				//     }
-				// }
-
-				// if (createNewProgramAndSolution || solutionExists) {
-
-				//     let programAndSolutionInformation =
-				//         await this.createProgramAndSolution(
-				//             data.programId,
-				//             data.programName,
-				//             updateProject.entityId ? [updateProject.entityId] : "",
-				//             userToken,
-				//             userProject[0].solutionInformation && userProject[0].solutionInformation._id ?
-				//                 userProject[0].solutionInformation._id : ""
-				//         );
-
-				//     if (!programAndSolutionInformation.success) {
-				//         return resolve(programAndSolutionInformation);
-				//     }
-
-				//     if (solutionExists) {
-
-				//         let updateProgram =
-				//             await programsHelper.removeSolutions(
-				//                 userToken,
-				//                 userProject[0].programInformation._id,
-				//                 [userProject[0].solutionInformation._id]
-				//             );
-
-				//         if (!updateProgram.success) {
-				//             throw {
-				//                 status: HTTP_STATUS_CODE.bad_request.status,
-				//                 message: CONSTANTS.apiResponses.PROGRAM_NOT_UPDATED
-				//             }
-				//         }
-				//     }
-
-				//     updateProject =
-				//         _.merge(updateProject, programAndSolutionInformation.data);
-				// }
 
 				let booleanData = this.booleanData(schemas['projects'].schema)
 				let mongooseIdData = this.mongooseIdData(schemas['projects'].schema)
@@ -1698,7 +1634,10 @@ module.exports = class UserProjectsHelper {
 							if (bodyData.hasOwnProperty('acl')) {
 								bodyData.acl.visibility = bodyData.acl.visibility.toUpperCase()
 								bodyData.acl.users.push(userId)
-								if (!bodyData.acl.hasOwnProperty('scope') || !(bodyData.acl.scope.length > 0)) {
+								if (
+									!bodyData.acl.hasOwnProperty('scope') ||
+									!(Object.keys(bodyData.acl.scope.length) > 0)
+								) {
 									bodyData.acl['scope'] = solutionDetails.scope
 								}
 								projectCreation.data['acl'] = bodyData.acl
@@ -4282,6 +4221,7 @@ module.exports = class UserProjectsHelper {
 					validateAllTasks(allTasksFalttened)
 				}
 
+				delete updateData.acl
 				let updateResult = await this.sync(
 					projectId,
 					'',
@@ -4543,6 +4483,101 @@ module.exports = class UserProjectsHelper {
 				})
 			} catch (error) {
 				return resolve({
+					message: error.message,
+					success: false,
+					status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
+				})
+			}
+		})
+	}
+
+	/**
+	 * Update ACL for a project if user owns the project and submission level is ENTITY.
+	 *
+	 * @param {String} projectId - The ID of the project whose ACL should be updated
+	 * @param {Object} bodyData - The request body containing ACL updates
+	 * @param {Object} userDetails - Logged-in user's details object
+	 * @returns {Promise<Object>} - Response object containing update status, message, and updated ACL data
+	 *
+	 * @throws {Object} - Throws an error if submission level is invalid or project update fails
+	 */
+	static updateAcl(projectId, bodyData, userDetails) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				// Only allow updates if submission level is ENTITY
+				if (process.env.SUBMISSION_LEVEL !== 'ENTITY') {
+					throw {
+						success: false,
+						message: CONSTANTS.apiResponses.SUBMISSION_LEVEL_NOT_COMPLIED,
+					}
+				}
+
+				// Extract user and tenant IDs
+				const userId = userDetails.userInformation.userId
+				const tenantId = userDetails.userInformation.tenantId
+
+				// Check if project exists and belongs to the user
+				const projectData = await projectQueries.projectDocument({
+					_id: projectId,
+					createdBy: userId,
+					tenantId,
+				})
+
+				if (!projectData || projectData.length === 0) {
+					throw {
+						success: false,
+						message: CONSTANTS.apiResponses.PROJECT_NOT_FOUND,
+						status: HTTP_STATUS_CODE['bad_request'].status,
+					}
+				}
+				if (
+					bodyData.acl.visibility === CONSTANTS.common.PROJECT_VISIBILITY_SPECIFIC &&
+					bodyData.acl.users.length > 0
+				) {
+					if (!bodyData.acl.users.includes(userId.toString())) {
+						bodyData.acl.users.push(userId.toString())
+					}
+				}
+				// Update ACL field in the project
+				const updatedProject = await projectQueries.findOneAndUpdate(
+					{
+						_id: projectId,
+						createdBy: userId,
+						tenantId,
+					},
+					{
+						$set: { acl: bodyData.acl },
+					},
+					{
+						new: true,
+					}
+				)
+
+				// Check if update was successful
+				if (!updatedProject) {
+					throw {
+						success: false,
+						message: CONSTANTS.apiResponses.PROJECT_UPDATE_FAILED,
+					}
+				}
+
+				// Success response
+				return resolve({
+					success: true,
+					status: 200,
+					message: CONSTANTS.apiResponses.PROJECT_UPDATED_SUCCESSFULLY,
+					result: {
+						_id: updatedProject._id,
+						acl: updatedProject.acl,
+					},
+					data: {
+						_id: updatedProject._id,
+						acl: updatedProject.acl,
+					},
+				})
+			} catch (error) {
+				// Unified error response
+				return reject({
 					message: error.message,
 					success: false,
 					status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,

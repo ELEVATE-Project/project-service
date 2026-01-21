@@ -19,9 +19,9 @@ The Project building block facilitates the creation and engagement with micro-im
 </div>
 </br>
 
-# Docker Setup Project Service - With Survey
+# Docker Setup Project Service - With Samiksha
 
-Expectation: By following these steps, you will establish a unified environment for the Project Service, integrated with the Survey and Observation modules. This setup focuses purely on the backend API infrastructure required to manage data collection and reporting.
+Expectation: By diligently following the outlined steps, you will successfully establish a fully operational Project application setup, including both the portal and backend services.
 
 ## Prerequisites
 
@@ -35,45 +35,81 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
 
 > Note: All commands are run from the project directory.
 
-## Operating Systems: Linux
+## Operating Systems: Windows
 
 > **Caution:** Before proceeding, please ensure that the ports given here are available and open. It is essential to verify their availability prior to moving forward. You can run below command in your terminal to check this
 
 ```
-for port in 3001 3002 6000 5001 4000 9092 5432 7007 2181 27017 3569 4301; do
-    if sudo lsof -iTCP:$port -sTCP:LISTEN &>/dev/null; then
-        echo "Port $port is IN USE"
-    else
-        echo "Port $port is available"
-    fi
-done
+for %p in (3001 3002 6000 5001 4000 9092 5432 7007 2181 27017 3569 4301) do @(
+  netstat -ano | findstr /R /C:":%p " /C:":%p$" >nul
+  if errorlevel 1 (
+    echo Port %p is available
+  ) else (
+    echo Port %p is IN USE
+  )
+)
 ```
 
-1. **Download and execute main setup script:** Execute the following command in your terminal from the project directory.
+1.  **Download Docker Compose File:** Retrieve the **[docker-compose-project.yml](https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/docker-compose-project.yml)** file from the Project service repository and save it to the project directory.
+
     ```
-    curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideWithSurvey/documentation/3.4.0/dockerized/scripts/project-with-survey/ubuntu/setup_project.sh && chmod +x setup_project.sh && sudo ./setup_project.sh
+    curl -OJL https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsWithSurvey/documentation/3.4.0/dockerized/dockerFiles/project-with-survey/docker-compose-project.yml
     ```
 
-> Note : The script will download all the essential files and launch the services in Docker. Once all services are successfully up and running, you can proceed to the next steps.
+    > Note: All commands are run from the project directory.
 
-**General Instructions :**
+2.  **Download Environment Files**: Using the OS specific commands given below, download environment files for all the services.
 
-1. All containers which are part of the docker-compose can be gracefully stopped by pressing Ctrl + c in the same terminal where the services are running.
-2. All docker containers can be stopped and removed by using below command.
+   ```
+   curl -L ^
+    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/envs/interface_env ^
+    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/envs/entity_management_env ^
+    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/envs/project_env ^
+    -O https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/setupGuideWithSurvey/documentation/3.4.0/dockerized/envs/notification_env ^
+    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/envs/scheduler_env ^
+    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/envs/user_env ^
+    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/dockerized/envs/env.js ^
+    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideWithSurvey/documentation/3.4.0/dockerized/envs/samiksha_env
+   ```
 
-```
-sudo ./docker-compose-down.sh
-```
+> **Note:** Modify the environment files as necessary for your deployment using any text editor, ensuring that the values are appropriate for your environment. The default values provided in the current files are functional and serve as a good starting point. Refer to the sample env files provided at the [Project](https://github.com/ELEVATE-Project/project-service/blob/main/.env.sample), [User](https://github.com/ELEVATE-Project/user/blob/master/src/.env.sample), [Notification](https://github.com/ELEVATE-Project/notification/blob/master/src/.env.sample), [Scheduler](https://github.com/ELEVATE-Project/scheduler/blob/master/src/.env.sample), [Interface](https://github.com/ELEVATE-Project/interface-service/blob/main/src/.env.sample) and [Entity-management](https://github.com/ELEVATE-Project/entity-management/blob/main/src/.env.sample) repositories for reference.
 
-3. All services and dependencies can be started using below command.
+> **Caution:** While the default values in the downloaded environment files enable the Project Application to operate, certain features may not function correctly or could be impaired unless the adopter-specific environment variables are properly configured.
 
-```
-sudo ./docker-compose-up.sh
-```
+3.  **Download `docker-compose-up` & `docker-compose-down` Script Files**
 
-**Keep the current terminal session active, and kindly open a new terminal window within the project directory.**
+   ```
+   curl -OJL https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsWithSurvey/documentation/3.4.0/dockerized/scripts/project-with-survey/windows/docker-compose-up.bat
+   ```
+   ```
+   curl -OJL https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsWithSurvey/documentation/3.4.0/dockerized/scripts/project-with-survey/windows/docker-compose-down.bat
+   ```
 
-**After successfully completing this, please move to the next section: [Enable Citus Extension](#enable-citus-extension-optional)**
+4.  **Download `Config` File**
+
+   ```
+   curl -L https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsStandAlone/documentation/3.4.0/dockerized/scripts/stand-alone/windows/configFile.json -o config.json
+   ```
+
+
+5.  **Run All Services & Dependencies**:All services and dependencies can be started using the `docker-compose-up` script file.
+
+   ```
+   docker-compose-up.bat
+   ```
+
+> Double-click the file or run the above command from the terminal.
+
+> **Note**: During the first Docker Compose run, the database, migration seeder files, and the script to set the default organization will be executed automatically.
+
+6.  **Remove All Service & Dependency Containers**:
+    All docker containers can be stopped and removed by using the `docker-compose-down` file.
+    
+   ```
+   docker-compose-down.bat
+   ```
+
+> **Caution**: As per the default configuration in the `docker-compose-project.yml` file, using the `down` command will lead to data loss since the database container does not persist data. To persist data across `down` commands and subsequent container removals, refer to the "Persistence of Database Data in Docker Containers" section of this documentation.
 
 ## Enable Citus Extension (Optional)
 
@@ -83,20 +119,21 @@ For more information, refer **[Citus Data](https://www.citusdata.com/)**.
 
 To enable the Citus extension for user services, follow these steps.
 
-1. Create a sub-directory named `user` and download `distributionColumns.sql` into it. (Skip this for linux)
-
+1. Create a sub-directory named `user` and download `distributionColumns.sql` into it.
     ```
-    mkdir user && curl -o ./user/distributionColumns.sql -JL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/distribution-columns/user/distributionColumns.sql
+    mkdir user && curl -o ./user/distributionColumns.sql -JL https://raw.githubusercontent.com/ELEVATE-Project/project-service/main/documentation/1.0.0/distribution-columns/user/distributionColumns.sql
     ```
-
 2. Set up the citus_setup file by following the steps given below.
 
-    1. Enable Citus and set distribution columns for `user` database by running the `citus_setup.sh`with the following arguments.
-
-    ```
-    sudo ./citus_setup.sh user postgres://postgres:postgres@citus_master:5432/user
-    ```
-
+   1. Download the `citus_setup.bat` file.
+      ```
+      curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/dockerized/scripts/windows/citus_setup.bat
+      ```
+   2. Enable Citus and set distribution columns for `user` database by running the `citus_setup.bat`with the following arguments.
+      ```
+      citus_setup.bat user postgres://postgres:postgres@citus_master:5432/user
+      ```
+      > **Note:** Since the `citus_setup.bat` file requires arguments, it must be run from a terminal.
 
 ## Update Cloud Credentials for Project Service
 
@@ -122,7 +159,6 @@ Add or update the following variables in the .env file, substituting the example
 > NOTE : This service is designed to support multiple cloud storage providers and offers flexible cloud integration capabilities. Based on your selected cloud provider, the service can be configured accordingly to enable seamless storage, certificate generation, and report handling.
 
 For detailed configuration options, supported cloud providers, and integration guidelines, please refer to the official documentation available in this [ReadMe](https://www.npmjs.com/package/client-cloud-services?activeTab=readme)
-
 
 ## Persistence Of Database Data In Docker Container (Optional)
 
@@ -177,29 +213,59 @@ During the initial setup of Project services with the default configuration, you
 In such cases, you can generate sample user accounts using the steps below. This allows you to explore the Project services and portal immediately after setup.
 
 > **Warning:** Use this generator only immediately after the initial system setup and before any normal user accounts are created through the portal. It should not be used under any circumstances thereafter.
+  1. **Download The `sampleData.sql` Files:**
 
-```
-sudo chmod +x ./insert_sample_data.sh && sudo ./insert_sample_data.sh user postgres://postgres:postgres@citus_master:5432/user
-```
+      ```
+      mkdir sample-data\user 2>nul & ^
+      curl -L "https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsWithSurvey/documentation/3.4.0/dockerized/scripts/project-with-survey/windows/sampleData.sql" -o sample-data\user\sampleData.sql
+      ```
 
-After successfully running the script mentioned above, the following user accounts will be created and available for login:
+2. **Download The `insert_sample_data` Script File:**
 
-| Email ID               | Password   | Role                    |
-| ---------------------- | ---------- | ----------------------- |
-| mallanagouda@gmail.com | Password1@ | State Education Officer |
-| prajwal@gmail.com      | Password1@ | State Education Officer |
-| vishnu@gmail.com       | Password1@ | State Education Officer |
+   ```
+   curl -L -o insert_sample_data.bat https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsWithSurvey/documentation/3.4.0/dockerized/scripts/project-with-survey/windows/insert_sample_data.bat
+   ```
 
-## Sample Data Creation For Projects and Survey
+3. **Run The `insert_sample_data` Script File:**
+
+   ```
+   insert_sample_data.bat user postgres://postgres:postgres@citus_master:5432/user
+   ```
+
+    After successfully running the script mentioned above, the following user accounts will be created and available for login:
+
+    | Email ID               | Password   | Role                    |
+    | ---------------------- | ---------- | ----------------------- |
+    | mallanagouda@gmail.com | Password1@ | State Education Officer |
+    | prajwal@gmail.com      | Password1@ | State Education Officer |
+    | vishnu@gmail.com       | Password1@ | State Education Officer |
+
+
+## Sample Data Creation For Projects
 
 This step will guide us in implementing a sample project solution following the initial setup of the project service.
 
 1. **Insert Sample Data To Database:**
 
-    ```
-    node insert_sample_solutions.js
-    ```
+   1. Download `insert_project_data.bat` Script File:
 
+      ```
+      curl -L ^
+      -O https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsWithSurvey/documentation/3.4.0/dockerized/scripts/project-with-survey/windows/insert_project_data.bat
+      ```
+
+    2. Make the setup file executable by running the following command.
+
+       ```
+       insert_project_data.bat
+       ```
+    3. Insert Sample Data To Database.
+
+       ```
+       node insert_sample_solutions.js
+       ```
+
+</details>
 ## 🌐 Micro-Frontend (FE) Setup
 
 The ELEVATE application uses a micro-frontend architecture. After setting up the backend services, you must configure and run the frontend repositories to access the application via the portal.
@@ -208,7 +274,6 @@ Follow the setup guides for the frontend repositories:
 
 -   **Login Portal:** [elevate-portal](https://github.com/ELEVATE-Project/elevate-portal/tree/releaase-1.1.0)
 -   **Projects Program Module (PWA):** [observation-survey-projects-pwa](https://github.com/ELEVATE-Project/observation-survey-projects-pwa/tree/release-3.4.0)
--   **Observtaion/Survey Portal:** [observation-survey-projects-pwa](https://github.com/ELEVATE-Project/observation-portal/tree/release-3.4.0)
 
 > **Warning:** In this setup, features such as **Sign-Up, Project Certificate, Project Sharing, and Project PDF Report** will not be available because cloud storage credentials have been masked in the environment files for security reasons.
 

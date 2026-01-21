@@ -117,23 +117,6 @@ module.exports = class ProgramUsersService {
 	}
 
 	/**
-	 * Update overview statistics
-	 * @method
-	 * @name updateOverview
-	 * @param {String} docId - document _id
-	 * @param {Object} operations - increment/decrement operations
-	 * @returns {Object} updated document
-	 */
-	static async updateOverview(docId, operations) {
-		try {
-			const result = await programUsersQueries.updateOverview(docId, operations)
-			return result
-		} catch (error) {
-			throw error
-		}
-	}
-
-	/**
 	 * Get program user entities with pagination
 	 * @method
 	 * @name getEntitiesWithPagination

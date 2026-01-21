@@ -162,60 +162,7 @@ module.exports = class ProgramUsersHelper {
 			// Update overview asynchronously (non-blocking)
 			if (result.result && result.result._id) {
 				setImmediate(async () => {
-					try {
-						const entities = result.result.entities || []
-						// Count entities by status
-						const statusCounts = {
-							notonboarded: 0,
-							onboarded: 0,
-							inprogress: 0,
-							completed: 0,
-							graduated: 0,
-							droppedout: 0,
-							total: entities.length,
-						}
-
-						entities.forEach((entity) => {
-							switch (entity.status) {
-								case 'ONBOARDED':
-									statusCounts.onboarded++
-									break
-								case 'NOT_ONBOARDED':
-									statusCounts.notonboarded++
-									break
-								case 'IN_PROGRESS':
-									statusCounts.inprogress++
-									break
-								case 'COMPLETED':
-									statusCounts.completed++
-									break
-								case 'GRADUATED':
-									statusCounts.graduated++
-									break
-								case 'DROP_OUT':
-									statusCounts.droppedout++
-									break
-							}
-						})
-
-						// Update overview with status counts
-						programUsersService
-							.updateOverview(result.result._id, {
-								$set: {
-									'overview.assigned': statusCounts.total,
-									'overview.notonboarded': statusCounts.notonboarded,
-									'overview.onboarded': statusCounts.onboarded,
-									'overview.inprogress': statusCounts.inprogress,
-									'overview.completed': statusCounts.completed,
-									'overview.graduated': statusCounts.graduated,
-									'overview.droppedout': statusCounts.droppedout,
-									'overview.lastModified': new Date(),
-								},
-							})
-							.catch((err) => console.error('Overview update error:', err))
-					} catch (err) {
-						console.error('Error calculating entity counts:', err)
-					}
+					this._updateOverviewAsync(result.result._id)
 				})
 			}
 
@@ -464,6 +411,12 @@ module.exports = class ProgramUsersHelper {
 				entityUpdates,
 				tenantId
 			)
+			// Update overview asynchronously (non-blocking)
+			if (result && result._id) {
+				setImmediate(async () => {
+					this._updateOverviewAsync(result._id)
+				})
+			}
 
 			return {
 				success: true,
@@ -502,5 +455,73 @@ module.exports = class ProgramUsersHelper {
 				return reject(error)
 			}
 		})
+	}
+
+	static async _updateOverviewAsync(programUsersId) {
+		// Placeholder for asynchronous overview update logic
+		// This could involve recalculating summary statistics or other data
+		console.log(`[ProgramUsers] Updating overview for programUsersId: ${programUsersId}`)
+
+		try {
+			// Fetch program user document
+			const docData = await programUsersQueries.findById(programUsersId)
+			if (!docData) {
+				console.error('Program user document not found for overview update:', programUsersId)
+				return
+			}
+
+			const entities = docData.entities || []
+			// Count entities by status
+			const statusCounts = {
+				notonboarded: 0,
+				onboarded: 0,
+				inprogress: 0,
+				completed: 0,
+				graduated: 0,
+				droppedout: 0,
+				total: entities.length,
+			}
+
+			entities.forEach((entity) => {
+				switch (entity.status) {
+					case 'ONBOARDED':
+						statusCounts.onboarded++
+						break
+					case 'NOT_ONBOARDED':
+						statusCounts.notonboarded++
+						break
+					case 'IN_PROGRESS':
+						statusCounts.inprogress++
+						break
+					case 'COMPLETED':
+						statusCounts.completed++
+						break
+					case 'GRADUATED':
+						statusCounts.graduated++
+						break
+					case 'DROP_OUT':
+						statusCounts.droppedout++
+						break
+				}
+			})
+
+			// Update overview with status counts
+			const result = await programUsersQueries
+				.updateOverview(programUsersId, {
+					$set: {
+						'overview.assigned': statusCounts.total,
+						'overview.notonboarded': statusCounts.notonboarded,
+						'overview.onboarded': statusCounts.onboarded,
+						'overview.inprogress': statusCounts.inprogress,
+						'overview.completed': statusCounts.completed,
+						'overview.graduated': statusCounts.graduated,
+						'overview.droppedout': statusCounts.droppedout,
+						'overview.lastModified': new Date(),
+					},
+				})
+				.catch((err) => console.error('Overview update error:', err))
+		} catch (err) {
+			console.error('Error calculating entity counts:', err)
+		}
 	}
 }

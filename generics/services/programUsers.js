@@ -143,6 +143,7 @@ module.exports = class ProgramUsersService {
 	 * @param {Number} page - page number
 	 * @param {Number} limit - items per page
 	 * @param {String} searchQuery - search text
+	 * @param {String} entityId - specific entity ID to fetch (optional)
 	 * @returns {Object} entities with pagination info
 	 */
 	static async getEntitiesWithPagination(
@@ -153,6 +154,7 @@ module.exports = class ProgramUsersService {
 		limit = 20,
 		status,
 		searchQuery = '',
+		entityId,
 		userDetails
 	) {
 		try {
@@ -171,6 +173,20 @@ module.exports = class ProgramUsersService {
 
 			// Get entities from the found document
 			let filteredEntities = docData.entities || []
+
+			// Filter by specific entityId if provided
+			if (entityId) {
+				filteredEntities = filteredEntities.filter(
+					(entity) => entity.userId === entityId || entity.entityId === entityId
+				)
+				if (filteredEntities.length === 0) {
+					return {
+						status: 404,
+						message: 'Entity not found',
+						data: [],
+					}
+				}
+			}
 
 			// Filter by status if provided
 			if (status) {

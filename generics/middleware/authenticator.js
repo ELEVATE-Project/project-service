@@ -173,9 +173,21 @@ module.exports = async function (req, res, next, token = '') {
 				// If using native authentication, verify the JWT using the secret key
 				decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
 			} catch (err) {
-				// If verification fails, send an unauthorized response
-				rspObj.errCode = CONSTANTS.apiResponses.TOKEN_MISSING_CODE
-				rspObj.errMsg = CONSTANTS.apiResponses.TOKEN_MISSING_MESSAGE
+				// If verification fails, send an unauthorized response with clear error message
+				// Set appropriate error message based on error type
+				if (err.name === 'TokenExpiredError') {
+					rspObj.errCode = 'ERR_TOKEN_EXPIRED'
+					rspObj.errMsg = 'Token has expired. Please login again to get a new token.'
+				} else if (err.name === 'JsonWebTokenError') {
+					rspObj.errCode = 'ERR_TOKEN_INVALID'
+					rspObj.errMsg = `Invalid token: ${err.message}. Please check ACCESS_TOKEN_SECRET matches the secret used to sign this token.`
+				} else if (err.name === 'NotBeforeError') {
+					rspObj.errCode = 'ERR_TOKEN_NOT_ACTIVE'
+					rspObj.errMsg = 'Token is not yet active.'
+				} else {
+					rspObj.errCode = 'ERR_TOKEN_VERIFICATION_FAILED'
+					rspObj.errMsg = `Token verification failed: ${err.message}`
+				}
 				rspObj.responseCode = HTTP_STATUS_CODE['unauthorized'].status
 				return res.status(HTTP_STATUS_CODE['unauthorized'].status).send(respUtil(rspObj))
 			}

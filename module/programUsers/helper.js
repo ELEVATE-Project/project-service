@@ -255,6 +255,7 @@ module.exports = class ProgramUsersHelper {
 		limit = 20,
 		status,
 		search = '',
+		entityId,
 		userDetails
 	) {
 		try {
@@ -267,6 +268,7 @@ module.exports = class ProgramUsersHelper {
 				limit,
 				status,
 				search,
+				entityId,
 				userDetails
 			)
 

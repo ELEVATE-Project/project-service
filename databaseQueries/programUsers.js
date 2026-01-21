@@ -327,8 +327,32 @@ module.exports = class programUsers {
 			}
 		})
 	}
+	/**
+	 * Find program user by userId and either programId or programExternalId
+	 * @method
+	 * @name findByUserAndProgram
+	 * @param {String} userId - user ID
+	 * @param {String} programId - program ID (optional)
+	 * @param {String} programExternalId - program external ID (optional)
+	 * @returns {Object} program user document
+	 */
+	static findById(docId) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				// Build query: use programId if available, otherwise programExternalId
+				const query = { _id: docId }
+
+				let result = await database.models.programUsers.findOne(query).lean()
+
+				return resolve(result)
+			} catch (error) {
+				return reject(error)
+			}
+		})
+	}
 
 	/**
+	 *
 	 * Update specific fields of an entity within a program user
 	 * @method
 	 * @name updateEntity

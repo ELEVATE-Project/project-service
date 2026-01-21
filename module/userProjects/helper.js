@@ -3094,7 +3094,10 @@ module.exports = class UserProjectsHelper {
 					)
 
 					if (!entityInformation?.success || !entityInformation?.data?.length > 0) {
-						return resolve(entityInformation)
+						return resolve({
+							success: false,
+							message: 'Entity information not found for the given entityId',
+						})
 					}
 
 					libraryProjects.data['entityInformation'] = entityInformation.data[0]

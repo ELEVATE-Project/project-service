@@ -259,4 +259,32 @@ module.exports = class ProgramUsersService {
 			throw error
 		}
 	}
+
+	/**
+	 * Update specific fields of an entity within a program user
+	 * @method
+	 * @name updateEntity
+	 * @param {String} userId - program user's userId
+	 * @param {String} programId - program ID (optional)
+	 * @param {String} programExternalId - program external ID (optional)
+	 * @param {String} entityId - entity's userId to identify which entity to update
+	 * @param {Object} entityUpdates - fields to update on the entity
+	 * @param {String} tenantId - tenant ID
+	 * @returns {Object} updated program user document
+	 */
+	static async updateEntity(userId, programId, programExternalId, entityId, entityUpdates, tenantId) {
+		try {
+			const result = await programUsersQueries.updateEntity(
+				userId,
+				programId,
+				programExternalId,
+				entityId,
+				entityUpdates,
+				tenantId
+			)
+			return result
+		} catch (error) {
+			throw error
+		}
+	}
 }

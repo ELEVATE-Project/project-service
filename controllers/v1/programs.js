@@ -159,6 +159,61 @@ module.exports = class Programs extends Abstract {
 	}
 
 	/**
+   * Update program.
+   * @api {post} /project/v1/programs/ProgramUpdateForLibrary/:programId
+   * @method
+   * @name ProgramUpdateForLibrary
+   * @description Updates an existing program in the library via API call.
+   * @param {Object} req - requested data.
+   * @param {object} req.params - Request parameters.
+   * @param {string} req.params._id - The unique ID of the program to be updated.
+   * @param {object} req.body - The request payload containing updated program data.
+   * @param {object} req.userDetails - The authenticated user details performing the update.
+   * @apiHeader {String} X-authenticated-user-token Authenticity token
+   * @apiParamExample {json} Request-Body:
+   * {
+    "components": [
+        {
+            "_id": "68ea15fe17da55d64ceae720",
+            "order": 1
+        }
+    ]
+    }
+
+    * @apiParamExample {json} Response:
+    {
+        "message": "Program updated successfully",
+        "status": 200,
+        "result": {
+            "_id": "5ff09aa4a43c952a32279234"
+        }
+    }
+
+   * @param {Object} 
+   * @returns {JSON} - 
+   */
+	async ProgramUpdateForLibrary(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let programUpdationData = await programsHelper.update(
+					req.params._id,
+					req.body,
+					req.userDetails,
+					true //this is true for when its called via API calls
+				)
+
+				return resolve(programUpdationData)
+			} catch (error) {
+				reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
+				})
+			}
+		})
+	}
+
+	/**
     * @api {post} /project/v1/programs/details/:programId
     * @apiVersion 1.0.0
     * @apiName 
@@ -236,6 +291,81 @@ module.exports = class Programs extends Abstract {
 				return resolve(programData)
 			} catch (error) {
 				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
+				})
+			}
+		})
+	}
+
+	/**
+    * Create program.
+    * @api {post} /project/v1/programs/publishToLibrary
+    * @apiVersion 1.0.0
+    * @apiName 
+    * @apiGroup Programs
+    * @apiHeader {String} X-authenticated-user-token Authenticity token
+    * @method
+    * @name publishToLibrary
+    * @param {Object} req - requested data.
+    *  @param {object} req.body - The request payload containing program creation details.
+    *  @param {object} req.userDetails - The authenticated user details performing the publish action.
+    *  @param {object} req.userDetails.userInformation - Contains user metadata.
+    *  @param {string} req.userDetails.userInformation.userId - The ID of the user publishing the program.
+    * @apiParamExample {json} Request-Body:
+    * {
+        "externalId" : "PROGID01",
+        "name" : "DCPCR School Development Index 2018-19",
+        "description" : "DCPCR School Development Index 2018-19",
+        "isDeleted" : false,
+        "resourceType" : [ 
+            "program"
+        ],
+        "language" : [ 
+            "English"
+        ],
+        "keywords" : [],
+        "concepts" : [],
+        "userId":"a082787f-8f8f-42f2-a706-35457ca6f1fd",
+        "imageCompression" : {
+            "quality" : 10
+        },
+        "components" : [ 
+            "5b98fa069f664f7e1ae7498c"
+        ],
+        "scope" : {
+            "state" : ["e3a58f2b3c4d719a6821b590"],
+            "roles" : [ "head_master","distrct_education_officer"]
+        },
+        "requestForPIIConsent" : true
+        }
+
+        * @apiParamExample {json} Response:
+        {
+        "message": "Program created successfully",
+        "status": 200,
+        "result": {
+            "_id": "5ff09aa4a43c952a32279234"
+        }
+        }
+
+
+    * @returns {JSON} - created program document.
+   */
+	async publishToLibrary(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let programCreationData = await programsHelper.create(
+					req.body,
+					req.userDetails.userInformation.userId,
+					false, //this is true for when its called via API calls
+					req.userDetails
+				)
+
+				return resolve(programCreationData)
+			} catch (error) {
+				reject({
 					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
 					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
 					errorObject: error,
@@ -728,6 +858,51 @@ module.exports = class Programs extends Abstract {
 					req.headers['internal-access-token'] ? true : req.headers.internalAccessToken ? true : false
 				)
 				return resolve(programJoin)
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
+				})
+			}
+		})
+	}
+
+	/**
+     * @api {get} /project/v1/programs/removeSolutions/:_id 
+     * @apiVersion 1.0.0
+     * @apiName removeSolutions
+     * @apiGroup Programs
+     * @apiHeader {String} internal-access-token
+     * @apiSampleRequest /project/v1/programs/removeSolutions/6825a30dc407a50014b6a73f
+	 * Controller method to remove a solution ID from all program documents where it exists.
+	 * Delegates the actual logic to `programsHelper.removeSolutions()`.
+	 *
+	 * @param {Object} req - Express request object containing `params._id` (solutionId).
+	 * @returns {Promise<Object>} - Result of the operation from the helper function.
+     * 
+     * * @apiUse successBody
+     * @apiUse errorBody
+     * @apiParamExample {json} Response:
+    {
+        "message": "Solution and associated resources deleted successfully",
+        "status": 200,
+        "result": {
+            "noSolutionDeleted": 2,
+            "solutionId": "682c0340ba875600144d8ec5",
+            "success": true
+     }
+    }
+	*/
+	async removeSolutions(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				// Call helper method to perform the $pull operation on programs collection
+				let deletedSolutionDetails = await programsHelper.removeSolutionsFromProgram(
+					req.params._id,
+					req.query.tenantId
+				)
+				return resolve(deletedSolutionDetails)
 			} catch (error) {
 				return reject({
 					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,

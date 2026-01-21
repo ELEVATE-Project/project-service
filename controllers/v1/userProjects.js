@@ -7,6 +7,7 @@
 
 // Dependencies
 const userProjectsHelper = require(MODULES_BASE_PATH + '/userProjects/helper')
+const entitiesHelper = require(MODULES_BASE_PATH + '/entities/helper')
 
 /**
  * UserProjects
@@ -1088,7 +1089,8 @@ module.exports = class UserProjects extends Abstract {
 					req.userDetails.userInformation.userId,
 					req.query.isATargetedSolution ? req.query.isATargetedSolution : false,
 					req.query.language ? req.query.language : '',
-					req.userDetails
+					req.userDetails,
+					req.query.isExternalProgram ? req.query.isExternalProgram : false
 				)
 
 				return resolve({
@@ -1422,16 +1424,30 @@ module.exports = class UserProjects extends Abstract {
 	}
 
 	/**
-	 * Delete user PII data
-	 * @method
-	 * @name deleteUserPIIData
-	 * @param {Object} req - request data.
+     * @api {post} /v1/userProjects/deleteUserPIIData
+     * @apiVersion 1.0.0
+     * @description To delete the user transactional data
+     * @apiName Search Entities
+     * @apiHeader {String} X-auth-token Authenticity token
+     * @apiSampleRequest /v1/userProjects/deleteUserPIIData
+     * @apiSampleRequest {json} Request
+     * {
+            "id": 1   //userId
+        }
+     * @apiUse successBody
+     * @apiUse errorBody
      * @apiParamExample {json} Response:
-        {
+      {
             "message": "Data deleted successfully.",
             "status": 200
-        }
-	 * @returns {JSON} User data deletion response
+      }
+    */
+	/**
+	 * Search entities in project.
+	 * @method
+	 * @name searchEntities
+	 * @param {Object} req - request Data.
+	 * @returns {JSON} Data deleted successfully.
 	 */
 
 	async deleteUserPIIData(req) {
@@ -1439,6 +1455,108 @@ module.exports = class UserProjects extends Abstract {
 			try {
 				const result = await userProjectsHelper.deleteUserPIIData(req.body)
 				return resolve(result)
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
+				})
+			}
+		})
+	}
+
+	/**
+     * @api {get} /v1/userProjects/searchEntities/:solutionId?search=:searchText&limit=1&page=1
+     * @apiVersion 1.0.0
+     * @apiName Search Entities
+     * @apiHeader {String} X-auth-token Authenticity token
+     * @apiSampleRequest /v1/userProjects/searchEntities/5d1a002d2dfd8135bc8e1615?search=&limit=100&page=1
+     * @apiUse successBody
+     * @apiUse errorBody
+     * @apiParamExample {json} Response:
+        {
+            "message": "Entities fetched successfully",
+            "status": 200,
+            "result": [
+                {
+                    "data": [
+                        {
+                           "_id": "6852c9207248c20014b38dd3",
+                            "externalId": "16030100406",
+                            "name": "BALARAM BAZAR J. B. SCHOOL",
+                            "entityType": "school",
+                            "selected": false
+                        }
+                    ],
+                    "count": 1
+                }
+            ]
+        }
+    */
+
+	/**
+	 * Search entities in project.
+	 * @method
+	 * @name searchEntities
+	 * @param {Object} req - request Data.
+	 * @returns {JSON} List of entities in observations.
+	 */
+	async searchEntities(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let searchEntitiesResult = await entitiesHelper.fetchEntities(req)
+				resolve(searchEntitiesResult)
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
+				})
+			}
+		})
+	}
+
+	/**
+     * @api {get} /v1/userProjects/addEntity/:_id={{projectId}}
+     * @apiVersion 1.0.0
+     * @apiName Add Entity
+     * @apiHeader {String} X-auth-token Authenticity token
+     * @apiSampleRequest /v1/userProjects/addEntity/68d38c9f69f139b91c9e57b8
+     * @apiSampleRequest {json} Request
+     * {
+            "entityId": "687a66c07f4bcd29a40c908d"
+        }
+     * @apiUse successBody
+     * @apiParamExample {json} Response:
+        {
+            "success" : true,
+            "message" : "Entity added to project successfully",
+            "result" : {
+                "projectId" : "68d38c9f69f139b91c9e57b8",
+                "entityInformation" : {
+                    "_id" : "687a66c07f4bcd29a40c908d",
+                    "entityType" : "school",
+                    "entityTypeId" : "687e96c01f4bce29a40c178h",
+                    "entityId" : "687a66c07f4bcd29a40c908d",
+                    "externalId" : "school-17384712438",
+                    "entityName" : "GOVT HIGH SCHOOL Gulbarga"
+                }
+            }
+        }
+    */
+
+	/**
+	 * Add entities in project.
+	 * @method
+	 * @name addEntity
+	 * @param {Object} req - request Data.
+	 * @returns {JSON} Entity Information
+	 */
+	async addEntity(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let addEntityResult = await entitiesHelper.addEntity(req)
+				return resolve(addEntityResult)
 			} catch (error) {
 				return reject({
 					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,

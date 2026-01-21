@@ -313,6 +313,116 @@ const createObservation = function (token, solutionId, data, userRoleAndProfileI
 						result['data'] = response.result
 					} else {
 						result.success = false
+						result.message = response.message
+					}
+				}
+
+				return resolve(result)
+			}
+		} catch (error) {
+			return reject(error)
+		}
+	})
+}
+
+/**
+ * Calls the Survey Service to delete a survey or observation resource linked to a solution.
+ *
+ * @param {String} token - The user authentication token.
+ * @param {String} solutionId - The ID of the solution (survey/observation) to be deleted.
+ * @param {String} resourceType - Type of the resource being deleted ('solution', 'program', etc.).
+ * @param {String} tenantId - Tenant identifier (used for multi-tenancy).
+ * @param {String} orgId - Organization ID from where the deletion is triggered.
+ *
+ * @returns {Promise<Object>} - Result indicating success/failure and optional response data.
+ */
+const deleteSolutionResource = function (solutionIds, resourceType, tenantId, orgId, userId) {
+	return new Promise(async (resolve, reject) => {
+		try {
+			// Construct the API URL to call the delete endpoint on the Survey Service
+			let deleteSolutionResourceUrl =
+				SURVEY_SERVICE_URL + CONSTANTS.endpoints.DELETE_SOLUTION_RESOURCE + '?type=' + resourceType
+			// Prepare request headers with tokens and tenant info
+			let options = {
+				headers: {
+					'content-type': 'application/json',
+					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
+				},
+				json: {
+					solutionIds: solutionIds,
+					tenantId: tenantId,
+					orgId: orgId,
+					deletedBy: userId,
+				},
+			}
+			// Send a POST request to the Survey Service to delete the resource
+			request.post(deleteSolutionResourceUrl, options, assessmentCallback)
+			// Callback function to handle the response from the Survey Service
+			function assessmentCallback(err, data) {
+				let result = {
+					success: true,
+				}
+
+				if (err) {
+					result.success = false
+				} else {
+					let response = data.body
+					// Check if the result status is HTTP 200 OK
+					if (response.status === HTTP_STATUS_CODE['ok'].status) {
+						result['data'] = response
+					} else {
+						result.success = false
+					}
+				}
+
+				return resolve(result)
+			}
+		} catch (error) {
+			return reject(error)
+		}
+	})
+}
+
+/**
+ * @function programsDocument
+ * @description Fetches program documents from the Survey Service API based on filter criteria.
+ *              Makes a POST request with filter query and fields array, then returns the response.
+ *
+ * @param {Object} filterQuery - MongoDB-style filter query object used to filter program documents.
+ * @param {Array<string>} fieldsArray - List of field names to include in the result.
+ * @returns {Promise<Object>} Result indicating success/failure and optional response data.
+ */
+const programsDocument = function (filterQuery, fieldsArray) {
+	return new Promise(async (resolve, reject) => {
+		try {
+			// Construct the URL for Survey Service API
+			let programsDocumentUrl = SURVEY_SERVICE_URL + CONSTANTS.endpoints.FETCH_PROGRAM_DOCUMENT
+			// Prepare request headers with authentication and body payload
+			let options = {
+				headers: {
+					'content-type': 'application/json',
+					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
+				},
+				json: {
+					filterQuery: filterQuery,
+					fieldsArray: fieldsArray,
+				},
+			}
+			// Send a POST request to the Survey Service
+			request.post(programsDocumentUrl, options, programsDocumentCallback)
+			// Callback function to handle the response from the Survey Service
+			function programsDocumentCallback(err, data) {
+				let result = {}
+
+				if (err) {
+					result.success = false
+				} else {
+					let response = data.body
+					// Check if the result status is HTTP 200 OK
+					if (response.status === HTTP_STATUS_CODE['ok'].status) {
+						result = response.result
+					} else {
+						result.success = false
 					}
 				}
 
@@ -330,4 +440,6 @@ module.exports = {
 	createObservation: createObservation,
 	surveyDetails: surveyDetails,
 	importTemplateToSolution: importTemplateToSolution,
+	deleteSolutionResource: deleteSolutionResource,
+	programsDocument: programsDocument,
 }

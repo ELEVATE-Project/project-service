@@ -108,6 +108,13 @@ module.exports = (req) => {
 					.withMessage('tenantId cannot be empty')
 			}
 		},
+		removeSolutions: function () {
+			req.checkParams('_id')
+				.exists()
+				.withMessage('Require program id')
+				.isMongoId()
+				.withMessage('Invalid program ID')
+		},
 	}
 
 	if (programsValidator[req.params.method]) {

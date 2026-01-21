@@ -21,6 +21,16 @@ module.exports = (req) => {
 					)
 			}
 		},
+		createChildProjectTemplate: function () {
+			req.checkQuery('programExternalId').exists().withMessage('required programExternalId')
+			req.checkBody('projectTemplateExternalIds')
+				.exists()
+				.withMessage('required projectTemplateExternalIds')
+				.isArray()
+				.withMessage('projectTemplateExternalIds must be an array')
+				.notEmpty()
+				.withMessage('projectTemplateExternalIds cannot be empty')
+		},
 	}
 
 	if (projectTemplateValidator[req.params.method]) {

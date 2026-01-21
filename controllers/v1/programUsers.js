@@ -53,7 +53,8 @@ module.exports = class ProgramUsers extends Abstract {
 	async getEntities(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				const { userId, programId, programExternalId, page = 1, limit = 20, status, search = '' } = req.query
+				const { userId, programId, programExternalId, status, search = '' } = req.query
+				const { pageNo = 1, pageSize = 20 } = req
 
 				if (!userId || (!programId && !programExternalId)) {
 					return reject({
@@ -66,8 +67,8 @@ module.exports = class ProgramUsers extends Abstract {
 					userId,
 					programId,
 					programExternalId,
-					parseInt(page),
-					parseInt(limit),
+					parseInt(pageNo),
+					parseInt(pageSize),
 					status,
 					search,
 					req.userDetails

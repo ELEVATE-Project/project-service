@@ -371,14 +371,58 @@ module.exports = class programUsers {
 					}
 				})
 
-				// Find and update: match the entity by userId or externalId
-				let result = await database.models.programUsers.findOneAndUpdate(
-					{ ...query, $or: [{ 'entities.userId': entityId }, { 'entities.externalId': entityId }] },
+				// First, find the document to verify it exists and find which field matches the entity
+				const docData = await database.models.programUsers.findOne(query).lean()
+
+				if (!docData) {
+					return reject({
+						message: 'Program user not found',
+						status: 404,
+					})
+				}
+
+				// Find the entity and determine which field matches
+				const entity = docData.entities?.find(
+					(e) => e.userId === entityId || e.externalId === entityId || e.entityId === entityId
+				)
+
+				if (!entity) {
+					return reject({
+						message: 'Entity not found in program user',
+						status: 404,
+					})
+				}
+
+				// Determine which field to use for matching (priority: userId > entityId > externalId)
+				let matchField = 'entities.userId'
+				if (entity.userId === entityId) {
+					matchField = 'entities.userId'
+				} else if (entity.entityId === entityId) {
+					matchField = 'entities.entityId'
+				} else if (entity.externalId === entityId) {
+					matchField = 'entities.externalId'
+				}
+
+				// Build the query with the specific matching field
+				// The positional operator requires the array matching condition to be directly in the query
+				const updateQuery = { ...query }
+				updateQuery[matchField] = entityId
+
+				// Perform the update
+				const result = await database.models.programUsers.findOneAndUpdate(
+					updateQuery,
 					{
 						$set: setOperations,
 					},
 					{ new: true, lean: true }
 				)
+
+				if (!result) {
+					return reject({
+						message: 'Failed to update entity',
+						status: 500,
+					})
+				}
 
 				return resolve(result)
 			} catch (error) {

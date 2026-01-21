@@ -23,6 +23,7 @@ module.exports = class ProgramUsers extends Abstract {
 	/**
 	 * Create or update program user
 	 * Supports: create, update, add entity, update status
+	 * Routes to updateEntity if entityId and entityUpdates are provided
 	 * @method
 	 * @name createOrUpdate
 	 * @param {Object} req - request object
@@ -31,6 +32,13 @@ module.exports = class ProgramUsers extends Abstract {
 	async createOrUpdate(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				// Check if this is an entity-specific update
+				if (req.body.entityId && req.body.entityUpdates) {
+					const result = await programUsersHelper.updateEntity(req.body, req.userDetails)
+					return resolve(result)
+				}
+
+				// Regular createOrUpdate flow
 				const result = await programUsersHelper.createOrUpdate(req.body, req.userDetails)
 
 				return resolve(result)

@@ -399,6 +399,83 @@ module.exports = class ProgramUsersHelper {
 	 * @param {String} programExternalId - program external ID
 	 * @returns {Boolean} true if program exists, false otherwise
 	 */
+	/**
+	 * Update specific entity fields within a program user
+	 * @method
+	 * @name updateEntity
+	 * @param {Object} data - request body data
+	 * @param {String} data.userId - program user's userId
+	 * @param {String} data.programId - program ID (optional)
+	 * @param {String} data.programExternalId - program external ID (optional)
+	 * @param {String} data.entityId - entity's userId to identify which entity to update
+	 * @param {Object} data.entityUpdates - fields to update on the entity
+	 * @param {Object} userDetails - logged in user details
+	 * @returns {Object} result with status and updated entity data
+	 */
+	static async updateEntity(data, userDetails) {
+		try {
+			const { userId, programId, programExternalId, entityId, entityUpdates } = data
+			const tenantId = userDetails.userInformation?.tenantId
+
+			// Validate required fields
+			if (!userId || (!programId && !programExternalId)) {
+				return {
+					success: false,
+					status: HTTP_STATUS_CODE.bad_request.status,
+					message: 'userId and either programId or programExternalId are required',
+				}
+			}
+
+			if (!entityId) {
+				return {
+					success: false,
+					status: HTTP_STATUS_CODE.bad_request.status,
+					message: 'entityId is required',
+				}
+			}
+
+			// Validate entityUpdates - only regular objects are supported (e.g., {status: "ONBOARDED", myList: [{1:1}]})
+			if (!entityUpdates) {
+				return {
+					success: false,
+					status: HTTP_STATUS_CODE.bad_request.status,
+					message: 'entityUpdates is required',
+				}
+			}
+
+			// Only accept regular objects with named properties
+			const isValidObject =
+				typeof entityUpdates === 'object' && entityUpdates !== null && Object.keys(entityUpdates).length > 0
+
+			if (!isValidObject) {
+				return {
+					success: false,
+					status: HTTP_STATUS_CODE.bad_request.status,
+					message: 'entityUpdates must be a non-empty object with named properties',
+				}
+			}
+
+			// Call service to update entity
+			const result = await programUsersService.updateEntity(
+				userId,
+				programId,
+				programExternalId,
+				entityId,
+				entityUpdates,
+				tenantId
+			)
+
+			return {
+				success: true,
+				status: 200,
+				message: 'Entity updated successfully',
+				result,
+			}
+		} catch (error) {
+			throw error
+		}
+	}
+
 	static checkProgramExists(tenantId, programId, programExternalId) {
 		return new Promise(async (resolve, reject) => {
 			try {

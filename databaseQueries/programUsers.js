@@ -327,4 +327,63 @@ module.exports = class programUsers {
 			}
 		})
 	}
+
+	/**
+	 * Update specific fields of an entity within a program user
+	 * @method
+	 * @name updateEntity
+	 * @param {String} userId - program user's userId
+	 * @param {String} programId - program ID (optional)
+	 * @param {String} programExternalId - program external ID (optional)
+	 * @param {String} entityId - entity's userId to identify which entity to update
+	 * @param {Object|Array} entityUpdates - fields to update on the entity (object or array of objects)
+	 * @param {String} tenantId - tenant ID
+	 * @returns {Object} updated program user document
+	 */
+	static updateEntity(userId, programId, programExternalId, entityId, entityUpdates, tenantId) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				// Build query: use programId if available, otherwise programExternalId
+				const query = { userId, tenantId }
+				if (programId) {
+					query.programId = programId
+				} else if (programExternalId) {
+					query.programExternalId = programExternalId
+				}
+
+				// Only support regular objects like {status: "ONBOARDED", myList: [{1:1}]}
+				// Handle edge case: if array was converted to object with numeric keys (e.g., {0: {...}})
+				let updates = entityUpdates
+
+				if (typeof entityUpdates !== 'object' || entityUpdates === null) {
+					return reject({
+						message: 'entityUpdates must be an object',
+						status: 400,
+					})
+				}
+
+				// Build the $set operations with dot notation for nested fields
+				const setOperations = { updatedAt: new Date() }
+				Object.keys(updates).forEach((key) => {
+					// Only process non-numeric keys (regular object properties)
+					if (!/^\d+$/.test(key)) {
+						setOperations[`entities.$.${key}`] = updates[key]
+					}
+				})
+
+				// Find and update: match the entity by userId or externalId
+				let result = await database.models.programUsers.findOneAndUpdate(
+					{ ...query, $or: [{ 'entities.userId': entityId }, { 'entities.externalId': entityId }] },
+					{
+						$set: setOperations,
+					},
+					{ new: true, lean: true }
+				)
+
+				return resolve(result)
+			} catch (error) {
+				return reject(error)
+			}
+		})
+	}
 }

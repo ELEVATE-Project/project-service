@@ -164,32 +164,6 @@ module.exports = (req) => {
 				.withMessage('entityId is required')
 				.notEmpty()
 				.withMessage('entityId cannot be empty')
-
-			// Validate projectConfig
-			req.checkBody('projectConfig')
-				.exists()
-				.withMessage('projectConfig is required')
-				.custom((config) => {
-					if (!config || typeof config !== 'object') {
-						throw new Error('projectConfig must be an object')
-					}
-					if (!config.name) {
-						throw new Error('projectConfig.name is required')
-					}
-					return true
-				})
-
-			// Validate isPrivateProgram - must always be true
-			req.checkBody('isPrivateProgram')
-				.exists()
-				.withMessage('isPrivateProgram is required')
-				.isBoolean()
-				.withMessage('isPrivateProgram must be a boolean')
-				.custom((value) => {
-					// Explicitly check for boolean true or string "true"
-					return value === true || value === 'true'
-				})
-				.withMessage('isPrivateProgram must always be true')
 		},
 	}
 

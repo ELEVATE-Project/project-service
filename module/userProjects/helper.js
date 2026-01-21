@@ -4454,8 +4454,8 @@ module.exports = class UserProjectsHelper {
 
 				// Step 1: Validations
 				// a. Validate Participant User
-				let participantProfile = await userService.profile(participantId, userToken)
-				if (!participantProfile.success || !participantProfile.data) {
+				let userProfile = await userService.profile(participantId, userToken)
+				if (!userProfile.success || !userProfile.data) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.USER_NOT_FOUND,
@@ -4534,7 +4534,7 @@ module.exports = class UserProjectsHelper {
 
 				// Step 2: Always Create New Program & Solution
 				let programAndSolutionData = {
-					programName: programName || `Program for ${participantProfile.data.name}`,
+					programName: programName || `Program for ${userProfile.data.name}`,
 					isPrivateProgram: true,
 					type: CONSTANTS.common.IMPROVEMENT_PROJECT,
 					subType: CONSTANTS.common.IMPROVEMENT_PROJECT,
@@ -4562,7 +4562,7 @@ module.exports = class UserProjectsHelper {
 
 				// Step 3: Initialize Single Project
 				let projectData = {
-					title: projectConfig?.name || `${participantProfile.data.name}'s Project Plan`,
+					title: projectConfig?.name || `${userProfile.data.name}'s Project Plan`,
 					description: projectConfig?.description || 'Individual Development Plan',
 					userId: participantId,
 					createdBy: userId,
@@ -4589,7 +4589,7 @@ module.exports = class UserProjectsHelper {
 					categories: allCategories, // Add categories from all templates
 					tasks: [],
 					taskSequence: [],
-					userProfile: participantProfile.data,
+					userProfile: userProfile.data,
 					createdAt: new Date(),
 					updatedAt: new Date(),
 				}

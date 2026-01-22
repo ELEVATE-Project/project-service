@@ -407,7 +407,7 @@ module.exports = class programUsers {
 
 				// Find the entity and determine which field matches
 				const entity = docData.entities?.find(
-					(e) => e.userId === entityId || e.externalId === entityId || e.entityId === entityId
+					(e) => e.userId == entityId || e.externalId == entityId || e.entityId == entityId
 				)
 
 				if (!entity) {
@@ -419,11 +419,11 @@ module.exports = class programUsers {
 
 				// Determine which field to use for matching (priority: userId > entityId > externalId)
 				let matchField = 'entities.userId'
-				if (entity.userId === entityId) {
+				if (entity.userId == entityId) {
 					matchField = 'entities.userId'
-				} else if (entity.entityId === entityId) {
+				} else if (entity.entityId == entityId) {
 					matchField = 'entities.entityId'
-				} else if (entity.externalId === entityId) {
+				} else if (entity.externalId == entityId) {
 					matchField = 'entities.externalId'
 				}
 
@@ -431,6 +431,19 @@ module.exports = class programUsers {
 				// The positional operator requires the array matching condition to be directly in the query
 				const updateQuery = { ...query }
 				updateQuery[matchField] = entityId
+
+				// Log for debugging
+				console.log('updateEntity - Debug Info:', {
+					userId,
+					programId,
+					programExternalId,
+					entityId,
+					matchField,
+					updateQuery: JSON.stringify(updateQuery),
+					setOperations: JSON.stringify(setOperations),
+					entityFound: entity ? true : false,
+					entityData: entity ? JSON.stringify(entity) : null,
+				})
 
 				// Perform the update
 				const result = await database.models.programUsers.findOneAndUpdate(
@@ -442,14 +455,48 @@ module.exports = class programUsers {
 				)
 
 				if (!result) {
+					// Enhanced error logging
+					console.error('updateEntity - Update failed:', {
+						message: 'findOneAndUpdate returned null',
+						updateQuery: JSON.stringify(updateQuery),
+						setOperations: JSON.stringify(setOperations),
+						userId,
+						programId,
+						programExternalId,
+						entityId,
+						matchField,
+						originalQuery: JSON.stringify(query),
+						docDataExists: docData ? true : false,
+						entityExists: entity ? true : false,
+					})
+
+					// Check if document still exists
+					const docStillExists = await database.models.programUsers.findOne(query).lean()
+					console.error('updateEntity - Document still exists:', docStillExists ? true : false)
+
 					return reject({
 						message: 'Failed to update entity',
 						status: 500,
+						details: {
+							updateQuery,
+							setOperations,
+							entityId,
+							matchField,
+						},
 					})
 				}
 
 				return resolve(result)
 			} catch (error) {
+				console.error('updateEntity - Exception caught:', {
+					error: error.message || error,
+					stack: error.stack,
+					userId,
+					programId,
+					programExternalId,
+					entityId,
+					entityUpdates: JSON.stringify(entityUpdates),
+				})
 				return reject(error)
 			}
 		})

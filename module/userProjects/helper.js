@@ -4563,8 +4563,22 @@ module.exports = class UserProjectsHelper {
 				const masterProgramId = programAndSolutionInformation.result.program._id
 				const masterSolutionId = programAndSolutionInformation.result.solution._id
 
+				let acl = {}
+				if (userDetails.userInformation.userId != participantId) {
+					acl = {
+						visibility: CONSTANTS.common.PROJECT_VISIBILITY_SPECIFIC,
+						users: [participantId, userDetails.userInformation.userId],
+					}
+				} else {
+					acl = {
+						visibility: CONSTANTS.common.PROJECT_VISIBILITY_SELF,
+						users: [participantId],
+					}
+				}
+
 				// Step 3: Initialize Single Project
 				let projectData = {
+					acl: acl,
 					title: projectConfig?.name || `${userProfile.data.name}'s Project Plan`,
 					description: projectConfig?.description || 'Individual Development Plan',
 					userId: participantId,
@@ -4590,6 +4604,8 @@ module.exports = class UserProjectsHelper {
 					tenantId: tenantId,
 					orgId: orgId,
 					categories: allCategories, // Add categories from all templates
+					keywords: ['project-plan'],
+					referenceFrom: projectConfig?.referenceFrom || '',
 					tasks: [],
 					taskSequence: [],
 					userProfile: userProfile.data,

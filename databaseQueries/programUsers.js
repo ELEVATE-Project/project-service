@@ -432,19 +432,6 @@ module.exports = class programUsers {
 				const updateQuery = { ...query }
 				updateQuery[matchField] = entityId
 
-				// Log for debugging
-				console.log('updateEntity - Debug Info:', {
-					userId,
-					programId,
-					programExternalId,
-					entityId,
-					matchField,
-					updateQuery: JSON.stringify(updateQuery),
-					setOperations: JSON.stringify(setOperations),
-					entityFound: entity ? true : false,
-					entityData: entity ? JSON.stringify(entity) : null,
-				})
-
 				// Perform the update
 				const result = await database.models.programUsers.findOneAndUpdate(
 					updateQuery,
@@ -455,25 +442,6 @@ module.exports = class programUsers {
 				)
 
 				if (!result) {
-					// Enhanced error logging
-					console.error('updateEntity - Update failed:', {
-						message: 'findOneAndUpdate returned null',
-						updateQuery: JSON.stringify(updateQuery),
-						setOperations: JSON.stringify(setOperations),
-						userId,
-						programId,
-						programExternalId,
-						entityId,
-						matchField,
-						originalQuery: JSON.stringify(query),
-						docDataExists: docData ? true : false,
-						entityExists: entity ? true : false,
-					})
-
-					// Check if document still exists
-					const docStillExists = await database.models.programUsers.findOne(query).lean()
-					console.error('updateEntity - Document still exists:', docStillExists ? true : false)
-
 					return reject({
 						message: 'Failed to update entity',
 						status: 500,

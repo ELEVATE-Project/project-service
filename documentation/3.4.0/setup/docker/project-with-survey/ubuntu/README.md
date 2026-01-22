@@ -19,7 +19,7 @@ The Project building block facilitates the creation and engagement with micro-im
 </div>
 </br>
 
-# Docker Setup Project Service - With Survey
+# Docker Setup Project Service - With Survey (Ubuntu)
 
 Expectation: By following these steps, you will establish a unified environment for the Project Service, integrated with the Survey and Observation modules. This setup focuses purely on the backend API infrastructure required to manage data collection and reporting.
 
@@ -35,7 +35,7 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
 
 > Note: All commands are run from the project directory.
 
-## Operating Systems: Linux
+## Checking Port Availability 
 
 > **Caution:** Before proceeding, please ensure that the ports given here are available and open. It is essential to verify their availability prior to moving forward. You can run below command in your terminal to check this
 
@@ -212,13 +212,32 @@ Follow the setup guides for the frontend repositories:
 
 > **Warning:** In this setup, features such as **Sign-Up, Project Certificate, Project Sharing, and Project PDF Report** will not be available because cloud storage credentials have been masked in the environment files for security reasons.
 
-## Postman Collections
+---
 
--   [Projects Service](https://github.com/ELEVATE-Project/project-service/tree/main/api-doc)
+### 🧪 Postman Collections and API DOC
 
-## Adding New Projects to the System
+- <a href="https://github.com/ELEVATE-Project/project-service/tree/main/api-doc" target="_blank">
+  Projects Service API Collection
+- <a href="https://github.com/ELEVATE-Project/samiksha-service/tree/main/api-doc" target="_blank">
+  Samiksha Service API Collection
+</a>
 
-With implementation scripts, you can seamlessly add new projects to the system. Once a project is successfully added, it becomes visible on the portal, ready for use and interaction. For a comprehensive guide on setting up and using the implementation script, please refer to the [documentation here](https://github.com/ELEVATE-Project/project-service/tree/main/Project-Service-implementation-Script).
+---
+
+### 🛠️ Adding New Projects to the System
+
+With SUP (Solution Upload Portal), you can seamlessly add new projects , survey and observation to the system.  
+Once it's successfully added, it becomes visible on the portal, ready for use and interaction.
+
+For a comprehensive guide on setting up and using the SUP, please refer to:
+
+- <a href="https://github.com/ELEVATE-Project/project-service/tree/main/Project-Service-implementation-Script" target="_blank">
+  solution-Upload-Portal-Service
+- <a href="https://github.com/ELEVATE-Project/project-service/tree/main/Project-Service-implementation-Script" target="_blank">
+  solution-Upload-Portal
+</a>
+
+---
 
 # Team
 
@@ -226,12 +245,15 @@ With implementation scripts, you can seamlessly add new projects to the system. 
   <img src="https://contrib.rocks/image?repo=ELEVATE-Project/project-service" />
 </a>
 
+---
 # Open Source Dependencies
 
-Several open source dependencies that have aided Projects's development:
+This project uses several open-source tools and dependencies that supported its development
 
-![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
-![Apache Kafka](https://img.shields.io/badge/Apache%20Kafka-000?style=for-the-badge&logo=apachekafka)
-![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white)
-![Jest](https://img.shields.io/badge/-jest-%23C21325?style=for-the-badge&logo=jest&logoColor=white)
-![Git](https://img.shields.io/badge/git-%23F05033.svg?style=for-the-badge&logo=git&logoColor=white)
+![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)  
+![Apache Kafka](https://img.shields.io/badge/Apache%20Kafka-000?style=for-the-badge&logo=apachekafka)  
+![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white)  
+![Git](https://img.shields.io/badge/git-%23F05033.svg?style=for-the-badge&logo=git&logoColor=white)  
+![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)  
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)  
+![RabbitMQ](https://img.shields.io/badge/RabbitMQ-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white)  

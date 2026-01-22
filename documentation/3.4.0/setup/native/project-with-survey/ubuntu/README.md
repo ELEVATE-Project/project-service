@@ -20,7 +20,7 @@ The Project building block facilitates the creation and engagement with micro-im
 </div>
 </br>
 
-# Native Setup Project Service - With Survey
+# Native Setup Project Service - With Survey (Ubuntu)
 
 </details>
 </details> Natively Installed Dependencies
@@ -359,13 +359,32 @@ After successfully running the script mentioned above, the following user accoun
 | prajwal@gmail.com      | Password1@ | State Education Officer |
 | vishnu@gmail.com       | Password1@ | State Education Officer |
 
-## Postman Collections
+---
 
--   [Projects Service](https://github.com/ELEVATE-Project/project-service/tree/main/api-doc)
+### 🧪 Postman Collections and API DOC
 
-## Adding New Projects to the System
+- <a href="https://github.com/ELEVATE-Project/project-service/tree/main/api-doc" target="_blank">
+  Projects Service API Collection
+- <a href="https://github.com/ELEVATE-Project/samiksha-service/tree/main/api-doc" target="_blank">
+  Samiksha Service API Collection
+</a>
 
-With implementation scripts, you can seamlessly add new projects to the system. Once a project is successfully added, it becomes visible on the portal, ready for use and interaction. For a comprehensive guide on setting up and using the implementation script, please refer to the [documentation here](https://github.com/ELEVATE-Project/project-service/tree/main/Project-Service-implementation-Script).
+---
+
+### 🛠️ Adding New Projects to the System
+
+With SUP (Solution Upload Portal), you can seamlessly add new projects , survey and observation to the system.  
+Once it's successfully added, it becomes visible on the portal, ready for use and interaction.
+
+For a comprehensive guide on setting up and using the SUP, please refer to:
+
+- <a href="https://github.com/ELEVATE-Project/project-service/tree/main/Project-Service-implementation-Script" target="_blank">
+  solution-Upload-Portal-Service
+- <a href="https://github.com/ELEVATE-Project/project-service/tree/main/Project-Service-implementation-Script" target="_blank">
+  solution-Upload-Portal
+</a>
+
+---
 
 # Team
 
@@ -373,12 +392,16 @@ With implementation scripts, you can seamlessly add new projects to the system. 
   <img src="https://contrib.rocks/image?repo=ELEVATE-Project/project-service" />
 </a>
 
+---
+
 # Open Source Dependencies
 
-Several open source dependencies that have aided Projects's development:
+This project uses several open-source tools and dependencies that supported its development
 
-![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
-![Apache Kafka](https://img.shields.io/badge/Apache%20Kafka-000?style=for-the-badge&logo=apachekafka)
-![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white)
-![Jest](https://img.shields.io/badge/-jest-%23C21325?style=for-the-badge&logo=jest&logoColor=white)
-![Git](https://img.shields.io/badge/git-%23F05033.svg?style=for-the-badge&logo=git&logoColor=white)
+![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)  
+![Apache Kafka](https://img.shields.io/badge/Apache%20Kafka-000?style=for-the-badge&logo=apachekafka)  
+![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white)  
+![Git](https://img.shields.io/badge/git-%23F05033.svg?style=for-the-badge&logo=git&logoColor=white)  
+![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)  
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)  
+![RabbitMQ](https://img.shields.io/badge/RabbitMQ-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white)  

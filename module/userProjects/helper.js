@@ -3210,7 +3210,7 @@ module.exports = class UserProjectsHelper {
 
 				//Fetch user profile information.
 				let addReportInfoToSolution = false
-				let userProfile = await projectService.profileRead(userToken)
+				let userProfile = await userService.profile(userId, userToken)
 				// Check if the user profile fetch was successful
 				if (!userProfile.success) {
 					throw {

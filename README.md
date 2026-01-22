@@ -35,28 +35,28 @@ This section outlines the different ways to set up the **Projects Service**. Ple
 ---
 
 <details>
-<summary> 🚀 <b>STAND-ALONE SETUP (Stand Alone Setup)</b> </summary>
+<summary> 🚀 <b>Stand Alone Setup</b> </summary>
 <br>
 
-This setup is ideal for **local development and testing** where only the core Projects Service components are required.  
+This setup is ideal for **local development and testing**, where only the core Projects Service components are required.
 
-In the **Stand-Alone Setup**, the **Samiksha service is not included**. Only the following flows will be available:  
-- **Programs**  
-- **Projects**  
-- **Reports**
+In the **Stand-Alone Setup**, the **Samiksha service is not included**. This mode supports the complete lifecycle of **program creation and program consumption**, along with **project creation and project consumption**. Users can also **view and generate reports** based on the configured programs and projects.  
+
+This setup is recommended when survey and observation features powered by Samiksha are not required, and the focus is limited to core program and project management workflows.
+
 
 #### I. Docker Setup (Recommended)
 
-- [Setup guide for Linux](https://github.com/ELEVATE-Project/project-service/blob/setupGuide-3.4/documentation/3.4.0/setup/docker/stand-alone/ubuntu/README.md)  
-- [Setup guide for macOS](link/to/standalone/docker/macos/README)  
-- [Setup guide for Windows](link/to/standalone/docker/windows/README)  
+- [Setup guide for Linux](https://github.com/ELEVATE-Project/project-service/blob/main/documentation/3.4.0/setup/docker/stand-alone/ubuntu/README.md)  
+- [Setup guide for macOS](https://github.com/ELEVATE-Project/project-service/blob/main/documentation/3.4.0/setup/docker/stand-alone/mac-os/README.md)  
+- [Setup guide for Windows](https://github.com/ELEVATE-Project/project-service/blob/main/documentation/3.4.0/setup/docker/stand-alone/windows/README.md)  
 
 <br>
 
 #### II. Native Setup (PM2 Managed Services)
 
-- [Setup guide for Linux](https://github.com/ELEVATE-Project/project-service/blob/setupGuide-3.4/documentation/3.4.0/setup/native/stand-alone/ubuntu/README.md)  
-- [Setup guide for macOS](link/to/standalone/native/macos/README)  
+- [Setup guide for Linux](https://github.com/ELEVATE-Project/project-service/blob/main/documentation/3.4.0/setup/native/stand-alone/ubuntu/README.md)  
+- [Setup guide for macOS](https://github.com/ELEVATE-Project/project-service/blob/main/documentation/3.4.0/setup/docker/stand-alone/mac-os/README.md)  
 - [Setup guide for Windows](link/to/standalone/native/windows/README)  
 
 </details>
@@ -64,27 +64,26 @@ In the **Stand-Alone Setup**, the **Samiksha service is not included**. Only the
 ---
 
 <details>
-<summary> 🚀 <b>WITH SAMIKSHA SERVICE (Integrated Setup)</b> </summary>
+<summary> 🚀 <b>Integrated Setup</b> </summary>
 <br>
 
-This setup integrates the Projects Service with the **Samiksha Service**, providing a full-featured, production-ready deployment environment. The following flows will be available:  
-- **Programs**  
-- **Projects**  
-- **Survey**  
-- **Observation**  
-- **Reports**
+This setup integrates the Projects Service with the **Samiksha Service**, providing a full-featured, production-ready deployment environment.
+
+In this **Integrated Setup**, the system supports the complete lifecycle of **program creation and program consumption**, along with **project creation and project consumption**. It also enables **survey creation, survey consumption, observation creation, and observation consumption**, allowing structured assessments and evaluations to be conducted.  
+
+Users can further **view and generate reports** across programs, projects, surveys, and observations, making this setup suitable for end-to-end project execution and assessment workflows in real-world deployments.
 
 #### I. Docker Setup (Recommended)
 
-- [Setup guide for Linux](https://github.com/ELEVATE-Project/project-service/blob/setupGuideWithSurvey/documentation/3.4.0/setup/docker/project-with-survey/ubuntu/README.md)  
-- [Setup guide for macOS](link/to/samiksha/docker/macos/README)  
-- [Setup guide for Windows](link/to/samiksha/docker/windows/README)  
+- [Setup guide for Linux](https://github.com/ELEVATE-Project/project-service/blob/main/documentation/3.4.0/setup/docker/project-with-survey/ubuntu/README.md)  
+- [Setup guide for macOS](https://github.com/ELEVATE-Project/project-service/blob/main/documentation/3.4.0/setup/docker/project-with-survey/mac-os/README.md)  
+- [Setup guide for Windows](https://github.com/ELEVATE-Project/project-service/blob/main/documentation/3.4.0/setup/docker/project-with-survey/windows/README.md)  
 
 <br>
 
 #### II. Native Setup (PM2 Managed Services)
 
-- [Setup guide for Linux](https://github.com/ELEVATE-Project/project-service/blob/setupGuideWithSurvey/documentation/3.4.0/setup/native/project-with-survey/ubuntu/README.md)  
+- [Setup guide for Linux](https://github.com/ELEVATE-Project/project-service/blob/main/documentation/3.4.0/setup/native/project-with-survey/ubuntu/README.md)  
 - [Setup guide for macOS](link/to/samiksha/native/macos/README)  
 - [Setup guide for Windows](link/to/samiksha/native/windows/README) 
 

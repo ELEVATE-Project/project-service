@@ -161,12 +161,12 @@ module.exports = class UserProjectsHelper {
 				})
 
 				if (process.env.SUBMISSION_LEVEL == 'USER') {
-					if (!(userProject[0].userId == userId)) {
-						throw {
-							status: HTTP_STATUS_CODE.bad_request.status,
-							message: CONSTANTS.apiResponses.USER_PROJECT_NOT_FOUND,
-						}
-					}
+					// if (!(userProject[0].userId == userId)) {
+					// 	throw {
+					// 		status: HTTP_STATUS_CODE.bad_request.status,
+					// 		message: CONSTANTS.apiResponses.USER_PROJECT_NOT_FOUND,
+					// 	}
+					// }
 				} else {
 					// validate user authenticity if the acl.visibility of project is SELf or SPECIFIC
 					if (
@@ -376,6 +376,19 @@ module.exports = class UserProjectsHelper {
 
 					updateProject.tasks = await _projectTask(data.tasks)
 
+					// Add metaInformation for custom tasks right after _projectTask processing
+					updateProject.tasks.forEach((task) => {
+						if (task.isACustomTask === true || task.isACustomTask === 'true') {
+							if (!task.metaInformation) {
+								task.metaInformation = {}
+							}
+							// Use buttonLabel from request if present, else default to "Upload"
+							task.metaInformation.buttonLabel = task.metaInformation.buttonLabel || 'Upload'
+							// Use icon from request if present, else default to "Upload"
+							task.metaInformation.icon = task.metaInformation.icon || 'Upload'
+						}
+					})
+
 					if (userProject[0].tasks && userProject[0].tasks.length > 0) {
 						// Helper function to recursively find a task by _id in nested structure
 						// This searches in both existing tasks and newly processed tasks
@@ -440,7 +453,44 @@ module.exports = class UserProjectsHelper {
 						// Pass 1: Merge all tasks first (so we can find parents that are also being updated)
 						// Pass 2: Handle parent-child relationships
 
-						// First pass: Merge tasks into userProject[0].tasks
+						// Helper function to recursively find and update a task by _id at any nesting level
+						const findAndUpdateTaskRecursively = (tasks, taskToUpdate) => {
+							for (let i = 0; i < tasks.length; i++) {
+								// Compare as strings to handle ObjectId vs string
+								if (String(tasks[i]._id) === String(taskToUpdate._id)) {
+									// Found the task - update it
+									let keepFieldsFromTask = ['observationInformation', 'submissions']
+
+									removeFieldsFromRequest.forEach((removeField) => {
+										delete tasks[i][removeField]
+									})
+
+									keepFieldsFromTask.forEach((field) => {
+										if (tasks[i][field]) {
+											taskToUpdate[field] = tasks[i][field]
+										}
+									})
+
+									// Merge existing task data with updates
+									tasks[i] = {
+										...tasks[i],
+										...taskToUpdate,
+										updatedBy: userId,
+										updatedAt: new Date(),
+									}
+									return true
+								}
+								// Recursively search in children
+								if (tasks[i].children && tasks[i].children.length > 0) {
+									if (findAndUpdateTaskRecursively(tasks[i].children, taskToUpdate)) {
+										return true
+									}
+								}
+							}
+							return false
+						}
+
+						// First pass: Merge tasks into userProject[0].tasks (recursively find and update existing tasks)
 						updateProject.tasks.forEach((task) => {
 							task.updatedBy = userId
 							task.updatedAt = new Date()
@@ -451,28 +501,26 @@ module.exports = class UserProjectsHelper {
 								delete task[' parentId']
 							}
 
-							let taskIndex = userProject[0].tasks.findIndex(
-								(projectTask) => String(projectTask._id) === String(task._id)
-							)
+							// Try to find and update the task recursively (at any nesting level)
+							const taskFound = findAndUpdateTaskRecursively(userProject[0].tasks, task)
 
-							if (taskIndex < 0) {
-								// New task - add to root tasks array
+							if (!taskFound) {
+								// Task not found - it's a new task, treat as custom task
+								// Mark as custom task if not already set
+								if (task.isACustomTask !== true && task.isACustomTask !== 'true') {
+									task.isACustomTask = true
+								}
+
+								// Add metaInformation for all new custom tasks
+								if (!task.metaInformation) {
+									task.metaInformation = {}
+								}
+								// Use buttonLabel from request if present, else default to "Upload"
+								task.metaInformation.buttonLabel = task.metaInformation.buttonLabel || 'Upload'
+								// Use icon from request if present, else default to "Upload"
+								task.metaInformation.icon = task.metaInformation.icon || 'Upload'
+
 								userProject[0].tasks.push(task)
-							} else {
-								// Existing task - update it
-								let keepFieldsFromTask = ['observationInformation', 'submissions']
-
-								removeFieldsFromRequest.forEach((removeField) => {
-									delete userProject[0].tasks[taskIndex][removeField]
-								})
-
-								keepFieldsFromTask.forEach((field) => {
-									if (userProject[0].tasks[taskIndex][field]) {
-										task[field] = userProject[0].tasks[taskIndex][field]
-									}
-								})
-
-								userProject[0].tasks[taskIndex] = task
 							}
 						})
 

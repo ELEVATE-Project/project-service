@@ -27,25 +27,8 @@ This document outlines the detailed deployment steps, environment changes, migra
 
 ```json
 {
-	"API_DOC_URL": "/interface/api-doc",
-	"APPLICATION_ENV": "production",
-	"APPLICATION_PORT": "3567",
-	"DEBUG_MODE": true,
-	"ENTITY_SERVICE_BASE_URL": "http://localhost:5002",
-	"MENTORING_SERVICE_BASE_URL": "http://localhost:7101",
-	"NOTIFICATION_SERVICE_BASE_URL": "http://localhost:7201",
-	"PROJECT_SERVICE_BASE_URL": "http://localhost:5003",
-	"RATE_LIMITER_ENABLED": true,
-	"RATE_LIMITER_GENERAL_LIMIT": 50,
-	"RATE_LIMITER_NUMBER_OF_PROXIES": 3,
-	"RATE_LIMITER_PUBLIC_LOW_LIMIT": 5,
-	"REQUIRED_BASE_PACKAGES": "project,self-creation-portal,survey",
-	"REQUIRED_PACKAGES": "elevate-project@1.1.34  elevate-self-creation-portal@1.0.64 elevate-survey-observation@1.0.3",
-	"ROUTE_CONFIG_JSON_URLS_PATHS": "https://raw.githubusercontent.com/ELEVATE-Project/utils/refs/heads/master/interface-routes/elevate-routes.json",
-	"SCHEDULER_SERVICE_BASE_URL": "http://localhost:7401",
-	"SUPPORTED_HTTP_TYPES": "GET POST PUT PATCH DELETE",
-	"SURVEY_SERVICE_BASE_URL": "http://localhost:5007",
-	"USER_SERVICE_BASE_URL": "http://localhost:7001"
+	"REQUIRED_PACKAGES": "elevate-project@1.1.53 elevate-survey-observation@1.0.23", // update these values
+	"ROUTE_CONFIG_JSON_URLS_PATHS": "https://raw.githubusercontent.com/ELEVATE-Project/utils/refs/heads/master/interface-routes/elevate-routes.json"
 }
 ```
 
@@ -160,6 +143,10 @@ node correctScopeOrgValues.js
 # M3. Update program components
 cd migrations/
 node updateComponentsOfAllPrograms.js
+
+# M4. Create default org policies
+cd migrations/createOrgExtensions
+node createOrgExtensions.js
 ```
 
 ### 3. PM2 Deployment

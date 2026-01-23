@@ -5447,9 +5447,9 @@ async function _projectTask(
 						singleTask.solutionDetails._id,
 						'',
 						{
-							name: `${singleTask.solutionDetails.name}-${timestamp}`,
+							name: `${singleTask.solutionDetails.name}`,
 							externalId: `${singleTask.solutionDetails.externalId}-${timestamp}`,
-							description: `${singleTask.solutionDetails.name}-${timestamp}`,
+							description: `${singleTask.solutionDetails.name}`,
 							programExternalId: programId,
 							status: CONSTANTS.common.PUBLISHED_STATUS,
 							tenantData: userDetails.tenantAndOrgInfo,

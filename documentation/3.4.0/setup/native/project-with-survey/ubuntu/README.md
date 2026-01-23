@@ -22,7 +22,7 @@ The Project building block facilitates the creation and engagement with micro-im
 
 # Native Setup Project Service - With Survey (Ubuntu)
 
-</details>
+## PM2 Managed Services & Natively Installed Dependencies
 
 ### System Requirements
 

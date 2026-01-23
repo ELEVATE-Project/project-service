@@ -161,12 +161,12 @@ module.exports = class UserProjectsHelper {
 				})
 
 				if (process.env.SUBMISSION_LEVEL == 'USER') {
-					// if (!(userProject[0].userId == userId)) {
-					// 	throw {
-					// 		status: HTTP_STATUS_CODE.bad_request.status,
-					// 		message: CONSTANTS.apiResponses.USER_PROJECT_NOT_FOUND,
-					// 	}
-					// }
+					if (!(userProject[0].userId == userId)) {
+						throw {
+							status: HTTP_STATUS_CODE.bad_request.status,
+							message: CONSTANTS.apiResponses.USER_PROJECT_NOT_FOUND,
+						}
+					}
 				} else {
 					// validate user authenticity if the acl.visibility of project is SELf or SPECIFIC
 					if (

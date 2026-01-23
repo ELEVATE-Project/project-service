@@ -4932,7 +4932,7 @@ module.exports = class UserProjectsHelper {
 					},
 					createdBy: createdBy,
 					updatedBy: createdBy,
-					referenceFrom: new ObjectId(project.referenceFrom),
+					referenceFrom: project.referenceFrom ? new ObjectId(project.referenceFrom) : null,
 					tenantId: project.tenantId,
 					orgId: project.orgId,
 				})

@@ -4503,6 +4503,13 @@ module.exports = class UserProjectsHelper {
 					['_id', 'title', 'categories', 'solutionId', 'solutionExternalId', 'externalId', 'taskSequence']
 				)
 
+				if (validTemplates.length !== templates.length) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.PROJECT_TEMPLATE_NOT_FOUND,
+					}
+				}
+
 				// Collect all unique category IDs from templates
 				let allCategoryIds = []
 				const categoryIdSet = new Set() // To avoid duplicates
@@ -4528,13 +4535,6 @@ module.exports = class UserProjectsHelper {
 						},
 						['_id', 'name', 'externalId', 'evidences']
 					)
-				}
-
-				if (validTemplates.length !== templates.length) {
-					throw {
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: CONSTANTS.apiResponses.PROJECT_TEMPLATE_NOT_FOUND,
-					}
 				}
 
 				// Step 2: Always Create New Program & Solution
@@ -4614,6 +4614,12 @@ module.exports = class UserProjectsHelper {
 					createdAt: new Date(),
 					updatedAt: new Date(),
 				}
+
+				// Add project templates to project data
+				projectData.projectTemplates = validTemplates.map((template) => ({
+					_id: template._id instanceof global.ObjectId ? template._id : new global.ObjectId(template._id),
+					externalId: template.externalId,
+				}))
 
 				// Add entity information if provided
 				if (entityId) {

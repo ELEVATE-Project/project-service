@@ -82,9 +82,9 @@ module.exports = {
 		},
 
 		// ============================================
-		// TAGS (OPTIONAL - FOR FILTERING/SEARCH)
+		// keywords (OPTIONAL - FOR FILTERING/SEARCH)
 		// ============================================
-		tags: {
+		keywords: {
 			type: [String],
 			default: [],
 			description: 'Optional tags for categorization and search',

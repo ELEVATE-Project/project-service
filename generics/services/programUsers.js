@@ -164,9 +164,10 @@ module.exports = class ProgramUsersService {
 				)
 				if (filteredEntities.length === 0) {
 					return {
-						status: 404,
+						status: 200,
 						message: 'Entity not found',
-						data: [],
+						data: { data: [], overview: docData.overview || {} },
+						result: { data: [], overview: docData.overview || {} },
 					}
 				}
 			}
@@ -196,10 +197,12 @@ module.exports = class ProgramUsersService {
 
 			// Throw error if no valid users returned from service
 			if (!success || !data || data.count === 0) {
-				throw {
-					success: false,
-					status: HTTP_STATUS_CODE.bad_request.status,
+				return {
+					success: true,
+					status: 200,
 					message: 'No valid users found for the provided entity user IDs.',
+					data: { data: [], overview: docData.overview || {} },
+					result: { data: [], overview: docData.overview || {} },
 				}
 			}
 

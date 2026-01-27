@@ -106,7 +106,7 @@ To enable the Citus extension for user services, follow these steps.
 
 To enable full functionality, including certificate generation and report storage, you must configure cloud credentials in the Project Service environment file.
 
-    Path: project_env
+    Path: ./project_env
 
 Add or update the following variables in the .env file, substituting the example values with your actual cloud credentials:
 

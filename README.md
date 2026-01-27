@@ -162,7 +162,7 @@ This README is focused on the **3.4.0 Setup Guide** for the Projects Service.
   All setup links above point to the **3.4.0** guides.
 
 - **Legacy Version (1.0.0) Documentation**  
-  <a href="https://github.com/ELEVATE-Project/project-service/blob/setupGuide-3.4/documentation/1.0.0/ReadMe.md" target="_blank">
+  <a href="https://github.com/ELEVATE-Project/project-service/blob/main/documentation/1.0.0/ReadMe.md" target="_blank">
     View 1.0.0 Documentation
   </a>
 

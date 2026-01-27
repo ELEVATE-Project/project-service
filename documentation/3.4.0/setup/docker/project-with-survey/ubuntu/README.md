@@ -51,7 +51,7 @@ done
 
 1. **Download and execute main setup script:** Execute the following command in your terminal from the project directory.
     ```
-    curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuideWithSurvey/documentation/3.4.0/dockerized/scripts/project-with-survey/ubuntu/setup_project.sh && chmod +x setup_project.sh && sudo ./setup_project.sh
+    curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/dockerized/scripts/project-with-survey/ubuntu/setup_project.sh && chmod +x setup_project.sh && sudo ./setup_project.sh
     ```
 
 > Note : The script will download all the essential files and launch the services in Docker. Once all services are successfully up and running, you can proceed to the next steps.
@@ -103,11 +103,11 @@ To enable the Citus extension for user services, follow these steps.
 To enable full functionality—including certificate generation, attachment uploads, and report storage—you must configure cloud credentials in the environment files for both services.
 
 A. Project Service Configuration Path:
-    ```./project/project_env
+    ```./project_env
     ```
 
 B. Samiksha (Survey & Observation) Service Configuration Path:
-    ```.project/samiksha_env
+    ```./samiksha_env
     ```
 
 Add or update the following variables in the .env file, substituting the example values with your actual cloud credentials:

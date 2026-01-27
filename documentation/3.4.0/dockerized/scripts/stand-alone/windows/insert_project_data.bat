@@ -10,13 +10,13 @@ echo Downloading entity sample data files...
 echo ------------------------------------------
 
 curl -L -o entity_sampleData.js ^
-https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsStandAlone/documentation/3.4.0/dockerized/scripts/stand-alone/windows/entity_sampleData.js
+https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/common-files/dockerized/stand-alone/entity_sampleData.js
 
 curl -L -o project_sampleData.js ^
-https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsStandAlone/documentation/3.4.0/dockerized/scripts/stand-alone/windows/project_sampleData.js
+https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/common-files/dockerized/stand-alone/project_sampleData.js
 
 curl -L -o insert_sample_solutions.js ^
-https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsStandAlone/documentation/3.4.0/dockerized/scripts/stand-alone/windows/insert_sample_solutions.js
+https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/common-files/dockerized/stand-alone/insert_sample_solutions.js
 
 echo.
 echo Files downloaded successfully.
@@ -42,7 +42,7 @@ echo.
 echo Installing mongodb npm package...
 npm -v >nul 2>&1
 
-
+npm install mongodb
 REM ------------------------------------------------
 REM Check and install MongoDB Server
 REM ------------------------------------------------

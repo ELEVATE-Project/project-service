@@ -66,6 +66,9 @@ log "Environment files downloaded."
 log "Downloading docker-compose scripts..."
 curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/dockerized/scripts/stand-alone/mac-os/docker-compose-up.sh
 curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/dockerized/scripts/stand-alone/mac-os/docker-compose-down.sh
+chmod +x docker-compose-down.sh
+chmod +x docker-compose-up.sh
+
 chmod +x docker-compose-up.sh docker-compose-down.sh
 
 # ---- SAFE patch (command only, filenames untouched)

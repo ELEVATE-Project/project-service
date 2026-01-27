@@ -4709,6 +4709,11 @@ module.exports = class UserProjectsHelper {
 					// e. Process Custom Tasks if provided
 					let processedCustomTasks = []
 					if (template.customTasks && template.customTasks.length > 0) {
+						// Preserve metaInformation from original request before processing
+						const originalMetaInformation = template.customTasks.map((task) => {
+							return task && task.metaInformation ? { ...task.metaInformation } : null
+						})
+
 						// Ensure all custom tasks have _id before processing
 						const customTasksWithIds = template.customTasks
 							.map((task) => {
@@ -4738,13 +4743,33 @@ module.exports = class UserProjectsHelper {
 							processedCustomTasks = []
 						}
 
-						// Mark all custom tasks as isACustomTask: true
-						processedCustomTasks.forEach((customTask) => {
+						// Mark all custom tasks as isACustomTask: true and add metaInformation
+						processedCustomTasks.forEach((customTask, index) => {
 							customTask.isACustomTask = true
 							customTask.createdBy = userId
 							customTask.updatedBy = userId
 							customTask.createdAt = new Date()
 							customTask.updatedAt = new Date()
+
+							// Add metaInformation for custom tasks
+							if (!customTask.metaInformation) {
+								customTask.metaInformation = {}
+							}
+
+							// Use metaInformation from original request if present, else use defaults
+							const originalMeta = originalMetaInformation[index]
+							if (originalMeta) {
+								// Merge original metaInformation with processed task's metaInformation
+								customTask.metaInformation.buttonLabel =
+									originalMeta.buttonLabel || customTask.metaInformation.buttonLabel || 'Upload'
+								customTask.metaInformation.icon =
+									originalMeta.icon || customTask.metaInformation.icon || 'Upload'
+							} else {
+								// No metaInformation in original request, use defaults
+								customTask.metaInformation.buttonLabel =
+									customTask.metaInformation.buttonLabel || 'Upload'
+								customTask.metaInformation.icon = customTask.metaInformation.icon || 'Upload'
+							}
 						})
 					}
 

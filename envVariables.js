@@ -245,6 +245,11 @@ let enviromentVariables = {
 		optional: true,
 		default: 'internal_access_token',
 	},
+	PROGRAM_USERS_ENTITIES: {
+		message: 'The program users entities type',
+		optional: true,
+		default: 'users',
+	},
 }
 
 let success = true

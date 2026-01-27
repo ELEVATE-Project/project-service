@@ -1078,4 +1078,73 @@ module.exports = {
 	strictObjectIdCheck,
 	upperCase: upperCase,
 	addSolutionsWithOrdersForProgramComponent,
+	/**
+	 * Sync project template fields between old (single) and new (array) formats
+	 * This ensures backward compatibility when reading/writing projects
+	 * @param {Object} projectData - Project data object
+	 * @param {String} direction - 'normalize' (old->new) or 'legacy' (new->old) or 'sync' (both ways)
+	 * @returns {Object} Project data with synced template fields
+	 */
+	syncProjectTemplates: function (projectData) {
+		if (!projectData || typeof projectData !== 'object') {
+			return projectData
+		}
+
+		const ObjectId = global.ObjectId || require('mongoose').Types.ObjectId
+
+		if (
+			(projectData.projectTemplateId || projectData.projectTemplateExternalId) &&
+			(!projectData.projectTemplates || projectData.projectTemplates.length === 0)
+		) {
+			projectData.projectTemplates = []
+			if (projectData.projectTemplateId) {
+				projectData.projectTemplates.push({
+					_id:
+						projectData.projectTemplateId instanceof ObjectId
+							? projectData.projectTemplateId
+							: new ObjectId(projectData.projectTemplateId),
+					externalId: projectData.projectTemplateExternalId || '',
+					addedAt: new Date(),
+				})
+			}
+		}
+
+		return projectData
+	},
+
+	/**
+	 * Build query to search projects by template ID (supports both legacy and new formats)
+	 * @param {String|ObjectId|Array} templateIds - Single template ID or array of template IDs
+	 * @param {Object} additionalFilters - Additional query filters (e.g., { tenantId, orgId, status })
+	 * @returns {Object} MongoDB query object
+	 */
+	buildProjectTemplateQuery: function (templateIds, additionalFilters = {}) {
+		if (!templateIds) {
+			return additionalFilters
+		}
+
+		const ObjectId = global.ObjectId || require('mongoose').Types.ObjectId
+
+		// Normalize templateIds to array
+		const templateIdsArray = Array.isArray(templateIds) ? templateIds : [templateIds]
+
+		// Convert to ObjectIds
+		const templateObjectIds = templateIdsArray.map((id) => (id instanceof ObjectId ? id : new ObjectId(id)))
+
+		// Build query that searches both legacy and new formats
+		const templateQuery = {
+			$or: [
+				// Legacy single template field
+				{ projectTemplateId: { $in: templateObjectIds } },
+				// New multiple templates array field
+				{ 'projectTemplates._id': { $in: templateObjectIds } },
+			],
+		}
+
+		// Merge with additional filters
+		return {
+			...additionalFilters,
+			...templateQuery,
+		}
+	},
 }

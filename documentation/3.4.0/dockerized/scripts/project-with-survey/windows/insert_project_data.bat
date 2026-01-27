@@ -45,7 +45,7 @@ echo.
 echo Installing mongodb npm package...
 npm -v >nul 2>&1
 
-
+npm install mongodb
 REM ------------------------------------------------
 REM Check and install MongoDB Server
 REM ------------------------------------------------

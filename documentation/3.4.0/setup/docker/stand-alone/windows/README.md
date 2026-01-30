@@ -26,7 +26,8 @@ Expectation: By diligently following the outlined steps, you will successfully e
 
 ## Prerequisites
 
-To set up the Project application, ensure you have Docker and Docker Compose installed on your system. For Linux users, detailed installation instructions for both can be found in the documentation here: [How To Install and Use Docker Compose on Linux](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-compose-on-ubuntu-20-04). To install and use Nodejs in Linux machine, you can follow instructions here: [How To Install Nodejs in Linux](https://nodejs.org/en/download/package-manager).
+To set up the Project application, ensure you have Docker and Docker Compose installed on your system. For Windows users, detailed installation instructions for both can be found in the documentation here: [How To Install and Use Docker Compose on Linux](https://docs.docker.com/desktop/setup/install/windows-install/). To install and use Nodejs in Window machine, you can follow instructions here: [How To Install Nodejs in Linux](https://nodejs.org/en/download/package-manager).
+
 
 ## Installation
 
@@ -87,7 +88,7 @@ for %p in (3001 3002 6000 5001 4000 9092 5432 7007 2181 27017 3569) do @(
 4.  **Download `Config` File**
 
    ```
-   curl -L https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/common-files/dockerized/project-with-survey/configFile.json -o config.json
+   curl -L https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/common-files/generics/configFile.json -o config.json
    ```
 
 
@@ -260,6 +261,7 @@ This step will guide us in implementing a sample project solution following the 
        ```
 
 </details>
+
 ## 🌐 Micro-Frontend (FE) Setup
 
 The ELEVATE application uses a micro-frontend architecture. After setting up the backend services, you must configure and run the frontend repositories to access the application via the portal.

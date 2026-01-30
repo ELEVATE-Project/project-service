@@ -60,7 +60,7 @@ log "sample data scripts downloaded."
 
 
 log "Downloading config.json file..."
-curl -L https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/common-files/dockerized/project-with-survey/configFile.json -o config.json
+curl -L https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/common-files/generics/configFile.json -o config.json
 log "config.json file is downloaded."
 
 # Step 13: Run docker-compose-up.sh script

@@ -1,9 +1,9 @@
 const { MongoClient } = require('mongodb')
 
 const url = 'mongodb://localhost:27017/' // MongoDB URL
-const dbName = 'elevate-project'
-const dbName2 = 'elevate-entity'
-const dbName3 = "elevate-samiksha";
+const projectDB = 'elevate-project'
+const entityDB = 'elevate-entity'
+const samikshaDB = "elevate-samiksha";
 const entityData = require('./entity_sampleData.js')
 const projectData = require('./project_sampleData.js')
 const surveyData = require("./survey_sampleData.js");
@@ -48,7 +48,7 @@ async function cleanData(collectionName, currentDB) {
  * @param {Array<Object>} dataFile The array of documents to insert.
  * @param {string} currentDB The name of the database.
  */
-async function insertData(collectionName, dataFile, currentDB = dbName) {
+async function insertData(collectionName, dataFile, currentDB = projectDB) {
 	const client = new MongoClient(url)
 
 	try {
@@ -119,25 +119,25 @@ async function insertData(collectionName, dataFile, currentDB = dbName) {
 
 async function main({ dataToBeInserted }) {
 	const collectionsToInsert = [
-		{ name: 'entities', data: dataToBeInserted.entities, db: dbName2 },
-		{ name: 'entityTypes', data: dataToBeInserted.entityType, db: dbName2 },
-		{ name: 'programs', data: dataToBeInserted.programData, db: dbName },
-		{ name: 'solutions', data: dataToBeInserted.solutionData, db: dbName },
-		{ name: 'projectTemplates', data: dataToBeInserted.projectTemplatesData, db: dbName },
-		{ name: 'projectTemplateTasks', data: dataToBeInserted.projectTemplateTasksData, db: dbName },
-		{ name: 'certificateTemplates', data: dataToBeInserted.certificateTemplatesData, db: dbName },
-		{ name: 'certificateBaseTemplates', data: dataToBeInserted.certificateBaseTemplatesData, db: dbName },
-		{ name: 'projectCategories', data: dataToBeInserted.projectCategoriesData, db: dbName },
-		{ name: 'configurations', data: dataToBeInserted.configurationData, db: dbName },
-		{ name: 'organizationExtension', data: dataToBeInserted.organizationExtensionData, db: dbName },
-    	{ name: "solutions", data: dataToBeInserted.solutionData, db:dbName3},
-    	{ name: "criteria",  data:dataToBeInserted.criteriaData, db : dbName3},
-    	{ name: "criteriaQuestions", data: dataToBeInserted.criteriaQuestionsData, db : dbName3},
-    	{ name: "frameworks", data: dataToBeInserted.frameworkData, db : dbName3},
-    	{ name: "questions", data: dataToBeInserted.questionsData, db : dbName3},
-		{ name: "observations", data: dataToBeInserted.observationData, db : dbName3},
-    	{ name: "surveys", data: dataToBeInserted.surveyData, db : dbName3},
-    	{ name: "organizationExtension", data: dataToBeInserted.organizationExtensionData, db : dbName3},
+		{ name: 'entities', data: dataToBeInserted.entities, db: entityDB },
+		{ name: 'entityTypes', data: dataToBeInserted.entityType, db: entityDB },
+		{ name: 'programs', data: dataToBeInserted.programData, db: projectDB },
+		{ name: 'solutions', data: dataToBeInserted.solutionData, db: projectDB },
+		{ name: 'projectTemplates', data: dataToBeInserted.projectTemplatesData, db: projectDB },
+		{ name: 'projectTemplateTasks', data: dataToBeInserted.projectTemplateTasksData, db: projectDB },
+		{ name: 'certificateTemplates', data: dataToBeInserted.certificateTemplatesData, db: projectDB },
+		{ name: 'certificateBaseTemplates', data: dataToBeInserted.certificateBaseTemplatesData, db: projectDB },
+		{ name: 'projectCategories', data: dataToBeInserted.projectCategoriesData, db: projectDB },
+		{ name: 'configurations', data: dataToBeInserted.configurationData, db: projectDB },
+		{ name: 'organizationExtension', data: dataToBeInserted.organizationExtensionData, db: projectDB },
+    	{ name: "solutions", data: dataToBeInserted.solutionData, db:samikshaDB},
+    	{ name: "criteria",  data:dataToBeInserted.criteriaData, db : samikshaDB},
+    	{ name: "criteriaQuestions", data: dataToBeInserted.criteriaQuestionsData, db : samikshaDB},
+    	{ name: "frameworks", data: dataToBeInserted.frameworkData, db : samikshaDB},
+    	{ name: "questions", data: dataToBeInserted.questionsData, db : samikshaDB},
+		{ name: "observations", data: dataToBeInserted.observationData, db : samikshaDB},
+    	{ name: "surveys", data: dataToBeInserted.surveyData, db : samikshaDB},
+    	{ name: "organizationExtension", data: dataToBeInserted.organizationExtensionData, db : samikshaDB},
 
 	]
 

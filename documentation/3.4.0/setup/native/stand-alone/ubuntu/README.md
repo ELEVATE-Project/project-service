@@ -24,7 +24,7 @@ The Project building block facilitates the creation and engagement with micro-im
 
 # Native Setup Project Service - Stand Alone (Ubuntu)
 
-## PM2 Managed Services & Natively Installed Dependencies
+This section describes the native setup, where all required dependencies and services are installed and managed directly on the host system using PM2, without Docker. This setup is primarily intended for local development and debugging.
 
 ### System Requirements
 
@@ -119,8 +119,8 @@ curl -L -o scheduler/src/.env https://raw.githubusercontent.com/ELEVATE-Project/
 5.  **Attaching Config File**
 
     ```
-    curl -L -o project-service/config.json https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/common-files/native/project-with-survey/configFile.json && \
-    curl -L -o entity-management/src/config.json https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/common-files/native/project-with-survey/configFile.json
+    curl -L -o project-service/config.json https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/common-files/generics/configFile.json && \
+    curl -L -o entity-management/src/config.json https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/common-files/generics/configFile.json
     ```
 
 6.  **Create Databases**

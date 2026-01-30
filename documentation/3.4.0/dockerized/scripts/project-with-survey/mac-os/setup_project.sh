@@ -117,7 +117,7 @@ log "MongoDB Node driver installed."
 # Step 10: config.json
 # -----------------------------
 log "Downloading config.json..."
-curl -L https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/common-files/dockerized/project-with-survey/configFile.json -o config.json
+curl -L https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/common-files/generics/configFile.json -o config.json
 log "config.json downloaded."
 
 # -----------------------------

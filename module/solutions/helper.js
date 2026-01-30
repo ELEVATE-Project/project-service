@@ -701,16 +701,34 @@ module.exports = class SolutionsHelper {
 					Object.keys(
 						_.omit(data, ['role', 'filter', 'factors', 'type', 'tenantId', 'orgId', 'organizations'])
 					).forEach((key) => {
-						data[key] = data[key].split(',')
+						// Only split if the value exists and is a string
+						if (typeof data[key] === 'string') {
+							data[key] = data[key].split(',')
+						}
 					})
 					// If validate entity set to ON . strict scoping should be applied
 					Object.keys(
 						_.omit(data, ['filter', 'role', 'factors', 'type', 'tenantId', 'orgId', 'organizations'])
 					).forEach((requestedDataKey) => {
-						registryIds.push(...data[requestedDataKey])
+						// 1. Get the value
+						const value = data[requestedDataKey]
+
+						// 2. Ensure it is an array before spreading
+						// If it's a string, split it. If it's already an array, use it. Otherwise, use an empty array.
+						const normalizedArray = Array.isArray(value)
+							? value
+							: typeof value === 'string'
+							? value.split(',')
+							: []
+
+						// 3. Spread safely
+						registryIds.push(...normalizedArray)
 						entityTypes.push(requestedDataKey)
 					})
-					if (!registryIds.length > 0) {
+
+					// Minor logic fix: "if (!registryIds.length > 0)" is a bit messy.
+					// Use "if (registryIds.length === 0)" for clarity.
+					if (registryIds.length === 0) {
 						throw {
 							message: CONSTANTS.apiResponses.NO_LOCATION_ID_FOUND_IN_DATA,
 						}

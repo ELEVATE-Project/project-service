@@ -1648,7 +1648,9 @@ module.exports = class UserProjectsHelper {
 							projectTemplateId,
 							userId,
 							tenantId,
-							orgId
+							orgId,
+							userDetails,
+							solutionDetails.programId
 						)
 						if (!projectCreation.success) {
 							return resolve(projectCreation)
@@ -2070,7 +2072,7 @@ module.exports = class UserProjectsHelper {
 	 * @returns {String} - message.
 	 */
 
-	static userAssignedProjectCreation(templateId, userId, tenantId, orgId) {
+	static userAssignedProjectCreation(templateId, userId, tenantId, orgId, userDetails = {}, programId = '') {
 		return new Promise(async (resolve, reject) => {
 			try {
 				const projectTemplateData = await projectTemplateQueries.templateDocument(
@@ -2112,7 +2114,7 @@ module.exports = class UserProjectsHelper {
 						orgId
 					)
 					if (tasksAndSubTasks.length > 0) {
-						result.tasks = await _projectTask(tasksAndSubTasks)
+						result.tasks = await _projectTask(tasksAndSubTasks, false, '', '', programId, userDetails)
 						result.tasks.forEach((task) => {
 							if (
 								task &&

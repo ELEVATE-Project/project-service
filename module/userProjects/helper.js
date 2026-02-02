@@ -4681,8 +4681,42 @@ module.exports = class UserProjectsHelper {
 						continue
 					}
 
+					let excludedExternalIds = []
+					let filteredTemplateTasks = templateTasks
+					if (
+						template.excludedTaskIds &&
+						Array.isArray(template.excludedTaskIds) &&
+						template.excludedTaskIds.length > 0
+					) {
+						// Create a map for quick task lookup
+						const templateTaskMap = new Map(templateTasks.map((task) => [task._id.toString(), task]))
+
+						for (const taskId of template.excludedTaskIds) {
+							const task = templateTaskMap.get(taskId.toString())
+							if (!task) {
+								throw {
+									status: HTTP_STATUS_CODE.bad_request.status,
+									message: `Task ID ${taskId} not found in template ${template.templateId}`,
+								}
+							}
+
+							const isDeletable = task.hasOwnProperty('isDeletable') ? task.isDeletable : false
+							if (!isDeletable) {
+								throw {
+									status: HTTP_STATUS_CODE.bad_request.status,
+									message: `Task ${task.name} (${taskId}) is not deletable and cannot be excluded`,
+								}
+							}
+							excludedExternalIds.push(task.externalId)
+						}
+
+						filteredTemplateTasks = templateTasks.filter(
+							(task) => !template.excludedTaskIds.includes(task._id.toString())
+						)
+					}
+
 					// Ensure all tasks have _id before processing (required by _projectTask)
-					const tasksWithIds = templateTasks
+					const tasksWithIds = filteredTemplateTasks
 						.map((task) => {
 							if (task && !task._id) {
 								task._id = uuidv4()
@@ -4803,6 +4837,11 @@ module.exports = class UserProjectsHelper {
 
 					// If template has taskSequence, use it to order the subtasks
 					if (templateData.taskSequence && templateData.taskSequence.length > 0) {
+						// Filter out excluded external IDs from template's taskSequence
+						const filteredTemplateTaskSequence = templateData.taskSequence.filter(
+							(extId) => !excludedExternalIds.includes(extId)
+						)
+
 						// Create a map of externalId to task for quick lookup
 						const taskMap = new Map()
 						allSubTasks.forEach((task) => {
@@ -4812,7 +4851,7 @@ module.exports = class UserProjectsHelper {
 						})
 
 						// First, add tasks in template's taskSequence order
-						templateData.taskSequence.forEach((templateTaskExternalId) => {
+						filteredTemplateTaskSequence.forEach((templateTaskExternalId) => {
 							const task = taskMap.get(templateTaskExternalId)
 							if (task && task.externalId) {
 								improvementTaskSequence.push(task.externalId)

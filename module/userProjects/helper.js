@@ -36,6 +36,8 @@ const projectService = require(SERVICES_BASE_PATH + '/projects')
 const defaultUserProfileConfig = require('@config/defaultUserProfileDeleteConfig')
 const configFilePath = process.env.AUTH_CONFIG_FILE_PATH
 const surveyService = require(SERVICES_BASE_PATH + '/survey')
+const programUsersService = require(SERVICES_BASE_PATH + '/programUsers')
+const ObjectId = global.ObjectId || require('mongoose').Types.ObjectId
 
 /**
  * UserProjectsHelper
@@ -373,7 +375,7 @@ module.exports = class UserProjectsHelper {
 				if (data.tasks) {
 					let taskReport = {}
 
-					updateProject.tasks = await _projectTask(data.tasks)
+					updateProject.tasks = await _projectTask(data.tasks, false, '', '', data.programId, userDetails)
 
 					if (userProject[0].tasks && userProject[0].tasks.length > 0) {
 						updateProject.tasks.forEach((task) => {
@@ -1291,7 +1293,7 @@ module.exports = class UserProjectsHelper {
                                      "programId": "685140cbf891ccf74e05baf9",
                                      "observationId": "685146542054fe175c7150c8",
                                     "solutionId": "685140d1ffc25f705c56e99e",
-					               } 
+					               }
                                }
 
 						*/
@@ -1646,7 +1648,9 @@ module.exports = class UserProjectsHelper {
 							projectTemplateId,
 							userId,
 							tenantId,
-							orgId
+							orgId,
+							userDetails,
+							solutionDetails.programId
 						)
 						if (!projectCreation.success) {
 							return resolve(projectCreation)
@@ -2068,7 +2072,7 @@ module.exports = class UserProjectsHelper {
 	 * @returns {String} - message.
 	 */
 
-	static userAssignedProjectCreation(templateId, userId, tenantId, orgId) {
+	static userAssignedProjectCreation(templateId, userId, tenantId, orgId, userDetails = {}, programId = '') {
 		return new Promise(async (resolve, reject) => {
 			try {
 				const projectTemplateData = await projectTemplateQueries.templateDocument(
@@ -2110,7 +2114,7 @@ module.exports = class UserProjectsHelper {
 						orgId
 					)
 					if (tasksAndSubTasks.length > 0) {
-						result.tasks = await _projectTask(tasksAndSubTasks)
+						result.tasks = await _projectTask(tasksAndSubTasks, false, '', '', programId, userDetails)
 						result.tasks.forEach((task) => {
 							if (
 								task &&
@@ -3089,12 +3093,15 @@ module.exports = class UserProjectsHelper {
 				// If it is valid make sure we add those data to newly creating projects
 				if (requestedData.entityId && requestedData.entityId !== '') {
 					let entityInformation = await entitiesService.entityDocuments(
-						{ _id: requestedData.entityId },
+						{ _id: requestedData.entityId, tenantId: tenantId },
 						CONSTANTS.common.ALL
 					)
 
 					if (!entityInformation?.success || !entityInformation?.data?.length > 0) {
-						return resolve(entityInformation)
+						return resolve({
+							success: false,
+							message: 'Entity information not found for the given entityId',
+						})
 					}
 
 					libraryProjects.data['entityInformation'] = entityInformation.data[0]
@@ -3207,7 +3214,7 @@ module.exports = class UserProjectsHelper {
 
 				//Fetch user profile information.
 				let addReportInfoToSolution = false
-				let userProfile = await projectService.profileRead(userToken)
+				let userProfile = await userService.profile(userId, userToken)
 				// Check if the user profile fetch was successful
 				if (!userProfile.success) {
 					throw {
@@ -4322,7 +4329,7 @@ module.exports = class UserProjectsHelper {
    * deleteUserPIIData function to delete users Data.
    * @method
    * @name deleteUserPIIData
-   * @param {userDeleteEvent} - userDeleteEvent message object 
+   * @param {userDeleteEvent} - userDeleteEvent message object
    * {
       	"entity": "user",
 		"eventType": "delete",
@@ -4435,6 +4442,612 @@ module.exports = class UserProjectsHelper {
 		} catch (err) {}
 	}
 
+	/**
+	 * Create project plan from multiple templates.
+	 * @method
+	 * @name createProjectPlan
+	 * @param {Object} data - request data.
+	 * @param {String} userId - Logged in user id (admin).
+	 * @param {String} userToken - User token.
+	 * @param {Object} userDetails - loggedin user's info
+	 * @returns {Object} Project Plan created information.
+	 */
+	static createProjectPlan(data, userId, userToken, userDetails) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				const { templates, userId: participantId, entityId, programName, projectConfig } = data
+				let tenantId = userDetails.userInformation.tenantId
+				let orgId = userDetails.userInformation.organizationId
+
+				// Step 1: Validations
+				// a. Validate Participant User
+				let userProfile = await userService.profile(participantId, userToken)
+				if (!userProfile.success || !userProfile.data) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.USER_NOT_FOUND,
+					}
+				}
+
+				// b. Validate Entity
+				if (entityId) {
+					let entityInformation = await entitiesService.entityDocuments(
+						{ _id: entityId, tenantId: tenantId },
+						CONSTANTS.common.ALL
+					)
+					if (!entityInformation?.success || !entityInformation?.data?.length > 0) {
+						throw {
+							status: HTTP_STATUS_CODE.bad_request.status,
+							message: CONSTANTS.apiResponses.ENTITY_NOT_FOUND,
+						}
+					}
+				}
+
+				// c. Validate all Template IDs - must exist and be published
+				// Filter out any templates without templateId
+				const templateIds = templates
+					.map((t) => (t && t.templateId ? t.templateId : null))
+					.filter((id) => id !== null)
+
+				if (templateIds.length === 0) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: 'No valid template IDs provided',
+					}
+				}
+
+				const validTemplates = await projectTemplateQueries.templateDocument(
+					{
+						_id: { $in: templateIds },
+						status: CONSTANTS.common.PUBLISHED,
+						tenantId: tenantId,
+					},
+					['_id', 'title', 'categories', 'solutionId', 'solutionExternalId', 'externalId', 'taskSequence']
+				)
+
+				if (validTemplates.length !== templates.length) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.PROJECT_TEMPLATE_NOT_FOUND,
+					}
+				}
+
+				// Collect all unique category IDs from templates
+				let allCategoryIds = []
+				const categoryIdSet = new Set() // To avoid duplicates
+				validTemplates.forEach((template) => {
+					if (template.categories && Array.isArray(template.categories)) {
+						template.categories.forEach((category) => {
+							const categoryId = category._id?.toString() || category
+							if (categoryId && !categoryIdSet.has(categoryId)) {
+								categoryIdSet.add(categoryId)
+								allCategoryIds.push(categoryId)
+							}
+						})
+					}
+				})
+
+				// Fetch full category documents from projectCategories collection
+				let allCategories = []
+				if (allCategoryIds.length > 0) {
+					allCategories = await projectCategoriesQueries.categoryDocuments(
+						{
+							_id: { $in: allCategoryIds },
+							tenantId: tenantId,
+						},
+						['_id', 'name', 'externalId', 'evidences']
+					)
+				}
+
+				// Step 2: Always Create New Program & Solution
+				let programAndSolutionData = {
+					programName: programName || `Program for ${userProfile.data.name}`,
+					isPrivateProgram: true,
+					type: CONSTANTS.common.IMPROVEMENT_PROJECT,
+					subType: CONSTANTS.common.IMPROVEMENT_PROJECT,
+					isReusable: false,
+					entities: entityId ? [entityId] : [],
+				}
+
+				let programAndSolutionInformation = await solutionsHelper.createProgramAndSolution(
+					userId,
+					programAndSolutionData,
+					false,
+					userDetails,
+					true // isExternalProgram
+				)
+
+				if (!programAndSolutionInformation.success) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.SOLUTION_PROGRAMS_NOT_CREATED,
+					}
+				}
+
+				const masterProgramId = programAndSolutionInformation.result.program._id
+				const masterSolutionId = programAndSolutionInformation.result.solution._id
+
+				let acl = {}
+				if (userDetails.userInformation.userId != participantId) {
+					acl = {
+						visibility: CONSTANTS.common.PROJECT_VISIBILITY_SPECIFIC,
+						users: [participantId, userDetails.userInformation.userId],
+					}
+				} else {
+					acl = {
+						visibility: CONSTANTS.common.PROJECT_VISIBILITY_SELF,
+						users: [participantId],
+					}
+				}
+
+				// Step 3: Initialize Single Project
+				let projectData = {
+					acl: acl,
+					title: projectConfig?.name || `${userProfile.data.name}'s Project Plan`,
+					description: projectConfig?.description || 'Individual Development Plan',
+					userId: participantId,
+					createdBy: userId,
+					updatedBy: userId,
+					status: CONSTANTS.common.STARTED,
+					lastDownloadedAt: new Date(),
+					isAPrivateProgram: true,
+					programId: masterProgramId,
+					programExternalId: programAndSolutionInformation.result.program.externalId,
+					solutionId: masterSolutionId,
+					solutionExternalId: programAndSolutionInformation.result.solution.externalId,
+					programInformation: {
+						_id: masterProgramId,
+						name: programAndSolutionInformation.result.program.name,
+						externalId: programAndSolutionInformation.result.program.externalId,
+					},
+					solutionInformation: {
+						_id: masterSolutionId,
+						name: programAndSolutionInformation.result.solution.name,
+						externalId: programAndSolutionInformation.result.solution.externalId,
+					},
+					tenantId: tenantId,
+					orgId: orgId,
+					categories: allCategories, // Add categories from all templates
+					keywords: ['project-plan'],
+					referenceFrom: projectConfig?.referenceFrom || '',
+					tasks: [],
+					taskSequence: [],
+					userProfile: userProfile.data,
+					createdAt: new Date(),
+					updatedAt: new Date(),
+				}
+
+				// Add project templates to project data
+				projectData.projectTemplates = validTemplates.map((template) => ({
+					_id: template._id instanceof global.ObjectId ? template._id : new global.ObjectId(template._id),
+					externalId: template.externalId,
+				}))
+
+				// Add entity information if provided
+				if (entityId) {
+					const entityInfo = await entitiesService.entityDocuments(
+						{ _id: entityId, tenantId: tenantId },
+						CONSTANTS.common.ALL
+					)
+					if (entityInfo?.success && entityInfo?.data?.length > 0) {
+						const entity = entityInfo.data[0]
+						projectData.entityInformation = {
+							_id: entity._id,
+							entityType: entity.entityType,
+							entityTypeId: entity.entityTypeId,
+							entityId: entity._id,
+							externalId: entity?.metaInformation?.externalId || '',
+							entityName: entity?.metaInformation?.name || '',
+						}
+						projectData.entityId = entity._id
+					}
+				}
+
+				// Step 4: Template Orchestration (Loop for each template)
+				for (let templateIndex = 0; templateIndex < templates.length; templateIndex++) {
+					const template = templates[templateIndex]
+
+					// Validate template has templateId
+					if (!template || !template.templateId) {
+						continue
+					}
+
+					// a. Fetch Template metadata
+					const templateData = validTemplates.find((t) => {
+						if (!t || !t._id || !template.templateId) return false
+						return t._id.toString() === template.templateId.toString()
+					})
+
+					if (!templateData) {
+						continue // Skip invalid templates
+					}
+
+					// b. Create improvementProject task at root level first (to get its ID)
+					const taskName =
+						template.targetTaskName ||
+						template.targetProjectName ||
+						templateData.title ||
+						`Template ${templateIndex + 1}`
+					const taskExternalId = `task-${uuidv4().replace(/-/g, '')}`
+					const improvementTaskId = uuidv4()
+
+					// c. Fetch Template Tasks and Subtasks
+					const templateTasks = await projectTemplatesHelper.tasksAndSubTasks(
+						template.templateId,
+						'', // language
+						tenantId,
+						orgId
+					)
+
+					if (!templateTasks || templateTasks.length === 0) {
+						continue
+					}
+
+					let excludedExternalIds = []
+					let filteredTemplateTasks = templateTasks
+					if (
+						template.excludedTaskIds &&
+						Array.isArray(template.excludedTaskIds) &&
+						template.excludedTaskIds.length > 0
+					) {
+						// Create a map for quick task lookup
+						const templateTaskMap = new Map(templateTasks.map((task) => [task._id.toString(), task]))
+
+						for (const taskId of template.excludedTaskIds) {
+							const task = templateTaskMap.get(taskId.toString())
+							if (!task) {
+								throw {
+									status: HTTP_STATUS_CODE.bad_request.status,
+									message: `Task ID ${taskId} not found in template ${template.templateId}`,
+								}
+							}
+
+							const isDeletable = task.hasOwnProperty('isDeletable') ? task.isDeletable : false
+							if (!isDeletable) {
+								throw {
+									status: HTTP_STATUS_CODE.bad_request.status,
+									message: `Task ${task.name} (${taskId}) is not deletable and cannot be excluded`,
+								}
+							}
+							excludedExternalIds.push(task.externalId)
+						}
+
+						filteredTemplateTasks = templateTasks.filter(
+							(task) => !template.excludedTaskIds.includes(task._id.toString())
+						)
+					}
+
+					// Ensure all tasks have _id before processing (required by _projectTask)
+					const tasksWithIds = filteredTemplateTasks
+						.map((task) => {
+							if (task && !task._id) {
+								task._id = uuidv4()
+							}
+							return task
+						})
+						.filter((task) => task !== null && task !== undefined)
+
+					// d. Process Template Tasks using _projectTask with improvementTaskId as parent
+					let processedTemplateTasks = []
+					try {
+						processedTemplateTasks = await _projectTask(
+							tasksWithIds,
+							true, // isImportedFromLibrary
+							improvementTaskId, // parentTaskId - set to improvementTask._id
+							userToken,
+							masterProgramId,
+							userDetails
+						)
+					} catch (error) {
+						console.error(`Error processing template tasks for template ${template.templateId}:`, error)
+						throw error
+					}
+
+					// Ensure processedTemplateTasks is an array
+					if (!Array.isArray(processedTemplateTasks)) {
+						processedTemplateTasks = []
+					}
+
+					// e. Process Custom Tasks if provided
+					let processedCustomTasks = []
+					if (template.customTasks && template.customTasks.length > 0) {
+						// Preserve metaInformation from original request before processing
+						const originalMetaInformation = template.customTasks.map((task) => {
+							return task && task.metaInformation ? { ...task.metaInformation } : null
+						})
+
+						// Ensure all custom tasks have _id before processing
+						const customTasksWithIds = template.customTasks
+							.map((task) => {
+								if (task && !task._id) {
+									task._id = uuidv4()
+								}
+								return task
+							})
+							.filter((task) => task !== null && task !== undefined)
+
+						try {
+							processedCustomTasks = await _projectTask(
+								customTasksWithIds,
+								false, // isImportedFromLibrary
+								improvementTaskId, // parentTaskId - set to improvementTask._id
+								userToken,
+								masterProgramId,
+								userDetails
+							)
+						} catch (error) {
+							console.error(`Error processing custom tasks for template ${template.templateId}:`, error)
+							throw error
+						}
+
+						// Ensure processedCustomTasks is an array
+						if (!Array.isArray(processedCustomTasks)) {
+							processedCustomTasks = []
+						}
+
+						// Mark all custom tasks as isACustomTask: true and add metaInformation
+						processedCustomTasks.forEach((customTask, index) => {
+							customTask.isACustomTask = true
+							customTask.createdBy = userId
+							customTask.updatedBy = userId
+							customTask.createdAt = new Date()
+							customTask.updatedAt = new Date()
+
+							// Add metaInformation for custom tasks
+							if (!customTask.metaInformation) {
+								customTask.metaInformation = {}
+							}
+
+							// Use metaInformation from original request if present, else use defaults
+							const originalMeta = originalMetaInformation[index]
+							if (originalMeta) {
+								// Merge original metaInformation with processed task's metaInformation
+								customTask.metaInformation.buttonLabel =
+									originalMeta.buttonLabel || customTask.metaInformation.buttonLabel || 'Upload'
+								customTask.metaInformation.icon =
+									originalMeta.icon || customTask.metaInformation.icon || 'Upload'
+							} else {
+								// No metaInformation in original request, use defaults
+								customTask.metaInformation.buttonLabel =
+									customTask.metaInformation.buttonLabel || 'Upload'
+								customTask.metaInformation.icon = customTask.metaInformation.icon || 'Upload'
+							}
+						})
+					}
+
+					// f. Ensure parentId is set correctly for all root-level subtasks
+					if (processedTemplateTasks && Array.isArray(processedTemplateTasks)) {
+						processedTemplateTasks.forEach((task) => {
+							if (task && (!task.parentId || task.parentId !== improvementTaskId)) {
+								task.parentId = improvementTaskId
+							}
+						})
+					}
+					if (processedCustomTasks && Array.isArray(processedCustomTasks)) {
+						processedCustomTasks.forEach((task) => {
+							if (task && (!task.parentId || task.parentId !== improvementTaskId)) {
+								task.parentId = improvementTaskId
+							}
+						})
+					}
+
+					// g. Combine template tasks and custom tasks as children
+					const allSubTasks = [...processedTemplateTasks, ...processedCustomTasks]
+
+					// h. Build taskSequence for improvementTask based on template's taskSequence
+					let improvementTaskSequence = []
+
+					// If template has taskSequence, use it to order the subtasks
+					if (templateData.taskSequence && templateData.taskSequence.length > 0) {
+						// Filter out excluded external IDs from template's taskSequence
+						const filteredTemplateTaskSequence = templateData.taskSequence.filter(
+							(extId) => !excludedExternalIds.includes(extId)
+						)
+
+						// Create a map of externalId to task for quick lookup
+						const taskMap = new Map()
+						allSubTasks.forEach((task) => {
+							if (task && task.externalId) {
+								taskMap.set(task.externalId, task)
+							}
+						})
+
+						// First, add tasks in template's taskSequence order
+						filteredTemplateTaskSequence.forEach((templateTaskExternalId) => {
+							const task = taskMap.get(templateTaskExternalId)
+							if (task && task.externalId) {
+								improvementTaskSequence.push(task.externalId)
+								taskMap.delete(templateTaskExternalId) // Remove to avoid duplicates
+							}
+						})
+
+						// Then, add any remaining tasks (custom tasks or tasks not in template sequence)
+						taskMap.forEach((task) => {
+							if (task && task.externalId) {
+								improvementTaskSequence.push(task.externalId)
+							}
+						})
+					} else {
+						// If no template taskSequence, use the order of processed tasks
+						allSubTasks.forEach((subTask) => {
+							if (subTask && subTask.externalId) {
+								improvementTaskSequence.push(subTask.externalId)
+							}
+						})
+					}
+
+					let improvementTask = {
+						_id: improvementTaskId,
+						externalId: taskExternalId,
+						name: taskName,
+						description: template.targetTaskName || template.targetProjectName || templateData.title || '',
+						type: CONSTANTS.common.IMPROVEMENT_PROJECT,
+						status: CONSTANTS.common.NOT_STARTED_STATUS,
+						isACustomTask: false,
+						isDeletable: false,
+						isDeleted: false,
+						isImportedFromLibrary: false,
+						createdAt: new Date(),
+						updatedAt: new Date(),
+						createdBy: userId,
+						updatedBy: userId,
+						tenantId: tenantId,
+						orgId: orgId,
+						syncedAt: new Date(),
+						children: allSubTasks, // Template tasks + custom tasks as subtasks
+						taskSequence: improvementTaskSequence, // Children's externalIds in correct order
+						attachments: [],
+						projectTemplateDetails: {
+							_id: template.templateId,
+							externalId: templateData && templateData.externalId ? templateData.externalId : '',
+							name: templateData && templateData.title ? templateData.title : taskName,
+						},
+					}
+
+					// Add improvementProject task to project
+					// Root taskSequence should only contain improvementTask externalIds (not subtasks)
+					projectData.tasks.push(improvementTask)
+					projectData.taskSequence.push(taskExternalId)
+				}
+
+				// Step 5: Initialize task report for Project
+				// Count all tasks (root level improvementProject tasks)
+				const activeTasks = projectData.tasks.filter((t) => !t.isDeleted)
+				let taskReport = {
+					total: activeTasks.length,
+				}
+
+				activeTasks.forEach((task) => {
+					if (task.isDeleted == false) {
+						if (!taskReport[task.status]) {
+							taskReport[task.status] = 1
+						} else {
+							taskReport[task.status] += 1
+						}
+					}
+				})
+
+				projectData.taskReport = taskReport
+				// Step 6: Create Single Project
+				// Ensure tasks array is properly initialized (should already be an array)
+				if (!Array.isArray(projectData.tasks)) {
+					projectData.tasks = []
+				}
+
+				let createdProject = await projectQueries.createProject(projectData)
+				// Verify tasks were saved
+				if (!createdProject.tasks || createdProject.tasks.length === 0) {
+					console.error('WARNING: Project created but tasks array is empty!')
+					console.error('Tasks that should have been saved:', projectData.tasks.length)
+				}
+
+				// Push to Kafka for event streaming
+				await this.attachEntityInformationIfExists(createdProject)
+				let programUserMapping = await this.handleProgramUserMapping({
+					userId: participantId,
+					project: createdProject,
+				})
+				console.log('Program User Mapping Result:*****************', programUserMapping)
+				await kafkaProducersHelper.pushProjectToKafka(createdProject)
+				await kafkaProducersHelper.pushUserActivitiesToKafka({
+					userId: participantId,
+					projects: createdProject,
+				})
+
+				return resolve({
+					success: true,
+					message: CONSTANTS.apiResponses.PROJECT_PLAN_CREATED,
+					data: {
+						projectId: createdProject._id,
+					},
+					result: {
+						projectId: createdProject._id,
+					},
+				})
+			} catch (error) {
+				return reject({
+					status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || error,
+				})
+			}
+		})
+	}
+
+	/*Add user to program user mapping on project creation*/
+	static async handleProgramUserMapping(eventData) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let { userId, project } = eventData
+				let createdBy = project.createdBy
+				let projectProgramId = project.programId
+				let programExternalId = project.programExternalId
+				let hierarchy = []
+				if (userId != createdBy) {
+					hierarchy.push({
+						level: 0,
+						id: createdBy,
+					})
+				}
+				//let programUsersRef = await programUsersService.findByUserAndProgram(userId, projectProgramId);
+				//if (!programUsersRef) {
+				let result = await programUsersService.createOrUpdate({
+					userId: userId,
+					hierarchy: hierarchy,
+					programId: projectProgramId,
+					programExternalId: programExternalId,
+					entities: [],
+					status: 'IN_PROGRESS',
+					metaInformation: {
+						idpAssignedAt: new Date(),
+						idpAssignedBy: createdBy,
+						idpProjectId: project._id,
+					},
+					createdBy: createdBy,
+					updatedBy: createdBy,
+					referenceFrom: project.referenceFrom ? new ObjectId(project.referenceFrom) : null,
+					tenantId: project.tenantId,
+					orgId: project.orgId,
+				})
+
+				if (result.result._id) {
+					console.log('PARTICIPANT_PROGRAMUSERS_ASSIGNED', result.result._id)
+					if (project.referenceFrom) {
+						let result2 = await programUsersService.updateEntity(
+							createdBy,
+							project.referenceFrom,
+							'',
+							`${userId}`,
+							{
+								status: 'IN_PROGRESS',
+								idpProjectId: project._id,
+								participantProgramUserReference: result.result._id,
+							},
+							project.tenantId
+						)
+						if (result2._id) {
+							console.log('LC_PROGRAMUSERS_ENTITY_UPDATED', result2._id)
+						} else {
+							console.log('LC_PROGRAMUSERS_ENTITY_ASSIGNMENT_FAILED', result2)
+						}
+					}
+				} else {
+					console.log('PARTICIPANT_PROGRAMUSERS_ASSIGNMENT_FAILED', result.result)
+				}
+
+				return resolve({
+					success: true,
+					message: 'Program user mapping handled successfully',
+					result: result.result,
+				})
+			} catch (error) {
+				return reject({
+					success: false,
+					status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || error,
+				})
+			}
+		})
+	}
 	/**
 	 * Get project  infromation when project as a task
 	 * @method
@@ -4906,9 +5519,9 @@ async function _projectTask(
 						singleTask.solutionDetails._id,
 						'',
 						{
-							name: `${singleTask.solutionDetails.name}-${timestamp}`,
+							name: `${singleTask.solutionDetails.name}`,
 							externalId: `${singleTask.solutionDetails.externalId}-${timestamp}`,
-							description: `${singleTask.solutionDetails.name}-${timestamp}`,
+							description: `${singleTask.solutionDetails.name}`,
 							programExternalId: programId,
 							status: CONSTANTS.common.PUBLISHED_STATUS,
 							tenantData: userDetails.tenantAndOrgInfo,

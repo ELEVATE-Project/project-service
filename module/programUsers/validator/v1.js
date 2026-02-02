@@ -8,13 +8,6 @@
 module.exports = (req) => {
 	let programUsersValidator = {
 		createOrUpdate: function () {
-			// Validate required fields
-			req.checkBody('userId')
-				.exists()
-				.withMessage('userId is required')
-				.isString()
-				.withMessage('userId must be a string')
-
 			// Either programId or programExternalId is required
 			req.checkBody('programId')
 				.custom((value) => {
@@ -108,13 +101,6 @@ module.exports = (req) => {
 		},
 
 		getEntities: function () {
-			// Validate required query parameters
-			req.checkQuery('userId')
-				.exists()
-				.withMessage('userId is required')
-				.isString()
-				.withMessage('userId must be a string')
-
 			// Either programId or programExternalId is required
 			req.checkQuery('programId')
 				.custom((value) => {

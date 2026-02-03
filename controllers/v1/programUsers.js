@@ -32,6 +32,14 @@ module.exports = class ProgramUsers extends Abstract {
 	async createOrUpdate(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				if (
+					!req.body.userId &&
+					req.userDetails &&
+					req.userDetails.userInformation &&
+					req.userDetails.userInformation.userId
+				) {
+					req.body.userId = req.userDetails.userInformation.userId
+				}
 				// Check if this is an entity-specific update
 				if (req.body.entityId && req.body.entityUpdates) {
 					const result = await programUsersHelper.updateEntity(req.body, req.userDetails)
@@ -61,8 +69,17 @@ module.exports = class ProgramUsers extends Abstract {
 	async getEntities(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				const { userId, programId, programExternalId, status, search = '', entityId = '' } = req.query
+				let { userId, programId, programExternalId, status, search = '', entityId = '' } = req.query
 				const { pageNo = 1, pageSize = 20 } = req
+
+				if (
+					!userId &&
+					req.userDetails &&
+					req.userDetails.userInformation &&
+					req.userDetails.userInformation.userId
+				) {
+					userId = req.userDetails.userInformation.userId
+				}
 
 				if (!userId || (!programId && !programExternalId)) {
 					return reject({

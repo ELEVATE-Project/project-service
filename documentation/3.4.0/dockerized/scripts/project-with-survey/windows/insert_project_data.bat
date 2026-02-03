@@ -10,16 +10,16 @@ echo Downloading entity sample data files...
 echo ------------------------------------------
 
 curl -L -o entity_sampleData.js ^
-https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsWithSurvey/documentation/3.4.0/dockerized/scripts/project-with-survey/windows/entity_sampleData.js
+https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/common-files/dockerized/project-with-survey/entity_sampleData.js
 
 curl -L -o project_sampleData.js ^
-https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsWithSurvey/documentation/3.4.0/dockerized/scripts/project-with-survey/windows/project_sampleData.js
+https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/common-files/dockerized/project-with-survey/project_sampleData.js
 
 curl -L -o survey_sampleData.js ^
-https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsWithSurvey/documentation/3.4.0/dockerized/scripts/project-with-survey/windows/survey_sampleData.js
+https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/common-files/dockerized/project-with-survey/survey_sampleData.js
 
 curl -L -o insert_sample_solutions.js ^
-https://raw.githubusercontent.com/MallanagoudaBiradar/project-service/refs/heads/windowsWithSurvey/documentation/3.4.0/dockerized/scripts/project-with-survey/windows/insert_sample_solutions.js
+https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/common-files/dockerized/project-with-survey/insert_sample_solutions.js
 
 echo.
 echo Files downloaded successfully.
@@ -45,7 +45,7 @@ echo.
 echo Installing mongodb npm package...
 npm -v >nul 2>&1
 
-
+npm install mongodb
 REM ------------------------------------------------
 REM Check and install MongoDB Server
 REM ------------------------------------------------

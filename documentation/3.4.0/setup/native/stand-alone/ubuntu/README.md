@@ -24,7 +24,7 @@ The Project building block facilitates the creation and engagement with micro-im
 
 # Native Setup Project Service - Stand Alone (Ubuntu)
 
-## PM2 Managed Services & Natively Installed Dependencies
+This section describes the native setup, where all required dependencies and services are installed and managed directly on the host system using PM2, without Docker. This setup is primarily intended for local development and debugging.
 
 ### System Requirements
 
@@ -43,9 +43,9 @@ Before setting up the following ELEVATE-Project application, dependencies given 
 1. Download dependency management scripts:
 
     ```
-    curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/scripts/stand-alone/ubuntu/check-dependencies.sh && \
-    curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/scripts/stand-alone/ubuntu/install-dependencies.sh && \
-    curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/scripts/stand-alone/ubuntu/uninstall-dependencies.sh && \
+    curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/native/scripts/stand-alone/ubuntu/check-dependencies.sh && \
+    curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/native/scripts/stand-alone/ubuntu/install-dependencies.sh && \
+    curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/native/scripts/stand-alone/ubuntu/uninstall-dependencies.sh && \
     chmod +x check-dependencies.sh && \
     chmod +x install-dependencies.sh && \
     chmod +x uninstall-dependencies.sh
@@ -103,11 +103,11 @@ cd scheduler/src && npm install && cd ../..
 4.  **Download Environment Files**
 
 ```
-curl -L -o project-service/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/envs/stand-alone/project_env && \
-curl -L -o entity-management/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/envs/stand-alone/entity_management_env && \
-curl -L -o user/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/envs/stand-alone/user_env && \
-curl -L -o interface-service/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/envs/stand-alone/interface_env && \
-curl -L -o scheduler/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/envs/stand-alone/scheduler_env
+curl -L -o project-service/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/native/envs/stand-alone/project_env && \
+curl -L -o entity-management/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/native/envs/stand-alone/entity_management_env && \
+curl -L -o user/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/native/envs/stand-alone/user_env && \
+curl -L -o interface-service/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/native/envs/stand-alone/interface_env && \
+curl -L -o scheduler/src/.env https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/native/envs/stand-alone/scheduler_env
 ```
 
 > **Note:** Modify the environment files as necessary for your deployment using any text editor, ensuring that the values are appropriate for your environment. The default values provided in the current files are functional and serve as a good starting point. Refer to the sample env files provided at the [Project](https://github.com/ELEVATE-Project/project-service/blob/main/.env.sample), [User](https://github.com/ELEVATE-Project/user/blob/master/src/.env.sample), [Notification](https://github.com/ELEVATE-Project/notification/blob/master/src/.env.sample), [Scheduler](https://github.com/ELEVATE-Project/scheduler/blob/master/src/.env.sample), [Interface](https://github.com/ELEVATE-Project/interface-service/blob/main/src/.env.sample) and [Entity-Management](https://github.com/ELEVATE-Project/entity-management/blob/main/src/.env.sample) repositories for reference.
@@ -119,8 +119,8 @@ curl -L -o scheduler/src/.env https://raw.githubusercontent.com/ELEVATE-Project/
 5.  **Attaching Config File**
 
     ```
-    curl -L -o project-service/config.json https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/scripts/stand-alone/ubuntu/configFile.json && \
-    curl -L -o entity-management/src/config.json https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/scripts/stand-alone/ubuntu/configFile.json
+    curl -L -o project-service/config.json https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/common-files/generics/configFile.json && \
+    curl -L -o entity-management/src/config.json https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/common-files/generics/configFile.json
     ```
 
 6.  **Create Databases**
@@ -128,7 +128,7 @@ curl -L -o scheduler/src/.env https://raw.githubusercontent.com/ELEVATE-Project/
     1. Download `create-databases.sh` Script File:
 
     ```
-    curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/scripts/stand-alone/ubuntu/create-databases.sh
+    curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/native/scripts/stand-alone/ubuntu/create-databases.sh
     ```
 
     2. Make the executable by running the following command:
@@ -165,8 +165,7 @@ curl -L -o scheduler/src/.env https://raw.githubusercontent.com/ELEVATE-Project/
     1. Download user `distributionColumns.sql` file.
 
         ```
-        curl -o ./user/distributionColumns.sql -JL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/distribution-columns/user/distributionColumns.sql
-
+        curl -o ./user/distributionColumns.sql -JL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/distribution-columns/user/distributionColumns.sql
         ```
 
     2. Set up the `citus_setup` file by following the steps given below.
@@ -212,7 +211,7 @@ curl -L -o scheduler/src/.env https://raw.githubusercontent.com/ELEVATE-Project/
     1.  Download `entity-project-sample-data.sh` Script File:
 
     ```
-    curl -o project_entity_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/scripts/stand-alone/ubuntu/project_entity_sample_data.sh && \
+    curl -o project_entity_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/native/scripts/stand-alone/ubuntu/project_entity_sample_data.sh && \
     chmod +x project_entity_sample_data.sh && \
     ./project_entity_sample_data.sh
     ```
@@ -229,15 +228,6 @@ curl -L -o scheduler/src/.env https://raw.githubusercontent.com/ELEVATE-Project/
     (cd scheduler/src && pm2 start app.js --name scheduler && cd -)
     ```
 
-## 🌐 Micro-Frontend (FE) Setup
-
-The ELEVATE application uses a micro-frontend architecture. After setting up the backend services, you must configure and run the frontend repositories to access the application via the portal.
-
-Follow the setup guides for the frontend repositories:
-
--   **Login Portal:** [elevate-portal](https://github.com/ELEVATE-Project/elevate-portal/tree/releaase-1.1.0)
--   **Projects Program Module (PWA):** [observation-survey-projects-pwa](https://github.com/ELEVATE-Project/observation-survey-projects-pwa/tree/release-3.4.0)
-
 ## Sample User Accounts Generation
 
 During the initial setup of ELEVATE-Project services with the default configuration, you may encounter issues creating new accounts through the regular SignUp flow on the ELEVATE-Project portal. This typically occurs because the default SignUp process includes OTP verification to prevent abuse. Until the notification service is configured correctly to send actual emails, you will not be able to create new accounts.
@@ -247,7 +237,7 @@ In such cases, you can generate sample user accounts using the steps below. This
 > **Warning:** Use this generator only immediately after the initial system setup and before any normal user accounts are created through the portal. It should not be used under any circumstances thereafter.
 
 ```
-curl -o insert_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/setupGuide-3.4/documentation/3.4.0/native/scripts/stand-alone/ubuntu/insert_sample_data.sh && \
+curl -o insert_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/native/scripts/stand-alone/ubuntu/insert_sample_data.sh && \
 chmod +x insert_sample_data.sh && \
 ./insert_sample_data.sh
 ```
@@ -262,12 +252,22 @@ After successfully running the script mentioned above, the following user accoun
 
 ---
 
+
+## 🌐 Micro-Frontend (FE) Setup
+
+The ELEVATE application uses a micro-frontend architecture. After setting up the backend services, you must configure and run the frontend repositories to access the application via the portal.
+
+Follow the setup guides for the frontend repositories:
+
+-   **Login Portal:** [elevate-portal](https://github.com/ELEVATE-Project/elevate-portal/tree/releaase-1.1.0)
+-   **Projects Program Module (PWA):** [observation-survey-projects-pwa](https://github.com/ELEVATE-Project/observation-survey-projects-pwa/tree/release-3.4.0)
+
+---
+
 ### 🧪 Postman Collections and API DOC
 
 - <a href="https://github.com/ELEVATE-Project/project-service/tree/main/api-doc" target="_blank">
   Projects Service API Collection
-- <a href="https://github.com/ELEVATE-Project/samiksha-service/tree/main/api-doc" target="_blank">
-  Samiksha Service API Collection
 </a>
 
 ---

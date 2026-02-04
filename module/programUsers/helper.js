@@ -11,6 +11,8 @@ const { resolveLevel } = require('bunyan')
 const programUsersQueries = require(DB_QUERY_BASE_PATH + '/programUsers')
 const programUsersService = require(SERVICES_BASE_PATH + '/programUsers')
 const programQueries = require(DB_QUERY_BASE_PATH + '/programs')
+const userService = require(SERVICES_BASE_PATH + '/users')
+const entityManagementService = require(SERVICES_BASE_PATH + '/entity-management')
 
 /**
  * ProgramUsersHelper
@@ -522,6 +524,196 @@ module.exports = class ProgramUsersHelper {
 				.catch((err) => console.error('Overview update error:', err))
 		} catch (err) {
 			console.error('Error calculating entity counts:', err)
+		}
+	}
+
+	/**
+	 * Assign users with role-based hierarchy
+	 * Handles creation of programUsers entries based on role hierarchy
+	 * @method
+	 * @name assignUsers
+	 * @param {Object} bodyData - request body data
+	 * @param {Object} userDetails - logged in user details
+	 * @returns {Object} result with status and data
+	 */
+	static async assignUsers(bodyData, userDetails) {
+		try {
+			const {
+				userId,
+				programId,
+				programExternalId,
+				assignedUserIds,
+				userRolesToEntityTypeMap,
+				assignedUsersStatus = 'ACTIVE',
+				managerLevel = 0,
+				addProgramUsersForAssignedUsers = false,
+			} = bodyData
+			const loggedInUserId = userDetails.userInformation?.userId
+			const tenantId = userDetails.userInformation?.tenantId
+			const orgId = userDetails.userInformation?.organizationId
+			const managerUserId = userId
+
+			// Validate program exists
+			const programExists = await this.checkProgramExists(tenantId, programId, programExternalId)
+			if (!programExists) {
+				return {
+					success: false,
+					status: HTTP_STATUS_CODE.not_found.status,
+					message: 'Program not found',
+				}
+			}
+
+			// Use the programId from the found program if programExternalId was provided
+			const resolvedProgramId = programId || programExists._id.toString()
+
+			// Fetch manager and assigned users details to get their roles and entity information
+			const allUserIds = [managerUserId, ...assignedUserIds]
+			const usersResponse = await userService.accountSearch(allUserIds, tenantId)
+
+			if (!usersResponse.success || !usersResponse.data || usersResponse.data.count === 0) {
+				throw new Error('User details not found in the user service')
+			}
+
+			const usersData = usersResponse.data.data
+
+			// check if the number of users in the usersData is equal to the number of assigned users
+			if (usersData.length !== assignedUserIds.length + 1) {
+				throw new Error('Either Manager or Some assigned users not found in the user service')
+			}
+
+			const results = {
+				managerUpdated: null,
+				assignedUsersCreated: [],
+			}
+
+			// Fetch entity information for assigned users and manager
+			assignedUserIds.push(managerUserId)
+
+			const assignedUsersWithEntities = []
+			const assignedUsersEntities = await entityManagementService.findEntities(
+				tenantId,
+				assignedUserIds,
+				'metaInformation.externalId'
+			)
+			if (assignedUsersEntities.success) {
+				// Create a Map of externalId -> entity for O(1) lookup
+				const entityMap = new Map(
+					assignedUsersEntities.data.map((entity) => [parseInt(entity.metaInformation.externalId), entity])
+				)
+
+				// Process each user: use existing entity or create new one
+				for (const user of usersData) {
+					const userId = parseInt(user.id)
+
+					const entity = entityMap.get(userId)
+
+					if (entity && userId !== parseInt(managerUserId)) {
+						// User has existing entity
+						assignedUsersWithEntities.push({
+							userId: entity.metaInformation.externalId,
+							name: entity.metaInformation.name,
+							entityId: entity._id,
+							status: assignedUsersStatus,
+						})
+					} else if (!entity) {
+						// Create entity for user
+						let userRoles = user.user_organizations[0].roles.map((role) => role.role.title) || []
+						// remove admin role
+						userRoles = userRoles.filter((role) => role !== 'admin')
+						const entityType = userRolesToEntityTypeMap[userRoles[0]]
+						if (entityType) {
+							const entityResult = await entityManagementService.addEntity(
+								{
+									externalId: user.id,
+									name: user.name,
+								},
+								entityType,
+								userDetails.userToken
+							)
+
+							if (entityResult.success && userId !== parseInt(managerUserId)) {
+								assignedUsersWithEntities.push({
+									userId: entityResult.data.metaInformation.externalId,
+									name: entityResult.data.metaInformation.name,
+									entityId: entityResult.data._id,
+									status: assignedUsersStatus,
+								})
+							} else {
+								throw new Error(`Failed to create entity for user: ${user.name}`)
+							}
+						}
+					}
+				}
+			} else {
+				throw new Error('Failed to fetch entity information for  users')
+			}
+
+			// Update manager's programUsers entry with assigned users as entities
+			const managerPayload = {
+				userId: managerUserId,
+				programId: resolvedProgramId,
+				programExternalId: programExternalId,
+				entities: assignedUsersWithEntities,
+				status: 'ACTIVE',
+				overview: {
+					assigned: assignedUsersWithEntities.length,
+				},
+			}
+
+			const managerResult = await this.createOrUpdate(managerPayload, userDetails)
+			if (managerResult.success) {
+				results.managerUpdated = managerResult.result
+			} else {
+				throw new Error('Failed to update manager programUsers entry')
+			}
+
+			if (managerResult.success && assignedUsersWithEntities.length > 0) {
+				// Create programUsers entry for each assigned user with hierarchy
+				for (const assignedUser of assignedUsersWithEntities) {
+					const assignedUserPayload = {
+						userId: assignedUser.userId,
+						programId: resolvedProgramId,
+						programExternalId: programExternalId,
+						hierarchy: [
+							{
+								level: managerLevel,
+								id: managerUserId,
+							},
+						],
+						status: assignedUsersStatus,
+					}
+					if (managerResult.result.hierarchy && managerResult.result.hierarchy.length > 0) {
+						for (const hierarchy of managerResult.result.hierarchy) {
+							assignedUserPayload.hierarchy.push({
+								level: hierarchy.level + 1,
+								id: hierarchy.id,
+							})
+						}
+					}
+
+					const assignedUserResult = await this.createOrUpdate(assignedUserPayload, userDetails)
+					if (assignedUserResult.success) {
+						results.assignedUsersCreated.push(assignedUserResult.result)
+					} else {
+						throw new Error('Failed to create programUsers entry for assigned user')
+					}
+				}
+			}
+
+			return {
+				success: true,
+				status: HTTP_STATUS_CODE.ok.status,
+				message: 'Users assigned successfully',
+				data: results,
+				result: results,
+			}
+		} catch (error) {
+			console.error('ProgramUsers assignUsers error:', error)
+			return {
+				success: false,
+				status: HTTP_STATUS_CODE.internal_server_error.status,
+				message: error.message || 'Internal server error',
+			}
 		}
 	}
 }

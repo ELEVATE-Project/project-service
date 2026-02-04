@@ -570,11 +570,23 @@ const getUserProfileByIdentifier = function (tenantId, userId = null, username) 
  * @returns {Promise} A promise that resolves with the user details or rejects with an error.
  */
 
-const accountSearch = function (userIds = [], tenantId, type = 'all') {
+const accountSearch = function (
+	userIds = [],
+	tenantId,
+	type = 'all',
+	excludeUserIds = [],
+	search,
+	page = 1,
+	limit = 20
+) {
 	return new Promise(async (resolve, reject) => {
 		try {
-			const params = `?tenant_code=${tenantId}&type=${type}`
+			const params = `?tenant_code=${tenantId}&type=${type}&page=${page}&limit=${limit}`
+			if (search) {
+				params += `&search=${search}`
+			}
 
+			const interfaceServiceUrl = 'http://localhost:7001'
 			let url = `${interfaceServiceUrl}${process.env.USER_SERVICE_BASE_URL}${CONSTANTS.endpoints.ACCOUNT_SEARCH}${params}`
 
 			const headers = {
@@ -582,8 +594,12 @@ const accountSearch = function (userIds = [], tenantId, type = 'all') {
 				internal_access_token: process.env.INTERNAL_ACCESS_TOKEN,
 			}
 
-			const body = {
-				user_ids: userIds,
+			const body = {}
+			if (userIds.length > 0) {
+				body.user_ids = userIds
+			}
+			if (excludeUserIds.length > 0) {
+				body.excluded_user_ids = excludeUserIds
 			}
 
 			request.post({ url, headers, body, json: true }, callBack)

@@ -586,7 +586,6 @@ const accountSearch = function (
 				params += `&search=${search}`
 			}
 
-			const interfaceServiceUrl = 'http://localhost:7001'
 			let url = `${interfaceServiceUrl}${process.env.USER_SERVICE_BASE_URL}${CONSTANTS.endpoints.ACCOUNT_SEARCH}${params}`
 
 			const headers = {

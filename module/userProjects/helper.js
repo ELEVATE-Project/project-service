@@ -1219,6 +1219,7 @@ module.exports = class UserProjectsHelper {
 	static solutionDetails(projectId, taskId, bodyData = {}, userToken, userId, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				let isAProjectPlan = false
 				let project = await projectQueries.projectDocument(
 					{
 						_id: projectId,
@@ -1241,14 +1242,50 @@ module.exports = class UserProjectsHelper {
 					]
 				)
 				if (!project.length > 0) {
+					project = await projectQueries.projectDocument(
+						{
+							_id: projectId,
+							'tasks.children._id': taskId,
+						},
+						[
+							'entityInformation._id',
+							'entityInformation.entityType',
+							'tasks.type',
+							'tasks._id',
+							'tasks.solutionDetails',
+							'tasks.projectTemplateDetails',
+							'tasks.submissions',
+							'tasks.observationInformation',
+							'tasks.surveyInformation',
+							'tasks.improvementProjectInformation',
+							'tasks.externalId',
+							'programInformation._id',
+							'projectTemplateId',
+							'tasks.children',
+						]
+					)
+					if (!project.length > 0) {
+						throw {
+							status: HTTP_STATUS_CODE.bad_request.status,
+							message: CONSTANTS.apiResponses.USER_PROJECT_NOT_FOUND,
+						}
+					}
+					isAProjectPlan = true
+				}
+				let currentTask
+				if (isAProjectPlan) {
+					currentTask = project[0].tasks
+						.flatMap((task) => task.children || [])
+						.find((childTask) => childTask._id == taskId)
+				} else {
+					currentTask = project[0].tasks.find((task) => task._id == taskId)
+				}
+				if (!currentTask) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
-						message: CONSTANTS.apiResponses.USER_PROJECT_NOT_FOUND,
+						message: 'Task not found',
 					}
 				}
-
-				let currentTask = project[0].tasks.find((task) => task._id == taskId)
-
 				let solutionDetails = currentTask.solutionDetails
 				let assessmentOrObservationData = {}
 
@@ -1336,19 +1373,41 @@ module.exports = class UserProjectsHelper {
 						if (!currentTask?.solutionDetails?.isReusable) {
 							assessmentOrObservationData['programId'] = project[0].programInformation._id
 						}
-						let fieldToUpdate = `tasks.$.${taskSolutionType}Information`
 
-						await projectQueries.findOneAndUpdate(
-							{
-								_id: projectId,
-								'tasks._id': taskId,
-							},
-							{
-								$set: {
-									[fieldToUpdate]: assessmentOrObservationData,
+						if (!isAProjectPlan) {
+							let fieldToUpdate = `tasks.$.${taskSolutionType}Information`
+
+							await projectQueries.findOneAndUpdate(
+								{
+									_id: projectId,
+									'tasks._id': taskId,
 								},
-							}
-						)
+								{
+									$set: {
+										[fieldToUpdate]: assessmentOrObservationData,
+									},
+								}
+							)
+						} else {
+							let fieldToUpdate = `tasks.$[task].children.$[child].${taskSolutionType}Information`
+
+							await projectQueries.findOneAndUpdate(
+								{
+									_id: projectId,
+								},
+								{
+									$set: {
+										[fieldToUpdate]: assessmentOrObservationData,
+									},
+								},
+								{
+									arrayFilters: [
+										{ 'task.children._id': taskId }, // Filter parent task
+										{ 'child._id': taskId }, // Filter child task
+									],
+								}
+							)
+						}
 					}
 
 					// assessmentOrObservationData['entityType'] = project[0].entityInformation.entityType

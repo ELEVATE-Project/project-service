@@ -247,8 +247,11 @@ module.exports = {
 	},
 	compoundIndex: [
 		{
-			name: { userId: 1, solutionId: 1 },
-			indexType: { unique: true, partialFilterExpression: { solutionId: { $exists: true } } },
+			name: { userId: 1, solutionId: 1, entityId: 1 },
+			indexType: {
+				unique: true,
+				partialFilterExpression: { solutionId: { $exists: true }, entityId: { $exists: true } },
+			},
 		},
 		// Index for querying by template ID in array (multiple templates)
 		{

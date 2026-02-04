@@ -1503,6 +1503,7 @@ module.exports = class UserProjectsHelper {
 							userId: userId,
 							isAPrivateProgram: targetedSolutionId.result.isATargetedSolution ? false : true,
 							tenantId: tenantId,
+							entityId: bodyData.entityId ? bodyData.entityId : '',
 						},
 						['_id']
 					)

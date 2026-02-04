@@ -501,7 +501,7 @@ module.exports = class ProgramUsersHelper {
 					case 'GRADUATED':
 						statusCounts.graduated++
 						break
-					case 'DROP_OUT':
+					case 'DROPPED_OUT':
 						statusCounts.droppedout++
 						break
 				}

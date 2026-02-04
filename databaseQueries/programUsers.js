@@ -389,6 +389,11 @@ module.exports = class programUsers {
 				// Build the $set operations with dot notation for nested fields
 				const setOperations = { updatedAt: new Date() }
 				Object.keys(updates).forEach((key) => {
+					// if key name is having Id as suffix then and values is not mongoObjectId if then add object id to the value
+					if ((key.endsWith('Id') || key.endsWith('id')) && updates[key]) {
+						updates[key] = UTILS.convertStringToObjectId(updates[key])
+					}
+
 					// Only process non-numeric keys (regular object properties)
 					if (!/^\d+$/.test(key)) {
 						setOperations[`entities.$.${key}`] = updates[key]

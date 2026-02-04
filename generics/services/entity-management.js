@@ -256,9 +256,89 @@ const findEntityDetails = function (tenantId, entityIdentifier) {
 	})
 }
 
+const findEntities = function (
+	tenantId,
+	userIds,
+	findBy,
+	projection = ['_id', 'metaInformation.name', 'metaInformation.externalId']
+) {
+	return new Promise(async (resolve, reject) => {
+		try {
+			const url = `${process.env.ENTITY_BASE_URL}${process.env.ENTITY_MANAGEMENT_SERVICE_BASE_URL}${CONSTANTS.endpoints.FIND_ENTITY_DOCUMENTS}`
+			const options = {
+				headers: {
+					'content-type': 'application/json',
+					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
+				},
+				json: {
+					query: {
+						tenantId: tenantId,
+						[findBy]: { $in: userIds },
+					},
+					projection: projection,
+				},
+			}
+
+			request.post(url, options, requestCallBack)
+			function requestCallBack(err, data) {
+				let result = {
+					success: true,
+				}
+				if (err) {
+					result.success = false
+				} else {
+					let response = data.body
+					if (response.status === HTTP_STATUS_CODE.ok.status) {
+						result['data'] = response.result
+					} else {
+						result.success = false
+					}
+				}
+				return resolve(result)
+			}
+		} catch (error) {
+			return reject(error)
+		}
+	})
+}
+const addEntity = function (requestBody, entityType, userToken) {
+	return new Promise(async (resolve, reject) => {
+		try {
+			const url = `${process.env.ENTITY_BASE_URL}${process.env.ENTITY_MANAGEMENT_SERVICE_BASE_URL}${CONSTANTS.endpoints.ADD_ENTITY}?type=${entityType}`
+			const options = {
+				headers: {
+					'content-type': 'application/json',
+					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
+					'x-auth-token': userToken,
+				},
+				json: requestBody,
+			}
+			request.post(url, options, (err, data) => {
+				let result = {
+					success: true,
+				}
+				if (err) {
+					result.success = false
+				} else {
+					let response = data.body
+					if (response.status === HTTP_STATUS_CODE.ok.status) {
+						result['data'] = response.result
+					} else {
+						result.success = false
+					}
+				}
+				return resolve(result)
+			})
+		} catch (error) {
+			return reject(error)
+		}
+	})
+}
 module.exports = {
 	entityDocuments: entityDocuments,
 	entityTypeDocuments: entityTypeDocuments,
 	getUserRoleExtensionDocuments: getUserRoleExtensionDocuments,
 	findEntityDetails: findEntityDetails,
+	findEntities: findEntities,
+	addEntity: addEntity,
 }

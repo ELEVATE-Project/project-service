@@ -990,6 +990,20 @@
 			"service": "entity"
 		},
 		{
+			"sourceRoute": "/user/v1/tenant/accountCreate",
+			"type": "POST",
+			"priority": "MUST_HAVE",
+			"inSequence": false,
+			"orchestrated": false,
+			"targetPackages": [
+				{
+					"basePackageName": "project",
+					"packageName": "elevate-project"
+				}
+			],
+			"service": "user"
+		},
+		{
 			"sourceRoute": "/project/v1/programs/create",
 			"type": "POST",
 			"priority": "MUST_HAVE",

@@ -71,27 +71,52 @@ module.exports = class LibraryCategories extends Abstract {
 	 * @param {Object} req - requested data
 	 * @returns {Array} Library Categories project.
 	 */
-
 	async projects(req) {
-		return new Promise(async (resolve, reject) => {
-			try {
-				const libraryProjects = await libraryCategoriesHelper.projects(
-					req.params._id ? req.params._id : '',
-					req.pageSize,
-					req.pageNo,
-					req.searchText,
-					req.query.sort,
-					req.userDetails
-				)
+		try {
+			// Support both single and multiple category IDs
+			let categoryIds = []
 
-				return resolve({
-					message: libraryProjects.message,
-					result: libraryProjects.data,
-				})
-			} catch (error) {
-				return reject(error)
+			// Method 1: Single ID from path parameter (GET /categories/:id/projects)
+			if (req.params._id) {
+				categoryIds = [req.params._id]
 			}
-		})
+			// Method 2: Comma-separated IDs from query string (GET /categories/projects?ids=id1,id2,id3)
+			else if (req.query.ids) {
+				categoryIds = req.query.ids
+					.split(',')
+					.map((id) => id.trim())
+					.filter((id) => id)
+			}
+
+			if (!categoryIds || categoryIds.length === 0) {
+				throw {
+					status: HTTP_STATUS_CODE.bad_request.status,
+					message:
+						'categoryIds required - provide as path param, query string (comma-separated), or request body array',
+				}
+			}
+
+			const libraryProjects = await libraryCategoriesHelper.projects(
+				categoryIds,
+				req.pageSize,
+				req.pageNo,
+				req.searchText,
+				req.query.sort,
+				req.userDetails
+			)
+
+			return {
+				success: true,
+				message: libraryProjects.message,
+				result: libraryProjects.data,
+			}
+		} catch (error) {
+			return {
+				status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+				message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+				errorObject: error,
+			}
+		}
 	}
 
 	/**
@@ -115,23 +140,41 @@ module.exports = class LibraryCategories extends Abstract {
 	 * @returns {Object} Library project category details .
 	 */
 
+	/**
+	 * @api {post} /project/v1/library/categories/create
+	 * @apiVersion 1.0.0
+	 * @apiName create
+	 * @apiGroup LibraryCategories
+	 * @apiHeader {String} x-auth-token Authenticity token
+	 * @apiUse successBody
+	 * @apiUse errorBody
+	 */
 	async create(req) {
-		return new Promise(async (resolve, reject) => {
-			try {
-				const libraryProjectcategory = await libraryCategoriesHelper.create(
-					req.body,
-					req.files,
-					req.userDetails
-				)
-
-				return resolve({
-					message: libraryProjectcategory.message,
-					result: libraryProjectcategory.data,
-				})
-			} catch (error) {
-				return reject(error)
+		try {
+			const result = await libraryCategoriesHelper.create(
+				req.body, 
+				req.files, 
+				req.userDetails
+			)
+			if (result.success) {
+				return {
+					success: true,
+					message: result.message,
+					result: result.data,
+				}
+			} else {
+				throw {
+					message: result.message,
+					status: result.status || HTTP_STATUS_CODE.bad_request.status,
+				}
 			}
-		})
+		} catch (error) {
+			return {
+				status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+				message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+				errorObject: error,
+			}
+		}
 	}
 
 	/**
@@ -155,27 +198,36 @@ module.exports = class LibraryCategories extends Abstract {
 	 * @returns {Array} Library Categories project.
 	 */
 
+	/**
+	 * @api {post} /project/v1/library/categories/update/:id
+	 * @apiVersion 1.0.0
+	 * @apiName update
+	 * @apiGroup LibraryCategories
+	 * @apiHeader {String} x-auth-token Authenticity token
+	 * @apiUse successBody
+	 * @apiUse errorBody
+	 */
 	async update(req) {
-		return new Promise(async (resolve, reject) => {
-			try {
-				const findQuery = {
-					_id: req.params._id,
+		try {
+			const result = await libraryCategoriesHelper.update(req)
+			if (result.success) {
+				return {
+					success: true,
+					message: result.message,
 				}
-				const libraryProjectcategory = await libraryCategoriesHelper.update(
-					findQuery,
-					req.body,
-					req.files,
-					req.userDetails
-				)
-
-				return resolve({
-					message: libraryProjectcategory.message,
-					result: libraryProjectcategory.data,
-				})
-			} catch (error) {
-				return reject(error)
+			} else {
+				throw {
+					message: result.message,
+					status: result.status || HTTP_STATUS_CODE.bad_request.status,
+				}
 			}
-		})
+		} catch (error) {
+			return {
+				status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+				message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+				errorObject: error,
+			}
+		}
 	}
 
 	/**
@@ -237,21 +289,183 @@ module.exports = class LibraryCategories extends Abstract {
 	 * @returns {Array} Library categories.
 	 */
 
+	/**
+	 * @api {get} /project/v1/library/categories/list
+	 * @apiVersion 1.0.0
+	 * @apiName list
+	 * @apiGroup LibraryCategories
+	 * @apiHeader {String} x-auth-token Authenticity token
+	 * @apiUse successBody
+	 * @apiUse errorBody
+	 */
 	async list(req) {
-		return new Promise(async (resolve, reject) => {
-			try {
-				let projectCategories = await libraryCategoriesHelper.list(req)
-
-				projectCategories.result = projectCategories.data
-
-				return resolve(projectCategories)
-			} catch (error) {
-				return reject({
-					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
-					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
-					errorObject: error,
-				})
+		try {
+			const result = await libraryCategoriesHelper.list(req)
+			return {
+				success: true,
+				message: result.message,
+				result: result.data,
 			}
-		})
+		} catch (error) {
+			return {
+				status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+				message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+				errorObject: error,
+			}
+		}
+	}
+
+	/**
+	 * @api {get} /project/v1/library/categories/:id/hierarchy
+	 * @apiVersion 1.0.0
+	 * @apiName categoryHierarchy
+	 * @apiGroup LibraryCategories
+	 * @apiHeader {String} x-auth-token Authenticity token
+	 * @apiUse successBody
+	 * @apiUse errorBody
+	 */
+	async hierarchy(req) {
+		try {
+			const result = await libraryCategoriesHelper.getCategoryHierarchy(req)
+			return {
+				success: true,
+				message: result.message,
+				result: result.data,
+			}
+		} catch (error) {
+			return {
+				status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+				message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+				errorObject: error,
+			}
+		}
+	}
+
+	/**
+	 * @api {patch} /project/v1/library/categories/leaves
+	 * @apiVersion 1.0.0
+	 * @apiName leaves
+	 * @apiGroup LibraryCategories
+	 * @apiHeader {String} x-auth-token Authenticity token
+	 * @apiUse successBody
+	 * @apiUse errorBody
+	 */
+	async leaves(req) {
+		try {
+			const result = await libraryCategoriesHelper.getLeaves(req)
+			return {
+				success: true,
+				message: result.message,
+				result: result.data,
+			}
+		} catch (error) {
+			return {
+				status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+				message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+				errorObject: error,
+			}
+		}
+	}
+
+	/**
+	 * @api {post} /project/v1/library/categories/bulk
+	 * @apiVersion 1.0.0
+	 * @apiName bulk
+	 * @apiGroup LibraryCategories
+	 * @apiHeader {String} x-auth-token Authenticity token
+	 * @apiUse successBody
+	 * @apiUse errorBody
+	 */
+	async bulk(req) {
+		try {
+			const categories = req.body.categories || []
+
+			if (!Array.isArray(categories) || categories.length === 0) {
+				throw {
+					status: HTTP_STATUS_CODE.bad_request.status,
+					message: 'categories required - provide a non-empty array in request body',
+				}
+			}
+
+			const result = await libraryCategoriesHelper.bulkCreate(
+				categories, 
+				req.userDetails
+			)
+			return {
+				success: true,
+				message: result.message,
+				result: result.data,
+			}
+		} catch (error) {
+			return {
+				status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+				message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+				errorObject: error,
+			}
+		}
+	}
+
+	/**
+	 * @api {delete} /project/v1/library/categories/delete/:id
+	 * @apiVersion 1.0.0
+	 * @apiName delete
+	 * @apiGroup LibraryCategories
+	 * @apiHeader {String} x-auth-token Authenticity token
+	 * @apiUse successBody
+	 * @apiUse errorBody
+	 */
+	async delete(req) {
+		try {
+			const result = await libraryCategoriesHelper.delete(req)
+			if (result.success) {
+				return {
+					success: true,
+					message: result.message,
+					result: result.data,
+				}
+			} else {
+				throw {
+					message: result.message,
+					status: result.status || HTTP_STATUS_CODE.bad_request.status,
+				}
+			}
+		} catch (error) {
+			return {
+				status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+				message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+				errorObject: error,
+			}
+		}
+	}
+
+	/**
+	 * @api {get} /project/v1/library/categories/:id
+	 * @apiVersion 1.0.0
+	 * @apiName details
+	 * @apiGroup LibraryCategories
+	 * @apiHeader {String} x-auth-token Authenticity token
+	 * @apiUse successBody
+	 * @apiUse errorBody
+	 */
+	async details(req) {
+		try {
+			const categoryId = req.params._id
+
+			const result = await libraryCategoriesHelper.details(
+				categoryId, 
+				req.userDetails
+			)
+			return {
+				success: true,
+				message: result.message,
+				result: result.data,
+			}
+		} catch (error) {
+			return {
+				status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+				message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+				errorObject: error,
+			}
+		}
 	}
 }

@@ -36,22 +36,43 @@ IF ERRORLEVEL 1 (
 )
 
 REM ------------------------------------------------
-REM Install mongodb npm package
+REM Check npm installation
+REM ------------------------------------------------
+echo.
+echo Checking npm installation...
+npm -v >nul 2>&1
+
+IF ERRORLEVEL 1 (
+    echo npm not found. Please reinstall Node.js.
+    pause
+    exit /b
+)
+
+REM ------------------------------------------------
+REM Install mongodb npm package (AS REQUESTED)
 REM ------------------------------------------------
 echo.
 echo Installing mongodb npm package...
-npm -v >nul 2>&1
 
-npm install mongodb
+npm i mongodb
+
+IF ERRORLEVEL 1 (
+    echo Failed to install mongodb npm package.
+    pause
+    exit /b
+) ELSE (
+    echo mongodb npm package installed successfully.
+)
+
 REM ------------------------------------------------
 REM Check and install MongoDB Server
 REM ------------------------------------------------
 echo.
-echo Checking MongoDB installation...
-npm install mongodb
+echo Checking MongoDB Server installation...
+mongod --version >nul 2>&1
 
 IF ERRORLEVEL 1 (
-    echo MongoDB not found. Installing MongoDB Server...
+    echo MongoDB Server not found. Installing MongoDB Server...
     winget install MongoDB.Server --accept-package-agreements --accept-source-agreements
 ) ELSE (
     echo MongoDB Server is already installed.

@@ -75,6 +75,7 @@ module.exports = {
 			type: String,
 			default: 'SYSTEM',
 		},
+		// Legacy single template fields (kept for backward compatibility)
 		projectTemplateId: {
 			type: 'ObjectId',
 			index: true,
@@ -82,6 +83,29 @@ module.exports = {
 		projectTemplateExternalId: {
 			type: String,
 			index: true,
+		},
+		// New multiple templates support
+		projectTemplates: {
+			type: [
+				{
+					_id: {
+						type: 'ObjectId',
+						required: true,
+					},
+					externalId: {
+						type: String,
+						required: true,
+					},
+				},
+			],
+			default: [],
+			description: 'Array of project templates associated with this project',
+		},
+		// keywords (OPTIONAL - FOR FILTERING/SEARCH)
+		keywords: {
+			type: [String],
+			default: [],
+			description: 'Optional tags for categorization and search',
 		},
 		startDate: Date,
 		endDate: Date,
@@ -223,8 +247,16 @@ module.exports = {
 	},
 	compoundIndex: [
 		{
-			name: { userId: 1, solutionId: 1 },
-			indexType: { unique: true, partialFilterExpression: { solutionId: { $exists: true } } },
+			name: { userId: 1, solutionId: 1, entityId: 1 },
+			indexType: {
+				unique: true,
+				partialFilterExpression: { solutionId: { $exists: true }, entityId: { $exists: true } },
+			},
+		},
+		// Index for querying by template ID in array (multiple templates)
+		{
+			name: { 'projectTemplates._id': 1 },
+			indexType: {},
 		},
 	],
 }

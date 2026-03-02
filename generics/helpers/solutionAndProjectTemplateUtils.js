@@ -336,7 +336,7 @@ function setScope(solutionId, scopeData, userDetails) {
 				} else if (userDetails.userInformation.roles.includes(CONSTANTS.common.TENANT_ADMIN)) {
 					validOrgs = await userService.fetchTenantDetails(userDetails.tenantAndOrgInfo.tenantId)
 				}
-				if (!validOrgs.success) {
+				if (!validOrgs?.success) {
 					throw {
 						success: false,
 						status: HTTP_STATUS_CODE['bad_request'].status,

@@ -557,8 +557,7 @@ module.exports = async function (req, res, next, token = '') {
 
 				let validateOrgsResult = await validateIfOrgsBelongsToTenant(
 					req.headers['tenantid'],
-					req.headers['orgid'],
-					token
+					req.headers['orgid']
 				)
 				if (!validateOrgsResult.success) {
 					return res

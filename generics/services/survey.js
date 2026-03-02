@@ -59,6 +59,13 @@ const importTemplateToSolution = function (token, solutionId, programId = '', pa
 				})
 			}
 
+			//  Tenant Admin need extra headers
+			if (roles && roles.includes(CONSTANTS.common.TENANT_ADMIN)) {
+				_.assign(options.headers, {
+					'x-auth-token': token,
+					orgId: userDetails.tenantAndOrgInfo.orgId.join(','),
+				})
+			}
 			// Admin need extra headers
 			if (roles && roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
 				_.assign(options.headers, {
@@ -167,6 +174,14 @@ const listSolutions = function (solutionIds, token, userDetails) {
 				json: solutionIds,
 			}
 			let roles = userDetails?.userInformation?.roles ?? []
+			//  Tenant Admin need extra headers
+			if (roles && roles.includes(CONSTANTS.common.TENANT_ADMIN)) {
+				_.assign(options.headers, {
+					'x-auth-token': token,
+					orgId: userDetails.tenantAndOrgInfo.orgId.join(','),
+				})
+			}
+
 			// pass admin and tenant info in header  if user superAdmin
 			if (roles && roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
 				_.assign(options.headers, {
@@ -226,6 +241,14 @@ const updateSolution = function (token, updateData, solutionExternalId, userDeta
 
 			// pass admin and tenant info in header  if user superAdmin
 			let roles = userDetails?.userInformation?.roles ?? []
+			//  Tenant Admin need extra headers
+			if (roles && roles.includes(CONSTANTS.common.TENANT_ADMIN)) {
+				_.assign(options.headers, {
+					'x-auth-token': token,
+					orgId: userDetails.tenantAndOrgInfo.orgId.join(','),
+				})
+			}
+
 			if (roles && roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
 				_.assign(options.headers, {
 					'admin-auth-token': process.env.ADMIN_AUTH_TOKEN,

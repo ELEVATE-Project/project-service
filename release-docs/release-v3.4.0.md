@@ -187,7 +187,7 @@ node createOrgExtensions.js
 
 ### 4. Docker Deployment
 
--   **Image Tag:** `shikshalokamqa/elevate-samiksha-service:3.4.0`
+-   **Image Tag:** `shikshalokamqa/elevate-samiksha-service:3.4.0_RC1`
 
 ---
 

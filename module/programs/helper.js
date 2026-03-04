@@ -41,17 +41,17 @@ module.exports = class ProgramsHelper {
 					})
 				}
 				// populate scopeData.organizations data
-				if (
-					scopeData.organizations &&
-					scopeData.organizations.length > 0 &&
-					userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)
-				) {
-					// call user-service to fetch related orgs
-					let validOrgs = await userService.fetchTenantDetails(
-						userDetails.tenantAndOrgInfo.tenantId,
-						userDetails.userToken,
-						true
-					)
+				if (scopeData.organizations && scopeData.organizations.length > 0) {
+					let validOrgs
+					if (userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)) {
+						validOrgs = await userService.fetchTenantDetails(
+							userDetails.tenantAndOrgInfo.tenantId,
+							userDetails.userToken,
+							true
+						)
+					} else if (userDetails.userInformation.roles.includes(CONSTANTS.common.TENANT_ADMIN)) {
+						validOrgs = await userService.fetchTenantDetails(userDetails.tenantAndOrgInfo.tenantId)
+					}
 					if (!validOrgs.success) {
 						throw {
 							success: false,

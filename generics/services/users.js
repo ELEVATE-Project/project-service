@@ -382,7 +382,6 @@ const getOrgDetails = function (organisationIdentifier, tenantId) {
 /**
  * Fetches the tenant details for a given tenant ID along with org it is associated with.
  * @param {string} tenantId - The code/id of the organization.
- * @param {String} userToken - user token
  * @param {Boolean} aggregateValidOrgs - boolean value to populate valid orgs from response
  * @returns {Promise} A promise that resolves with the organization details or rejects with an error.
  */

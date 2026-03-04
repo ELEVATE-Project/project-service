@@ -370,7 +370,7 @@ curl '{{domain}}/survey/v1/profile/read' \
 
 ### 2. Docker Deployment
 
--   Update **React-wrapper/Shikshagraha app** image tag: `shikshalokamqa/elevate-portal:1.1.1`
+-   Update **React-wrapper/Shikshagraha app** image tag: `shikshalokamqa/elevate-portal:1.1.3`
 
 ### 3. Form Update
 

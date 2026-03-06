@@ -60,7 +60,7 @@ _No migrations applicable._
 
     verify the existing tag. if not matching update it
 
--   **Image Tag:** `shikshalokamqa/elevate-user:3.3.24`
+-   **Image Tag:** `shikshalokamqa/elevate-user:3.4.0`
 
 ---
 

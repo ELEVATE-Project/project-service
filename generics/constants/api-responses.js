@@ -80,6 +80,8 @@ module.exports = {
 	PROJECT_CATEGORIES_ADDED: 'Successfully created project categories',
 	PROJECT_CATEGORIES_NOT_UPDATED: 'Could not updated project categories',
 	PROJECT_CATEGORIES_NOT_ADDED: 'Could not create project categories',
+	PROJECT_CATEGORIES_DELETED: 'Successfully deleted project categories',
+	PROJECT_CATEGORIES_NOT_DELETED: 'Could not delete project categories',
 	PROJECT_TEMPLATE_NOT_UPDATED: 'Not found project template',
 	COULD_NOT_CREATE_ASSESSMENT_SOLUTION: 'Could not create assessment solution',
 	FAILED_TO_ADD_ENTITY_TO_SOLUTION: 'Failed to add entity to solution',

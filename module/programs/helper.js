@@ -47,11 +47,7 @@ module.exports = class ProgramsHelper {
 					userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)
 				) {
 					// call user-service to fetch related orgs
-					let validOrgs = await userService.fetchTenantDetails(
-						userDetails.tenantAndOrgInfo.tenantId,
-						userDetails.userToken,
-						true
-					)
+					let validOrgs = await userService.fetchTenantDetails(userDetails.tenantAndOrgInfo.tenantId, true)
 					if (!validOrgs.success) {
 						throw {
 							success: false,

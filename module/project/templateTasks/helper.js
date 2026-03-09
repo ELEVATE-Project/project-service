@@ -72,6 +72,8 @@ module.exports = class ProjectTemplateTasksHelper {
 						}
 					}
 
+					console.log(filterData, 'line no 75')
+
 					let tasksData = await projectTemplateTaskQueries.taskDocuments(filterData, [
 						'_id',
 						'children',
@@ -81,6 +83,8 @@ module.exports = class ProjectTemplateTasksHelper {
 						'taskSequence',
 						'hasSubTasks',
 					])
+					console.log(tasksData, 'line no 84')
+
 					if (tasksData.length > 0) {
 						tasksData.forEach((task) => {
 							if (systemId) {
@@ -99,6 +103,7 @@ module.exports = class ProjectTemplateTasksHelper {
 					},
 					['_id', 'entityType', 'externalId', 'taskSequence']
 				)
+				console.log(projectTemplate, 'line no 102')
 
 				if (!projectTemplate.length > 0) {
 					throw {

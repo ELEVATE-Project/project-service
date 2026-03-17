@@ -152,6 +152,7 @@ node createOrgExtensions.js
 "USER_COURSES_SUBMISSION_TOPIC": "elevate_user_courses_prod"
 "USER_COURSES_TOPIC": "elevate_user_courses_prod_raw"
 "RESOURCE_DELETION_TOPIC": "resource_deletion_topic_prod"
+"ORG_UPDATES_TOPIC" : "elevate_survey_org_extension_event_listener"
 "IMPROVEMENT_PROJECT_SUBMISSION_TOPIC": saas_project_submission_prod // should be same as SUBMISSION_TOPIC of project service
 ```
 
@@ -162,6 +163,12 @@ node createOrgExtensions.js
 ```
 
 ### 2. Migrations
+
+> Note: Please run the below command before migration
+
+```bash
+npm install axios
+```
 
 ```bash
 # M1. Normalize orgIds in multiple collections

@@ -44,7 +44,7 @@ services:
     networks:
       - project_net
   project:
-    image: shikshalokamqa/elevate-project-service:3.3.6.1
+    image: shikshalokamqa/elevate-project-service:3.4.0
     container_name: project
     ports:
       - '6000:6000'
@@ -60,7 +60,7 @@ services:
     networks:
       - project_net
   samiksha:
-    image: shikshalokamqa/elevate-samiksha-service:3.3.8.1
+    image: shikshalokamqa/elevate-samiksha-service:3.4.0_RC1
     ports:
       - '4301:4301'
     command: ['nodemon', 'dev']
@@ -73,7 +73,7 @@ services:
     networks:
       - project_net
   entity_management:
-    image: shikshalokamqa/elevate-entity-management:3.3.13.1
+    image: shikshalokamqa/elevate-entity-management:3.4
     ports:
       - '5001:5001'
     env_file:
@@ -85,7 +85,7 @@ services:
     networks:
       - project_net
   user:
-    image: shikshalokamqa/elevate-user:3.3.24
+    image: shikshalokamqa/elevate-user:3.4.0
     ports:
       - '3001:3001'
     command: >
@@ -139,7 +139,7 @@ services:
       - ./notification_env
 
   scheduler:
-    image: shikshalokamqa/elevate-scheduler:2.6.1
+    image: shikshalokamqa/elevate-scheduler:3.4.0
     ports:
       - '4000:4000'
     command: ['nodemon', 'app.js']

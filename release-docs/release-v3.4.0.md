@@ -235,6 +235,8 @@ node normalizeOrgIdInCollections.js
 
 ### 3. Form Creation
 
+For detailed instructions on how to create the form, refer to [this document](https://docs.google.com/document/d/13zmU5H8Vr3tnYEGI89y-Az5TgCqYyNEFqTX4VWr_zQ0/edit?tab=t.onvajv5wm81c).
+
 ```
 curl '{{domain}}/project/v1/profile/read' \
   -H 'accept: application/json, text/plain, */*' \

@@ -210,6 +210,7 @@ node createOrgExtensions.js
 "KAFKA_GROUP_ID": "qa.entity"
 "KAFKA_HEALTH_CHECK_TOPIC": "entity-health-check-topic-check"
 "KAFKA_URL": "172.30.148.74:9092"
+"USER_SERVICE_URL": "http://localhost:3569"
 "RESOURCE_DELETION_TOPIC": "resource_deletion_topic_prod"
 ```
 

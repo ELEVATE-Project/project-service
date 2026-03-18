@@ -217,12 +217,10 @@ node your-script-file.js
 
 ---
 
-## ❌ Error Handling
-
-All errors result in:
+## ⚠️ Disclaimer
 
 ```
-Migration failed: <error>
+Solutions created for other organizations will not be subjected for migration.
 ```
 
 ---

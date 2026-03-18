@@ -22,10 +22,10 @@ const collections = [
 	'certificateTemplates',
 	'organizationExtension',
 	'programs',
+	'solutions',
 	'projectTemplates',
 	'projectTemplateTasks',
 	'projects',
-	'solutions',
 	'userExtension',
 	'userCourses',
 ]

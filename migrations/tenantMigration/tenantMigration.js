@@ -545,7 +545,7 @@ async function migratePrograms(db, collectionName) {
 				},
 				{
 					_id: 1,
-					tenantMigrationReferenceId: 1,
+					'metaInformation.tenantMigrationReferenceId': 1,
 				}
 			)
 
@@ -649,7 +649,7 @@ async function migrateSolutions(db, collectionName) {
 				},
 				{
 					_id: 1,
-					tenantMigrationReferenceId: 1,
+					'metaInformation.tenantMigrationReferenceId': 1,
 				}
 			)
 
@@ -886,7 +886,7 @@ async function migrateProjects(db, collectionName) {
 				},
 				{
 					_id: 1,
-					tenantMigrationReferenceId: 1,
+					'metaInformation.tenantMigrationReferenceId': 1,
 				}
 			)
 
@@ -894,7 +894,7 @@ async function migrateProjects(db, collectionName) {
 				const entityMap = new Map()
 
 				for (const entity of result.data) {
-					entityMap.set(entity.tenantMigrationReferenceId.toString(), entity._id.toString())
+					entityMap.set(entity.metaInformation.tenantMigrationReferenceId.toString(), entity._id.toString())
 				}
 
 				updatedUserRoleInformation[key] = updatedUserRoleInformation[key].map(
@@ -919,7 +919,7 @@ async function migrateProjects(db, collectionName) {
 				},
 				{
 					_id: 1,
-					tenantMigrationReferenceId: 1,
+					'metaInformation.tenantMigrationReferenceId': 1,
 				}
 			)
 
@@ -936,7 +936,7 @@ async function migrateProjects(db, collectionName) {
 				},
 				{
 					_id: 1,
-					tenantMigrationReferenceId: 1,
+					'metaInformation.tenantMigrationReferenceId': 1,
 				}
 			)
 

@@ -30,6 +30,9 @@ const collections = [
 	'userCourses',
 ]
 
+let kafkaPushSuccessProjects = []
+let kafkaPushFailedProjects = []
+
 if (!MONGO_URL) {
 	console.error('❌ MONGO_URL missing in .env')
 	process.exit(1)
@@ -149,7 +152,7 @@ async function migrateOrganizationExtension(db, collectionName) {
 	}
 
 	const totalDocs = await collection.countDocuments(query)
-	console.log(`📊 Documents to migrate: ${totalDocs}`)
+	console.log(`📊 Documents to delete: ${totalDocs}`)
 
 	let outputData = {
 		data: [],
@@ -164,14 +167,8 @@ async function migrateOrganizationExtension(db, collectionName) {
 		if (!doc) break
 
 		batch.push({
-			updateOne: {
+			deleteOne: {
 				filter: { _id: doc._id },
-				update: {
-					$set: {
-						tenantId: inputData.newTenantId.toString().trim(),
-						orgId: inputData.newOrgId.toString().trim(),
-					},
-				},
 			},
 		})
 
@@ -738,7 +735,7 @@ async function fetchUserProfile(userId, tenantId) {
 	})
 }
 
-async function pushToKafka(projectId, token) {
+async function pushToKafka(projectId, token, kafkaPushFailedProjects, kafkaPushSuccessProjects) {
 	return new Promise((resolve, reject) => {
 		const baseUrl = new URL(process.env.INTERFACE_SERVICE_URL)
 
@@ -765,9 +762,11 @@ async function pushToKafka(projectId, token) {
 				try {
 					if (res.statusCode >= 200 && res.statusCode < 300) {
 						console.log(`[Success] Project ${projectId} pushed to Kafka.`)
+						kafkaPushSuccessProjects.push(projectId)
 						resolve()
 					} else {
 						console.error(`[Failed] Project ${projectId} failed to push:`)
+						kafkaPushFailedProjects.push(projectId)
 						reject()
 					}
 				} catch (err) {
@@ -781,9 +780,6 @@ async function pushToKafka(projectId, token) {
 			console.error(`[Error] Project ${projectId}:`, err.message)
 			reject(err)
 		})
-
-		// axios was sending empty body {}
-		req.write(JSON.stringify({}))
 
 		req.end()
 	})
@@ -903,7 +899,9 @@ async function migrateProjects(db, collectionName) {
 			}
 		}
 
-		updatedUserRoleInformation['organizations'] = inputData.newOrgId.toString().trim()
+		updatedUserRoleInformation['organizations'] = [inputData.newOrgId.toString().trim()]
+		updatedUserRoleInformation['tenantId'] = inputData.newTenantId.toString().trim()
+		updatedUserRoleInformation['orgId'] = inputData.newOrgId.toString().trim()
 
 		/* --------------------------
 		   Update entity-information
@@ -955,16 +953,16 @@ async function migrateProjects(db, collectionName) {
 		   Update program-information
 		---------------------------*/
 
-		let updatedProgramInformation = programsCollection.findOne({
-			_id: doc.programId,
+		let updatedProgramInformation = await programsCollection.findOne({
+			_id: new ObjectId(doc.programId),
 			tenantId: inputData.newTenantId.toString().trim(),
 		})
 
 		/* --------------------------
 		   Update solution-information
 		---------------------------*/
-		let updatedSolutionInformation = solutionsCollection.findOne({
-			_id: doc.solutionId,
+		let updatedSolutionInformation = await solutionsCollection.findOne({
+			_id: new ObjectId(doc.solutionId),
 			tenantId: inputData.newTenantId.toString().trim(),
 		})
 
@@ -1027,10 +1025,17 @@ async function migrateProjects(db, collectionName) {
 
 	// Push projects to Kafka
 	for (const projectId of projectIdsToPushToKafka) {
-		await pushToKafka(projectId, inputData.token.toString().trim())
+		await pushToKafka(
+			projectId,
+			inputData.token.toString().trim(),
+			kafkaPushFailedProjects,
+			kafkaPushSuccessProjects
+		)
 		await delay(1000)
 	}
 
+	writeMigrationOutput('kafkaPushSuccessProjects', kafkaPushSuccessProjects)
+	writeMigrationOutput('kafkaPushFailedProjects', kafkaPushFailedProjects)
 	writeMigrationOutput(collectionName, outputData)
 }
 
@@ -1176,16 +1181,16 @@ async function runMigration() {
 					await migrateAssetCollections(db, collectionName)
 					break
 
+				case 'organizationExtension':
+					await migrateOrganizationExtension(db, collectionName)
+					break
+
 				case 'programs':
 					await migratePrograms(db, collectionName)
 					break
 
 				case 'solutions':
 					await migrateSolutions(db, collectionName)
-					break
-
-				case 'organizationExtension':
-					await migrateOrganizationExtension(db, collectionName)
 					break
 
 				case 'projectTemplateTasks':

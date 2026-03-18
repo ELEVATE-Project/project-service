@@ -12,7 +12,7 @@ const http = require('http')
 const request = require('request')
 const jwt = require('jsonwebtoken')
 const MONGO_URL = process.env.MONGODB_URL
-const BATCH_SIZE = 10
+const BATCH_SIZE = 100
 const interfaceServiceUrl = process.env.INTERFACE_SERVICE_URL
 
 // Add collections here

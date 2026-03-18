@@ -882,7 +882,7 @@ async function migrateProjects(db, collectionName) {
 			const result = await entityDocuments(
 				{
 					tenantId: inputData.newTenantId.toString().trim(),
-					tenantMigrationReferenceId: { $in: updatedUserRoleInformation[key] },
+					'metaInformation.tenantMigrationReferenceId': { $in: updatedUserRoleInformation[key] },
 				},
 				{
 					_id: 1,
@@ -915,7 +915,7 @@ async function migrateProjects(db, collectionName) {
 			const result = await entityDocuments(
 				{
 					tenantId: inputData.newTenantId.toString().trim(),
-					tenantMigrationReferenceId: doc.entityInformation._id,
+					'metaInformation.tenantMigrationReferenceId': doc.entityInformation._id,
 				},
 				{
 					_id: 1,
@@ -932,7 +932,7 @@ async function migrateProjects(db, collectionName) {
 			const result = await entityDocuments(
 				{
 					tenantId: inputData.newTenantId.toString().trim(),
-					tenantMigrationReferenceId: doc.entityInformation._id,
+					'metaInformation.tenantMigrationReferenceId': doc.entityInformation._id,
 				},
 				{
 					_id: 1,

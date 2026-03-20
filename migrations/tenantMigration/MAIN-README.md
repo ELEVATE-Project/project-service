@@ -31,7 +31,7 @@ https://github.com/ELEVATE-Project/entity-management/blob/develop/src/migrations
 -   Migrates user-related data and profiles
 
 🔗 README:
-_(To be added)_
+https://github.com/ELEVATE-Project/user/blob/develop/src/scripts/readme.md
 
 ---
 

@@ -188,8 +188,6 @@ const listSolutions = function (solutionIds, token, userDetails) {
 					orgId: userDetails.tenantAndOrgInfo.orgId.join(','),
 				})
 			}
-			console.log(options.headers, 'line no 192')
-
 			request.post(url, options, assessmentCallback)
 			function assessmentCallback(err, data) {
 				let result = {

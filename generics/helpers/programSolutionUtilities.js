@@ -25,43 +25,43 @@ function getUpdateObjectTOAddScope(bodyData, tenantId, orgId, userDetails) {
 			let updateObject = { $addToSet: {} }
 			let validationExcludedEntitiesKeys = []
 			let tenantDetails
-			let adminTenantAdminRole = [CONSTANTS.common.ADMIN_ROLE, CONSTANTS.common.TENANT_ADMIN]
 			// Check if user is Admin or Tenant Admin
-			if (UTILS.validateRoles(userDetails.userInformation.roles, adminTenantAdminRole)) {
-				// Fetch tenant details to validate organization codes
+			if (UTILS.validateRoles(userDetails.userInformation.roles, CONSTANTS.common.ADMIN_ROLE)) {
 				tenantDetails = await userService.fetchTenantDetails(tenantId, userDetails.userToken)
-				if (!tenantDetails?.success || !tenantDetails?.data?.meta) {
-					throw {
-						message: CONSTANTS.apiResponses.FAILED_TO_FETCH_TENANT_DETAILS,
-						status: HTTP_STATUS_CODE.bad_request.status,
-					}
+			} else if (UTILS.validateRoles(userDetails.userInformation.roles, CONSTANTS.common.TENANT_ADMIN)) {
+				tenantDetails = await userService.fetchTenantDetails(tenantId)
+			}
+			if (!tenantDetails?.success || !tenantDetails?.data?.meta) {
+				throw {
+					message: CONSTANTS.apiResponses.FAILED_TO_FETCH_TENANT_DETAILS,
+					status: HTTP_STATUS_CODE.bad_request.status,
 				}
-				// Store validation-excluded scope keys if present
-				if (
-					Array.isArray(tenantDetails?.data?.meta?.validationExcludedScopeKeys) &&
-					tenantDetails.data.meta.validationExcludedScopeKeys.length > 0
-				) {
-					// Fetch tenant details (will include valid org codes & validationExcludedScopeKeys)
-					validationExcludedEntitiesKeys.push(...tenantDetails.data.meta.validationExcludedScopeKeys)
-				}
+			}
+			// Store validation-excluded scope keys if present
+			if (
+				Array.isArray(tenantDetails?.data?.meta?.validationExcludedScopeKeys) &&
+				tenantDetails.data.meta.validationExcludedScopeKeys.length > 0
+			) {
+				// Fetch tenant details (will include valid org codes & validationExcludedScopeKeys)
+				validationExcludedEntitiesKeys.push(...tenantDetails.data.meta.validationExcludedScopeKeys)
+			}
 
-				// Handle organization values if passed
-				if (bodyData.organizations) {
-					if (Array.isArray(bodyData.organizations)) {
-						if (bodyData.organizations.includes(ALL_SCOPE_VALUE)) {
-							// Add "ALL" if specified
-							updateObject.$addToSet[`scope.organizations`] = { $each: [ALL_SCOPE_VALUE] }
-						} else {
-							const validOrgCodes = tenantDetails.data.organizations.map((org) => org.code)
-							const isValid = bodyData.organizations.every((orgCode) => validOrgCodes.includes(orgCode))
-							if (!isValid) {
-								throw {
-									message: CONSTANTS.apiResponses.INVALID_ORGANIZATION,
-									status: HTTP_STATUS_CODE.bad_request.status,
-								}
+			// Handle organization values if passed
+			if (bodyData.organizations) {
+				if (Array.isArray(bodyData.organizations)) {
+					if (bodyData.organizations.includes(ALL_SCOPE_VALUE)) {
+						// Add "ALL" if specified
+						updateObject.$addToSet[`scope.organizations`] = { $each: [ALL_SCOPE_VALUE] }
+					} else {
+						const validOrgCodes = tenantDetails.data.organizations.map((org) => org.code)
+						const isValid = bodyData.organizations.every((orgCode) => validOrgCodes.includes(orgCode))
+						if (!isValid) {
+							throw {
+								message: CONSTANTS.apiResponses.INVALID_ORGANIZATION,
+								status: HTTP_STATUS_CODE.bad_request.status,
 							}
-							updateObject.$addToSet[`scope.organizations`] = { $each: bodyData.organizations }
 						}
+						updateObject.$addToSet[`scope.organizations`] = { $each: bodyData.organizations }
 					}
 				}
 			}
@@ -162,16 +162,16 @@ function getUpdateObjectToRemoveScope(currentScope, bodyData, tenantId, userDeta
 			let updatedScope = JSON.parse(JSON.stringify(currentScope))
 
 			// Fetch tenant details if role is admin/tenant admin
-			let adminTenantAdminRole = [CONSTANTS.common.ADMIN_ROLE, CONSTANTS.common.TENANT_ADMIN]
 			let tenantDetails
-			if (UTILS.validateRoles(userDetails.userInformation.roles, adminTenantAdminRole)) {
-				// Fetch tenant meta details if user is admin/tenant admin
+			if (UTILS.validateRoles(userDetails.userInformation.roles, CONSTANTS.common.ADMIN_ROLE)) {
 				tenantDetails = await userService.fetchTenantDetails(tenantId, userDetails.userToken)
-				if (!tenantDetails?.success || !tenantDetails?.data?.meta) {
-					throw {
-						message: CONSTANTS.apiResponses.FAILED_TO_FETCH_TENANT_DETAILS,
-						status: HTTP_STATUS_CODE.bad_request.status,
-					}
+			} else if (UTILS.validateRoles(userDetails.userInformation.roles, CONSTANTS.common.TENANT_ADMIN)) {
+				tenantDetails = await userService.fetchTenantDetails(tenantId)
+			}
+			if (!tenantDetails?.success || !tenantDetails?.data?.meta) {
+				throw {
+					message: CONSTANTS.apiResponses.FAILED_TO_FETCH_TENANT_DETAILS,
+					status: HTTP_STATUS_CODE.bad_request.status,
 				}
 			}
 

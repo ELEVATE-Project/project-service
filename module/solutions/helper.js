@@ -1297,10 +1297,8 @@ module.exports = class SolutionsHelper {
 					isReusable: false,
 					isAPrivateProgram: false,
 				}
-
-				// Only super admin can generate solution links for all tenants and orgs
-				// solutionMatchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-				// solutionMatchQuery['orgId'] = { $in: ['ALL', ...userDetails.tenantAndOrgInfo.orgId] }
+				solutionMatchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+				solutionMatchQuery['orgId'] = userDetails.tenantAndOrgInfo.orgId[0]
 
 				let solutionData = await solutionsQueries.solutionsDocument(solutionMatchQuery, [
 					'link',

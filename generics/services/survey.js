@@ -53,7 +53,12 @@ const importTemplateToSolution = function (token, solutionId, programId = '', pa
 			}
 			//pass the user Token only for admin and orgAdmin
 			let roles = userDetails?.userInformation?.roles ?? []
-			if (roles && (roles.includes(CONSTANTS.common.ORG_ADMIN) || roles.includes(CONSTANTS.common.ADMIN_ROLE))) {
+			if (
+				roles &&
+				(roles.includes(CONSTANTS.common.ORG_ADMIN) ||
+					roles.includes(CONSTANTS.common.ADMIN_ROLE) ||
+					roles.includes(CONSTANTS.common.TENANT_ADMIN))
+			) {
 				_.assign(options.headers, {
 					'x-auth-token': token,
 				})
@@ -64,6 +69,10 @@ const importTemplateToSolution = function (token, solutionId, programId = '', pa
 				_.assign(options.headers, {
 					'admin-auth-token': process.env.ADMIN_AUTH_TOKEN,
 					tenantId: userDetails.tenantAndOrgInfo.tenantId,
+					orgId: userDetails.tenantAndOrgInfo.orgId.join(','),
+				})
+			} else if (roles && roles.includes(CONSTANTS.common.TENANT_ADMIN)) {
+				_.assign(options.headers, {
 					orgId: userDetails.tenantAndOrgInfo.orgId.join(','),
 				})
 			}
@@ -174,6 +183,10 @@ const listSolutions = function (solutionIds, token, userDetails) {
 					tenantId: userDetails.tenantAndOrgInfo.tenantId,
 					orgId: userDetails.tenantAndOrgInfo.orgId.join(','),
 				})
+			} else if (roles && roles.includes(CONSTANTS.common.TENANT_ADMIN)) {
+				_.assign(options.headers, {
+					orgId: userDetails.tenantAndOrgInfo.orgId.join(','),
+				})
 			}
 			request.post(url, options, assessmentCallback)
 			function assessmentCallback(err, data) {
@@ -230,6 +243,10 @@ const updateSolution = function (token, updateData, solutionExternalId, userDeta
 				_.assign(options.headers, {
 					'admin-auth-token': process.env.ADMIN_AUTH_TOKEN,
 					tenantId: userDetails.tenantAndOrgInfo.tenantId,
+					orgId: userDetails.tenantAndOrgInfo.orgId.join(','),
+				})
+			} else if (roles && roles.includes(CONSTANTS.common.TENANT_ADMIN)) {
+				_.assign(options.headers, {
 					orgId: userDetails.tenantAndOrgInfo.orgId.join(','),
 				})
 			}

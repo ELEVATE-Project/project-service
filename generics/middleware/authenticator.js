@@ -112,8 +112,9 @@ module.exports = async function (req, res, next, token = '') {
 		'/organizationExtension/updateRelatedOrgs',
 		'/userExtension/update',
 		'/solutions/fetchLinkInternal',
-		'/solutions/fetchLink',
 	]
+
+	let publicAccessApiPath = ['/solutions/fetchLink']
 	let performInternalAccessTokenCheck = false
 	let adminHeader = false
 	if (process.env.ADMIN_ACCESS_TOKEN) {
@@ -139,6 +140,14 @@ module.exports = async function (req, res, next, token = '') {
 			return
 		}
 	}
+
+	await Promise.all(
+		publicAccessApiPath.map(async function (path) {
+			if (req.path.includes(path)) {
+				performInternalAccessTokenCheck = true
+			}
+		})
+	)
 
 	if (!token) {
 		rspObj.errCode = CONSTANTS.apiResponses.TOKEN_MISSING_CODE

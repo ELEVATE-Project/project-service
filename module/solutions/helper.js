@@ -1291,14 +1291,28 @@ module.exports = class SolutionsHelper {
 	static fetchLink(solutionId, userDetails, token = '') {
 		return new Promise(async (resolve, reject) => {
 			try {
-				// build solution match query
+				// Extract user org + tenant
+				const userOrgId = userDetails?.tenantAndOrgInfo?.orgId?.[0]
+				const tenantId = userDetails?.tenantAndOrgInfo?.tenantId
+
+				// Build solution match query
 				let solutionMatchQuery = {
 					_id: solutionId,
 					isReusable: false,
 					isAPrivateProgram: false,
+					tenantId: tenantId,
+
+					$or: [
+						{ orgId: userOrgId },
+						{
+							'scope.organizations': {
+								$in: ['ALL', userOrgId],
+							},
+						},
+					],
 				}
-				solutionMatchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-				solutionMatchQuery['orgId'] = userDetails.tenantAndOrgInfo.orgId[0]
+
+				console.log(solutionMatchQuery, 'line no 1322')
 
 				let solutionData = await solutionsQueries.solutionsDocument(solutionMatchQuery, [
 					'link',

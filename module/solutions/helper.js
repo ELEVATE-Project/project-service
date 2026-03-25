@@ -1311,9 +1311,6 @@ module.exports = class SolutionsHelper {
 						},
 					],
 				}
-
-				console.log(solutionMatchQuery, 'line no 1322')
-
 				let solutionData = await solutionsQueries.solutionsDocument(solutionMatchQuery, [
 					'link',
 					'type',

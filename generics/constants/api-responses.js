@@ -322,4 +322,6 @@ module.exports = {
 	ACCESS_TOKEN_EXPIRED: 'Access Token Expired!! Please Login Again.',
 	USER_SERVICE_DOWN_CODE: 'USER_SERVICE_DOWN',
 	USER_SERVICE_DOWN: 'User service is down',
+	INVALID_USER_PERMISSION: 'User do not have required permission ',
+	INVALID_USER_PERMISSION_CODE: 'INVALID_USER_PERMISSION',
 }

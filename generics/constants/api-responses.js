@@ -325,7 +325,6 @@ module.exports = {
 	INVALID_USER_PERMISSION: 'User do not have required permission ',
 	INVALID_USER_PERMISSION_CODE: 'INVALID_USER_PERMISSION',
 	PROJECT_DOES_NOT_BELONG_TO_USER: 'Project does not belong to the user!!',
-	SUBMISSION_LEVEL_NOT_COMPLIED: 'Not allowed to update project. SUBMISSION_LEVEL not complied!!!',
 	SUBMISSION_LEVEL_NOT_COMPLIED: 'Not allowed to update project. SUBMISSION_LEVEL not complied!',
 	PROJECT_UPDATED_SUCCESSFULLY: 'Project updated successfully.',
 }

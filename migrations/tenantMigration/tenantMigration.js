@@ -40,8 +40,14 @@ if (!MONGO_URL) {
 
 const inputFilePath = path.resolve(__dirname, './input.json')
 const rawData = fs.readFileSync(inputFilePath, 'utf8')
-const inputData = JSON.parse(rawData)
+let inputData = JSON.parse(rawData)
 const timeStamp = new Date()
+
+;['currentTenantId', 'currentOrgId', 'newTenantId', 'newOrgId'].forEach((key) => {
+	if (inputData[key]) {
+		inputData[key] = inputData[key].toLowerCase()
+	}
+})
 
 const outputFilePath = path.resolve(__dirname, `./output-${timeStamp}.json`)
 fs.writeFileSync(outputFilePath, JSON.stringify({}, null, 2), 'utf8')

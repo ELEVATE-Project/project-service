@@ -1291,17 +1291,26 @@ module.exports = class SolutionsHelper {
 	static fetchLink(solutionId, userDetails, token = '') {
 		return new Promise(async (resolve, reject) => {
 			try {
-				// build solution match query
+				// Extract user org + tenant
+				const userOrgId = userDetails?.tenantAndOrgInfo?.orgId?.[0]
+				const tenantId = userDetails?.tenantAndOrgInfo?.tenantId
+
+				// Build solution match query
 				let solutionMatchQuery = {
 					_id: solutionId,
 					isReusable: false,
 					isAPrivateProgram: false,
+					tenantId: tenantId,
+
+					$or: [
+						{ orgId: userOrgId },
+						{
+							'scope.organizations': {
+								$in: ['ALL', userOrgId],
+							},
+						},
+					],
 				}
-
-				// Only super admin can generate solution links for all tenants and orgs
-				// solutionMatchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-				// solutionMatchQuery['orgId'] = { $in: ['ALL', ...userDetails.tenantAndOrgInfo.orgId] }
-
 				let solutionData = await solutionsQueries.solutionsDocument(solutionMatchQuery, [
 					'link',
 					'type',

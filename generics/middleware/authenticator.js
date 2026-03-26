@@ -113,7 +113,10 @@ module.exports = async function (req, res, next, token = '') {
 		'/userExtension/update',
 		'/solutions/fetchLinkInternal',
 	]
+
+	let publicApisWithLimitedAccess = ['/solutions/fetchLink']
 	let performInternalAccessTokenCheck = false
+	let unautherizedApiAccessDetected = false
 	let adminHeader = false
 	if (process.env.ADMIN_ACCESS_TOKEN) {
 		adminHeader = req.headers[process.env.ADMIN_TOKEN_HEADER_NAME]
@@ -138,6 +141,15 @@ module.exports = async function (req, res, next, token = '') {
 			return
 		}
 	}
+
+	await Promise.all(
+		publicApisWithLimitedAccess.map(async function (path) {
+			if (req.path.includes(path)) {
+				performInternalAccessTokenCheck = true
+				unautherizedApiAccessDetected = true
+			}
+		})
+	)
 
 	if (!token) {
 		rspObj.errCode = CONSTANTS.apiResponses.TOKEN_MISSING_CODE
@@ -568,8 +580,13 @@ module.exports = async function (req, res, next, token = '') {
 				req.headers['tenantid'] = UTILS.lowerCase(decodedToken.data.tenant_id.toString())
 				req.headers['orgid'] = [UTILS.lowerCase(decodedToken.data.organization_id.toString())]
 			} else {
-				rspObj.errCode = CONSTANTS.apiResponses.TOKEN_MISSING_CODE
-				rspObj.errMsg = CONSTANTS.apiResponses.TOKEN_MISSING_MESSAGE
+				if (unautherizedApiAccessDetected) {
+					rspObj.errCode = CONSTANTS.apiResponses.INVALID_USER_PERMISSION_CODE
+					rspObj.errMsg = CONSTANTS.apiResponses.INVALID_USER_PERMISSION
+				} else {
+					rspObj.errCode = CONSTANTS.apiResponses.TOKEN_MISSING_CODE
+					rspObj.errMsg = CONSTANTS.apiResponses.TOKEN_MISSING_MESSAGE
+				}
 				rspObj.responseCode = HTTP_STATUS_CODE['unauthorized'].status
 				return res.status(HTTP_STATUS_CODE['unauthorized'].status).send(respUtil(rspObj))
 			}

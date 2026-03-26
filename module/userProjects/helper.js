@@ -124,6 +124,7 @@ module.exports = class UserProjectsHelper {
 			try {
 				let tenantId = userDetails.userInformation.tenantId
 				let orgId = userDetails.userInformation.organizationId
+				const userId = userDetails.userInformation.userId
 				const userProject = await projectQueries.projectDocument(
 					{
 						_id: projectId,
@@ -191,7 +192,7 @@ module.exports = class UserProjectsHelper {
 						}
 					}
 					// validate user authenticity if the acl.visibility of project is SCOPE
-					else if (userProject[0].acl.visibility == CONSTANTS.common.PROJECT_VISIBILITY_SCOPE) {
+					else if (userProject[0].acl.visibility == CONSTANTS.common.PROJECT_VISIBILITY_SCOPE && (userProject[0].userId != userId)) {
 						let scopeData = data.userProfileInformation.scope
 						scopeData['tenantId'] = tenantId
 						let queryData = await solutionsHelper.queryBasedOnRoleAndLocation(scopeData, '', 'acl')

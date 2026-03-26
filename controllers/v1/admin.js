@@ -155,7 +155,8 @@ module.exports = class Admin {
 	 *
 	 * @param {Object} req - Express request object containing user details, params, and query.
 	 * @param {Object} req.params - Contains route parameters, specifically `_id` of the resource.
-	 * @param {Object} req.query - Contains query parameters, specifically `type` (program/solution).
+	 * @param {Object} req.query.type - Contains query parameters, specifically `type` (program/solution).
+	 * @param {Object} req.query.isAPrivateProgram - If Program is Private `true` else `false`.
 	 * @param {Object} req.userDetails - Contains user roles and tenant/org info.
 	 * @returns {Promise<Object>} - Returns a success or failure response from the adminHelper.
 	 * @throws {Object} - Throws an error object with status, message, and error details if validation or deletion fails.
@@ -167,6 +168,7 @@ module.exports = class Admin {
 				let deleteResource = await adminHelper.deletedResourceDetails(
 					req.params._id,
 					req.query.type,
+					req.query.isAPrivateProgram ? UTILS.convertStringToBoolean(req.query.isAPrivateProgram) : false,
 					req.userDetails.tenantAndOrgInfo.tenantId,
 					req.userDetails.tenantAndOrgInfo.orgId,
 					req.userDetails.userInformation.userId,

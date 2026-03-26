@@ -70,6 +70,7 @@ function createSolution(
 					'endDate',
 					'startDate',
 					'components',
+					'externalId',
 				])
 			} else {
 				programData = await programQueries.programsDocument(programMatchQuery, [
@@ -79,6 +80,7 @@ function createSolution(
 					'endDate',
 					'startDate',
 					'components',
+					'externalId',
 				])
 			}
 			if (!programData.length > 0) {
@@ -91,6 +93,7 @@ function createSolution(
 			solutionData.programId = programData[0]._id
 			solutionData.programName = programData[0].name
 			solutionData.programDescription = programData[0].description
+			solutionData.programExternalId = programData[0].externalId
 
 			if (solutionData.type == CONSTANTS.common.COURSE && !solutionData.linkUrl) {
 				return resolve({
@@ -203,7 +206,7 @@ function update(solutionId, solutionData, userDetails, checkDate = false) {
 			if (
 				checkDate &&
 				(solutionData.hasOwnProperty(CONSTANTS.common.END_DATE) ||
-					solutionData.hasOwnProperty(CONSTANTS.common.END_DATE))
+					solutionData.hasOwnProperty(CONSTANTS.common.START_DATE))
 			) {
 				let programData = await programQueries.programsDocument(
 					{
@@ -328,11 +331,7 @@ function setScope(solutionId, scopeData, userDetails) {
 				userDetails.userInformation.roles.includes(CONSTANTS.common.ADMIN_ROLE)
 			) {
 				// call user-service to fetch related orgs
-				let validOrgs = await userService.fetchTenantDetails(
-					userDetails.tenantAndOrgInfo.tenantId,
-					userDetails.userToken,
-					true
-				)
+				let validOrgs = await userService.fetchTenantDetails(userDetails.tenantAndOrgInfo.tenantId, true)
 				if (!validOrgs.success) {
 					throw {
 						success: false,

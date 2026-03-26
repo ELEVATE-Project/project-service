@@ -233,13 +233,14 @@ module.exports = class SolutionsHelper {
 
 				if (!updateSolution.success) {
 					throw {
+						success: false,
 						status: HTTP_STATUS_CODE.bad_request.status,
-						message: CONSTANTS.apiResponses.SOLUTION_NOT_UPDATED,
+						message: updateSolution.message || CONSTANTS.apiResponses.SOLUTION_NOT_UPDATED,
 					}
 				}
 				return resolve(updateSolution)
 			} catch (error) {
-				return resolve({
+				return reject({
 					success: false,
 					message: error.message,
 					data: {},
@@ -1302,17 +1303,26 @@ module.exports = class SolutionsHelper {
 	static fetchLink(solutionId, userDetails, token = '') {
 		return new Promise(async (resolve, reject) => {
 			try {
-				// build solution match query
+				// Extract user org + tenant
+				const userOrgId = userDetails?.tenantAndOrgInfo?.orgId?.[0]
+				const tenantId = userDetails?.tenantAndOrgInfo?.tenantId
+
+				// Build solution match query
 				let solutionMatchQuery = {
 					_id: solutionId,
 					isReusable: false,
 					isAPrivateProgram: false,
+					tenantId: tenantId,
+
+					$or: [
+						{ orgId: userOrgId },
+						{
+							'scope.organizations': {
+								$in: ['ALL', userOrgId],
+							},
+						},
+					],
 				}
-
-				// Only super admin can generate solution links for all tenants and orgs
-				// solutionMatchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-				// solutionMatchQuery['orgId'] = { $in: ['ALL', ...userDetails.tenantAndOrgInfo.orgId] }
-
 				let solutionData = await solutionsQueries.solutionsDocument(solutionMatchQuery, [
 					'link',
 					'type',
@@ -1366,7 +1376,7 @@ module.exports = class SolutionsHelper {
 				}
 
 				// fetch tenant domain by calling  tenant details API
-				let tenantDetailsResponse = await userService.fetchTenantDetails(solution.tenantId, token)
+				let tenantDetailsResponse = await userService.fetchTenantDetails(solution.tenantId)
 				const domains = tenantDetailsResponse?.data?.domains || []
 
 				// Error handling if API failed or no domains found

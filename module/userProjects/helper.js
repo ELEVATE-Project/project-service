@@ -192,7 +192,10 @@ module.exports = class UserProjectsHelper {
 						}
 					}
 					// validate user authenticity if the acl.visibility of project is SCOPE
-					else if (userProject[0].acl.visibility == CONSTANTS.common.PROJECT_VISIBILITY_SCOPE && (userProject[0].userId != userId)) {
+					else if (
+						userProject[0].acl.visibility == CONSTANTS.common.PROJECT_VISIBILITY_SCOPE &&
+						userProject[0].userId != userId
+					) {
 						let scopeData = data.userProfileInformation.scope
 						scopeData['tenantId'] = tenantId
 						let queryData = await solutionsHelper.queryBasedOnRoleAndLocation(scopeData, '', 'acl')
@@ -4546,6 +4549,14 @@ module.exports = class UserProjectsHelper {
 						bodyData.acl.users.push(userId.toString())
 					}
 				}
+
+				// validate the users[] against the tenant
+				if (bodyData.acl.users && bodyData.acl.users.length > 0) {
+					const accountSearchResponse = await userService.accountSearch(bodyData.acl.users, tenantId, 'all')
+					const userIds = accountSearchResponse.data.data.map((user) => user.id.toString())
+					bodyData.acl.users = userIds && userIds.length ? userIds : []
+				}
+
 				// Update ACL field in the project
 				const updatedProject = await projectQueries.findOneAndUpdate(
 					{

@@ -22,7 +22,6 @@ module.exports = class UserExtensionHelper {
 	static bulkCreateOrUpdate(userRolesCSVData, userDetails, tenantAndOrgInfo) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let userRoleMap = {}
 				let userRolesUploadedData = new Array()
 				let aggregateKafkaEventPayloads = []
 				// Pre-fetch all required data
@@ -108,9 +107,8 @@ module.exports = class UserExtensionHelper {
 					{
 						externalId: { $in: Array.from(allProgramIds) },
 						tenantId: tenantAndOrgInfo.tenantId,
-						orgId: tenantAndOrgInfo.orgId[0],
 					},
-					['_id', 'externalId', 'name', 'orgId']
+					['_id', 'externalId', 'name', 'orgId', 'scope.organizations']
 				)
 
 				// Create maps for program IDs and program information
@@ -158,33 +156,7 @@ module.exports = class UserExtensionHelper {
 					}
 				}
 
-				//iterating through userProfileMap to check if user belongs to same org
-				for (let userId in userProfileMap) {
-					const user = userProfileMap[userId]
-					if (
-						!user.organizations ||
-						!Array.isArray(user.organizations) ||
-						user.organizations.length === 0 ||
-						!user.organizations.find((org) => org.code === tenantAndOrgInfo.orgId[0])
-					) {
-						delete userProfileMap[userId]
-					}
-				}
-
-				// Fetch user extensions
-
-				const userExtensionDocs = await userExtensionsQueries.userExtensionDocument(
-					{
-						userId: { $in: Object.values(userProfileMap).map((user) => user.id) },
-						tenantId: tenantAndOrgInfo.tenantId,
-					},
-					['userId', 'programRoleMapping']
-				)
-
 				const userExtensionMap = {}
-				for (const userExtension of userExtensionDocs) {
-					userExtensionMap[userExtension.userId] = userExtension
-				}
 
 				// Process each CSV row
 				// iterating through userRolesCSVData to process each user role
@@ -205,13 +177,33 @@ module.exports = class UserExtensionHelper {
 							}
 						}
 
-						// Validate user exists
-						const userProfile = userProfileMap[userRole.user]
-						if (!userProfile) {
+						const eligibleProgramsForUser = getEligibleProgramsForUser(
+							userProfileMap[userRole.user],
+							userRole.programs,
+							programIdMap,
+							programInfoMap
+						)
+						let userProfile
+						if (!eligibleProgramsForUser) {
 							userRole['_SYSTEM_ID'] = ''
 							userRole.status = CONSTANTS.apiResponses.USER_PROFILE_NOT_FOUND
 							userRolesUploadedData.push(userRole)
 							continue outerloop
+						} else {
+							userProfile = userProfileMap[userRole.user]
+							userRole.programs = eligibleProgramsForUser
+
+							// Fetch user extension
+							const userExtensionDoc = await userExtensionsQueries.userExtensionDocument(
+								{
+									userId: userProfile.id.toString(),
+									tenantId: tenantAndOrgInfo.tenantId,
+								},
+								['userId', 'programRoleMapping']
+							)
+							if (userExtensionDoc && userExtensionDoc.length > 0) {
+								userExtensionMap[userExtensionDoc[0].userId] = userExtensionDoc[0]
+							}
 						}
 
 						// Validate platform roles
@@ -996,4 +988,29 @@ function buildResponse(success, data, id = null) {
 		programId: data.programId,
 		roles: data.roles,
 	}
+}
+
+/**
+ *
+ * Determines which programs are eligible for a user based on organization overlap.
+ *
+ * @param {Object} userData - User object containing organization details
+ * @param {Array<String>} programs - List of program identifiers to validate against the user
+ * @param {Object} programIdMap - Mapping of program identifier to programId
+ * @param {Object} programInfoMap - Mapping of programId to program details including scope information
+ * @returns {Array<String> | Boolean} List of eligible program identifiers if any match is found, otherwise false
+ *
+ */
+
+function getEligibleProgramsForUser(userData, programs, programIdMap, programInfoMap) {
+	const userOrgCodes = userData.organizations.map((org) => org.code)
+	let eligibleProgramsForUser = []
+	for (const program of programs) {
+		const programOrganizations = programInfoMap[programIdMap[program].toString()].scope.organizations
+		const commonOrganizationCodes = userOrgCodes.filter((value) => programOrganizations.includes(value))
+
+		if (commonOrganizationCodes && commonOrganizationCodes.length > 0) eligibleProgramsForUser.push(program)
+	}
+
+	return eligibleProgramsForUser.length > 0 ? eligibleProgramsForUser : false
 }

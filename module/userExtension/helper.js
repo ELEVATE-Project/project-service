@@ -1005,8 +1005,24 @@ function buildResponse(success, data, id = null) {
 function getEligibleProgramsForUser(userData, programs, programIdMap, programInfoMap) {
 	const userOrgCodes = userData.organizations.map((org) => org.code)
 	let eligibleProgramsForUser = []
+
 	for (const program of programs) {
-		const programOrganizations = programInfoMap[programIdMap[program].toString()].scope.organizations
+		const programInfo = programInfoMap[programIdMap[program].toString()]
+		if (!programInfo) continue
+		let programOrganizations = []
+
+		// Primary: use scope.organizations if it exists and is a non-empty array
+		if (
+			programInfo?.scope?.organizations &&
+			Array.isArray(programInfo.scope.organizations) &&
+			programInfo.scope.organizations.length > 0
+		) {
+			programOrganizations = programInfo.scope.organizations
+		}
+		// Fallback: use program.orgId (string)
+		else {
+			programOrganizations = [program.orgId]
+		}
 		const commonOrganizationCodes = userOrgCodes.filter((value) => programOrganizations.includes(value))
 
 		if (commonOrganizationCodes && commonOrganizationCodes.length > 0) eligibleProgramsForUser.push(program)

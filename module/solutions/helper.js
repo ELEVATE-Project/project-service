@@ -1291,25 +1291,33 @@ module.exports = class SolutionsHelper {
 	static fetchLink(solutionId, userDetails, token = '') {
 		return new Promise(async (resolve, reject) => {
 			try {
-				// Extract user org + tenant
-				const userOrgId = userDetails?.tenantAndOrgInfo?.orgId?.[0]
-				const tenantId = userDetails?.tenantAndOrgInfo?.tenantId
-
-				// Build solution match query
 				let solutionMatchQuery = {
 					_id: solutionId,
 					isReusable: false,
 					isAPrivateProgram: false,
-					tenantId: tenantId,
+				}
+				// Apply extra filters ONLY if userDetails is present
+				if (
+					userDetails &&
+					userDetails.tenantAndOrgInfo &&
+					userDetails.tenantAndOrgInfo.tenantId &&
+					Array.isArray(userDetails.tenantAndOrgInfo.orgId) &&
+					userDetails.tenantAndOrgInfo.orgId.length > 0
+				) {
+					const tenantId = userDetails.tenantAndOrgInfo.tenantId
+					const userOrgId = userDetails.tenantAndOrgInfo.orgId[0]
 
-					$or: [
+					solutionMatchQuery.tenantId = tenantId
+
+					// Add org / scope access control
+					solutionMatchQuery.$or = [
 						{ orgId: userOrgId },
 						{
 							'scope.organizations': {
 								$in: ['ALL', userOrgId],
 							},
 						},
-					],
+					]
 				}
 				let solutionData = await solutionsQueries.solutionsDocument(solutionMatchQuery, [
 					'link',

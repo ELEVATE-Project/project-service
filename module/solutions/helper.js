@@ -1297,12 +1297,16 @@ module.exports = class SolutionsHelper {
 					isAPrivateProgram: false,
 				}
 				// Apply extra filters ONLY if userDetails is present
-				if (userDetails) {
-					// Extract user org + tenant
-					const userOrgId = userDetails?.tenantAndOrgInfo?.orgId?.[0]
-					const tenantId = userDetails?.tenantAndOrgInfo?.tenantId
+				if (
+					userDetails &&
+					userDetails.tenantAndOrgInfo &&
+					userDetails.tenantAndOrgInfo.tenantId &&
+					Array.isArray(userDetails.tenantAndOrgInfo.orgId) &&
+					userDetails.tenantAndOrgInfo.orgId.length > 0
+				) {
+					const tenantId = userDetails.tenantAndOrgInfo.tenantId
+					const userOrgId = userDetails.tenantAndOrgInfo.orgId[0]
 
-					// Add tenant filter
 					solutionMatchQuery.tenantId = tenantId
 
 					// Add org / scope access control

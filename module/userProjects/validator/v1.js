@@ -10,6 +10,8 @@ module.exports = (req) => {
 		sync: function () {
 			req.checkParams('_id').exists().withMessage('required project id')
 			req.checkQuery('lastDownloadedAt').exists().withMessage('required last downloaded at')
+			req.checkBody('title').optional().notEmpty().withMessage('title cannot be empty')
+			req.checkBody('description').optional().notEmpty().withMessage('description cannot be empty')
 		},
 		tasksStatus: function () {
 			req.checkParams('_id').exists().withMessage('required project id')

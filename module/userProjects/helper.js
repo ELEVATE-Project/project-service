@@ -154,7 +154,19 @@ module.exports = class UserProjectsHelper {
 				}
 
 				// if entityId & entityInformation are passed through payload, ignore them
-				const blackListedPayloadItems = ['entityId', 'entityInformation']
+				const blackListedPayloadItems = [
+					'entityId',
+					'entityInformation',
+					'userRoleInformation',
+					'userProfile',
+					'certificate',
+					'title',
+					'description',
+					'name',
+					'programInformation',
+					'solutionInformation',
+					'updateHistory',
+				]
 				blackListedPayloadItems.map((payloadItem) => {
 					if (data.hasOwnProperty(payloadItem)) delete data[payloadItem]
 				})
@@ -273,11 +285,6 @@ module.exports = class UserProjectsHelper {
 				}
 
 				const projectsModel = Object.keys(schemas['projects'].schema)
-
-				let keysToRemoveFromUpdation = ['userRoleInformation', 'userProfile', 'certificate']
-				keysToRemoveFromUpdation.forEach((key) => {
-					if (data[key]) delete data[key]
-				})
 
 				let updateProject = {}
 				if (data.solutionId) {

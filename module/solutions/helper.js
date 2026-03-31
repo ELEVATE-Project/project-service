@@ -1291,17 +1291,34 @@ module.exports = class SolutionsHelper {
 	static fetchLink(solutionId, userDetails, token = '') {
 		return new Promise(async (resolve, reject) => {
 			try {
-				// build solution match query
 				let solutionMatchQuery = {
 					_id: solutionId,
 					isReusable: false,
 					isAPrivateProgram: false,
 				}
+				// Apply extra filters ONLY if userDetails is present
+				if (
+					userDetails &&
+					userDetails.tenantAndOrgInfo &&
+					userDetails.tenantAndOrgInfo.tenantId &&
+					Array.isArray(userDetails.tenantAndOrgInfo.orgId) &&
+					userDetails.tenantAndOrgInfo.orgId.length > 0
+				) {
+					const tenantId = userDetails.tenantAndOrgInfo.tenantId
+					const userOrgId = userDetails.tenantAndOrgInfo.orgId[0]
 
-				// Only super admin can generate solution links for all tenants and orgs
-				// solutionMatchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-				// solutionMatchQuery['orgId'] = { $in: ['ALL', ...userDetails.tenantAndOrgInfo.orgId] }
+					solutionMatchQuery.tenantId = tenantId
 
+					// Add org / scope access control
+					solutionMatchQuery.$or = [
+						{ orgId: userOrgId },
+						{
+							'scope.organizations': {
+								$in: ['ALL', userOrgId],
+							},
+						},
+					]
+				}
 				let solutionData = await solutionsQueries.solutionsDocument(solutionMatchQuery, [
 					'link',
 					'type',
@@ -1355,7 +1372,7 @@ module.exports = class SolutionsHelper {
 				}
 
 				// fetch tenant domain by calling  tenant details API
-				let tenantDetailsResponse = await userService.fetchTenantDetails(solution.tenantId, token)
+				let tenantDetailsResponse = await userService.fetchTenantDetails(solution.tenantId)
 				const domains = tenantDetailsResponse?.data?.domains || []
 
 				// Error handling if API failed or no domains found

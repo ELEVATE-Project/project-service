@@ -1497,22 +1497,6 @@ module.exports = class UserProjectsHelper {
 									isAPrivateSolution
 								)
 
-								// await coreService.solutionDetailsBasedOnRoleAndLocation(
-								//     userToken,
-								//     bodyData,
-								//     solutionId,
-								//     isAPrivateSolution
-								// );
-
-								// if (
-								// 	!solutionDetails.success ||
-								// 	(solutionDetails.data.data && !solutionDetails.data.data.length > 0)
-								// ) {
-								// 	throw {
-								// 		status: HTTP_STATUS_CODE.bad_request.status,
-								// 		message: CONSTANTS.apiResponses.SOLUTION_DOES_NOT_EXISTS_IN_SCOPE,
-								// 	}
-								// }
 								if (
 									solutionDetails &&
 									solutionDetails.success &&
@@ -1528,60 +1512,8 @@ module.exports = class UserProjectsHelper {
 								tenantId: tenantId,
 							})
 							solutionDetails = solutionDetails[0]
-							// if( !solutionDetails.success ) {
-							//     throw {
-							//         message : CONSTANTS.apiResponses.SOLUTION_NOT_FOUND,
-							//         status : HTTP_STATUS_CODE.bad_request.status
-							//     }
-							// }
-
-							// solutionDetails = solutionDetails.data[0];
 						}
 
-						// program join is not implemented in this for drop 1
-
-						// check for requestForPIIConsent data
-						// let queryData = {}
-						// queryData['_id'] = solutionDetails.programId
-						// let programDetails = await programsQueries.programsDocument(queryData, ['requestForPIIConsent'])
-
-						// // if requestForPIIConsent not there do not call program join
-						// if (
-						// 	Object.keys(solutionDetails).length > 0 &&
-						// 	programDetails.length > 0 &&
-						// 	programDetails[0].hasOwnProperty('requestForPIIConsent')
-						// ) {
-						// 	// program join API call it will increment the noOfResourcesStarted counter and will make user join program
-						// 	// before creating any project this api has to called
-						// 	let programUsers = await programUsersQueries.programUsersDocument(
-						// 		{
-						// 			userId: userId,
-						// 			programId: solutionDetails.programId,
-						// 		},
-						// 		['_id', 'resourcesStarted']
-						// 	)
-
-						// 	if (
-						// 		!programUsers.length > 0 ||
-						// 		(programUsers.length > 0 && programUsers[0].resourcesStarted == false)
-						// 	) {
-						// 		let programJoinBody = {}
-						// 		programJoinBody.userRoleInformation = userRoleInformation
-						// 		programJoinBody.isResource = true
-						// 		programJoinBody.consentShared = true
-						// 		let joinProgramData = await programsHelper.join(
-						// 			solutionDetails.programId,
-						// 			programJoinBody,
-						// 			userId
-						// 		)
-						// 		if (!joinProgramData.success) {
-						// 			return resolve({
-						// 				status: HTTP_STATUS_CODE.bad_request.status,
-						// 				message: CONSTANTS.apiResponses.PROGRAM_JOIN_FAILED,
-						// 			})
-						// 		}
-						// 	}
-						// }
 						let projectTemplateId
 						if (templateId != '' && templateDocuments && templateDocuments.length > 0) {
 							projectTemplateId = templateDocuments[0]._id
@@ -1703,8 +1635,6 @@ module.exports = class UserProjectsHelper {
 							delete projectCreation.data.certificateTemplateId
 						}
 
-						let getUserProfileFromObservation = false
-
 						if (bodyData && Object.keys(bodyData).length > 0) {
 							if (bodyData.hasAcceptedTAndC) {
 								projectCreation.data.hasAcceptedTAndC = bodyData.hasAcceptedTAndC
@@ -1760,94 +1690,17 @@ module.exports = class UserProjectsHelper {
 						projectCreation.data.status = CONSTANTS.common.STARTED
 						projectCreation.data.lastDownloadedAt = new Date()
 
-						// fetch userRoleInformation from observation if referenecFrom is observation
-						// let addReportInfoToSolution = false;
-						// if ( getUserProfileFromObservation ){
-
-						//     let observationDetails = await entitiesHelper.details(
-						//         userToken,
-						//         bodyData.submissions.observationId
-						//     );
-
-						//     if( observationDetails.data &&
-						//         Object.keys(observationDetails.data).length > 0 &&
-						//         observationDetails.data.userRoleInformation &&
-						//         Object.keys(observationDetails.data.userRoleInformation).length > 0
-						//     ) {
-
-						//         userRoleInformation = observationDetails.data.userRoleInformation;
-
-						//     }
-
-						//     if( observationDetails.data &&
-						//         Object.keys(observationDetails.data).length > 0 &&
-						//         observationDetails.data.userProfile &&
-						//         Object.keys(observationDetails.data.userProfile).length > 0
-						//     ) {
-
-						//         projectCreation.data.userProfile = observationDetails.data.userProfile;
-						//         addReportInfoToSolution = true;
-
-						//     } else {
-						//         //Fetch user profile information by calling sunbird's user read api.
-
-						//         let userProfile = await projectService.profileRead(userToken)
-						//         if ( userProfile.success &&
-						//              userProfile.data &&
-						//              userProfile.data.response
-						//         ) {
-						//                 projectCreation.data.userProfile = userProfile.data.response;
-						//                 addReportInfoToSolution = true;
-						//         }
-						//     }
-
-						// } else {
-						//     //Fetch user profile information by calling sunbird's user read api.
-
 						let userProfileData = await projectService.profileRead(userToken)
 						// Check if the user profile fetch was successful
-						if (!userProfileData.success) {
+						if (!userProfileData.success || !userProfileData.data) {
 							throw {
 								message: CONSTANTS.apiResponses.USER_DATA_FETCH_UNSUCCESSFUL,
 								status: HTTP_STATUS_CODE.bad_request.status,
 							}
 						}
-						if (userProfileData.success && userProfileData.data) {
-							projectCreation.data.userProfile = userProfileData.data
-							// addReportInfoToSolution = true;
-						}
-						// }
 
+						projectCreation.data.userProfile = userProfileData.data
 						projectCreation.data.userRoleInformation = userRoleInformation
-
-						//compare & update userProfile with userRoleInformation
-						if (
-							projectCreation.data.userProfile &&
-							userRoleInformation &&
-							Object.keys(userRoleInformation).length > 0 &&
-							Object.keys(projectCreation.data.userProfile).length > 0
-						) {
-							// let updatedUserProfile = await _updateUserProfileBasedOnUserRoleInfo(
-							//     projectCreation.data.userProfile,
-							//     userRoleInformation
-							// );
-							let updatedUserProfile = await projectService.profileRead(userToken)
-
-							// Check if the user profile fetch was successful
-							if (!updatedUserProfile.success) {
-								throw {
-									message: CONSTANTS.apiResponses.USER_DATA_FETCH_UNSUCCESSFUL,
-									status: HTTP_STATUS_CODE.bad_request.status,
-								}
-							}
-							if (
-								updatedUserProfile &&
-								updatedUserProfile.success &&
-								Object.keys(updatedUserProfile.data).length > 0
-							) {
-								projectCreation.data.userProfile = updatedUserProfile.data
-							}
-						}
 
 						if (bodyData.project) {
 							projectCreation.data['project'] = bodyData.project
@@ -1858,12 +1711,6 @@ module.exports = class UserProjectsHelper {
 
 						let project = await projectQueries.createProject(projectCreation.data)
 
-						// if ( addReportInfoToSolution && project.solutionId ) {
-						//     let updateSolution = await solutionsHelper.addReportInformationInSolution(
-						//         project.solutionId,
-						//         project.userProfile
-						//     );
-						// }
 						let kafkaUserProject = {
 							userId: userId,
 							projects: project,
@@ -1889,12 +1736,7 @@ module.exports = class UserProjectsHelper {
 					}
 				}
 				let projectDetails = await this.details(projectId, userId, userRoleInformation, language, userDetails)
-				// let revertStatusorNot = UTILS.revertStatusorNot(appVersion);
-				// if ( revertStatusorNot ) {
-				//     projectDetails.data.status = UTILS.revertProjectStatus(projectDetails.data.status);
-				// } else {
-				//     projectDetails.data.status = UTILS.convertProjectStatus(projectDetails.data.status);
-				// }
+
 				// make templateUrl downloadable befor passing to front-end
 				if (
 					projectDetails.data.certificate &&

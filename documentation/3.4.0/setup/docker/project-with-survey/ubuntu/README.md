@@ -13,18 +13,15 @@
 ![GitHub package.json version (subfolder of monorepo)](https://img.shields.io/github/package-json/v/ELEVATE-Project/mentoring?filename=src%2Fpackage.json)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-</details>
-</details>
-
 </br>
 The Project building block facilitates the creation and engagement with micro-improvement projects.
 
 </div>
 </br>
 
-# Docker Setup Project Service - Stand Alone (Ubuntu)
+# Docker Setup Project Service - With Survey (Ubuntu)
 
-Expectation: By diligently following the outlined steps, you will successfully establish a fully operational Project application setup, including both the portal and backend services.
+Expectation: By following these steps, you will establish a unified environment for the Project Service, integrated with the Survey and Observation modules. This setup focuses purely on the backend API infrastructure required to manage data collection and reporting.
 
 ## Prerequisites
 
@@ -43,7 +40,7 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
 > **Caution:** Before proceeding, please ensure that the ports given here are available and open. It is essential to verify their availability prior to moving forward. You can run below command in your terminal to check this
 
 ```
-for port in 3001 3002 6000 5001 4000 9092 5432 7007 2181 27017 3569; do
+for port in 3001 3002 6000 5001 4000 9092 5432 7007 2181 27017 3569 4301; do
     if sudo lsof -iTCP:$port -sTCP:LISTEN &>/dev/null; then
         echo "Port $port is IN USE"
     else
@@ -54,7 +51,7 @@ done
 
 1. **Download and execute main setup script:** Execute the following command in your terminal from the project directory.
     ```
-    curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/dockerized/scripts/stand-alone/ubuntu/setup_project.sh && chmod +x setup_project.sh && sudo ./setup_project.sh
+    curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/dockerized/scripts/project-with-survey/ubuntu/setup_project.sh && chmod +x setup_project.sh && sudo ./setup_project.sh
     ```
 
 > Note : The script will download all the essential files and launch the services in Docker. Once all services are successfully up and running, you can proceed to the next steps.
@@ -102,9 +99,15 @@ To enable the Citus extension for user services, follow these steps.
 
 ## Update Cloud Credentials for Project Service
 
-To enable full functionality, including certificate generation and report storage, you must configure cloud credentials in the Project Service environment file.
+To enable full functionality—including certificate generation, attachment uploads, and report storage—you must configure cloud credentials in the environment files for both services.
 
-    Path: ./project_env
+A. Project Service Configuration Path:
+`./project_env
+    `
+
+B. Samiksha (Survey & Observation) Service Configuration Path:
+`./samiksha_env
+    `
 
 Add or update the following variables in the .env file, substituting the example values with your actual cloud credentials:
 
@@ -185,7 +188,7 @@ After successfully running the script mentioned above, the following user accoun
 | prajwal@gmail.com      | Password1@ | State Education Officer |
 | vishnu@gmail.com       | Password1@ | State Education Officer |
 
-## Sample Data Creation For Projects
+## Sample Data Creation For Projects and Survey
 
 This step will guide us in implementing a sample project solution following the initial setup of the project service.
 
@@ -203,6 +206,7 @@ Follow the setup guides for the frontend repositories:
 
 -   **Login Portal:** [elevate-portal](https://github.com/ELEVATE-Project/elevate-portal/tree/releaase-1.1.0)
 -   **Projects Program Module (PWA):** [observation-survey-projects-pwa](https://github.com/ELEVATE-Project/observation-survey-projects-pwa/tree/release-3.4.0)
+-   **Observtaion/Survey Portal:** [observation-survey-projects-pwa](https://github.com/ELEVATE-Project/observation-portal/tree/release-3.4.0)
 
 > **Warning:** In this setup, features such as **Sign-Up, Project Certificate, Project Sharing, and Project PDF Report** will not be available because cloud storage credentials have been masked in the environment files for security reasons.
 
@@ -211,7 +215,9 @@ Follow the setup guides for the frontend repositories:
 ### 🧪 Postman Collections and API DOC
 
 -   <a href="https://github.com/ELEVATE-Project/project-service/tree/main/api-doc" target="_blank">
-      Projects Service API Collection
+    Projects Service API Collection
+-   <a href="https://github.com/ELEVATE-Project/samiksha-service/tree/main/api-doc" target="_blank">
+      Samiksha Service API Collection
     </a>
 
 ---

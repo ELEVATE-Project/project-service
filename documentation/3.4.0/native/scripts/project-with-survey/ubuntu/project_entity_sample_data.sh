@@ -14,10 +14,11 @@ set -e
 echo "Starting data setup script..."
 
 # --- 1. Define URL and Files ---
-BASE_URL="https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/common-files/native/stand-alone"
+BASE_URL="https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/common-files/native/project-with-survey"
 
 ENTITY_FILE="entity_sampleData.js"
 PROJECT_FILE="project_sampleData.js"
+SURVEY_FILE="survey_sampleData.js"
 INSERT_SCRIPT="insert_sample_solutions.js"
 
 # --- 2. Download Files ---
@@ -30,6 +31,10 @@ echo "Downloaded ${ENTITY_FILE}"
 # Download project_sampleData.js
 curl -L "${BASE_URL}/${PROJECT_FILE}" -o "${PROJECT_FILE}"
 echo "Downloaded ${PROJECT_FILE}"
+
+# Download survey_sampleData.js
+curl -L "${BASE_URL}/${SURVEY_FILE}" -o "${SURVEY_FILE}"
+echo "Downloaded ${SURVEY_FILE}"
 
 # Download insert_sample_solutions.js (saved correctly to be run by node)
 curl -L "${BASE_URL}/${INSERT_SCRIPT}" -o "${INSERT_SCRIPT}"

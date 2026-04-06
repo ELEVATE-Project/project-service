@@ -5,7 +5,7 @@ services:
     ports:
       - '2181:2181'
     environment:
-      - ALLOW_ANONYMOUS_LOGIN='yes'
+      - ALLOW_ANONYMOUS_LOGIN=yes
       - ZOOKEEPER_CLIENT_PORT=2181
       - ZOOKEEPER_TICK_TIME=2000
     networks:
@@ -17,9 +17,9 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     depends_on:
@@ -59,6 +59,19 @@ services:
       - ./config.json:/opt/projects/config.json
     networks:
       - project_net
+  samiksha:
+    image: shikshalokamqa/elevate-samiksha-service:3.4.0_RC1
+    ports:
+      - '4301:4301'
+    command: ['nodemon', 'dev']
+    env_file:
+      - ./samiksha_env
+    depends_on:
+      - mongo
+    volumes:
+      - ./config.json:/opt/samiksha/config.json
+    networks:
+      - project_net
   entity_management:
     image: shikshalokamqa/elevate-entity-management:3.4
     ports:
@@ -87,7 +100,7 @@ services:
       (while ! curl -sSf http://user:3001 > /dev/null; do
         sleep 1;
       done && echo 'Service is up' &&
-      /bin/bash -c 'cd scripts && echo Running user service scripts  &&  node -r module-alias/register uploadSampleCSV.js');
+      /bin/bash -c 'cd scripts && echo Running user service scripts && node insertDefaultOrg.js && node viewsScript.js && node -r module-alias/register uploadSampleCSV.js');
       tail -f /dev/null"
     depends_on:
       - kafka
@@ -96,7 +109,7 @@ services:
       - scheduler
     environment:
       - DEV_DATABASE_URL=postgres://postgres:postgres@citus_master:5432/user
-      - KAFKA_URL=kafka:9092
+      - KAFKA_URL=kafka:29092
       - REDIS_HOST=redis://redis:6379
     volumes:
       - ./user:/usr/src/app
@@ -106,16 +119,25 @@ services:
       - ./user_env
 
   notification:
-    image: ttpldevops/notification
+    image: shikshalokamqa/elevate-notification:2.6.1
     ports:
       - '3002:3002'
+    command: >
+      bash -c "echo 'Waiting for PostgreSQL on citus_master:5432 to accept connections...' &&
+      while ! timeout 1 bash -c 'cat < /dev/null > /dev/tcp/citus_master/5432' 2> /dev/null; do
+        echo 'Waiting for citus_master to be ready...';
+        sleep 1;
+      done;
+      echo 'Database is ready.';
+      npm run db:init && nodemon app.js"
     depends_on:
-      citus:
-        condition: service_started
+      - kafka
+      - citus
     networks:
       - project_net
     env_file:
       - ./notification_env
+
   scheduler:
     image: shikshalokamqa/elevate-scheduler:3.4.0
     ports:
@@ -157,11 +179,6 @@ services:
       POSTGRES_DB: 'postgres'
       POSTGRES_HOST_AUTH_METHOD: '${POSTGRES_HOST_AUTH_METHOD:-trust}'
       POSTGRES_LOG_STATEMENT: 'all' # Enable query logging (set to 'all' for all queries)
-    healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB']
-      interval: 5s
-      timeout: 3s
-      retries: 5
     networks:
       - project_net
     #volumes:
@@ -199,12 +216,14 @@ services:
     restart: 'always'
 
   # portal:
-  #   image: shikshalokamqa/elevate-project-obervation-pwa:3.4.0.1
+  #   image: shikshalokamqa/elevate-project-obervation-pwa:3.4.0
   #   container_name: portal
   #   ports:
   #     - '7007:7007'
   #   volumes:
-  #     - ./env.js:/usr/src/app/www/ml/assets/env/env.js
+  #     - /home/user4/project/env.js:/usr/src/app/www/assets/env/env.js
+  #   command: >
+  #     /bin/bash -c "ionic build --prod && ionic serve --host 0.0.0.0"
   #   networks:
   #     - project_net
 

@@ -22,13 +22,13 @@ The Project building block facilitates the creation and engagement with micro-im
 </div>
 </br>
 
-# Docker Setup Project Service - Stand Alone (Ubuntu)
+# Docker Setup Project Service - Stand Alone (Mac-Os)
 
 Expectation: By diligently following the outlined steps, you will successfully establish a fully operational Project application setup, including both the portal and backend services.
 
 ## Prerequisites
 
-To set up the Project application, ensure you have Docker and Docker Compose installed on your system. For Linux users, detailed installation instructions for both can be found in the documentation here: [How To Install and Use Docker Compose on Linux](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-compose-on-ubuntu-20-04). To install and use Nodejs in Linux machine, you can follow instructions here: [How To Install Nodejs in Linux](https://nodejs.org/en/download/package-manager).
+To set up the Project application, ensure you have Docker and Docker Compose installed on your system. For Mac users, detailed installation instructions for both can be found in the documentation here: [How To Install and Use Docker Compose on Mac](https://docs.docker.com/desktop/setup/install/mac-install/). To install and use Nodejs in Mac machine, you can follow instructions here: [How To Install Nodejs in Mac](https://nodejs.org/en/download/package-manager).
 
 ## Installation
 
@@ -54,7 +54,9 @@ done
 
 1. **Download and execute main setup script:** Execute the following command in your terminal from the project directory.
     ```
-    curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/dockerized/scripts/stand-alone/ubuntu/setup_project.sh && chmod +x setup_project.sh && sudo ./setup_project.sh
+    curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/dockerized/scripts/stand-alone/mac-os/setup_project.sh \
+    && chmod +x setup_project.sh \
+    && ./setup_project.sh
     ```
 
 > Note : The script will download all the essential files and launch the services in Docker. Once all services are successfully up and running, you can proceed to the next steps.
@@ -86,7 +88,7 @@ For more information, refer **[Citus Data](https://www.citusdata.com/)**.
 
 To enable the Citus extension for user services, follow these steps.
 
-1. Create a sub-directory named `user` and download `distributionColumns.sql` into it. (Skip this for linux)
+1. Create a sub-directory named `user` and download `distributionColumns.sql` into it.
 
     ```
     mkdir user && curl -o ./user/distributionColumns.sql -JL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/distribution-columns/user/distributionColumns.sql
@@ -117,7 +119,7 @@ Add or update the following variables in the .env file, substituting the example
 
 > NOTE : This service is designed to support multiple cloud storage providers and offers flexible cloud integration capabilities. Based on your selected cloud provider, the service can be configured accordingly to enable seamless storage, certificate generation, and report handling.
 
-For detailed configuration options, supported cloud providers, and integration guidelines, please refer to the official documentation available in this [ReadMe](https://www.npmjs.com/package/client-cloud-services?activeTab=readme)
+For detailed configuration options, supported cloud providers, and integration guidelines, please refer to the official documentation available [here](https://www.npmjs.com/package/client-cloud-services?activeTab=readme)
 
 ## Persistence Of Database Data In Docker Container (Optional)
 
@@ -174,7 +176,7 @@ In such cases, you can generate sample user accounts using the steps below. This
 > **Warning:** Use this generator only immediately after the initial system setup and before any normal user accounts are created through the portal. It should not be used under any circumstances thereafter.
 
 ```
-sudo chmod +x ./insert_sample_data.sh && sudo ./insert_sample_data.sh user postgres://postgres:postgres@citus_master:5432/user
+docker exec -i citus_master psql -U postgres -d user < insert_sample_data.sql
 ```
 
 After successfully running the script mentioned above, the following user accounts will be created and available for login:

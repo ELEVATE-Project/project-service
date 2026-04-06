@@ -17,28 +17,56 @@ const interfaceServiceUrl = process.env.INTERFACE_SERVICE_URL
  * @name entityDocuments
  * @param {Object} filterData - Filter data.
  * @param {Array} projection - Projected data.
+ * @param {number} page - The page number for pagination.
+ * @param {number} limit - The maximum number of results per page.
+ * @param {String} search - Text string used for filtering entities using a search.
+ * @param {String} aggregateValue - Path to the field to aggregate (e.g., 'groups.school') used for grouping or lookups.
+ * @param {Boolean} isAggregateStaging - Flag indicating whether aggregation stages should be used in the pipeline (true = include stages).
+ * @param {Boolean} isSort - Flag indicating whether sorting is required within the aggregation pipeline.
+ * @param {Array<Object>} aggregateProjection - Array of projection fields to apply within the aggregation pipeline (used when `isAggregateStaging` is true).
  * @returns {JSON} - List of entity data.
  */
 
 // Function to find entity documents based on the given filter and projection
-const entityDocuments = function (filterData = 'all', projection = 'all') {
+const entityDocuments = function (
+	filterData = 'all',
+	projection = 'all',
+	page = null,
+	limit = null,
+	search = '',
+	aggregateValue = null,
+	isAggregateStaging = false,
+	isSort = true,
+	aggregateProjection = []
+) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			// Function to find entity documents based on the given filter and projection
 			const url =
 				interfaceServiceUrl +
 				process.env.ENTITY_MANAGEMENT_SERVICE_BASE_URL +
-				CONSTANTS.endpoints.FIND_ENTITY_DOCUMENTS
+				CONSTANTS.endpoints.FIND_ENTITY_DOCUMENTS +
+				`?page=${page}&limit=${limit}&search=${search}&aggregateValue=${aggregateValue}&aggregateStaging=${isAggregateStaging}&aggregateSort=${isSort}`
+
+			if (filterData._id && Array.isArray(filterData._id) && filterData._id.length > 0) {
+				filterData['_id'] = {
+					$in: filterData._id,
+				}
+			}
+
+			let requestJSON = {
+				query: filterData,
+				projection: projection,
+				aggregateProjection: aggregateProjection,
+			}
+
 			// Set the options for the HTTP POST request
 			const options = {
 				headers: {
 					'content-type': 'application/json',
 					'internal-access-token': process.env.INTERNAL_ACCESS_TOKEN,
 				},
-				json: {
-					query: filterData,
-					projection: projection,
-				},
+				json: requestJSON,
 			}
 			// Make the HTTP POST request to the entity management service
 			request.post(url, options, requestCallBack)

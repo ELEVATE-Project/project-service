@@ -16,6 +16,8 @@ const filesHelpers = require(MODULES_BASE_PATH + '/cloud-services/files/helper')
 const axios = require('axios')
 const entitiesService = require(GENERICS_FILES_PATH + '/services/entity-management')
 const projectAttributesQueries = require(DB_QUERY_BASE_PATH + '/projectAttributes')
+const solutionAndProjectTemplateUtils = require(GENERICS_FILES_PATH + '/helpers/solutionAndProjectTemplateUtils')
+const orgExtensionQueries = require(DB_QUERY_BASE_PATH + '/organizationExtension')
 
 /**
  * LibraryCategoriesHelper
@@ -64,7 +66,95 @@ module.exports = class LibraryCategoriesHelper {
 					},
 				}
 
+				// Fetch the organization extension document of the loggedin user
+				let orgExtension = await orgExtensionQueries.orgExtenDocuments({
+					tenantId: userDetails.userInformation.tenantId,
+					orgId: userDetails.userInformation.organizationId,
+				})
+
+				if (!orgExtension || orgExtension.length === 0) {
+					orgExtension = null
+				} else {
+					orgExtension = orgExtension[0]
+				}
+
 				matchQuery['$match']['tenantId'] = userDetails.userInformation.tenantId
+				/**
+				 * 
+					Sample for matchQuery obj when orgExtension.externalProjectResourceVisibilityPolicy = CURRENT
+					{
+						"$match": {
+							"status": "published",
+							"isReusable": true,
+							"tenantId": "shikshalokam",
+							"orgId": "slorg"
+						}
+					}
+				*/
+				/**
+				 * 
+					Sample for matchQuery obj when orgExtension.externalProjectResourceVisibilityPolicy = ASSOCIATED
+					{
+						"$match": {
+							"status": "published",
+							"isReusable": true,
+							"tenantId": "shikshalokam",
+							"$and": [
+								{
+								"$or": [
+									{
+										"visibility": {
+											"$ne": "CURRENT"
+										},
+										"visibleToOrganizations": {
+											"$in": [
+												"sot"
+											]
+										}
+									},
+									{
+										"orgId": "sot"
+									}
+								]
+								}
+							]
+						}
+					}
+				*/
+				/**
+				 * 
+					Sample for matchQuery obj when orgExtension.externalProjectResourceVisibilityPolicy = ALL
+					{
+						"$match": {
+						"status": "published",
+						"isReusable": true,
+						"tenantId": "shikshalokam",
+						"$and": [
+							{
+							"$or": [
+								{
+									"visibility": "ALL"
+								},
+								{
+									"visibility": {
+										"$ne": "CURRENT"
+									},
+									"visibleToOrganizations": {
+										"$in": [
+											"mys"
+										]
+									}
+								},
+								{
+									"orgId": "mys"
+								}
+							]
+							}
+						]
+						}
+					}
+				*/
+				matchQuery = applyVisibilityConditions(matchQuery, orgExtension, userDetails)
 
 				if (categoryId && categoryId !== '') {
 					matchQuery['$match']['categories.externalId'] = categoryId
@@ -140,7 +230,8 @@ module.exports = class LibraryCategoriesHelper {
 
 						// construct the match query for filters
 						if (minDays !== Infinity && exactDurationFiltersInDays.length > 0) {
-							matchQuery['$match']['$or'] = [
+							matchQuery['$match']['$and'] = [
+								...(matchQuery['$match']['$and'] || []),
 								{ durationInDays: { $gt: minDays } }, // Use $gt for greater than
 								{ durationInDays: { $in: exactDurationFiltersInDays } }, // For exact durations
 							]
@@ -177,24 +268,26 @@ module.exports = class LibraryCategoriesHelper {
 					}
 				}
 
+				const searchConditions = []
 				if (search !== '') {
 					if (userLanguage === defaultLanguage) {
-						// Search directly in default fields for English
-						matchQuery['$match']['$or'] = [
+						searchConditions.push(
 							{ title: new RegExp(search, 'i') },
 							{ description: new RegExp(search, 'i') },
-							{ categories: new RegExp(search, 'i') },
-						]
+							{ categories: new RegExp(search, 'i') }
+						)
 					} else {
-						// Search in translations for other languages
-						matchQuery['$match']['$or'] = [
+						searchConditions.push(
 							{ [`translations.${userLanguage}.title`]: new RegExp(search, 'i') },
 							{ [`translations.${userLanguage}.description`]: new RegExp(search, 'i') },
 							{ title: new RegExp(search, 'i') },
 							{ description: new RegExp(search, 'i') },
-							{ categories: new RegExp(search, 'i') },
-						]
+							{ categories: new RegExp(search, 'i') }
+						)
 					}
+
+					// Add into $and instead of overwriting
+					matchQuery.$match.$and = [...(matchQuery.$match.$and || []), { $or: searchConditions }]
 				}
 
 				let sortedQuery = {
@@ -202,7 +295,6 @@ module.exports = class LibraryCategoriesHelper {
 						createdAt: -1,
 					},
 				}
-
 				if (sortedData && sortedData === CONSTANTS.common.IMPORTANT_PROJECT) {
 					sortedQuery['$sort'] = {}
 					sortedQuery['$sort']['noOfRatings'] = -1
@@ -402,13 +494,10 @@ module.exports = class LibraryCategoriesHelper {
 					},
 				})
 			} catch (error) {
-				return resolve({
-					success: true,
-					message: CONSTANTS.apiResponses.PROJECTS_FETCHED,
-					data: {
-						data: [],
-						count: 0,
-					},
+				return reject({
+					success: false,
+					status: HTTP_STATUS_CODE.not_found.status,
+					message: error.message,
 				})
 			}
 		})
@@ -593,10 +682,29 @@ module.exports = class LibraryCategoriesHelper {
 	static create(categoryData, files, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				const tenantId = userDetails.tenantAndOrgInfo.tenantId
+				const orgId = userDetails.tenantAndOrgInfo.orgId
+
+				// Check if organization extension exists for the loggedin user
+				let orgExtension
+				orgExtension = await orgExtensionQueries.orgExtenDocuments({
+					tenantId,
+					orgId: orgId[0],
+				})
+
+				//Throw error if org policy is not found
+				if (!orgExtension || orgExtension.length === 0) {
+					throw {
+						success: false,
+						status: HTTP_STATUS_CODE.not_found.status,
+						message: CONSTANTS.apiResponses.ORG_EXTENSION_NOT_FOUND,
+					}
+				}
+
 				// Check if the category already exists
 				let filterQuery = {}
 				filterQuery['externalId'] = categoryData.externalId.toString()
-				filterQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+				filterQuery['tenantId'] = tenantId
 
 				const checkIfCategoryExist = await projectCategoriesQueries.categoryDocuments(filterQuery, [
 					'_id',
@@ -621,8 +729,9 @@ module.exports = class LibraryCategoriesHelper {
 				categoryData['evidences'] = evidences.data
 
 				// add tenantId and orgId
-				categoryData['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-				categoryData['orgId'] = userDetails.tenantAndOrgInfo.orgId[0]
+				categoryData['tenantId'] = tenantId
+				categoryData['orgId'] = orgId[0]
+				categoryData['visibleToOrganizations'] = orgId
 
 				let projectCategoriesData = await projectCategoriesQueries.create(categoryData)
 
@@ -660,12 +769,14 @@ module.exports = class LibraryCategoriesHelper {
 	static list(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let tenantId
-				let organizationId
-				let query = {}
+				let tenantId = req.userDetails.userInformation.tenantId
+				let organizationId = req.userDetails.userInformation.organizationId
+				let query = {
+					visibleToOrganizations: { $in: [organizationId] },
+				}
 
 				// create query to fetch assets
-				query['tenantId'] = req.userDetails.userInformation.tenantId
+				query['tenantId'] = tenantId
 
 				// handle currentOrgOnly filter
 				if (req.query['currentOrgOnly']) {
@@ -794,4 +905,126 @@ function handleEvidenceUpload(files, userId) {
 			})
 		}
 	})
+}
+
+/**
+ * Helper to build visibility conditions and mutate matchQuery
+ * @name applyVisibilityConditions
+ * @param {Object} matchQuery - matchQuery
+ * @param {Object} orgExtension - orgExtension
+ * @param {Object} userDetails - userDetails
+ * @returns {Object} returns modified matchQuery
+ */
+/**
+ * 
+	Sample for matchQuery obj when orgExtension.externalProjectResourceVisibilityPolicy = CURRENT
+	{
+		"$match": {
+			"status": "published",
+			"isReusable": true,
+			"tenantId": "shikshalokam",
+			"orgId": "slorg"
+		}
+	}
+ */
+/**
+ * 
+	Sample for matchQuery obj when orgExtension.externalProjectResourceVisibilityPolicy = ASSOCIATED
+	{
+		"$match": {
+			"status": "published",
+			"isReusable": true,
+			"tenantId": "shikshalokam",
+			"$and": [
+				{
+				"$or": [
+					{
+						"visibility": {
+							"$ne": "CURRENT"
+						},
+						"visibleToOrganizations": {
+							"$in": [
+								"sot"
+							]
+						}
+					},
+					{
+						"orgId": "sot"
+					}
+				]
+				}
+			]
+		}
+	}
+ */
+/**
+ * 
+	Sample for matchQuery obj when orgExtension.externalProjectResourceVisibilityPolicy = ALL
+	{
+		"$match": {
+		"status": "published",
+		"isReusable": true,
+		"tenantId": "shikshalokam",
+		"$and": [
+			{
+			"$or": [
+				{
+					"visibility": "ALL"
+				},
+				{
+					"visibility": {
+						"$ne": "CURRENT"
+					},
+					"visibleToOrganizations": {
+						"$in": [
+							"mys"
+						]
+					}
+				},
+				{
+					"orgId": "mys"
+				}
+			]
+			}
+		]
+		}
+	}
+*/
+function applyVisibilityConditions(matchQuery, orgExtension, userDetails) {
+	let matchConditions = []
+
+	// allow ALL templates
+	if (
+		orgExtension &&
+		orgExtension.externalProjectResourceVisibilityPolicy === CONSTANTS.common.ORG_EXTENSION_VISIBILITY.ALL
+	) {
+		matchConditions.push({ visibility: CONSTANTS.common.ORG_EXTENSION_VISIBILITY.ALL })
+	}
+
+	// allow ASSOCIATED templates with orgId match (for both ALL and ASSOCIATED cases)
+	if (
+		orgExtension &&
+		[CONSTANTS.common.ORG_EXTENSION_VISIBILITY.ALL, CONSTANTS.common.ORG_EXTENSION_VISIBILITY.ASSOCIATED].includes(
+			orgExtension.externalProjectResourceVisibilityPolicy
+		)
+	) {
+		matchConditions.push({
+			visibility: { $ne: CONSTANTS.common.ORG_EXTENSION_VISIBILITY.CURRENT },
+			visibleToOrganizations: {
+				$in: [userDetails.userInformation.organizationId],
+			},
+		})
+	}
+
+	// Build a single `$or` array for visibility, then add it into `$and`
+	const visibilityOr =
+		matchConditions.length > 0 ? [...matchConditions, { orgId: userDetails.userInformation.organizationId }] : null
+	if (visibilityOr) {
+		// Preserve any existing $and clauses and append the visibility OR
+		matchQuery.$match.$and = [...(matchQuery.$match.$and || []), { $or: visibilityOr }]
+	} else {
+		// Fallback to a simple orgId match when there are no other visibility conditions
+		matchQuery.$match.orgId = userDetails.userInformation.organizationId
+	}
+	return matchQuery
 }

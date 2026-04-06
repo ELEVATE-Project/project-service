@@ -1,6 +1,5 @@
 module.exports = {
 	name: process.env.SERVICE_NAME,
-	version: '1.0.0',
 	checks: {
 		mongodb: {
 			enabled: true,
@@ -9,6 +8,8 @@ module.exports = {
 		kafka: {
 			enabled: true,
 			url: process.env.KAFKA_URL,
+			topic: process.env.KAFKA_HEALTH_CHECK_TOPIC,
+			groupId: process.env.KAFKA_GROUP_ID,
 		},
 		gotenberg: {
 			enabled: true,

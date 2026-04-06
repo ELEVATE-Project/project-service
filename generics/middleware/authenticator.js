@@ -11,6 +11,7 @@ const fs = require('fs')
 const path = require('path')
 const isBearerRequired = process.env.IS_AUTH_TOKEN_BEARER === 'true'
 const userService = require('../services/users')
+const requests = require('../helpers/requests')
 
 var respUtil = function (resp) {
 	return {
@@ -50,7 +51,6 @@ module.exports = async function (req, res, next, token = '') {
 	let guestAccess = false
 	let guestAccessPaths = [
 		'/dataPipeline/',
-		'/templates/details',
 		'userProjects/certificateCallback',
 		'userProjects/certificateCallbackError',
 		'cloud-services/files/download',
@@ -105,6 +105,13 @@ module.exports = async function (req, res, next, token = '') {
 		'/userProjects/pushSubmissionToTask',
 		'/templates/importProjectTemplate',
 		'/templates/listByIds',
+		'/admin/deleteResource',
+		'/programs/removeSolutions',
+		'/templates/createChildProjectTemplate',
+		'/organizationExtension/createOrUpdate',
+		'/organizationExtension/updateRelatedOrgs',
+		'/userExtension/update',
+		'/solutions/fetchLinkInternal',
 	]
 	let performInternalAccessTokenCheck = false
 	let adminHeader = false
@@ -236,6 +243,26 @@ module.exports = async function (req, res, next, token = '') {
 			rspObj.errMsg = CONSTANTS.apiResponses.TOKEN_MISSING_MESSAGE
 			rspObj.responseCode = HTTP_STATUS_CODE['unauthorized'].status
 			return res.status(HTTP_STATUS_CODE['unauthorized'].status).send(respUtil(rspObj))
+		}
+
+		if (
+			!performInternalAccessTokenCheck &&
+			process.env.SESSION_VERIFICATION_METHOD === CONSTANTS.common.SESSION_VERIFICATION_METHOD.USER_SERVICE
+		) {
+			try {
+				const userSession = await validateSession(token)
+				if (!userSession.success) {
+					throw {
+						message: userSession.message,
+						status: userSession.status,
+					}
+				}
+			} catch (error) {
+				rspObj.errCode = error.status || CONSTANTS.apiResponses.USER_SERVICE_DOWN_CODE
+				rspObj.errMsg = error.message || CONSTANTS.apiResponses.USER_SERVICE_DOWN
+				rspObj.responseCode = HTTP_STATUS_CODE['unauthorized'].status
+				return res.status(HTTP_STATUS_CODE['unauthorized'].status).send(respUtil(rspObj))
+			}
 		}
 
 		// Path to config.json
@@ -383,7 +410,7 @@ module.exports = async function (req, res, next, token = '') {
 
 			// convert the types of items to string
 			orgDetails.data.related_orgs = orgDetails.data.organizations.map((data) => {
-				return data.code.toString()
+				return data.code.toString().toLowerCase()
 			})
 			// aggregate valid orgids
 
@@ -495,6 +522,7 @@ module.exports = async function (req, res, next, token = '') {
 					rspObj.responseCode = HTTP_STATUS_CODE['unauthorized'].status
 					return res.status(HTTP_STATUS_CODE['unauthorized'].status).send(respUtil(rspObj))
 				}
+				result = convertTenantAndOrgToLowercase(result)
 				req.headers['tenantid'] = result.tenantId
 				req.headers['orgid'] = result.orgId
 
@@ -512,7 +540,7 @@ module.exports = async function (req, res, next, token = '') {
 
 				req.headers['orgid'] = validateOrgsResult.validOrgIds
 			} else if (userRoles.includes(CONSTANTS.common.TENANT_ADMIN)) {
-				req.headers['tenantid'] = decodedToken.data.tenant_id.toString()
+				req.headers['tenantid'] = UTILS.lowerCase(decodedToken.data.tenant_id.toString())
 
 				let orgId = req.body.orgId || req.headers['orgid']
 
@@ -523,7 +551,9 @@ module.exports = async function (req, res, next, token = '') {
 					return res.status(HTTP_STATUS_CODE['bad_request'].status).send(respUtil(rspObj))
 				}
 
-				req.headers['orgid'] = orgId
+				req.headers['orgid'] = Array.isArray(orgId)
+					? orgId.map((org) => UTILS.lowerCase(org))
+					: UTILS.lowerCase(orgId)
 
 				let validateOrgsResult = await validateIfOrgsBelongsToTenant(
 					req.headers['tenantid'],
@@ -537,8 +567,8 @@ module.exports = async function (req, res, next, token = '') {
 				}
 				req.headers['orgid'] = validateOrgsResult.validOrgIds
 			} else if (userRoles.includes(CONSTANTS.common.ORG_ADMIN)) {
-				req.headers['tenantid'] = decodedToken.data.tenant_id.toString()
-				req.headers['orgid'] = [decodedToken.data.organization_id.toString()]
+				req.headers['tenantid'] = UTILS.lowerCase(decodedToken.data.tenant_id.toString())
+				req.headers['orgid'] = [UTILS.lowerCase(decodedToken.data.organization_id.toString())]
 			} else {
 				rspObj.errCode = CONSTANTS.apiResponses.TOKEN_MISSING_CODE
 				rspObj.errMsg = CONSTANTS.apiResponses.TOKEN_MISSING_MESSAGE
@@ -619,5 +649,71 @@ module.exports = async function (req, res, next, token = '') {
 		})
 	}
 
+	/**
+	 *
+	 * @function
+	 * @name convertTenantAndOrgToLowercase
+	 * @param {Object} result - The result object containing success flag, tenantId, and orgId.
+	 * @param {Boolean} result.success - Indicates whether the operation was successful.
+	 * @param {String} result.tenantId - Tenant ID to be converted to lowercase.
+	 * @param {String} result.orgId - Organization ID to be converted to lowercase.
+	 * @returns {Object} Returns the modified result object with tenantId and orgId in lowercase,
+	 *                   or the original result object if conditions are not met.
+	 */
+	function convertTenantAndOrgToLowercase(result) {
+		if (result?.success && result.tenantId && result.orgId) {
+			const tenantId = UTILS.lowerCase(result.tenantId)
+			const orgId = Array.isArray(result.orgId)
+				? result.orgId.map((org) => UTILS.lowerCase(org))
+				: UTILS.lowerCase(result.orgId)
+			return { ...result, tenantId, orgId }
+		}
+		return result
+	}
+
 	next()
+}
+
+/**
+ * Validates the user's session token by calling the user service.
+ * @param {string} token - The access token extracted from the request header.
+ */
+
+async function validateSession(token) {
+	try {
+		const userBaseUrl = `${process.env.INTERFACE_SERVICE_URL}${process.env.USER_SERVICE_BASE_URL}`
+		const validateSessionEndpoint = `${userBaseUrl}${CONSTANTS.endpoints.VALIDATE_SESSIONS}`
+		const reqBody = { token }
+
+		const isSessionActive = await requests.post(
+			validateSessionEndpoint,
+			reqBody,
+			'',
+			true,
+			process.env.USER_SERVICE_INTERNAL_ACCESS_TOKEN_HEADER_KEY
+		)
+
+		// Case 1: Unauthorized token
+		if (isSessionActive?.data?.responseCode === 'UNAUTHORIZED') {
+			throw {
+				status: CONSTANTS.apiResponses.ACCESS_TOKEN_EXPIRED_CODE,
+				message: CONSTANTS.apiResponses.ACCESS_TOKEN_EXPIRED,
+			}
+		}
+		// Case 2: User service down / session inactive
+		if (!isSessionActive?.success || !isSessionActive?.data?.result?.data?.user_session_active) {
+			throw {
+				status: CONSTANTS.apiResponses.USER_SERVICE_DOWN_CODE,
+				message: CONSTANTS.apiResponses.USER_SERVICE_DOWN,
+			}
+		}
+
+		return isSessionActive
+	} catch (err) {
+		return {
+			success: false,
+			status: err.status || CONSTANTS.apiResponses.USER_SERVICE_DOWN_CODE,
+			message: err.message || CONSTANTS.apiResponses.USER_SERVICE_DOWN,
+		}
+	}
 }

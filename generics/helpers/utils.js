@@ -146,6 +146,18 @@ function lowerCase(str) {
 }
 
 /**
+ * convert string to upperCase.
+ * @function
+ * @name upperCase
+ * @param {String} str
+ * @returns {String} returns a upperCase string. ex: HELLO, o/p: hello
+ */
+
+function upperCase(str) {
+	return str.toUpperCase()
+}
+
+/**
  * check whether the given string is url.
  * @function
  * @name checkIfStringIsUrl - check whether string is url or not.
@@ -987,6 +999,38 @@ function getFilteredScope(scopeData, tenantPublicDetailsMetaField) {
 	return filteredScope
 }
 
+/**
+ * Strictly validates whether the given value is a valid MongoDB ObjectId string.
+ * @param {string} _id - The value to validate.
+ * @returns {boolean} - True if the value is a 24-character hex string, false otherwise.
+ */
+function strictObjectIdCheck(_id) {
+	return /^[a-fA-F0-9]{24}$/.test(_id)
+}
+/**
+ * generate SolutionsIds with orders to be added to the program component.
+ *
+ * @param {Array} existingComponents - current program component data.
+ * @param {newSolutionIds} newSolutionIds - solutionIds to update in program component.
+ * @returns {Object} -  solutions Id with orders to update in program components.
+ */
+function addSolutionsWithOrdersForProgramComponent(existingComponents = [], newSolutionIds = []) {
+	// Get the latest order from existing components
+	const latestOrderFromComponents = existingComponents.length
+		? Math.max(...existingComponents.map((comp) => comp.order || 0))
+		: 0
+
+	// Assign orders to new solutions starting from next available
+	let currentOrder = latestOrderFromComponents + 1
+
+	const newComponents = newSolutionIds.map((solutionId) => ({
+		_id: new ObjectId(solutionId),
+		order: currentOrder++,
+	}))
+
+	return newComponents
+}
+
 module.exports = {
 	camelCaseToTitleCase: camelCaseToTitleCase,
 	lowerCase: lowerCase,
@@ -1031,4 +1075,7 @@ module.exports = {
 	validateRoles,
 	targetingQuery,
 	getFilteredScope,
+	strictObjectIdCheck,
+	upperCase: upperCase,
+	addSolutionsWithOrdersForProgramComponent,
 }

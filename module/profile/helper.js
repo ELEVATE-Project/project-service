@@ -21,7 +21,8 @@ module.exports = class ProfileHelper {
 				if (!userResponse.success) {
 					throw {
 						message: CONSTANTS.apiResponses.USER_DATA_FETCH_UNSUCCESSFUL,
-						status: HTTP_STATUS_CODE.bad_request.status,
+						status: HTTP_STATUS_CODE.unauthorized.status,
+						success: false,
 					}
 				}
 				// Store the fetched user details
@@ -64,10 +65,20 @@ module.exports = class ProfileHelper {
 					// Process the user details to replace meta data with entity details
 					const processedResponse = await this.processUserDetailsResponse(userDetails, entityDetails)
 
-					return resolve(processedResponse)
+					return resolve({
+						success: true,
+						message: CONSTANTS.apiResponses.DATA_FETCHED_SUCCESSFULLY,
+						result: processedResponse,
+						data: processedResponse,
+					})
 				} else {
 					delete userDetails.location // Remove location key from userDetails
-					return resolve(userDetails)
+					return resolve({
+						success: true,
+						message: CONSTANTS.apiResponses.DATA_FETCHED_SUCCESSFULLY,
+						result: userDetails,
+						data: userDetails,
+					})
 				}
 			} catch (error) {
 				return resolve({

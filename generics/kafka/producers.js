@@ -20,6 +20,11 @@ const programOperationTopic =
 	process.env.PROGRAM_USER_MAPPING_TOPIC && process.env.PROGRAM_USER_MAPPING_TOPIC != 'OFF'
 		? process.env.PROGRAM_USER_MAPPING_TOPIC
 		: 'elevate_program_operation'
+const pushDeletedResourceTopic =
+	process.env.RESOURCE_DELETION_TOPIC && process.env.RESOURCE_DELETION_TOPIC != 'OFF'
+		? process.env.RESOURCE_DELETION_TOPIC
+		: 'resource_deletion_topic'
+const userCoursesTopic = process.env.USER_COURSES_TOPIC
 
 /**
  * Push improvement projects to kafka.
@@ -53,6 +58,30 @@ const pushUserActivitiesToKafka = function (message) {
 			let kafkaPushStatus = await pushMessageToKafka([
 				{
 					topic: userProjectActivityTopic,
+					messages: JSON.stringify(message),
+				},
+			])
+
+			return resolve(kafkaPushStatus)
+		} catch (error) {
+			return reject(error)
+		}
+	})
+}
+
+/**
+ * Push resource deleted data to kafka.
+ * @function
+ * @name pushResourceDeleteKafkaEvent
+ * @param {Object} message - Message data.
+ */
+
+const pushResourceDeleteKafkaEvent = function (message) {
+	return new Promise(async (resolve, reject) => {
+		try {
+			let kafkaPushStatus = await pushMessageToKafka([
+				{
+					topic: pushDeletedResourceTopic,
 					messages: JSON.stringify(message),
 				},
 			])
@@ -131,8 +160,33 @@ const pushProgramOperationEvent = function (message) {
 	})
 }
 
+/**
+ * Push userCourses event to Kafka.
+ * @function
+ * @name pushUserCoursesToKafka
+ * @param {Object} message - The message payload to be pushed to Kafka.
+ * @returns {Promise<Object>} Kafka push status response.
+ */
+const pushUserCoursesToKafka = function (message) {
+	return new Promise(async (resolve, reject) => {
+		try {
+			let kafkaPushStatus = await pushMessageToKafka([
+				{
+					topic: userCoursesTopic,
+					messages: JSON.stringify(message),
+				},
+			])
+			return resolve(kafkaPushStatus)
+		} catch (error) {
+			return reject(error)
+		}
+	})
+}
+
 module.exports = {
 	pushProjectToKafka: pushProjectToKafka,
 	pushUserActivitiesToKafka: pushUserActivitiesToKafka,
 	pushProgramOperationEvent: pushProgramOperationEvent,
+	pushResourceDeleteKafkaEvent: pushResourceDeleteKafkaEvent,
+	pushUserCoursesToKafka: pushUserCoursesToKafka,
 }

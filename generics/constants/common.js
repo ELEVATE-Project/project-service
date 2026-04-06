@@ -5,7 +5,14 @@
  * Description : All common messages.
  */
 
+const ORG_EXTENSION_VISIBILITY = {
+	ALL: 'ALL',
+	CURRENT: 'CURRENT',
+	ASSOCIATED: 'ASSOCIATED',
+}
+
 module.exports = {
+	ORG_EXTENSION_VISIBILITY,
 	ACTIVE_STATUS: 'active',
 	PUBLISHED: 'published',
 	ASSESSMENT: 'assessment',
@@ -66,6 +73,7 @@ module.exports = {
 	PREFIX_FOR_SOLUTION_LINK: 'view',
 	CREATE_OBSERVATION: '/create-observation/',
 	CREATE_PROJECT: '/project/',
+	CREATE_COURSE: '/create-course/',
 	CREATE_SURVEY: '/create-survey/',
 	SUBMISSION_STATUS_COMPLETED: 'completed',
 	EXPIRED: 'expired',
@@ -150,6 +158,7 @@ module.exports = {
 	DELETE_EVENT_ENTITY: 'user',
 	DELETE_EVENT_TYPE: 'delete',
 	CREATE_EVENT_TYPE: 'create',
+	UPDATE_EVENT_TYPE: 'update',
 	OBJECT: 'object',
 	STRING: 'string',
 	ALL: 'all',
@@ -161,8 +170,23 @@ module.exports = {
 	OVERRIDE_OPERATION: 'OVERRIDE',
 	PROMISE_FULFILLED: 'fulfilled',
 	DEFAULT_PROGRAM_USER_MAPPING_TOPIC: 'elevate_program_operation',
-	PROGRAM_EVENT_ENTITY: 'program',
+	PROGRAM: 'program',
 	FALSE: 'false',
 	OPTIONAL_SCOPE_FIELD: 'optional_factors',
 	MANDATORY_SCOPE_FIELD: 'factors',
+	SOLUTION: 'solution',
+	DEFAULT_ORG_EXTENSION_POLICIES: {
+		projectResourceVisibilityPolicy: ORG_EXTENSION_VISIBILITY.CURRENT,
+		externalProjectResourceVisibilityPolicy: ORG_EXTENSION_VISIBILITY.CURRENT,
+	},
+	API_REQUEST_METHODS: {
+		GET: 'GET',
+		POST: 'POST',
+		PATCH: 'PATCH',
+		PUT: 'PUT',
+		DELETE: 'DELETE',
+	},
+	SESSION_VERIFICATION_METHOD: {
+		USER_SERVICE: 'user_service_authenticated',
+	},
 }

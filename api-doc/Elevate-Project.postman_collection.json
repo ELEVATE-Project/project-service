@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "c9964b04-92c9-4e57-8613-3bd331773fca",
+		"_postman_id": "137475d2-44ec-4746-84ec-1f12779168ec",
 		"name": "Elevate-Project",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "33513401"
@@ -21,6 +21,21 @@
 							{
 								"key": "internal-access-token",
 								"value": "{{internal_access_token}}"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -39,9 +54,9 @@
 							]
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/project/templates/bulkCreate",
+							"raw": "{{baseUrl}}/project/v1/project/templates/bulkCreate",
 							"host": ["{{baseUrl}}"],
-							"path": ["project", "v1", "project", "templates", "bulkUpdate", "bulkCreate"]
+							"path": ["project", "v1", "project", "templates", "bulkCreate"]
 						}
 					},
 					"response": []
@@ -71,7 +86,7 @@
 							]
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/project/templates/bulkUpdate",
+							"raw": "{{baseUrl}}/project/v1/project/templates/bulkUpdate",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "project", "templates", "bulkUpdate"]
 						}
@@ -94,12 +109,26 @@
 							},
 							{
 								"key": "internal-access-token",
-								"value": "{{internal_access_token}}",
-								"disabled": true
+								"value": "{{internal_access_token}}"
 							},
 							{
 								"key": "Content-Type",
 								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
 								"type": "text"
 							}
 						],
@@ -108,7 +137,7 @@
 							"raw": "{\n    \"description\" : \"शिक्षकों को कक्षा में मापन - लंबाई , भार एवं धारिता के शिक्षण कौशलों का संवर्धन करना । updated\"\n\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/project/templates/update/64b534d32bf17aea84b3862f",
+							"raw": "{{baseUrl}}/project/v1/project/templates/update/64b534d32bf17aea84b3862f",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "project", "templates", "update", "64b534d32bf17aea84b3862f"]
 						}
@@ -145,7 +174,7 @@
 							"raw": "{\n    \"externalIds\" : [\"TSCSLHAR02-1710148664591\"]\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/project/templates/listByIds",
+							"raw": "{{baseUrl}}/project/v1/project/templates/listByIds",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "project", "templates", "listByIds"]
 						}
@@ -178,7 +207,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}project/v1/project/templates/importProjectTemplate/TSCSLHAR02-1710148664591=",
+							"raw": "http://{{baseUrl}}/project/v1/project/templates/importProjectTemplate/TSCSLHAR02-1710148664591=",
 							"protocol": "http",
 							"host": ["{{baseUrl}}"],
 							"path": [
@@ -223,7 +252,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/project/templates/details/TSCSLHAR02-1710148664591",
+							"raw": "{{baseUrl}}/project/v1/project/templates/details/TSCSLHAR02-1710148664591",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "project", "templates", "details", "TSCSLHAR02-1710148664591"]
 						}
@@ -242,9 +271,93 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}project/v1/project/templates/list",
+							"raw": "{{baseUrl}}/project/v1/project/templates/list",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "project", "templates", "list"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "createChildProjectTemplate",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"content-type": true
+						}
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{userToken}}"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "N0DM5NAwwCN5KNXKJwlwu6c0nQQt6Rcl",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "tenantId",
+								"value": "shikshalokam",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "orgId",
+								"value": "sot",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "internal-access-token",
+								"value": "Fqn0m0HQ0gXydRtBCg5l",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "X-auth-token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoxLCJuYW1lIjoiTmV2aWwiLCJzZXNzaW9uX2lkIjoxMTc4Miwib3JnYW5pemF0aW9uX2lkcyI6WyIxIl0sIm9yZ2FuaXphdGlvbl9jb2RlcyI6WyJkZWZhdWx0X2NvZGUiXSwib3JnYW5pemF0aW9ucyI6W3siaWQiOjEsIm5hbWUiOiJEZWZhdWx0IE9yZ2FuaXphdGlvbiIsImNvZGUiOiJkZWZhdWx0X2NvZGUiLCJkZXNjcmlwdGlvbiI6IkRlZmF1bHQgIFNMIE9yZ2FuaXNhdGlvbiIsInN0YXR1cyI6IkFDVElWRSIsInJlbGF0ZWRfb3JncyI6bnVsbCwidGVuYW50X2NvZGUiOiJkZWZhdWx0IiwibWV0YSI6bnVsbCwiY3JlYXRlZF9ieSI6bnVsbCwidXBkYXRlZF9ieSI6MSwicm9sZXMiOlt7ImlkIjo1LCJ0aXRsZSI6Im1lbnRlZSIsImxhYmVsIjoibWVudGVlIiwidXNlcl90eXBlIjowLCJzdGF0dXMiOiJBQ1RJVkUiLCJvcmdhbml6YXRpb25faWQiOjEsInZpc2liaWxpdHkiOiJQVUJMSUMiLCJ0ZW5hbnRfY29kZSI6ImRlZmF1bHQiLCJ0cmFuc2xhdGlvbnMiOm51bGx9LHsiaWQiOjYsInRpdGxlIjoiYWRtaW4iLCJsYWJlbCI6IkFkbWluIiwidXNlcl90eXBlIjoxLCJzdGF0dXMiOiJBQ1RJVkUiLCJvcmdhbml6YXRpb25faWQiOjEsInZpc2liaWxpdHkiOiJQVUJMSUMiLCJ0ZW5hbnRfY29kZSI6ImRlZmF1bHQiLCJ0cmFuc2xhdGlvbnMiOm51bGx9LHsiaWQiOjI1LCJ0aXRsZSI6ImxlYXJuZXIiLCJsYWJlbCI6IkxlYXJuZXIiLCJ1c2VyX3R5cGUiOjAsInN0YXR1cyI6IkFDVElWRSIsIm9yZ2FuaXphdGlvbl9pZCI6MSwidmlzaWJpbGl0eSI6IlBVQkxJQyIsInRlbmFudF9jb2RlIjoiZGVmYXVsdCIsInRyYW5zbGF0aW9ucyI6bnVsbH1dfV0sInRlbmFudF9jb2RlIjoiZGVmYXVsdCJ9LCJpYXQiOjE3NjAzNTg1MDQsImV4cCI6MTc2NTU0MjUwNH0.eDjC-_t8nc6NGTKioy8FkJ8wYqv_XxEaLevZ6yX12sw",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"projectTemplateExternalIds\": [\n        \"IDE-1747297137661\",\n        \"IDE-1747297530253\",\n        \"IDE-1747326100274\"\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/project/templates/createChildProjectTemplate?isExternalProgram=true&programExternalId=AWS_Prog_MYS_may192",
+							"host": ["{{baseUrl}}"],
+							"path": ["v1", "project", "templates", "createChildProjectTemplate"],
+							"query": [
+								{
+									"key": "isExternalProgram",
+									"value": "true"
+								},
+								{
+									"key": "programExternalId",
+									"value": "AWS_Prog_MYS_may192"
+								}
+							]
 						}
 					},
 					"response": []
@@ -277,6 +390,21 @@
 								"key": "Content-Type",
 								"value": "application/json",
 								"type": "text"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -300,7 +428,7 @@
 							]
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/library/categories/create",
+							"raw": "{{baseUrl}}/project/v1/library/categories/create",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "library", "categories", "create"]
 						}
@@ -329,6 +457,21 @@
 								"key": "Content-Type",
 								"value": "application/json",
 								"type": "text"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -352,7 +495,7 @@
 							]
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/library/categories/update/665ea7cccbf5d12ba8827223",
+							"raw": "{{baseUrl}}/project/v1/library/categories/update/665ea7cccbf5d12ba8827223",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "library", "categories", "update", "665ea7cccbf5d12ba8827223"]
 						}
@@ -367,7 +510,7 @@
 						}
 					},
 					"request": {
-						"method": "POST",
+						"method": "GET",
 						"header": [
 							{
 								"key": "X-auth-token",
@@ -383,12 +526,8 @@
 								"type": "text"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    // \"name\" : \"Teachers\",\n    // \"externalId\" : \"teachers\",\n    // \"icon\" : \"static/projectCategories/teacher.png\"\n}"
-						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/library/categories/list",
+							"raw": "{{baseUrl}}/project/v1/library/categories/list",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "library", "categories", "list"]
 						}
@@ -407,7 +546,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}project/v1/library/categories/projects/:categoryExternalId",
+							"raw": "{{baseUrl}}/project/v1/library/categories/projects/:categoryExternalId",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "library", "categories", "projects", ":categoryExternalId"],
 							"variable": [
@@ -437,6 +576,21 @@
 							{
 								"key": "internal-access-token",
 								"value": "{{internal_access_token}}"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -455,7 +609,7 @@
 							]
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/project/templateTasks/bulkCreate/665430eb8f2943842b2ae46b",
+							"raw": "{{baseUrl}}/project/v1/project/templateTasks/bulkCreate/665430eb8f2943842b2ae46b",
 							"host": ["{{baseUrl}}"],
 							"path": [
 								"project",
@@ -494,8 +648,8 @@
 							]
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/project/templateTasks/bulkUpdate/:projectTemplateId",
-							"host": ["{{baseUrl}}project"],
+							"raw": "{{baseUrl}}/project/v1/project/templateTasks/bulkUpdate/:projectTemplateId",
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "project", "templateTasks", "bulkUpdate", ":projectTemplateId"],
 							"variable": [
 								{
@@ -541,7 +695,7 @@
 							"raw": "{\n \"programId\" : \"6752aee1c1438653af10d613\"\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/userProjects/importFromLibrary/5fcf9954546a92494f2e587c?isATargetedSolution=false",
+							"raw": "{{baseUrl}}/project/v1/userProjects/importFromLibrary/5fcf9954546a92494f2e587c?isATargetedSolution=false",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "userProjects", "importFromLibrary", "5fcf9954546a92494f2e587c"],
 							"query": [
@@ -584,7 +738,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/userProjects/importedProjects",
+							"raw": "{{baseUrl}}/project/v1/userProjects/importedProjects",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "userProjects", "importedProjects"]
 						}
@@ -620,7 +774,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/userProjects/list?page=1&limit=2&search=&filter=",
+							"raw": "{{baseUrl}}/project/v1/userProjects/list?page=1&limit=10&search=&language=hi&status=completed",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "userProjects", "list"],
 							"query": [
@@ -678,8 +832,8 @@
 							"raw": "{\n    \"_id\" : \"6624ff5124fc48e1fcdbec29\",\n    \"userId\" : \"2\",\n    \"userRole\" : \"BEO\",\n    \"status\" : \"started\",\n    \"isDeleted\" : false,\n    \"categories\" : [\n        {\n            \"externalId\" : \"\",\n            \"_id\" : \"\"\n        }\n    ],\n    \"createdBy\" : \"2\",\n    \"tasks\" : [\n        {\n            \"externalId\" : \"Task1-1710148664591\",\n            \"name\" : \"Address the assembly and share ideas about Smart Learn\",\n            \"_id\" : \"1234\",\n            \"type\" : \"observation\",\n            \"status\" : \"notStarted\",\n            \"isDeleted\" : false,\n            \"isDeletable\" : true,\n            \"createdAt\" : \"2024-04-21T11:58:09.204+0000\",\n            \"updatedAt\" : \"2024-04-21T11:58:09.204+0000\",\n            \"isImportedFromLibrary\" : false,\n            \"syncedAt\" : \"2024-04-21T11:58:09.204+0000\",\n            \"children\" : [\n\n            ]\n        }\n    ],\n    \"updatedBy\" : \"2\",\n    \"learningResources\" : [\n\n    ],\n    \"hasAcceptedTAndC\" : false,\n    \"taskSequence\" : [\n\n    ],\n    \"recommendedFor\" : [\n\n    ],\n    \"attachments\" : [\n\n    ],\n    \"deleted\" : false,\n    \"userProfile\" : {\n        \"id\" : 2,\n        \"email\" : \"prajwal@tunerlabs.com\",\n        \"email_verified\" : \"false\",\n        \"name\" : \"prajwal\",\n        \"gender\" : null,\n        \"location\" : null,\n        \"about\" : null,\n        \"share_link\" : null,\n        \"status\" : \"ACTIVE\",\n        \"image\" : null,\n        \"last_logged_in_at\" : \"2024-04-21T07:44:54.239Z\",\n        \"has_accepted_terms_and_conditions\" : true,\n        \"languages\" : null,\n        \"preferred_language\" : \"en\",\n        \"organization_id\" : 1,\n        \"roles\" : [\n            3\n        ],\n        \"meta\" : null,\n        \"created_at\" : \"2024-03-22T07:11:10.925Z\",\n        \"updated_at\" : \"2024-04-21T07:44:54.240Z\",\n        \"deleted_at\" : null,\n        \"organization\" : {\n            \"id\" : 1,\n            \"name\" : \"Default Organization\",\n            \"code\" : \"default_code\"\n        },\n        \"user_roles\" : [\n            {\n                \"id\" : 3,\n                \"title\" : \"mentee\",\n                \"user_type\" : 0,\n                \"status\" : \"ACTIVE\"\n            }\n        ]\n    },\n    \"syncedAt\" : \"2024-04-21T11:58:09.183+0000\",\n    \"entityInformation\" : {\n        \"_id\" : \"5f33c3d85f637784791cd830\",\n        \"childHierarchyPath\" : [\n            \"district\",\n            \"beat\",\n            \"cluster\",\n            \"school\"\n        ],\n        \"deleted\" : false,\n        \"entityTypeId\" : \"5f32d8228e0dc8312404056e\",\n        \"entityType\" : \"state\",\n        \"metaInformation\" : {\n            \"externalId\" : \"MH\",\n            \"name\" : \"Maharashtra\",\n            \"region\" : \"West\",\n            \"capital\" : \"Mumbai\"\n        },\n        \"updatedBy\" : \"124fdade-aaa2-4587-9dcd-3c7cf15c7147\",\n        \"createdBy\" : \"2b655fd1-201d-4d2a-a1b7-9048a25c0afa\",\n        \"updatedAt\" : \"2021-01-18T06:51:31.086Z\",\n        \"createdAt\" : \"2020-08-12T10:26:32.038Z\",\n        \"__v\" : 0,\n        \"groups\" : {\n            \"district\" : [\n                \"5f33c56fb451f58478b36996\"\n            ],\n            \"beat\" : [\n                \"5f33cb24c1352f84a29f547c\",\n                \"5f33cb24c1352f84a29f547d\"\n            ],\n            \"cluster\" : [\n                \"5f33cb07ce438a849b4a17f6\",\n                \"5f33cb07ce438a849b4a17f7\"\n            ],\n            \"school\" : [\n                \"5f33caebb451f58478b36998\",\n                \"5f33caebb451f58478b36999\"\n            ]\n        },\n        \"registryDetails\" : {\n            \"locationId\" : \"db331a8c-b9e2-45f8-b3c0-7ec1e826b6df\",\n            \"code\" : \"db331a8c-b9e2-45f8-b3c0-7ec1e826b6df\"\n        }\n    },\n    \"entityId\" : \"5f33c3d85f637784791cd830\",\n    \"programInformation\" : {\n        \"_id\" : \"5f5f6f66f69c8a0fd28a8aba\",\n        \"name\" : \"My Program\",\n        \"description\" : \"Unnati-Default-Program\",\n        \"isAPrivateProgram\" : true\n    },\n    \"taskReport\" : {\n        \"total\" : 1,\n        \"notStarted\" : 1\n    },\n    \"description\" : \"Come See Our School!- Parent Mela vishwa\",\n    \"title\" : \"Come See Our School!- Parent Mela\",\n    \"metaInformation\" : {\n        \"rationale\" : \"\",\n        \"primaryAudience\" : [\n            \"Community\"\n        ],\n        \"goal\" : \"Organizing the Parent Mela in the school in order to make better community reach\",\n        \"duration\" : \"At the end of every quarter\",\n        \"successIndicators\" : \"\",\n        \"risks\" : \"\",\n        \"approaches\" : \"\"\n    },\n    \"programId\" : \"5f5f6f66f69c8a0fd28a8aba\",\n    \"lastDownloadedAt\" : \"2024-04-21T11:58:09.204+0000\",\n    \"updatedAt\" : \"2024-04-21T11:58:09.213+0000\",\n    \"createdAt\" : \"2024-04-21T11:58:09.213+0000\",\n    \"__v\" : 0\n}\n"
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/userProjects/sync/6624ff5124fc48e1fcdbec29?lastDownloadedAt=2024-04-21T11:58:09.204Z",
-							"host": ["{{baseUrl}}project"],
+							"raw": "{{baseUrl}}/project/v1/userProjects/sync/6624ff5124fc48e1fcdbec29?lastDownloadedAt=2024-04-21T11:58:09.204Z",
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "userProjects", "sync", "6624ff5124fc48e1fcdbec29"],
 							"query": [
 								{
@@ -718,14 +872,12 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n   \"role\": \"HM\",\n  \"entities\": [\"66506485e59a5ccb82b9eff6\"],\n  \"entityType\":\"block\",\n  \"type\": \"improvementProject\"\n}"
+							"raw": " {\n        \"userRole\": \"DEO\",\n        \"externalId\" : \"TSCSLHAR02-1710148664591\",\n        \"createdFor\": [\n            \"0126796199493140480\"\n        ],\n        \"status\": \"completed\",\n        \"isDeleted\": false,\n        \"description\": \"Come See Our School!- Parent Mela vishwa\",\n        \"title\": \"Come See Our School!- Parent Mela\",\n        \"metaInformation\": {\n            \"rationale\": \"\",\n            \"primaryAudience\": [\n                \"Community\"\n            ],\n            \"goal\": \"Organizing the Parent Mela in the school in order to make better community reach\",\n            \"duration\": \"At the end of every quarter\",\n            \"successIndicators\": \"\",\n            \"risks\": \"\",\n            \"approaches\": \"\"\n        },\n        \"isAPrivateProgram\": false,\n        \"hasAcceptedTAndC\": false,\n        \"entityId\":\"a4268dc5-61c3-4eab-9a89-ffaaee809147\"\n    }"
 						},
 						"url": {
-							"raw": "http://localhost:3567/project/v1/userProjects/details?solutionId=66727b63cf0222d7ec1fa7e0&templateId=IMP-3147f",
-							"protocol": "http",
-							"host": ["localhost"],
-							"port": "3567",
-							"path": ["project", "v1", "userProjects", "details"],
+							"raw": "{{baseUrl}}/project/v1/userProjects/details?solutionId=66727b63cf0222d7ec1fa7e0&templateId=IMP-3147f",
+							"host": ["{{baseUrl}}"],
+							"path": ["v1", "userProjects", "details"],
 							"query": [
 								{
 									"key": "solutionId",
@@ -764,7 +916,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/userProjects/add",
+							"raw": "{{baseUrl}}/project/v1/userProjects/add",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "userProjects", "add"]
 						}
@@ -795,7 +947,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/userProjects/update/66ceec390c9cad9f3e066de7",
+							"raw": "{{baseUrl}}/project/v1/userProjects/update/66ceec390c9cad9f3e066de7",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "userProjects", "update", "66ceec390c9cad9f3e066de7"]
 						}
@@ -803,7 +955,7 @@
 					"response": []
 				},
 				{
-					"name": "add Copy",
+					"name": "addStory",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -826,7 +978,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/userProjects/addStory/665ea7cccbf5d12ba8827223",
+							"raw": "{{baseUrl}}/project/v1/userProjects/addStory/665ea7cccbf5d12ba8827223",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "userProjects", "addStory", "665ea7cccbf5d12ba8827223"]
 						}
@@ -859,7 +1011,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/userProjects/tasksStatus",
+							"raw": "{{baseUrl}}/project/v1/userProjects/tasksStatus",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "userProjects", "tasksStatus"]
 						}
@@ -890,7 +1042,7 @@
 							"formdata": []
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/userProjects/share/6018e75f14969a4cfd76f52c",
+							"raw": "{{baseUrl}}/project/v1/userProjects/share/6018e75f14969a4cfd76f52c",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "userProjects", "share", "6018e75f14969a4cfd76f52c"]
 						}
@@ -909,7 +1061,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}project/v1/userProjects/certificateReIssue/66cedfd0c9c3f0714de096c1",
+							"raw": "{{baseUrl}}/project/v1/userProjects/certificateReIssue/66cedfd0c9c3f0714de096c1",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "userProjects", "certificateReIssue", "66cedfd0c9c3f0714de096c1"]
 						}
@@ -928,7 +1080,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}project/v1/userProjects/verifyCertificate/:_id",
+							"raw": "{{baseUrl}}/project/v1/userProjects/verifyCertificate/:_id",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "userProjects", "verifyCertificate", ":_id"],
 							"variable": [
@@ -937,6 +1089,100 @@
 									"value": ""
 								}
 							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "searchEntities",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{userToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/userProjects/searchEntities?solutionId=6880adeee1b9e76a809cd9db&page=10&limit=5",
+							"host": ["{{baseUrl}}"],
+							"path": ["v1", "userProjects", "searchEntities"],
+							"query": [
+								{
+									"key": "solutionId",
+									"value": "6880adeee1b9e76a809cd9db"
+								},
+								{
+									"key": "page",
+									"value": "10"
+								},
+								{
+									"key": "limit",
+									"value": "5"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "addEntity",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{userToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"entityId\": \"687a66c07f4bcd29a40c908d\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/userProjects/addEntity/68d38c9f69f139b91c9e57b8",
+							"host": ["{{baseUrl}}"],
+							"path": ["v1", "userProjects", "addEntity", "68d38c9f69f139b91c9e57b8"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteUserPIIData",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-auth-token",
+								"value": "{{userToken}}",
+								"type": "text"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": 1 //userId\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/userProjects/deleteUserPIIData",
+							"host": ["{{baseUrl}}"],
+							"path": ["v1", "userProjects", "deleteUserPIIData"]
 						}
 					},
 					"response": []
@@ -963,8 +1209,8 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}project/v1/reports/entity?requestPdf=true&reportType=0",
-							"host": ["{{baseUrl}}project"],
+							"raw": "{{baseUrl}}/project/v1/reports/entity?requestPdf=true&reportType=0",
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "reports", "entity"],
 							"query": [
 								{
@@ -997,8 +1243,8 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}project/v1/reports/detailView?requestPdf=true&reportType=2&programId=5f3bc13016fdc4ed008171ae",
-							"host": ["{{baseUrl}}project"],
+							"raw": "{{baseUrl}}/project/v1/reports/detailView?requestPdf=true&reportType=2&programId=5f3bc13016fdc4ed008171ae",
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "reports", "detailView"],
 							"query": [
 								{
@@ -1037,11 +1283,26 @@
 								"key": "internal-access-token",
 								"value": "{{internal_access_token}}",
 								"type": "text"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
+								"type": "text"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n      \"externalId\" : \"test_5\",\n      \"name\" : \"school\",\n      \"description\" : \"DCPCR School Development Index 2018-19\",\n      \"isDeleted\" : false,\n    \"isAPrivateProgram\": true,\n      \"resourceType\" : [ \n          \"program\"\n      ],\n      \"language\" : [ \n          \"English\"\n      ],\n      \"keywords\" : [],\n      \"concepts\" : [],\n      \"imageCompression\" : {\n          \"quality\" : 10\n      },\n      \"components\" : [ \n          \n      ],\n      \"scope\" : {\n          \"entityType\" : \"block\",\n          \"entities\" : [\"66506485e59a5ccb82b9eff6\"],\n          \"roles\" : \"HM\"\n      },\n      \"requestForPIIConsent\" : true\n}\n",
+							"raw": "{\n    \"externalId\": \"PROGID01\",\n    \"name\": \"DCPCR School Development Index 2018-19\",\n    \"description\": \"DCPCR School Development Index 2018-19\",\n    \"isDeleted\": false,\n    \"resourceType\": [\n        \"program\"\n    ],\n    \"language\": [\n        \"English\"\n    ],\n    \"keywords\": [],\n    \"concepts\": [],\n    \"userId\": \"a082787f-8f8f-42f2-a706-35457ca6f1fd\",\n    \"imageCompression\": {\n        \"quality\": 10\n    },\n    \"components\": [\n        \"5b98fa069f664f7e1ae7498c\"\n    ],\n    \"scope\": {\n        \"state\": [\n            \"e3a58f2b3c4d719a6821b590\"\n        ]\n    },\n    \"requestForPIIConsent\": true\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1049,7 +1310,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/programs/create",
+							"raw": "{{baseUrl}}/project/v1/programs/create",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "programs", "create"]
 						}
@@ -1070,11 +1331,26 @@
 								"key": "internal-access-token",
 								"value": "{{internal_access_token}}",
 								"type": "text"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
+								"type": "text"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n      \"externalId\" : \"PROGID01\",\n      \"name\" : \"DCPCR School Development Index 2018-19\",\n      \"description\" : \"DCPCR School Development Index 2018-19\",\n      \"isDeleted\" : false,\n      \"resourceType\" : [ \n          \"program\"\n      ],\n      \"language\" : [ \n          \"English\", \"Kannada\",\"telugu\"\n      ],\n      \"keywords\" : [],\n      \"concepts\" : [],\n      \"userId\":\"a082787f-8f8f-42f2-a706-35457ca6f1fd\",\n      \"imageCompression\" : {\n          \"quality\" : 10\n      },\n      \"components\" : [ \n          \"5b98fa069f664f7e1ae7498c\"\n      ],\n      \"scope\" : {\n          \"entityType\" : \"state\",\n          \"entities\" : [\"bc75cc99-9205-463e-a722-5326857838f8\",\"8ac1efe9-0415-4313-89ef-884e1c8eee34\",\"5f33c3d85f637784791cd830\"],\n          \"roles\" : [\"HM\",\"BEO\"]\n      },\n      \"requestForPIIConsent\" : true\n}\n",
+							"raw": "{\n    \"externalId\": \"PROGID01\",\n    \"name\": \"DCPCR School Development Index 2018-19\",\n    \"description\": \"DCPCR School Development Index 2018-19\",\n    \"isDeleted\": false,\n    \"resourceType\": [\n        \"program\"\n    ],\n    \"language\": [\n        \"English\"\n    ],\n    \"keywords\": [],\n    \"concepts\": [],\n    \"userId\": \"a082787f-8f8f-42f2-a706-35457ca6f1fd\",\n    \"imageCompression\": {\n        \"quality\": 10\n    },\n    \"components\": [\n        \"5b98fa069f664f7e1ae7498c\"\n    ],\n    \"scope\": {\n        \"state\": [\n            \"e3a58f2b3c4d719a6821b590\"\n        ],\n        \"roles\": [\n            \"head_master\",\n            \"distrct_education_officer\"\n        ]\n    },\n    \"requestForPIIConsent\": true\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1082,7 +1358,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/programs/update/667953639a5223446315e011",
+							"raw": "{{baseUrl}}/project/v1/programs/update/667953639a5223446315e011",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "programs", "update", "667953639a5223446315e011"]
 						}
@@ -1092,7 +1368,7 @@
 				{
 					"name": "details",
 					"request": {
-						"method": "GET",
+						"method": "POST",
 						"header": [
 							{
 								"key": "X-auth-token",
@@ -1106,7 +1382,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}project/v1/programs/details/667954289a5223446315e01c",
+							"raw": "{{baseUrl}}/project/v1/programs/details/667954289a5223446315e01c",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "programs", "details", "667954289a5223446315e01c"]
 						}
@@ -1131,7 +1407,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"roles\" : [\"UUU\"]\n}",
+							"raw": "{\n    \"roles\" : [\"head_master\"]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1139,7 +1415,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/programs/addRolesInScope/667954289a5223446315e01c",
+							"raw": "{{baseUrl}}/project/v1/programs/addRolesInScope/667954289a5223446315e01c",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "programs", "addRolesInScope", "667954289a5223446315e01c"]
 						}
@@ -1164,7 +1440,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "    {\n      \"entities\" : [\"6645b7c7d162b402bae6161e\"]\n    }",
+							"raw": "{\n    \"entities\": {\n        \"district\": [\n            \"682303044e2812081f3426fb\"\n        ],\n        \"professional_subroles\": [\n            \"682301604e2812081f342674\",\n            \"682303044e2812081f3426fb\"\n        ],\n        \"professional_role\": [\n            \"681b07b49c57cdcf03c79ae3\",\n            \"681b0800f21c88cef9517e0e\"\n        ],\n        \"school\": [\n            \"67c82d9553812588916410d3\"\n        ],\n        \"language\": [\n            \"681b0800f21c88cef951890e\"\n        ],\n        \"gender\": [\n            \"67c82d955381258891642345\"\n        ]\n    },\n    \"organizations\": [\n        \"blr\"\n    ]\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1172,7 +1448,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/programs/addEntitiesInScope/667954289a5223446315e01c",
+							"raw": "{{baseUrl}}/project/v1/programs/addEntitiesInScope/667954289a5223446315e01c",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "programs", "addEntitiesInScope", "667954289a5223446315e01c"]
 						}
@@ -1197,7 +1473,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"roles\": [\n                \"HM\",\n                \"BEO\"\n            ]\n}",
+							"raw": "{\n    \"roles\": [\n                \"head_master\"\n            ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1205,7 +1481,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/programs/removeRolesInScope/665eb764cbf5d12ba882722f",
+							"raw": "{{baseUrl}}/project/v1/programs/removeRolesInScope/665eb764cbf5d12ba882722f",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "programs", "removeRolesInScope", "665eb764cbf5d12ba882722f"]
 						}
@@ -1229,7 +1505,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}project/v1/programs/list?page=1&limit=5&search=",
+							"raw": "{{baseUrl}}/project/v1/programs/list?page=1&limit=5&search=",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "programs", "list"],
 							"query": [
@@ -1277,7 +1553,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/programs/join/665eb764cbf5d12ba882722f",
+							"raw": "{{baseUrl}}/project/v1/programs/join/665eb764cbf5d12ba882722f",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "programs", "join", "665eb764cbf5d12ba882722f"]
 						}
@@ -1304,10 +1580,10 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"roles\": [\n                \"HM\",\n                \"BEO\"\n            ]\n}"
+							"raw": "{\n        \"entities\": {\n            \"professional_subroles\": [\n                \"682301254e2812081f34266c\",\n                \"682303044e2812081f3426fb\",\n                \"682301604e2812081f342674\"\n            ],\n            \"professional_role\": [\n                \"681b07b49c57cdcf03c79ae3\",\n                \"681b0800f21c88cef9517e0e\"\n            ]\n        },\n        \"organizations\": [\n            \"ALL\"\n        ]\n    }"
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/programs/removeEntitiesInScope/665eb764cbf5d12ba882722f",
+							"raw": "http://{{baseUrl}}/project/v1/programs/removeEntitiesInScope/665eb764cbf5d12ba882722f",
 							"protocol": "http",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "programs", "removeEntitiesInScope", "665eb764cbf5d12ba882722f"]
@@ -1334,11 +1610,26 @@
 								"key": "internal-access-token",
 								"value": "{{internal_access_token}}",
 								"type": "text"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
+								"type": "text"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"create solution\",\n    \"programExternalId\": \"test_2\",\n    \"link\":\"\",\n    \"resourceType\": [],\n    \"language\": [],\n    \"keywords\": [],\n    \"concepts\": [],\n    \"themes\": [],\n    \"flattenedThemes\": [],\n    \"entities\": [\n        \"66506485e59a5ccb82b9eff6\"\n        \n    ],\n    \"registry\": [],\n    \"isRubricDriven\": false,\n    \"enableQuestionReadOut\": false,\n    \"allowMultipleAssessemts\": false,\n    \"isDeleted\": false,\n    \"entityType\": \"school\",\n    \"type\": \"improvementProject\",\n    \"subType\": \"improvementProject\",\n    \"isReusable\": false,\n    \"externalId\": \"01c04166f-a65eh-4e92-a87b-a9e4194e771ll9\",\n    \"minNoOfSubmissionsRequired\": 2,\n    \"scope\": {\n        \"entityType\": \"block\",\n        \"entityTypeId\": \"66506485e59a5ccb82b9eff6\",\n        \"entities\": [\n          \n            \"66506485e59a5ccb82b9eff6\"\n        ],\n        \"roles\": [\"BEO\",\"HM\"]\n    }\n}\n",
+							"raw": "{\n    \"name\": \"create solution\",\n    \"programExternalId\": \"MAHARASTHA-AUTO-TARGETING\",\n    \"resourceType\": [],\n    \"language\": [],\n    \"keywords\": [],\n    \"concepts\": [],\n    \"themes\": [],\n    \"flattenedThemes\": [],\n    \"entities\": [\n        \"5beaa888af0065f0e0a10515\",\n        \"5fd098e2e049735a86b748ac\"\n    ],\n    \"registry\": [],\n    \"isRubricDriven\": false,\n    \"enableQuestionReadOut\": false,\n    \"allowMultipleAssessemts\": false,\n    \"isDeleted\": false,\n    \"entityType\": \"school\",\n    \"type\": \"improvementProject\",\n    \"subType\": \"improvementProject\",\n    \"isReusable\": false,\n    \"externalId\": \"01c04166-a65e-4e92-a87b-a9e4194e771lll\",\n    \"minNoOfSubmissionsRequired\": 2,\n    \"scope\": {\n        \"roles\": [\n            \"head_master\",\n            \"district_education_officer\"\n        ],\n        \"state\": [\n            \"e3a58f2b3c4d719a6821b590\"\n        ]\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1346,7 +1637,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/solutions/create",
+							"raw": "{{baseUrl}}/project/v1/solutions/create",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "solutions", "create"]
 						}
@@ -1367,11 +1658,26 @@
 								"key": "internal-access-token",
 								"value": "{{internal_access_token}}",
 								"type": "text"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
+								"type": "text"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"entityType\":\"66506485e59a5ccb82b9eff6\",\n      \"scope\": {\"entityType\": \"state\", \"entities\": [\"666031b6f10e2087c1846d05\"], \"roles\": [\"HM\",\"kkk\"]}\n      }",
+							"raw": "{\n    \"name\": \"create solution\",\n    \"programExternalId\": \"MAHARASTHA-AUTO-TARGETING\",\n    \"resourceType\": [],\n    \"language\": [],\n    \"keywords\": [],\n    \"concepts\": [],\n    \"themes\": [],\n    \"flattenedThemes\": [],\n    \"entities\": [\n        \"5beaa888af0065f0e0a10515\",\n        \"5fd098e2e049735a86b748ac\"\n    ],\n    \"registry\": [],\n    \"isRubricDriven\": false,\n    \"enableQuestionReadOut\": false,\n    \"allowMultipleAssessemts\": false,\n    \"isDeleted\": false,\n    \"entityType\": \"school\",\n    \"type\": \"improvementProject\",\n    \"subType\": \"improvementProject\",\n    \"isReusable\": false,\n    \"externalId\": \"01c04166-a65e-4e92-a87b-a9e4194e771lll\",\n    \"minNoOfSubmissionsRequired\": 2,\n    \"scope\": {\n        \"roles\": [\n            \"head_master\",\n            \"district_education_officer\"\n        ],\n        \"state\": [\n            \"e3a58f2b3c4d719a6821b590\"\n        ]\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1379,7 +1685,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/solutions/update/667957bbc9d3d7c5740dafb7",
+							"raw": "{{baseUrl}}/project/v1/solutions/update/667957bbc9d3d7c5740dafb7",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "solutions", "update", "667957bbc9d3d7c5740dafb7"]
 						}
@@ -1404,7 +1710,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"roles\" : [\"aaa\"]\n}",
+							"raw": "{\n    \"roles\" : [\"head_master\"]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1412,7 +1718,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/solutions/addRolesInScope/665ec2f8cbf5d12ba8827253",
+							"raw": "{{baseUrl}}/project/v1/solutions/addRolesInScope/665ec2f8cbf5d12ba8827253",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "solutions", "addRolesInScope", "665ec2f8cbf5d12ba8827253"]
 						}
@@ -1437,7 +1743,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \n    \"entityType\" : \"block\",\n    \"entities\" : [\n            \"5fd1b52ab53a6416aaeefc80\",\n            \"5fd098e2e049735a86b748ac\"\n        ],\n    \"role\" : \"BEO,SEO\",\n    \"filter\" : {\n        \"skipSolutions\" : [\"660f9383f65100c296372c79\"]\n    }\n}\n    \n",
+							"raw": "{\n    \"roles\": [\n        \"head_master\",\n        \"district_education_officer\"\n    ],\n    \"state\": [\n        \"e3a58f2b3c4d719a6821b590\"\n    ],\n    \"filter\": {\n        \"skipSolutions\": [\n            \"660f9383f65100c296372c77\"\n        ]\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1445,7 +1751,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/solutions/detailsBasedOnRoleAndLocation",
+							"raw": "{{baseUrl}}/project/v1/solutions/detailsBasedOnRoleAndLocation",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "solutions", "detailsBasedOnRoleAndLocation"]
 						}
@@ -1470,7 +1776,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"roles\" : [\"ak\"]\n}",
+							"raw": "{\n    \"roles\" : [\"head_master\"]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1478,7 +1784,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/solutions/removeRolesInScope/665ec2f8cbf5d12ba8827253",
+							"raw": "{{baseUrl}}/project/v1/solutions/removeRolesInScope/665ec2f8cbf5d12ba8827253",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "solutions", "removeRolesInScope", "665ec2f8cbf5d12ba8827253"]
 						}
@@ -1514,7 +1820,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/solutions/fetchLink/:solutionId",
+							"raw": "{{baseUrl}}/project/v1/solutions/fetchLink/:solutionId",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "solutions", "fetchLink", ":solutionId"],
 							"variable": [
@@ -1545,7 +1851,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n      \"entities\" : [\"5fd1b52ab53a6416aaeefb12\"]\n    }",
+							"raw": "{\n    \"entities\": {\n        \"district\": [\n            \"682303044e2812081f3426fb\"\n        ],\n        \"professional_subroles\": [\n            \"682301604e2812081f342674\",\n            \"682303044e2812081f3426fb\"\n        ],\n        \"professional_role\": [\n            \"681b07b49c57cdcf03c79ae3\",\n            \"681b0800f21c88cef9517e0e\"\n        ],\n        \"school\": [\n            \"67c82d9553812588916410d3\"\n        ],\n        \"language\": [\n            \"681b0800f21c88cef951890e\"\n        ],\n        \"gender\": [\n            \"67c82d955381258891642345\"\n        ]\n    },\n    \"organizations\": [\n        \"blr\"\n    ]\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1553,7 +1859,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/solutions/addEntitiesInScope/665ec2f8cbf5d12ba8827253",
+							"raw": "{{baseUrl}}/project/v1/solutions/addEntitiesInScope/665ec2f8cbf5d12ba8827253",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "solutions", "addEntitiesInScope", "665ec2f8cbf5d12ba8827253"]
 						}
@@ -1578,7 +1884,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"entities\" : [\n            \"5fd098e2e049735a86b748ac\",\n            \"5fd1b52ab53a6416aaeefb12\"\n        ]\n}",
+							"raw": "{\n        \"entities\": {\n            \"professional_subroles\": [\n                \"682301254e2812081f34266c\",\n                \"682303044e2812081f3426fb\",\n                \"682301604e2812081f342674\"\n            ],\n            \"professional_role\": [\n                \"681b07b49c57cdcf03c79ae3\",\n                \"681b0800f21c88cef9517e0e\"\n            ]\n        },\n        \"organizations\": [\n            \"ALL\"\n        ]\n    }",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1586,7 +1892,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/solutions/removeEntitiesInScope/665ec2f8cbf5d12ba8827253",
+							"raw": "{{baseUrl}}/project/v1/solutions/removeEntitiesInScope/665ec2f8cbf5d12ba8827253",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "solutions", "removeEntitiesInScope", "665ec2f8cbf5d12ba8827253"]
 						}
@@ -1611,7 +1917,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"role\" : \"BEO\",\n   \t\"entities\" : [\n            \"5fd1b52ab53a6416aaeefc80\",\n            \"5fd098e2e049735a86b748ac\"\n        ],\n    \"entityType\" : \"block\"\n}\n",
+							"raw": "{\n    \"roles\": \"head_master,district_education_officer\",\n    \"state\": [\n        \"e3a58f2b3c4d719a6821b590\"\n    ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1619,7 +1925,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/solutions/forUserRoleAndLocation?programId=5ff840ce383ae437eb02b96c&type=improvementProject&subType=improvementProject&page=1&limit=100&search=create solutio",
+							"raw": "{{baseUrl}}/project/v1/solutions/forUserRoleAndLocation?programId=5ff840ce383ae437eb02b96c&type=improvementProject&subType=improvementProject&page=1&limit=100&search=create solutio",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "solutions", "forUserRoleAndLocation"],
 							"query": [
@@ -1670,7 +1976,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"entityType\" : \"block\",\n    \"entities\" : [\n        \"5fd1b52ab53a6416aaeefc80\",\n        \"5fd098e2e049735a86b748ac\",\n        \"5fd1b52ab53a6416aaeefc83\",\n        \"5fd1b52ab53a6416aaeefb20\"\n    ],\n    \"role\" :\"HM,BEO\"\n}",
+							"raw": "{\n    \"roles\": \"head_master,district_education_officer\",\n    \"state\": [\n        \"e3a58f2b3c4d719a6821b590\"\n    ],\n    \"factors\": [\n        \"role\",\n        \"entities\"\n    ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1678,7 +1984,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/solutions/targetedSolutions?type=improvementProject&page=1&limit=10&search=&filter=",
+							"raw": "{{baseUrl}}/project/v1/solutions/targetedSolutions?type=improvementProject&page=1&limit=10&search=&filter=",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "solutions", "targetedSolutions"],
 							"query": [
@@ -1725,7 +2031,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n        \"entityType\" : \"block\",\n        \"entities\" : [\n            \"5fd1b52ab53a6416aaeefc80\",\n            \"5fd098e2e049735a86b748ac\"\n        ],\n        \"role\" : \"BEO\"\n    }",
+							"raw": "{\n    \"roles\": \"head_master,district_education_officer\",\n    \"state\": [\n        \"e3a58f2b3c4d719a6821b590\"\n    ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1733,7 +2039,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/solutions/verifyLink",
+							"raw": "{{baseUrl}}/project/v1/solutions/verifyLink",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "solutions", "verifyLink"]
 						}
@@ -1758,7 +2064,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"entityType\" : \"block\",\n    \"entities\" : [\n        \"5fd1b52ab53a6416aaeefc80\",\n        \"5fd098e2e049735a86b748ac\"\n    ],\n    \"role\" : \"BEO\"\n}",
+							"raw": "{\n    \"roles\": \"head_master,district_education_officer\",\n    \"state\": [\n        \"e3a58f2b3c4d719a6821b590\"\n    ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1766,7 +2072,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/solutions/verifySolution/:solutionId",
+							"raw": "{{baseUrl}}/project/v1/solutions/verifySolution/:solutionId",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "solutions", "verifySolution", ":solutionId"],
 							"variable": [
@@ -1797,7 +2103,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"isReusable\" : false\n}",
+							"raw": "{\n    \"isReusable\": false\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1805,7 +2111,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/solutions/list?page=1&limit=100&search=&type=improvementProject&subType",
+							"raw": "{{baseUrl}}/project/v1/solutions/list?page=1&limit=100&search=&type=improvementProject&subType",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "solutions", "list"],
 							"query": [
@@ -1845,13 +2151,23 @@
 								"type": "text"
 							},
 							{
-								"key": "internal-access-token",
-								"value": "{{internal_access_token}}",
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
 								"type": "text"
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}project/v1/solutions/getDetails/66727b63cf0222d7ec1fa7e0",
+							"raw": "{{baseUrl}}/project/v1/solutions/getDetails/66727b63cf0222d7ec1fa7e0",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "solutions", "getDetails", "66727b63cf0222d7ec1fa7e0"]
 						}
@@ -1870,7 +2186,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "// {\n//     \"entityType\" : \"block\",\n//     // \"entityTypeId\" : \"5f32d8228e0dc8312404056e\",\n//     \"entities\" : [\n//         \"5fd1b52ab53a6416aaeefc80\",\n//         \"5fd098e2e049735a86b748ac\",\n//         \"5fd1b52ab53a6416aaeefc83\",\n//         \"5fd1b52ab53a6416aaeefb20\"\n//     ],\n//     \"role\" : \"BEO,HM\"\n// }\n\n{\n    \"role\": \"district_education_officer\",\n    \"state\": \"66bc5afebb293e9d6930ad7a\"\n   \n}",
+							"raw": "{\n    \"roles\": \"head_master,district_education_officer\",\n    \"state\": [\n        \"e3a58f2b3c4d719a6821b590\"\n    ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1878,7 +2194,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/solutions/details/:_id",
+							"raw": "{{baseUrl}}/project/v1/solutions/details/:_id",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "solutions", "details", ":_id"],
 							"variable": [
@@ -1922,7 +2238,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/admin/createIndex/:collectionName",
+							"raw": "{{baseUrl}}/project/v1/admin/createIndex/:collectionName",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "admin", "createIndex", ":collectionName"],
 							"variable": [
@@ -1958,7 +2274,7 @@
 							"raw": "{\n    \"query\": {\n       \"_id\":\"66975a4a4999c205ea017da9\"\n    },\n    \"mongoIdKeys\": [\n        \"_id\"\n    ],\n    \"limit\":2000\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/admin/dbFind/:collectionName",
+							"raw": "http://{{baseUrl}}/project/v1/admin/dbFind/:collectionName",
 							"protocol": "http",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "admin", "dbFind", ":collectionName"],
@@ -1966,6 +2282,52 @@
 								{
 									"key": "collectionName",
 									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteResource",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-auth-token",
+								"value": "{{userToken}}",
+								"type": "text"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}",
+								"type": "text"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://{{baseUrl}}/project/v1/admin/deleteResource/{_id}?type=solution",
+							"protocol": "http",
+							"host": ["{{baseUrl}}"],
+							"path": ["project", "v1", "admin", "deleteResource", "{_id}"],
+							"query": [
+								{
+									"key": "type",
+									"value": "solution"
 								}
 							]
 						}
@@ -1990,7 +2352,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}project/v1/cloud-services/files/download",
+							"raw": "{{baseUrl}}/project/v1/cloud-services/files/download",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "cloud-services", "files", "download"],
 							"query": [
@@ -2030,7 +2392,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/cloud-services/files/preSignedUrls",
+							"raw": "{{baseUrl}}/project/v1/cloud-services/files/preSignedUrls",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "cloud-services", "files", "preSignedUrls"]
 						}
@@ -2061,7 +2423,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/cloud-services/files/getDownloadableUrl",
+							"raw": "{{baseUrl}}/project/v1/cloud-services/files/getDownloadableUrl",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "cloud-services", "files", "getDownloadableUrl"]
 						}
@@ -2088,7 +2450,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}project/v1/forms/read/:_id",
+							"raw": "{{baseUrl}}/project/v1/forms/read/:_id",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "forms", "read", ":_id"],
 							"variable": [
@@ -2113,6 +2475,21 @@
 							{
 								"key": "internal-access-token",
 								"value": "{{internal_access_token}}"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -2125,7 +2502,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/forms/create",
+							"raw": "{{baseUrl}}/project/v1/forms/create",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "forms", "create"]
 						}
@@ -2144,6 +2521,21 @@
 							{
 								"key": "internal-access-token",
 								"value": "{{internal_access_token}}"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -2156,7 +2548,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/forms/update/",
+							"raw": "{{baseUrl}}/project/v1/forms/update/",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "forms", "update", ""]
 						}
@@ -2180,6 +2572,21 @@
 							{
 								"key": "internal-access-token",
 								"value": "{{internal_access_token}}"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -2203,8 +2610,8 @@
 							]
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/certificateBaseTemplates/createOrUpdate",
-							"host": ["{{baseUrl}}project"],
+							"raw": "{{baseUrl}}/project/v1/certificateBaseTemplates/createOrUpdate",
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "certificateBaseTemplates", "createOrUpdate"]
 						}
 					},
@@ -2222,6 +2629,21 @@
 							{
 								"key": "internal-access-token",
 								"value": "{{internal_access_token}}"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -2245,8 +2667,8 @@
 							]
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/certificateBaseTemplates/createOrUpdate/6646e0a7b5226e19a19edf37",
-							"host": ["{{baseUrl}}project"],
+							"raw": "{{baseUrl}}/project/v1/certificateBaseTemplates/createOrUpdate/6646e0a7b5226e19a19edf37",
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "certificateBaseTemplates", "createOrUpdate", "6646e0a7b5226e19a19edf37"]
 						}
 					},
@@ -2258,7 +2680,7 @@
 			"name": "certificateTemplates",
 			"item": [
 				{
-					"name": "createOrUpdate",
+					"name": "create",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -2269,6 +2691,21 @@
 							{
 								"key": "internal-access-token",
 								"value": "{{devInternalAccessToken}}"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -2281,15 +2718,15 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/certificateTemplates/createOrUpdate",
-							"host": ["{{baseUrl}}project"],
+							"raw": "{{baseUrl}}/project/v1/certificateTemplates/createOrUpdate",
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "certificateTemplates", "createOrUpdate"]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "createOrUpdate",
+					"name": "update",
 					"request": {
 						"method": "PATCH",
 						"header": [
@@ -2300,6 +2737,21 @@
 							{
 								"key": "internal-access-token",
 								"value": "{{devInternalAccessToken}}"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -2312,8 +2764,8 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/certificateTemplates/createOrUpdate",
-							"host": ["{{baseUrl}}project"],
+							"raw": "{{baseUrl}}/project/v1/certificateTemplates/createOrUpdate",
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "certificateTemplates", "createOrUpdate"]
 						}
 					},
@@ -2331,6 +2783,21 @@
 							{
 								"key": "internal-access-token",
 								"value": "{{internal_access_token}}"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -2344,8 +2811,8 @@
 							]
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/certificateTemplates/uploadTemplate/:_id?updateTemplate=true",
-							"host": ["{{baseUrl}}project"],
+							"raw": "{{baseUrl}}/project/v1/certificateTemplates/uploadTemplate/:_id?updateTemplate=true",
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "certificateTemplates", "uploadTemplate", ":_id"],
 							"query": [
 								{
@@ -2371,6 +2838,26 @@
 							{
 								"key": "X-auth-token",
 								"value": "{{userToken}}"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal-access-token}}",
+								"type": "text"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -2426,8 +2913,8 @@
 							]
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/certificateTemplates/createSvg?baseTemplateId=66bb5c3e196c83581cc26aa8",
-							"host": ["{{baseUrl}}project"],
+							"raw": "{{baseUrl}}/project/v1/certificateTemplates/createSvg?baseTemplateId=66bb5c3e196c83581cc26aa8",
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "certificateTemplates", "createSvg"],
 							"query": [
 								{
@@ -2456,8 +2943,8 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}project/v1/configurations/read",
-							"host": ["{{baseUrl}}project"],
+							"raw": "{{baseUrl}}/project/v1/configurations/read",
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "configurations", "read"]
 						}
 					},
@@ -2479,7 +2966,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}project/v1/profile/read",
+							"raw": "{{baseUrl}}/project/v1/profile/read",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "profile", "read"]
 						}
@@ -2512,8 +2999,8 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/users/programs?isAPrivateProgram=false&page=1&limit=&search=",
-							"host": ["{{baseUrl}}project"],
+							"raw": "{{baseUrl}}/project/v1/users/programs?isAPrivateProgram=true&page=1&limit=100&search=&language=&getProjectsCount=true",
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "users", "programs"],
 							"query": [
 								{
@@ -2566,8 +3053,8 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/users/solutions/66bb85bebf682a1f367c55b9",
-							"host": ["{{baseUrl}}project"],
+							"raw": "{{baseUrl}}/project/v1/users/solutions/66bb85bebf682a1f367c55b9",
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "users", "solutions", "66bb85bebf682a1f367c55b9"]
 						}
 					},
@@ -2590,8 +3077,8 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}project/v1/wishlist/add/66399e6304785762f7e8e4cb",
-							"host": ["{{baseUrl}}project"],
+							"raw": "{{baseUrl}}/project/v1/wishlist/add/66399e6304785762f7e8e4cb",
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "wishlist", "add", "66399e6304785762f7e8e4cb"]
 						}
 					},
@@ -2609,8 +3096,8 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}project/v1/wishlist/list?page=1&language=ka&limit=10",
-							"host": ["{{baseUrl}}project"],
+							"raw": "{{baseUrl}}/project/v1/wishlist/list?page=1&language=ka&limit=10",
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "wishlist", "list"],
 							"query": [
 								{
@@ -2642,8 +3129,8 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}project/v1/wishlist/remove/66399e6304785762f7e8e4cb",
-							"host": ["{{baseUrl}}project"],
+							"raw": "{{baseUrl}}/project/v1/wishlist/remove/66399e6304785762f7e8e4cb",
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "wishlist", "remove", "66399e6304785762f7e8e4cb"]
 						}
 					},
@@ -2663,11 +3150,31 @@
 								"key": "X-auth-token",
 								"value": "{{devToken}}",
 								"type": "text"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal-access-token}}",
+								"type": "text"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
+								"type": "text"
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}project/v1/projectAttributes/create",
-							"host": ["{{baseUrl}}project"],
+							"raw": "{{baseUrl}}/project/v1/projectAttributes/create",
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "projectAttributes", "create"]
 						}
 					},
@@ -2687,6 +3194,21 @@
 								"key": "internal-access-token",
 								"value": "{{internal_access_token}}",
 								"type": "text"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
+								"type": "text"
 							}
 						],
 						"body": {
@@ -2699,8 +3221,8 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}project/v1/projectAttributes/update?code=duration&language=hi",
-							"host": ["{{baseUrl}}project"],
+							"raw": "{{baseUrl}}/project/v1/projectAttributes/update?code=duration&language=hi",
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "projectAttributes", "update"],
 							"query": [
 								{
@@ -2733,8 +3255,8 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}project/v1/projectAttributes/find?language=en",
-							"host": ["{{baseUrl}}project"],
+							"raw": "{{baseUrl}}/project/v1/projectAttributes/find?language=en",
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "projectAttributes", "find"],
 							"query": [
 								{
@@ -2768,8 +3290,8 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}project/v1/template/list?language=ka&hasSpotlight=false&duration=1week&roles=DistrictsEducationOfficer",
-							"host": ["{{baseUrl}}project"],
+							"raw": "{{baseUrl}}/project/v1/template/list?language=ka&hasSpotlight=false&duration=1week&roles=DistrictsEducationOfficer",
+							"host": ["{{baseUrl}}"],
 							"path": ["v1", "template", "list"],
 							"query": [
 								{
@@ -2799,7 +3321,7 @@
 			"name": "userExtension",
 			"item": [
 				{
-					"name": "Bulkupload",
+					"name": "bulkUpload",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -2842,7 +3364,158 @@
 								}
 							]
 						},
-						"url": "{{baseUrl}}/v1/userExtension/bulkUpload"
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/userExtension/bulkUpload",
+							"host": ["{{baseUrl}}"],
+							"path": ["v1", "userExtension", "bulkUpload"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "internal-access-token",
+								"value": "",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"data\": [\n        {\n            \"userId\": 1,\n            \"programId\": \"686e16212cb81c0014a49111\",\n            \"operation\": \"append\",\n            \"roles\": [\n                \"program_manager\"\n            ]\n        },\n        {\n            \"userId\": 456,\n            \"programId\": \"6825a30dc407a50014b6a73f\",\n            \"operation\": \"append\",\n            \"roles\": [\n                \"program_manager\",\n                \"mentee\",\n                \"org_admin\"\n            ]\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/userExtension/update?tenantId&orgId&userId",
+							"host": ["{{baseUrl}}"],
+							"path": ["v1", "userExtension", "update"],
+							"query": [
+								{
+									"key": "tenantId",
+									"value": null
+								},
+								{
+									"key": "orgId",
+									"value": null
+								},
+								{
+									"key": "userId",
+									"value": null
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "healthCheck",
+			"item": [
+				{
+					"name": "healthCheck",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/project/health",
+							"host": ["{{baseUrl}}"],
+							"path": ["health"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "organizationExtension",
+			"item": [
+				{
+					"name": "update",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "x-auth-token",
+								"value": "{{token}}",
+								"type": "text"
+							},
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}",
+								"type": "text"
+							},
+							{
+								"key": "admin-auth-token",
+								"value": "{{adminAuthToken}}",
+								"type": "text"
+							},
+							{
+								"key": "tenantId",
+								"value": "{{tenantId}}",
+								"type": "text"
+							},
+							{
+								"key": "orgId",
+								"value": "{{orgId}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"projectResourceVisibilityPolicy\": \"ASSOCIATED\",\n    \"externalProjectResourceVisibilityPolicy\" : \"ASSOCIATED\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/organizationExtension/createOrUpdate/:_id",
+							"host": ["{{baseUrl}}"],
+							"path": ["project", "v1", "organizationExtension", "createOrUpdate", ":_id"],
+							"variable": [
+								{
+									"key": "_id",
+									"value": "68bad65b2ffef8d283ae1efa"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateRelatedOrgs",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "internal-access-token",
+								"value": "{{internal_access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"entity\": \"organization\",\n    \"eventType\": \"update\",\n    \"entityId\": \"46\",\n    \"changes\": {\n        \"name\": {\n            \"oldValue\": \"Old Org Name\",\n            \"newValue\": \"New Org Name\"\n        },\n        \"description\": {\n            \"oldValue\": \"Old Desc\",\n            \"newValue\": \"Updated Desc\"\n        },\n        \"related_org_details\": {\n            \"oldValue\": [\n                {\n                    \"id\": 5,\n                    \"code\": \"bel\"\n                }\n            ],\n            \"newValue\": [\n                {\n                    \"id\": 5,\n                    \"code\": \"bel\"\n                },\n                {\n                    \"id\": 77,\n                    \"code\": \"blr\"\n                }\n            ]\n        }\n    },\n    \"id\": \"46\",\n    \"tenant_code\": \"shikshalokam\",\n    \"code\": \"mys\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/project/v1/organizationExtension/updateRelatedOrgs",
+							"host": ["{{baseUrl}}"],
+							"path": ["project", "v1", "organizationExtension", "updateRelatedOrgs"]
+						}
 					},
 					"response": []
 				}

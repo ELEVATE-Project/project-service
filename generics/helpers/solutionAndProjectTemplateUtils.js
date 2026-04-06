@@ -15,6 +15,7 @@ const solutionsQueries = require(DB_QUERY_BASE_PATH + '/solutions')
 const programQueries = require(DB_QUERY_BASE_PATH + '/programs')
 const userService = require(GENERICS_FILES_PATH + '/services/users')
 const timeZoneDifference = process.env.TIMEZONE_DIFFRENECE_BETWEEN_LOCAL_TIME_AND_UTC
+const surveyService = require(GENERICS_FILES_PATH + '/services/survey')
 
 /**
  * Create solution.
@@ -25,13 +26,24 @@ const timeZoneDifference = process.env.TIMEZONE_DIFFRENECE_BETWEEN_LOCAL_TIME_AN
  * @param {Object} userDetails - user related info
  * @param {String} tenantId - tenant id
  * @param {String} orgId - org id
+ * @param {Boolean} isExternalProgram - isExternalProgram info
+ * @param {Boolean} isProgramUpdateRequired - condition to update program
  * @returns {JSON} solution creation data.
  */
 
-function createSolution(solutionData, checkDate = false, userDetails) {
+function createSolution(
+	solutionData,
+	checkDate = false,
+	userDetails,
+	isExternalProgram = false,
+	isProgramUpdateRequired = true
+) {
 	return new Promise(async (resolve, reject) => {
 		try {
-			solutionData.type = solutionData.subType = CONSTANTS.common.IMPROVEMENT_PROJECT
+			solutionData.type = solutionData.subType =
+				solutionData?.type === CONSTANTS.common.COURSE
+					? CONSTANTS.common.COURSE
+					: CONSTANTS.common.IMPROVEMENT_PROJECT
 			solutionData.resourceType = [CONSTANTS.common.RESOURCE_TYPE]
 			solutionData.language = [CONSTANTS.common.ENGLISH_LANGUAGE]
 			solutionData.keywords = [CONSTANTS.common.KEYWORDS]
@@ -43,25 +55,47 @@ function createSolution(solutionData, checkDate = false, userDetails) {
 			let programMatchQuery = {}
 			programMatchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
 
-			programMatchQuery['externalId'] = solutionData.programExternalId
-			let programData = await programQueries.programsDocument(programMatchQuery, [
-				'name',
-				'description',
-				'scope',
-				'endDate',
-				'startDate',
-			])
+			if (UTILS.strictObjectIdCheck(solutionData.programExternalId)) {
+				programMatchQuery['_id'] = solutionData.programExternalId
+			} else {
+				programMatchQuery['externalId'] = solutionData.programExternalId
+			}
+
+			let programData
+			if (UTILS.convertStringToBoolean(isExternalProgram)) {
+				programData = await surveyService.programsDocument(programMatchQuery, [
+					'name',
+					'description',
+					'scope',
+					'endDate',
+					'startDate',
+					'components',
+					'externalId',
+				])
+			} else {
+				programData = await programQueries.programsDocument(programMatchQuery, [
+					'name',
+					'description',
+					'scope',
+					'endDate',
+					'startDate',
+					'components',
+					'externalId',
+				])
+			}
 			if (!programData.length > 0) {
 				throw {
 					message: CONSTANTS.apiResponses.PROGRAM_NOT_FOUND,
 				}
 			}
 
+			let programsComponent = programData[0].components || []
 			solutionData.programId = programData[0]._id
 			solutionData.programName = programData[0].name
 			solutionData.programDescription = programData[0].description
+			solutionData.programExternalId = programData[0].externalId
 
-			if (solutionData.type == CONSTANTS.common.COURSE && !solutionData.link) {
+			if (solutionData.type == CONSTANTS.common.COURSE && !solutionData.linkUrl) {
 				return resolve({
 					status: HTTP_STATUS_CODE.bad_request.status,
 					message: CONSTANTS.apiResponses.COURSE_LINK_REQUIRED,
@@ -108,13 +142,20 @@ function createSolution(solutionData, checkDate = false, userDetails) {
 			}
 
 			delete programMatchQuery.externalId
-			programMatchQuery['_id'] = solutionData.programId
-
-			let updateProgram = await programQueries.findAndUpdate(programMatchQuery, {
-				$addToSet: { components: solutionCreation._id },
-			})
-
-			if (!solutionData.excludeScope && programData[0].scope) {
+			if (UTILS.strictObjectIdCheck(solutionData.programExternalId)) {
+				programMatchQuery['_id'] = solutionData.programExternalId
+			} else {
+				programMatchQuery['externalId'] = solutionData.programExternalId
+			}
+			if (isProgramUpdateRequired) {
+				let updateProgram = await programQueries.findAndUpdate(programMatchQuery, {
+					$addToSet: {
+						components: { _id: solutionCreation._id, order: programsComponent.length + 1 },
+					},
+				})
+			}
+			//If scope data is provided, update it separately
+			if (!solutionData?.excludeScope && programData[0].scope) {
 				await setScope(solutionCreation._id, solutionData.scope ? solutionData.scope : {}, userDetails)
 			}
 
@@ -165,7 +206,7 @@ function update(solutionId, solutionData, userDetails, checkDate = false) {
 			if (
 				checkDate &&
 				(solutionData.hasOwnProperty(CONSTANTS.common.END_DATE) ||
-					solutionData.hasOwnProperty(CONSTANTS.common.END_DATE))
+					solutionData.hasOwnProperty(CONSTANTS.common.START_DATE))
 			) {
 				let programData = await programQueries.programsDocument(
 					{
@@ -303,7 +344,8 @@ function setScope(solutionId, scopeData, userDetails) {
 					}
 				}
 				validOrgs = validOrgs.data
-
+				validOrgs = validOrgs.map((org) => org.toLowerCase())
+				scopeData.organizations = scopeData.organizations.map((id) => id.toLowerCase())
 				// filter valid orgs
 				scopeData.organizations = scopeData.organizations.filter(
 					(id) => validOrgs.includes(id) || id.toLowerCase() == CONSTANTS.common.ALL
@@ -389,8 +431,54 @@ function setScope(solutionId, scopeData, userDetails) {
 	})
 }
 
+/**
+ * Fetch related org details from user-service
+ * @method
+ * @name organizationDetails
+ * @param {Object} userDetails - loggedin user info
+ * @returns {Array} - Array of related org details
+ */
+function organizationDetails(userDetails) {
+	return new Promise(async (resolve, reject) => {
+		try {
+			// fetching related_org_details from user-service
+			let orgRead = await userService.getOrgDetails(
+				userDetails.tenantAndOrgInfo.orgId[0],
+				userDetails.tenantAndOrgInfo.tenantId
+			)
+			if (!orgRead || !orgRead.success || !orgRead.data || Object.keys(orgRead.data).length == 0) {
+				throw {
+					success: false,
+					status: HTTP_STATUS_CODE.bad_request.status,
+					message: CONSTANTS.apiResponses.ORG_DETAILS_FETCH_UNSUCCESSFUL,
+				}
+			}
+			orgRead = orgRead.data
+			let relatedOrgCodes
+
+			// aggregate organization codes
+			if (orgRead.related_org_details && Array.isArray(orgRead.related_org_details)) {
+				relatedOrgCodes = orgRead.related_org_details.map((org) => {
+					return org.code
+				})
+			}
+			relatedOrgCodes = relatedOrgCodes && Array.isArray(relatedOrgCodes) ? relatedOrgCodes : []
+			return resolve({
+				success: true,
+				result: relatedOrgCodes,
+			})
+		} catch (error) {
+			return reject({
+				message: error.message,
+				success: false,
+			})
+		}
+	})
+}
+
 module.exports = {
 	createSolution: createSolution,
 	update: update,
 	setScope: setScope,
+	organizationDetails,
 }

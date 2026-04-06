@@ -133,4 +133,62 @@ module.exports = class Programs {
 			}
 		})
 	}
+
+	/**
+	 * Delete programs documents based on the provided MongoDB filter.
+	 *
+	 * @param {Object} filter - MongoDB query filter to match documents for deletion.
+	 * @returns {Promise<Object>} - MongoDB deleteMany result containing deleted count.
+	 */
+	static delete(filter) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let deleteDocuments = await database.models.programs.deleteMany(filter)
+
+				return resolve(deleteDocuments)
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.bad_request.status,
+					message: error.message || HTTP_STATUS_CODE.bad_request.message,
+					errorObject: error,
+				})
+			}
+		})
+	}
+
+	/**
+	 * Removes a specific solution ID from the `components` array in all program documents where it's found.
+	 * This is typically used when a solution is being deleted and should no longer be referenced in programs.
+	 *
+	 * @param {ObjectId} solutionId - The ID of the solution to be removed from program components.
+	 * @returns {Promise<Object>} - MongoDB update result containing number of modified documents.
+	 */
+	static pullSolutionsFromComponents(solutionId, tenantId) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				// Build the update operation: $pull removes matching solutionId from the components array
+				const updateQuery = {
+					$pull: {
+						components: { _id: solutionId },
+					},
+				}
+
+				// Filter: Find programs that contain components._id = solutionId
+				const filterQuery = {
+					'components._id': solutionId,
+					tenantId: tenantId,
+				}
+
+				// Run updateMany to apply this change to all program docs
+				const result = await database.models.programs.updateMany(filterQuery, updateQuery)
+				return resolve(result)
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.bad_request.status,
+					message: error.message || HTTP_STATUS_CODE.bad_request.message,
+					errorObject: error,
+				})
+			}
+		})
+	}
 }

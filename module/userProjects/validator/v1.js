@@ -106,6 +106,32 @@ module.exports = (req) => {
 			req.checkParams('_id').exists().withMessage('required project id'),
 				req.checkQuery('taskId').exists().withMessage('required task id')
 		},
+		addEntity: function () {
+			// Validate path param: id
+			req.checkParams('_id')
+				.exists()
+				.withMessage('projectId is required in path params')
+				.isMongoId()
+				.withMessage('projectId must be a valid MongoDB ObjectId')
+
+			// Validate body param: entityId
+			req.checkBody('entityId')
+				.exists()
+				.withMessage('entityId is required in request body')
+				.isMongoId()
+				.withMessage('entityId must be a valid MongoDB ObjectId')
+		},
+		searchEntities: function () {
+			let existId = 'solutionId,projectId'
+			if (req.query.solutionId) {
+				existId = 'solutionId'
+			}
+
+			if (req.query.projectId) {
+				existId = 'projectId'
+			}
+			req.checkQuery(existId).exists().withMessage('required solution or projectId Id')
+		},
 	}
 
 	if (projectsValidator[req.params.method]) {

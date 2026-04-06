@@ -1,93 +1,133 @@
 #!/bin/bash
 
-# Exit on error
+# Exit immediately if a command exits with a non-zero status.
 set -e
 
-# Ensure correct number of arguments are provided
+# --- 1. ARGUMENT VALIDATION ---
 if [ $# -lt 2 ]; then
-    echo "Error: Folder name and database URL not provided. Usage: $0 <folder_name> <database_url>"
+    echo "Error: Folder name and database URL not provided." >&2
+    echo "Usage: $0 <folder_name> <database_url>" >&2
     exit 1
 fi
 
-# Use the provided folder name
 FOLDER_NAME="$1"
+DEV_DATABASE_URL="$2"
 
 # Check if folder exists
 if [ ! -d "$FOLDER_NAME" ]; then
-    echo "Error: Folder '$FOLDER_NAME' not found."
+    echo "Error: Folder '$FOLDER_NAME' not found." >&2
     exit 1
 fi
 
-# Use the provided database URL
-DEV_DATABASE_URL="$2"
+# --- 2. HIGHLY RELIABLE DATABASE URL PARSING ---
+echo "Parsing database URL..."
 
-# Extract database credentials and connection details using awk for portability
-DB_USER=$(echo $DEV_DATABASE_URL | awk -F '[:@/]' '{print $4}')
-DB_PASSWORD=$(echo $DEV_DATABASE_URL | awk -F '[:@/]' '{print $5}')
-DB_HOST=$(echo $DEV_DATABASE_URL | awk -F '[:@/]' '{print $6}')
-DB_PORT=$(echo $DEV_DATABASE_URL | awk -F '[:@/]' '{split($7,a,"/"); print a[1]}')
-DB_NAME=$(echo $DEV_DATABASE_URL | awk -F '/' '{print $NF}')
+# Remove protocol (postgres://)
+DB_CLEAN_URL=$(echo "$DEV_DATABASE_URL" | sed 's/.*:\/\///')
 
-# Log database variables
+# Extract DB_NAME
+DB_NAME=$(echo "$DB_CLEAN_URL" | awk -F '/' '{print $NF}')
+
+# Remove DB_NAME from path
+HOST_PORT_PATH=$(echo "$DB_CLEAN_URL" | sed "s/\/$DB_NAME//")
+
+# Extract components
+DB_USER=$(echo "$HOST_PORT_PATH" | awk -F '[:@]' '{print $1}')
+DB_PASSWORD=$(echo "$HOST_PORT_PATH" | awk -F '[:@]' '{print $2}')
+DB_HOST=$(echo "$HOST_PORT_PATH" | awk -F '[:@]' '{print $3}')
+DB_PORT=$(echo "$HOST_PORT_PATH" | awk -F '[:@]' '{print $4}')
+
+# Log extracted values (excluding password)
 echo "Extracted Database Variables:"
 echo "DB_USER: $DB_USER"
-echo "DB_PASSWORD: $DB_PASSWORD"
 echo "DB_HOST: $DB_HOST"
 echo "DB_PORT: $DB_PORT"
 echo "DB_NAME: $DB_NAME"
+echo ""
 
-# Wait for PostgreSQL to be ready to accept connections
-echo "Waiting for PostgreSQL on '$DB_HOST:$DB_PORT' to accept connections..."
-until pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER"; do
-    echo "Waiting for database to be ready..."
-    sleep 1
-done
-echo "Database is ready."
-
-# Function to check if the database exists
-check_database() {
-    PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -U "$DB_USER" -p "$DB_PORT" -lqt | cut -d \| -f 1 | grep -qw "$DB_NAME"
-}
-
-echo "Checking existence of database '$DB_NAME'..."
-until check_database; do
-    echo "Database '$DB_NAME' does not exist, waiting..."
-    sleep 5
-done
-echo "Database '$DB_NAME' exists, proceeding with script."
-
-# Retrieve and prepare SQL file operations
-DISTRIBUTION_COLUMNS_FILE="$FOLDER_NAME/distributionColumns.sql"
-if [ ! -f "$DISTRIBUTION_COLUMNS_FILE" ]; then
-    echo "Error: distributionColumns.sql not found in folder '$FOLDER_NAME'."
+if [[ -z "$DB_PORT" ]]; then
+    echo "Error: Could not extract database port. Check URL format." >&2
     exit 1
 fi
 
-echo "Creating Citus extension in the database..."
-PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -p "$DB_PORT" -c 'CREATE EXTENSION IF NOT EXISTS citus;'
+# --- 3. WAIT FOR LOCAL POSTGRESQL ---
 
-# Function to check if table exists
+echo "Waiting for PostgreSQL on $DB_HOST:$DB_PORT to accept connections..."
+until pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" > /dev/null 2>&1; do
+    echo -n "."
+    sleep 1
+done
+echo -e "\nPostgreSQL is ready."
+
+# Wait until database exists
+echo "Checking existence of database '$DB_NAME'..."
+until PGPASSWORD="$DB_PASSWORD" psql \
+    -h "$DB_HOST" \
+    -U "$DB_USER" \
+    -p "$DB_PORT" \
+    -d postgres \
+    -lqt | awk '{print $1}' | grep -qw "$DB_NAME"; do
+    echo -n "."
+    sleep 5
+done
+echo -e "\nDatabase '$DB_NAME' exists."
+
+# --- 4. CITUS EXTENSION SETUP ---
+
+DISTRIBUTION_COLUMNS_FILE="$FOLDER_NAME/distributionColumns.sql"
+if [ ! -f "$DISTRIBUTION_COLUMNS_FILE" ]; then
+    echo "Error: distributionColumns.sql not found in folder '$FOLDER_NAME'." >&2
+    exit 1
+fi
+
+echo "Creating Citus extension (if not exists)..."
+PGPASSWORD="$DB_PASSWORD" psql \
+    -h "$DB_HOST" \
+    -U "$DB_USER" \
+    -d "$DB_NAME" \
+    -p "$DB_PORT" \
+    --set ON_ERROR_STOP=1 \
+    -c "CREATE EXTENSION IF NOT EXISTS citus;"
+
+# --- 5. EXECUTE SQL FILE WITH ROBUST TABLE CHECK ---
+
 check_table() {
-    local table=$1
-    local exists=$(PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -p "$DB_PORT" -t -c "SELECT EXISTS(SELECT 1 FROM pg_tables WHERE schemaname = 'public' AND tablename = '$table');")
-    exists=$(echo "$exists" | tr -d '[:space:]')             # Trim whitespace
-    echo "Debug: exists result for table $table = '$exists'" # Debug line
-    [[ "$exists" == "t" ]]                                   # Checking specifically for 't'
+    local table_name=$1
+    PGPASSWORD="$DB_PASSWORD" psql \
+        -h "$DB_HOST" \
+        -U "$DB_USER" \
+        -d "$DB_NAME" \
+        -p "$DB_PORT" \
+        -q -t \
+        --set ON_ERROR_STOP=1 \
+        -c "SELECT 1 FROM $table_name LIMIT 1;" \
+        > /dev/null 2>&1
 }
 
-# Execute the SQL file with checks for table existence
-echo "Creating distribution columns..."
+echo "Starting creation of distributed tables..."
+
 while IFS= read -r line; do
-    if [[ $line =~ create_distributed_table\(\'([^\']+)\', ]]; then
+    trimmed_line=$(echo "$line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+
+    if [[ "$trimmed_line" =~ ^create_distributed_table\(\'([^\']+)\', ]]; then
         table="${BASH_REMATCH[1]}"
-        echo "Checking existence of table '$table'..."
+        echo "Processing table: '$table'"
+
+        # Wait until table exists
         until check_table "$table"; do
-            echo "Table '$table' does not exist, waiting..."
+            echo "Table '$table' does not exist yet (waiting for migration)..."
             sleep 1
         done
-        echo "Table '$table' exists, executing: $line"
-        PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -p "$DB_PORT" -c "$line"
-    fi
-done <"$DISTRIBUTION_COLUMNS_FILE"
 
-echo "Citus extension setup complete."
+        echo "Table '$table' exists. Applying Citus distribution..."
+        PGPASSWORD="$DB_PASSWORD" psql \
+            -h "$DB_HOST" \
+            -U "$DB_USER" \
+            -d "$DB_NAME" \
+            -p "$DB_PORT" \
+            --set ON_ERROR_STOP=1 \
+            -c "$trimmed_line"
+    fi
+done < "$DISTRIBUTION_COLUMNS_FILE"
+
+echo "✅ Local PostgreSQL Citus setup and table distribution completed successfully!"

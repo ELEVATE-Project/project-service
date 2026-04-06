@@ -81,4 +81,82 @@ module.exports = class UserExtension extends Abstract {
 			}
 		})
 	}
+
+	/**
+	 * update user extensions.
+	 * @method
+	 * @name update
+	 * @param {Object} req - request data.
+	 * @returns {Object} user extension data.
+	 */
+
+	/**
+	* @api {post} /project/v1/userExtension/update?tenantId=shikshalokam&orgId=mys&userId=1
+	* @apiVersion 1.0.0
+	* @apiName update
+	* @apiGroup User Extension
+	* @apiParamExample {json} Request-Body:
+	* {
+		"data": [
+			{
+				"userId": 1,
+				"programId": "686e16212cb81c0014a49111",
+				"operation": "append",
+				"roles": [
+					"program_manager"
+				]
+			},
+			{
+				"userId": 456,
+				"programId": "6825a30dc407a50014b6a73f",
+				"operation": "append",
+				"roles": [
+					"program_manager",
+					"mentee",
+					"org_admin"
+				]
+			}
+		]
+	  }
+	* @apiHeader {String} internal-access-token internal access token  
+	* @apiHeader {String} X-auth-token Authenticity token
+	* @apiHeader {String} admin-auth-token admin authentication token
+	* @apiHeader {String} tenantId tenant Id
+	* @apiHeader {String} orgId organization id
+	* @apiSampleRequest /project/v1/userExtension/update
+	* @apiUse successBody
+	* @apiParamExample {json} Response:
+	* {
+		"message": "User extension updated successfully",
+		"status": 200,
+		"result": [
+			{
+			"success": true,
+			"message": "User extension updated successfully",
+			"userId": 456,
+			"_id": "68d624bcb29ba75de094634e",
+			"programId": "6825a30dc407a50014b6a73f",
+			"roles": [
+				"org_admin",
+				"mentee"
+			]
+			}
+		]
+	  }
+	*/
+
+	update(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				const updateUserExtension = await userExtensionHelper.update(req.body.data, req.query)
+				return resolve(updateUserExtension)
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
+				})
+			}
+		})
+	}
 }

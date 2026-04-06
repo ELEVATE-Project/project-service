@@ -24,7 +24,9 @@ const userService = require(GENERICS_FILES_PATH + '/services/users')
 const programSolutionUtility = require(GENERICS_FILES_PATH + '/helpers/programSolutionUtilities')
 const timeZoneDifference = process.env.TIMEZONE_DIFFRENECE_BETWEEN_LOCAL_TIME_AND_UTC
 const solutionsUtils = require(GENERICS_FILES_PATH + '/helpers/solutionAndProjectTemplateUtils')
+const surveyService = require(GENERICS_FILES_PATH + '/services/survey')
 
+const moment = require('moment-timezone')
 /**
  * SolutionsHelper
  * @class
@@ -180,13 +182,27 @@ module.exports = class SolutionsHelper {
 	 * @param {Object} userDetails - user related info
 	 * @param {String} tenantId - tenant id
 	 * @param {String} orgId - org id
+	 * @param {Boolean} isExternalProgram - isExternalProgram info
+	 * @param {Boolean} isProgramUpdateRequired - condition to update program
 	 * @returns {JSON} solution creation data.
 	 */
 
-	static createSolution(solutionData, checkDate = false, userDetails) {
+	static createSolution(
+		solutionData,
+		checkDate = false,
+		userDetails,
+		isExternalProgram,
+		isProgramUpdateRequired = true
+	) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let newSolution = await solutionsUtils.createSolution(solutionData, checkDate, userDetails)
+				let newSolution = await solutionsUtils.createSolution(
+					solutionData,
+					checkDate,
+					userDetails,
+					isExternalProgram,
+					isProgramUpdateRequired
+				)
 				if (newSolution?.data && !newSolution?.data?._id) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
@@ -217,13 +233,14 @@ module.exports = class SolutionsHelper {
 
 				if (!updateSolution.success) {
 					throw {
+						success: false,
 						status: HTTP_STATUS_CODE.bad_request.status,
-						message: CONSTANTS.apiResponses.SOLUTION_NOT_UPDATED,
+						message: updateSolution.message || CONSTANTS.apiResponses.SOLUTION_NOT_UPDATED,
 					}
 				}
 				return resolve(updateSolution)
 			} catch (error) {
-				return resolve({
+				return reject({
 					success: false,
 					message: error.message,
 					data: {},
@@ -479,6 +496,8 @@ module.exports = class SolutionsHelper {
 						'entityType',
 						'certificateTemplateId',
 						'metaInformation',
+						'linkUrl',
+						'linkTitle',
 					],
 					userDetails,
 					currentOrgOnly
@@ -894,7 +913,13 @@ module.exports = class SolutionsHelper {
 	 * @returns {Array} - Created user program and solution.
 	 */
 
-	static createProgramAndSolution(userId, data, createADuplicateSolution = '', userDetails) {
+	static createProgramAndSolution(
+		userId,
+		data,
+		createADuplicateSolution = '',
+		userDetails,
+		isExternalProgram = false
+	) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let userPrivateProgram = {}
@@ -915,8 +940,12 @@ module.exports = class SolutionsHelper {
 						filterQuery.createdBy = userId
 					}
 
-					let checkforProgramExist = await programQueries.programsDocument(filterQuery, 'all', ['__v'])
-
+					let checkforProgramExist
+					if (UTILS.convertStringToBoolean(isExternalProgram)) {
+						checkforProgramExist = await surveyService.programsDocument(filterQuery, ['all'])
+					} else {
+						checkforProgramExist = await programQueries.programsDocument(filterQuery, 'all', ['__v'])
+					}
 					if (!checkforProgramExist.length > 0) {
 						return resolve({
 							status: HTTP_STATUS_CODE.bad_request.status,
@@ -1118,13 +1147,14 @@ module.exports = class SolutionsHelper {
 				}
 
 				if (solution && solution._id) {
+					let length = userPrivateProgram.components ? userPrivateProgram.components.length : 0
 					let updatedProgram = await programQueries.findAndUpdate(
 						{
 							_id: userPrivateProgram._id,
 							tenantId: userDetails.userInformation.tenantId,
 						},
 						{
-							$addToSet: { components: ObjectId(solution._id) },
+							$addToSet: { components: { _id: new ObjectId(solution._id), order: length + 1 } },
 						},
 						{
 							new: true,
@@ -1238,6 +1268,9 @@ module.exports = class SolutionsHelper {
 			case CONSTANTS.common.IMPROVEMENT_PROJECT:
 				link = appsPortalBaseUrl + prefix + CONSTANTS.common.CREATE_PROJECT + solutionLink
 				break
+			case CONSTANTS.common.COURSE:
+				link = appsPortalBaseUrl + prefix + CONSTANTS.common.CREATE_COURSE + solutionLink
+				break
 			default:
 				link = appsPortalBaseUrl + prefix + CONSTANTS.common.CREATE_SURVEY + solutionLink
 		}
@@ -1255,7 +1288,7 @@ module.exports = class SolutionsHelper {
 	 * @returns {Object} - Details of the solution.
 	 */
 
-	static fetchLink(solutionId, userDetails, token) {
+	static fetchLink(solutionId, userDetails, token = '') {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// build solution match query
@@ -1298,17 +1331,22 @@ module.exports = class SolutionsHelper {
 				if (!solutionLink) {
 					solutionLink = await UTILS.md5Hash(solution._id + '###' + solution.author)
 					// replacing the userDetails tena
-					userDetails.tenantAndOrgInfo = {
-						tenantId: solution.tenantId,
-						orgId: [solution.orgId],
+					let updateData = {
+						link: solutionLink,
+					}
+					let matchQuery = {
+						_id: solutionId,
 					}
 
-					let updateSolution = await this.update(solutionId, { link: solutionLink }, userDetails)
-					if (
-						!updateSolution.success ||
-						!updateSolution.data ||
-						!(Object.keys(updateSolution.data).length > 0)
-					) {
+					if (token) {
+						updateData.updatedBy = userDetails.userInformation.userId
+					}
+
+					let updateSolution = await solutionsQueries.updateSolutionDocument(matchQuery, updateData, {
+						new: true,
+					})
+
+					if (!updateSolution._id) {
 						throw {
 							status: HTTP_STATUS_CODE.bad_request.status,
 							message: CONSTANTS.apiResponses.LINK_GENERATION_FAILED,
@@ -1383,26 +1421,24 @@ module.exports = class SolutionsHelper {
 					{
 						link: link,
 						isReusable: false,
-						status: {
-							$ne: CONSTANTS.common.INACTIVE,
-						},
 						tenantId: tenantId,
 					},
-					['type', 'status', 'endDate']
+					['type', 'status', 'endDate', 'startDate']
 				)
 
+				// updated condition, if solution is inactive no need to check further
 				if (!Array.isArray(solutionData) || solutionData.length < 1) {
 					return resolve({
-						message: CONSTANTS.apiResponses.INVALID_LINK,
+						message: CONSTANTS.apiResponses.NO_SOLUTION_FOUND_FOR_THE_LINK,
 						result: [],
+						returnError: true,
 					})
 				}
 
 				if (solutionData[0].status !== CONSTANTS.common.ACTIVE_STATUS) {
 					return resolve({
-						message: CONSTANTS.apiResponses.LINK_IS_EXPIRED,
+						message: CONSTANTS.apiResponses.INVALID_LINK,
 						result: [],
-						syuccess: false,
 					})
 				}
 
@@ -1426,6 +1462,30 @@ module.exports = class SolutionsHelper {
 					return resolve({
 						message: CONSTANTS.apiResponses.LINK_IS_EXPIRED,
 						result: [],
+					})
+				}
+
+				if (solutionData[0].status !== CONSTANTS.common.ACTIVE_STATUS) {
+					return resolve({
+						message: CONSTANTS.apiResponses.INVALID_LINK,
+						result: [],
+						success: false,
+					})
+				}
+
+				// check start date is greater than current date
+				if (solutionData[0].startDate && new Date() < new Date(solutionData[0].startDate)) {
+					//isValidStartDate is passed in this situation and based on that key only verifyLink function should return message
+					return resolve({
+						message:
+							CONSTANTS.apiResponses.LINK_IS_NOT_ACTIVE_YET +
+							moment(solutionData[0].startDate)
+								.utc()
+								.utcOffset(timeZoneDifference)
+								.add(1, 'minute')
+								.format('ddd, D MMM YYYY, hh:mm A'),
+						result: [],
+						returnError: true,
 					})
 				}
 				response.verified = true
@@ -1671,7 +1731,13 @@ module.exports = class SolutionsHelper {
 
 				queryData.data['link'] = link
 				let matchQuery = queryData.data
+				// here we have to identify if the solution is targetted or not regardless of time (solution active or not)
+				if (matchQuery.status) {
+					delete matchQuery.status
+				}
+
 				matchQuery['tenantId'] = userDetails.userInformation.tenantId
+
 				let solutionData = await solutionsQueries.solutionsDocument(matchQuery, [
 					'_id',
 					'link',
@@ -1704,6 +1770,7 @@ module.exports = class SolutionsHelper {
 					? solutionDetails[0].projectTemplateId
 					: ''
 				response.programName = solutionDetails[0].programName
+				response.status = solutionDetails[0].status // this status is required to know whether the solution is active or inactive at verifyLink function.
 				delete response._id
 
 				return resolve({
@@ -2401,9 +2468,7 @@ module.exports = class SolutionsHelper {
 				let solutionIds = []
 				requestedData['filter'] = {}
 				let getTargetedSolution = true
-				let targetedSolutions = {
-					success: false,
-				}
+				let targetedSolutions = null
 				let result = {
 					data: [],
 					count: 0,
@@ -2449,7 +2514,7 @@ module.exports = class SolutionsHelper {
 					requestedData,
 					userDetails
 				)
-				if (!userCreatedProjects.success) {
+				if (!userCreatedProjects.success && solutionType !== CONSTANTS.common.COURSE) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: userCreatedProjects.message,
@@ -2524,7 +2589,7 @@ module.exports = class SolutionsHelper {
 						}
 					}
 				}
-				if (targetedSolutions.success) {
+				if (targetedSolutions?.success) {
 					// When targetedSolutions is empty and currentScopeOnly is set to true send empty response
 					if (!(targetedSolutions.data.data.length > 0) && currentScopeOnly) {
 						return resolve({
@@ -2559,6 +2624,8 @@ module.exports = class SolutionsHelper {
 									'programName',
 									'name',
 									'description',
+									'linkUrl',
+									'linkTitle',
 								])
 							)
 							filteredTargetedSolutions.push(newEntry)
@@ -2592,7 +2659,7 @@ module.exports = class SolutionsHelper {
 							totalCount = mergedData.length
 						}
 					}
-				} else {
+				} else if (targetedSolutions?.success == false) {
 					return resolve({
 						success: true,
 						message: CONSTANTS.apiResponses.TARGETED_SOLUTIONS_FETCHED,
@@ -2781,88 +2848,28 @@ module.exports = class SolutionsHelper {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let verifySolution = await this.verifySolutionDetails(link, userId, userToken, userDetails)
-				if (!verifySolution.success) {
+
+				// if link access is requested before start date return error
+				if (verifySolution.returnError) {
 					throw {
-						satus: HTTP_STATUS_CODE.bad_request.status,
-						message: verifySolution.message ? verifySolution.message : CONSTANTS.apiResponses.INVALID_LINK,
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: verifySolution.message
+							? verifySolution.message
+							: messageConstants.apiResponses.INVALID_LINK,
 					}
 				}
+
 				let checkForTargetedSolution = await this.checkForTargetedSolution(link, bodyData, userDetails)
+
 				if (!checkForTargetedSolution || Object.keys(checkForTargetedSolution.result).length <= 0) {
 					return resolve(checkForTargetedSolution)
 				}
 
 				let solutionData = checkForTargetedSolution.result
 				let isSolutionActive = solutionData.status === CONSTANTS.common.INACTIVE ? false : true
-				// if (solutionData.type == CONSTANTS.common.OBSERVATION) {
-				// Targeted solution
-				// if (checkForTargetedSolution.result.isATargetedSolution) {
-				//   let observationDetailFromLink =
-				//     await entitiesHelper.details(
-				//       userToken,
-				//       solutionData.solutionId
-				//     );
 
-				//   if (observationDetailFromLink.success) {
-				//     checkForTargetedSolution.result["observationId"] =
-				//       observationDetailFromLink.result._id != ""
-				//         ? observationDetailFromLink.result._id
-				//         : "";
-				//   } else if (!isSolutionActive) {
-				//     throw new Error(CONSTANTS.apiResponses.LINK_IS_EXPIRED);
-				//   }
-				// } else {
-				//   if (!isSolutionActive) {
-				//     throw new Error(CONSTANTS.apiResponses.LINK_IS_EXPIRED);
-				//   }
-				// }
-				// } else if (solutionData.type === CONSTANTS.common.SURVEY) {
-				// Get survey submissions of user
-				/**
-           * function userServeySubmission 
-           * Request:
-           * @query :SolutionId -> solutionId
-           * @param {userToken} for UserId
-           * @response Array of survey submissions
-           * example: {
-            "success":true,
-            "message":"Survey submission fetched successfully",
-            "data":[
-                {
-                    "_id":"62e228eedd8c6d0009da5084",
-                    "solutionId":"627dfc6509446e00072ccf78",
-                    "surveyId":"62e228eedd8c6d0009da507d",
-                    "status":"completed",
-                    "surveyInformation":{
-                        "name":"Create a Survey (To check collated reports) for 4.9 regression -- FD 380",
-                        "description":"Create a Survey (To check collated reports) for 4.9 regression -- FD 380"
-                    }
-                }
-            ]
-          }       
-           */
-				// let surveySubmissionDetails =
-				//   await surveyService.userSurveySubmissions(
-				//     userToken,
-				//     solutionData.solutionId
-				//   );
-				// let surveySubmissionData = surveySubmissionDetails.result;
-				// if (surveySubmissionData.length > 0) {
-				//   checkForTargetedSolution.result.submissionId =
-				//     surveySubmissionData[0]._id ? surveySubmissionData[0]._id : "";
-				//   checkForTargetedSolution.result.surveyId = surveySubmissionData[0]
-				//     .surveyId
-				//     ? surveySubmissionData[0].surveyId
-				//     : "";
-				//   checkForTargetedSolution.result.submissionStatus =
-				//     surveySubmissionData[0].status;
-				// } else if (!isSolutionActive) {
-				//   throw new Error(CONSTANTS.apiResponses.LINK_IS_EXPIRED);
-				// }
-				// } else
 				if (solutionData.type === CONSTANTS.common.IMPROVEMENT_PROJECT) {
 					// Targeted solution
-
 					if (checkForTargetedSolution.result.isATargetedSolution && createProject) {
 						//targeted user with project creation
 
@@ -3066,6 +3073,7 @@ module.exports = class SolutionsHelper {
 							message: CONSTANTS.apiResponses.PROJECT_TEMPLATE_ID_NOT_FOUND,
 						}
 					}
+					//Adding for drop 1 of elevate-project will remove it later
 					templateOrQuestionDetails = await projectTemplatesHelper.details(
 						solutionData.projectTemplateId,
 						'',

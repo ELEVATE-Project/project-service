@@ -319,11 +319,11 @@ const profile = function (userId = '', userToken = '') {
 /**
  * Fetches the default organization details for a given organization code/id.
  * @param {string} organisationIdentifier - The code/id of the organization.
- * @param {String} userToken - user token
+ * @param {String} tenantId - tenantId
  * @returns {Promise} A promise that resolves with the organization details or rejects with an error.
  */
 
-const fetchDefaultOrgDetails = function (organisationIdentifier, userToken) {
+const getOrgDetails = function (organisationIdentifier, tenantId) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			let url
@@ -340,7 +340,9 @@ const fetchDefaultOrgDetails = function (organisationIdentifier, userToken) {
 					process.env.USER_SERVICE_BASE_URL +
 					CONSTANTS.endpoints.ORGANIZATION_READ +
 					'?organisation_code=' +
-					organisationIdentifier
+					organisationIdentifier +
+					'&tenant_code=' +
+					tenantId
 			}
 			const options = {
 				headers: {
@@ -385,22 +387,38 @@ const fetchDefaultOrgDetails = function (organisationIdentifier, userToken) {
  * @returns {Promise} A promise that resolves with the organization details or rejects with an error.
  */
 
-const fetchTenantDetails = function (tenantId, userToken, aggregateValidOrgs = false) {
+const fetchTenantDetails = function (tenantId, userToken = '', aggregateValidOrgs = false) {
 	return new Promise(async (resolve, reject) => {
 		try {
-			let url =
-				interfaceServiceUrl +
-				process.env.USER_SERVICE_BASE_URL +
-				CONSTANTS.endpoints.TENANT_READ +
-				'/' +
-				tenantId
+			let url, headers
 
-			const options = {
-				headers: {
+			if (userToken) {
+				// External request
+				url =
+					interfaceServiceUrl +
+					process.env.USER_SERVICE_BASE_URL +
+					CONSTANTS.endpoints.TENANT_READ +
+					'/' +
+					tenantId
+				headers = {
 					'content-type': 'application/json',
 					'X-auth-token': userToken,
-				},
+				}
+			} else {
+				// Internal request
+				url =
+					interfaceServiceUrl +
+					process.env.USER_SERVICE_BASE_URL +
+					CONSTANTS.endpoints.TENANT_READ_INTERNAL +
+					'/' +
+					tenantId
+				headers = {
+					'content-type': 'application/json',
+					internal_access_token: process.env.INTERNAL_ACCESS_TOKEN,
+				}
 			}
+
+			const options = { headers }
 			request.get(url, options, userReadCallback)
 			let result = {
 				success: true,
@@ -456,7 +474,7 @@ const fetchPublicTenantDetails = function (tenantId) {
 			const options = {
 				headers: {
 					'content-type': 'application/json',
-					tenantid: tenantId,
+					'x-tenant-code': tenantId,
 				},
 			}
 			request.get(url, options, publicBranding)
@@ -543,6 +561,60 @@ const getUserProfileByIdentifier = function (tenantId, userId = null, username) 
 		}
 	})
 }
+
+/**
+ * Fetches valid user profile by userIds and tenantId.
+ * @param {Array} userIds - array of userIds
+ * @param {String} tenantId - tenantId details
+ * @param {String} type - user-service url param
+ * @returns {Promise} A promise that resolves with the user details or rejects with an error.
+ */
+
+const accountSearch = function (userIds = [], tenantId, type = 'all') {
+	return new Promise(async (resolve, reject) => {
+		try {
+			const params = `?tenant_code=${tenantId}&type=${type}`
+
+			let url = `${interfaceServiceUrl}${process.env.USER_SERVICE_BASE_URL}${CONSTANTS.endpoints.ACCOUNT_SEARCH}${params}`
+
+			const headers = {
+				'content-type': 'application/json',
+				internal_access_token: process.env.INTERNAL_ACCESS_TOKEN,
+			}
+
+			const body = {
+				user_ids: userIds,
+			}
+
+			request.post({ url, headers, body, json: true }, callBack)
+			let result = {
+				success: true,
+			}
+			function callBack(error, response, body) {
+				if (error) {
+					result.success = false
+				} else {
+					if (body.responseCode === HTTP_STATUS_CODE['ok'].code) {
+						result['data'] = body.result
+					} else {
+						result.success = false
+					}
+				}
+				return resolve(result)
+			}
+			setTimeout(function () {
+				return resolve(
+					(result = {
+						success: false,
+					})
+				)
+			}, CONSTANTS.common.SERVER_TIME_OUT)
+		} catch (error) {
+			return reject(error)
+		}
+	})
+}
+
 module.exports = {
 	profile: profile,
 	// locationSearch : locationSearch,
@@ -550,8 +622,9 @@ module.exports = {
 	// profileReadPrivate: profileReadPrivate,
 	// getSubEntitiesBasedOnEntityType : getSubEntitiesBasedOnEntityType,
 	// getUserRoles: getUserRoles,
-	fetchDefaultOrgDetails: fetchDefaultOrgDetails,
+	getOrgDetails: getOrgDetails,
 	fetchTenantDetails: fetchTenantDetails,
 	fetchPublicTenantDetails: fetchPublicTenantDetails,
 	getUserProfileByIdentifier: getUserProfileByIdentifier,
+	accountSearch,
 }

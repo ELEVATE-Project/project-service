@@ -50,7 +50,6 @@ async function insertData(collectionName, dataFile, currentDB = dbName) {
 	const client = new MongoClient(url)
 
 	try {
-		// Connect to MongoDB
 		await client.connect()
 		const db = client.db(currentDB)
 		const collection = db.collection(collectionName)
@@ -64,16 +63,12 @@ async function insertData(collectionName, dataFile, currentDB = dbName) {
 		console.log(`\n--- Attempting insertion into: ${currentDB}.${collectionName} ---`)
 
 		const results = []
-
-		// Use Promise.all with map for concurrent insertion (faster)
 		await Promise.all(
 			data.map(async (doc, index) => {
 				const tempId = doc._id || `(Document Index: ${index})`
 
 				try {
 					const result = await collection.insertOne(doc)
-
-					// The _id is either the one from the source doc or the generated one
 					const finalId = result.insertedId || doc._id
 
 					results.push({
@@ -83,7 +78,6 @@ async function insertData(collectionName, dataFile, currentDB = dbName) {
 					})
 				} catch (error) {
 					if (error.code === DUPLICATE_KEY_ERROR_CODE) {
-						// This typically happens if the document has an _id or a unique index violation
 						results.push({
 							id: tempId,
 							status: 'DUPLICATE',
@@ -120,8 +114,6 @@ async function insertData(collectionName, dataFile, currentDB = dbName) {
 	}
 }
 
-// --- MAIN EXECUTION LOGIC ---
-
 async function main({ dataToBeInserted }) {
 	const collectionsToInsert = [
 		{ name: 'entities', data: dataToBeInserted.entities, db: dbName2 },
@@ -142,9 +134,7 @@ async function main({ dataToBeInserted }) {
 	)
 	console.log(`=================================================`)
 
-	// 1. CLEANUP PHASE: Drop all relevant collections first
 	for (const item of collectionsToInsert) {
-		// Only call cleanData if there is corresponding data to be inserted, to avoid dropping unrelated collections
 		if (item.data) {
 			await cleanData(item.name, item.db)
 		}
@@ -156,16 +146,12 @@ async function main({ dataToBeInserted }) {
 	)
 	console.log(`=================================================`)
 
-	// 2. INSERTION PHASE: Insert new data
 	for (const item of collectionsToInsert) {
 		if (item.data) {
-			// The insertData function already handles the database selection via the last argument
 			await insertData(item.name, item.data, item.db)
 		}
 	}
 }
-
-// --- EXECUTION CALLS ---
 
 main({ dataToBeInserted: entityData })
 	.then(() => {

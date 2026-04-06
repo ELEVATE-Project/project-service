@@ -213,6 +213,25 @@ With implementation scripts, you can seamlessly add new projects to the system. 
 
 ---
 
+## 📖 Related Documentation & Tools
+
+### Versioning & Documentation Links
+
+This README is focused on the **3.4.0 Setup Guide** for the Projects Service.
+
+-   **Current Version (3.4.0) Documentation:** All setup links above point to the **3.4.0** guides.
+-   **Legacy Version (1.0.0) Documentation:** Access the documentation for the previous major release here: **<a href="https://github.com/ELEVATE-Project/project-service/blob/setupGuide-3.4/documentation/1.0.0/ReadMe.md" target="_blank">View 1.0.0 Documentation</a>**
+
+### Postman Collections
+
+-   **<a href="https://github.com/ELEVATE-Project/project-service/tree/main/api-doc" target="_blank">Projects Service API Collection</a>**
+
+### Adding New Projects to the System
+
+With implementation scripts, you can seamlessly add new projects to the system. Once a project is successfully added, it becomes visible on the portal, ready for use and interaction. For a comprehensive guide on setting up and using the implementation script, please refer to the **<a href="https://github.com/ELEVATE-Project/project-service/tree/main/Project-Service-implementation-Script" target="_blank">documentation here</a>**.
+
+---
+
 ## 🤝 Team
 
 <a href="https://github.com/ELEVATE-Project/project-service/graphs/contributors">

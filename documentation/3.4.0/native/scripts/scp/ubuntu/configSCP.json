@@ -1,0 +1,239 @@
+{
+  "authTokenUserInformation": {
+    "id": "data.id",
+    "name": "data.name",
+    "organization_code": "data.organization_codes[0]",
+    "organization_id": "data.organization_ids[0]",
+    "organizations": "data.organizations",
+    "roles": "data.organizations[?code={{organization_code}}].roles",
+    "tenant_code": "data.tenant_code"
+  },
+  "targeting_criteria": {
+    "factors": [
+      {
+        "api": {
+          "base_name": "entity-management",
+          "data_key": "result.data",
+          "endpoint": "v1/entities/entityListBasedOnEntityType",
+          "method": "GET",
+          "query_params": {
+            "entityType": "state",
+            "limit": "{$limit}",
+            "page": "{$page}",
+            "paginate": true
+          },
+          "service": "entity-service"
+        },
+        "default": null,
+        "depends_on": null,
+        "key": "state",
+        "mandatory": true,
+        "multi_select": true,
+        "order": 1,
+        "type": "selection"
+      },
+      {
+        "api": {
+          "base_name": "entity-management",
+          "data_key": "result.data",
+          "endpoint": "v1/entities/subEntityListBasedOnRoleAndLocation",
+          "method": "GET",
+          "path_params": {
+            "stateId": "{$state._id}"
+          },
+          "query_params": {
+            "limit": "{$limit}",
+            "page": "{$page}",
+            "paginate": true
+          },
+          "service": "entity-service"
+        },
+        "default": null,
+        "depends_on": [
+          "state"
+        ],
+        "key": "entityType",
+        "mandatory": true,
+        "multi_select": true,
+        "order": 2,
+        "type": "selection"
+      },
+      {
+        "api": {
+          "base_name": "entity-management",
+          "data_key": "result.data",
+          "endpoint": "v1/entities/entityListBasedOnEntityType",
+          "method": "GET",
+          "query_params": {
+            "entityType": "professional_role",
+            "limit": "{$limit}",
+            "page": "{$page}",
+            "paginate": true
+          },
+          "service": "entity-service"
+        },
+        "default": null,
+        "depends_on": null,
+        "key": "professional_role",
+        "mandatory": true,
+        "multi_select": true,
+        "order": 3,
+        "type": "selection"
+      },
+      {
+        "api": {
+          "base_name": "entity-management",
+          "data_key": "result.data",
+          "endpoint": "v1/entities/entityListBasedOnEntityType",
+          "method": "GET",
+          "query_params": {
+            "entityType": "professional_subroles",
+            "limit": "{$limit}",
+            "page": "{$page}",
+            "paginate": true
+          },
+          "service": "entity-service"
+        },
+        "default": null,
+        "depends_on": [
+          "professional_role"
+        ],
+        "key": "professional_subroles",
+        "mandatory": true,
+        "multi_select": true,
+        "order": 4,
+        "type": "selection"
+      },
+      {
+        "api": {
+          "base_name": "entity-management",
+          "data_key": "result.data",
+          "endpoint": "v1/entities/subEntityList",
+          "method": "GET",
+          "path_params": {
+            "stateId": "{$state._id}"
+          },
+          "query_params": {
+            "limit": "{$limit}",
+            "page": "{$page}",
+            "paginate": true,
+            "parentInfoRequired": true,
+            "type": "district"
+          },
+          "service": "entity-service"
+        },
+        "default": null,
+        "depends_on": [
+          "state"
+        ],
+        "key": "district",
+        "mandatory": true,
+        "multi_select": true,
+        "order": 5,
+        "type": "selection"
+      },
+      {
+        "api": {
+          "base_name": "entity-management",
+          "data_key": "result.data",
+          "endpoint": "v1/entities/subEntityList",
+          "method": "GET",
+          "path_params": {
+            "stateId": "{$state._id}"
+          },
+          "query_params": {
+            "limit": "{$limit}",
+            "page": "{$page}",
+            "paginate": true,
+            "parentInfoRequired": true,
+            "type": "block"
+          },
+          "service": "entity-service"
+        },
+        "default": null,
+        "depends_on": [
+          "district"
+        ],
+        "key": "block",
+        "mandatory": true,
+        "multi_select": true,
+        "order": 6,
+        "type": "selection"
+      },
+      {
+        "api": {
+          "base_name": "entity-management",
+          "data_key": "result.data",
+          "endpoint": "v1/entities/subEntityList",
+          "method": "GET",
+          "path_params": {
+            "stateId": "{$state._id}"
+          },
+          "query_params": {
+            "limit": "{$limit}",
+            "page": "{$page}",
+            "paginate": true,
+            "parentInfoRequired": true,
+            "type": "cluster"
+          },
+          "service": "entity-service"
+        },
+        "default": null,
+        "depends_on": [
+          "block"
+        ],
+        "key": "cluster",
+        "mandatory": true,
+        "multi_select": true,
+        "order": 7,
+        "type": "selection"
+      },
+      {
+        "api": {
+          "base_name": "entity-management",
+          "data_key": "result.data",
+          "endpoint": "v1/entities/subEntityList",
+          "method": "GET",
+          "path_params": {
+            "stateId": "{$state._id}"
+          },
+          "query_params": {
+            "limit": "{$limit}",
+            "page": "{$page}",
+            "paginate": true,
+            "parentInfoRequired": true,
+            "type": "school"
+          },
+          "service": "entity-service"
+        },
+        "default": null,
+        "depends_on": [
+          "cluster"
+        ],
+        "key": "school",
+        "mandatory": true,
+        "multi_select": true,
+        "order": 8,
+        "type": "selection"
+      }
+    ],
+    "ui_config": {
+      "tabs": [
+        {
+          "fields": [
+            "state",
+            "entityType",
+            "professional_role",
+            "professional_subroles",
+            "district",
+            "block",
+            "cluster",
+            "school"
+          ],
+          "id": "location",
+          "name": "Location"
+        }
+      ]
+    }
+  }
+}

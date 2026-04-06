@@ -35,7 +35,7 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
 
 > Note: All commands are run from the project directory.
 
-## Checking Port Availability 
+## Checking Port Availability
 
 > **Caution:** Before proceeding, please ensure that the ports given here are available and open. It is essential to verify their availability prior to moving forward. You can run below command in your terminal to check this
 
@@ -60,16 +60,16 @@ for %p in (3001 3002 6000 5001 4000 9092 5432 7007 2181 27017 3569 4301) do @(
 
 2.  **Download Environment Files**: Using the OS specific commands given below, download environment files for all the services.
 
-   ```
-   curl -L ^
-    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/dockerized/envs/interface_env ^
-    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/dockerized/envs/entity_management_env ^
-    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/dockerized/envs/project_env ^
-    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/dockerized/envs/notification_env ^
-    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/dockerized/envs/scheduler_env ^
-    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/dockerized/envs/user_env ^
-    -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/dockerized/envs/samiksha_env
-   ```
+```
+curl -L ^
+ -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/dockerized/envs/interface_env ^
+ -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/dockerized/envs/entity_management_env ^
+ -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/dockerized/envs/project_env ^
+ -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/dockerized/envs/notification_env ^
+ -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/dockerized/envs/scheduler_env ^
+ -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/dockerized/envs/user_env ^
+ -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/dockerized/envs/samiksha_env
+```
 
 > **Note:** Modify the environment files as necessary for your deployment using any text editor, ensuring that the values are appropriate for your environment. The default values provided in the current files are functional and serve as a good starting point. Refer to the sample env files provided at the [Project](https://github.com/ELEVATE-Project/project-service/blob/main/.env.sample), [User](https://github.com/ELEVATE-Project/user/blob/master/src/.env.sample), [Notification](https://github.com/ELEVATE-Project/notification/blob/master/src/.env.sample), [Scheduler](https://github.com/ELEVATE-Project/scheduler/blob/master/src/.env.sample), [Interface](https://github.com/ELEVATE-Project/interface-service/blob/main/src/.env.sample) and [Entity-management](https://github.com/ELEVATE-Project/entity-management/blob/main/src/.env.sample) repositories for reference.
 
@@ -77,25 +77,25 @@ for %p in (3001 3002 6000 5001 4000 9092 5432 7007 2181 27017 3569 4301) do @(
 
 3.  **Download `docker-compose-up` & `docker-compose-down` Script Files**
 
-   ```
-   curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/dockerized/scripts/project-with-survey/windows/docker-compose-up.bat
-   ```
-   ```
-   curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/dockerized/scripts/project-with-survey/windows/docker-compose-down.bat
-   ```
+```
+curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/dockerized/scripts/project-with-survey/windows/docker-compose-up.bat
+```
+
+```
+curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/dockerized/scripts/project-with-survey/windows/docker-compose-down.bat
+```
 
 4.  **Download `Config` File**
 
-   ```
-   curl -L https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/common-files/generics/configFile.json -o config.json
-   ```
-
+```
+curl -L https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/common-files/generics/configFile.json -o config.json
+```
 
 5.  **Run All Services & Dependencies**:All services and dependencies can be started using the `docker-compose-up` script file.
 
-   ```
-   docker-compose-up.bat
-   ```
+```
+docker-compose-up.bat
+```
 
 > Double-click the file or run the above command from the terminal.
 
@@ -103,10 +103,10 @@ for %p in (3001 3002 6000 5001 4000 9092 5432 7007 2181 27017 3569 4301) do @(
 
 6.  **Remove All Service & Dependency Containers**:
     All docker containers can be stopped and removed by using the `docker-compose-down` file.
-    
-   ```
-   docker-compose-down.bat
-   ```
+
+```
+docker-compose-down.bat
+```
 
 > **Caution**: As per the default configuration in the `docker-compose-project.yml` file, using the `down` command will lead to data loss since the database container does not persist data. To persist data across `down` commands and subsequent container removals, refer to the "Persistence of Database Data in Docker Containers" section of this documentation.
 
@@ -124,27 +124,27 @@ To enable the Citus extension for user services, follow these steps.
     ```
 2. Set up the citus_setup file by following the steps given below.
 
-   1. Download the `citus_setup.bat` file.
-      ```
-      curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/dockerized/scripts/stand-alone/windows/citus_setup.bat
-      ```
-   2. Enable Citus and set distribution columns for `user` database by running the `citus_setup.bat`with the following arguments.
-      ```
-      citus_setup.bat user postgres://postgres:postgres@citus_master:5432/user
-      ```
-      > **Note:** Since the `citus_setup.bat` file requires arguments, it must be run from a terminal.
+    1. Download the `citus_setup.bat` file.
+        ```
+        curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/dockerized/scripts/stand-alone/windows/citus_setup.bat
+        ```
+    2. Enable Citus and set distribution columns for `user` database by running the `citus_setup.bat`with the following arguments.
+        ```
+        citus_setup.bat user postgres://postgres:postgres@citus_master:5432/user
+        ```
+        > **Note:** Since the `citus_setup.bat` file requires arguments, it must be run from a terminal.
 
 ## Update Cloud Credentials for Project Service
 
 To enable full functionality—including certificate generation, attachment uploads, and report storage—you must configure cloud credentials in the environment files for both services.
 
 A. Project Service Configuration Path:
-    ```./project_env
-    ```
+`./project_env
+    `
 
 B. Samiksha (Survey & Observation) Service Configuration Path:
-    ```./samiksha_env
-    ```
+`./samiksha_env
+    `
 
 Add or update the following variables in the .env file, substituting the example values with your actual cloud credentials:
 
@@ -212,24 +212,25 @@ During the initial setup of Project services with the default configuration, you
 In such cases, you can generate sample user accounts using the steps below. This allows you to explore the Project services and portal immediately after setup.
 
 > **Warning:** Use this generator only immediately after the initial system setup and before any normal user accounts are created through the portal. It should not be used under any circumstances thereafter.
-  1. **Download The `sampleData.sql` Files:**
 
-      ```
-      mkdir sample-data\user 2>nul & ^
-      curl -L "https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/dockerized/scripts/project-with-survey/windows/sampleData.sql" -o sample-data\user\sampleData.sql
-      ```
+1. **Download The `sampleData.sql` Files:**
+
+    ```
+    mkdir sample-data\user 2>nul & ^
+    curl -L "https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/dockerized/scripts/project-with-survey/windows/sampleData.sql" -o sample-data\user\sampleData.sql
+    ```
 
 2. **Download The `insert_sample_data` Script File:**
 
-   ```
-   curl -L -o insert_sample_data.bat https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/dockerized/scripts/stand-alone/windows/sampleData.sql
-   ```
+    ```
+    curl -L -o insert_sample_data.bat https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/dockerized/scripts/stand-alone/windows/sampleData.sql
+    ```
 
 3. **Run The `insert_sample_data` Script File:**
 
-   ```
-   insert_sample_data.bat user postgres://postgres:postgres@citus_master:5432/user
-   ```
+    ```
+    insert_sample_data.bat user postgres://postgres:postgres@citus_master:5432/user
+    ```
 
     After successfully running the script mentioned above, the following user accounts will be created and available for login:
 
@@ -239,30 +240,30 @@ In such cases, you can generate sample user accounts using the steps below. This
     | prajwal@gmail.com      | Password1@ | State Education Officer |
     | vishnu@gmail.com       | Password1@ | State Education Officer |
 
-
 ## Sample Data Creation For Projects
 
 This step will guide us in implementing a sample project solution following the initial setup of the project service.
 
 1. **Insert Sample Data To Database:**
 
-   1. Download `insert_project_data.bat` Script File:
+    1. Download `insert_project_data.bat` Script File:
 
-      ```
-      curl -L ^
-      -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/dockerized/scripts/stand-alone/windows/insert_project_data.bat
-      ```
+        ```
+        curl -L ^
+        -O https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/dockerized/scripts/stand-alone/windows/insert_project_data.bat
+        ```
 
     2. Make the setup file executable by running the following command.
 
-       ```
-       insert_project_data.bat
-       ```
+        ```
+        insert_project_data.bat
+        ```
+
     3. Insert Sample Data To Database.
 
-       ```
-       node insert_sample_solutions.js
-       ```
+        ```
+        node insert_sample_solutions.js
+        ```
 
 </details>
 
@@ -281,11 +282,11 @@ Follow the setup guides for the frontend repositories:
 
 ### 🧪 Postman Collections and API DOC
 
-- <a href="https://github.com/ELEVATE-Project/project-service/tree/main/api-doc" target="_blank">
-  Projects Service API Collection
-- <a href="https://github.com/ELEVATE-Project/samiksha-service/tree/main/api-doc" target="_blank">
-  Samiksha Service API Collection
-</a>
+-   <a href="https://github.com/ELEVATE-Project/project-service/tree/main/api-doc" target="_blank">
+    Projects Service API Collection
+-   <a href="https://github.com/ELEVATE-Project/samiksha-service/tree/main/api-doc" target="_blank">
+      Samiksha Service API Collection
+    </a>
 
 ---
 
@@ -296,11 +297,11 @@ Once it's successfully added, it becomes visible on the portal, ready for use an
 
 For a comprehensive guide on setting up and using the SUP, please refer to:
 
-- <a href="https://github.com/ELEVATE-Project/project-service/tree/main/Project-Service-implementation-Script" target="_blank">
-  solution-Upload-Portal-Service
-- <a href="https://github.com/ELEVATE-Project/project-service/tree/main/Project-Service-implementation-Script" target="_blank">
-  solution-Upload-Portal
-</a>
+-   <a href="https://github.com/ELEVATE-Project/project-service/tree/main/Project-Service-implementation-Script" target="_blank">
+    solution-Upload-Portal-Service
+-   <a href="https://github.com/ELEVATE-Project/project-service/tree/main/Project-Service-implementation-Script" target="_blank">
+      solution-Upload-Portal
+    </a>
 
 ---
 
@@ -311,6 +312,7 @@ For a comprehensive guide on setting up and using the SUP, please refer to:
 </a>
 
 ---
+
 # Open Source Dependencies
 
 This project uses several open-source tools and dependencies that supported its development
@@ -321,4 +323,4 @@ This project uses several open-source tools and dependencies that supported its 
 ![Git](https://img.shields.io/badge/git-%23F05033.svg?style=for-the-badge&logo=git&logoColor=white)  
 ![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)  
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)  
-![RabbitMQ](https://img.shields.io/badge/RabbitMQ-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white)  
+![RabbitMQ](https://img.shields.io/badge/RabbitMQ-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white)

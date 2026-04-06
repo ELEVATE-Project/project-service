@@ -13,7 +13,6 @@
 ![GitHub package.json version (subfolder of monorepo)](https://img.shields.io/github/package-json/v/ELEVATE-Project/mentoring?filename=src%2Fpackage.json)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-
 </br>
 The Project building block facilitates the creation and engagement with micro-improvement projects.
 
@@ -192,16 +191,14 @@ curl -L -o scheduler/src/.env https://raw.githubusercontent.com/ELEVATE-Project/
     To enable full functionality—including certificate generation, attachment uploads, and report storage—you must configure cloud credentials in the environment files for both services.
 
     A. Project Service Configuration Path:
-    	```./ELEVATE-Project/project-service/.env
-    	```
+    `./ELEVATE-Project/project-service/.env
+	`
 
     B. Samiksha (Survey & Observation) Service Configuration Path:
-    	```./ELEVATE-Project/samiksha-service/.env
-    	```
+    `./ELEVATE-Project/samiksha-service/.env
+	`
 
-
-
-       Add or update the following variables in the .env file, substituting the example values with your actual cloud credentials:
+    Add or update the following variables in the .env file, substituting the example values with your actual cloud credentials:
 
         CLOUD_STORAGE_PROVIDER=gcloud
         CLOUD_STORAGE_ACCOUNTNAME=your_account_name
@@ -214,7 +211,7 @@ curl -L -o scheduler/src/.env https://raw.githubusercontent.com/ELEVATE-Project/
 
     For detailed configuration options, supported cloud providers, and integration guidelines, please refer to the official documentation available in this [ReadMe](https://www.npmjs.com/package/client-cloud-services?activeTab=readme)
 
-11. **Insert Initial Data**
+10. **Insert Initial Data**
 
     1.  Download `entity-project-sample-data.sh` Script File:
 
@@ -224,7 +221,7 @@ curl -L -o scheduler/src/.env https://raw.githubusercontent.com/ELEVATE-Project/
     ./project_entity_sample_data.sh
     ```
 
-12. **Start The Services**
+11. **Start The Services**
 
     Following the steps given below, 2 instances of each ELEVATE-Project backend service will be deployed and be managed by PM2 process manager.
 
@@ -236,7 +233,6 @@ curl -L -o scheduler/src/.env https://raw.githubusercontent.com/ELEVATE-Project/
     (cd interface-service/src && pm2 start app.js --name interface && cd -) && \
     (cd scheduler/src && pm2 start app.js --name scheduler && cd -)
     ```
-
 
 ## Sample User Accounts Generation
 
@@ -262,7 +258,6 @@ After successfully running the script mentioned above, the following user accoun
 
 ---
 
-
 ## 🌐 Micro-Frontend (FE) Setup
 
 The ELEVATE application uses a micro-frontend architecture. After setting up the backend services, you must configure and run the frontend repositories to access the application via the portal.
@@ -277,11 +272,11 @@ Follow the setup guides for the frontend repositories:
 
 ### 🧪 Postman Collections and API DOC
 
-- <a href="https://github.com/ELEVATE-Project/project-service/tree/main/api-doc" target="_blank">
-  Projects Service API Collection
-- <a href="https://github.com/ELEVATE-Project/samiksha-service/tree/main/api-doc" target="_blank">
-  Samiksha Service API Collection
-</a>
+-   <a href="https://github.com/ELEVATE-Project/project-service/tree/main/api-doc" target="_blank">
+    Projects Service API Collection
+-   <a href="https://github.com/ELEVATE-Project/samiksha-service/tree/main/api-doc" target="_blank">
+      Samiksha Service API Collection
+    </a>
 
 ---
 
@@ -292,11 +287,11 @@ Once it's successfully added, it becomes visible on the portal, ready for use an
 
 For a comprehensive guide on setting up and using the SUP, please refer to:
 
-- <a href="https://github.com/ELEVATE-Project/project-service/tree/main/Project-Service-implementation-Script" target="_blank">
-  solution-Upload-Portal-Service
-- <a href="https://github.com/ELEVATE-Project/project-service/tree/main/Project-Service-implementation-Script" target="_blank">
-  solution-Upload-Portal
-</a>
+-   <a href="https://github.com/ELEVATE-Project/project-service/tree/main/Project-Service-implementation-Script" target="_blank">
+    solution-Upload-Portal-Service
+-   <a href="https://github.com/ELEVATE-Project/project-service/tree/main/Project-Service-implementation-Script" target="_blank">
+      solution-Upload-Portal
+    </a>
 
 ---
 
@@ -318,4 +313,4 @@ This project uses several open-source tools and dependencies that supported its 
 ![Git](https://img.shields.io/badge/git-%23F05033.svg?style=for-the-badge&logo=git&logoColor=white)  
 ![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)  
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)  
-![RabbitMQ](https://img.shields.io/badge/RabbitMQ-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white)  
+![RabbitMQ](https://img.shields.io/badge/RabbitMQ-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white)

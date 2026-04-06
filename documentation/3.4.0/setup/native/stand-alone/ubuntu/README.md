@@ -228,6 +228,15 @@ curl -L -o scheduler/src/.env https://raw.githubusercontent.com/ELEVATE-Project/
     (cd scheduler/src && pm2 start app.js --name scheduler && cd -)
     ```
 
+## 🌐 Micro-Frontend (FE) Setup
+
+The ELEVATE application uses a micro-frontend architecture. After setting up the backend services, you must configure and run the frontend repositories to access the application via the portal.
+
+Follow the setup guides for the frontend repositories:
+
+-   **Login Portal:** [elevate-portal](https://github.com/ELEVATE-Project/elevate-portal/tree/releaase-1.1.0)
+-   **Projects Program Module (PWA):** [observation-survey-projects-pwa](https://github.com/ELEVATE-Project/observation-survey-projects-pwa/tree/release-3.4.0)
+
 ## Sample User Accounts Generation
 
 During the initial setup of ELEVATE-Project services with the default configuration, you may encounter issues creating new accounts through the regular SignUp flow on the ELEVATE-Project portal. This typically occurs because the default SignUp process includes OTP verification to prevent abuse. Until the notification service is configured correctly to send actual emails, you will not be able to create new accounts.
@@ -252,7 +261,6 @@ After successfully running the script mentioned above, the following user accoun
 
 ---
 
-
 ## 🌐 Micro-Frontend (FE) Setup
 
 The ELEVATE application uses a micro-frontend architecture. After setting up the backend services, you must configure and run the frontend repositories to access the application via the portal.
@@ -266,9 +274,9 @@ Follow the setup guides for the frontend repositories:
 
 ### 🧪 Postman Collections and API DOC
 
-- <a href="https://github.com/ELEVATE-Project/project-service/tree/main/api-doc" target="_blank">
-  Projects Service API Collection
-</a>
+-   <a href="https://github.com/ELEVATE-Project/project-service/tree/main/api-doc" target="_blank">
+      Projects Service API Collection
+    </a>
 
 ---
 
@@ -279,11 +287,11 @@ Once it's successfully added, it becomes visible on the portal, ready for use an
 
 For a comprehensive guide on setting up and using the SUP, please refer to:
 
-- <a href="https://github.com/ELEVATE-Project/project-service/tree/main/Project-Service-implementation-Script" target="_blank">
-  solution-Upload-Portal-Service
-- <a href="https://github.com/ELEVATE-Project/project-service/tree/main/Project-Service-implementation-Script" target="_blank">
-  solution-Upload-Portal
-</a>
+-   <a href="https://github.com/ELEVATE-Project/project-service/tree/main/Project-Service-implementation-Script" target="_blank">
+    solution-Upload-Portal-Service
+-   <a href="https://github.com/ELEVATE-Project/project-service/tree/main/Project-Service-implementation-Script" target="_blank">
+      solution-Upload-Portal
+    </a>
 
 ---
 
@@ -305,4 +313,4 @@ This project uses several open-source tools and dependencies that supported its 
 ![Git](https://img.shields.io/badge/git-%23F05033.svg?style=for-the-badge&logo=git&logoColor=white)  
 ![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)  
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)  
-![RabbitMQ](https://img.shields.io/badge/RabbitMQ-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white)  
+![RabbitMQ](https://img.shields.io/badge/RabbitMQ-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white)

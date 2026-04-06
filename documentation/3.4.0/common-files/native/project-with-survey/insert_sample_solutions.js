@@ -3,10 +3,10 @@ const { MongoClient } = require('mongodb')
 const url = 'mongodb://localhost:27017/' // MongoDB URL
 const projectDB = 'elevate-project'
 const entityDB = 'elevate-entity'
-const samikshaDB = "elevate-samiksha";
+const samikshaDB = 'elevate-samiksha'
 const entityData = require('./entity_sampleData.js')
 const projectData = require('./project_sampleData.js')
-const surveyData = require("./survey_sampleData.js");
+const surveyData = require('./survey_sampleData.js')
 
 // MongoDB Error Code for Duplicate Key
 const DUPLICATE_KEY_ERROR_CODE = 11000
@@ -116,7 +116,6 @@ async function insertData(collectionName, dataFile, currentDB = projectDB) {
 	}
 }
 
-
 async function main({ dataToBeInserted }) {
 	const collectionsToInsert = [
 		{ name: 'entities', data: dataToBeInserted.entities, db: entityDB },
@@ -130,20 +129,21 @@ async function main({ dataToBeInserted }) {
 		{ name: 'projectCategories', data: dataToBeInserted.projectCategoriesData, db: projectDB },
 		{ name: 'configurations', data: dataToBeInserted.configurationData, db: projectDB },
 		{ name: 'organizationExtension', data: dataToBeInserted.organizationExtensionData, db: projectDB },
-    	{ name: "solutions", data: dataToBeInserted.solutionData, db:samikshaDB},
-    	{ name: "criteria",  data:dataToBeInserted.criteriaData, db : samikshaDB},
-    	{ name: "criteriaQuestions", data: dataToBeInserted.criteriaQuestionsData, db : samikshaDB},
-    	{ name: "frameworks", data: dataToBeInserted.frameworkData, db : samikshaDB},
-    	{ name: "questions", data: dataToBeInserted.questionsData, db : samikshaDB},
-		{ name: "observations", data: dataToBeInserted.observationData, db : samikshaDB},
-    	{ name: "surveys", data: dataToBeInserted.surveyData, db : samikshaDB},
-    	{ name: "organizationExtension", data: dataToBeInserted.organizationExtensionData, db : samikshaDB},
-
+		{ name: 'solutions', data: dataToBeInserted.solutionData, db: samikshaDB },
+		{ name: 'criteria', data: dataToBeInserted.criteriaData, db: samikshaDB },
+		{ name: 'criteriaQuestions', data: dataToBeInserted.criteriaQuestionsData, db: samikshaDB },
+		{ name: 'frameworks', data: dataToBeInserted.frameworkData, db: samikshaDB },
+		{ name: 'questions', data: dataToBeInserted.questionsData, db: samikshaDB },
+		{ name: 'observations', data: dataToBeInserted.observationData, db: samikshaDB },
+		{ name: 'surveys', data: dataToBeInserted.surveyData, db: samikshaDB },
+		{ name: 'organizationExtension', data: dataToBeInserted.organizationExtensionData, db: samikshaDB },
 	]
 
 	console.log(`\n=================================================`)
 	console.log(
-		`🗑️ Starting CLEANUP for ${dataToBeInserted === entityData ? 'Entity Data' : 'Project Data & Survey Data' } Collections...`
+		`🗑️ Starting CLEANUP for ${
+			dataToBeInserted === entityData ? 'Entity Data' : 'Project Data & Survey Data'
+		} Collections...`
 	)
 	console.log(`=================================================`)
 
@@ -155,7 +155,9 @@ async function main({ dataToBeInserted }) {
 
 	console.log(`\n=================================================`)
 	console.log(
-		`➕ Starting INSERTION for ${dataToBeInserted === entityData ? 'Entity Data' : 'Project Data & Survey Data '} Collections...`
+		`➕ Starting INSERTION for ${
+			dataToBeInserted === entityData ? 'Entity Data' : 'Project Data & Survey Data '
+		} Collections...`
 	)
 	console.log(`=================================================`)
 
@@ -182,11 +184,10 @@ main({ dataToBeInserted: projectData })
 	})
 	.catch(console.error)
 
-
 main({ dataToBeInserted: surveyData })
-.then(() => {
-  console.log('\n=======================================')
-  console.log('✅ survey data population process finished.')
-  console.log('=======================================')
-})
-.catch(console.error)
+	.then(() => {
+		console.log('\n=======================================')
+		console.log('✅ survey data population process finished.')
+		console.log('=======================================')
+	})
+	.catch(console.error)

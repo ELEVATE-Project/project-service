@@ -22,9 +22,9 @@ The Project building block facilitates the creation and engagement with micro-im
 
 ## 💻 Supported Operating Systems
 
-- **Ubuntu** (Recommended: Version 20 and above)  
-- **Windows** (Recommended: Version 11 and above)  
-- **macOS** (Recommended: Version 12 and above)  
+-   **Ubuntu** (Recommended: Version 20 and above)
+-   **Windows** (Recommended: Version 11 and above)
+-   **macOS** (Recommended: Version 12 and above)
 
 ---
 
@@ -40,24 +40,23 @@ This section outlines the different ways to set up the **Projects Service**. Ple
 
 This setup is ideal for **local development and testing**, where only the core Projects Service components are required.
 
-In the **Stand-Alone Setup**, the **Samiksha service is not included**. This mode supports the complete lifecycle of **program creation and program consumption**, along with **project creation and project consumption**. Users can also **view and generate reports** based on the configured programs and projects.  
+In the **Stand-Alone Setup**, the **Samiksha service is not included**. This mode supports the complete lifecycle of **program creation and program consumption**, along with **project creation and project consumption**. Users can also **view and generate reports** based on the configured programs and projects.
 
 This setup is recommended when survey and observation features powered by Samiksha are not required, and the focus is limited to core program and project management workflows.
 
-
 #### I. Docker Setup (Recommended)
 
-- [Setup guide for Linux](https://github.com/ELEVATE-Project/project-service/blob/main/documentation/3.4.0/setup/docker/stand-alone/ubuntu/README.md)  
-- [Setup guide for macOS](https://github.com/ELEVATE-Project/project-service/blob/main/documentation/3.4.0/setup/docker/stand-alone/mac-os/README.md)  
-- [Setup guide for Windows](https://github.com/ELEVATE-Project/project-service/blob/main/documentation/3.4.0/setup/docker/stand-alone/windows/README.md)  
+-   [Setup guide for Linux](https://github.com/ELEVATE-Project/project-service/blob/main/documentation/3.4.0/setup/docker/stand-alone/ubuntu/README.md)
+-   [Setup guide for macOS](https://github.com/ELEVATE-Project/project-service/blob/main/documentation/3.4.0/setup/docker/stand-alone/mac-os/README.md)
+-   [Setup guide for Windows](https://github.com/ELEVATE-Project/project-service/blob/main/documentation/3.4.0/setup/docker/stand-alone/windows/README.md)
 
 <br>
 
 #### II. Native Setup (PM2 Managed Services)
 
-- [Setup guide for Linux](https://github.com/ELEVATE-Project/project-service/blob/main/documentation/3.4.0/setup/native/stand-alone/ubuntu/README.md)  
-- [Setup guide for macOS](https://github.com/ELEVATE-Project/project-service/blob/main/documentation/3.4.0/setup/docker/stand-alone/mac-os/README.md)  
-- [Setup guide for Windows](link/to/standalone/native/windows/README)  
+-   [Setup guide for Linux](https://github.com/ELEVATE-Project/project-service/blob/main/documentation/3.4.0/setup/native/stand-alone/ubuntu/README.md)
+-   [Setup guide for macOS](https://github.com/ELEVATE-Project/project-service/blob/main/documentation/3.4.0/setup/docker/stand-alone/mac-os/README.md)
+-   [Setup guide for Windows](link/to/standalone/native/windows/README)
 
 </details>
 
@@ -69,29 +68,101 @@ This setup is recommended when survey and observation features powered by Samiks
 
 This setup integrates the Projects Service with the **Samiksha Service**, providing a full-featured, production-ready deployment environment.
 
-In this **Integrated Setup**, the system supports the complete lifecycle of **program creation and program consumption**, along with **project creation and project consumption**. It also enables **survey creation, survey consumption, observation creation, and observation consumption**, allowing structured assessments and evaluations to be conducted.  
+In this **Integrated Setup**, the system supports the complete lifecycle of **program creation and program consumption**, along with **project creation and project consumption**. It also enables **survey creation, survey consumption, observation creation, and observation consumption**, allowing structured assessments and evaluations to be conducted.
 
 Users can further **view and generate reports** across programs, projects, surveys, and observations, making this setup suitable for end-to-end project execution and assessment workflows in real-world deployments.
 
 #### I. Docker Setup (Recommended)
 
-- [Setup guide for Linux](https://github.com/ELEVATE-Project/project-service/blob/main/documentation/3.4.0/setup/docker/project-with-survey/ubuntu/README.md)  
-- [Setup guide for macOS](https://github.com/ELEVATE-Project/project-service/blob/main/documentation/3.4.0/setup/docker/project-with-survey/mac-os/README.md)  
-- [Setup guide for Windows](https://github.com/ELEVATE-Project/project-service/blob/main/documentation/3.4.0/setup/docker/project-with-survey/windows/README.md)  
+-   [Setup guide for Linux](https://github.com/ELEVATE-Project/project-service/blob/main/documentation/3.4.0/setup/docker/project-with-survey/ubuntu/README.md)
+-   [Setup guide for macOS](https://github.com/ELEVATE-Project/project-service/blob/main/documentation/3.4.0/setup/docker/project-with-survey/mac-os/README.md)
+-   [Setup guide for Windows](https://github.com/ELEVATE-Project/project-service/blob/main/documentation/3.4.0/setup/docker/project-with-survey/windows/README.md)
 
 <br>
 
 #### II. Native Setup (PM2 Managed Services)
 
-- [Setup guide for Linux](https://github.com/ELEVATE-Project/project-service/blob/main/documentation/3.4.0/setup/native/project-with-survey/ubuntu/README.md)  
-- [Setup guide for macOS](link/to/samiksha/native/macos/README)  
-- [Setup guide for Windows](link/to/samiksha/native/windows/README) 
+-   [Setup guide for Linux](https://github.com/ELEVATE-Project/project-service/blob/main/documentation/3.4.0/setup/native/project-with-survey/ubuntu/README.md)
+-   [Setup guide for macOS](link/to/samiksha/native/macos/README)
+-   [Setup guide for Windows](link/to/samiksha/native/windows/README)
 
 </details>
 <br>
 
+### 🚀 **WITH SELF CREATION PORTAL (SCP) (Integrated Deployment)**
+
+<details>
+<summary> **Click to Expand Integrated Setup Options** </summary>
+<br>
+
+This setup integrates the Projects Service and Samiksha Service with the **Self Creation Portal**, providing a full-featured, production-ready deployment environment.
+
+#### I. Docker Setup (Recommended)
+
+<details>
+<summary> 1. Ubuntu Setup </summary>
+<br>
+Go to the detailed Ubuntu Docker setup guide: **<a href="https://github.com/ELEVATE-Project/project-service/blob/setupGuideSCP/documentation/3.4.0/setup/docker/scp/ubuntu/README.md" target="_blank">SETUP_SCP_DOCKER_UBUNTU.md</a>**
+</details>
+
+<details>
+<summary> 2. macOS Setup </summary>
+<br>
+Go to the detailed macOS Docker setup guide: **<a href="https://github.com/ELEVATE-Project/project-service/blob/setupGuideSCP/documentation/3.4.0/setup/docker/scp/mac/README.md" target="_blank">SETUP_SCP_DOCKER_MACOS.md</a>**
+</details>
+
+<details>
+<summary> 3. Windows Setup </summary>
+<br>
+Go to the detailed Windows Docker setup guide: **<a href="link/to/scp/docker/windows/README" target="_blank">SETUP_SCP_DOCKER_WINDOWS.md</a>**
+</details>
+
+<br>
+
+#### II. Native Setup (PM2 Managed Services)
+
+<details>
+<summary> 1. Ubuntu Setup </summary>
+<br>
+Go to the detailed Ubuntu Native setup guide: **<a href="link/to/samiksha/native/ubuntu/README" target="_blank">SETUP_SCP_NATIVE_UBUNTU.md</a>**
+</details>
+
+<details>
+<summary> 2. macOS Setup </summary>
+<br>
+Go to the detailed macOS Native setup guide: **<a href="link/to/samiksha/native/macos/README" target="_blank">SETUP_SCP_NATIVE_MACOS.md</a>**
+</details>
+
+<details>
+<summary> 3. Windows Setup </summary>
+<br>
+Go to the detailed Windows Native setup guide: **<a href="link/to/samiksha/native/windows/README" target="_blank">SETUP_SCP_NATIVE_WINDOWS.md</a>**
+</details>
+
+</details>
+
+---
+
 ## 📖 Related Documentation & Tools
 
+### Versioning & Documentation Links
+
+This README is focused on the **3.4.0 Setup Guide** for the Projects Service.
+
+-   **Current Version (3.4.0) Documentation:** All setup links above point to the **3.4.0** guides.
+-   **Legacy Version (1.0.0) Documentation:** Access the documentation for the previous major release here: **<a href="https://github.com/ELEVATE-Project/project-service/blob/setupGuide-3.4/documentation/1.0.0/ReadMe.md" target="_blank">View 1.0.0 Documentation</a>**
+
+### Postman Collections
+
+-   **<a href="https://github.com/ELEVATE-Project/project-service/tree/main/api-doc" target="_blank">Projects Service API Collection</a>**
+
+### Adding New Projects to the System
+
+With implementation scripts, you can seamlessly add new projects to the system. Once a project is successfully added, it becomes visible on the portal, ready for use and interaction. For a comprehensive guide on setting up and using the implementation script, please refer to the **<a href="https://github.com/ELEVATE-Project/project-service/tree/main/Project-Service-implementation-Script" target="_blank">documentation here</a>**.
+
+---
+
+## 📖 Related Documentation & Tools
 
 ### 🗂️ Database Architecture Diagrams
 
@@ -131,11 +202,11 @@ Click on a service name to expand and view the diagram.
 
 ### 🧪 Postman Collections and API DOC
 
-- <a href="https://github.com/ELEVATE-Project/project-service/tree/main/api-doc" target="_blank">
-  Projects Service API Collection
-- <a href="https://github.com/ELEVATE-Project/samiksha-service/tree/main/api-doc" target="_blank">
-  Samiksha Service API Collection
-</a>
+-   <a href="https://github.com/ELEVATE-Project/project-service/tree/main/api-doc" target="_blank">
+    Projects Service API Collection
+-   <a href="https://github.com/ELEVATE-Project/samiksha-service/tree/main/api-doc" target="_blank">
+      Samiksha Service API Collection
+    </a>
 
 ---
 
@@ -146,11 +217,11 @@ Once it's successfully added, it becomes visible on the portal, ready for use an
 
 For a comprehensive guide on setting up and using the SUP, please refer to:
 
-- <a href="https://github.com/ELEVATE-Project/project-service/tree/main/Project-Service-implementation-Script" target="_blank">
-  solution-Upload-Portal-Service
-- <a href="https://github.com/ELEVATE-Project/project-service/tree/main/Project-Service-implementation-Script" target="_blank">
-  solution-Upload-Portal
-</a>
+-   <a href="https://github.com/ELEVATE-Project/project-service/tree/main/Project-Service-implementation-Script" target="_blank">
+    solution-Upload-Portal-Service
+-   <a href="https://github.com/ELEVATE-Project/project-service/tree/main/Project-Service-implementation-Script" target="_blank">
+      solution-Upload-Portal
+    </a>
 
 ---
 
@@ -158,15 +229,16 @@ For a comprehensive guide on setting up and using the SUP, please refer to:
 
 This README is focused on the **3.4.0 Setup Guide** for the Projects Service.
 
-- **Current Version (3.4.0) Documentation**  
-  All setup links above point to the **3.4.0** guides.
+-   **Current Version (3.4.0) Documentation**  
+    All setup links above point to the **3.4.0** guides.
 
-- **Legacy Version (1.0.0) Documentation**  
-  <a href="https://github.com/ELEVATE-Project/project-service/blob/main/documentation/1.0.0/ReadMe.md" target="_blank">
+-   **Legacy Version (1.0.0) Documentation**  
+    <a href="https://github.com/ELEVATE-Project/project-service/blob/main/documentation/1.0.0/ReadMe.md" target="_blank">
     View 1.0.0 Documentation
-  </a>
+    </a>
 
 ---
+
 ## 👥 Team
 
 <a href="https://github.com/ELEVATE-Project/project-service/graphs/contributors">
@@ -176,6 +248,7 @@ This README is focused on the **3.4.0 Setup Guide** for the Projects Service.
 ---
 
 ### Open Source Dependencies
+
 This project uses several open-source tools and dependencies that supported its development
 
 ![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)  
@@ -184,4 +257,4 @@ This project uses several open-source tools and dependencies that supported its 
 ![Git](https://img.shields.io/badge/git-%23F05033.svg?style=for-the-badge&logo=git&logoColor=white)  
 ![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)  
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)  
-![RabbitMQ](https://img.shields.io/badge/RabbitMQ-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white)  
+![RabbitMQ](https://img.shields.io/badge/RabbitMQ-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white)

@@ -38,7 +38,7 @@ To set up the Project application, ensure you have Docker and Docker Compose ins
 
 > Note: All commands are run from the project directory.
 
-## Checking Port Availability 
+## Checking Port Availability
 
 > **Caution:** Before proceeding, please ensure that the ports given here are available and open. It is essential to verify their availability prior to moving forward. You can run below command in your terminal to check this
 
@@ -212,9 +212,9 @@ Follow the setup guides for the frontend repositories:
 
 ### 🧪 Postman Collections and API DOC
 
-- <a href="https://github.com/ELEVATE-Project/project-service/tree/main/api-doc" target="_blank">
-  Projects Service API Collection
-</a>
+-   <a href="https://github.com/ELEVATE-Project/project-service/tree/main/api-doc" target="_blank">
+      Projects Service API Collection
+    </a>
 
 ---
 
@@ -225,13 +225,14 @@ Once it's successfully added, it becomes visible on the portal, ready for use an
 
 For a comprehensive guide on setting up and using the SUP, please refer to:
 
-- <a href="https://github.com/ELEVATE-Project/project-service/tree/main/Project-Service-implementation-Script" target="_blank">
-  solution-Upload-Portal-Service
-- <a href="https://github.com/ELEVATE-Project/project-service/tree/main/Project-Service-implementation-Script" target="_blank">
-  solution-Upload-Portal
-</a>
+-   <a href="https://github.com/ELEVATE-Project/project-service/tree/main/Project-Service-implementation-Script" target="_blank">
+    solution-Upload-Portal-Service
+-   <a href="https://github.com/ELEVATE-Project/project-service/tree/main/Project-Service-implementation-Script" target="_blank">
+      solution-Upload-Portal
+    </a>
 
 ---
+
 # Team
 
 <a href="https://github.com/ELEVATE-Project/project-service/graphs/contributors">
@@ -239,6 +240,7 @@ For a comprehensive guide on setting up and using the SUP, please refer to:
 </a>
 
 ---
+
 # Open Source Dependencies
 
 This project uses several open-source tools and dependencies that supported its development
@@ -249,4 +251,4 @@ This project uses several open-source tools and dependencies that supported its 
 ![Git](https://img.shields.io/badge/git-%23F05033.svg?style=for-the-badge&logo=git&logoColor=white)  
 ![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)  
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)  
-![RabbitMQ](https://img.shields.io/badge/RabbitMQ-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white)  
+![RabbitMQ](https://img.shields.io/badge/RabbitMQ-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white)

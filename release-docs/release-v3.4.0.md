@@ -62,6 +62,8 @@ _No migrations applicable._
 
 -   **Image Tag:** `shikshalokamqa/elevate-user:3.4.0`
 
+**Note:** If the current User Service `.env` contains **`TENANT_CODE_HEADER_NAME`**, please remove it. If it is not present, kindly ignore this note.
+
 ---
 
 ## scheduler Service
@@ -336,15 +338,21 @@ Update object paths:
 -   If it exists, no changes are required.
 -   If it does not exist, add a new Nginx configuration entry for `/observations`.
 
+### Env configuration
+
+Please refer to the environment configuration structure and location [here](https://github.com/ELEVATE-Project/observation-portal/tree/release-3.5.0?tab=readme-ov-file#environment-configuration).
+
 ### 1. Branch
 
 -   **Branch:** `release-3.4.0`
 
 ### 2. Docker Deployment
 
--   Update **Docker image tag** for Observation/Survey PWA: `shikshalokamqa/elevate-observation-portal:3.4.1`
+-   Update **Docker image tag** for Observation/Survey PWA: `shikshalokamqa/elevate-observation-portal:3.4.2`
 
 ### 3. Forms Creation
+
+For detailed instructions on how to create the form, refer to [this document](https://docs.google.com/document/d/13zmU5H8Vr3tnYEGI89y-Az5TgCqYyNEFqTX4VWr_zQ0/edit?tab=t.onvajv5wm81c).
 
 ```
 curl '{{domain}}/survey/v1/configurations/read' \
@@ -376,13 +384,15 @@ curl '{{domain}}/survey/v1/profile/read' \
 
 ### 1. Branch
 
--   **Branch:** `release-1.1.0`
+-   **Branch:** `release-1.1.1`
 
 ### 2. Docker Deployment
 
--   Update **React-wrapper/Shikshagraha app** image tag: `shikshalokamqa/elevate-portal:1.1.3`
+-   Update **React-wrapper/Shikshagraha app** image tag: `shikshalokamqa/elevate-portal:1.1.5`
 
 ### 3. Form Update
+
+or detailed instructions on how to update the form, refer to [this document](https://docs.google.com/document/d/13zmU5H8Vr3tnYEGI89y-Az5TgCqYyNEFqTX4VWr_zQ0/edit?tab=t.jo8dcfof8ufg).
 
 ```
 curl '{{domain}}/user/v1/organization-feature/read' \

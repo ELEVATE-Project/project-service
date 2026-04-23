@@ -113,4 +113,152 @@ module.exports = class ProjectCategories {
 			}
 		})
 	}
+
+	/**
+	 * Update single category document.
+	 * @method
+	 * @name updateOne
+	 * @param {Object} filterQuery - filtered Query.
+	 * @param {Object} updateData - update data.
+	 * @returns {Object} - Updated category data.
+	 */
+	static updateOne(filterQuery, updateData) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let updatedCategory = await database.models.projectCategories.updateOne(filterQuery, updateData)
+				return resolve(updatedCategory)
+			} catch (error) {
+				return reject(error)
+			}
+		})
+	}
+
+	/**
+	 * Find single category document.
+	 * @method
+	 * @name findOne
+	 * @param {Object} filterQuery - filtered Query.
+	 * @param {Object} projection - fields to project.
+	 * @returns {Object} - Category data.
+	 */
+	static findOne(filterQuery, projection = {}) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let category = await database.models.projectCategories.findOne(filterQuery, projection).lean()
+				return resolve(category)
+			} catch (error) {
+				return reject(error)
+			}
+		})
+	}
+
+	/**
+	 * Get all descendants of a category using path.
+	 * @method
+	 * @name getDescendants
+	 * @param {String} categoryId - Category ID.
+	 * @param {String} tenantId - Tenant ID.
+	 * @returns {Array} - Descendant categories.
+	 */
+	static getDescendants(categoryId, tenantId) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				// If the collection does not maintain a `path` field, compute descendants
+				// by walking children via `parent_id`. This performs breadth-first
+				// traversal and returns all descendant documents.
+				const root = await database.models.projectCategories.findOne({ _id: categoryId, tenantId }).lean()
+
+				if (!root) return resolve([])
+
+				const descendants = []
+				let queue = [root._id]
+
+				while (queue.length) {
+					// Find direct children of all nodes in the current queue
+					const children = await database.models.projectCategories
+						.find({ parent_id: { $in: queue }, tenantId, isDeleted: false })
+						.lean()
+
+					if (!children || children.length === 0) break
+
+					// Add to results and prepare next level
+					descendants.push(...children)
+					queue = children.map((c) => c._id)
+				}
+
+				return resolve(descendants)
+			} catch (error) {
+				return reject(error)
+			}
+		})
+	}
+
+	/**
+	 * Get leaf categories (categories with no children).
+	 * @method
+	 * @name getLeafCategories
+	 * @param {Object} filterQuery - filtered Query.
+	 * @returns {Array} - Leaf categories.
+	 */
+	static getLeafCategories(filterQuery) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				// Treat as leaf when either:
+				// - hasChildCategories is explicitly false
+				// - hasChildCategories field is missing
+				// - children array is missing or empty
+				const leafFilter = {
+					$and: [
+						filterQuery,
+						{
+							$or: [
+								{ hasChildCategories: false },
+								{ hasChildCategories: { $exists: false } },
+								{ children: { $exists: true, $size: 0 } },
+								{ children: { $exists: false } },
+							],
+						},
+					],
+				}
+
+				let leafCategories = await database.models.projectCategories.find(leafFilter).lean()
+				return resolve(leafCategories)
+			} catch (error) {
+				return reject(error)
+			}
+		})
+	}
+
+	/**
+	 * List project categories with pagination.
+	 * @method
+	 * @name list
+	 * @param {Object} query - Filter query.
+	 * @param {Object} projection - Fields to select.
+	 * @param {Object} sort - Sort options.
+	 * @param {Number} skip - Skip count.
+	 * @param {Number} limit - Limit count.
+	 * @returns {Array} - List of project categories.
+	 */
+	static list(query, projection = {}, sort = {}, skip, limit) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let projectCategoriesData = await database.models.projectCategories
+					.find(query, projection)
+					.sort(sort)
+					.skip(skip)
+					.limit(limit)
+					.lean()
+
+				let count = await database.models.projectCategories.countDocuments(query)
+
+				return resolve({
+					data: projectCategoriesData,
+					count: count,
+				})
+			} catch (error) {
+				return reject(error)
+			}
+		})
+	}
 }

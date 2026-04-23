@@ -17,7 +17,11 @@ module.exports = async function (req, res, next) {
 		'userProjects/details',
 		'users/solutions',
 	]
-	let normalUserInternalAccessPath = ['/programs/publishToLibrary', '/programs/ProgramUpdateForLibrary']
+	let normalUserInternalAccessPath = [
+		'/programs/publishToLibrary',
+		'/programs/ProgramUpdateForLibrary',
+		'library/categories',
+	]
 
 	let addTenantAndOrgDetails = false
 

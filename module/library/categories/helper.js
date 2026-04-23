@@ -10,26 +10,27 @@
 // const sessionHelpers = require(GENERIC_HELPERS_PATH+"/sessions");
 const projectCategoriesQueries = require(DB_QUERY_BASE_PATH + '/projectCategories')
 const projectTemplateQueries = require(DB_QUERY_BASE_PATH + '/projectTemplates')
-const projectTemplateTaskQueries = require(DB_QUERY_BASE_PATH + '/projectTemplateTask')
-const moment = require('moment-timezone')
+const orgExtensionQueries = require(DB_QUERY_BASE_PATH + '/organizationExtension')
 const filesHelpers = require(MODULES_BASE_PATH + '/cloud-services/files/helper')
 const axios = require('axios')
+const { ObjectId } = require('mongodb')
+const moment = require('moment-timezone')
+const _ = require('lodash')
 const entitiesService = require(GENERICS_FILES_PATH + '/services/entity-management')
+const projectTemplateTaskQueries = require(DB_QUERY_BASE_PATH + '/projectTemplateTask')
 const projectAttributesQueries = require(DB_QUERY_BASE_PATH + '/projectAttributes')
-const solutionAndProjectTemplateUtils = require(GENERICS_FILES_PATH + '/helpers/solutionAndProjectTemplateUtils')
-const orgExtensionQueries = require(DB_QUERY_BASE_PATH + '/organizationExtension')
+const kafkaProducersHelper = require(GENERICS_FILES_PATH + '/kafka/producers')
 
 /**
  * LibraryCategoriesHelper
  * @class
  */
-
 module.exports = class LibraryCategoriesHelper {
 	/**
 	 * List of library projects.
 	 * @method
 	 * @name projects
-	 * @param categoryId - category external id.
+	 * @param categoryIds - category external id.
 	 * @param pageSize - Size of page.
 	 * @param pageNo - Recent page no.
 	 * @param search - search text.
@@ -44,7 +45,7 @@ module.exports = class LibraryCategoriesHelper {
 	 */
 
 	static projects(
-		categoryId,
+		categoryIds,
 		pageSize,
 		pageNo,
 		search,
@@ -156,8 +157,14 @@ module.exports = class LibraryCategoriesHelper {
 				*/
 				matchQuery = applyVisibilityConditions(matchQuery, orgExtension, userDetails)
 
-				if (categoryId && categoryId !== '') {
-					matchQuery['$match']['categories.externalId'] = categoryId
+				if (categoryIds) {
+					// Ensure categoryIds is an array (handles both single string or array)
+					const idsToFilter = Array.isArray(categoryIds) ? categoryIds : [categoryIds]
+
+					if (idsToFilter.length > 0) {
+						// Use $in to support multiple IDs
+						matchQuery['$match']['categories.externalId'] = { $in: idsToFilter }
+					}
 				}
 
 				let aggregateData = []
@@ -504,60 +511,170 @@ module.exports = class LibraryCategoriesHelper {
 	}
 
 	/**
-	 * Update categories
+	 * Update category
 	 * @method
 	 * @name update
-	 * @param filterQuery - Filter query.
-	 * @param updateData - Update data.
-	 * @param files - files
-	 * @param userDetails - user related information
-	 * @returns {Object} updated data
+	 * @param {Object} filterQuery - Filter query
+	 * @param {Object} updateData - Update data
+	 * @param {Object} files - Files
+	 * @param {Object} req - Express request object (controller passes the full `req`)
+	 * @returns {Object} Updated category
 	 */
-
-	static update(filterQuery, updateData, files, userDetails) {
+	static update(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let matchQuery = { _id: filterQuery._id }
-				matchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
+				// Extract inputs from req
+				const filterQuery = { _id: req.params._id }
+				const updateData = req.body || {}
+				const files = req.files || {}
+				const userDetails = req.userDetails
+
+				// Find category to update
+				let matchQuery = { tenantId: userDetails.tenantAndOrgInfo.tenantId, isDeleted: false }
+				if (ObjectId.isValid(filterQuery._id)) {
+					matchQuery['$or'] = [{ _id: new ObjectId(filterQuery._id) }, { externalId: filterQuery._id }]
+				} else {
+					matchQuery['externalId'] = filterQuery._id
+				}
+				// Remove _id from filterQuery as we constructed matchQuery
+				delete filterQuery._id
 
 				let categoryData = await projectCategoriesQueries.categoryDocuments(matchQuery, 'all')
-				// Throw error if category is not found
-				if (
-					!categoryData ||
-					!(categoryData.length > 0) ||
-					!(Object.keys(categoryData[0]).length > 0) ||
-					categoryData[0]._id == ''
-				) {
+
+				if (!categoryData || !categoryData.length > 0 || !categoryData[0]._id) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,
 						message: CONSTANTS.apiResponses.CATEGORY_NOT_FOUND,
 					}
 				}
 
-				let evidenceUploadData = await handleEvidenceUpload(files, userDetails.userInformation.userId)
-				evidenceUploadData = evidenceUploadData.data
+				// Extract parent_id if provided (move operation)
+				const newParentId = updateData.parent_id || null
+				const hasParentChange = updateData.parent_id !== undefined
 
-				// Update the sequence numbers
-				updateData['evidences'] = []
+				// Handle evidence upload if files provided
+				if (files && files.cover_image) {
+					let evidenceUploadData = await handleEvidenceUpload(files, userDetails.userInformation.userId)
+					evidenceUploadData = evidenceUploadData.data
 
-				if (categoryData[0].evidences && categoryData[0].evidences.length > 0) {
-					for (const evidence of evidenceUploadData) {
-						evidence.sequence += categoryData[0].evidences.length
-						categoryData[0].evidences.push(evidence)
+					updateData['evidences'] = []
+
+					if (categoryData[0].evidences && categoryData[0].evidences.length > 0) {
+						for (const evidence of evidenceUploadData) {
+							evidence.sequence += categoryData[0].evidences.length
+							categoryData[0].evidences.push(evidence)
+						}
+						updateData['evidences'] = categoryData[0].evidences
+					} else {
+						updateData['evidences'] = evidenceUploadData
 					}
-					updateData['evidences'] = categoryData[0].evidences
-				} else {
-					updateData['evidences'] = evidenceUploadData
 				}
 
-				// delete tenantId & orgId attached in req.body to avoid adding manupulative data
+				// Check for duplicate name if name is being updated
+				if (updateData.name) {
+					const parentId = categoryData[0].parent_id
+					const duplicateCheck = await projectCategoriesQueries.findOne(
+						{
+							name: updateData.name,
+							tenantId: userDetails.tenantAndOrgInfo.tenantId,
+							parent_id: parentId,
+							isDeleted: false,
+							_id: { $ne: categoryData[0]._id }, // Exclude current doc
+						},
+						{ _id: 1 }
+					)
+
+					if (duplicateCheck) {
+						throw {
+							status: HTTP_STATUS_CODE.bad_request.status,
+							message:
+								CONSTANTS.apiResponses.CATEGORY_NAME_EXISTS ||
+								'Category with this name already exists in this level',
+						}
+					}
+				}
+
+				// Handle parent_id change (move operation) if provided
+				if (hasParentChange) {
+					// Prevent circular reference
+					if (newParentId) {
+						const categoryId = categoryData[0]._id
+						if (newParentId.toString() === categoryId.toString()) {
+							throw {
+								status: HTTP_STATUS_CODE.bad_request.status,
+								message: 'Cannot move category to itself',
+							}
+						}
+						const descendants = await projectCategoriesQueries.getDescendants(
+							categoryId,
+							userDetails.tenantAndOrgInfo.tenantId
+						)
+						const descendantIds = descendants.map((d) => d._id.toString())
+						if (descendantIds.includes(newParentId.toString())) {
+							throw {
+								status: HTTP_STATUS_CODE.bad_request.status,
+								message: 'Cannot move category to its own descendant',
+							}
+						}
+					}
+
+					// Get old parent
+					const oldParentId = categoryData[0].parent_id
+					const categoryId = categoryData[0]._id
+
+					// Get all descendants (for syncing templates later)
+					const descendants = await projectCategoriesQueries.getDescendants(
+						categoryId,
+						userDetails.tenantAndOrgInfo.tenantId
+					)
+
+					// Update old parent: decrement count and remove from children array
+					if (oldParentId) {
+						await this.updateParentHasChildCategories(
+							oldParentId,
+							userDetails.tenantAndOrgInfo.tenantId,
+							-1
+						)
+						await projectCategoriesQueries.updateOne(
+							{ _id: oldParentId },
+							{ $pull: { children: categoryId } }
+						)
+						this.syncTemplatesForCategory(oldParentId, userDetails.tenantAndOrgInfo.tenantId).catch(
+							console.error
+						)
+					}
+
+					// Update new parent: increment count and add to children array
+					if (newParentId) {
+						await this.updateParentHasChildCategories(newParentId, userDetails.tenantAndOrgInfo.tenantId, 1)
+						await projectCategoriesQueries.updateOne(
+							{ _id: newParentId },
+							{ $addToSet: { children: categoryId } }
+						)
+						this.syncTemplatesForCategory(newParentId, userDetails.tenantAndOrgInfo.tenantId).catch(
+							console.error
+						)
+					}
+
+					// Sync moved category and all descendants
+					this.syncTemplatesForCategory(categoryId, userDetails.tenantAndOrgInfo.tenantId).catch(
+						console.error
+					)
+					descendants.forEach((descendant) => {
+						this.syncTemplatesForCategory(descendant._id, userDetails.tenantAndOrgInfo.tenantId).catch(
+							console.error
+						)
+					})
+				}
+
+				// Remove tenantId, orgId, hasChildCategories from updateData
 				delete updateData.tenantId
 				delete updateData.orgId
+				delete updateData.hasChildCategories
+				delete updateData.parent_id
 
-				filterQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-
-				// Update the category
-				let categoriesUpdated = await projectCategoriesQueries.updateMany(filterQuery, updateData)
+				// Update category - use the constructed matchQuery so only the targeted category is updated
+				let categoriesUpdated = await projectCategoriesQueries.updateMany(matchQuery, { $set: updateData })
 
 				if (!categoriesUpdated) {
 					throw {
@@ -566,13 +683,27 @@ module.exports = class LibraryCategoriesHelper {
 					}
 				}
 
+				// Sync templates if name or externalId changed
+				if (updateData.name || updateData.externalId) {
+					// Trigger template sync (can be async)
+					this.syncTemplatesForCategory(categoryData[0]._id, userDetails.tenantAndOrgInfo.tenantId).catch(
+						console.error
+					)
+				}
+
 				return resolve({
 					success: true,
 					message: CONSTANTS.apiResponses.PROJECT_CATEGORIES_UPDATED,
+					data: {
+						categoryId: categoryData[0]._id,
+						movedCategory: hasParentChange ? categoryData[0]._id : null,
+						newParentId: hasParentChange ? newParentId : null,
+					},
 				})
 			} catch (error) {
-				return resolve({
+				return reject({
 					success: false,
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
 					message: error.message,
 					data: {},
 				})
@@ -637,7 +768,7 @@ module.exports = class LibraryCategoriesHelper {
 
 							if (currentTask.parentId && currentTask.parentId !== '') {
 								if (!taskData[currentTask.parentId.toString()]) {
-									taskData[currentTask.parentId.toString()].children = []
+									taskData[currentTask.parentId.toString()] = { children: [] } // Initialize if not present
 								}
 
 								taskData[currentTask.parentId.toString()].children.push(
@@ -670,29 +801,27 @@ module.exports = class LibraryCategoriesHelper {
 	}
 
 	/**
-	 * create categories
+	 * Create category
 	 * @method
 	 * @name create
-	 * @param categoryData - categoryData.
-	 * @param files - files.
-	 * @param userDetails - user decoded token details.
-	 * @returns {Object} category details
+	 * @param {Object} categoryData - Category data
+	 * @param {Object} files - Files
+	 * @param {Object} userDetails - User details
+	 * @returns {Object} Created category
 	 */
-
-	static create(categoryData, files, userDetails) {
+	static async create(categoryData, files, userDetails) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				// Extract tenant & org details
 				const tenantId = userDetails.tenantAndOrgInfo.tenantId
 				const orgId = userDetails.tenantAndOrgInfo.orgId
 
-				// Check if organization extension exists for the loggedin user
-				let orgExtension
-				orgExtension = await orgExtensionQueries.orgExtenDocuments({
+				// Validate org extension
+				const orgExtension = await orgExtensionQueries.orgExtenDocuments({
 					tenantId,
 					orgId: orgId[0],
 				})
 
-				//Throw error if org policy is not found
 				if (!orgExtension || orgExtension.length === 0) {
 					throw {
 						success: false,
@@ -701,22 +830,38 @@ module.exports = class LibraryCategoriesHelper {
 					}
 				}
 
-				// Check if the category already exists
-				let filterQuery = {}
-				filterQuery['externalId'] = categoryData.externalId.toString()
-				filterQuery['tenantId'] = tenantId
+				const parentId = categoryData.parentId || categoryData.parent_id || null
 
-				const checkIfCategoryExist = await projectCategoriesQueries.categoryDocuments(filterQuery, [
+				// Duplicate category check — always enforce duplicate name prevention
+				const nameFilter = {
+					name: categoryData.name,
+					tenantId: tenantId,
+					isDeleted: false,
+					parent_id: parentId ? new ObjectId(parentId) : null,
+				}
+				const duplicateName = await projectCategoriesQueries.findOne(nameFilter, { _id: 1 })
+				if (duplicateName) {
+					throw {
+						success: false,
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message:
+							CONSTANTS.apiResponses.CATEGORY_ALREADY_EXISTS ||
+							'Category with this name already exists in this level',
+					}
+				}
+
+				// Legacy check for externalId (global uniqueness)
+				const filterQuery = {
+					externalId: categoryData.externalId?.toString(),
+					tenantId: tenantId,
+				}
+
+				const existingCategory = await projectCategoriesQueries.categoryDocuments(filterQuery, [
 					'_id',
 					'externalId',
 				])
 
-				// Throw error if the category already exists
-				if (
-					checkIfCategoryExist.length > 0 &&
-					Object.keys(checkIfCategoryExist[0]).length > 0 &&
-					checkIfCategoryExist[0]._id != ''
-				) {
+				if (existingCategory.length > 0) {
 					throw {
 						success: false,
 						status: HTTP_STATUS_CODE.bad_request.status,
@@ -724,28 +869,51 @@ module.exports = class LibraryCategoriesHelper {
 					}
 				}
 
-				// Fetch the signed urls from handleEvidenceUpload function
+				// Validate parent
+				const parent = await this.validateParent(parentId, tenantId)
+
+				// Upload evidences
 				const evidences = await handleEvidenceUpload(files, userDetails.userInformation.userId)
-				categoryData['evidences'] = evidences.data
+				categoryData.evidences = evidences.data
 
-				// add tenantId and orgId
-				categoryData['tenantId'] = tenantId
-				categoryData['orgId'] = orgId[0]
-				categoryData['visibleToOrganizations'] = orgId
+				// Add required fields before creation
+				categoryData.tenantId = tenantId
+				categoryData.orgId = orgId[0]
+				categoryData.hasChildCategories = false
+				categoryData.sequenceNumber = categoryData.sequenceNumber || 0
+				categoryData.description = categoryData.description || '' // Ensure description is set with empty default
 
-				let projectCategoriesData = await projectCategoriesQueries.create(categoryData)
+				// Create category
+				let createdCategory = await projectCategoriesQueries.create(categoryData)
 
-				if (!projectCategoriesData._id) {
-					throw {
-						status: HTTP_STATUS_CODE.bad_request.status,
-						message: CONSTANTS.apiResponses.PROJECT_CATEGORIES_NOT_ADDED,
+				// Update parent counters and add to children array
+				if (parentId) {
+					await this.updateParentHasChildCategories(parentId, tenantId, 1)
+					// add to parent's children array
+					await projectCategoriesQueries.updateOne(
+						{ _id: parentId },
+						{ $addToSet: { children: createdCategory._id } }
+					)
+					this.syncTemplatesForCategory(parentId, tenantId).catch(console.error)
+				}
+
+				createdCategory = await projectCategoriesQueries.findOne({ _id: createdCategory._id })
+
+				// Normalize icon: prefer root `icon`, fallback to legacy `metaInformation.icon`
+				if (createdCategory) {
+					if (
+						(createdCategory.icon === undefined || createdCategory.icon === '') &&
+						createdCategory.metaInformation &&
+						createdCategory.metaInformation.icon !== undefined
+					) {
+						createdCategory.icon = createdCategory.metaInformation.icon
 					}
 				}
 
 				return resolve({
 					success: true,
 					message: CONSTANTS.apiResponses.PROJECT_CATEGORIES_ADDED,
-					data: projectCategoriesData._id,
+					data: createdCategory,
 				})
 			} catch (error) {
 				return reject({
@@ -759,56 +927,897 @@ module.exports = class LibraryCategoriesHelper {
 	}
 
 	/**
-	 * list categories
+	 * List categories with hierarchy support
 	 * @method
 	 * @name list
-	 * @param {Object} req - user decoded token details
-	 * @returns {Object} category details
+	 * @param {Object} req - Request object
+	 * @returns {Object} Categories list
 	 */
-
 	static list(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				let tenantId = req.userDetails.userInformation.tenantId
 				let organizationId = req.userDetails.userInformation.organizationId
 				let query = {
-					visibleToOrganizations: { $in: [organizationId] },
+					// visibleToOrganizations: { $in: [organizationId] } // We have handle this in below condition,
+					tenantId: tenantId,
+					status: CONSTANTS.common.ACTIVE_STATUS,
+					isDeleted: false,
 				}
 
-				// create query to fetch assets
-				query['tenantId'] = tenantId
+				// Filter by parentId if provided (supports both parentId and parent_id)
+				const parentIdParam = req.query.parentId || req.query.parent_id
+				if (parentIdParam) {
+					query.parent_id = parentIdParam
+				} else if (req.query.rootOnly === 'true' || req.query.rootOnly === true) {
+					// Root categories only
+					query.parent_id = null
+				}
 
-				// handle currentOrgOnly filter
-				if (req.query['currentOrgOnly']) {
-					let currentOrgOnly = UTILS.convertStringToBoolean(req.query['currentOrgOnly'])
-					if (currentOrgOnly) {
-						query['orgId'] = { $in: ['ALL', req.userDetails.userInformation.organizationId] }
+				// Filter by noOfProjects if provided
+				if (req.query.noOfProjects !== undefined) {
+					const noOfProjects = parseInt(req.query.noOfProjects)
+					if (!isNaN(noOfProjects)) {
+						query.noOfProjects = noOfProjects
 					}
 				}
-				query['status'] = CONSTANTS.common.ACTIVE_STATUS
-				let categoryData = await projectCategoriesQueries.categoryDocuments(query, [
+
+				// handle currentOrgOnly filter
+				if (req.query.currentOrgOnly) {
+					let currentOrgOnly = UTILS.convertStringToBoolean(req.query.currentOrgOnly)
+					if (currentOrgOnly) {
+						query['orgId'] = { $in: ['ALL', organizationId] }
+					}
+				}
+				// Pagination logic
+				const pageSize = req.pageSize
+				const skip = pageSize * (req.pageNo - 1)
+				const sort = { sequenceNumber: 1, name: 1 }
+
+				// Use new paginated list query
+				let projectCategories = await projectCategoriesQueries.list(
+					query,
+					{
+						externalId: 1,
+						name: 1,
+						description: 1,
+						icon: 1,
+						'metaInformation.icon': 1,
+						updatedAt: 1,
+						noOfProjects: 1,
+						parent_id: 1,
+						hasChildCategories: 1,
+						sequenceNumber: 1,
+					},
+					sort,
+					skip,
+					pageSize
+				)
+
+				if (projectCategories.data.length === 0) {
+					return resolve({
+						success: true,
+						message: CONSTANTS.apiResponses.PROJECT_CATEGORIES_FETCHED || 'Categories fetched successfully',
+						data: [],
+						count: 0,
+					})
+				}
+
+				// Normalize icon from metaInformation and ensure sequenceNumber exists for compatibility
+				const normalizedData = projectCategories.data.map((cat) => {
+					const copy = { ...cat }
+					// Prefer root icon; if missing, fallback to legacy metaInformation.icon
+					if (
+						(copy.icon === undefined || copy.icon === '') &&
+						copy.metaInformation &&
+						copy.metaInformation.icon !== undefined
+					) {
+						copy.icon = copy.metaInformation.icon
+					}
+					copy.sequenceNumber = copy.sequenceNumber || 0
+					return copy
+				})
+
+				return resolve({
+					success: true,
+					message: CONSTANTS.apiResponses.PROJECT_CATEGORIES_FETCHED || 'Categories fetched successfully',
+					data: normalizedData,
+					count: projectCategories.count,
+				})
+			} catch (error) {
+				return reject({
+					success: false,
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message,
+					data: {},
+				})
+			}
+		})
+	}
+
+	/**
+	 * Update parent's hasChildCategories
+	 * @method
+	 * @name updateParentHasChildCategories
+	 * @param {ObjectId} parentId - Parent category ID
+	 * @param {String} tenantId - Tenant ID
+	 * @param {Number} increment - Increment value (1 or -1)
+	 */
+	static async updateParentHasChildCategories(parentId, tenantId, increment = 1) {
+		if (!parentId) return
+
+		try {
+			const parent = await projectCategoriesQueries.findOne({ _id: parentId, tenantId })
+			if (parent) {
+				const existingChildren = Array.isArray(parent.children) ? parent.children.length : 0
+				const newChildCount = Math.max(0, existingChildren + increment)
+				await projectCategoriesQueries.updateOne(
+					{ _id: parentId, tenantId },
+					{
+						$set: {
+							hasChildCategories: newChildCount > 0,
+						},
+					}
+				)
+			}
+		} catch (error) {
+			console.error('Error updating parent counts:', error)
+		}
+	}
+
+	/**
+	 * Validate parent category
+	 * @method
+	 * @name validateParent
+	 * @param {ObjectId} parentId - Parent category ID
+	 * @param {String} tenantId - Tenant ID
+	 * @returns {Object} Parent category
+	 */
+	static async validateParent(parentId, tenantId) {
+		if (!parentId) return null
+
+		const parent = await projectCategoriesQueries.findOne({
+			_id: parentId,
+			tenantId,
+			isDeleted: false,
+		})
+
+		if (!parent) {
+			throw {
+				status: HTTP_STATUS_CODE.bad_request.status,
+				message: 'PARENT_CATEGORY_NOT_FOUND',
+			}
+		}
+
+		return parent
+	}
+
+	/**
+	 * Get hierarchy for a specific category (subtree starting from category)
+	 * @method
+	 * @name getCategoryHierarchy
+	 * @param {Object} req - Request object (contains params, headers, query, body and userDetails)
+	 * @returns {Object} Category subtree
+	 */
+	static getCategoryHierarchy(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				const categoryId = req.params._id
+				let tenantId =
+					req.headers['tenantId'] ||
+					req.body.tenantId ||
+					req.query.tenantId ||
+					req.query.tenantCode ||
+					req.userDetails?.userInformation?.tenantId
+
+				// Find the category
+				let matchQuery = { tenantId: tenantId, isDeleted: false }
+				if (ObjectId.isValid(categoryId)) {
+					matchQuery['$or'] = [{ _id: new ObjectId(categoryId) }, { externalId: categoryId }]
+				} else {
+					matchQuery['externalId'] = categoryId
+				}
+
+				const category = await projectCategoriesQueries.findOne(matchQuery)
+
+				if (!category) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.CATEGORY_NOT_FOUND || 'Category not found',
+					}
+				}
+
+				// Get all descendant categories recursively
+				const descendantIds = await this.getAllDescendantIds(category._id, tenantId)
+				const allCategoryIds = [category._id, ...descendantIds]
+
+				// Convert all IDs to ObjectId for query
+				const objectIdArray = allCategoryIds.map((id) => {
+					if (id instanceof ObjectId) return id
+					if (ObjectId.isValid(id)) return new ObjectId(id)
+					return id
+				})
+
+				// Get all categories in the subtree
+				let query = {
+					tenantId: tenantId,
+					_id: { $in: objectIdArray },
+					status: CONSTANTS.common.ACTIVE_STATUS,
+					isDeleted: false,
+				}
+
+				let allCategories = await projectCategoriesQueries.categoryDocuments(query, [
+					'_id',
 					'externalId',
 					'name',
+					'description',
 					'icon',
-					'updatedAt',
-					'noOfProjects',
+					'metaInformation.icon',
+					'parent_id',
+					'hasChildCategories',
+					'sequenceNumber',
 				])
 
-				if (!categoryData.length > 0) {
+				// Build tree structure starting from the requested category
+				const categoryMap = {}
+				let rootCategory = null
+
+				// Create map of all categories
+				allCategories.forEach((cat) => {
+					const catIdStr = cat._id.toString()
+					categoryMap[catIdStr] = { ...cat, children: [] }
+					const categoryIdStr = category._id.toString()
+					if (catIdStr === categoryIdStr) {
+						rootCategory = categoryMap[catIdStr]
+					}
+				})
+
+				// Build tree - only add children that are in our map
+				allCategories.forEach((cat) => {
+					const categoryNode = categoryMap[cat._id.toString()]
+					if (cat.parent_id) {
+						// Handle both ObjectId and string formats
+						let parentIdStr
+						if (cat.parent_id instanceof ObjectId) {
+							parentIdStr = cat.parent_id.toString()
+						} else if (cat.parent_id._id) {
+							parentIdStr = cat.parent_id._id.toString()
+						} else {
+							parentIdStr = cat.parent_id.toString()
+						}
+
+						if (categoryMap[parentIdStr]) {
+							categoryMap[parentIdStr].children.push(categoryNode)
+						}
+					}
+				})
+
+				// Sort by sequenceNumber
+				const sortBySequenceNumber = (categoryNode) => {
+					if (categoryNode.children && categoryNode.children.length > 0) {
+						categoryNode.children.sort((a, b) => (a.sequenceNumber || 0) - (b.sequenceNumber || 0))
+						categoryNode.children.forEach((child) => {
+							if (child.children && child.children.length > 0) {
+								sortBySequenceNumber(child)
+							}
+						})
+					}
+				}
+
+				// normalize icon field from metaInformation to top-level for backward compatibility
+				const normalizeIcon = (categoryNode) => {
+					if (
+						(categoryNode.icon === undefined || categoryNode.icon === '') &&
+						categoryNode.metaInformation &&
+						categoryNode.metaInformation.icon !== undefined
+					) {
+						categoryNode.icon = categoryNode.metaInformation.icon
+					}
+					if (categoryNode.children && categoryNode.children.length) {
+						categoryNode.children.forEach((child) => normalizeIcon(child))
+					}
+				}
+
+				if (rootCategory) {
+					sortBySequenceNumber(rootCategory)
+					// Ensure icon exists at root (fallback from legacy metaInformation.icon)
+					normalizeIcon(rootCategory)
+					const applyFallback = (node) => {
+						if (
+							(node.icon === undefined || node.icon === '') &&
+							node.metaInformation &&
+							node.metaInformation.icon !== undefined
+						) {
+							node.icon = node.metaInformation.icon
+						}
+						if (node.children && node.children.length) {
+							node.children.forEach((c) => applyFallback(c))
+						}
+					}
+					applyFallback(rootCategory)
+				}
+
+				return resolve({
+					success: true,
+					message: 'Category hierarchy fetched successfully',
+					data: {
+						tree: rootCategory,
+						totalCategories: allCategories.length,
+					},
+				})
+			} catch (error) {
+				return reject({
+					success: false,
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message,
+					data: {},
+				})
+			}
+		})
+	}
+
+	/**
+	 * Get leaf categories
+	 * @method
+	 * @name getLeaves
+	 * @param {Object} req - Request object
+	 * @returns {Object} Leaf categories
+	 */
+	static getLeaves(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let tenantId =
+					req.headers['tenantId'] ||
+					req.body.tenantId ||
+					req.query.tenantId ||
+					req.query.tenantCode ||
+					req.userDetails.userInformation.tenantId
+				let orgId =
+					req.headers['orgId'] ||
+					req.body.orgId ||
+					req.query.orgId ||
+					req.query.orgCode ||
+					req.userDetails.userInformation.organizationId
+
+				let query = {
+					tenantId: tenantId,
+					// visibleToOrganizations: { $in: [orgId] },
+					status: CONSTANTS.common.ACTIVE_STATUS,
+					isDeleted: false,
+					hasChildCategories: false,
+				}
+
+				// Pagination logic using defaults
+				const pageSize = req.pageSize
+				const skip = pageSize * (req.pageNo - 1)
+				const sort = { sequenceNumber: 1, name: 1 }
+
+				// Use list query with pagination
+				let leafCategoriesResult = await projectCategoriesQueries.list(
+					query,
+					{
+						externalId: 1,
+						name: 1,
+						description: 1,
+						'metaInformation.icon': 1,
+						parent_id: 1,
+						hasChildCategories: 1,
+						sequenceNumber: 1,
+					},
+					sort,
+					skip,
+					pageSize
+				)
+				// Normalize icon from metaInformation
+				const normalizedData = leafCategoriesResult.data.map((cat) => {
+					const copy = { ...cat }
+					if (
+						(copy.icon === undefined || copy.icon === '') &&
+						copy.metaInformation &&
+						copy.metaInformation.icon !== undefined
+					) {
+						copy.icon = copy.metaInformation.icon
+					}
+					return copy
+				})
+
+				return resolve({
+					success: true,
+					message: 'Leaf categories fetched successfully',
+					data: normalizedData,
+					count: leafCategoriesResult.count,
+				})
+			} catch (error) {
+				return reject({
+					success: false,
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message,
+					data: {},
+				})
+			}
+		})
+	}
+
+	/**
+	 * Get all descendant category IDs for a given category (recursive)
+	 * @method
+	 * @name getAllDescendantIds
+	 * @param {ObjectId} categoryId - Parent category ID
+	 * @param {String} tenantId - Tenant ID
+	 * @returns {Array} Array of descendant category IDs
+	 */
+	static async getAllDescendantIds(categoryId, tenantId) {
+		try {
+			const allDescendantIds = []
+			const processedIds = new Set()
+
+			// Recursive function to get all descendants
+			const getDescendants = async (parentId) => {
+				// Normalize parentId to string for comparison
+				const parentIdStr = parentId instanceof ObjectId ? parentId.toString() : parentId.toString()
+
+				// Avoid infinite loops
+				if (processedIds.has(parentIdStr)) {
+					return
+				}
+				processedIds.add(parentIdStr)
+
+				// Convert to ObjectId for query - MongoDB can match ObjectId with ObjectId or string
+				const parentObjectId =
+					parentId instanceof ObjectId
+						? parentId
+						: ObjectId.isValid(parentId)
+						? new ObjectId(parentId)
+						: parentId
+
+				// Query for direct children - try both ObjectId and string formats
+				const children = await projectCategoriesQueries.categoryDocuments(
+					{
+						tenantId: tenantId,
+						$or: [{ parent_id: parentObjectId }, { parent_id: parentIdStr }],
+						isDeleted: false,
+						status: CONSTANTS.common.ACTIVE_STATUS,
+					},
+					['_id', 'parent_id']
+				)
+
+				for (const child of children) {
+					const childIdStr = child._id.toString()
+					// Only add if not already in the list
+					if (!allDescendantIds.some((id) => id.toString() === childIdStr)) {
+						allDescendantIds.push(child._id)
+						// Recursively get children of this child
+						await getDescendants(child._id)
+					}
+				}
+			}
+
+			await getDescendants(categoryId)
+			return allDescendantIds
+		} catch (error) {
+			console.error('Error getting descendant IDs:', error)
+			return []
+		}
+	}
+
+	/**
+	 * Check if categories have any projects associated
+	 * @method
+	 * @name checkCategoriesHaveProjects
+	 * @param {Array} categoryIds - Array of category IDs to check
+	 * @param {String} tenantId - Tenant ID
+	 * @returns {Object} Result with hasProjects flag and details
+	 */
+	static async checkCategoriesHaveProjects(categoryIds, tenantId) {
+		try {
+			// Build aggregation pipeline to count projects for each category
+			const pipeline = [
+				{
+					$match: {
+						tenantId: tenantId,
+						isReusable: true,
+						status: CONSTANTS.common.PUBLISHED_STATUS,
+						isDeleted: false,
+						'categories._id': { $in: categoryIds },
+					},
+				},
+				{
+					$unwind: '$categories',
+				},
+				{
+					$match: {
+						'categories._id': { $in: categoryIds },
+					},
+				},
+				{
+					$group: {
+						_id: '$categories._id',
+						categoryName: { $first: '$categories.name' },
+						projectCount: { $sum: 1 },
+						projectTitles: { $push: '$title' },
+					},
+				},
+			]
+
+			const results = await projectTemplateQueries.getAggregate(pipeline)
+
+			if (!results || results.length === 0) {
+				return {
+					hasProjects: false,
+					totalProjects: 0,
+					categoriesWithProjects: [],
+				}
+			}
+
+			const totalProjects = results.reduce((sum, cat) => sum + cat.projectCount, 0)
+			const categoriesWithProjects = results.map((cat) => ({
+				categoryId: cat._id,
+				categoryName: cat.categoryName,
+				projectCount: cat.projectCount,
+				projectTitles: cat.projectTitles.slice(0, 5), // Limit to first 5 project names
+			}))
+
+			return {
+				hasProjects: true,
+				totalProjects,
+				categoriesWithProjects,
+			}
+		} catch (error) {
+			console.error('Error checking categories for projects:', error)
+			return {
+				hasProjects: false,
+				totalProjects: 0,
+				categoriesWithProjects: [],
+			}
+		}
+	}
+
+	/**
+	 * Delete category
+	 * @method
+	 * @name delete
+	 * @param {Object} req - Express request object. `req.params._id` should contain categoryId and `req.userDetails` contains user info
+	 * @returns {Object} Delete result
+	 */
+	static delete(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				// extract categoryId and userDetails from req
+				const categoryId = req.params?._id || req.params?.id || null
+				const userDetails = req.userDetails || {}
+
+				// derive tenantId and orgId from userDetails
+				const tenantId =
+					userDetails?.tenantAndOrgInfo?.tenantId || userDetails?.userInformation?.tenantId || null
+				const orgId = Array.isArray(userDetails?.tenantAndOrgInfo?.orgId)
+					? userDetails.tenantAndOrgInfo.orgId[0]
+					: userDetails?.tenantAndOrgInfo?.orgId || userDetails?.userInformation?.organizationId || null
+
+				if (!tenantId) {
 					throw {
-						status: HTTP_STATUS_CODE.ok.status,
-						message: CONSTANTS.apiResponses.LIBRARY_CATEGORIES_NOT_FOUND,
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: 'Tenant ID is required',
+					}
+				}
+
+				// 1. Get category details
+				let matchQuery = { tenantId: tenantId, isDeleted: false }
+				if (ObjectId.isValid(categoryId)) {
+					matchQuery['$or'] = [{ _id: new ObjectId(categoryId) }, { externalId: categoryId }]
+				} else {
+					matchQuery['externalId'] = categoryId
+				}
+
+				const category = await projectCategoriesQueries.findOne(matchQuery)
+
+				if (!category) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.CATEGORY_NOT_FOUND,
+					}
+				}
+
+				// 2. Validate deletion eligibility
+				const allCategoryIds = await this.getAllDescendantIds(category._id, tenantId)
+				allCategoryIds.push(category._id) // Include the category itself
+
+				// Check if any category (parent or children) has projects
+				const projectsCheck = await this.checkCategoriesHaveProjects(allCategoryIds, tenantId)
+				if (projectsCheck.hasProjects) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: `Category or its children are used by ${projectsCheck.totalProjects} projects`,
+					}
+				}
+
+				// Check if has children
+				if (category.hasChildCategories) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: 'Has child categories. Delete children first.',
+					}
+				}
+
+				// Check if referenced by templates
+				const templates = await projectTemplateQueries.templateDocument(
+					{
+						'categories._id': category._id,
+						tenantId,
+						isDeleted: false,
+					},
+					['_id', 'title']
+				)
+
+				if (templates && templates.length > 0) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: `Referenced by ${templates.length} templates`,
+					}
+				}
+
+				// 3. Soft delete the category
+				await projectCategoriesQueries.updateOne(
+					{ _id: category._id, tenantId },
+					{ $set: { isDeleted: true, deletedAt: new Date() } }
+				)
+
+				// 4. Remove category from all templates
+				const templatesUpdated = await this.removeCategoryFromTemplates(category._id, tenantId)
+
+				// 5. Update parent counts
+				if (category.parent_id) {
+					await this.updateParentHasChildCategories(category.parent_id, tenantId, -1)
+					// remove from parent's children array
+					await projectCategoriesQueries.updateOne(
+						{ _id: category.parent_id },
+						{ $pull: { children: category._id } }
+					)
+				}
+
+				return resolve({
+					success: true,
+					message: CONSTANTS.apiResponses.CATEGORY_DELETED || 'Category deleted successfully',
+					data: {
+						categoryId: category._id,
+						templatesUpdated: templatesUpdated,
+					},
+				})
+			} catch (error) {
+				return reject({
+					success: false,
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message,
+					data: {},
+				})
+			}
+		})
+	}
+
+	/**
+	 * Remove category from all templates
+	 * @method
+	 * @name removeCategoryFromTemplates
+	 * @param {ObjectId} categoryId - Category ID
+	 * @param {String} tenantId - Tenant ID
+	 * @returns {Number} Number of templates updated
+	 */
+	static async removeCategoryFromTemplates(categoryId, tenantId) {
+		try {
+			// Find all templates with this category
+			const templates = await projectTemplateQueries.templateDocument(
+				{
+					'categories._id': categoryId,
+					tenantId,
+					isDeleted: false,
+				},
+				['_id', 'categories']
+			)
+
+			console.log(`Removing category ${categoryId} from ${templates.length} templates`)
+
+			// Remove category from each template
+			for (const template of templates) {
+				const updatedCategories = template.categories.filter(
+					(cat) => cat._id && cat._id.toString() !== categoryId.toString()
+				)
+
+				await projectTemplateQueries.updateProjectTemplateDocument(
+					{ _id: template._id },
+					{
+						$set: {
+							categories: updatedCategories,
+						},
+					}
+				)
+			}
+
+			return templates.length
+		} catch (error) {
+			console.error('Error removing category from templates:', error)
+			throw error
+		}
+	}
+
+	/**
+	 * Bulk create categories
+	 * @method
+	 * @name bulkCreate
+	 * @param {Array} categories - Array of category data
+	 * @param {Object} userDetails - User details
+	 * @returns {Object} Bulk create result
+	 */
+	static bulkCreate(categories, userDetails) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				// derive tenant & org from userDetails
+				const tenantId = userDetails?.tenantAndOrgInfo?.tenantId
+				const orgId = Array.isArray(userDetails?.tenantAndOrgInfo?.orgId)
+					? userDetails.tenantAndOrgInfo.orgId[0]
+					: userDetails?.tenantAndOrgInfo?.orgId
+
+				let created = 0
+				let failed = 0
+				const errors = []
+
+				for (const categoryData of categories) {
+					try {
+						// Find parent by externalId if parentExternalId provided
+						let parentId = null
+						if (categoryData.parentExternalId) {
+							const parent = await projectCategoriesQueries.findOne(
+								{ externalId: categoryData.parentExternalId, tenantId },
+								{ _id: 1 }
+							)
+							if (parent) {
+								parentId = parent._id
+							} else {
+								throw {
+									message:
+										CONSTANTS.apiResponses.PARENT_CATEGORY_NOT_FOUND || 'Parent category not found',
+									status: HTTP_STATUS_CODE.bad_request.status,
+								}
+							}
+						}
+
+						categoryData.parentId = parentId
+						categoryData.tenantId = tenantId
+						categoryData.orgId = orgId
+						// categoryData.visibleToOrganizations = [orgId]
+
+						// Create category
+						const result = await this.create(categoryData, null, userDetails)
+						if (result.success) {
+							created++
+						} else {
+							failed++
+							errors.push({ category: categoryData.externalId, error: result.message })
+						}
+					} catch (error) {
+						failed++
+						errors.push({ category: categoryData.externalId, error: error.message })
+					}
+				}
+
+				return resolve({
+					success: true,
+					data: {
+						created,
+						failed,
+						errors,
+					},
+				})
+			} catch (error) {
+				return reject({
+					success: false,
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message,
+					data: {},
+				})
+			}
+		})
+	}
+
+	/**
+	 * Sync templates for a category (background job)
+	 * @method
+	 * @name syncTemplatesForCategory
+	 * @param {ObjectId} categoryId - Category ID
+	 * @param {String} tenantId - Tenant ID
+	 */
+	static async syncTemplatesForCategory(categoryId, tenantId) {
+		try {
+			const category = await projectCategoriesQueries.findOne({ _id: categoryId, tenantId })
+			if (!category) return
+
+			// Find all templates with this category
+			const templates = await projectTemplateQueries.templateDocument(
+				{
+					'categories._id': categoryId,
+					tenantId,
+					isDeleted: false,
+				},
+				['_id', 'categories']
+			)
+
+			// Instead of updating templates directly here, publish a kafka event so
+			// downstream template sync workers can handle updates in a decoupled way.
+			for (const template of templates) {
+				const message = {
+					templateId: template._id,
+					tenantId: tenantId,
+					category: {
+						_id: category._id,
+						name: category.name,
+						externalId: category.externalId,
+						isLeaf: !category.hasChildCategories,
+						syncAt: new Date(),
+					},
+					action: 'category_updated',
+				}
+
+				// fire and forget - log error if kafka push fails
+				kafkaProducersHelper.pushCategoryChangeEvent(message).catch((err) => {
+					console.error('Failed to push category change event for template', template._id, err)
+				})
+			}
+		} catch (error) {
+			console.error('Error syncing templates for category:', error)
+		}
+	}
+
+	static details(categoryId, userDetails) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				const tenantId =
+					userDetails?.tenantAndOrgInfo?.tenantId || userDetails?.userInformation?.tenantId || null
+
+				if (!tenantId) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: 'Tenant ID is required',
+					}
+				}
+
+				let matchQuery = {
+					tenantId: tenantId,
+					isDeleted: false,
+				}
+
+				if (ObjectId.isValid(categoryId)) {
+					matchQuery['$or'] = [{ _id: new ObjectId(categoryId) }, { externalId: categoryId }]
+				} else {
+					matchQuery['externalId'] = categoryId
+				}
+
+				const category = await projectCategoriesQueries.findOne(matchQuery)
+
+				if (!category) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.CATEGORY_NOT_FOUND,
+					}
+				}
+
+				// Normalize icon: prefer root `icon`, fallback to legacy `metaInformation.icon`
+				if (category) {
+					if (
+						(category.icon === undefined || category.icon === '') &&
+						category.metaInformation &&
+						category.metaInformation.icon !== undefined
+					) {
+						category.icon = category.metaInformation.icon
 					}
 				}
 
 				return resolve({
 					success: true,
 					message: CONSTANTS.apiResponses.PROJECT_CATEGORIES_FETCHED,
-					data: categoryData,
+					data: category,
 				})
 			} catch (error) {
-				return resolve({
+				return reject({
 					success: false,
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
 					message: error.message,
 					data: {},
 				})
@@ -990,6 +1999,16 @@ function handleEvidenceUpload(files, userId) {
 		}
 	}
 */
+
+/**
+ * Apply visibility conditions to the match query.
+ * @method
+ * @name applyVisibilityConditions
+ * @param {Object} matchQuery - The current match query.
+ * @param {Object} orgExtension - Organization extension document.
+ * @param {Object} userDetails - User details.
+ * @returns {Object} Updated match query.
+ */
 function applyVisibilityConditions(matchQuery, orgExtension, userDetails) {
 	let matchConditions = []
 

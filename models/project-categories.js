@@ -2,7 +2,7 @@
  * name : project-categories.js.
  * author : Aman Karki.
  * created-date : 14-July-2020.
- * Description : Schema for project categories.
+ * Description : Schema for project categories with hierarchical support.
  */
 
 module.exports = {
@@ -15,6 +15,7 @@ module.exports = {
 		name: {
 			type: String,
 			required: true,
+			maxlength: 100,
 		},
 		createdBy: {
 			type: String,
@@ -24,9 +25,31 @@ module.exports = {
 			type: String,
 			default: 'SYSTEM',
 		},
+		parent_id: {
+			type: 'ObjectId',
+			ref: 'projectCategories',
+			default: null,
+			index: true, // CRITICAL for hierarchy queries
+		},
+		hasChildCategories: {
+			type: Boolean,
+			default: false,
+			index: true, // Quick leaf identification
+		},
+		children: {
+			type: Array,
+			default: [],
+		},
+		sequenceNumber: {
+			type: Number,
+			default: 0,
+			index: true,
+		},
+		// ==========================================
 		isDeleted: {
 			type: Boolean,
 			default: false,
+			index: true,
 		},
 		isVisible: {
 			type: Boolean,
@@ -34,9 +57,15 @@ module.exports = {
 		},
 		status: {
 			type: String,
+			enum: ['active', 'inactive', 'archived'],
 			default: 'active',
+			index: true,
 		},
 		icon: {
+			type: String,
+			default: '',
+		},
+		description: {
 			type: String,
 			default: '',
 		},
@@ -66,11 +95,19 @@ module.exports = {
 			default: [],
 			index: true,
 		},
+		metaInformation: {
+			type: Object,
+			default: {},
+		},
 	},
 	compoundIndex: [
 		{
 			name: { externalId: 1, tenantId: 1 },
 			indexType: { unique: true },
+		},
+		{
+			name: { parent_id: 1, tenantId: 1, orgId: 1, sequenceNumber: 1 },
+			indexType: {}, // For fetching sorted children
 		},
 	],
 }

@@ -45,7 +45,6 @@ module.exports = class ProfileHelper {
 						},
 					}
 					let tenantId = reqUserDetails.userInformation.tenantId
-					let orgId = reqUserDetails.userInformation.organizationId
 
 					filterData['tenantId'] = tenantId
 					// Define the fields to be projected in the entity documents

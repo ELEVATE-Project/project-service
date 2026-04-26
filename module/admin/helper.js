@@ -23,6 +23,7 @@ const ObjectId = require('mongodb').ObjectId
 const kafkaProducersHelper = require(GENERICS_FILES_PATH + '/kafka/producers')
 const userExtensionQueries = require(DB_QUERY_BASE_PATH + '/userExtension')
 const projectQueries = require(DB_QUERY_BASE_PATH + '/projects')
+const cacheHelper = require(GENERICS_FILES_PATH + '/helpers/cache')
 
 module.exports = class AdminHelper {
 	/**
@@ -606,5 +607,32 @@ module.exports = class AdminHelper {
 				console.error(`Kafka push failed for ${resourceType} ${resourceId}:`, error.message)
 			}
 		})
+	}
+
+	/**
+	 * clearTenantCache  based on tenantId
+	 *
+	 * @param {String} tenantId - tenant id
+	 * @returns {Object} returns a object.
+	 */
+	static async clearTenantCache(tenantId) {
+		try {
+			let removeTenantCache = await cacheHelper.clearCache(`tenant_${tenantId}`)
+			if (removeTenantCache.success) {
+				return {
+					message: removeTenantCache.message,
+					success: true,
+				}
+			}
+			return {
+				message: removeTenantCache.message,
+				success: false,
+			}
+		} catch (error) {
+			return {
+				message: error.message,
+				success: false,
+			}
+		}
 	}
 }

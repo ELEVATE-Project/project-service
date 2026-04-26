@@ -112,6 +112,7 @@ module.exports = async function (req, res, next, token = '') {
 		'/organizationExtension/updateRelatedOrgs',
 		'/userExtension/update',
 		'/solutions/fetchLinkInternal',
+		'admin/clearTenantCache',
 	]
 
 	let publicApisWithLimitedAccess = ['/solutions/fetchLink']

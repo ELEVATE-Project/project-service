@@ -184,4 +184,39 @@ module.exports = class Admin {
 			}
 		})
 	}
+
+	/**
+	 * @api {post} /project/v1/admin/clearTenantCache/:_id
+	 * clears cache for tenants based on id provided in the params
+	 * @apiVersion 1.0.0
+	 * @apiGroup Admin
+	 * @apiSampleRequest /project/v1/admin/clearTenantCache/shikshalokam
+     * @apiSampleResponse {json} Response:
+		{
+			"message": "Cache cleared for  tenant_shikshalokam",
+			"status": 200
+		}
+    */
+
+	/**
+	 * clearTenantCache based on the passed tenantId
+	 * @method POST
+	 * @name clearTenantCache
+	 * @param {Object} req - Req Body
+	 * @returns {Promise<Object>} successObject.
+	 */
+	async clearTenantCache(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let result = await adminHelper.clearTenantCache(req.params._id)
+				return resolve(result)
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
+				})
+			}
+		})
+	}
 }

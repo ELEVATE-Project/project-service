@@ -8,6 +8,7 @@
 //dependencies
 const request = require('request')
 const interfaceServiceUrl = process.env.INTERFACE_SERVICE_URL
+const tenantCache = require('../helpers/cache')
 
 // Function to read the user profile based on the given userId
 const profile = function (userId = '', userToken = '') {
@@ -453,6 +454,8 @@ const fetchTenantDetails = function (tenantId, aggregateValidOrgs = false) {
 const fetchPublicTenantDetails = function (tenantId) {
 	return new Promise(async (resolve, reject) => {
 		try {
+			const cached = tenantCache.getCache(`tenant_${tenantId}`)
+			if (cached) return resolve(cached)
 			let url = interfaceServiceUrl + process.env.USER_SERVICE_BASE_URL + CONSTANTS.endpoints.PUBLIC_BRANDING
 			const options = {
 				headers: {
@@ -471,6 +474,7 @@ const fetchPublicTenantDetails = function (tenantId) {
 					let response = JSON.parse(data.body)
 					if (response.responseCode === HTTP_STATUS_CODE['ok'].code) {
 						result['data'] = response.result
+						tenantCache.setCache(`tenant_${tenantId}`, result)
 					} else {
 						result.success = false
 					}

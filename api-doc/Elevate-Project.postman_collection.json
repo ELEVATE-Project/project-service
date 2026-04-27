@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "137475d2-44ec-4746-84ec-1f12779168ec",
+		"_postman_id": "83b8c44c-b33a-49b1-9976-6748481be8b0",
 		"name": "Elevate-Project",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "28589818"
@@ -2308,8 +2308,7 @@
 							"raw": "{\n    \"query\": {\n       \"_id\":\"66975a4a4999c205ea017da9\"\n    },\n    \"mongoIdKeys\": [\n        \"_id\"\n    ],\n    \"limit\":2000\n}"
 						},
 						"url": {
-							"raw": "http://{{baseUrl}}/project/v1/admin/dbFind/:collectionName",
-							"protocol": "http",
+							"raw": "{{baseUrl}}/project/v1/admin/dbFind/:collectionName",
 							"host": ["{{baseUrl}}"],
 							"path": ["project", "v1", "admin", "dbFind", ":collectionName"],
 							"variable": [
@@ -2362,6 +2361,43 @@
 								{
 									"key": "type",
 									"value": "solution"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "clearTenantCache",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "internal-access-token",
+								"value": "{{devInternalAccessToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}project/v1/admin/clearTenantCache/:_id",
+							"host": ["{{baseUrl}}project"],
+							"path": ["v1", "admin", "clearTenantCache", ":_id"],
+							"variable": [
+								{
+									"key": "_id",
+									"value": ""
 								}
 							]
 						}

@@ -1021,7 +1021,7 @@ function getEligibleProgramsForUser(userData, programs, programIdMap, programInf
 		}
 		// Fallback: use program.orgId (string)
 		else {
-			programOrganizations = [program.orgId]
+			programOrganizations = [programInfo.orgId]
 		}
 		const commonOrganizationCodes = userOrgCodes.filter((value) => programOrganizations.includes(value))
 

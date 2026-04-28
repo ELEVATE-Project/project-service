@@ -12647,5 +12647,41 @@ paths:
         schema:
           type: string
         required: true
+  /v1/project/admin/clearTenantCache/:tenantId:
+    post:
+      description: ''
+      operationId: ''
+      tags:
+        - Admin
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  status:
+                    type: number
+              examples:
+                example1:
+                  value:
+                    message: Cache cleared for  tenant_shikshalokam
+                    status: 200
+    parameters:
+      - in: path
+        name: _id
+        description: Tenant Id is mandatory in path params
+        schema: &ref_73
+          type: string
+        required: true
+      - in: header
+        name: internal-access-token
+        description: Internal Access Token is mandatory in headers.
+        schema: *ref_73
+        required: true
 components:
   securitySchemes: {}

@@ -120,7 +120,7 @@ module.exports = class ReportsHelper {
 					}
 				})
 
-				if (!projectDetails.length > 0) {
+				if (!(projectDetails.length > 0)) {
 					if (getPdf == true) {
 						let reportTaskData = {}
 						Object.keys(tasksReport).map((taskData) => {
@@ -233,7 +233,11 @@ module.exports = class ReportsHelper {
 						await Promise.all(
 							project.tasks.map((task) => {
 								//consider task only if not deleted
-								if (task.isDeleted == false && task.status != CONSTANTS.common.COMPLETED_STATUS) {
+								if (
+									task &&
+									task.isDeleted == false &&
+									task.status != CONSTANTS.common.COMPLETED_STATUS
+								) {
 									//Returns true or false
 									let overdue = _getOverdueStatus(task.endDate)
 

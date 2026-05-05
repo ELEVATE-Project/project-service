@@ -3177,7 +3177,6 @@ module.exports = class SolutionsHelper {
 
 					// Construct query for projects accessible by the user
 					query = {
-						'solutionInformation.submissionLevel': process.env.SUBMISSION_LEVEL,
 						$or: [
 							{ 'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_ALL },
 							{

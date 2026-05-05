@@ -2542,7 +2542,6 @@ module.exports = class SolutionsHelper {
 					requestedData,
 					userDetails
 				)
-				// console.log(userCreatedProjects)
 				if (!userCreatedProjects.success && solutionType !== CONSTANTS.common.COURSE) {
 					throw {
 						status: HTTP_STATUS_CODE.bad_request.status,

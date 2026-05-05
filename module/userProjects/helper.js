@@ -144,6 +144,7 @@ module.exports = class UserProjectsHelper {
 						'acl',
 						'userId',
 						'reflection',
+						'solutionInformation.submissionLevel',
 					]
 				)
 
@@ -153,7 +154,7 @@ module.exports = class UserProjectsHelper {
 						message: CONSTANTS.apiResponses.USER_PROJECT_NOT_FOUND,
 					}
 				}
-				// if entityId & entityInformation are passed through payload, ignore them
+				// ignore blackListed items if passed in payload
 				const blackListedPayloadItems = [
 					'entityId',
 					'entityInformation',
@@ -166,19 +167,27 @@ module.exports = class UserProjectsHelper {
 					'programInformation',
 					'solutionInformation',
 					'updateHistory',
+					'acl',
+					'userId',
+					'createdBy',
 				]
 				blackListedPayloadItems.map((payloadItem) => {
 					if (data.hasOwnProperty(payloadItem)) delete data[payloadItem]
 				})
 
-				if (process.env.SUBMISSION_LEVEL == 'USER') {
-					if (!(userProject[0].userId == userId)) {
+				if (userProject[0].userId != userId) {
+					if (
+						!(
+							userProject[0].solutionInformation.submissionLevel == CONSTANTS.common.ENTITY &&
+							process.env.SUBMISSION_LEVEL == CONSTANTS.common.ENTITY
+						)
+					) {
 						throw {
 							status: HTTP_STATUS_CODE.bad_request.status,
-							message: CONSTANTS.apiResponses.USER_PROJECT_NOT_FOUND,
+							message: CONSTANTS.apiResponses.SUBMISSION_LEVEL_NOT_COMPLIED,
 						}
 					}
-				} else {
+
 					// validate user authenticity if the acl.visibility of project is SELf or SPECIFIC
 					if (
 						(userProject[0].acl.visibility == CONSTANTS.common.PROJECT_VISIBILITY_SELF &&
@@ -4358,7 +4367,7 @@ module.exports = class UserProjectsHelper {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Only allow updates if submission level is ENTITY
-				if (process.env.SUBMISSION_LEVEL !== 'ENTITY') {
+				if (process.env.SUBMISSION_LEVEL !== CONSTANTS.common.ENTITY) {
 					throw {
 						success: false,
 						message: CONSTANTS.apiResponses.SUBMISSION_LEVEL_NOT_COMPLIED,
@@ -4375,6 +4384,14 @@ module.exports = class UserProjectsHelper {
 					createdBy: userId,
 					tenantId,
 				})
+
+				// Avoid updating project.acl if project.solutionInformation.submissionLevel is not 'ENTITY'
+				if (projectData.solutionInformation.submissionLevel != CONSTANTS.common.ENTITY) {
+					throw {
+						success: false,
+						message: CONSTANTS.apiResponses.SUBMISSION_LEVEL_NOT_COMPLIED,
+					}
+				}
 
 				if (!projectData || projectData.length === 0) {
 					throw {

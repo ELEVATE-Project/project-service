@@ -3165,7 +3165,7 @@ module.exports = class SolutionsHelper {
 			try {
 				let query = { isDeleted: false }
 
-				if (process.env.SUBMISSION_LEVEL === 'ENTITY') {
+				if (process.env.SUBMISSION_LEVEL === CONSTANTS.common.ENTITY) {
 					// Use queryBasedOnRoleAndLocation function to form query for acl.visibility = SCOPE projects
 					let queryData = await this.queryBasedOnRoleAndLocation(requestedData, '', 'acl')
 					// status of the project could be anything, hence deleting status property from the querydata

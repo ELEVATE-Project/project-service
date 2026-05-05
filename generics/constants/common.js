@@ -189,4 +189,6 @@ module.exports = {
 	SESSION_VERIFICATION_METHOD: {
 		USER_SERVICE: 'user_service_authenticated',
 	},
+	USERS: 'USERS',
+	ENTITY: 'ENTITY',
 }

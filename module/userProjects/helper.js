@@ -178,8 +178,8 @@ module.exports = class UserProjectsHelper {
 				if (userProject[0].userId != userId) {
 					if (
 						!(
-							userProject[0].solutionInformation.submissionLevel == 'ENTITY' &&
-							process.env.SUBMISSION_LEVEL == 'ENTITY'
+							userProject[0].solutionInformation.submissionLevel == CONSTANTS.common.ENTITY &&
+							process.env.SUBMISSION_LEVEL == CONSTANTS.common.ENTITY
 						)
 					) {
 						throw {
@@ -4367,7 +4367,7 @@ module.exports = class UserProjectsHelper {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Only allow updates if submission level is ENTITY
-				if (process.env.SUBMISSION_LEVEL !== 'ENTITY') {
+				if (process.env.SUBMISSION_LEVEL !== CONSTANTS.common.ENTITY) {
 					throw {
 						success: false,
 						message: CONSTANTS.apiResponses.SUBMISSION_LEVEL_NOT_COMPLIED,
@@ -4386,7 +4386,7 @@ module.exports = class UserProjectsHelper {
 				})
 
 				// Avoid updating project.acl if project.solutionInformation.submissionLevel is not 'ENTITY'
-				if (projectData.solutionInformation.submissionLevel != 'ENTITY') {
+				if (projectData.solutionInformation.submissionLevel != CONSTANTS.common.ENTITY) {
 					throw {
 						success: false,
 						message: CONSTANTS.apiResponses.SUBMISSION_LEVEL_NOT_COMPLIED,

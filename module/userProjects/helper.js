@@ -4386,7 +4386,7 @@ module.exports = class UserProjectsHelper {
 				})
 
 				// Avoid updating project.acl if project.solutionInformation.submissionLevel is not 'ENTITY'
-				if (projectData.solutionInformation.submissionLevel != CONSTANTS.common.ENTITY) {
+				if (projectData[0].solutionInformation.submissionLevel != CONSTANTS.common.ENTITY) {
 					throw {
 						success: false,
 						message: CONSTANTS.apiResponses.SUBMISSION_LEVEL_NOT_COMPLIED,

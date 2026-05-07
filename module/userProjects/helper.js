@@ -188,12 +188,10 @@ module.exports = class UserProjectsHelper {
 						}
 					}
 
-					// validate user authenticity if the acl.visibility of project is SELf or SPECIFIC
+					// validate user authenticity if the acl.visibility of project is SPECIFIC
 					if (
-						(userProject[0].acl.visibility == CONSTANTS.common.PROJECT_VISIBILITY_SELF &&
-							!(userProject[0].userId == userId)) ||
-						(userProject[0].acl.visibility == CONSTANTS.common.PROJECT_VISIBILITY_SPECIFIC &&
-							!(userProject[0].acl.hasOwnProperty('users') && userProject[0].acl.users.includes(userId)))
+						userProject[0].acl.visibility == CONSTANTS.common.PROJECT_VISIBILITY_SPECIFIC &&
+						!(userProject[0].acl.hasOwnProperty('users') && userProject[0].acl.users.includes(userId))
 					) {
 						throw {
 							status: HTTP_STATUS_CODE.bad_request.status,
@@ -4371,6 +4369,7 @@ module.exports = class UserProjectsHelper {
 					throw {
 						success: false,
 						message: CONSTANTS.apiResponses.SUBMISSION_LEVEL_NOT_COMPLIED,
+						status: HTTP_STATUS_CODE['bad_request'].status,
 					}
 				}
 
@@ -4385,21 +4384,23 @@ module.exports = class UserProjectsHelper {
 					tenantId,
 				})
 
+				if (!projectData || projectData.length === 0) {
+					throw {
+						success: false,
+						message: CONSTANTS.apiResponses.NOT_ALLOWED_TO_UPDATE_ACL,
+						status: HTTP_STATUS_CODE['bad_request'].status,
+					}
+				}
+
 				// Avoid updating project.acl if project.solutionInformation.submissionLevel is not 'ENTITY'
 				if (projectData[0].solutionInformation.submissionLevel != CONSTANTS.common.ENTITY) {
 					throw {
 						success: false,
 						message: CONSTANTS.apiResponses.SUBMISSION_LEVEL_NOT_COMPLIED,
-					}
-				}
-
-				if (!projectData || projectData.length === 0) {
-					throw {
-						success: false,
-						message: CONSTANTS.apiResponses.PROJECT_NOT_FOUND,
 						status: HTTP_STATUS_CODE['bad_request'].status,
 					}
 				}
+
 				if (
 					bodyData.acl.visibility === CONSTANTS.common.PROJECT_VISIBILITY_SPECIFIC &&
 					bodyData.acl.users.length > 0
@@ -4436,6 +4437,7 @@ module.exports = class UserProjectsHelper {
 					throw {
 						success: false,
 						message: CONSTANTS.apiResponses.PROJECT_UPDATE_FAILED,
+						status: HTTP_STATUS_CODE['bad_request'].status,
 					}
 				}
 

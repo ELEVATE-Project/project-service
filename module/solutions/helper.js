@@ -3163,53 +3163,87 @@ module.exports = class SolutionsHelper {
 	static async generateAssignedProjectsQuery(userId, requestedData, filter) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let query = { isDeleted: false }
+				let query = {
+					isDeleted: false,
+				}
 
+				// ---------------------------------------------
+				// Apply filter logic by default
+				// ---------------------------------------------
+				if (filter && filter !== '') {
+					if (filter === CONSTANTS.common.CREATED_BY_ME) {
+						query['referenceFrom'] = { $ne: CONSTANTS.common.LINK }
+						query['isAPrivateProgram'] = { $ne: false }
+					} else if (filter === CONSTANTS.common.ASSIGN_TO_ME) {
+						query['isAPrivateProgram'] = false
+					} else {
+						query['$or'] = [
+							{
+								$and: [{ programId: { $exists: false } }, { projectTemplateId: { $exists: true } }],
+							},
+							{
+								$and: [
+									{ programId: { $exists: true } },
+									{ isAPrivateProgram: true },
+									{ projectTemplateId: { $exists: true } },
+								],
+							},
+						]
+					}
+				}
+
+				// ---------------------------------------------
+				// Apply ENTITY visibility logic
+				// ---------------------------------------------
 				if (process.env.SUBMISSION_LEVEL === CONSTANTS.common.ENTITY) {
-					// Use queryBasedOnRoleAndLocation function to form query for acl.visibility = SCOPE projects
+					// Use queryBasedOnRoleAndLocation function
+					// to form query for acl.visibility = SCOPE projects
 					let queryData = await this.queryBasedOnRoleAndLocation(requestedData, '', 'acl')
-					// status of the project could be anything, hence deleting status property from the querydata
+
+					// status of the project could be anything
 					delete queryData.data.status
-					// isReusable field doesn't exist for projects model hence removing the key
+
+					// isReusable field doesn't exist for projects model
 					delete queryData.data.isReusable
 
 					let matchQuery = queryData.data
 
-					// Construct query for projects accessible by the user
 					query = {
-						$or: [
-							{ 'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_ALL },
+						...query,
+						$and: [
+							...(query.$or ? [{ $or: query.$or }] : []),
 							{
-								'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_SPECIFIC,
-								'acl.users': { $in: [userId.toString()] },
+								$or: [
+									{
+										'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_ALL,
+									},
+									{
+										'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_SPECIFIC,
+										'acl.users': {
+											$in: [userId.toString()],
+										},
+									},
+									{
+										'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_SCOPE,
+										...matchQuery,
+									},
+									{
+										createdBy: userId,
+									},
+								],
 							},
-							{ 'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_SCOPE, ...matchQuery },
-							{ createdBy: userId },
 						],
 					}
-				} else {
-					query['userId'] = userId
 
-					if (filter && filter !== '') {
-						if (filter === CONSTANTS.common.CREATED_BY_ME) {
-							query['referenceFrom'] = { $ne: CONSTANTS.common.LINK }
-							query['isAPrivateProgram'] = { $ne: false }
-						} else if (filter === CONSTANTS.common.ASSIGN_TO_ME) {
-							query['isAPrivateProgram'] = false
-						} else {
-							query['$or'] = [
-								{ $and: [{ programId: { $exists: false } }, { projectTemplateId: { $exists: true } }] },
-								{
-									$and: [
-										{ programId: { $exists: true } },
-										{ isAPrivateProgram: true },
-										{ projectTemplateId: { $exists: true } },
-									],
-								},
-							]
-						}
+					// Remove top-level $or if already moved into $and
+					if (query.$or) {
+						delete query.$or
 					}
+				} else {
+					// Non-ENTITY flow
+					query['createdBy'] = userId
 				}
+
 				return resolve({
 					success: true,
 					data: query,

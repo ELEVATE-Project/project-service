@@ -326,4 +326,5 @@ module.exports = {
 	INVALID_USER_PERMISSION_CODE: 'INVALID_USER_PERMISSION',
 	SUBMISSION_LEVEL_NOT_COMPLIED: 'Not allowed to update project. SUBMISSION_LEVEL not complied!',
 	PROJECT_UPDATED_SUCCESSFULLY: 'Project updated successfully.',
+	NOT_ALLOWED_TO_UPDATE_ACL: 'Not allowed to update acl!',
 }

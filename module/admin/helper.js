@@ -237,7 +237,8 @@ module.exports = class AdminHelper {
 								CONSTANTS.common.SOLUTION,
 								tenantId,
 								orgId,
-								deletedBy
+								deletedBy,
+								isAPrivateProgram
 							)
 
 							deletedSurveysCount += deleteResponse.data.result.deletedSurveysCount || 0
@@ -246,6 +247,7 @@ module.exports = class AdminHelper {
 							deletedObservationsCount += deleteResponse.data.result.deletedObservationsCount || 0
 							deletedObservationSubmissionsCount +=
 								deleteResponse.data.result.deletedObservationSubmissionsCount || 0
+							deletedSolutionsCount += deleteResponse.data.result.deletedSolutionsCount || 0
 						}
 
 						const deletedSolutions = await solutionsQueries.delete(solutionFilter)
@@ -288,7 +290,8 @@ module.exports = class AdminHelper {
 								projectTemplateIds,
 								tenantId,
 								orgId,
-								deletedBy
+								deletedBy,
+								isAPrivateProgram
 							)
 
 							if (result.success) {
@@ -384,7 +387,8 @@ module.exports = class AdminHelper {
 							[solutionDetails[0].projectTemplateId],
 							tenantId,
 							orgId,
-							deletedBy
+							deletedBy,
+							isAPrivateProgram
 						)
 
 						if (result.success) {
@@ -438,8 +442,9 @@ module.exports = class AdminHelper {
 	 * @param {string} tenantId - Tenant identifier.
 	 * @param {string} orgId - Organization identifier.
 	 * @param {string} deletedBy - Auth token for downstream service calls.
+	 * @param {String} isAPrivateProgram - If Program is Private `true` else `false`.
 	 */
-	static deleteAssociatedResources(projectTemplateIds, tenantId, orgId, deletedBy) {
+	static deleteAssociatedResources(projectTemplateIds, tenantId, orgId, deletedBy, isAPrivateProgram) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Initialize counters to track deletions
@@ -510,7 +515,8 @@ module.exports = class AdminHelper {
 							CONSTANTS.common.SOLUTION,
 							tenantId,
 							orgId,
-							deletedBy
+							deletedBy,
+							isAPrivateProgram
 						)
 
 						deletedSurveysCount += deleteResponse.data.result.deletedSurveysCount || 0

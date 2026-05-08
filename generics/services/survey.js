@@ -333,10 +333,10 @@ const createObservation = function (token, solutionId, data, userRoleAndProfileI
  * @param {String} resourceType - Type of the resource being deleted ('solution', 'program', etc.).
  * @param {String} tenantId - Tenant identifier (used for multi-tenancy).
  * @param {String} orgId - Organization ID from where the deletion is triggered.
- *
+ * @param {String} isAPrivateProgram - If Program is Private `true` else `false`.
  * @returns {Promise<Object>} - Result indicating success/failure and optional response data.
  */
-const deleteSolutionResource = function (solutionIds, resourceType, tenantId, orgId, userId) {
+const deleteSolutionResource = function (solutionIds, resourceType, tenantId, orgId, userId, isAPrivateProgram) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			// Construct the API URL to call the delete endpoint on the Survey Service
@@ -353,6 +353,7 @@ const deleteSolutionResource = function (solutionIds, resourceType, tenantId, or
 					tenantId: tenantId,
 					orgId: orgId,
 					deletedBy: userId,
+					isAPrivateProgram: isAPrivateProgram,
 				},
 			}
 			// Send a POST request to the Survey Service to delete the resource

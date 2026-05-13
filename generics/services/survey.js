@@ -53,7 +53,12 @@ const importTemplateToSolution = function (token, solutionId, programId = '', pa
 			}
 			//pass the user Token only for admin and orgAdmin
 			let roles = userDetails?.userInformation?.roles ?? []
-			if (roles && (roles.includes(CONSTANTS.common.ORG_ADMIN) || roles.includes(CONSTANTS.common.ADMIN_ROLE))) {
+			if (
+				roles &&
+				(roles.includes(CONSTANTS.common.ORG_ADMIN) ||
+					roles.includes(CONSTANTS.common.ADMIN_ROLE) ||
+					roles.includes(CONSTANTS.common.TENANT_ADMIN))
+			) {
 				_.assign(options.headers, {
 					'x-auth-token': token,
 				})
@@ -64,6 +69,10 @@ const importTemplateToSolution = function (token, solutionId, programId = '', pa
 				_.assign(options.headers, {
 					'admin-auth-token': process.env.ADMIN_AUTH_TOKEN,
 					tenantId: userDetails.tenantAndOrgInfo.tenantId,
+					orgId: userDetails.tenantAndOrgInfo.orgId.join(','),
+				})
+			} else if (roles && roles.includes(CONSTANTS.common.TENANT_ADMIN)) {
+				_.assign(options.headers, {
 					orgId: userDetails.tenantAndOrgInfo.orgId.join(','),
 				})
 			}
@@ -174,6 +183,10 @@ const listSolutions = function (solutionIds, token, userDetails) {
 					tenantId: userDetails.tenantAndOrgInfo.tenantId,
 					orgId: userDetails.tenantAndOrgInfo.orgId.join(','),
 				})
+			} else if (roles && roles.includes(CONSTANTS.common.TENANT_ADMIN)) {
+				_.assign(options.headers, {
+					orgId: userDetails.tenantAndOrgInfo.orgId.join(','),
+				})
 			}
 			request.post(url, options, assessmentCallback)
 			function assessmentCallback(err, data) {
@@ -230,6 +243,10 @@ const updateSolution = function (token, updateData, solutionExternalId, userDeta
 				_.assign(options.headers, {
 					'admin-auth-token': process.env.ADMIN_AUTH_TOKEN,
 					tenantId: userDetails.tenantAndOrgInfo.tenantId,
+					orgId: userDetails.tenantAndOrgInfo.orgId.join(','),
+				})
+			} else if (roles && roles.includes(CONSTANTS.common.TENANT_ADMIN)) {
+				_.assign(options.headers, {
 					orgId: userDetails.tenantAndOrgInfo.orgId.join(','),
 				})
 			}
@@ -333,10 +350,10 @@ const createObservation = function (token, solutionId, data, userRoleAndProfileI
  * @param {String} resourceType - Type of the resource being deleted ('solution', 'program', etc.).
  * @param {String} tenantId - Tenant identifier (used for multi-tenancy).
  * @param {String} orgId - Organization ID from where the deletion is triggered.
- *
+ * @param {String} isAPrivateProgram - If Program is Private `true` else `false`.
  * @returns {Promise<Object>} - Result indicating success/failure and optional response data.
  */
-const deleteSolutionResource = function (solutionIds, resourceType, tenantId, orgId, userId) {
+const deleteSolutionResource = function (solutionIds, resourceType, tenantId, orgId, userId, isAPrivateProgram) {
 	return new Promise(async (resolve, reject) => {
 		try {
 			// Construct the API URL to call the delete endpoint on the Survey Service
@@ -353,6 +370,7 @@ const deleteSolutionResource = function (solutionIds, resourceType, tenantId, or
 					tenantId: tenantId,
 					orgId: orgId,
 					deletedBy: userId,
+					isAPrivateProgram: isAPrivateProgram,
 				},
 			}
 			// Send a POST request to the Survey Service to delete the resource

@@ -1,0 +1,7 @@
+{
+	"currentTenantId": "<current-tenant-id>",
+	"currentOrgId": "<current-org-id>",
+	"newTenantId": "<new-tenant-id>",
+	"newOrgId": "<new-org-id>",
+	"token": "<--token-->"
+}

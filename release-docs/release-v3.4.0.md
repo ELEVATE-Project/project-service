@@ -27,25 +27,8 @@ This document outlines the detailed deployment steps, environment changes, migra
 
 ```json
 {
-	"API_DOC_URL": "/interface/api-doc",
-	"APPLICATION_ENV": "production",
-	"APPLICATION_PORT": "3567",
-	"DEBUG_MODE": true,
-	"ENTITY_SERVICE_BASE_URL": "http://localhost:5002",
-	"MENTORING_SERVICE_BASE_URL": "http://localhost:7101",
-	"NOTIFICATION_SERVICE_BASE_URL": "http://localhost:7201",
-	"PROJECT_SERVICE_BASE_URL": "http://localhost:5003",
-	"RATE_LIMITER_ENABLED": true,
-	"RATE_LIMITER_GENERAL_LIMIT": 50,
-	"RATE_LIMITER_NUMBER_OF_PROXIES": 3,
-	"RATE_LIMITER_PUBLIC_LOW_LIMIT": 5,
-	"REQUIRED_BASE_PACKAGES": "project,self-creation-portal,survey",
-	"REQUIRED_PACKAGES": "elevate-project@1.1.34  elevate-self-creation-portal@1.0.64 elevate-survey-observation@1.0.3",
-	"ROUTE_CONFIG_JSON_URLS_PATHS": "https://raw.githubusercontent.com/ELEVATE-Project/utils/refs/heads/master/interface-routes/elevate-routes.json",
-	"SCHEDULER_SERVICE_BASE_URL": "http://localhost:7401",
-	"SUPPORTED_HTTP_TYPES": "GET POST PUT PATCH DELETE",
-	"SURVEY_SERVICE_BASE_URL": "http://localhost:5007",
-	"USER_SERVICE_BASE_URL": "http://localhost:7001"
+	"REQUIRED_PACKAGES": "elevate-project@1.1.53 elevate-survey-observation@1.0.23", // update these values
+	"ROUTE_CONFIG_JSON_URLS_PATHS": "https://raw.githubusercontent.com/ELEVATE-Project/utils/refs/heads/master/interface-routes/elevate-routes.json"
 }
 ```
 
@@ -61,7 +44,37 @@ _No migrations applicable._
 
 ### 4. Docker Deployment
 
--   **Image Tag:** `elevate-interface:3.4.0`
+    verify the existing tag. if not matching update it
+
+-   **Image Tag:** `shikshalokamqa/elevate-interface:3.3.2`
+
+---
+
+## User Service
+
+### 1. PM2 Deployment
+
+-   **Branch:** `master`
+
+### 2. Docker Deployment
+
+    verify the existing tag. if not matching update it
+
+-   **Image Tag:** `shikshalokamqa/elevate-user:3.4.0`
+
+---
+
+## scheduler Service
+
+### 1. PM2 Deployment
+
+-   **Branch:** `master`
+
+### 2. Docker Deployment
+
+    verify the existing tag. if not matching update it
+
+-   **Image Tag:** `shikshalokamqa/elevate-scheduler:3.4.0`
 
 ---
 
@@ -69,10 +82,10 @@ _No migrations applicable._
 
 ### 1. Environment Changes
 
-**Add:**
+**Add (if not present):**
 
 ```
-"ADMIN_AUTH_TOKEN": "N0DM5NAwwCN5KNXKJwlwu6c0nQQt6Rcl"
+"ADMIN_AUTH_TOKEN": "N0DM5NAwwCN5KNXKJwlwu6c0nQQt6Rcl" //This is a sample
 "AUTH_CONFIG_FILE_PATH": "config.json"
 "AUTH_METHOD": "native"
 "ENABLE_REFLECTION": "true"
@@ -85,6 +98,7 @@ _No migrations applicable._
 "USER_COURSES_TOPIC": "elevate_user_courses_prod_raw"
 "RESOURCE_DELETION_TOPIC": "resource_deletion_topic_prod"
 "ORG_UPDATES_TOPIC" : "elevate_project_org_extension_event_listener"
+"SUBMISSION_TOPIC: : "saas_project_submission_prod"
 ```
 
 **Update:**
@@ -121,7 +135,7 @@ node createOrgExtensions.js
 
 ### 4. Docker Deployment
 
--   **Image Tag:** `elevate-project-service:3.4.0`
+-   **Image Tag:** `shikshalokamqa/elevate-project-service:3.4.0`
 
 ---
 
@@ -138,6 +152,8 @@ node createOrgExtensions.js
 "USER_COURSES_SUBMISSION_TOPIC": "elevate_user_courses_prod"
 "USER_COURSES_TOPIC": "elevate_user_courses_prod_raw"
 "RESOURCE_DELETION_TOPIC": "resource_deletion_topic_prod"
+"ORG_UPDATES_TOPIC" : "elevate_survey_org_extension_event_listener"
+"IMPROVEMENT_PROJECT_SUBMISSION_TOPIC": saas_project_submission_prod // should be same as SUBMISSION_TOPIC of project service
 ```
 
 **Update:**
@@ -147,6 +163,12 @@ node createOrgExtensions.js
 ```
 
 ### 2. Migrations
+
+> Note: Please run the below command before migration
+
+```bash
+npm install axios
+```
 
 ```bash
 # M1. Normalize orgIds in multiple collections
@@ -160,6 +182,10 @@ node correctScopeOrgValues.js
 # M3. Update program components
 cd migrations/
 node updateComponentsOfAllPrograms.js
+
+# M4. Create default org policies
+cd migrations/createOrgExtensions
+node createOrgExtensions.js
 ```
 
 ### 3. PM2 Deployment
@@ -168,7 +194,7 @@ node updateComponentsOfAllPrograms.js
 
 ### 4. Docker Deployment
 
--   **Image Tag:** `elevate-samiksha-service:3.4.0`
+-   **Image Tag:** `shikshalokamqa/elevate-samiksha-service:3.4.0_RC1`
 
 ---
 
@@ -184,13 +210,14 @@ node updateComponentsOfAllPrograms.js
 "KAFKA_GROUP_ID": "qa.entity"
 "KAFKA_HEALTH_CHECK_TOPIC": "entity-health-check-topic-check"
 "KAFKA_URL": "172.30.148.74:9092"
+"USER_SERVICE_URL": "http://localhost:3569"
 "RESOURCE_DELETION_TOPIC": "resource_deletion_topic_prod"
 ```
 
 ### 2. Migration
 
 ```bash
-cd migrations/normalizeOrgIdInCollections
+cd migrations/
 node normalizeOrgIdInCollections.js
 ```
 
@@ -200,7 +227,7 @@ node normalizeOrgIdInCollections.js
 
 ### 4. Docker Deployment
 
--   **Image Tag:** `elevate-entity-management:3.4.0`
+-   **Image Tag:** `shikshalokamqa/elevate-entity-management:3.4`
 
 ---
 
@@ -212,9 +239,11 @@ node normalizeOrgIdInCollections.js
 
 ### 2. Docker Deployment
 
--   Update **Docker image tag** with: `[docker image tag]`
+-   Update **Docker image tag** with: `shikshalokamqa/elevate-project-obervation-pwa:3.4.0.1`
 
 ### 3. Form Creation
+
+For detailed instructions on how to create the form, refer to [this document](https://docs.google.com/document/d/13zmU5H8Vr3tnYEGI89y-Az5TgCqYyNEFqTX4VWr_zQ0/edit?tab=t.onvajv5wm81c).
 
 ```
 curl '{{domain}}/project/v1/profile/read' \
@@ -301,13 +330,19 @@ Update object paths:
 
 ## Observation Portal
 
+### New Portal – Nginx Configuration Check
+
+-   Check whether the `/observations` route is already configured in Nginx.
+-   If it exists, no changes are required.
+-   If it does not exist, add a new Nginx configuration entry for `/observations`.
+
 ### 1. Branch
 
 -   **Branch:** `release-3.4.0`
 
 ### 2. Docker Deployment
 
--   Update **Docker image tag** for Observation/Survey PWA: `[image tag]`
+-   Update **Docker image tag** for Observation/Survey PWA: `shikshalokamqa/elevate-observation-portal:3.4.1`
 
 ### 3. Forms Creation
 
@@ -345,7 +380,7 @@ curl '{{domain}}/survey/v1/profile/read' \
 
 ### 2. Docker Deployment
 
--   Update **React-wrapper/Shikshagraha app** image tag: `[image tag]`
+-   Update **React-wrapper/Shikshagraha app** image tag: `shikshalokamqa/elevate-portal:1.1.3`
 
 ### 3. Form Update
 
@@ -400,6 +435,104 @@ curl '{{domain}}/user/v1/organization-feature/read' \
     "sameOrigin": true
   },
   "display_order": 4
+}
+```
+
+#### shikshagraha Tenant
+
+```
+curl '{{domain}}/user/v1/form/read' \
+  -H 'accept: application/json, text/plain, */*' \
+  -H 'accept-language: en-GB,en-US;q=0.9,en;q=0.8' \
+  -H 'content-type: application/json' \
+  -H 'origin: https://app.shikshagraha.org' \
+  -H 'priority: u=1, i' \
+  -H 'referer: https://app.shikshagraha.org/' \
+  -H 'sec-ch-ua: "Not(A:Brand";v="8", "Chromium";v="144", "Google Chrome";v="144"' \
+  -H 'sec-ch-ua-mobile: ?0' \
+  -H 'sec-ch-ua-platform: "Linux"' \
+  -H 'sec-fetch-dest: empty' \
+  -H 'sec-fetch-mode: cors' \
+  -H 'sec-fetch-site: cross-site' \
+  -H 'user-agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36' \
+  --data-raw '{"type":"user","sub_type":"registration"}'
+```
+
+```json
+    "meta": {
+                    "registration_code": {
+                        "name": "State",
+                        "value_ref": "externalId"
+                    }
+                }
+
+```
+
+```json
+{
+	"hint": null,
+	"name": "password",
+	"type": "text",
+	"label": "Password",
+	"order": "6",
+	"fieldId": null,
+	"options": [],
+	"pattern": "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[~!@#$%^&*()_+`\\-={}:\";'<>?,./\\\\])(?!.*\\s).{8,}$",
+	"policyMsg": "Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, a number, a special character, and no spaces.",
+	"coreField": 1,
+	"dependsOn": null,
+	"isEditable": true,
+	"isPIIField": true,
+	"isRequired": true,
+	"validation": ["password"],
+	"placeholder": "ENTER_PASSWORD",
+	"isMultiSelect": false,
+	"maxSelections": 0,
+	"sourceDetails": {}
+}
+```
+
+#### shikshalokam Tenant
+
+```
+curl '{{domain}}/user/v1/form/read' \
+  -H 'accept: application/json, text/plain, */*' \
+  -H 'accept-language: en-GB,en-US;q=0.9,en;q=0.8' \
+  -H 'content-type: application/json' \
+  -H 'origin: https://app.shikshagraha.org' \
+  -H 'priority: u=1, i' \
+  -H 'referer: https://app.shikshagraha.org/' \
+  -H 'sec-ch-ua: "Not(A:Brand";v="8", "Chromium";v="144", "Google Chrome";v="144"' \
+  -H 'sec-ch-ua-mobile: ?0' \
+  -H 'sec-ch-ua-platform: "Linux"' \
+  -H 'sec-fetch-dest: empty' \
+  -H 'sec-fetch-mode: cors' \
+  -H 'sec-fetch-site: cross-site' \
+  -H 'user-agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36' \
+  --data-raw '{"type":"user","sub_type":"registration"}'
+```
+
+```json
+{
+	"hint": null,
+	"name": "password",
+	"type": "text",
+	"label": "Password",
+	"order": "6",
+	"fieldId": null,
+	"options": [],
+	"pattern": "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[~!@#$%^&*()_+`\\-={}:\";'<>?,./\\\\])(?!.*\\s).{8,}$",
+	"policyMsg": "Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, a number, a special character, and no spaces.",
+	"coreField": 1,
+	"dependsOn": null,
+	"isEditable": true,
+	"isPIIField": true,
+	"isRequired": true,
+	"validation": ["password"],
+	"placeholder": "ENTER_PASSWORD",
+	"isMultiSelect": false,
+	"maxSelections": 0,
+	"sourceDetails": {}
 }
 ```
 

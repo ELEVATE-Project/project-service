@@ -124,6 +124,7 @@ module.exports = class UserProjectsHelper {
 			try {
 				let tenantId = userDetails.userInformation.tenantId
 				let orgId = userDetails.userInformation.organizationId
+				const userId = userDetails.userInformation.userId
 				const userProject = await projectQueries.projectDocument(
 					{
 						_id: projectId,
@@ -143,6 +144,7 @@ module.exports = class UserProjectsHelper {
 						'acl',
 						'userId',
 						'reflection',
+						'solutionInformation.submissionLevel',
 					]
 				)
 
@@ -152,27 +154,44 @@ module.exports = class UserProjectsHelper {
 						message: CONSTANTS.apiResponses.USER_PROJECT_NOT_FOUND,
 					}
 				}
-
-				// if entityId & entityInformation are passed through payload, ignore them
-				const blackListedPayloadItems = ['entityId', 'entityInformation']
+				// ignore blackListed items if passed in payload
+				const blackListedPayloadItems = [
+					'entityId',
+					'entityInformation',
+					'userRoleInformation',
+					'userProfile',
+					'certificate',
+					'title',
+					'description',
+					'name',
+					'programInformation',
+					'solutionInformation',
+					'updateHistory',
+					'acl',
+					'userId',
+					'createdBy',
+				]
 				blackListedPayloadItems.map((payloadItem) => {
 					if (data.hasOwnProperty(payloadItem)) delete data[payloadItem]
 				})
 
-				if (process.env.SUBMISSION_LEVEL == 'USER') {
-					if (!(userProject[0].userId == userId)) {
+				if (userProject[0].userId != userId) {
+					if (
+						!(
+							userProject[0].solutionInformation.submissionLevel == CONSTANTS.common.ENTITY &&
+							process.env.SUBMISSION_LEVEL == CONSTANTS.common.ENTITY
+						)
+					) {
 						throw {
 							status: HTTP_STATUS_CODE.bad_request.status,
-							message: CONSTANTS.apiResponses.USER_PROJECT_NOT_FOUND,
+							message: CONSTANTS.apiResponses.SUBMISSION_LEVEL_NOT_COMPLIED,
 						}
 					}
-				} else {
-					// validate user authenticity if the acl.visibility of project is SELf or SPECIFIC
+
+					// validate user authenticity if the acl.visibility of project is SPECIFIC
 					if (
-						(userProject[0].acl.visibility == CONSTANTS.common.PROJECT_VISIBILITY_SELF &&
-							!(userProject[0].userId == userId)) ||
-						(userProject[0].acl.visibility == CONSTANTS.common.PROJECT_VISIBILITY_SPECIFIC &&
-							!(userProject[0].acl.hasOwnProperty('users') && userProject[0].acl.users.includes(userId)))
+						userProject[0].acl.visibility == CONSTANTS.common.PROJECT_VISIBILITY_SPECIFIC &&
+						!(userProject[0].acl.hasOwnProperty('users') && userProject[0].acl.users.includes(userId))
 					) {
 						throw {
 							status: HTTP_STATUS_CODE.bad_request.status,
@@ -180,8 +199,12 @@ module.exports = class UserProjectsHelper {
 						}
 					}
 					// validate user authenticity if the acl.visibility of project is SCOPE
-					else if (userProject[0].acl.visibility == CONSTANTS.common.PROJECT_VISIBILITY_SCOPE) {
+					else if (
+						userProject[0].acl.visibility == CONSTANTS.common.PROJECT_VISIBILITY_SCOPE &&
+						userProject[0].userId != userId
+					) {
 						let scopeData = data.userProfileInformation.scope
+						scopeData['tenantId'] = tenantId
 						let queryData = await solutionsHelper.queryBasedOnRoleAndLocation(scopeData, '', 'acl')
 						if (!queryData.success) {
 							return resolve(queryData)
@@ -274,11 +297,6 @@ module.exports = class UserProjectsHelper {
 
 				const projectsModel = Object.keys(schemas['projects'].schema)
 
-				let keysToRemoveFromUpdation = ['userRoleInformation', 'userProfile', 'certificate']
-				keysToRemoveFromUpdation.forEach((key) => {
-					if (data[key]) delete data[key]
-				})
-
 				let updateProject = {}
 				if (data.solutionId) {
 					const solutionInformation = await solutionsQueries.solutionsDocument({
@@ -302,70 +320,6 @@ module.exports = class UserProjectsHelper {
 				if (projectData && projectData.success == true) {
 					updateProject = _.merge(updateProject, projectData.data)
 				}
-				// let createNewProgramAndSolution = false;
-				// let solutionExists = false;
-
-				// if (data.programId && data.programId !== "") {
-
-				//     // Check if program already existed in project and if its not an existing program.
-				//     if (!userProject[0].programInformation) {
-				//         createNewProgramAndSolution = true;
-				//     } else if (
-				//         userProject[0].programInformation &&
-				//         userProject[0].programInformation._id &&
-				//         userProject[0].programInformation._id.toString() !== data.programId
-				//     ) {
-				//         // Not an existing program.
-
-				//         solutionExists = true;
-				//     }
-
-				// } else if (data.programName) {
-
-				//     if (!userProject[0].solutionInformation) {
-				//         createNewProgramAndSolution = true;
-				//     } else {
-				//         solutionExists = true;
-				//         // create new program using current name and add existing solution and remove program from it.
-				//     }
-				// }
-
-				// if (createNewProgramAndSolution || solutionExists) {
-
-				//     let programAndSolutionInformation =
-				//         await this.createProgramAndSolution(
-				//             data.programId,
-				//             data.programName,
-				//             updateProject.entityId ? [updateProject.entityId] : "",
-				//             userToken,
-				//             userProject[0].solutionInformation && userProject[0].solutionInformation._id ?
-				//                 userProject[0].solutionInformation._id : ""
-				//         );
-
-				//     if (!programAndSolutionInformation.success) {
-				//         return resolve(programAndSolutionInformation);
-				//     }
-
-				//     if (solutionExists) {
-
-				//         let updateProgram =
-				//             await programsHelper.removeSolutions(
-				//                 userToken,
-				//                 userProject[0].programInformation._id,
-				//                 [userProject[0].solutionInformation._id]
-				//             );
-
-				//         if (!updateProgram.success) {
-				//             throw {
-				//                 status: HTTP_STATUS_CODE.bad_request.status,
-				//                 message: CONSTANTS.apiResponses.PROGRAM_NOT_UPDATED
-				//             }
-				//         }
-				//     }
-
-				//     updateProject =
-				//         _.merge(updateProject, programAndSolutionInformation.data);
-				// }
 
 				let booleanData = this.booleanData(schemas['projects'].schema)
 				let mongooseIdData = this.mongooseIdData(schemas['projects'].schema)
@@ -1550,22 +1504,6 @@ module.exports = class UserProjectsHelper {
 									isAPrivateSolution
 								)
 
-								// await coreService.solutionDetailsBasedOnRoleAndLocation(
-								//     userToken,
-								//     bodyData,
-								//     solutionId,
-								//     isAPrivateSolution
-								// );
-
-								// if (
-								// 	!solutionDetails.success ||
-								// 	(solutionDetails.data.data && !solutionDetails.data.data.length > 0)
-								// ) {
-								// 	throw {
-								// 		status: HTTP_STATUS_CODE.bad_request.status,
-								// 		message: CONSTANTS.apiResponses.SOLUTION_DOES_NOT_EXISTS_IN_SCOPE,
-								// 	}
-								// }
 								if (
 									solutionDetails &&
 									solutionDetails.success &&
@@ -1581,60 +1519,8 @@ module.exports = class UserProjectsHelper {
 								tenantId: tenantId,
 							})
 							solutionDetails = solutionDetails[0]
-							// if( !solutionDetails.success ) {
-							//     throw {
-							//         message : CONSTANTS.apiResponses.SOLUTION_NOT_FOUND,
-							//         status : HTTP_STATUS_CODE.bad_request.status
-							//     }
-							// }
-
-							// solutionDetails = solutionDetails.data[0];
 						}
 
-						// program join is not implemented in this for drop 1
-
-						// check for requestForPIIConsent data
-						// let queryData = {}
-						// queryData['_id'] = solutionDetails.programId
-						// let programDetails = await programsQueries.programsDocument(queryData, ['requestForPIIConsent'])
-
-						// // if requestForPIIConsent not there do not call program join
-						// if (
-						// 	Object.keys(solutionDetails).length > 0 &&
-						// 	programDetails.length > 0 &&
-						// 	programDetails[0].hasOwnProperty('requestForPIIConsent')
-						// ) {
-						// 	// program join API call it will increment the noOfResourcesStarted counter and will make user join program
-						// 	// before creating any project this api has to called
-						// 	let programUsers = await programUsersQueries.programUsersDocument(
-						// 		{
-						// 			userId: userId,
-						// 			programId: solutionDetails.programId,
-						// 		},
-						// 		['_id', 'resourcesStarted']
-						// 	)
-
-						// 	if (
-						// 		!programUsers.length > 0 ||
-						// 		(programUsers.length > 0 && programUsers[0].resourcesStarted == false)
-						// 	) {
-						// 		let programJoinBody = {}
-						// 		programJoinBody.userRoleInformation = userRoleInformation
-						// 		programJoinBody.isResource = true
-						// 		programJoinBody.consentShared = true
-						// 		let joinProgramData = await programsHelper.join(
-						// 			solutionDetails.programId,
-						// 			programJoinBody,
-						// 			userId
-						// 		)
-						// 		if (!joinProgramData.success) {
-						// 			return resolve({
-						// 				status: HTTP_STATUS_CODE.bad_request.status,
-						// 				message: CONSTANTS.apiResponses.PROGRAM_JOIN_FAILED,
-						// 			})
-						// 		}
-						// 	}
-						// }
 						let projectTemplateId
 						if (templateId != '' && templateDocuments && templateDocuments.length > 0) {
 							projectTemplateId = templateDocuments[0]._id
@@ -1698,7 +1584,10 @@ module.exports = class UserProjectsHelper {
 							if (bodyData.hasOwnProperty('acl')) {
 								bodyData.acl.visibility = bodyData.acl.visibility.toUpperCase()
 								bodyData.acl.users.push(userId)
-								if (!bodyData.acl.hasOwnProperty('scope') || !(bodyData.acl.scope.length > 0)) {
+								if (
+									!bodyData.acl.hasOwnProperty('scope') ||
+									!(Object.keys(bodyData.acl.scope.length) > 0)
+								) {
 									bodyData.acl['scope'] = solutionDetails.scope
 								}
 								projectCreation.data['acl'] = bodyData.acl
@@ -1752,8 +1641,6 @@ module.exports = class UserProjectsHelper {
 							delete projectCreation.data.certificate
 							delete projectCreation.data.certificateTemplateId
 						}
-
-						let getUserProfileFromObservation = false
 
 						if (bodyData && Object.keys(bodyData).length > 0) {
 							if (bodyData.hasAcceptedTAndC) {
@@ -1810,94 +1697,17 @@ module.exports = class UserProjectsHelper {
 						projectCreation.data.status = CONSTANTS.common.STARTED
 						projectCreation.data.lastDownloadedAt = new Date()
 
-						// fetch userRoleInformation from observation if referenecFrom is observation
-						// let addReportInfoToSolution = false;
-						// if ( getUserProfileFromObservation ){
-
-						//     let observationDetails = await entitiesHelper.details(
-						//         userToken,
-						//         bodyData.submissions.observationId
-						//     );
-
-						//     if( observationDetails.data &&
-						//         Object.keys(observationDetails.data).length > 0 &&
-						//         observationDetails.data.userRoleInformation &&
-						//         Object.keys(observationDetails.data.userRoleInformation).length > 0
-						//     ) {
-
-						//         userRoleInformation = observationDetails.data.userRoleInformation;
-
-						//     }
-
-						//     if( observationDetails.data &&
-						//         Object.keys(observationDetails.data).length > 0 &&
-						//         observationDetails.data.userProfile &&
-						//         Object.keys(observationDetails.data.userProfile).length > 0
-						//     ) {
-
-						//         projectCreation.data.userProfile = observationDetails.data.userProfile;
-						//         addReportInfoToSolution = true;
-
-						//     } else {
-						//         //Fetch user profile information by calling sunbird's user read api.
-
-						//         let userProfile = await projectService.profileRead(userToken)
-						//         if ( userProfile.success &&
-						//              userProfile.data &&
-						//              userProfile.data.response
-						//         ) {
-						//                 projectCreation.data.userProfile = userProfile.data.response;
-						//                 addReportInfoToSolution = true;
-						//         }
-						//     }
-
-						// } else {
-						//     //Fetch user profile information by calling sunbird's user read api.
-
 						let userProfileData = await projectService.profileRead(userToken)
 						// Check if the user profile fetch was successful
-						if (!userProfileData.success) {
+						if (!userProfileData.success || !userProfileData.data) {
 							throw {
 								message: CONSTANTS.apiResponses.USER_DATA_FETCH_UNSUCCESSFUL,
 								status: HTTP_STATUS_CODE.bad_request.status,
 							}
 						}
-						if (userProfileData.success && userProfileData.data) {
-							projectCreation.data.userProfile = userProfileData.data
-							// addReportInfoToSolution = true;
-						}
-						// }
 
+						projectCreation.data.userProfile = userProfileData.data
 						projectCreation.data.userRoleInformation = userRoleInformation
-
-						//compare & update userProfile with userRoleInformation
-						if (
-							projectCreation.data.userProfile &&
-							userRoleInformation &&
-							Object.keys(userRoleInformation).length > 0 &&
-							Object.keys(projectCreation.data.userProfile).length > 0
-						) {
-							// let updatedUserProfile = await _updateUserProfileBasedOnUserRoleInfo(
-							//     projectCreation.data.userProfile,
-							//     userRoleInformation
-							// );
-							let updatedUserProfile = await projectService.profileRead(userToken)
-
-							// Check if the user profile fetch was successful
-							if (!updatedUserProfile.success) {
-								throw {
-									message: CONSTANTS.apiResponses.USER_DATA_FETCH_UNSUCCESSFUL,
-									status: HTTP_STATUS_CODE.bad_request.status,
-								}
-							}
-							if (
-								updatedUserProfile &&
-								updatedUserProfile.success &&
-								Object.keys(updatedUserProfile.data).length > 0
-							) {
-								projectCreation.data.userProfile = updatedUserProfile.data
-							}
-						}
 
 						if (bodyData.project) {
 							projectCreation.data['project'] = bodyData.project
@@ -1908,12 +1718,6 @@ module.exports = class UserProjectsHelper {
 
 						let project = await projectQueries.createProject(projectCreation.data)
 
-						// if ( addReportInfoToSolution && project.solutionId ) {
-						//     let updateSolution = await solutionsHelper.addReportInformationInSolution(
-						//         project.solutionId,
-						//         project.userProfile
-						//     );
-						// }
 						let kafkaUserProject = {
 							userId: userId,
 							projects: project,
@@ -1939,12 +1743,7 @@ module.exports = class UserProjectsHelper {
 					}
 				}
 				let projectDetails = await this.details(projectId, userId, userRoleInformation, language, userDetails)
-				// let revertStatusorNot = UTILS.revertStatusorNot(appVersion);
-				// if ( revertStatusorNot ) {
-				//     projectDetails.data.status = UTILS.revertProjectStatus(projectDetails.data.status);
-				// } else {
-				//     projectDetails.data.status = UTILS.convertProjectStatus(projectDetails.data.status);
-				// }
+
 				// make templateUrl downloadable befor passing to front-end
 				if (
 					projectDetails.data.certificate &&
@@ -4282,6 +4081,7 @@ module.exports = class UserProjectsHelper {
 					validateAllTasks(allTasksFalttened)
 				}
 
+				delete updateData.acl
 				let updateResult = await this.sync(
 					projectId,
 					'',
@@ -4543,6 +4343,121 @@ module.exports = class UserProjectsHelper {
 				})
 			} catch (error) {
 				return resolve({
+					message: error.message,
+					success: false,
+					status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,
+				})
+			}
+		})
+	}
+
+	/**
+	 * Update ACL for a project if user owns the project and submission level is ENTITY.
+	 *
+	 * @param {String} projectId - The ID of the project whose ACL should be updated
+	 * @param {Object} bodyData - The request body containing ACL updates
+	 * @param {Object} userDetails - Logged-in user's details object
+	 * @returns {Promise<Object>} - Response object containing update status, message, and updated ACL data
+	 *
+	 * @throws {Object} - Throws an error if submission level is invalid or project update fails
+	 */
+	static updateAcl(projectId, bodyData, userDetails) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				// Only allow updates if submission level is ENTITY
+				if (process.env.SUBMISSION_LEVEL !== CONSTANTS.common.ENTITY) {
+					throw {
+						success: false,
+						message: CONSTANTS.apiResponses.SUBMISSION_LEVEL_NOT_COMPLIED,
+						status: HTTP_STATUS_CODE['bad_request'].status,
+					}
+				}
+
+				// Extract user and tenant IDs
+				const userId = userDetails.userInformation.userId
+				const tenantId = userDetails.userInformation.tenantId
+
+				// Check if project exists and belongs to the user
+				const projectData = await projectQueries.projectDocument({
+					_id: projectId,
+					createdBy: userId,
+					tenantId,
+				})
+
+				if (!projectData || projectData.length === 0) {
+					throw {
+						success: false,
+						message: CONSTANTS.apiResponses.NOT_ALLOWED_TO_UPDATE_ACL,
+						status: HTTP_STATUS_CODE['bad_request'].status,
+					}
+				}
+
+				// Avoid updating project.acl if project.solutionInformation.submissionLevel is not 'ENTITY'
+				if (projectData[0].solutionInformation.submissionLevel != CONSTANTS.common.ENTITY) {
+					throw {
+						success: false,
+						message: CONSTANTS.apiResponses.SUBMISSION_LEVEL_NOT_COMPLIED,
+						status: HTTP_STATUS_CODE['bad_request'].status,
+					}
+				}
+
+				if (
+					bodyData.acl.visibility === CONSTANTS.common.PROJECT_VISIBILITY_SPECIFIC &&
+					bodyData.acl.users.length > 0
+				) {
+					if (!bodyData.acl.users.includes(userId.toString())) {
+						bodyData.acl.users.push(userId.toString())
+					}
+				}
+
+				// validate the users[] against the tenant
+				if (bodyData.acl.users && bodyData.acl.users.length > 0) {
+					const accountSearchResponse = await userService.accountSearch(bodyData.acl.users, tenantId, 'all')
+					const userIds = accountSearchResponse.data.data.map((user) => user.id.toString())
+					bodyData.acl.users = userIds && userIds.length ? userIds : []
+				}
+
+				// Update ACL field in the project
+				const updatedProject = await projectQueries.findOneAndUpdate(
+					{
+						_id: projectId,
+						createdBy: userId,
+						tenantId,
+					},
+					{
+						$set: { acl: bodyData.acl },
+					},
+					{
+						new: true,
+					}
+				)
+
+				// Check if update was successful
+				if (!updatedProject) {
+					throw {
+						success: false,
+						message: CONSTANTS.apiResponses.PROJECT_UPDATE_FAILED,
+						status: HTTP_STATUS_CODE['bad_request'].status,
+					}
+				}
+
+				// Success response
+				return resolve({
+					success: true,
+					status: 200,
+					message: CONSTANTS.apiResponses.PROJECT_UPDATED_SUCCESSFULLY,
+					result: {
+						_id: updatedProject._id,
+						acl: updatedProject.acl,
+					},
+					data: {
+						_id: updatedProject._id,
+						acl: updatedProject.acl,
+					},
+				})
+			} catch (error) {
+				// Unified error response
+				return reject({
 					message: error.message,
 					success: false,
 					status: error.status ? error.status : HTTP_STATUS_CODE.internal_server_error.status,

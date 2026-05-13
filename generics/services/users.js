@@ -8,6 +8,7 @@
 //dependencies
 const request = require('request')
 const interfaceServiceUrl = process.env.INTERFACE_SERVICE_URL
+const tenantCache = require('../helpers/cache')
 
 // Function to read the user profile based on the given userId
 const profile = function (userId = '', userToken = '') {
@@ -382,43 +383,26 @@ const getOrgDetails = function (organisationIdentifier, tenantId) {
 /**
  * Fetches the tenant details for a given tenant ID along with org it is associated with.
  * @param {string} tenantId - The code/id of the organization.
- * @param {String} userToken - user token
  * @param {Boolean} aggregateValidOrgs - boolean value to populate valid orgs from response
  * @returns {Promise} A promise that resolves with the organization details or rejects with an error.
  */
 
-const fetchTenantDetails = function (tenantId, userToken = '', aggregateValidOrgs = false) {
+const fetchTenantDetails = function (tenantId, aggregateValidOrgs = false) {
 	return new Promise(async (resolve, reject) => {
 		try {
-			let url, headers
+			let url =
+				interfaceServiceUrl +
+				process.env.USER_SERVICE_BASE_URL +
+				CONSTANTS.endpoints.TENANT_READ_INTERNAL +
+				'/' +
+				tenantId
 
-			if (userToken) {
-				// External request
-				url =
-					interfaceServiceUrl +
-					process.env.USER_SERVICE_BASE_URL +
-					CONSTANTS.endpoints.TENANT_READ +
-					'/' +
-					tenantId
-				headers = {
-					'content-type': 'application/json',
-					'X-auth-token': userToken,
-				}
-			} else {
-				// Internal request
-				url =
-					interfaceServiceUrl +
-					process.env.USER_SERVICE_BASE_URL +
-					CONSTANTS.endpoints.TENANT_READ_INTERNAL +
-					'/' +
-					tenantId
-				headers = {
+			const options = {
+				headers: {
 					'content-type': 'application/json',
 					internal_access_token: process.env.INTERNAL_ACCESS_TOKEN,
-				}
+				},
 			}
-
-			const options = { headers }
 			request.get(url, options, userReadCallback)
 			let result = {
 				success: true,
@@ -470,6 +454,8 @@ const fetchTenantDetails = function (tenantId, userToken = '', aggregateValidOrg
 const fetchPublicTenantDetails = function (tenantId) {
 	return new Promise(async (resolve, reject) => {
 		try {
+			const cached = tenantCache.getCache(`tenant_${tenantId}`)
+			if (cached) return resolve(cached)
 			let url = interfaceServiceUrl + process.env.USER_SERVICE_BASE_URL + CONSTANTS.endpoints.PUBLIC_BRANDING
 			const options = {
 				headers: {
@@ -488,6 +474,7 @@ const fetchPublicTenantDetails = function (tenantId) {
 					let response = JSON.parse(data.body)
 					if (response.responseCode === HTTP_STATUS_CODE['ok'].code) {
 						result['data'] = response.result
+						tenantCache.setCache(`tenant_${tenantId}`, result)
 					} else {
 						result.success = false
 					}

@@ -731,6 +731,18 @@ module.exports = class SolutionsHelper {
 						CONSTANTS.common.MANDATORY_SCOPE_FIELD,
 						CONSTANTS.common.OPTIONAL_SCOPE_FIELD
 					)
+
+					// If a prefix is provided, modify all query conditions to apply on nested fields.
+					// Example: if prefix = "acl", a condition like { "scope": {...} }
+					// becomes { "acl.scope": {...} }.
+					// This ensures the targeting rules apply inside a specific nested object.
+					if (prefix != '') {
+						builtQuery['$and'] = builtQuery['$and'].map((obj) => {
+							const key = Object.keys(obj)[0] // Extract the field name in the condition
+							const value = obj[key] // Extract the condition value
+							return { [`${prefix}.${key}`]: value }
+						})
+					}
 					filterQuery = {
 						...filterQuery,
 						...builtQuery,
@@ -1291,17 +1303,34 @@ module.exports = class SolutionsHelper {
 	static fetchLink(solutionId, userDetails, token = '') {
 		return new Promise(async (resolve, reject) => {
 			try {
-				// build solution match query
 				let solutionMatchQuery = {
 					_id: solutionId,
 					isReusable: false,
 					isAPrivateProgram: false,
 				}
+				// Apply extra filters ONLY if userDetails is present
+				if (
+					userDetails &&
+					userDetails.tenantAndOrgInfo &&
+					userDetails.tenantAndOrgInfo.tenantId &&
+					Array.isArray(userDetails.tenantAndOrgInfo.orgId) &&
+					userDetails.tenantAndOrgInfo.orgId.length > 0
+				) {
+					const tenantId = userDetails.tenantAndOrgInfo.tenantId
+					const userOrgId = userDetails.tenantAndOrgInfo.orgId[0]
 
-				// Only super admin can generate solution links for all tenants and orgs
-				// solutionMatchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
-				// solutionMatchQuery['orgId'] = { $in: ['ALL', ...userDetails.tenantAndOrgInfo.orgId] }
+					solutionMatchQuery.tenantId = tenantId
 
+					// Add org / scope access control
+					solutionMatchQuery.$or = [
+						{ orgId: userOrgId },
+						{
+							'scope.organizations': {
+								$in: ['ALL', userOrgId],
+							},
+						},
+					]
+				}
 				let solutionData = await solutionsQueries.solutionsDocument(solutionMatchQuery, [
 					'link',
 					'type',
@@ -1355,7 +1384,7 @@ module.exports = class SolutionsHelper {
 				}
 
 				// fetch tenant domain by calling  tenant details API
-				let tenantDetailsResponse = await userService.fetchTenantDetails(solution.tenantId, token)
+				let tenantDetailsResponse = await userService.fetchTenantDetails(solution.tenantId)
 				const domains = tenantDetailsResponse?.data?.domains || []
 
 				// Error handling if API failed or no domains found
@@ -2115,7 +2144,6 @@ module.exports = class SolutionsHelper {
 				}
 
 				matchQuery['$match']['tenantId'] = userDetails.userInformation.tenantId
-				matchQuery['$match']['orgId'] = userDetails.userInformation.organizationId
 
 				if (currentOrgOnly) {
 					let organizationId = userDetails.userInformation.organizationId
@@ -2528,27 +2556,6 @@ module.exports = class SolutionsHelper {
 					)
 				})
 
-				if (process.env.SUBMISSION_LEVEL == 'ENTITY' && requestedData.hasOwnProperty('entityId')) {
-					mergedData = userCreatedProjects.data.data
-					totalCount = mergedData.length
-					if (mergedData.length > 0) {
-						let startIndex = pageSize * (pageNo - 1)
-						let endIndex = startIndex + pageSize
-						mergedData = mergedData.slice(startIndex, endIndex)
-					}
-					return resolve({
-						success: true,
-						message: CONSTANTS.apiResponses.TARGETED_SOLUTIONS_FETCHED,
-						data: {
-							data: mergedData,
-							count: totalCount,
-						},
-						result: {
-							data: mergedData,
-							count: totalCount,
-						},
-					})
-				}
 				// Add program data to the fetched projects
 				if (userCreatedProjects.success && userCreatedProjects.data) {
 					totalCount = userCreatedProjects.data.count
@@ -3156,59 +3163,87 @@ module.exports = class SolutionsHelper {
 	static async generateAssignedProjectsQuery(userId, requestedData, filter) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let query = { isDeleted: false }
+				let query = {
+					isDeleted: false,
+				}
 
-				if (process.env.SUBMISSION_LEVEL === 'ENTITY' && requestedData.hasOwnProperty('entityId')) {
-					// Use queryBasedOnRoleAndLocation function to form query for acl.visibility = SCOPE projects
-					let queryData = await this.queryBasedOnRoleAndLocation(
-						_.omit(requestedData, ['entityId']),
-						'',
-						'acl'
-					)
-					// status of the project could be anything, hence deleting status property from the querydata
+				// ---------------------------------------------
+				// Apply filter logic by default
+				// ---------------------------------------------
+				if (filter && filter !== '') {
+					if (filter === CONSTANTS.common.CREATED_BY_ME) {
+						query['referenceFrom'] = { $ne: CONSTANTS.common.LINK }
+						query['isAPrivateProgram'] = { $ne: false }
+					} else if (filter === CONSTANTS.common.ASSIGN_TO_ME) {
+						query['isAPrivateProgram'] = false
+					} else {
+						query['$or'] = [
+							{
+								$and: [{ programId: { $exists: false } }, { projectTemplateId: { $exists: true } }],
+							},
+							{
+								$and: [
+									{ programId: { $exists: true } },
+									{ isAPrivateProgram: true },
+									{ projectTemplateId: { $exists: true } },
+								],
+							},
+						]
+					}
+				}
+
+				// ---------------------------------------------
+				// Apply ENTITY visibility logic
+				// ---------------------------------------------
+				if (process.env.SUBMISSION_LEVEL === CONSTANTS.common.ENTITY) {
+					// Use queryBasedOnRoleAndLocation function
+					// to form query for acl.visibility = SCOPE projects
+					let queryData = await this.queryBasedOnRoleAndLocation(requestedData, '', 'acl')
+
+					// status of the project could be anything
 					delete queryData.data.status
-					// isReusable field doesn't exist for projects model hence removing the key
+
+					// isReusable field doesn't exist for projects model
 					delete queryData.data.isReusable
 
 					let matchQuery = queryData.data
 
-					// Construct query for projects accessible by the user
 					query = {
-						entityId: requestedData.entityId,
-						'solutionInformation.submissionLevel': process.env.SUBMISSION_LEVEL,
-						$or: [
-							{ 'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_ALL },
+						...query,
+						$and: [
+							...(query.$or ? [{ $or: query.$or }] : []),
 							{
-								'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_SPECIFIC,
-								'acl.users': { $in: [userId] },
+								$or: [
+									{
+										'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_ALL,
+									},
+									{
+										'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_SPECIFIC,
+										'acl.users': {
+											$in: [userId.toString()],
+										},
+									},
+									{
+										'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_SCOPE,
+										...matchQuery,
+									},
+									{
+										createdBy: userId,
+									},
+								],
 							},
-							{ 'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_SCOPE, ...matchQuery },
-							{ 'acl.visibility': CONSTANTS.common.PROJECT_VISIBILITY_SELF, userId: userId },
 						],
 					}
-				} else {
-					query['userId'] = userId
 
-					if (filter && filter !== '') {
-						if (filter === CONSTANTS.common.CREATED_BY_ME) {
-							query['referenceFrom'] = { $ne: CONSTANTS.common.LINK }
-							query['isAPrivateProgram'] = { $ne: false }
-						} else if (filter === CONSTANTS.common.ASSIGN_TO_ME) {
-							query['isAPrivateProgram'] = false
-						} else {
-							query['$or'] = [
-								{ $and: [{ programId: { $exists: false } }, { projectTemplateId: { $exists: true } }] },
-								{
-									$and: [
-										{ programId: { $exists: true } },
-										{ isAPrivateProgram: true },
-										{ projectTemplateId: { $exists: true } },
-									],
-								},
-							]
-						}
+					// Remove top-level $or if already moved into $and
+					if (query.$or) {
+						delete query.$or
 					}
+				} else {
+					// Non-ENTITY flow
+					query['createdBy'] = userId
 				}
+
 				return resolve({
 					success: true,
 					data: query,

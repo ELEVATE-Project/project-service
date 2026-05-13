@@ -71,7 +71,6 @@ module.exports = class ProjectTemplateTasksHelper {
 							externalId: { $in: taskIds },
 						}
 					}
-
 					let tasksData = await projectTemplateTaskQueries.taskDocuments(filterData, [
 						'_id',
 						'children',
@@ -99,7 +98,6 @@ module.exports = class ProjectTemplateTasksHelper {
 					},
 					['_id', 'entityType', 'externalId', 'taskSequence']
 				)
-
 				if (!projectTemplate.length > 0) {
 					throw {
 						message: CONSTANTS.apiResponses.PROJECT_TEMPLATE_NOT_FOUND,

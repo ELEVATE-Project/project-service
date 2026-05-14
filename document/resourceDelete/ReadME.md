@@ -74,7 +74,7 @@ curl --location --request POST 'http://localhost:4301/project/v1/admin/deleteRes
 
 ```json
 {
-	"message": "Program and associated resources deleted successfull",
+	"message": "Program and associated resources deleted successfully",
 	"status": 200,
 	"result": {
 		"deletedPrograms": {

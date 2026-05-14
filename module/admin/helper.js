@@ -167,7 +167,14 @@ module.exports = class AdminHelper {
 			try {
 				// Track deletion IDs and counts for all associated resources
 				let deletedPrograms = { deletedProgramsIds: [], deletedProgramsCount: 0 }
-				let deletedSolutions = { deletedSolutionsIds: [], deletedSolutionsCount: 0 }
+				let deletedSolutionsFromProject = {
+					deletedSolutionsFromProjectIds: [],
+					deletedSolutionsFromProjectCount: 0,
+				}
+				let deletedSolutionsFromSamiksha = {
+					deletedSolutionsFromSamikshaIds: [],
+					deletedSolutionsFromSamikshaCount: 0,
+				}
 				let deletedProjectTemplates = { deletedProjectTemplatesIds: [], deletedProjectTemplatesCount: 0 }
 				let deletedCertificateTemplates = {
 					deletedCertificateTemplatesIds: [],
@@ -246,33 +253,46 @@ module.exports = class AdminHelper {
 								deletedBy,
 								isAPrivateProgram
 							)
+							const surveyData =
+								deleteResponse?.success && deleteResponse.data ? deleteResponse.data.result || {} : {}
 
-							const surveyData = deleteResponse.data.result
 							// IDs will be populated once samiksha returns them; counts always merged
-							deletedSurveys.deletedSurveysIds.push(...(surveyData.deletedSurveysIds || []))
-							deletedSurveys.deletedSurveysCount += surveyData.deletedSurveysCount || 0
+							deletedSurveys.deletedSurveysIds.push(
+								...(surveyData.deletedSurveys.deletedSurveysIds || [])
+							)
+							deletedSurveys.deletedSurveysCount += surveyData.deletedSurveys.deletedSurveysCount || 0
 							deletedSurveySubmissions.deletedSurveySubmissionsIds.push(
-								...(surveyData.deletedSurveySubmissionsIds || [])
+								...(surveyData.deletedSurveySubmissions.deletedSurveySubmissionsIds || [])
 							)
 							deletedSurveySubmissions.deletedSurveySubmissionsCount +=
-								surveyData.deletedSurveySubmissionsCount || 0
+								surveyData.deletedSurveySubmissions.deletedSurveySubmissionsCount || 0
 							deletedObservations.deletedObservationsIds.push(
-								...(surveyData.deletedObservationsIds || [])
+								...(surveyData.deletedObservations.deletedObservationsIds || [])
 							)
-							deletedObservations.deletedObservationsCount += surveyData.deletedObservationsCount || 0
+							deletedObservations.deletedObservationsCount +=
+								surveyData.deletedObservations.deletedObservationsCount || 0
 							deletedObservationSubmissions.deletedObservationSubmissionsIds.push(
-								...(surveyData.deletedObservationSubmissionsIds || [])
+								...(surveyData.deletedObservationSubmissions.deletedObservationSubmissionsIds || [])
 							)
 							deletedObservationSubmissions.deletedObservationSubmissionsCount +=
-								surveyData.deletedObservationSubmissionsCount || 0
-							deletedSolutions.deletedSolutionsIds.push(...(surveyData.deletedSolutionsIds || []))
-							deletedSolutions.deletedSolutionsCount += surveyData.deletedSolutionsCount || 0
+								surveyData.deletedObservationSubmissions.deletedObservationSubmissionsCount || 0
+							// Solutions deleted via samiksha (survey service)
+							deletedSolutionsFromSamiksha.deletedSolutionsFromSamikshaIds.push(
+								...(surveyData.deletedSolutions.deletedSolutionsIds ||
+									surveyData.deletedSolutions.deletedSolutionsIds ||
+									[])
+							)
+							deletedSolutionsFromSamiksha.deletedSolutionsFromSamikshaCount +=
+								surveyData.deletedSolutions.deletedSolutionsCount ||
+								surveyData.deletedSolutions.deletedSolutionsCount ||
+								0
 						}
 
 						// Delete solutions from project service
 						await solutionsQueries.delete(solutionFilter)
-						deletedSolutions.deletedSolutionsIds.push(...solutionIds.map((id) => id.toString()))
-						deletedSolutions.deletedSolutionsCount += solutionIds.length
+						const locallyDeletedSolutionIds = solutionDetails.map((s) => s._id.toString())
+						deletedSolutionsFromProject.deletedSolutionsFromProjectIds.push(...locallyDeletedSolutionIds)
+						deletedSolutionsFromProject.deletedSolutionsFromProjectCount += locallyDeletedSolutionIds.length
 
 						// Audit log entries for solutions
 						solutionIds.forEach((id) => resourceIdsWithType.push({ id, type: CONSTANTS.common.SOLUTION }))
@@ -284,7 +304,6 @@ module.exports = class AdminHelper {
 						// Fetch IDs first since deleteMany does not return them
 						const projectFilter = {
 							solutionId: { $in: solutionIds },
-							isAPrivateProgram: false,
 							tenantId,
 						}
 						const projectsToDelete = await projectQueries.projectDocument(projectFilter, ['_id'])
@@ -382,7 +401,8 @@ module.exports = class AdminHelper {
 						message: CONSTANTS.apiResponses.PROGRAM_RESOURCE_DELETED,
 						result: {
 							deletedPrograms,
-							deletedSolutions,
+							deletedSolutionsFromProject,
+							deletedSolutionsFromSamiksha,
 							deletedProjectTemplates,
 							deletedCertificateTemplates,
 							deletedProjectTemplateTasks,
@@ -412,7 +432,7 @@ module.exports = class AdminHelper {
 					}
 					// Fetch project IDs before deleting
 					const projectFilter = {
-						solutionId: { $in: [resourceId] },
+						solutionId: resourceId,
 						isAPrivateProgram: false,
 						tenantId,
 					}
@@ -428,8 +448,8 @@ module.exports = class AdminHelper {
 					await programsQueries.pullSolutionsFromComponents(solutionObjectId, tenantId)
 
 					await solutionsQueries.delete(solutionFilter)
-					deletedSolutions.deletedSolutionsIds.push(resourceId.toString())
-					deletedSolutions.deletedSolutionsCount++
+					deletedSolutionsFromProject.deletedSolutionsFromProjectIds.push(resourceId.toString())
+					deletedSolutionsFromProject.deletedSolutionsFromProjectCount++
 
 					// Publish Kafka event for solution deletion
 					await this.pushResourceDeleteKafkaEvent('solution', resourceId, deletedBy, tenantId, orgId)
@@ -491,7 +511,7 @@ module.exports = class AdminHelper {
 						success: true,
 						message: CONSTANTS.apiResponses.SOLUTION_RESOURCE_DELETED,
 						result: {
-							deletedSolutions,
+							deletedSolutionsFromProject,
 							deletedProjectTemplates,
 							deletedCertificateTemplates,
 							deletedProjectTemplateTasks,
@@ -612,22 +632,35 @@ module.exports = class AdminHelper {
 							deletedBy,
 							isAPrivateProgram
 						)
-						const surveyData = deleteResponse.data.result
+						const surveyData =
+							deleteResponse?.success && deleteResponse.data ? deleteResponse.data.result || {} : {}
 						// IDs populated once samiksha returns them; counts always merged
-						deletedSurveys.deletedSurveysIds.push(...(surveyData.deletedSurveysIds || []))
-						deletedSurveys.deletedSurveysCount += surveyData.deletedSurveysCount || 0
+						deletedSurveys.deletedSurveysIds.push(...(surveyData.deletedSurveys.deletedSurveysIds || []))
+						deletedSurveys.deletedSurveysCount += surveyData.deletedSurveys.deletedSurveysCount || 0
 						deletedSurveySubmissions.deletedSurveySubmissionsIds.push(
-							...(surveyData.deletedSurveySubmissionsIds || [])
+							...(surveyData.deletedSurveySubmissions.deletedSurveySubmissionsIds || [])
 						)
 						deletedSurveySubmissions.deletedSurveySubmissionsCount +=
-							surveyData.deletedSurveySubmissionsCount || 0
-						deletedObservations.deletedObservationsIds.push(...(surveyData.deletedObservationsIds || []))
-						deletedObservations.deletedObservationsCount += surveyData.deletedObservationsCount || 0
+							surveyData.deletedSurveySubmissions.deletedSurveySubmissionsCount || 0
+						deletedObservations.deletedObservationsIds.push(
+							...(surveyData.deletedObservations.deletedObservationsIds || [])
+						)
+						deletedObservations.deletedObservationsCount +=
+							surveyData.deletedObservations.deletedObservationsCount || 0
 						deletedObservationSubmissions.deletedObservationSubmissionsIds.push(
-							...(surveyData.deletedObservationSubmissionsIds || [])
+							...(surveyData.deletedObservationSubmissions.deletedObservationSubmissionsIds || [])
 						)
 						deletedObservationSubmissions.deletedObservationSubmissionsCount +=
-							surveyData.deletedObservationSubmissionsCount || 0
+							surveyData.deletedObservationSubmissions.deletedObservationSubmissionsCount || 0
+						deletedSolutionsFromSamiksha.deletedSolutionsFromSamikshaIds.push(
+							...(surveyData.deletedSolutions.deletedSolutionsIds ||
+								surveyData.deletedSolutions.deletedSolutionsIds ||
+								[])
+						)
+						deletedSolutionsFromSamiksha.deletedSolutionsFromSamikshaCount +=
+							surveyData.deletedSolutions.deletedSolutionsCount ||
+							surveyData.deletedSolutions.deletedSolutionsCount ||
+							0
 					}
 
 					// Delete tasks and record their IDs
@@ -681,7 +714,9 @@ module.exports = class AdminHelper {
 					deletedBy: userId,
 					deletedAt: new Date().toISOString(),
 				}))
-				await createDeletionLog.create(logs)
+				if (logs.length > 0) {
+					await createDeletionLog.create(logs)
+				}
 				return resolve({ success: true })
 			} catch (error) {
 				return resolve({

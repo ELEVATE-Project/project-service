@@ -74,20 +74,62 @@ curl --location --request POST 'http://localhost:4301/project/v1/admin/deleteRes
 
 ```json
 {
-	"message": "Solution and associated resources deleted successfully",
+	"message": "Program and associated resources deleted successfully",
 	"status": 200,
 	"result": {
-		"deletedProgramsCount": 1,
-		"deletedSolutionsCount": 1,
-		"deletedProjectTemplatesCount": 2,
-		"deletedCertificateTemplatesCount": 1,
-		"deletedProjectTemplateTasksCount": 15,
-		"deletedSurveysCount": 0,
-		"deletedSurveySubmissionsCount": 0,
-		"deletedObservationsCount": 0,
-		"deletedObservationSubmissionsCount": 0,
+		"deletedPrograms": {
+			"deletedProgramsIds": ["695cb84c5dfcac0952f562f4"],
+			"deletedProgramsCount": 1
+		},
+		"deletedSolutions": {
+			"deletedSolutionsIds": [
+				"695cb84f941a350e28bfa991",
+				"695cb857941a350e28bfaa03",
+				"695cb8645dfcac0952f56335",
+				"695cb8654f13df702d51c003",
+				"695cb8654f13df702d51c028"
+			],
+			"deletedSolutionsCount": 5
+		},
+		"deletedProjectTemplates": {
+			"deletedProjectTemplatesIds": ["695cb8655dfcac0952f5633d"],
+			"deletedProjectTemplatesCount": 1
+		},
+		"deletedCertificateTemplates": {
+			"deletedCertificateTemplatesIds": ["695cb8655dfcac0952f56342", "695cb8655dfcac0952f56347"],
+			"deletedCertificateTemplatesCount": 2
+		},
+		"deletedProjectTemplateTasks": {
+			"deletedProjectTemplateTasksIds": [
+				"695cb8655dfcac0952f56342",
+				"695cb8655dfcac0952f56347",
+				"695cb8655dfcac0952f5634c",
+				"695cb8655dfcac0952f56351",
+				"695cb8655dfcac0952f56355"
+			],
+			"deletedProjectTemplateTasksCount": 5
+		},
+		"deletedSurveys": {
+			"deletedSurveysIds": ["695cb8655dfcac0952f56351", "695cb8655dfcac0952f56355"],
+			"deletedSurveysCount": 2
+		},
+		"deletedSurveySubmissions": {
+			"deletedSurveySubmissionsIds": ["695cb8655dfcac0952f56351", "695cb8655dfcac0952f56355"],
+			"deletedSurveySubmissionsCount": 2
+		},
+		"deletedObservations": {
+			"deletedObservationsIds": ["695cb84f941a350e28bfa991", "695cb857941a350e28bfaa03"],
+			"deletedObservationsCount": 2
+		},
+		"deletedObservationSubmissions": {
+			"deletedObservationSubmissionsIds": ["695cb84f941a350e28bfa991", "695cb857941a350e28bfaa03"],
+			"deletedObservationSubmissionsCount": 2
+		},
 		"pullProgramFromUserExtensionCount": 0,
-		"deletedProjectsCount": 0
+		"deletedProjects": {
+			"deletedProjectsIds": ["695cb8654f13df702d51c003", "695cb8654f13df702d51c028"],
+			"deletedProjectsCount": 2
+		}
 	}
 }
 ```

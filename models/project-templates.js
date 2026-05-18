@@ -23,7 +23,6 @@ module.exports = {
 					type: String,
 					index: true,
 				},
-				name: String,
 			},
 		],
 		description: {

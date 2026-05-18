@@ -81,10 +81,7 @@ module.exports = class ProjectTemplatesHelper {
 					matchQuery['tenantId'] = userDetails.tenantAndOrgInfo.tenantId
 					matchQuery['externalId'] = { $in: categoryIds }
 					// what is category documents
-					let categories = await projectCategoriesQueries.categoryDocuments(matchQuery, [
-						'externalId',
-						'name',
-					])
+					let categories = await projectCategoriesQueries.categoryDocuments(matchQuery, ['externalId'])
 
 					if (!categories.length > 0) {
 						throw {
@@ -99,7 +96,6 @@ module.exports = class ProjectTemplatesHelper {
 							[category.externalId]: {
 								_id: ObjectId(category._id),
 								externalId: category.externalId,
-								name: category.name,
 							},
 						}),
 						{}
@@ -1982,13 +1978,23 @@ module.exports = class ProjectTemplatesHelper {
 	 * @returns {Object}            - project templates list.
 	 */
 
-	static list(pageNo = '', pageSize = '', searchText = '', currentOrgOnly = false, userDetails) {
+	static list(
+		pageNo = '',
+		pageSize = '',
+		searchText = '',
+		currentOrgOnly = false,
+		userDetails,
+		categoryIds = '',
+		groupByCategory = false,
+		taskDetails = false
+	) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				// Create a query object with the 'isReusable' property set to true.
 				let queryObject = { isReusable: true }
 				currentOrgOnly = UTILS.convertStringToBoolean(currentOrgOnly)
-
+				groupByCategory = UTILS.convertStringToBoolean(groupByCategory)
+				taskDetails = UTILS.convertStringToBoolean(taskDetails)
 				queryObject['tenantId'] = userDetails.userInformation.tenantId
 
 				// handle currentOrgOnly filter
@@ -2006,6 +2012,27 @@ module.exports = class ProjectTemplatesHelper {
 					]
 				}
 
+				// If 'categoryIds' are provided, add a filter for categories.
+				let categoryIdArray
+
+				if (categoryIds && categoryIds !== '') {
+					categoryIdArray = categoryIds
+						.split(',')
+						.map((id) => id.trim())
+						.filter((id) => id !== '')
+					if (categoryIdArray.length > 0) {
+						// Convert category IDs to ObjectIds if needed
+						const categoryObjectIds = categoryIdArray.map((id) => {
+							const objectId = UTILS.convertStringToObjectId(id) || id
+							//requestedCategorySet.add(id);
+							return objectId
+						})
+
+						// Filter by categories._id to match category objects within the categories array
+						queryObject['categories._id'] = { $in: categoryObjectIds }
+					}
+				}
+
 				// Call the 'templateDocument' function from 'projectTemplateQueries'
 				// using the 'queryObject' to fetch templates.
 				const templates = await projectTemplateQueries.templateDocument(queryObject)
@@ -2015,8 +2042,48 @@ module.exports = class ProjectTemplatesHelper {
 				const endIndex = pageNo * pageSize
 
 				// Slice the 'templates' array to get paginated results.
-				const paginatedResults = templates.slice(startIndex, endIndex)
+				let paginatedResults = templates.slice(startIndex, endIndex)
 
+				if (taskDetails) {
+					for (const template of paginatedResults) {
+						// Fetch tasks and subtasks for each template in paginated results
+						if (template.tasks && template.tasks.length > 0) {
+							template.tasks = await this.tasksAndSubTasks(
+								template._id,
+								'',
+								userDetails.userInformation.tenantId,
+								userDetails.userInformation.organizationId
+							)
+						}
+					}
+				}
+
+				if (groupByCategory) {
+					let groupedTemplates = {}
+					paginatedResults.forEach((template) => {
+						if (template.categories && template.categories.length > 0) {
+							template.categories.forEach((category) => {
+								let catId = category._id.toString()
+
+								if (categoryIdArray && categoryIdArray.length > 0) {
+									// Check if the current categoryId is in the requestedCategorySet
+									if (categoryIdArray.includes(catId)) {
+										if (!groupedTemplates[catId]) {
+											groupedTemplates[catId] = []
+										}
+										groupedTemplates[catId].push(template)
+									}
+								} else {
+									if (!groupedTemplates[catId]) {
+										groupedTemplates[catId] = []
+									}
+									groupedTemplates[catId].push(template)
+								}
+							})
+						}
+					})
+					paginatedResults = groupedTemplates
+				}
 				// Resolve the promise with success, message, and paginated data.
 				return resolve({
 					success: true,

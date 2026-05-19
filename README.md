@@ -124,13 +124,13 @@ Go to the detailed Windows Docker setup guide: **<a href="link/to/scp/docker/win
 <details>
 <summary> 1. Ubuntu Setup </summary>
 <br>
-Go to the detailed Ubuntu Native setup guide: **<a href="link/to/samiksha/native/ubuntu/README" target="_blank">SETUP_SCP_NATIVE_UBUNTU.md</a>**
+Go to the detailed Ubuntu Native setup guide: **<a href="https://github.com/ELEVATE-Project/project-service/blob/setupGuideSCP/documentation/3.4.0/setup/native/scp/ubuntu/README.md" target="_blank">SETUP_SCP_NATIVE_UBUNTU.md</a>**
 </details>
 
 <details>
 <summary> 2. macOS Setup </summary>
 <br>
-Go to the detailed macOS Native setup guide: **<a href="link/to/samiksha/native/macos/README" target="_blank">SETUP_SCP_NATIVE_MACOS.md</a>**
+Go to the detailed macOS Native setup guide: **<a href="https://github.com/ELEVATE-Project/project-service/blob/setupGuideSCP/documentation/3.4.0/setup/native/scp/mac/README.md" target="_blank">SETUP_SCP_NATIVE_MACOS.md</a>**
 </details>
 
 <details>

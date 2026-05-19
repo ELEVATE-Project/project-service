@@ -10,6 +10,8 @@ module.exports = (req) => {
 		sync: function () {
 			req.checkParams('_id').exists().withMessage('required project id')
 			req.checkQuery('lastDownloadedAt').exists().withMessage('required last downloaded at')
+			req.checkBody('title').optional().notEmpty().withMessage('title cannot be empty')
+			req.checkBody('description').optional().notEmpty().withMessage('description cannot be empty')
 		},
 		tasksStatus: function () {
 			req.checkParams('_id').exists().withMessage('required project id')
@@ -131,6 +133,36 @@ module.exports = (req) => {
 				existId = 'projectId'
 			}
 			req.checkQuery(existId).exists().withMessage('required solution or projectId Id')
+		},
+		updateAcl: function () {
+			// Validate path param: id
+			req.checkParams('_id')
+				.exists()
+				.withMessage('projectId is required in path params')
+				.isMongoId()
+				.withMessage('projectId must be a valid MongoDB ObjectId')
+
+			// acl must be present
+			req.checkBody('acl').exists().withMessage('acl is required in body')
+
+			// acl.visibility must be present and string
+			req.checkBody('acl.visibility')
+				.exists()
+				.withMessage('acl.visibility is required')
+				.isString()
+				.withMessage('acl.visibility must be a string')
+
+			// if acl.users is present → must be an array
+			req.checkBody('acl.users')
+				.optional()
+				.custom((value) => Array.isArray(value))
+				.withMessage('acl.users must be an array if provided')
+
+			// if acl.scope is present → must be an object
+			req.checkBody('acl.scope')
+				.optional()
+				.custom((value) => typeof value === 'object' && !Array.isArray(value))
+				.withMessage('acl.scope must be an object if provided')
 		},
 	}
 

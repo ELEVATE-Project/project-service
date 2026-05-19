@@ -6,9 +6,9 @@ module.exports = (req) => {
 			req.checkBody('requestForPIIConsent').exists().withMessage('required requestForPIIConsent value of program')
 			req.checkBody('scope')
 				.exists()
-				.withMessage('required solution scope')
+				.withMessage('required program scope')
 				.notEmpty()
-				.withMessage('solution scope cannot be empty')
+				.withMessage('program scope cannot be empty')
 		},
 		update: function () {
 			req.checkParams('_id')

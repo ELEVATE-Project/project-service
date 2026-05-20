@@ -1,4 +1,4 @@
-APPLICATION_PORT = 6000
+APPLICATION_PORT = 6001
 APPLICATION_ENV = development
 ACCESS_TOKEN_SECRET=bsj82AHBxahusub12yexlashsbxAXADHBlaj
 INTERNAL_ACCESS_TOKEN =xahusub12yexlashsbxAXADHBlaj
@@ -11,7 +11,7 @@ KAFKA_HEALTH_CHECK_TOPIC = project-health-check-topic-check
 PROJECT_SUBMISSION_TOPIC=sl-improvement-project-submission-dev
 SUBMISSION_TOPIC = Projectsubmissions
 PROJECT_CERTIFICATE_TOPIC = generateProjectCertificate
-ELEVATE_PROJECT_SERVICE_URL=http://project:6000
+ELEVATE_PROJECT_SERVICE_URL=http://project:6001
 SERVICE_NAME = project
 USER_DELETE_TOPIC = deleteuser
 TELEMETRY_TOPIC=telemetry.raw

@@ -47,7 +47,7 @@ services:
     image: shikshalokamqa/elevate-project-service:3.4.0
     container_name: project
     ports:
-      - '6000:6000'
+      - '6001:6001'
     environment:
       - MONGODB_URL=mongodb://mongo:27017/elevate-project
     env_file:

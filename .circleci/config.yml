@@ -1,92 +1,401 @@
-# version: 2.17
-# jobs:
-#   build:
-#     docker:
-#       - image: circleci/node:10.0.0
-#     working_directory: ~/project-service/
-#     steps:
-#       - checkout
-#       - restore_cache:
-#           key: dependency-cache-{{ checksum "package.json" }}
-#       - run:
-#           name: update-npm
-#           command: 'sudo npm install -g npm@latest'
-#       - run:
-#           name: install-npm
-#           command: npm install
-#       - save_cache:
-#           key: dependency-cache-{{checksum "package.json"}}
-#           paths:
-#             - ./node_modules
-#       - run:
-#           name: Executing unit test cases
-#           command: npm install nyc && npm run coverage
-      
-#       - run: 
-#           name: Install sonar scanner
-#           command: 'sudo npm install -g sonarqube-scanner'
-          
-#       - run: 
-#           name: Sonar scanner
-#           command: |
-#                   sonar-scanner
-# workflows:
-#   version: 2
-#   build_and_test:
-#     jobs:
-#       - build
-version: 2.1 # CircleCI version
-orbs:
-  sonarcloud: sonarsource/sonarcloud@1.1.1
+version: 2.1
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Reusable commands
+# ─────────────────────────────────────────────────────────────────────────────
+commands:
+  wait_for_port:
+    description: 'Poll a TCP port until it accepts connections (max 90 s)'
+    parameters:
+      port:
+        type: integer
+      label:
+        type: string
+    steps:
+      - run:
+          name: 'Wait for << parameters.label >> on port << parameters.port >>'
+          command: |
+            echo "Waiting for << parameters.label >> (port << parameters.port >>)..."
+            for i in $(seq 1 30); do
+              nc -z localhost << parameters.port >> 2>/dev/null && echo "<< parameters.label >> is up." && exit 0
+              echo "  attempt $i/30 – not ready, retrying in 3 s..."
+              sleep 3
+            done
+            echo "ERROR: << parameters.label >> did not start within 90 s." >&2
+            exit 1
+
+  wait_for_http:
+    description: 'Poll an HTTP endpoint until it returns HTTP 2xx (max 90 s)'
+    parameters:
+      url:
+        type: string
+      label:
+        type: string
+    steps:
+      - run:
+          name: 'Wait for << parameters.label >> at << parameters.url >>'
+          command: |
+            echo "Waiting for << parameters.label >> at << parameters.url >>..."
+            for i in $(seq 1 30); do
+              curl -sf --max-time 3 "<< parameters.url >>" 2>/dev/null && echo "<< parameters.label >> is up." && exit 0
+              echo "  attempt $i/30 – not ready, retrying in 3 s..."
+              sleep 3
+            done
+            echo "ERROR: << parameters.label >> did not become healthy within 90 s." >&2
+            exit 1
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Jobs
+# ─────────────────────────────────────────────────────────────────────────────
 jobs:
-  build:
-    machine: #Linux machine instead of docker environment
-      image: ubuntu-2004:202111-01
+  # ───────────────────────────────────────────────────────────────────────────
+  # Full integration test
+  #
+  # Dependency graph (all on localhost):
+  #
+  #   [Zookeeper :2181]
+  #         │
+  #   [Kafka :9092]    [MongoDB :27017]   [Redis :6379]   [PostgreSQL :5432]
+  #         │                │                  │
+  #   ┌─────┴────────────────┴──────────────────┤
+  #   │  user-service          :7001             │
+  #   │  entity-management     :5002             │
+  #   └─────────────────────────────────────────┘
+  #         │
+  #   [interface-service :3567]  ← routes all inter-service HTTP traffic
+  #         │
+  #   [project-service :5003]   ← service under test
+  #
+  # ───────────────────────────────────────────────────────────────────────────
+  integration-test:
+    machine:
+      image: ubuntu-2204:current
       docker_layer_caching: true
-    working_directory: ~/project-service # Default working directory
+    working_directory: ~/project-service
+
     steps:
       - checkout:
           path: ~/project-service
-      - restore_cache:
-          key: project-service-dependency-cache-{{ checksum "package.json" }}
-      - run:
-          name: Install dependencies
-          command: npm install
-      - save_cache:
-          key: project-service-dependency-cache-{{checksum "package.json"}}
-          paths:
-            - ./node_modules
-      - run:
-          name: Executing unit test cases
-          command: npm test -- --collectCoverage --collectCoverageFrom="modules/helper/*"
-      - store_artifacts:
-          path: coverage/
-          destination: /coverage/
-      - sonarcloud/scan
-      - run:
-          name: Checking prerequisites
-          command: |-
-            docker-compose --version
-      - run:
-          name: Starting the docker containers
-          command: |-
-            cd dev-ops/ && docker-compose up -d
-      - run:
-          name: Running test cases
-          command: |-
-            npm run test:integration
-      - store_test_results:
-          path: ./dev-ops/report
 
+      # ── Use Node 20 for all services ─────────────────────────────────────
+      - run:
+          name: Switch to Node 20
+          command: |
+            source ~/.nvm/nvm.sh
+            nvm install 20
+            nvm use 20
+            nvm alias default 20
+            node --version
+            echo "export NVM_DIR=\"$HOME/.nvm\"" >> $BASH_ENV
+            echo "source \"\$NVM_DIR/nvm.sh\""   >> $BASH_ENV
+            echo "nvm use 20 --silent"            >> $BASH_ENV
+
+      # ── Install project-service dependencies ────────────────────────────
+      - restore_cache:
+          keys:
+            - project-deps-v1-{{ checksum "package.json" }}
+            - project-deps-v1-
+
+      - run:
+          name: Install project-service dependencies
+          command: npm install
+
+      - save_cache:
+          key: project-deps-v1-{{ checksum "package.json" }}
+          paths:
+            - node_modules
+
+      # ── Clone dependent microservices (always from develop) ──────────────
+      - run:
+          name: Clone user-service
+          command: |
+            git clone --depth 1 --branch develop \
+              https://github.com/ELEVATE-Project/user.git \
+              ~/services/user
+
+      - run:
+          name: Clone entity-management service
+          command: |
+            git clone --depth 1 --branch develop \
+              https://github.com/ELEVATE-Project/entity-management.git \
+              ~/services/entity-management
+
+      - run:
+          name: Clone interface-service
+          command: |
+            git clone --depth 1 --branch develop \
+              https://github.com/ELEVATE-Project/interface-service.git \
+              ~/services/interface-service
+
+      # ── Install dependencies for each dependent service ──────────────────
+      - restore_cache:
+          keys:
+            - user-deps-v1-{{ checksum "/root/services/user/src/package.json" }}
+            - user-deps-v1-
+      - run:
+          name: Install user-service dependencies
+          command: cd ~/services/user/src && npm install
+      - save_cache:
+          key: user-deps-v1-{{ checksum "/root/services/user/src/package.json" }}
+          paths:
+            - /root/services/user/src/node_modules
+
+      - restore_cache:
+          keys:
+            - entity-deps-v1-{{ checksum "/root/services/entity-management/src/package.json" }}
+            - entity-deps-v1-
+      - run:
+          name: Install entity-management dependencies
+          command: cd ~/services/entity-management/src && npm install
+      - save_cache:
+          key: entity-deps-v1-{{ checksum "/root/services/entity-management/src/package.json" }}
+          paths:
+            - /root/services/entity-management/src/node_modules
+
+      - restore_cache:
+          keys:
+            - interface-deps-v1-{{ checksum "/root/services/interface-service/src/package.json" }}
+            - interface-deps-v1-
+      - run:
+          name: Install interface-service dependencies
+          command: cd ~/services/interface-service/src && npm install
+      - save_cache:
+          key: interface-deps-v1-{{ checksum "/root/services/interface-service/src/package.json" }}
+          paths:
+            - /root/services/interface-service/src/node_modules
+
+      # ── Infrastructure: all services via docker-compose ──────────────────
+      - run:
+          name: Start infrastructure (docker-compose)
+          command: |
+            docker-compose -f ~/project-service/dev-ops/docker-compose.yml up -d
+
+      - wait_for_port:
+          label: Zookeeper
+          port: 2181
+
+      - wait_for_port:
+          label: Kafka
+          port: 9092
+
+      - run:
+          name: Wait for MongoDB
+          command: |
+            echo "Waiting for MongoDB..."
+            for i in $(seq 1 30); do
+              docker exec mongo mongo --eval "db.adminCommand({ping:1})" --quiet 2>/dev/null \
+                && echo "MongoDB is up." && exit 0
+              echo "  attempt $i/30 – not ready, retrying in 3 s..."
+              sleep 3
+            done
+            echo "ERROR: MongoDB did not start in time." >&2; exit 1
+
+      - run:
+          name: Wait for Redis
+          command: |
+            for i in $(seq 1 15); do
+              docker exec redis redis-cli ping 2>/dev/null | grep -q PONG \
+                && echo "Redis is up." && exit 0
+              sleep 2
+            done
+            echo "ERROR: Redis did not start in time." >&2; exit 1
+
+      - run:
+          name: Wait for PostgreSQL
+          command: |
+            echo "Waiting for PostgreSQL..."
+            for i in $(seq 1 20); do
+              docker exec postgres pg_isready -U postgres 2>/dev/null \
+                && echo "PostgreSQL is up." && exit 0
+              echo "  attempt $i/20 – not ready, retrying in 2 s..."
+              sleep 2
+            done
+            echo "ERROR: PostgreSQL did not start in time." >&2; exit 1
+
+      - wait_for_port:
+          label: Gotenberg
+          port: 3003
+
+      # ── Create log directory before any background service starts ───────────
+      - run:
+          name: Create log directory
+          command: mkdir -p /tmp/logs
+
+      # ── Configure environments and run DB migrations ──────────────────────
+      # Cloud storage credentials (CLOUD_STORAGE_PROVIDER, CLOUD_STORAGE_SECRET,
+      # CLOUD_STORAGE_ACCOUNTNAME, CLOUD_STORAGE_BUCKETNAME, PUBLIC_ASSET_BUCKETNAME)
+      # must be set as CircleCI environment variables (Project Settings → Env Vars
+      # or a Context). They are injected into process.env at runtime and take
+      # priority over the .env file values automatically via dotenv first-wins.
+      - run:
+          name: Configure user-service environment
+          command: cp ~/project-service/dev-ops/user_integration_test.env ~/services/user/src/.env
+
+      - run:
+          name: Inject cloud credentials into user-service environment
+          command: |
+            # Prepend secrets to .env so they take priority (dotenv first-wins).
+            # CLOUD_STORAGE_SECRET is a multi-line PEM — CircleCI injects it as a
+            # shell env var automatically; dotenv will not override a pre-set var.
+            {
+              printf 'AWS_ACCESS_KEY_ID=%s\n'          "${AWS_ACCESS_KEY_ID}"
+              printf 'AWS_BUCKET_ENDPOINT=%s\n'        "${AWS_BUCKET_ENDPOINT}"
+              printf 'AWS_BUCKET_REGION=%s\n'          "${AWS_BUCKET_REGION}"
+              printf 'AWS_SECRET_ACCESS_KEY=%s\n'      "${AWS_SECRET_ACCESS_KEY}"
+              printf 'AZURE_ACCOUNT_KEY=%s\n'          "${AZURE_ACCOUNT_KEY}"
+              printf 'AZURE_ACCOUNT_NAME=%s\n'         "${AZURE_ACCOUNT_NAME}"
+              printf 'CLOUD_STORAGE=%s\n'              "${CLOUD_STORAGE}"
+              printf 'CLOUD_STORAGE_ACCOUNTNAME=%s\n'  "${CLOUD_STORAGE_ACCOUNTNAME}"
+              printf 'CLOUD_STORAGE_BUCKETNAME=%s\n'   "${CLOUD_STORAGE_BUCKETNAME}"
+              printf 'CLOUD_STORAGE_BUCKET_TYPE=%s\n'  "${CLOUD_STORAGE_BUCKET_TYPE}"
+              printf 'CLOUD_STORAGE_PROJECT=%s\n'      "${CLOUD_STORAGE_PROJECT}"
+              printf 'CLOUD_STORAGE_PROVIDER=%s\n'     "${CLOUD_STORAGE_PROVIDER}"
+            } | cat - ~/services/user/src/.env > /tmp/user_env_tmp \
+              && mv /tmp/user_env_tmp ~/services/user/src/.env
+
+      - run:
+          name: Run user-service database migrations
+          command: |
+            cd ~/services/user/src
+            npm run db:init  || true
+            npm run db:migrate
+            npm run db:seed:all || true
+
+      - run:
+          name: Configure entity-management environment
+          command: cp ~/project-service/dev-ops/entity_integration_test.env ~/services/entity-management/src/.env
+
+      - run:
+          name: Configure project-service environment
+          command: cp ~/project-service/dev-ops/project_integration_test.env ~/project-service/.env
+
+      - run:
+          name: Inject cloud credentials into project-service environment
+          command: |
+            # Prepend secrets to .env so they take priority (dotenv first-wins).
+            # CLOUD_STORAGE_SECRET is a multi-line PEM — CircleCI injects it as a
+            # shell env var automatically; dotenv will not override a pre-set var.
+            {
+              printf 'CLOUD_STORAGE=%s\n'              "${CLOUD_STORAGE}"
+              printf 'CLOUD_STORAGE_ACCOUNTNAME=%s\n'  "${CLOUD_STORAGE_ACCOUNTNAME}"
+              printf 'CLOUD_STORAGE_BUCKETNAME=%s\n'   "${CLOUD_STORAGE_BUCKETNAME}"
+              printf 'CLOUD_STORAGE_BUCKET_TYPE=%s\n'  "${CLOUD_STORAGE_BUCKET_TYPE}"
+              printf 'CLOUD_STORAGE_PROJECT=%s\n'      "${CLOUD_STORAGE_PROJECT}"
+              printf 'CLOUD_STORAGE_PROVIDER=%s\n'     "${CLOUD_STORAGE_PROVIDER}"
+            } | cat - ~/project-service/.env > /tmp/project_env_tmp \
+              && mv /tmp/project_env_tmp ~/project-service/.env
+
+      # ── Start user, entity, project in parallel ───────────────────────────
+      # interface-service fetches API docs from these at startup, so they must
+      # be healthy before interface-service is launched.
+      - run:
+          name: Start user-service
+          command: |
+            cd ~/services/user/src
+            npx nodemon app.js >> /tmp/logs/user-service.log 2>&1
+          background: true
+          environment:
+            NODE_ENV: development
+
+      - run:
+          name: Start entity-management service
+          command: |
+            cd ~/services/entity-management/src
+            npx nodemon app.js >> /tmp/logs/entity-service.log 2>&1
+          background: true
+          environment:
+            NODE_ENV: development
+
+      - run:
+          name: Start project-service
+          command: |
+            cd ~/project-service
+            npx nodemon app.js >> /tmp/logs/project-service.log 2>&1
+          background: true
+          environment:
+            NODE_ENV: development
+
+      - wait_for_http:
+          label: user-service
+          url: http://localhost:7001/health
+
+      - wait_for_http:
+          label: entity-management
+          url: http://localhost:5002/health
+
+      - wait_for_http:
+          label: project-service
+          url: http://localhost:5003/health
+
+      # ── Start interface-service after dependencies are healthy ─────────────
+      - run:
+          name: Configure interface-service environment
+          command: cp ~/project-service/dev-ops/interface_integration_test.env ~/services/interface-service/src/.env
+
+      - run:
+          name: Start interface-service
+          command: |
+            cd ~/services/interface-service/src
+            node app.js >> /tmp/logs/interface-service.log 2>&1
+          background: true
+          environment:
+            NODE_ENV: development
+
+      - wait_for_port:
+          label: interface-service
+          port: 3567
+
+      # ── Run integration tests ─────────────────────────────────────────────
+      - run:
+          name: Run project-service integration tests
+          command: |
+            mkdir -p dev-ops/report
+            npm run test:integration
+          environment:
+            MOCHA_FILE: dev-ops/report/integration-results.xml
+            INTERFACE_SERVICE_URL: http://localhost:3567
+            PROJECT_SERVICE_URL: http://localhost:5003
+            USER_SERVICE_URL: http://localhost:7001
+            ENTITY_SERVICE_URL: http://localhost:5002
+            USER_INTERNAL_ACCESS_TOKEN: internal-access-token
+            ADMIN_SECRET_CODE: W5bF7gesuS0xsNWmpsKy
+          no_output_timeout: 5m
+
+      # ── Collect logs on failure ───────────────────────────────────────────
+      - run:
+          name: Collect service logs
+          when: always
+          command: |
+            mkdir -p /tmp/logs
+            echo "=== user-service ===" >> /tmp/logs/all-services.log
+            cat /tmp/logs/user-service.log >> /tmp/logs/all-services.log 2>/dev/null || true
+            echo "=== entity-management ===" >> /tmp/logs/all-services.log
+            cat /tmp/logs/entity-service.log >> /tmp/logs/all-services.log 2>/dev/null || true
+            echo "=== interface-service ===" >> /tmp/logs/all-services.log
+            cat /tmp/logs/interface-service.log >> /tmp/logs/all-services.log 2>/dev/null || true
+            echo "=== project-service ===" >> /tmp/logs/all-services.log
+            cat /tmp/logs/project-service.log >> /tmp/logs/all-services.log 2>/dev/null || true
+
+      - store_artifacts:
+          path: /tmp/logs
+          destination: service-logs
+
+      # Requires JUnit XML output (see test:integration script note above)
+      - store_test_results:
+          path: dev-ops/report
+
+      - store_artifacts:
+          path: dev-ops/report
+          destination: test-report
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Workflows
+# ─────────────────────────────────────────────────────────────────────────────
 workflows:
-  build-and-test: # This is the name of the workflow,
-    # Inside the workflow, you define the jobs you want to run.
+  ci:
     jobs:
-      - build:
-          context:
-            - SonarCloud
+      - integration-test:
           filters:
-            tags:
+            branches:
               only:
                 - develop
-#test commit

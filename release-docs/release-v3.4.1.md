@@ -37,14 +37,6 @@ _No migrations applicable._
 
 -   **Branch:** `master`
 
-### 4. Docker Deployment
-
-```
-verify the existing tag. if not matching update it
-```
-
--   **Image Tag:** `<TO_BE_UPDATED>`
-
 ### 5. Post Deployment Step
 
 -   Restart the interface service after environment updates.
@@ -73,11 +65,7 @@ _No migrations applicable._
 
 ### 4. Docker Deployment
 
-```
-docker image is not created yet. update once available
-```
-
--   **Image Tag:** `<TO_BE_UPDATED>`
+-   **Image Tag:** `shikshalokamqa/elevate-project-service:3.4.1`
 
 ---
 
@@ -103,11 +91,7 @@ _No migrations applicable._
 
 ### 4. Docker Deployment
 
-```
-docker image is not created yet. update once available
-```
-
--   **Image Tag:** `<TO_BE_UPDATED>`
+-   **Image Tag:** `shikshalokamqa/elevate-samiksha-service:3.4.1`
 
 ---
 
@@ -127,11 +111,7 @@ _No migrations applicable._
 
 ### 4. Docker Deployment
 
-```
-verify the existing tag. if not matching update it
-```
-
--   **Image Tag:** `<TO_BE_UPDATED>`
+-   **Image Tag:** `shikshalokamqa/elevate-entity-management:3.4.1`
 
 ## Projects PWA
 
@@ -145,7 +125,6 @@ verify the existing tag. if not matching update it
 
 **Note**: For detailed setup and configuration, please refer to the parent [documentation](https://github.com/ELEVATE-Project/observation-survey-projects-pwa/blob/release-3.4.1/README.md).
 
-
 ## Observation Portal
 
 ### 1. Branch
@@ -157,7 +136,6 @@ verify the existing tag. if not matching update it
 -   Update **Docker image tag** for Observation/Survey PWA: `<TO_BE_UPDATED>`
 
 **Note**: For additional deployment steps, refer to the parent [documentation](https://github.com/ELEVATE-Project/observation-portal/blob/release-3.4.1/README.md).
-
 
 ## Elevate Portal
 

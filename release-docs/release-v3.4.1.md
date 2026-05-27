@@ -121,7 +121,7 @@ _No migrations applicable._
 
 ### 2. Docker Deployment
 
--   Update **Docker image tag** with: `<TO_BE_UPDATED>`
+-   Update **Docker image tag** with: `shikshalokamqa/elevate-project-obervation-pwa:3.4.1`
 
 **Note**: For detailed setup and configuration, please refer to the parent [documentation](https://github.com/ELEVATE-Project/observation-survey-projects-pwa/blob/release-3.4.1/README.md).
 
@@ -133,7 +133,7 @@ _No migrations applicable._
 
 ### 2. Docker Deployment
 
--   Update **Docker image tag** for Observation/Survey PWA: `<TO_BE_UPDATED>`
+-   Update **Docker image tag** for Observation/Survey PWA: `shikshalokamqa/elevate-observation-portal:3.4.1.0`
 
 **Note**: For additional deployment steps, refer to the parent [documentation](https://github.com/ELEVATE-Project/observation-portal/blob/release-3.4.1/README.md).
 
@@ -145,6 +145,6 @@ _No migrations applicable._
 
 ### 2. Docker Deployment
 
--   Update **React-wrapper/Shikshagraha app** image tag: `<TO_BE_UPDATED>`
+-   Update **React-wrapper/Shikshagraha app** image tag: `shikshalokamqa/elevate-portal:3.4.1`
 
 **Note**: Refer to the [Elevate Portal documentation](https://github.com/ELEVATE-Project/elevate-portal/blob/release-1.1.1/README.md) for more details.

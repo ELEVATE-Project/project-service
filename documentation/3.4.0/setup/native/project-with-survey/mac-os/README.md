@@ -94,7 +94,7 @@ Before setting up the following ELEVATE-Project application, dependencies given 
 7. Download `check-dependencies.sh` file:
 
     ```
-    curl -OJL https://github.com/ELEVATE-Project/project-service/raw/main/documentation/1.0.0/native/scripts/macos/check-dependencies.sh && \
+    curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/native/scripts/project-with-survey/mac-os/check-dependencies.sh && \
     chmod +x check-dependencies.sh
     ```
 
@@ -164,7 +164,7 @@ curl -L -o scheduler/src/.env https://raw.githubusercontent.com/ELEVATE-Project/
     1. Download `create-databases.sh` Script File:
 
     ```
-    curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/native/scripts/project-with-survey/ubuntu/create-databases.sh
+    curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/native/scripts/project-with-survey/mac-os/create-databases.sh
     ```
 
     2. Make the executable by running the following command:
@@ -209,7 +209,7 @@ curl -L -o scheduler/src/.env https://raw.githubusercontent.com/ELEVATE-Project/
         1. Download the `citus_setup.sh` file:
 
             ```
-            curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/native/scripts/project-with-survey/ubuntu/citus_setup.sh
+            curl -OJL https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/native/scripts/project-with-survey/mac-os/citus_setup.sh
             ```
 
         2. Make the setup file executable by running the following command:
@@ -229,11 +229,11 @@ curl -L -o scheduler/src/.env https://raw.githubusercontent.com/ELEVATE-Project/
 
     A. Project Service Configuration Path:
     `./ELEVATE-Project/project-service/.env
-	`
+`
 
     B. Samiksha (Survey & Observation) Service Configuration Path:
     `./ELEVATE-Project/samiksha-service/.env
-	`
+`
 
     Add or update the following variables in the .env file, substituting the example values with your actual cloud credentials:
 
@@ -250,10 +250,10 @@ curl -L -o scheduler/src/.env https://raw.githubusercontent.com/ELEVATE-Project/
 
 10. **Insert Initial Data**
 
-    1.  Download `entity-project-sample-data.sh` Script File:
+    1.  Download `project_entity_sample_data.sh` Script File:
 
     ```
-    curl -o project_entity_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/native/scripts/project-with-survey/ubuntu/project_entity_sample_data.sh && \
+    curl -o project_entity_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/native/scripts/project-with-survey/mac-os/project_entity_sample_data.sh && \
     chmod +x project_entity_sample_data.sh && \
     ./project_entity_sample_data.sh
     ```
@@ -281,7 +281,7 @@ In such cases, you can generate sample user accounts using the steps below. This
 > **Warning:** Use this generator only immediately after the initial system setup and before any normal user accounts are created through the portal. It should not be used under any circumstances thereafter.
 
 ```
-curl -o insert_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/native/scripts/project-with-survey/ubuntu/insert_sample_data.sh && \
+curl -o insert_sample_data.sh https://raw.githubusercontent.com/ELEVATE-Project/project-service/refs/heads/main/documentation/3.4.0/native/scripts/project-with-survey/mac-os/insert_sample_data.sh && \
 chmod +x insert_sample_data.sh && \
 ./insert_sample_data.sh
 ```

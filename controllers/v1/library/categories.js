@@ -36,7 +36,7 @@ module.exports = class LibraryCategories extends Abstract {
 	}
 
 	/**
-    * @api {get} /improvement-project/api/v1/library/categories/projects/:categoryExternalId?page=:page&limit=:limit&search=:search&sort=:sort 
+    * @api {get} /improvement-project/api/v1/library/categories/projects/:categoryExternalId?page=:page&limit=:limit&search=:search&sort=:sort
     * List of library projects.
     * @apiVersion 1.0.0
     * @apiGroup Library Categories
@@ -56,7 +56,7 @@ module.exports = class LibraryCategories extends Abstract {
                 "description" : "Test template description",
                 "createdAt": "2020-08-31T05:59:12.230Z"
             }
-        ], 
+        ],
         "count": 7
     }
     }
@@ -179,7 +179,7 @@ module.exports = class LibraryCategories extends Abstract {
 	}
 
 	/**
-    * @api {get} /improvement-project/api/v1/library/categories/list 
+    * @api {get} /improvement-project/api/v1/library/categories/list
     * List of library categories.
     * @apiVersion 1.0.0
     * @apiGroup Library Categories
@@ -240,7 +240,66 @@ module.exports = class LibraryCategories extends Abstract {
 	async list(req) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				let projectCategories = await libraryCategoriesHelper.list(req)
+				let projectCategories = await libraryCategoriesHelper.list(req.searchText, req.query, req.userDetails)
+
+				projectCategories.result = projectCategories.data
+
+				return resolve(projectCategories)
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
+				})
+			}
+		})
+	}
+
+	/**
+	 * delete a library category
+	 * @method
+	 * @name delete
+	 * @param {Object} req - requested data
+	 * @returns {Array} Library categories.
+	 */
+
+	async delete(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				const filterQuery = {
+					_id: req.params._id,
+				}
+				let projectCategories = await libraryCategoriesHelper.delete(filterQuery, req.userDetails)
+
+				projectCategories.result = projectCategories.data
+
+				return resolve(projectCategories)
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
+				})
+			}
+		})
+	}
+
+	/**
+	 * read a library category
+	 * @method
+	 * @name details
+	 * @param {Object} req - requested data
+	 * @returns {Array} Library categories.
+	 */
+
+	async details(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				const filterQuery = {
+					_id: req.params._id,
+					getChildren: req.query.getChildren === 'true',
+				}
+				let projectCategories = await libraryCategoriesHelper.details(filterQuery, req.userDetails)
 
 				projectCategories.result = projectCategories.data
 

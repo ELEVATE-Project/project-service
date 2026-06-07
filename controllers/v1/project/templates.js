@@ -125,12 +125,12 @@ module.exports = class ProjectTemplates extends Abstract {
 	}
 
 	/**
-    * @api {post} /project/v1/project/templates/importProjectTemplate/:projectTemplateExternalId 
+    * @api {post} /project/v1/project/templates/importProjectTemplate/:projectTemplateExternalId
     * Import templates from existsing project templates.
     * @apiVersion 1.0.0
     * @apiGroup Project Templates
     * @apiSampleRequest /project/v1/project/templates/importProjectTemplate/template-1
-    * @apiParamExample {json} Request: 
+    * @apiParamExample {json} Request:
     * {
     * "externalId" : "template1",
       "isReusable" : false,
@@ -187,7 +187,7 @@ module.exports = class ProjectTemplates extends Abstract {
     * @apiVersion 1.0.0
     * @apiGroup Project Templates
     * @apiSampleRequest /project/v1/project/templates/listByIds
-    * @apiParamExample {json} Request: 
+    * @apiParamExample {json} Request:
     * {
     * "externalIds" : ["IDEAIMP 4"]
     * }
@@ -680,13 +680,13 @@ module.exports = class ProjectTemplates extends Abstract {
 	}
 
 	/**
-    * @api {post} /project/v1/project/templates/update/:templateId 
+    * @api {post} /project/v1/project/templates/update/:templateId
     * Update projects template.
     * @apiVersion 1.0.0
     * @apiGroup Project Templates
     * @apiSampleRequest /project/v1/project/templates/update/6006b5cca1a95727dbcdf648
-    * @apiHeader {String} internal-access-token internal access token 
-    * @apiHeader {String} X-authenticated-user-token Authenticity token  
+    * @apiHeader {String} internal-access-token internal access token
+    * @apiHeader {String} X-authenticated-user-token Authenticity token
     * @apiUse successBody
     * @apiUse errorBody
     * @apiParamExample {json} Response:
@@ -822,7 +822,10 @@ module.exports = class ProjectTemplates extends Abstract {
 					req.pageSize,
 					req.searchText,
 					req.query.currentOrgOnly ? req.query.currentOrgOnly : false,
-					req.userDetails
+					req.userDetails,
+					req.query.categoryIds ? req.query.categoryIds : '',
+					req.query.groupByCategory ? req.query.groupByCategory : false,
+					req.query.taskDetails ? req.query.taskDetails : false
 				)
 
 				// Assign the 'data' property of 'projectTemplates' to 'result'.

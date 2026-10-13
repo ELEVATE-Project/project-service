@@ -1502,13 +1502,13 @@ module.exports = class UserProjectsHelper {
 					)
 					// const entityStatus = updatePayload.status
 					delete updatePayload.status
-					// await programUsersService.createOrUpdate({
-					// 	userId: entity.userId,
-					// 	programId: targetProgramId,
-					// 	tenantId: project.tenantId,
-					// 	metaInformation: updatePayload,
-					// 	// status: entityStatus,
-					// })
+					await programUsersService.createOrUpdate({
+						userId: entity.userId,
+						programId: targetProgramId,
+						tenantId: project.tenantId,
+						metaInformation: updatePayload,
+						// status: entityStatus,
+					})
 
 					// Additional step for Scenario 2: Sync the assigned user's record
 					if (!isSelfCreated) {

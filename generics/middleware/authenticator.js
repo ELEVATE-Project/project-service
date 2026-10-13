@@ -114,6 +114,7 @@ module.exports = async function (req, res, next, token = '') {
 		'/userExtension/update',
 		'/solutions/fetchLinkInternal',
 		'/changeRequests/resolveSupervisor',
+		'/userProjects/updateTaskFromProjectPlan',
 		//'/programUsers/createOrUpdate',
 	]
 	let performInternalAccessTokenCheck = false

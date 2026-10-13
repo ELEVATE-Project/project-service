@@ -36,7 +36,7 @@ module.exports = class UserProjects extends Abstract {
 	}
 
 	/**
-    * @api {post} /project/v1/userProjects/sync/:projectId?lastDownloadedAt=:epochTime 
+    * @api {post} /project/v1/userProjects/sync/:projectId?lastDownloadedAt=:epochTime
     * Sync project.
     * @apiVersion 1.0.0
     * @apiGroup User Projects
@@ -83,7 +83,7 @@ module.exports = class UserProjects extends Abstract {
                 ]
             }
         ],
-    
+
         "programId": "",
         "programName": "New Project Program",
         "entityId" : “5beaa888af0065f0e0a10515”,
@@ -805,7 +805,7 @@ module.exports = class UserProjects extends Abstract {
    * @apiSampleRequest /project/v1/userProjects/list?page=1&limit=2&search=&language=ka
    * @apiUse successBody
    * @apiUse errorBody
-    * @apiParamExample {json} Response: 
+    * @apiParamExample {json} Response:
       * {
     "message": "Successfully fetched projects",
     "status": 200,
@@ -1673,6 +1673,39 @@ module.exports = class UserProjects extends Abstract {
 			try {
 				let addEntityResult = await entitiesHelper.addEntity(req)
 				return resolve(addEntityResult)
+			} catch (error) {
+				return reject({
+					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,
+					message: error.message || HTTP_STATUS_CODE.internal_server_error.message,
+					errorObject: error,
+				})
+			}
+		})
+	}
+
+	/**
+	 * @api {post} /project/v1/pushSubmissionToTask/:_projectid
+	 * Push task Submission status
+	 * @apiVersion 1.0.0
+	 * @apiGroup User Projects
+	 * @apiSampleRequest /project/v1/userProjects/pushSubmissionToTask/66ac9949227504a96d8dce1c
+	 **/
+	/**
+	 * pushSubmissionTo project Task
+	 * @method
+	 * @name updateProjectTask
+	 * @param {Object} req .
+	 * @returns {JSON}  Success body.
+	 */
+	async updateTaskFromProjectPlan(req) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				const updateProjectTask = await userProjectsHelper.updateTaskFromProjectPlan(
+					req.params._id,
+					req.query.taskId,
+					req.body
+				)
+				return resolve(updateProjectTask)
 			} catch (error) {
 				return reject({
 					status: error.status || HTTP_STATUS_CODE.internal_server_error.status,

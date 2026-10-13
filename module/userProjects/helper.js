@@ -1281,6 +1281,145 @@ module.exports = class UserProjectsHelper {
 		})
 	}
 
+	/**
+	 * Update task.
+	 * @method
+	 * @name updateTaskFromProjectPlan
+	 * @param {String} projectId - Project id.
+	 * @param {String} taskId - Task id.
+	 * @param {Object} updatedData - Update data.
+	 * @returns {Object}
+	 */
+
+	static updateTaskFromProjectPlan(projectId, taskId, updatedData) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let projectDocument
+				let tasksUpdated
+				if (updatedData.isCustomTask && updatedData.isCustomTask === true && updatedData.parentTaskId) {
+					projectDocument = await projectQueries.projectDocument(
+						{
+							_id: projectId,
+							'tasks._id': updatedData.parentTaskId,
+						},
+						['tasks']
+					)
+
+					if (!projectDocument.length > 0) {
+						throw {
+							status: HTTP_STATUS_CODE.bad_request.status,
+							message: CONSTANTS.apiResponses.USER_PROJECT_NOT_FOUND,
+						}
+					}
+
+					const { new: _new, isCustom, parentTaskId, ...taskFields } = updatedData
+					const now = new Date()
+					const newTask = {
+						...taskFields,
+						_id: taskFields._id || taskId || uuidv4(),
+						externalId: taskFields.externalId || `task-${uuidv4().replace(/-/g, '')}`,
+						parentId: parentTaskId,
+						isCustomTask: true,
+						isDeleted: false,
+						children: [],
+						taskSequence: [],
+						createdAt: now,
+						updatedAt: now,
+					}
+
+					tasksUpdated = await projectQueries.findOneAndUpdate(
+						{
+							_id: projectId,
+						},
+						{
+							$push: {
+								'tasks.$[task].children': newTask,
+								'tasks.$[task].taskSequence': newTask.externalId,
+							},
+							$set: { 'tasks.$[task].updatedAt': now },
+						},
+						{
+							arrayFilters: [{ 'task._id': parentTaskId }],
+						}
+					)
+				} else {
+					projectDocument = await projectQueries.projectDocument(
+						{
+							_id: projectId,
+							'tasks.children._id': taskId,
+						},
+						['tasks']
+					)
+
+					if (!projectDocument.length > 0) {
+						throw {
+							status: HTTP_STATUS_CODE.bad_request.status,
+							message: CONSTANTS.apiResponses.USER_PROJECT_NOT_FOUND,
+						}
+					}
+					const currentTask = projectDocument[0].tasks
+						.flatMap((task) => task.children || [])
+						.find((childTask) => String(childTask._id) === String(taskId))
+
+					if (!currentTask) {
+						throw {
+							status: HTTP_STATUS_CODE.bad_request.status,
+							message: CONSTANTS.apiResponses.USER_PROJECT_NOT_FOUND,
+						}
+					}
+
+					const updateFields = {
+						'tasks.$[task].children.$[child].updatedAt': new Date(),
+					}
+
+					if (updatedData.metaInformation) {
+						updateFields['tasks.$[task].children.$[child].metaInformation'] = {
+							...(currentTask.metaInformation || {}),
+							...(updatedData.metaInformation || {}),
+						}
+					}
+
+					Object.keys(updatedData).forEach((key) => {
+						if (['_id', 'metaInformation'].includes(key) || updatedData[key] === undefined) {
+							return
+						}
+
+						updateFields[`tasks.$[task].children.$[child].${key}`] = updatedData[key]
+					})
+
+					tasksUpdated = await projectQueries.findOneAndUpdate(
+						{
+							_id: projectId,
+						},
+						{
+							$set: updateFields,
+						},
+						{
+							arrayFilters: [{ 'task.children._id': taskId }, { 'child._id': taskId }],
+						}
+					)
+				}
+
+				if (!tasksUpdated?._id) {
+					throw {
+						status: HTTP_STATUS_CODE.bad_request.status,
+						message: CONSTANTS.apiResponses.USER_PROJECT_NOT_UPDATED,
+					}
+				}
+				if (process.env.ENABLE_PROGRAM_USER_MAPPING === 'true') {
+					await this.updateProgramUserMapping(projectId)
+				}
+				return resolve({
+					success: true,
+					message: CONSTANTS.apiResponses.USER_PROJECT_UPDATED,
+					result: tasksUpdated._id,
+				})
+			} catch (error) {
+				return reject(error)
+			}
+		})
+	}
+
 	static updateProgramUserMapping(projectId) {
 		return new Promise(async (resolve, reject) => {
 			try {
@@ -1363,13 +1502,13 @@ module.exports = class UserProjectsHelper {
 					)
 					// const entityStatus = updatePayload.status
 					delete updatePayload.status
-					await programUsersService.createOrUpdate({
-						userId: entity.userId,
-						programId: targetProgramId,
-						tenantId: project.tenantId,
-						metaInformation: updatePayload,
-						// status: entityStatus,
-					})
+					// await programUsersService.createOrUpdate({
+					// 	userId: entity.userId,
+					// 	programId: targetProgramId,
+					// 	tenantId: project.tenantId,
+					// 	metaInformation: updatePayload,
+					// 	// status: entityStatus,
+					// })
 
 					// Additional step for Scenario 2: Sync the assigned user's record
 					if (!isSelfCreated) {
